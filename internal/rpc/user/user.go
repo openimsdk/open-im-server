@@ -12,7 +12,6 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
@@ -169,8 +168,8 @@ func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID s
 }
 
 // ok
-func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
-	resp := &pbUser.GetUsersInfoResp{}
+func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbUser.GetDesignateUsersReq) (resp *pbUser.GetDesignateUsersResp, err error) {
+	resp = &pbUser.GetDesignateUsersResp{}
 	users, err := s.Find(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -271,54 +270,8 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	return resp, nil
 }
 
-// todo
-func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
-	resp := pbUser.GetUsersResp{}
-	var err error
-	if req.UserID != "" {
-		u, err := s.Find(ctx, []string{req.UserID})
-		if err != nil {
-			return nil, err
-		}
-		resp.Total = 1
-		u1, err := convert.NewDBUser(u[0]).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.Users = append(resp.Users, u1)
-		return &resp, nil
-	}
-
-	if req.UserName != "" {
-		usersDB, total, err := s.GetByName(ctx, req.UserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
-		if err != nil {
-			return nil, err
-		}
-		resp.Total = int32(total)
-		for _, v := range usersDB {
-			u1, err := convert.NewDBUser(v).Convert()
-			if err != nil {
-				return nil, err
-			}
-			resp.Users = append(resp.Users, u1)
-		}
-		return &resp, nil
-	} else if req.Content != "" {
-		usersDB, total, err := s.GetByNameAndID(ctx, req.UserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
-		if err != nil {
-			return nil, err
-		}
-		resp.Total = int32(total)
-		for _, v := range usersDB {
-			u1, err := convert.NewDBUser(v).Convert()
-			if err != nil {
-				return nil, err
-			}
-			resp.Users = append(resp.Users, u1)
-		}
-		return &resp, nil
-	}
-
+func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbUser.GetPaginationUsersReq) (resp *pbUser.GetPaginationUsersResp, err error) {
+	resp = &pbUser.GetPaginationUsersResp{}
 	usersDB, total, err := s.Get(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
@@ -333,7 +286,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		resp.Users = append(resp.Users, u)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (resp *pbUser.UserRegisterResp, err error) {

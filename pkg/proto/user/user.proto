@@ -132,7 +132,7 @@ message userRegisterResp {
 
 service user {
   //获取指定的用户信息 全字段
-  rpc getDesignateUsers(getUsersInfoReq) returns(getUsersInfoResp);
+  rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
   //更新用户信息
   rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
   //设置用户消息接收选项

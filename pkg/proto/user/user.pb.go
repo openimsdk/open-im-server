@@ -36,7 +36,7 @@ func (m *GetAllUserIDReq) Reset()         { *m = GetAllUserIDReq{} }
 func (m *GetAllUserIDReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllUserIDReq) ProtoMessage()    {}
 func (*GetAllUserIDReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{0}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{0}
 }
 func (m *GetAllUserIDReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllUserIDReq.Unmarshal(m, b)
@@ -75,7 +75,7 @@ func (m *GetAllUserIDResp) Reset()         { *m = GetAllUserIDResp{} }
 func (m *GetAllUserIDResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllUserIDResp) ProtoMessage()    {}
 func (*GetAllUserIDResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{1}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{1}
 }
 func (m *GetAllUserIDResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllUserIDResp.Unmarshal(m, b)
@@ -120,7 +120,7 @@ func (m *AccountCheckReq) Reset()         { *m = AccountCheckReq{} }
 func (m *AccountCheckReq) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckReq) ProtoMessage()    {}
 func (*AccountCheckReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{2}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{2}
 }
 func (m *AccountCheckReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckReq.Unmarshal(m, b)
@@ -158,7 +158,7 @@ func (m *AccountCheckResp) Reset()         { *m = AccountCheckResp{} }
 func (m *AccountCheckResp) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckResp) ProtoMessage()    {}
 func (*AccountCheckResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{3}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{3}
 }
 func (m *AccountCheckResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckResp.Unmarshal(m, b)
@@ -197,7 +197,7 @@ func (m *AccountCheckRespSingleUserStatus) Reset()         { *m = AccountCheckRe
 func (m *AccountCheckRespSingleUserStatus) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckRespSingleUserStatus) ProtoMessage()    {}
 func (*AccountCheckRespSingleUserStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{3, 0}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{3, 0}
 }
 func (m *AccountCheckRespSingleUserStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckRespSingleUserStatus.Unmarshal(m, b)
@@ -231,76 +231,76 @@ func (m *AccountCheckRespSingleUserStatus) GetAccountStatus() string {
 	return ""
 }
 
-type GetUsersInfoReq struct {
+type GetDesignateUsersReq struct {
 	UserIDs              []string `protobuf:"bytes,1,rep,name=userIDs" json:"userIDs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetUsersInfoReq) Reset()         { *m = GetUsersInfoReq{} }
-func (m *GetUsersInfoReq) String() string { return proto.CompactTextString(m) }
-func (*GetUsersInfoReq) ProtoMessage()    {}
-func (*GetUsersInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{4}
+func (m *GetDesignateUsersReq) Reset()         { *m = GetDesignateUsersReq{} }
+func (m *GetDesignateUsersReq) String() string { return proto.CompactTextString(m) }
+func (*GetDesignateUsersReq) ProtoMessage()    {}
+func (*GetDesignateUsersReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{4}
 }
-func (m *GetUsersInfoReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetUsersInfoReq.Unmarshal(m, b)
+func (m *GetDesignateUsersReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDesignateUsersReq.Unmarshal(m, b)
 }
-func (m *GetUsersInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetUsersInfoReq.Marshal(b, m, deterministic)
+func (m *GetDesignateUsersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDesignateUsersReq.Marshal(b, m, deterministic)
 }
-func (dst *GetUsersInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetUsersInfoReq.Merge(dst, src)
+func (dst *GetDesignateUsersReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDesignateUsersReq.Merge(dst, src)
 }
-func (m *GetUsersInfoReq) XXX_Size() int {
-	return xxx_messageInfo_GetUsersInfoReq.Size(m)
+func (m *GetDesignateUsersReq) XXX_Size() int {
+	return xxx_messageInfo_GetDesignateUsersReq.Size(m)
 }
-func (m *GetUsersInfoReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetUsersInfoReq.DiscardUnknown(m)
+func (m *GetDesignateUsersReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDesignateUsersReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetUsersInfoReq proto.InternalMessageInfo
+var xxx_messageInfo_GetDesignateUsersReq proto.InternalMessageInfo
 
-func (m *GetUsersInfoReq) GetUserIDs() []string {
+func (m *GetDesignateUsersReq) GetUserIDs() []string {
 	if m != nil {
 		return m.UserIDs
 	}
 	return nil
 }
 
-type GetUsersInfoResp struct {
+type GetDesignateUsersResp struct {
 	UsersInfo            []*sdk_ws.UserInfo `protobuf:"bytes,1,rep,name=usersInfo" json:"usersInfo,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
 	XXX_sizecache        int32              `json:"-"`
 }
 
-func (m *GetUsersInfoResp) Reset()         { *m = GetUsersInfoResp{} }
-func (m *GetUsersInfoResp) String() string { return proto.CompactTextString(m) }
-func (*GetUsersInfoResp) ProtoMessage()    {}
-func (*GetUsersInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{5}
+func (m *GetDesignateUsersResp) Reset()         { *m = GetDesignateUsersResp{} }
+func (m *GetDesignateUsersResp) String() string { return proto.CompactTextString(m) }
+func (*GetDesignateUsersResp) ProtoMessage()    {}
+func (*GetDesignateUsersResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{5}
 }
-func (m *GetUsersInfoResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetUsersInfoResp.Unmarshal(m, b)
+func (m *GetDesignateUsersResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDesignateUsersResp.Unmarshal(m, b)
 }
-func (m *GetUsersInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetUsersInfoResp.Marshal(b, m, deterministic)
+func (m *GetDesignateUsersResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDesignateUsersResp.Marshal(b, m, deterministic)
 }
-func (dst *GetUsersInfoResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetUsersInfoResp.Merge(dst, src)
+func (dst *GetDesignateUsersResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDesignateUsersResp.Merge(dst, src)
 }
-func (m *GetUsersInfoResp) XXX_Size() int {
-	return xxx_messageInfo_GetUsersInfoResp.Size(m)
+func (m *GetDesignateUsersResp) XXX_Size() int {
+	return xxx_messageInfo_GetDesignateUsersResp.Size(m)
 }
-func (m *GetUsersInfoResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetUsersInfoResp.DiscardUnknown(m)
+func (m *GetDesignateUsersResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDesignateUsersResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetUsersInfoResp proto.InternalMessageInfo
+var xxx_messageInfo_GetDesignateUsersResp proto.InternalMessageInfo
 
-func (m *GetUsersInfoResp) GetUsersInfo() []*sdk_ws.UserInfo {
+func (m *GetDesignateUsersResp) GetUsersInfo() []*sdk_ws.UserInfo {
 	if m != nil {
 		return m.UsersInfo
 	}
@@ -318,7 +318,7 @@ func (m *UpdateUserInfoReq) Reset()         { *m = UpdateUserInfoReq{} }
 func (m *UpdateUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoReq) ProtoMessage()    {}
 func (*UpdateUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{6}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{6}
 }
 func (m *UpdateUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoReq.Unmarshal(m, b)
@@ -355,7 +355,7 @@ func (m *UpdateUserInfoResp) Reset()         { *m = UpdateUserInfoResp{} }
 func (m *UpdateUserInfoResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoResp) ProtoMessage()    {}
 func (*UpdateUserInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{7}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{7}
 }
 func (m *UpdateUserInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoResp.Unmarshal(m, b)
@@ -387,7 +387,7 @@ func (m *SetGlobalRecvMessageOptReq) Reset()         { *m = SetGlobalRecvMessage
 func (m *SetGlobalRecvMessageOptReq) String() string { return proto.CompactTextString(m) }
 func (*SetGlobalRecvMessageOptReq) ProtoMessage()    {}
 func (*SetGlobalRecvMessageOptReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{8}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{8}
 }
 func (m *SetGlobalRecvMessageOptReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGlobalRecvMessageOptReq.Unmarshal(m, b)
@@ -431,7 +431,7 @@ func (m *SetGlobalRecvMessageOptResp) Reset()         { *m = SetGlobalRecvMessag
 func (m *SetGlobalRecvMessageOptResp) String() string { return proto.CompactTextString(m) }
 func (*SetGlobalRecvMessageOptResp) ProtoMessage()    {}
 func (*SetGlobalRecvMessageOptResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{9}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{9}
 }
 func (m *SetGlobalRecvMessageOptResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGlobalRecvMessageOptResp.Unmarshal(m, b)
@@ -464,7 +464,7 @@ func (m *SetConversationReq) Reset()         { *m = SetConversationReq{} }
 func (m *SetConversationReq) String() string { return proto.CompactTextString(m) }
 func (*SetConversationReq) ProtoMessage()    {}
 func (*SetConversationReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{10}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{10}
 }
 func (m *SetConversationReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetConversationReq.Unmarshal(m, b)
@@ -515,7 +515,7 @@ func (m *SetConversationResp) Reset()         { *m = SetConversationResp{} }
 func (m *SetConversationResp) String() string { return proto.CompactTextString(m) }
 func (*SetConversationResp) ProtoMessage()    {}
 func (*SetConversationResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{11}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{11}
 }
 func (m *SetConversationResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetConversationResp.Unmarshal(m, b)
@@ -550,7 +550,7 @@ func (m *SetRecvMsgOptReq) Reset()         { *m = SetRecvMsgOptReq{} }
 func (m *SetRecvMsgOptReq) String() string { return proto.CompactTextString(m) }
 func (*SetRecvMsgOptReq) ProtoMessage()    {}
 func (*SetRecvMsgOptReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{12}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{12}
 }
 func (m *SetRecvMsgOptReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetRecvMsgOptReq.Unmarshal(m, b)
@@ -615,7 +615,7 @@ func (m *SetRecvMsgOptResp) Reset()         { *m = SetRecvMsgOptResp{} }
 func (m *SetRecvMsgOptResp) String() string { return proto.CompactTextString(m) }
 func (*SetRecvMsgOptResp) ProtoMessage()    {}
 func (*SetRecvMsgOptResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{13}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{13}
 }
 func (m *SetRecvMsgOptResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetRecvMsgOptResp.Unmarshal(m, b)
@@ -648,7 +648,7 @@ func (m *GetConversationReq) Reset()         { *m = GetConversationReq{} }
 func (m *GetConversationReq) String() string { return proto.CompactTextString(m) }
 func (*GetConversationReq) ProtoMessage()    {}
 func (*GetConversationReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{14}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{14}
 }
 func (m *GetConversationReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetConversationReq.Unmarshal(m, b)
@@ -700,7 +700,7 @@ func (m *GetConversationResp) Reset()         { *m = GetConversationResp{} }
 func (m *GetConversationResp) String() string { return proto.CompactTextString(m) }
 func (*GetConversationResp) ProtoMessage()    {}
 func (*GetConversationResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{15}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{15}
 }
 func (m *GetConversationResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetConversationResp.Unmarshal(m, b)
@@ -740,7 +740,7 @@ func (m *GetConversationsReq) Reset()         { *m = GetConversationsReq{} }
 func (m *GetConversationsReq) String() string { return proto.CompactTextString(m) }
 func (*GetConversationsReq) ProtoMessage()    {}
 func (*GetConversationsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{16}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{16}
 }
 func (m *GetConversationsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetConversationsReq.Unmarshal(m, b)
@@ -792,7 +792,7 @@ func (m *GetConversationsResp) Reset()         { *m = GetConversationsResp{} }
 func (m *GetConversationsResp) String() string { return proto.CompactTextString(m) }
 func (*GetConversationsResp) ProtoMessage()    {}
 func (*GetConversationsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{17}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{17}
 }
 func (m *GetConversationsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetConversationsResp.Unmarshal(m, b)
@@ -831,7 +831,7 @@ func (m *GetAllConversationsReq) Reset()         { *m = GetAllConversationsReq{}
 func (m *GetAllConversationsReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllConversationsReq) ProtoMessage()    {}
 func (*GetAllConversationsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{18}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{18}
 }
 func (m *GetAllConversationsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllConversationsReq.Unmarshal(m, b)
@@ -876,7 +876,7 @@ func (m *GetAllConversationsResp) Reset()         { *m = GetAllConversationsResp
 func (m *GetAllConversationsResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllConversationsResp) ProtoMessage()    {}
 func (*GetAllConversationsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{19}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{19}
 }
 func (m *GetAllConversationsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllConversationsResp.Unmarshal(m, b)
@@ -917,7 +917,7 @@ func (m *BatchSetConversationsReq) Reset()         { *m = BatchSetConversationsR
 func (m *BatchSetConversationsReq) String() string { return proto.CompactTextString(m) }
 func (*BatchSetConversationsReq) ProtoMessage()    {}
 func (*BatchSetConversationsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{20}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{20}
 }
 func (m *BatchSetConversationsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchSetConversationsReq.Unmarshal(m, b)
@@ -977,7 +977,7 @@ func (m *BatchSetConversationsResp) Reset()         { *m = BatchSetConversations
 func (m *BatchSetConversationsResp) String() string { return proto.CompactTextString(m) }
 func (*BatchSetConversationsResp) ProtoMessage()    {}
 func (*BatchSetConversationsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{21}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{21}
 }
 func (m *BatchSetConversationsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchSetConversationsResp.Unmarshal(m, b)
@@ -1011,69 +1011,45 @@ func (m *BatchSetConversationsResp) GetFailed() []string {
 	return nil
 }
 
-type GetUsersReq struct {
+type GetPaginationUsersReq struct {
 	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
-	UserName             string                    `protobuf:"bytes,3,opt,name=userName" json:"userName,omitempty"`
-	UserID               string                    `protobuf:"bytes,4,opt,name=userID" json:"userID,omitempty"`
-	Content              string                    `protobuf:"bytes,5,opt,name=content" json:"content,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
 	XXX_unrecognized     []byte                    `json:"-"`
 	XXX_sizecache        int32                     `json:"-"`
 }
 
-func (m *GetUsersReq) Reset()         { *m = GetUsersReq{} }
-func (m *GetUsersReq) String() string { return proto.CompactTextString(m) }
-func (*GetUsersReq) ProtoMessage()    {}
-func (*GetUsersReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{22}
+func (m *GetPaginationUsersReq) Reset()         { *m = GetPaginationUsersReq{} }
+func (m *GetPaginationUsersReq) String() string { return proto.CompactTextString(m) }
+func (*GetPaginationUsersReq) ProtoMessage()    {}
+func (*GetPaginationUsersReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{22}
 }
-func (m *GetUsersReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetUsersReq.Unmarshal(m, b)
+func (m *GetPaginationUsersReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetPaginationUsersReq.Unmarshal(m, b)
 }
-func (m *GetUsersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetUsersReq.Marshal(b, m, deterministic)
+func (m *GetPaginationUsersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetPaginationUsersReq.Marshal(b, m, deterministic)
 }
-func (dst *GetUsersReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetUsersReq.Merge(dst, src)
+func (dst *GetPaginationUsersReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetPaginationUsersReq.Merge(dst, src)
 }
-func (m *GetUsersReq) XXX_Size() int {
-	return xxx_messageInfo_GetUsersReq.Size(m)
+func (m *GetPaginationUsersReq) XXX_Size() int {
+	return xxx_messageInfo_GetPaginationUsersReq.Size(m)
 }
-func (m *GetUsersReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetUsersReq.DiscardUnknown(m)
+func (m *GetPaginationUsersReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetPaginationUsersReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetUsersReq proto.InternalMessageInfo
+var xxx_messageInfo_GetPaginationUsersReq proto.InternalMessageInfo
 
-func (m *GetUsersReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetPaginationUsersReq) GetPagination() *sdk_ws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-func (m *GetUsersReq) GetUserName() string {
-	if m != nil {
-		return m.UserName
-	}
-	return ""
-}
-
-func (m *GetUsersReq) GetUserID() string {
-	if m != nil {
-		return m.UserID
-	}
-	return ""
-}
-
-func (m *GetUsersReq) GetContent() string {
-	if m != nil {
-		return m.Content
-	}
-	return ""
-}
-
-type GetUsersResp struct {
+type GetPaginationUsersResp struct {
 	Total                int32              `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
 	Users                []*sdk_ws.UserInfo `protobuf:"bytes,2,rep,name=users" json:"users,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
@@ -1081,38 +1057,38 @@ type GetUsersResp struct {
 	XXX_sizecache        int32              `json:"-"`
 }
 
-func (m *GetUsersResp) Reset()         { *m = GetUsersResp{} }
-func (m *GetUsersResp) String() string { return proto.CompactTextString(m) }
-func (*GetUsersResp) ProtoMessage()    {}
-func (*GetUsersResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{23}
+func (m *GetPaginationUsersResp) Reset()         { *m = GetPaginationUsersResp{} }
+func (m *GetPaginationUsersResp) String() string { return proto.CompactTextString(m) }
+func (*GetPaginationUsersResp) ProtoMessage()    {}
+func (*GetPaginationUsersResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{23}
 }
-func (m *GetUsersResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetUsersResp.Unmarshal(m, b)
+func (m *GetPaginationUsersResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetPaginationUsersResp.Unmarshal(m, b)
 }
-func (m *GetUsersResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetUsersResp.Marshal(b, m, deterministic)
+func (m *GetPaginationUsersResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetPaginationUsersResp.Marshal(b, m, deterministic)
 }
-func (dst *GetUsersResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetUsersResp.Merge(dst, src)
+func (dst *GetPaginationUsersResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetPaginationUsersResp.Merge(dst, src)
 }
-func (m *GetUsersResp) XXX_Size() int {
-	return xxx_messageInfo_GetUsersResp.Size(m)
+func (m *GetPaginationUsersResp) XXX_Size() int {
+	return xxx_messageInfo_GetPaginationUsersResp.Size(m)
 }
-func (m *GetUsersResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetUsersResp.DiscardUnknown(m)
+func (m *GetPaginationUsersResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetPaginationUsersResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetUsersResp proto.InternalMessageInfo
+var xxx_messageInfo_GetPaginationUsersResp proto.InternalMessageInfo
 
-func (m *GetUsersResp) GetTotal() int32 {
+func (m *GetPaginationUsersResp) GetTotal() int32 {
 	if m != nil {
 		return m.Total
 	}
 	return 0
 }
 
-func (m *GetUsersResp) GetUsers() []*sdk_ws.UserInfo {
+func (m *GetPaginationUsersResp) GetUsers() []*sdk_ws.UserInfo {
 	if m != nil {
 		return m.Users
 	}
@@ -1130,7 +1106,7 @@ func (m *UserRegisterReq) Reset()         { *m = UserRegisterReq{} }
 func (m *UserRegisterReq) String() string { return proto.CompactTextString(m) }
 func (*UserRegisterReq) ProtoMessage()    {}
 func (*UserRegisterReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{24}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{24}
 }
 func (m *UserRegisterReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserRegisterReq.Unmarshal(m, b)
@@ -1167,7 +1143,7 @@ func (m *UserRegisterResp) Reset()         { *m = UserRegisterResp{} }
 func (m *UserRegisterResp) String() string { return proto.CompactTextString(m) }
 func (*UserRegisterResp) ProtoMessage()    {}
 func (*UserRegisterResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_ca0d4cfbb41aa43a, []int{25}
+	return fileDescriptor_user_c6c77fe2e81ca7ab, []int{25}
 }
 func (m *UserRegisterResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserRegisterResp.Unmarshal(m, b)
@@ -1193,8 +1169,8 @@ func init() {
 	proto.RegisterType((*AccountCheckReq)(nil), "user.accountCheckReq")
 	proto.RegisterType((*AccountCheckResp)(nil), "user.accountCheckResp")
 	proto.RegisterType((*AccountCheckRespSingleUserStatus)(nil), "user.accountCheckResp.singleUserStatus")
-	proto.RegisterType((*GetUsersInfoReq)(nil), "user.getUsersInfoReq")
-	proto.RegisterType((*GetUsersInfoResp)(nil), "user.getUsersInfoResp")
+	proto.RegisterType((*GetDesignateUsersReq)(nil), "user.getDesignateUsersReq")
+	proto.RegisterType((*GetDesignateUsersResp)(nil), "user.getDesignateUsersResp")
 	proto.RegisterType((*UpdateUserInfoReq)(nil), "user.updateUserInfoReq")
 	proto.RegisterType((*UpdateUserInfoResp)(nil), "user.updateUserInfoResp")
 	proto.RegisterType((*SetGlobalRecvMessageOptReq)(nil), "user.setGlobalRecvMessageOptReq")
@@ -1211,8 +1187,8 @@ func init() {
 	proto.RegisterType((*GetAllConversationsResp)(nil), "user.getAllConversationsResp")
 	proto.RegisterType((*BatchSetConversationsReq)(nil), "user.batchSetConversationsReq")
 	proto.RegisterType((*BatchSetConversationsResp)(nil), "user.batchSetConversationsResp")
-	proto.RegisterType((*GetUsersReq)(nil), "user.getUsersReq")
-	proto.RegisterType((*GetUsersResp)(nil), "user.getUsersResp")
+	proto.RegisterType((*GetPaginationUsersReq)(nil), "user.getPaginationUsersReq")
+	proto.RegisterType((*GetPaginationUsersResp)(nil), "user.getPaginationUsersResp")
 	proto.RegisterType((*UserRegisterReq)(nil), "user.userRegisterReq")
 	proto.RegisterType((*UserRegisterResp)(nil), "user.userRegisterResp")
 }
@@ -1229,7 +1205,7 @@ const _ = grpc.SupportPackageIsVersion4
 
 type UserClient interface {
 	// 获取指定的用户信息 全字段
-	GetUsersInfo(ctx context.Context, in *GetUsersInfoReq, opts ...grpc.CallOption) (*GetUsersInfoResp, error)
+	GetDesignateUsers(ctx context.Context, in *GetDesignateUsersReq, opts ...grpc.CallOption) (*GetDesignateUsersResp, error)
 	// 更新用户信息
 	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error)
 	// 设置用户消息接收选项
@@ -1237,7 +1213,7 @@ type UserClient interface {
 	// 检查userID是否存在
 	AccountCheck(ctx context.Context, in *AccountCheckReq, opts ...grpc.CallOption) (*AccountCheckResp, error)
 	// 翻页（或指定userID，昵称）拉取用户信息 全字段
-	GetUsers(ctx context.Context, in *GetUsersReq, opts ...grpc.CallOption) (*GetUsersResp, error)
+	GetPaginationUsers(ctx context.Context, in *GetPaginationUsersReq, opts ...grpc.CallOption) (*GetPaginationUsersResp, error)
 	// 用户注册
 	UserRegister(ctx context.Context, in *UserRegisterReq, opts ...grpc.CallOption) (*UserRegisterResp, error)
 }
@@ -1250,9 +1226,9 @@ func NewUserClient(cc *grpc.ClientConn) UserClient {
 	return &userClient{cc}
 }
 
-func (c *userClient) GetUsersInfo(ctx context.Context, in *GetUsersInfoReq, opts ...grpc.CallOption) (*GetUsersInfoResp, error) {
-	out := new(GetUsersInfoResp)
-	err := grpc.Invoke(ctx, "/user.user/getUsersInfo", in, out, c.cc, opts...)
+func (c *userClient) GetDesignateUsers(ctx context.Context, in *GetDesignateUsersReq, opts ...grpc.CallOption) (*GetDesignateUsersResp, error) {
+	out := new(GetDesignateUsersResp)
+	err := grpc.Invoke(ctx, "/user.user/getDesignateUsers", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1286,9 +1262,9 @@ func (c *userClient) AccountCheck(ctx context.Context, in *AccountCheckReq, opts
 	return out, nil
 }
 
-func (c *userClient) GetUsers(ctx context.Context, in *GetUsersReq, opts ...grpc.CallOption) (*GetUsersResp, error) {
-	out := new(GetUsersResp)
-	err := grpc.Invoke(ctx, "/user.user/getUsers", in, out, c.cc, opts...)
+func (c *userClient) GetPaginationUsers(ctx context.Context, in *GetPaginationUsersReq, opts ...grpc.CallOption) (*GetPaginationUsersResp, error) {
+	out := new(GetPaginationUsersResp)
+	err := grpc.Invoke(ctx, "/user.user/getPaginationUsers", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1308,7 +1284,7 @@ func (c *userClient) UserRegister(ctx context.Context, in *UserRegisterReq, opts
 
 type UserServer interface {
 	// 获取指定的用户信息 全字段
-	GetUsersInfo(context.Context, *GetUsersInfoReq) (*GetUsersInfoResp, error)
+	GetDesignateUsers(context.Context, *GetDesignateUsersReq) (*GetDesignateUsersResp, error)
 	// 更新用户信息
 	UpdateUserInfo(context.Context, *UpdateUserInfoReq) (*UpdateUserInfoResp, error)
 	// 设置用户消息接收选项
@@ -1316,7 +1292,7 @@ type UserServer interface {
 	// 检查userID是否存在
 	AccountCheck(context.Context, *AccountCheckReq) (*AccountCheckResp, error)
 	// 翻页（或指定userID，昵称）拉取用户信息 全字段
-	GetUsers(context.Context, *GetUsersReq) (*GetUsersResp, error)
+	GetPaginationUsers(context.Context, *GetPaginationUsersReq) (*GetPaginationUsersResp, error)
 	// 用户注册
 	UserRegister(context.Context, *UserRegisterReq) (*UserRegisterResp, error)
 }
@@ -1325,20 +1301,20 @@ func RegisterUserServer(s *grpc.Server, srv UserServer) {
 	s.RegisterService(&_User_serviceDesc, srv)
 }
 
-func _User_GetUsersInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUsersInfoReq)
+func _User_GetDesignateUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDesignateUsersReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).GetUsersInfo(ctx, in)
+		return srv.(UserServer).GetDesignateUsers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user.user/GetUsersInfo",
+		FullMethod: "/user.user/GetDesignateUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetUsersInfo(ctx, req.(*GetUsersInfoReq))
+		return srv.(UserServer).GetDesignateUsers(ctx, req.(*GetDesignateUsersReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1397,20 +1373,20 @@ func _User_AccountCheck_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUsersReq)
+func _User_GetPaginationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPaginationUsersReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).GetUsers(ctx, in)
+		return srv.(UserServer).GetPaginationUsers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user.user/GetUsers",
+		FullMethod: "/user.user/GetPaginationUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetUsers(ctx, req.(*GetUsersReq))
+		return srv.(UserServer).GetPaginationUsers(ctx, req.(*GetPaginationUsersReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1438,8 +1414,8 @@ var _User_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "getUsersInfo",
-			Handler:    _User_GetUsersInfo_Handler,
+			MethodName: "getDesignateUsers",
+			Handler:    _User_GetDesignateUsers_Handler,
 		},
 		{
 			MethodName: "updateUserInfo",
@@ -1454,8 +1430,8 @@ var _User_serviceDesc = grpc.ServiceDesc{
 			Handler:    _User_AccountCheck_Handler,
 		},
 		{
-			MethodName: "getUsers",
-			Handler:    _User_GetUsers_Handler,
+			MethodName: "getPaginationUsers",
+			Handler:    _User_GetPaginationUsers_Handler,
 		},
 		{
 			MethodName: "userRegister",
@@ -1466,66 +1442,65 @@ var _User_serviceDesc = grpc.ServiceDesc{
 	Metadata: "user/user.proto",
 }
 
-func init() { proto.RegisterFile("user/user.proto", fileDescriptor_user_ca0d4cfbb41aa43a) }
+func init() { proto.RegisterFile("user/user.proto", fileDescriptor_user_c6c77fe2e81ca7ab) }
 
-var fileDescriptor_user_ca0d4cfbb41aa43a = []byte{
-	// 926 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x51, 0x6f, 0xdc, 0x44,
-	0x10, 0x96, 0xef, 0x72, 0x4d, 0x33, 0x49, 0x9b, 0xcb, 0x26, 0x4d, 0x8c, 0xa3, 0xa2, 0xb0, 0xaa,
-	0x20, 0x02, 0xf5, 0x4e, 0x0d, 0x42, 0x80, 0x10, 0x88, 0x92, 0x13, 0x70, 0x52, 0x8f, 0xab, 0x1c,
-	0xa2, 0x22, 0x40, 0x04, 0xc7, 0xd9, 0xba, 0x56, 0xae, 0xf6, 0xc6, 0xb3, 0x4e, 0xc4, 0x1b, 0x12,
-	0x3f, 0x83, 0x27, 0x78, 0xe1, 0xbf, 0x20, 0x7e, 0x14, 0xda, 0x5d, 0x3b, 0xb7, 0xf6, 0xda, 0x69,
-	0x1a, 0xf5, 0x25, 0xb9, 0x99, 0x9d, 0xf9, 0x76, 0xbe, 0x99, 0x59, 0xcf, 0xc0, 0x6a, 0x8e, 0x2c,
-	0x1b, 0xca, 0x3f, 0x03, 0x9e, 0xa5, 0x22, 0x25, 0x0b, 0xf2, 0xb7, 0xb7, 0x3b, 0xe5, 0x2c, 0x79,
-	0x38, 0x9e, 0x3c, 0x3c, 0x60, 0xd9, 0x39, 0xcb, 0x86, 0xfc, 0x34, 0x1a, 0xaa, 0xf3, 0x21, 0x9e,
-	0x9c, 0x1e, 0x5d, 0xe0, 0xf0, 0x02, 0xb5, 0xbd, 0xf7, 0x49, 0xab, 0x65, 0x98, 0x26, 0xe7, 0x2c,
-	0xc3, 0x40, 0xc4, 0x69, 0x52, 0x11, 0xb4, 0x27, 0x7d, 0x06, 0xab, 0x11, 0x13, 0x8f, 0x67, 0xb3,
-	0x43, 0x64, 0xd9, 0x78, 0xe4, 0xb3, 0x33, 0x32, 0x02, 0xe0, 0x41, 0x14, 0x27, 0xca, 0xcc, 0x75,
-	0x76, 0x9c, 0xdd, 0xe5, 0xbd, 0x07, 0x03, 0x54, 0xc8, 0x47, 0x01, 0x8f, 0x8f, 0x78, 0x90, 0x05,
-	0x2f, 0x71, 0xe0, 0xb3, 0xb3, 0x9c, 0xa1, 0x78, 0x7a, 0x69, 0xeb, 0x1b, 0x7e, 0xf4, 0x5b, 0xe8,
-	0x57, 0x81, 0x91, 0x93, 0x0d, 0xe8, 0x89, 0x54, 0x04, 0x33, 0x05, 0xda, 0xf3, 0xb5, 0x40, 0xde,
-	0x06, 0xc8, 0x95, 0xcd, 0x93, 0x18, 0x85, 0xdb, 0xd9, 0xe9, 0xee, 0x2e, 0xf9, 0x86, 0x86, 0x7e,
-	0x04, 0xab, 0x41, 0x18, 0xa6, 0x79, 0x22, 0xf6, 0x5f, 0xb0, 0xf0, 0x54, 0x86, 0x48, 0x61, 0x25,
-	0x94, 0xbf, 0x35, 0x36, 0xba, 0x8e, 0x72, 0xaa, 0xe8, 0xe8, 0x3f, 0x0e, 0xf4, 0xab, 0x7e, 0xc8,
-	0xc9, 0x63, 0x58, 0xcc, 0x18, 0xe6, 0x33, 0xa1, 0x7d, 0x96, 0xf7, 0xde, 0x1b, 0xa8, 0xb4, 0xd7,
-	0x0d, 0x07, 0x18, 0x27, 0xd1, 0x8c, 0x49, 0xac, 0x03, 0x11, 0x88, 0x1c, 0xfd, 0xd2, 0xcf, 0x7b,
-	0x0a, 0xfd, 0xfa, 0x21, 0xd9, 0x84, 0x5b, 0x3a, 0x60, 0xc5, 0x6c, 0xc9, 0x2f, 0x24, 0xf2, 0x00,
-	0xee, 0x14, 0xc8, 0xda, 0xd0, 0xed, 0xa8, 0xe3, 0xaa, 0x92, 0x7e, 0xa0, 0x6a, 0x20, 0xe1, 0x70,
-	0x9c, 0x3c, 0x4f, 0x25, 0x41, 0x17, 0x16, 0xf3, 0x0a, 0xb7, 0x52, 0xa4, 0x13, 0x95, 0x57, 0xc3,
-	0x18, 0x39, 0xf9, 0x14, 0x96, 0xf2, 0x52, 0x51, 0xf0, 0xda, 0x6e, 0x28, 0x98, 0xca, 0x8c, 0xf4,
-	0x99, 0x5b, 0xd3, 0x27, 0xb0, 0x96, 0xf3, 0x93, 0x40, 0xb0, 0xcb, 0x43, 0x76, 0x46, 0x3e, 0x86,
-	0xdb, 0x79, 0x21, 0x16, 0xf5, 0xbf, 0x12, 0xee, 0xd2, 0x98, 0x6e, 0x00, 0xa9, 0xa3, 0x21, 0xa7,
-	0xbf, 0x82, 0x87, 0x4c, 0x7c, 0x33, 0x4b, 0x8f, 0x83, 0x99, 0xcf, 0xc2, 0xf3, 0x09, 0x43, 0x0c,
-	0x22, 0x36, 0xe5, 0x42, 0x5e, 0xd6, 0x96, 0xbb, 0xf7, 0xa1, 0x1f, 0xcd, 0x5d, 0x30, 0x9a, 0x72,
-	0xe1, 0x76, 0x55, 0xdf, 0x58, 0x7a, 0x7a, 0x1f, 0xb6, 0x5b, 0x6f, 0x40, 0x4e, 0xff, 0x76, 0x80,
-	0x20, 0x13, 0xfb, 0x46, 0xfb, 0xcb, 0x9b, 0xbf, 0x80, 0x15, 0xf3, 0x45, 0x14, 0x54, 0xbd, 0x41,
-	0xe5, 0x99, 0x54, 0x9c, 0x2a, 0xf6, 0x32, 0xc2, 0x24, 0x15, 0xf1, 0xf3, 0x38, 0x54, 0xf2, 0xf7,
-	0xbf, 0x71, 0xa6, 0x0a, 0xdc, 0xf3, 0x2d, 0x3d, 0xd9, 0x81, 0xe5, 0x94, 0xb3, 0x4c, 0x29, 0xc6,
-	0x23, 0x45, 0x64, 0xc9, 0x37, 0x55, 0xf4, 0x1e, 0xac, 0x5b, 0x31, 0x22, 0xa7, 0xff, 0x3a, 0xd0,
-	0x47, 0x26, 0xe6, 0x64, 0x65, 0xe4, 0x12, 0xed, 0x22, 0x61, 0xd9, 0xa1, 0x99, 0x38, 0x53, 0x45,
-	0xde, 0x85, 0xbb, 0x66, 0xac, 0xe3, 0x51, 0xd1, 0x7a, 0x35, 0xad, 0x7c, 0x7c, 0x59, 0x3d, 0xbf,
-	0x86, 0xa6, 0x91, 0xe3, 0xc2, 0xf5, 0x38, 0xf6, 0x6c, 0x8e, 0xeb, 0xb0, 0x56, 0xe3, 0x82, 0x9c,
-	0xfe, 0xee, 0x00, 0x89, 0xec, 0xea, 0xd8, 0x0c, 0x9c, 0x46, 0x06, 0xb5, 0x5c, 0x74, 0xec, 0x5c,
-	0xbc, 0x3a, 0xf7, 0x87, 0xb0, 0x1e, 0xd9, 0xb9, 0xb7, 0x1a, 0xa4, 0xf3, 0x7a, 0x0d, 0x42, 0xff,
-	0x70, 0x2c, 0x5c, 0xbc, 0x5e, 0xf9, 0x76, 0x61, 0xb5, 0x4a, 0x13, 0x8b, 0x0f, 0x63, 0x5d, 0x7d,
-	0x0d, 0x72, 0x3f, 0xc0, 0x86, 0x1d, 0x04, 0x72, 0xf2, 0x25, 0xdc, 0x31, 0xc1, 0xf4, 0x0d, 0x57,
-	0xd3, 0xab, 0x3a, 0xd0, 0x9f, 0x61, 0x53, 0x7f, 0xe3, 0x6f, 0xc0, 0xb0, 0x16, 0x77, 0xc7, 0x8e,
-	0xfb, 0x27, 0xd8, 0x6a, 0x44, 0x7f, 0x23, 0xa1, 0xff, 0xe7, 0x80, 0x7b, 0x1c, 0x88, 0xf0, 0xc5,
-	0x41, 0x43, 0x7d, 0x2c, 0x78, 0xe7, 0x35, 0xe1, 0x25, 0xbb, 0xa9, 0xdd, 0x94, 0x86, 0xaa, 0xf1,
-	0x61, 0x75, 0xdb, 0x1f, 0xd6, 0xd4, 0xc8, 0xd5, 0x42, 0x81, 0x66, 0xe4, 0x6a, 0x02, 0x6f, 0xb5,
-	0xb0, 0x41, 0x2e, 0x87, 0xc9, 0x41, 0x1e, 0x86, 0x0c, 0xcb, 0x26, 0x2a, 0x45, 0xf9, 0xed, 0xfd,
-	0x3a, 0x88, 0x67, 0xec, 0xc4, 0xed, 0xaa, 0x83, 0x42, 0xa2, 0x7f, 0x39, 0xb0, 0x5c, 0x4e, 0x19,
-	0x7b, 0x25, 0xe8, 0xdc, 0x6c, 0x25, 0x20, 0x9e, 0x1e, 0x2b, 0xdf, 0x05, 0x2f, 0x59, 0xd1, 0xa7,
-	0x97, 0xb2, 0x31, 0x05, 0x16, 0x2a, 0x53, 0xc0, 0x85, 0xc5, 0x30, 0x4d, 0x04, 0x4b, 0x44, 0xf1,
-	0x3d, 0x29, 0x45, 0xfa, 0x0c, 0x56, 0xe6, 0x21, 0xb6, 0x2e, 0x17, 0x8f, 0xa0, 0xa7, 0x86, 0x5d,
-	0xd1, 0x21, 0x57, 0xce, 0x31, 0x6d, 0x49, 0x47, 0x7a, 0x1f, 0xf3, 0x59, 0x14, 0xa3, 0x90, 0xff,
-	0xcf, 0xe6, 0x28, 0xce, 0xb5, 0x51, 0x08, 0xf4, 0xab, 0x28, 0xc8, 0xf7, 0xfe, 0xec, 0x82, 0xda,
-	0xec, 0xc8, 0xe7, 0xf3, 0xd8, 0xa5, 0x0f, 0xb9, 0xa7, 0xb7, 0x90, 0xda, 0x16, 0xe0, 0x6d, 0x36,
-	0xa9, 0x91, 0x93, 0x7d, 0xb8, 0x5b, 0x1d, 0xb3, 0x64, 0x4b, 0x5b, 0x5a, 0xa3, 0xdc, 0x73, 0x9b,
-	0x0f, 0x90, 0x93, 0x5f, 0x60, 0xab, 0x65, 0x66, 0x92, 0x1d, 0xed, 0xd4, 0x3e, 0xb4, 0xbd, 0x77,
-	0x5e, 0x61, 0x81, 0x5c, 0x72, 0x34, 0xb7, 0xaa, 0x92, 0x63, 0x6d, 0x95, 0x2b, 0x39, 0x5a, 0x9b,
-	0xda, 0x23, 0xb8, 0x5d, 0xf2, 0x26, 0x6b, 0xd5, 0x3c, 0x48, 0x37, 0x52, 0x57, 0xe9, 0x1b, 0xcd,
-	0x94, 0x97, 0x37, 0xd6, 0x8a, 0x59, 0xde, 0x58, 0xaf, 0xce, 0x57, 0xf7, 0x7f, 0xdc, 0x96, 0x6b,
-	0xf4, 0xd1, 0x78, 0x62, 0xec, 0xcf, 0xd2, 0xea, 0x33, 0xf9, 0xe7, 0xf8, 0x96, 0x52, 0x7c, 0xf8,
-	0x7f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x20, 0xab, 0x70, 0x2d, 0xad, 0x0b, 0x00, 0x00,
+var fileDescriptor_user_c6c77fe2e81ca7ab = []byte{
+	// 911 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x6d, 0x6f, 0xe3, 0x44,
+	0x10, 0x96, 0x93, 0xe6, 0x8e, 0x4e, 0x7b, 0xd7, 0x74, 0xfb, 0x66, 0x5c, 0x0e, 0x95, 0xd5, 0x09,
+	0x2a, 0xa4, 0x4b, 0xa0, 0x08, 0x01, 0x42, 0x20, 0x8e, 0x46, 0x40, 0xa4, 0x46, 0x39, 0x39, 0x54,
+	0x20, 0xde, 0x82, 0xeb, 0x6e, 0x7d, 0x56, 0x8d, 0xbd, 0xf1, 0xac, 0x5b, 0xf1, 0x0d, 0x89, 0x7f,
+	0xc2, 0x17, 0xfe, 0x0a, 0x42, 0xfc, 0x28, 0xb4, 0x6b, 0xa7, 0x59, 0x7b, 0xed, 0x5e, 0xae, 0xba,
+	0x2f, 0x89, 0x77, 0x76, 0xe6, 0xd9, 0x79, 0x66, 0x66, 0x77, 0x06, 0x36, 0x32, 0x64, 0x69, 0x5f,
+	0xfe, 0xf4, 0x78, 0x9a, 0x88, 0x84, 0xac, 0xc8, 0x6f, 0xe7, 0x70, 0xcc, 0x59, 0xfc, 0x64, 0x38,
+	0x7a, 0x32, 0x61, 0xe9, 0x15, 0x4b, 0xfb, 0xfc, 0x32, 0xe8, 0xab, 0xfd, 0x3e, 0x9e, 0x5f, 0x4e,
+	0xaf, 0xb1, 0x7f, 0x8d, 0xb9, 0xbe, 0xf3, 0x71, 0xa3, 0xa6, 0x9f, 0xc4, 0x57, 0x2c, 0x45, 0x4f,
+	0x84, 0x49, 0x5c, 0x5a, 0xe4, 0x96, 0xf4, 0x3b, 0xd8, 0x08, 0x98, 0x78, 0x1a, 0x45, 0xa7, 0xc8,
+	0xd2, 0xe1, 0xc0, 0x65, 0x33, 0x32, 0x00, 0xe0, 0x5e, 0x10, 0xc6, 0x4a, 0xcd, 0xb6, 0x0e, 0xac,
+	0xc3, 0xb5, 0xa3, 0xc7, 0x3d, 0x54, 0xc8, 0x53, 0x8f, 0x87, 0x53, 0xee, 0xa5, 0xde, 0x6f, 0xd8,
+	0x73, 0xd9, 0x2c, 0x63, 0x28, 0x9e, 0xdd, 0xe8, 0xba, 0x9a, 0x1d, 0xfd, 0x06, 0xba, 0x65, 0x60,
+	0xe4, 0x64, 0x1b, 0x3a, 0x22, 0x11, 0x5e, 0xa4, 0x40, 0x3b, 0x6e, 0xbe, 0x20, 0x6f, 0x02, 0x64,
+	0x4a, 0xe7, 0x24, 0x44, 0x61, 0xb7, 0x0e, 0xda, 0x87, 0xab, 0xae, 0x26, 0xa1, 0x1f, 0xc2, 0x86,
+	0xe7, 0xfb, 0x49, 0x16, 0x8b, 0xe3, 0xe7, 0xcc, 0xbf, 0x94, 0x2e, 0x52, 0x58, 0xf7, 0xe5, 0x77,
+	0x8e, 0x8d, 0xb6, 0xa5, 0x8c, 0x4a, 0x32, 0xfa, 0xb7, 0x05, 0xdd, 0xb2, 0x1d, 0x72, 0xf2, 0x14,
+	0xee, 0xa7, 0x0c, 0xb3, 0x48, 0xe4, 0x36, 0x6b, 0x47, 0xef, 0xf4, 0x54, 0xd8, 0xab, 0x8a, 0x3d,
+	0x0c, 0xe3, 0x20, 0x62, 0x12, 0x6b, 0x22, 0x3c, 0x91, 0xa1, 0x3b, 0xb7, 0x73, 0x9e, 0x41, 0xb7,
+	0xba, 0x49, 0x76, 0xe1, 0x5e, 0xee, 0xb0, 0x62, 0xb6, 0xea, 0x16, 0x2b, 0xf2, 0x18, 0x1e, 0x14,
+	0xc8, 0xb9, 0xa2, 0xdd, 0x52, 0xdb, 0x65, 0x21, 0x7d, 0x0f, 0xb6, 0x03, 0x26, 0x06, 0x0c, 0xc3,
+	0x20, 0xf6, 0x84, 0xc2, 0x45, 0xc9, 0xd2, 0x86, 0xfb, 0x59, 0x89, 0xe0, 0x7c, 0x49, 0x5d, 0xd8,
+	0xa9, 0xb1, 0x40, 0x4e, 0x3e, 0x81, 0x55, 0xa9, 0x83, 0xc3, 0xf8, 0x22, 0x29, 0x18, 0xee, 0xd7,
+	0xa4, 0x4e, 0xc5, 0x28, 0xbe, 0x48, 0xdc, 0x85, 0x36, 0x3d, 0x81, 0xcd, 0x8c, 0x9f, 0x17, 0x68,
+	0x6a, 0x93, 0xcd, 0xc8, 0x47, 0xf0, 0x5a, 0x56, 0x2c, 0x8b, 0x4a, 0xb8, 0x15, 0xee, 0x46, 0x99,
+	0x6e, 0x03, 0xa9, 0xa2, 0x21, 0xa7, 0xbf, 0x82, 0x83, 0x4c, 0x7c, 0x1d, 0x25, 0x67, 0x5e, 0xe4,
+	0x32, 0xff, 0x6a, 0xc4, 0x10, 0xbd, 0x80, 0x8d, 0xb9, 0x90, 0x87, 0x35, 0x45, 0xf1, 0x5d, 0xe8,
+	0x06, 0x0b, 0x13, 0x0c, 0xc6, 0x5c, 0xd8, 0x6d, 0x55, 0x41, 0x86, 0x9c, 0x3e, 0x82, 0xfd, 0xc6,
+	0x13, 0x90, 0xd3, 0xbf, 0x2c, 0x20, 0xc8, 0xc4, 0xb1, 0x76, 0x11, 0xe4, 0xc9, 0x9f, 0xc3, 0xba,
+	0x7e, 0x37, 0x0a, 0xaa, 0x4e, 0xaf, 0x74, 0x61, 0x4a, 0x46, 0x25, 0x7d, 0xe9, 0x61, 0x9c, 0x88,
+	0xf0, 0x22, 0xf4, 0xd5, 0xfa, 0xdb, 0xdf, 0x39, 0x53, 0xa9, 0xee, 0xb8, 0x86, 0x9c, 0x1c, 0xc0,
+	0x5a, 0xc2, 0x59, 0xaa, 0x04, 0xc3, 0x81, 0x22, 0xb2, 0xea, 0xea, 0x22, 0xba, 0x03, 0x5b, 0x86,
+	0x8f, 0xc8, 0xe9, 0xbf, 0x16, 0x74, 0x91, 0x89, 0x05, 0x59, 0xe9, 0xb9, 0x44, 0xbb, 0x8e, 0x59,
+	0x7a, 0xaa, 0x07, 0x4e, 0x17, 0x91, 0xb7, 0xe1, 0xa1, 0xee, 0xeb, 0x70, 0x50, 0x14, 0x61, 0x45,
+	0x2a, 0xaf, 0x61, 0x5a, 0x8d, 0xaf, 0x26, 0xa9, 0xe5, 0xb8, 0xb2, 0x1c, 0xc7, 0x8e, 0xc9, 0x71,
+	0x0b, 0x36, 0x2b, 0x5c, 0x90, 0xd3, 0x3f, 0x2c, 0x20, 0x81, 0x99, 0x1d, 0x93, 0x81, 0x55, 0xcb,
+	0xa0, 0x12, 0x8b, 0x96, 0x19, 0x8b, 0x17, 0xc7, 0xfe, 0x14, 0xb6, 0x02, 0x33, 0xf6, 0x46, 0x81,
+	0xb4, 0x5e, 0xae, 0x40, 0xe8, 0x9f, 0x96, 0x81, 0x8b, 0xcb, 0xa5, 0xef, 0x10, 0x36, 0xca, 0x34,
+	0xb1, 0x78, 0x22, 0xab, 0xe2, 0x25, 0xc8, 0x7d, 0xaf, 0x1e, 0x9a, 0x8a, 0x13, 0xc8, 0xc9, 0x17,
+	0xf0, 0x40, 0x07, 0xcb, 0x4f, 0xb8, 0x9d, 0x5e, 0xd9, 0x80, 0xfe, 0x04, 0xbb, 0xf9, 0x6b, 0x7f,
+	0x07, 0x86, 0x15, 0xbf, 0x5b, 0xa6, 0xdf, 0x3f, 0xc2, 0x5e, 0x2d, 0xfa, 0x2b, 0x71, 0xfd, 0x3f,
+	0x0b, 0xec, 0x33, 0x4f, 0xf8, 0xcf, 0x27, 0x35, 0xf9, 0x31, 0xe0, 0xad, 0x97, 0x84, 0x97, 0xec,
+	0xc6, 0x66, 0x51, 0x6a, 0xa2, 0xda, 0x8b, 0xd5, 0x6e, 0xbe, 0x58, 0x63, 0x2d, 0x56, 0x2b, 0x05,
+	0x9a, 0x16, 0xab, 0x11, 0xbc, 0xde, 0xc0, 0x06, 0xb9, 0xec, 0x28, 0x93, 0xcc, 0xf7, 0x19, 0xce,
+	0x8b, 0x68, 0xbe, 0x94, 0x6f, 0xef, 0x57, 0x5e, 0x18, 0xb1, 0x73, 0xbb, 0xad, 0x36, 0x8a, 0x15,
+	0xfd, 0x59, 0x75, 0x9a, 0x45, 0x8f, 0xbf, 0x69, 0x4e, 0xe5, 0x29, 0xa1, 0x75, 0xc7, 0x29, 0xc1,
+	0x53, 0x75, 0x63, 0xc0, 0x37, 0xce, 0x0a, 0xef, 0x43, 0x47, 0x75, 0xac, 0x22, 0xcd, 0xb7, 0x36,
+	0xa3, 0x5c, 0x93, 0x0e, 0xf2, 0xf1, 0xca, 0x65, 0x41, 0x88, 0x42, 0xfe, 0xcf, 0x16, 0x28, 0xd6,
+	0xd2, 0x28, 0x04, 0xba, 0x65, 0x14, 0xe4, 0x47, 0xff, 0xb4, 0x41, 0x0d, 0x6a, 0xe4, 0x04, 0x36,
+	0x8d, 0x76, 0x4c, 0x9c, 0x7c, 0xb2, 0xa8, 0xeb, 0xec, 0xce, 0x7e, 0xe3, 0x1e, 0x72, 0x72, 0x0c,
+	0x0f, 0xcb, 0xad, 0x93, 0xec, 0xe5, 0xea, 0x46, 0x7b, 0x76, 0xec, 0xfa, 0x0d, 0xe4, 0xe4, 0x17,
+	0xd8, 0x6b, 0xe8, 0x83, 0xe4, 0x20, 0x37, 0x6a, 0x6e, 0xc4, 0xce, 0x5b, 0x2f, 0xd0, 0x40, 0x4e,
+	0x3e, 0x83, 0x75, 0x7d, 0x66, 0x22, 0x3b, 0x75, 0x73, 0xd4, 0xcc, 0xd9, 0xad, 0x1f, 0xaf, 0xc8,
+	0x58, 0x3d, 0xf4, 0x95, 0xbc, 0x93, 0x45, 0x58, 0xcc, 0x82, 0x73, 0xde, 0x68, 0xde, 0xcc, 0xfd,
+	0xd1, 0xf3, 0x33, 0xf7, 0xa7, 0x92, 0xf9, 0xb9, 0x3f, 0xd5, 0x54, 0x7e, 0xf9, 0xe8, 0x87, 0x7d,
+	0x39, 0x42, 0x4f, 0x87, 0x23, 0x6d, 0x76, 0x96, 0x5a, 0x9f, 0xca, 0x9f, 0xb3, 0x7b, 0x4a, 0xf0,
+	0xc1, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff, 0x3f, 0x3a, 0xa4, 0xbe, 0xa9, 0x0b, 0x00, 0x00,
 }
