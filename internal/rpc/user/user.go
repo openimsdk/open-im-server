@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
@@ -199,7 +199,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	err = s.Update(ctx, []*relation2.UserModel{user})
+	err = s.Update(ctx, []*relationTb.UserModel{user})
 	if err != nil {
 		return nil, err
 	}

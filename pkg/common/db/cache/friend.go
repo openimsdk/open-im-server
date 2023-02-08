@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -99,7 +99,7 @@ func (f *FriendCache) DelTwoWayFriendIDs(ctx context.Context, ownerUserID string
 	return f.rcClient.TagAsDeleted(f.getTwoWayFriendsIDsKey(ownerUserID))
 }
 
-func (f *FriendCache) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relation2.FriendModel, err error) {
+func (f *FriendCache) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error) {
 	getFriend := func() (string, error) {
 		friend, err = f.friendDB.Take(ctx, ownerUserID, friendUserID)
 		if err != nil {
@@ -115,7 +115,7 @@ func (f *FriendCache) GetFriend(ctx context.Context, ownerUserID, friendUserID s
 	if err != nil {
 		return nil, err
 	}
-	friend = &relation2.FriendModel{}
+	friend = &relationTb.FriendModel{}
 	err = json.Unmarshal([]byte(friendStr), friend)
 	return friend, utils.Wrap(err, "")
 }

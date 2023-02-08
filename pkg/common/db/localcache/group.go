@@ -3,10 +3,9 @@ package localcache
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	"Open_IM/pkg/proto/group"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
-	"google.golang.org/grpc"
 	"sync"
 )
 
@@ -15,9 +14,9 @@ type GroupLocalCacheInterface interface {
 }
 
 type GroupLocalCache struct {
-	lock     sync.Mutex
-	cache    map[string]GroupMemberIDsHash
-	zkClient *openKeeper.ZkClient
+	lock   sync.Mutex
+	cache  map[string]GroupMemberIDsHash
+	client discoveryRegistry.SvcDiscoveryRegistry
 }
 
 type GroupMemberIDsHash struct {
@@ -25,17 +24,17 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupMemberIDsLocalCache(zkClient *openKeeper.ZkClient) GroupLocalCache {
+func NewGroupMemberIDsLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) GroupLocalCache {
 	return GroupLocalCache{
-		cache:    make(map[string]GroupMemberIDsHash, 0),
-		zkClient: zkClient,
+		cache:  make(map[string]GroupMemberIDsHash, 0),
+		client: client,
 	}
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	conn, err := g.zkClient.GetConn(config.Config.RpcRegisterName.OpenImGroupName, nil)
+	conn, err := g.client.GetConn(config.Config.RpcRegisterName.OpenImGroupName, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -136,3 +136,17 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 	}
 	return nil
 }
+
+func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.SessionContext) error) error {
+	sess, err := mgo.StartSession()
+	if err != nil {
+		return err
+	}
+	sCtx := mongo.NewSessionContext(ctx, sess)
+	defer sess.EndSession(sCtx)
+	if err := fn(sCtx); err != nil {
+		_ = sess.AbortTransaction(sCtx)
+		return err
+	}
+	return utils.Wrap(sess.CommitTransaction(sCtx), "")
+}

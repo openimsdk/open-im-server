@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -63,16 +63,16 @@ func NewFriendServer(port int) *friendServer {
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.FriendGorm
-	err = mysql.InitConn().AutoMigrateModel(&relation2.FriendModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relationTb.FriendModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
-	err = mysql.InitConn().AutoMigrateModel(&relation2.FriendRequestModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relationTb.FriendRequestModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
 
-	err = mysql.InitConn().AutoMigrateModel(&relation2.BlackModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relationTb.BlackModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -185,7 +185,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := relation2.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := relationTb.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {

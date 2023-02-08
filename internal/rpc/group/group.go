@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
@@ -73,7 +73,7 @@ func NewGroupServer(port int) *groupServer {
 	//mysql init
 	var mysql relation.Mysql
 	var mongo unrelation.Mongo
-	var groupModel relation2.GroupModel
+	var groupModel relationTb.GroupModel
 	var redis cache.RedisClient
 	err = mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
@@ -200,7 +200,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	var groupMembers []*relation2.GroupMemberModel
+	var groupMembers []*relationTb.GroupMemberModel
 	group := PbToDBGroupInfo(req.GroupInfo)
 	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	joinGroup := func(userID string, roleLevel int32) error {
@@ -235,7 +235,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}
 	}
-	if err := s.GroupInterface.CreateGroup(ctx, []*relation2.GroupModel{group}, groupMembers); err != nil {
+	if err := s.GroupInterface.CreateGroup(ctx, []*relationTb.GroupModel{group}, groupMembers); err != nil {
 		return nil, err
 	}
 	resp.GroupInfo = DbToPbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
@@ -265,7 +265,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	if len(members) == 0 {
 		return resp, nil
 	}
-	groupIDs := utils.Slice(members, func(e *relation2.GroupMemberModel) string {
+	groupIDs := utils.Slice(members, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
 	groups, err := s.GroupInterface.FindGroup(ctx, groupIDs)
@@ -280,12 +280,12 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	if err != nil {
 		return nil, err
 	}
-	ownerMap := utils.SliceToMap(owners, func(e *relation2.GroupMemberModel) string {
+	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relation2.GroupModel) string {
+	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
-	}), func(group *relation2.GroupModel) *open_im_sdk.GroupInfo {
+	}), func(group *relationTb.GroupModel) *open_im_sdk.GroupInfo {
 		return DbToPbGroupInfo(group, ownerMap[group.GroupID].UserID, uint32(groupMemberNum[group.GroupID]))
 	})
 	return resp, nil
@@ -310,7 +310,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if err != nil {
 		return nil, err
 	}
-	memberMap := utils.SliceToMap(members, func(e *relation2.GroupMemberModel) string {
+	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) string {
 		return e.UserID
 	})
 	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
@@ -331,9 +331,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 				return nil, constant.ErrNoPermission.Wrap("not in group")
 			}
 			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
-				var requests []*relation2.GroupRequestModel
+				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
-					requests = append(requests, &relation2.GroupRequestModel{
+					requests = append(requests, &relationTb.GroupRequestModel{
 						UserID:        userID,
 						GroupID:       req.GroupID,
 						JoinSource:    constant.JoinByInvitation,
@@ -364,7 +364,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		}
 	} else {
 		opUserID := tracelog.GetOpUserID(ctx)
-		var groupMembers []*relation2.GroupMemberModel
+		var groupMembers []*relationTb.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
 			member := PbToDbGroupMember(userMap[userID])
 			member.GroupID = req.GroupID
@@ -398,7 +398,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		return nil, err
 	}
-	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -411,7 +411,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
-	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -447,7 +447,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		if err != nil {
 			return nil, err
 		}
-		memberMap := make(map[string]*relation2.GroupMemberModel)
+		memberMap := make(map[string]*relationTb.GroupMemberModel)
 		for i, member := range members {
 			memberMap[member.UserID] = members[i]
 		}
@@ -496,7 +496,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	if err != nil {
 		return nil, err
 	}
-	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -533,7 +533,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	groupMap := utils.SliceToMap(groups, func(e *relation2.GroupModel) string {
+	groupMap := utils.SliceToMap(groups, func(e *relationTb.GroupModel) string {
 		return e.GroupID
 	})
 	if ids := utils.Single(utils.Keys(groupMap), groupIDs); len(ids) > 0 {
@@ -547,10 +547,10 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	ownerMap := utils.SliceToMap(owners, func(e *relation2.GroupMemberModel) string {
+	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	resp.GroupRequests = utils.Slice(groupRequests, func(e *relation2.GroupRequestModel) *open_im_sdk.GroupRequest {
+	resp.GroupRequests = utils.Slice(groupRequests, func(e *relationTb.GroupRequestModel) *open_im_sdk.GroupRequest {
 		return DbToPbGroupRequest(e, userMap[e.UserID], DbToPbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNumMap[e.GroupID])))
 	})
 	return resp, nil
@@ -573,10 +573,10 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	if err != nil {
 		return nil, err
 	}
-	ownerMap := utils.SliceToMap(owners, func(e *relation2.GroupMemberModel) string {
+	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	resp.GroupInfos = utils.Slice(groups, func(e *relation2.GroupModel) *open_im_sdk.GroupInfo {
+	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *open_im_sdk.GroupInfo {
 		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, uint32(groupMemberNumMap[e.GroupID]))
 	})
 	return resp, nil
@@ -618,9 +618,9 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err != nil {
 		return nil, err
 	}
-	var member *relation2.GroupMemberModel
+	var member *relationTb.GroupMemberModel
 	if req.HandleResult == constant.GroupResponseAgree {
-		member = &relation2.GroupMemberModel{
+		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
 			UserID:         user.UserID,
 			Nickname:       user.Nickname,
@@ -677,20 +677,20 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
 			return nil, err
 		}
-		if err := s.GroupInterface.CreateGroup(ctx, nil, []*relation2.GroupMemberModel{groupMember}); err != nil {
+		if err := s.GroupInterface.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
 		chat.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
 		return resp, nil
 	}
-	groupRequest := relation2.GroupRequestModel{
+	groupRequest := relationTb.GroupRequestModel{
 		UserID:     tracelog.GetOpUserID(ctx),
 		ReqMsg:     req.ReqMessage,
 		GroupID:    req.GroupID,
 		JoinSource: req.JoinSource,
 		ReqTime:    time.Now(),
 	}
-	if err := s.GroupInterface.CreateGroupRequest(ctx, []*relation2.GroupRequestModel{&groupRequest}); err != nil {
+	if err := s.GroupInterface.CreateGroupRequest(ctx, []*relationTb.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
 	}
 	chat.JoinGroupApplicationNotification(ctx, req)
@@ -770,7 +770,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	if err != nil {
 		return nil, err
 	}
-	memberMap := utils.SliceToMap(members, func(e *relation2.GroupMemberModel) string { return e.UserID })
+	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) string { return e.UserID })
 	if ids := utils.Single([]string{req.OldOwnerUserID, req.NewOwnerUserID}, utils.Keys(memberMap)); len(ids) > 0 {
 		return nil, constant.ErrArgs.Wrap("user not in group " + strings.Join(ids, ","))
 	}
@@ -804,7 +804,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	resp := &pbGroup.GetGroupsResp{}
 	var (
-		groups []*relation2.GroupModel
+		groups []*relationTb.GroupModel
 		err    error
 	)
 	if req.GroupID != "" {
@@ -816,14 +816,14 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 	if err != nil {
 		return nil, err
 	}
-	groupIDs := utils.Slice(groups, func(e *relation2.GroupModel) string {
+	groupIDs := utils.Slice(groups, func(e *relationTb.GroupModel) string {
 		return e.GroupID
 	})
 	ownerMembers, err := s.GroupInterface.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
-	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relation2.GroupMemberModel) string {
+	ownerMemberMap := utils.SliceToMap(ownerMembers, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(ownerMemberMap)); len(ids) > 0 {
@@ -833,7 +833,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 	if err != nil {
 		return nil, err
 	}
-	resp.Groups = utils.Slice(groups, func(group *relation2.GroupModel) *pbGroup.CMSGroup {
+	resp.Groups = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.CMSGroup {
 		member := ownerMemberMap[group.GroupID]
 		return DbToPbCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID]))
 	})
@@ -847,7 +847,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.MemberNums = total
-	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -867,14 +867,14 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	if len(requests) == 0 {
 		return resp, nil
 	}
-	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relation2.GroupRequestModel) string {
+	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationTb.GroupRequestModel) string {
 		return e.GroupID
 	}))
 	groups, err := s.GroupInterface.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
-	groupMap := utils.SliceToMap(groups, func(e *relation2.GroupModel) string {
+	groupMap := utils.SliceToMap(groups, func(e *relationTb.GroupModel) string {
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
@@ -884,7 +884,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	if err != nil {
 		return nil, err
 	}
-	ownerMap := utils.SliceToMap(owners, func(e *relation2.GroupMemberModel) string {
+	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
@@ -894,7 +894,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	if err != nil {
 		return nil, err
 	}
-	resp.GroupRequests = utils.Slice(requests, func(e *relation2.GroupRequestModel) *open_im_sdk.GroupRequest {
+	resp.GroupRequests = utils.Slice(requests, func(e *relationTb.GroupRequestModel) *open_im_sdk.GroupRequest {
 		return DbToPbGroupRequest(e, user, DbToPbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
 	})
 	return resp, nil
@@ -1058,7 +1058,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	if err != nil {
 		return nil, err
 	}
-	resp.GroupAbstractInfos = utils.Slice(groups, func(e *relation2.GroupModel) *pbGroup.GroupAbstractInfo {
+	resp.GroupAbstractInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
 		userIDs := groupUserMap[e.GroupID]
 		utils.Sort(userIDs, true)
 		bi := big.NewInt(0)
@@ -1077,7 +1077,7 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	if err != nil {
 		return nil, err
 	}
-	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil

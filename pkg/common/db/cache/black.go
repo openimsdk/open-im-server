@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -18,7 +18,7 @@ const (
 )
 
 type BlackCache struct {
-	blackDB    *relation2.BlackModel
+	blackDB    *relationTb.BlackModel
 	expireTime time.Duration
 	rcClient   *rockscache.Client
 }
