@@ -46,10 +46,24 @@ func (db *SuperGroupMongoDriver) CreateSuperGroup(sCtx mongo.SessionContext, gro
 
 }
 
-func (db *SuperGroupMongoDriver) GetSuperGroup(ctx context.Context, groupID string) (*unrelation.SuperGroupModel, error) {
-	superGroup := unrelation.SuperGroupModel{}
-	err := db.superGroupCollection.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&superGroup)
-	return &superGroup, err
+//func (db *SuperGroupMongoDriver) GetSuperGroup(ctx context.Context, groupID string) (*unrelation.SuperGroupModel, error) {
+//	superGroup := unrelation.SuperGroupModel{}
+//	err := db.superGroupCollection.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&superGroup)
+//	return &superGroup, err
+//}
+
+func (db *SuperGroupMongoDriver) FindSuperGroup(ctx context.Context, groupIDs []string) (groups []*unrelation.SuperGroupModel, err error) {
+	cursor, err := db.superGroupCollection.Find(ctx, bson.M{"group_id": bson.M{
+		"$in": groupIDs,
+	}})
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	defer cursor.Close(ctx)
+	if err := cursor.All(ctx, &groups); err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	return groups, nil
 }
 
 func (db *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
@@ -96,16 +110,6 @@ func (db *SuperGroupMongoDriver) GetSuperGroupByUserID(ctx context.Context, user
 	var user unrelation.UserToSuperGroupModel
 	err := db.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
 	return &user, utils.Wrap(err, "")
-}
-
-func (db *SuperGroupMongoDriver) GetJoinGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *SuperGroupMongoDriver) MapGroupMemberCount(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (db *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID string) error {

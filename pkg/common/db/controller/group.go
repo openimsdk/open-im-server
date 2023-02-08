@@ -43,13 +43,12 @@ type GroupInterface interface {
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
 	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
 	// SuperGroup
-	TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
-	FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (superGroup *unrelation2.UserToSuperGroupModel, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 }
 
 var _ GroupInterface = (*GroupController)(nil)
@@ -138,12 +137,15 @@ func (g *GroupController) PageGroupRequestUser(ctx context.Context, userID strin
 	return g.database.PageGroupRequestUser(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *GroupController) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
-	return g.database.TakeSuperGroup(ctx, groupID)
+//	func (g *GroupController) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
+//		return g.database.TakeSuperGroup(ctx, groupID)
+//	}
+func (g *GroupController) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error) {
+	return g.database.FindSuperGroup(ctx, groupIDs)
 }
 
-func (g *GroupController) FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error) {
-	return g.database.FindJoinSuperGroup(ctx, userID, pageNumber, showNumber)
+func (g *GroupController) FindJoinSuperGroup(ctx context.Context, userID string) (*unrelation2.UserToSuperGroupModel, error) {
+	return g.database.FindJoinSuperGroup(ctx, userID)
 }
 
 func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
@@ -160,10 +162,6 @@ func (g *GroupController) DeleteSuperGroupMember(ctx context.Context, groupID st
 
 func (g *GroupController) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
 	return g.database.CreateSuperGroupMember(ctx, groupID, userIDs)
-}
-
-func (g *GroupController) MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
-	return g.database.MapSuperGroupMemberNum(ctx, groupIDs)
 }
 
 type GroupDataBaseInterface interface {
@@ -190,13 +188,13 @@ type GroupDataBaseInterface interface {
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
 	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
 	// SuperGroup
-	TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
-	FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
+	//TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (*unrelation2.UserToSuperGroupModel, error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 }
 
 func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupDataBaseInterface {
@@ -356,12 +354,16 @@ func (g *GroupDataBase) PageGroupRequestUser(ctx context.Context, userID string,
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *GroupDataBase) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
-	return g.mongoDB.GetSuperGroup(ctx, groupID)
+//func (g *GroupDataBase) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
+//	return g.mongoDB.GetSuperGroup(ctx, groupID)
+//}
+
+func (g *GroupDataBase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error) {
+	return g.mongoDB.FindSuperGroup(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error) {
-	return g.mongoDB.GetJoinGroup(ctx, userID, pageNumber, showNumber)
+func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (*unrelation2.UserToSuperGroupModel, error) {
+	return g.mongoDB.GetSuperGroupByUserID(ctx, userID)
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
@@ -383,10 +385,6 @@ func (g *GroupDataBase) DeleteSuperGroupMember(ctx context.Context, groupID stri
 
 func (g *GroupDataBase) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
 	return g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs)
-}
-
-func (g *GroupDataBase) MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
-	return g.mongoDB.MapGroupMemberCount(ctx, groupIDs)
 }
 
 func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.SessionContext) error) error {

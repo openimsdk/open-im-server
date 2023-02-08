@@ -322,6 +322,10 @@ func If[T any](isa bool, a, b T) T {
 	return b
 }
 
+func ToPtr[T any](t T) *T {
+	return &t
+}
+
 // Equal 比较切片是否相对(包括元素顺序)
 func Equal[E comparable](a []E, b []E) bool {
 	if len(a) != len(b) {
