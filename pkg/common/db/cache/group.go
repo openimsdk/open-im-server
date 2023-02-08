@@ -2,8 +2,8 @@ package cache
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/db/relation"
+	relation2 "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
@@ -14,7 +14,6 @@ import (
 	"math/big"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -30,16 +29,16 @@ const (
 )
 
 type GroupCache struct {
-	group        *relation.GroupGorm
-	groupMember  *relation.GroupMemberGorm
-	groupRequest *relation.GroupRequestGorm
+	group        relation2.GroupModelInterface
+	groupMember  relation2.GroupMemberModelInterface
+	groupRequest relation2.GroupRequestModelInterface
 	mongoDB      *unrelation.SuperGroupMongoDriver
 	expireTime   time.Duration
 	redisClient  *RedisClient
 	rcClient     *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
+func NewGroupCache(rdb redis.UniversalClient, groupDB relation2.GroupModelInterface, groupMemberDB relation2.GroupMemberModelInterface, groupRequestDB relation2.GroupRequestModelInterface, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient,

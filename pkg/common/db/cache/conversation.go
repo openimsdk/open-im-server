@@ -22,6 +22,8 @@ type ConversationCache interface {
 	GetConversationsFromCache(ownerUserID string, conversationIDList []string, fn DBFun) ([]*table.ConversationModel, error)
 	GetUserAllConversationList(ownerUserID string, fn DBFun) ([]*table.ConversationModel, error)
 	DelConversationFromCache(ownerUserID, conversationID string) error
+
+	GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(ctx context.Context, userID string) ([]string, error)) ([]string, error)
 }
 type ConversationRedis struct {
 	rcClient *rockscache.Client
@@ -51,7 +53,7 @@ func (c *ConversationCache) getSuperGroupRecvNotNotifyUserIDsKey(groupID string)
 	return superGroupRecvMsgNotNotifyUserIDsKey + groupID
 }
 
-func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(userID string) ([]string, error)) (conversationIDs []string, err error) {
+func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(ctx context.Context, userID string) ([]string, error)) (conversationIDs []string, err error) {
 	//getConversationIDs := func() (string, error) {
 	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
 	//	if err != nil {

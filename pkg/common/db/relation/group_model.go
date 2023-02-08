@@ -1,98 +1,69 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
-	"fmt"
-
-	"time"
+	"context"
+	"gorm.io/gorm"
 )
 
-func InsertIntoGroup(groupInfo Group) error {
-	if groupInfo.GroupName == "" {
-		groupInfo.GroupName = "Group Chat"
-	}
-	groupInfo.CreateTime = time.Now()
+var _ relation.GroupModelInterface = (*GroupGorm)(nil)
 
-	if groupInfo.NotificationUpdateTime.Unix() < 0 {
-		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
-	}
-	err := GroupDB.Create(groupInfo).Error
-	if err != nil {
-		return err
-	}
-	return nil
+type GroupGorm struct {
+	DB *gorm.DB
 }
 
-func TakeGroupInfoByGroupID(groupID string) (*Group, error) {
-	var groupInfo Group
-	err := GroupDB.Where("group_id=?", groupID).Take(&groupInfo).Error
-	return &groupInfo, err
+func NewGroupDB(db *gorm.DB) relation.GroupModelInterface {
+	return &GroupGorm{DB: db}
 }
 
-func GetGroupInfoByGroupID(groupID string) (*Group, error) {
-	var groupInfo Group
-	err := GroupDB.Where("group_id=?", groupID).Take(&groupInfo).Error
-	return &groupInfo, err
+func (g *GroupGorm) Create(ctx context.Context, groups []*relation.GroupModel, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groups", groups)
+	}()
+	return utils.Wrap(getDBConn(g.DB, tx).Create(&groups).Error, "")
 }
 
-func SetGroupInfo(groupInfo Group) error {
-	return GroupDB.Where("group_id=?", groupInfo.GroupID).Updates(&groupInfo).Error
+//func (g *GroupGorm) Delete(ctx context.Context, groupIDs []string, tx ...any) (err error) {
+//	defer func() {
+//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs)
+//	}()
+//	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Delete(&relation.GroupModel{}).Error, "")
+//}
+
+func (g *GroupGorm) UpdateMap(ctx context.Context, groupID string, args map[string]interface{}, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "args", args)
+	}()
+	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Model(&relation.GroupModel{}).Updates(args).Error, "")
 }
 
-type GroupWithNum struct {
-	Group
-	MemberCount int `gorm:"column:num"`
+func (g *GroupGorm) UpdateStatus(ctx context.Context, groupID string, status int32, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "status", status)
+	}()
+	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Model(&relation.GroupModel{}).Updates(map[string]any{"status": status}).Error, "")
 }
 
-func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]GroupWithNum, int64, error) {
-	var groups []GroupWithNum
-	var count int64
-	sql := GroupDB.Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
-		Where(" name like ? and status != ?", fmt.Sprintf("%%%s%%", groupName), constant.GroupStatusDismissed)
-	if err := sql.Count(&count).Error; err != nil {
-		return nil, 0, err
-	}
-	err := sql.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
-	return groups, count, err
+func (g *GroupGorm) Find(ctx context.Context, groupIDs []string, tx ...any) (groups []*relation.GroupModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "groups", groups)
+	}()
+	return groups, utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
 }
 
-func GetGroups(pageNumber, showNumber int) ([]GroupWithNum, error) {
-	var groups []GroupWithNum
-	if err := GroupDB.Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
-		Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groups).Error; err != nil {
-		return groups, err
-	}
-	return groups, nil
+func (g *GroupGorm) Take(ctx context.Context, groupID string, tx ...any) (group *relation.GroupModel, err error) {
+	group = &relation.GroupModel{}
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", group)
+	}()
+	return group, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Take(group).Error, "")
 }
 
-func OperateGroupStatus(groupId string, groupStatus int32) error {
-	group := Group{
-		GroupID: groupId,
-		Status:  groupStatus,
-	}
-	if err := SetGroupInfo(group); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetGroupsCountNum(group Group) (int32, error) {
-	var count int64
-	if err := GroupDB.Where(" name like ? ", fmt.Sprintf("%%%s%%", group.GroupName)).Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return int32(count), nil
-}
-
-func UpdateGroupInfoDefaultZero(groupID string, args map[string]interface{}) error {
-	return GroupDB.Where("group_id = ? ", groupID).Updates(args).Error
-}
-
-func GetGroupIDListByGroupType(groupType int) ([]string, error) {
-	var groupIDList []string
-	if err := GroupDB.Where("group_type = ? ", groupType).Pluck("group_id", &groupIDList).Error; err != nil {
-		return nil, err
-	}
-	return groupIDList, nil
+func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...any) (total int32, groups []*relation.GroupModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "keyword", keyword, "pageNumber", pageNumber, "showNumber", showNumber, "total", total, "groups", groups)
+	}()
+	return gormSearch[relation.GroupModel](getDBConn(g.DB, tx), []string{"name"}, keyword, pageNumber, showNumber)
 }
