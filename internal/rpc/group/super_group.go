@@ -23,10 +23,13 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, groupIDs)
+	owners, err := s.GroupInterface.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
+	ownerMap := utils.SliceToMap(owners, func(e *relation.GroupMemberModel) string {
+		return e.GroupID
+	})
 	groups, err := s.GroupInterface.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
@@ -35,7 +38,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	resp.Groups = utils.Slice(groupIDs, func(groupID string) *sdk_ws.GroupInfo {
-		return DbToPbGroupInfo(groupMap[groupID], ownerIdMap[groupID], numMap[groupID])
+		return DbToPbGroupInfo(groupMap[groupID], ownerMap[groupID].UserID, numMap[groupID])
 	})
 	return resp, nil
 }
@@ -53,12 +56,15 @@ func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSu
 	if err != nil {
 		return nil, err
 	}
-	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, req.GroupIDs)
+	owners, err := s.GroupInterface.FindGroupMember(ctx, req.GroupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
+	ownerMap := utils.SliceToMap(owners, func(e *relation.GroupMemberModel) string {
+		return e.GroupID
+	})
 	resp.GroupInfos = utils.Slice(groups, func(e *relation.GroupModel) *sdk_ws.GroupInfo {
-		return DbToPbGroupInfo(e, ownerIdMap[e.GroupID], numMap[e.GroupID])
+		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, numMap[e.GroupID])
 	})
 	return resp, nil
 }
