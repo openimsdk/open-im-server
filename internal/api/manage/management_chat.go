@@ -38,6 +38,7 @@ func SetOptions(options map[string]bool, value bool) {
 
 func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
+	options := make(map[string]bool, 5)
 	var err error
 	switch params.ContentType {
 	case constant.Text:
@@ -57,12 +58,13 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	case constant.CustomOnlineOnly:
 		fallthrough
 	case constant.AdvancedRevoke:
+		utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
+		utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 		newContent = params.Content["revokeMsgClientID"].(string)
 	default:
 	}
-	options := make(map[string]bool, 5)
 	if params.IsOnlineOnly {
 		SetOptions(options, false)
 	}

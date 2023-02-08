@@ -17,8 +17,8 @@ import (
 
 func SetMessageReactionExtensions(c *gin.Context) {
 	var (
-		req   api.SetMessageReactionExtensionsCallbackReq
-		resp  api.SetMessageReactionExtensionsCallbackResp
+		req   api.SetMessageReactionExtensionsReq
+		resp  api.SetMessageReactionExtensionsResp
 		reqPb rpc.SetMessageReactionExtensionsReq
 	)
 
@@ -72,7 +72,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 		reqPb rpc.GetMessageListReactionExtensionsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
@@ -86,7 +86,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -115,8 +115,9 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	var (
 		req   api.AddMessageReactionExtensionsReq
 		resp  api.AddMessageReactionExtensionsResp
-		reqPb rpc.ModifyMessageReactionExtensionsReq
+		reqPb rpc.AddMessageReactionExtensionsReq
 	)
+
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -152,6 +153,9 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
+	resp.Data.ResultKeyValue = respPb.Result
+	resp.Data.MsgFirstModifyTime = respPb.MsgFirstModifyTime
+	resp.Data.IsReact = respPb.IsReact
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }

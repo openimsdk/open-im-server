@@ -253,7 +253,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				ws.sendKickMsg(oldConn)
+				ws.sendKickMsg(oldConn, operationID)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -302,11 +302,12 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 	case constant.WebAndOther:
 	}
 }
-func (ws *WServer) sendKickMsg(oldConn *UserConn) {
+func (ws *WServer) sendKickMsg(oldConn *UserConn, operationID string) {
 	mReply := Resp{
 		ReqIdentifier: constant.WSKickOnlineMsg,
 		ErrCode:       constant.ErrTokenInvalid.ErrCode,
 		ErrMsg:        constant.ErrTokenInvalid.ErrMsg,
+		OperationID:   operationID,
 	}
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
@@ -422,19 +423,19 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 	return nil
 }
 
-//func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
-//	rwLock.RLock()
-//	defer rwLock.RUnlock()
+//	func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
+//		rwLock.RLock()
+//		defer rwLock.RUnlock()
 //
-//	if stringMap, ok := ws.wsConnToUser[conn]; ok {
-//		for k, v := range stringMap {
-//			platform = k
-//			uid = v
+//		if stringMap, ok := ws.wsConnToUser[conn]; ok {
+//			for k, v := range stringMap {
+//				platform = k
+//				uid = v
+//			}
+//			return uid, platform
 //		}
-//		return uid, platform
+//		return "", 0
 //	}
-//	return "", 0
-//}
 func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()

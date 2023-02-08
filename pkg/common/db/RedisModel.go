@@ -40,6 +40,9 @@ const (
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum       = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker               = "EX_LOCK:"
+
+	//temp
+	superGroupUserNotRecvOfflineMsgOptTemp = "SG_RECV_MSG_OPT_TEMP:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -164,6 +167,23 @@ func (d *DataBases) GetSingleConversationRecvMsgOpt(userID, conversationID strin
 	result, err := d.RDB.HGet(context.Background(), key, conversationID).Result()
 	return utils.StringToInt(result), err
 }
+
+func (d *DataBases) SetSuperGroupUserReceiveNotNotifyMessage(groupID, userID string) error {
+	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
+	return d.RDB.SAdd(context.Background(), key, userID).Err()
+}
+
+func (d *DataBases) SetSuperGroupUserReceiveNotifyMessage(groupID, userID string) error {
+	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
+	return d.RDB.SRem(context.Background(), key, userID).Err()
+}
+
+func (d *DataBases) GetSuperGroupUserReceiveNotNotifyMessageIDList(groupID string) ([]string, error) {
+	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
+	userIDs, _ := d.RDB.SMembers(context.Background(), key).Result()
+	return userIDs, nil
+}
+
 func (d *DataBases) SetUserGlobalMsgRecvOpt(userID string, opt int32) error {
 	key := conversationReceiveMessageOpt + userID
 	return d.RDB.HSet(context.Background(), key, GlobalMsgRecvOpt, opt).Err()
@@ -374,7 +394,7 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 			continue
 		}
 		var msg pbCommon.MsgData
-		if err := utils.String2Pb(result, &msg); err != nil {
+		if err := jsonpb.UnmarshalString(result, &msg); err != nil {
 			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, result, key, err.Error())
 			continue
 		}

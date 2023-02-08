@@ -115,11 +115,11 @@ sdk:
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
-    appID:  
-    region:  
-    bucket:  
-    secretID:  
-    secretKey:  
+    appID:
+    region:
+    bucket:
+    secretID:
+    secretKey:
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
@@ -132,15 +132,15 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     storageTime: 50 #文件在minio中保存的时间
     isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
-    regionID:  
-    accessKeyID: ""
-    accessKeySecret: ""
-    stsEndpoint:  
-    ossEndpoint: 
-    bucket: 
-    finalHost:  
-    stsDurationSeconds: 3600
-    OssRoleArn: "acs:ram::xxx:role/xxx"
+    regionID:
+    accessKeyID:
+    accessKeySecret:
+    stsEndpoint:
+    ossEndpoint:
+    bucket:
+    finalHost:
+    stsDurationSeconds:
+    OssRoleArn:
   aws:
     accessKeyID:                            #AssumeRole用户关联的accessKeyID
     accessKeySecret:                        #AssumeRole用户关联的accessKeySecrect
@@ -216,17 +216,17 @@ longconnsvr:
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
-      accessID:  
-      secretKey:  
+      accessID:
+      secretKey:
     android:
-      accessID: 111
-      secretKey: 111
+      accessID:
+      secretKey:
     enable: false # true or false (bool)
   jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
-    appKey:  
-    masterSecret:  
-    pushUrl:  
-    pushIntent:  
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
     enable: false # true or false (bool)
   getui:  #个推推送
     pushUrl: 
@@ -237,13 +237,13 @@ push:
     channelID: ""
     channelName: ""
   fcm:  #firebase cloud message 消息推送
-    serviceAccount:  #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    serviceAccount:   #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
   mob:  #袤博推送
-    appKey:  #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-    pushUrl:  
-    scheme:  
-    appSecret:  
+    appKey:   #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    pushUrl:
+    scheme:
+    appSecret:
     enable: false
 
 
@@ -765,18 +765,18 @@ demo:
   #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 10004 ]
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
-    accessKeyId:  
-    accessKeySecret:  
-    signName:  
-    verificationCodeTemplateCode:  
+    accessKeyId:
+    accessKeySecret:
+    signName:
+    verificationCodeTemplateCode:
     enable: false
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
-    appID:   
-    region:  
-    secretID:  
-    secretKey:  
-    signName: 
-    verificationCodeTemplateCode:  
+    appID:
+    region:
+    secretID:
+    secretKey:
+    signName:
+    verificationCodeTemplateCode:
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   needInvitationCode: false
@@ -784,10 +784,10 @@ demo:
   codeTTL: 60
   useSuperCode: true
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
-    title:  
-    senderMail:  
-    senderAuthorizationCode: 
-    smtpAddr:  
+    title:
+    senderMail:
+    senderAuthorizationCode:
+    smtpAddr:
     smtpPort:     #需开放此端口 出口方向
   testDepartMentID: 001
   imAPIURL: http://127.0.0.1:10002

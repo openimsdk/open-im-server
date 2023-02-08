@@ -18,6 +18,31 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 	var m base_info.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
+	m.Operation = constant.SetMessageExtensions
+	m.SessionType = req.SessionType
+	keyMap := make(map[string]*open_im_sdk.KeyValue)
+	for _, valueResp := range resp.Result {
+		if valueResp.ErrCode == 0 {
+			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
+		}
+	}
+	if len(keyMap) == 0 {
+		log.NewWarn(operationID, "all key set failed can not send notification", *req)
+		return
+	}
+	m.SuccessReactionExtensionList = keyMap
+	m.ClientMsgID = req.ClientMsgID
+	m.IsReact = resp.IsReact
+	m.IsExternalExtensions = req.IsExternalExtensions
+	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
+	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
+}
+func ExtendMessageAddedNotification(operationID, sendID string, sourceID string, sessionType int32,
+	req *msg.AddMessageReactionExtensionsReq, resp *msg.AddMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+	var m base_info.ReactionMessageModifierNotification
+	m.SourceID = req.SourceID
+	m.OpUserID = req.OpUserID
+	m.Operation = constant.AddMessageExtensions
 	m.SessionType = req.SessionType
 	keyMap := make(map[string]*open_im_sdk.KeyValue)
 	for _, valueResp := range resp.Result {

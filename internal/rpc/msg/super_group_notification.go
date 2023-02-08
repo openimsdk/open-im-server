@@ -18,6 +18,7 @@ func SuperGroupNotification(operationID, sendID, recvID string) {
 		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
+
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
 	Notification(n)
 }

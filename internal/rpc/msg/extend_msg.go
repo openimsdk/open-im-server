@@ -282,8 +282,50 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 
 }
 
-func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
-	return
+func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.AddMessageReactionExtensionsReq) (resp *msg.AddMessageReactionExtensionsResp, err error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
+	var rResp msg.AddMessageReactionExtensionsResp
+	rResp.ClientMsgID = req.ClientMsgID
+	rResp.MsgFirstModifyTime = req.MsgFirstModifyTime
+	callbackResp := callbackAddMessageReactionExtensions(req)
+	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
+		rResp.ErrCode = int32(callbackResp.ErrCode)
+		rResp.ErrMsg = callbackResp.ErrMsg
+		for _, value := range req.ReactionExtensionList {
+			temp := new(msg.KeyValueResp)
+			temp.KeyValue = value
+			temp.ErrMsg = callbackResp.ErrMsg
+			temp.ErrCode = 100
+			rResp.Result = append(rResp.Result, temp)
+		}
+		return &rResp, nil
+	}
+
+	//if !req.IsExternalExtensions {
+	//	rResp.ErrCode = 200
+	//	rResp.ErrMsg = "only extenalextensions message can be used"
+	//	for _, value := range req.ReactionExtensionList {
+	//		temp := new(msg.KeyValueResp)
+	//		temp.KeyValue = value
+	//		temp.ErrMsg = callbackResp.ErrMsg
+	//		temp.ErrCode = 100
+	//		rResp.Result = append(rResp.Result, temp)
+	//	}
+	//	return &rResp, nil
+	//}
+	//if ExternalExtension
+	var isHistory bool
+	if req.IsReact {
+		isHistory = false
+	} else {
+		isHistory = true
+	}
+	rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
+	rResp.Result = callbackResp.ResultReactionExtensionList
+	rResp.IsReact = callbackResp.IsReact
+	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", resp.String())
+	return &rResp, nil
 }
 
 func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
