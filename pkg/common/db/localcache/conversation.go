@@ -1,24 +1,25 @@
 package localcache
 
 import (
-	"Open_IM/pkg/proto/conversation"
 	"context"
-	"google.golang.org/grpc"
+	"github.com/OpenIMSDK/openKeeper"
 	"sync"
 )
+
+type ConversationLocalCacheInterface interface {
+	GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) []string
+}
 
 type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	SuperGroupRecvMsgNotNotifyUserIDs map[string][]string
-	rpc                               *grpc.ClientConn
-	conversation                      conversation.ConversationClient
+	zkClient                          *openKeeper.ZkClient
 }
 
-func NewConversationLocalCache(rpc *grpc.ClientConn) ConversationLocalCache {
+func NewConversationLocalCache(zkClient *openKeeper.ZkClient) ConversationLocalCache {
 	return ConversationLocalCache{
 		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string][]string, 0),
-		rpc:                               rpc,
-		conversation:                      conversation.NewConversationClient(rpc),
+		zkClient:                          zkClient,
 	}
 }
 

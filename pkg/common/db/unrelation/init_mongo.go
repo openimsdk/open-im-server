@@ -119,7 +119,6 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 			keysDoc = keysDoc.Append(key, bsonx.Int32(1))
 		}
 	}
-
 	// create index
 	index := mongo.IndexModel{
 		Keys: keysDoc,

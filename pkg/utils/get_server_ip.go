@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Open_IM/pkg/common/config"
 	"errors"
 	"net"
 )
@@ -22,4 +23,16 @@ func GetLocalIP() (string, error) {
 	}
 
 	return "", errors.New("no ip")
+}
+
+func GetRpcIP() (string, error) {
+	registerIP := config.Config.RpcRegisterIP
+	if registerIP == "" {
+		ip, err := GetLocalIP()
+		if err != nil {
+			return "", err
+		}
+		registerIP = ip
+	}
+	return registerIP, nil
 }

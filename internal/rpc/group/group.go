@@ -91,6 +91,11 @@ func NewGroupServer(port int) *groupServer {
 	if err != nil {
 		panic(err.Error())
 	}
+	registerIP, err := utils.GetRpcIP()
+	err = zkClient.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
+	if err != nil {
+		panic(err.Error())
+	}
 	var registerCenter discoveryRegistry.SvcDiscoveryRegistry = zkClient
 	conns, err := registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
 	g.GroupInterface = controller.NewGroupController(groupModel.DB, redis.GetClient(), mongo.GetClient())

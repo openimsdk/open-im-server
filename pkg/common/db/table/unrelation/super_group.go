@@ -1,6 +1,8 @@
 package unrelation
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"context"
+)
 
 const (
 	CSuperGroup       = "super_group"
@@ -26,5 +28,11 @@ func (UserToSuperGroupModel) TableName() string {
 }
 
 type SuperGroupModelInterface interface {
-	CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDs []string) error
+	// tx is your transaction object
+	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string, tx ...interface{}) error
+	GetSuperGroup(ctx context.Context, groupID string) (SuperGroupModel, error)
+	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...interface{}) error
+	RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...interface{}) error
+	GetSuperGroupByUserID(ctx context.Context, userID string) (*UserToSuperGroupModel, error)
+	DeleteSuperGroup(ctx context.Context, groupID string, tx ...interface{}) error
 }

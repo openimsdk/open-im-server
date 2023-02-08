@@ -71,12 +71,6 @@ func (s *Statistics) GetGroupNum(to time.Time) (num int64, err error) {
 	return num, err
 }
 
-type ActiveGroup struct {
-	Name       string
-	ID         string `gorm:"column:recv_id"`
-	MessageNum int    `gorm:"column:message_num"`
-}
-
 func (s *Statistics) GetActiveGroups(from, to time.Time, limit int) ([]*ActiveGroup, error) {
 	var activeGroups []*ActiveGroup
 	err := s.getChatLogModel().Select("recv_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.GroupChatType, constant.SuperGroupChatType}).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
@@ -88,12 +82,6 @@ func (s *Statistics) GetActiveGroups(from, to time.Time, limit int) ([]*ActiveGr
 		activeGroup.Name = group.GroupName
 	}
 	return activeGroups, err
-}
-
-type ActiveUser struct {
-	Name       string
-	ID         string `gorm:"column:send_id"`
-	MessageNum int    `gorm:"column:message_num"`
 }
 
 func (s *Statistics) GetActiveUsers(from, to time.Time, limit int) (activeUsers []*ActiveUser, err error) {

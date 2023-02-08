@@ -1,5 +1,7 @@
 package unrelation
 
+import "context"
+
 const (
 	CTag     = "tag"
 	CSendLog = "send_log"
@@ -29,4 +31,12 @@ func (TagSendLogModel) TableName() string {
 }
 
 type TagModelInterface interface {
+	GetUserTags(ctx context.Context, userID string) ([]TagModel, error)
+	CreateTag(ctx context.Context, userID, tagName string, userList []string) error
+	GetTagByID(ctx context.Context, userID, tagID string) (TagModel, error)
+	DeleteTag(ctx context.Context, userID, tagID string) error
+	SetTag(ctx context.Context, userID, tagID, newName string, increaseUserIDList []string, reduceUserIDList []string) error
+	GetUserIDListByTagID(ctx context.Context, userID, tagID string) ([]string, error)
+	SaveTagSendLog(ctx context.Context, tagSendLog *TagSendLogModel) error
+	GetTagSendLogs(ctx context.Context, userID string, showNumber, pageNumber int32) ([]TagSendLogModel, error)
 }
