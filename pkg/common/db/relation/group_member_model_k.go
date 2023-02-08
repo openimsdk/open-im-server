@@ -24,12 +24,19 @@ func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*relatio
 	return utils.Wrap(getDBConn(g.DB, tx).Create(&groupMemberList).Error, "")
 }
 
-func (g *GroupMemberGorm) Delete(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
+func (g *GroupMemberGorm) Delete(ctx context.Context, groupID string, userIDs []string, tx ...*gorm.DB) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userIDs", userIDs)
 	}()
-	return utils.Wrap(getDBConn(g.DB, tx).Delete(groupMembers).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and user_id in (?)", groupID, userIDs).Delete(&relation.GroupMemberModel{}).Error, "")
 }
+
+//func (g *GroupMemberGorm) Delete(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
+//	defer func() {
+//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
+//	}()
+//	return utils.Wrap(getDBConn(g.DB, tx).Delete(groupMembers).Error, "")
+//}
 
 func (g *GroupMemberGorm) DeleteGroup(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (err error) {
 	defer func() {
@@ -45,9 +52,21 @@ func (g *GroupMemberGorm) UpdateByMap(ctx context.Context, groupID string, userI
 	return utils.Wrap(getDBConn(g.DB, tx).Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
-func (g *GroupMemberGorm) Update(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
-	defer func() { tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
-	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groupMembers).Error, "")
+func (g *GroupMemberGorm) Update(ctx context.Context, groupID string, userID string, data map[string]any, tx ...*gorm.DB) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "data", data)
+	}()
+	return utils.Wrap(getDBConn(g.DB, tx).Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(data).Error, "")
+}
+
+func (g *GroupMemberGorm) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32, tx ...*gorm.DB) (rowsAffected int64, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "roleLevel", roleLevel)
+	}()
+	db := getDBConn(g.DB, tx).Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(map[string]any{
+		"role_level": roleLevel,
+	})
+	return db.RowsAffected, utils.Wrap(db.Error, "")
 }
 
 func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, tx ...*gorm.DB) (groupList []*relation.GroupMemberModel, err error) {
@@ -66,17 +85,6 @@ func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs [
 	}
 	return groupList, utils.Wrap(db.Find(&groupList).Error, "")
 }
-
-//func (g *GroupMemberGorm) Find(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (groupList []*relation.GroupMemberModel, err error) {
-//	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
-//	}()
-//	var where [][]interface{}
-//	for _, groupMember := range groupMembers {
-//		where = append(where, []interface{}{groupMember.GroupID, groupMember.UserID})
-//	}
-//	return groupList, utils.Wrap(getDBConn(g.DB, tx).Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
-//}
 
 func (g *GroupMemberGorm) FindGroupUser(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, tx ...*gorm.DB) (groupList []*relation.GroupMemberModel, err error) {
 	defer func() {
@@ -120,4 +128,29 @@ func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, grou
 	gormIn(&db, "user_id", userIDs)
 	gormIn(&db, "role_level", roleLevels)
 	return gormSearch[relation.GroupMemberModel](db, []string{"nickname"}, keyword, pageNumber, showNumber)
+}
+
+func (g *GroupMemberGorm) MapGroupMemberNum(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (count map[string]uint32, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "count", count)
+	}()
+	return mapCount(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs), "group_id")
+}
+
+func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (groupUsers map[string][]string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "groupUsers", groupUsers)
+	}()
+	var items []struct {
+		GroupID string `gorm:"group_id"`
+		UserID  string `gorm:"user_id"`
+	}
+	if err := getDBConn(g.DB, tx).Model(&relation.GroupMemberModel{}).Where("group_id in (?)", groupIDs).Find(&items).Error; err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	groupUsers = make(map[string][]string)
+	for _, item := range items {
+		groupUsers[item.GroupID] = append(groupUsers[item.GroupID], item.UserID)
+	}
+	return groupUsers, nil
 }

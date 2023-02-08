@@ -39,3 +39,18 @@ func gormIn[E any](db **gorm.DB, field string, es []E) {
 	}
 	*db = (*db).Where(field+" in (?)", es)
 }
+
+func mapCount(db *gorm.DB, field string) (map[string]uint32, error) {
+	var items []struct {
+		ID    string `gorm:"column:id"`
+		Count uint32 `gorm:"column:count"`
+	}
+	if err := db.Select(field + " as id, count(1) as count").Group(field).Find(&items).Error; err != nil {
+		return nil, err
+	}
+	m := make(map[string]uint32)
+	for _, item := range items {
+		m[item.ID] = item.Count
+	}
+	return m, nil
+}

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/OpenIMSDK/getcdv3"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -788,7 +789,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", tracelog.GetOpUserID(ctx)))
 		}
 	}
-	if err := s.GroupInterface.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID); err != nil {
+	if err := s.GroupInterface.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
 		return nil, err
 	}
 	chat.GroupOwnerTransferredNotification(req)
@@ -1048,16 +1049,16 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	if err != nil {
 		return nil, err
 	}
-	numMap, err := s.GroupInterface.MapGroupMemberNum(ctx, req.GroupIDs)
-	if err != nil {
-		return nil, err
-	}
-	hashMap, err := s.GroupInterface.MapGroupHash(ctx, req.GroupIDs)
+	groupUserMap, err := s.GroupInterface.MapGroupMemberUserID(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
 	resp.GroupAbstractInfos = utils.Slice(groups, func(e *relation2.GroupModel) *pbGroup.GroupAbstractInfo {
-		return DbToPbGroupAbstractInfo(e.GroupID, int32(numMap[e.GroupID]), hashMap[e.GroupID])
+		userIDs := groupUserMap[e.GroupID]
+		utils.Sort(userIDs, true)
+		bi := big.NewInt(0)
+		bi.SetString(utils.Md5(strings.Join(userIDs, ";;"))[0:8], 16)
+		return DbToPbGroupAbstractInfo(e.GroupID, int32(len(userIDs)), bi.Uint64())
 	})
 	return resp, nil
 }
