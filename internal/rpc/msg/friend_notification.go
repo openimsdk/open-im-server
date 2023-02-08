@@ -91,14 +91,14 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 	Notification(&n)
 }
 
-func FriendApplicationNotification(ctx context.Context, req *pbFriend.AddFriendReq) {
+func FriendApplicationAddNotification(ctx context.Context, req *pbFriend.AddFriendReq) {
 	FriendApplicationTips := open_im_sdk.FriendApplicationTips{FromToUserID: &open_im_sdk.FromToUserID{}}
 	FriendApplicationTips.FromToUserID.FromUserID = req.FromUserID
 	FriendApplicationTips.FromToUserID.ToUserID = req.ToUserID
 	friendNotification(tracelog.GetOperationID(ctx), req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &FriendApplicationTips)
 }
 
-func FriendApplicationApprovedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
+func FriendApplicationAgreedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
 	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
 	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.FromUserID
 	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.ToUserID
@@ -106,7 +106,7 @@ func FriendApplicationApprovedNotification(ctx context.Context, req *pbFriend.Re
 	friendNotification(tracelog.GetOperationID(ctx), req.ToUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &FriendApplicationApprovedTips)
 }
 
-func FriendApplicationRejectedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
+func FriendApplicationRefusedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
 	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
 	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.FromUserID
 	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.ToUserID

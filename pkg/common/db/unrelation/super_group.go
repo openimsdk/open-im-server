@@ -98,6 +98,16 @@ func (db *SuperGroupMongoDriver) GetSuperGroupByUserID(ctx context.Context, user
 	return &user, utils.Wrap(err, "")
 }
 
+func (db *SuperGroupMongoDriver) GetJoinGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *SuperGroupMongoDriver) MapGroupMemberCount(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (db *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID string) error {
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return db.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {

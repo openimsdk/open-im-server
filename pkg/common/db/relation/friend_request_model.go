@@ -20,68 +20,80 @@ type FriendRequestGorm struct {
 	DB *gorm.DB `gorm:"-"`
 }
 
-func (f *FriendRequestGorm) Create(ctx context.Context, friends []*relation.FriendRequestModel, tx ...*gorm.DB) (err error) {
+// 插入多条记录
+func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...*gorm.DB) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendRequests", friendRequests)
 	}()
-	return utils.Wrap(f.DB.Model(&relation.FriendRequestModel{}).Create(&friends).Error, "")
+	return utils.Wrap(getDBConn(f.DB, tx).Create(&friendRequests).Error, "")
 }
 
-func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
+// 删除记录
+func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID)
 	}()
-	return utils.Wrap(f.DB.Model(&relation.FriendRequestModel{}).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Delete(&relation.FriendRequestModel{}).Error, "")
+	return utils.Wrap(getDBConn(f.DB, tx).Where("from_user_id = ? AND to_user_id = ?", fromUserID, toUserID).Delete(&relation.FriendRequestModel{}).Error, "")
 }
 
+// 更新零值
 func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "formUserID", formUserID, "toUserID", toUserID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "formUserID", formUserID, "toUserID", toUserID, "args", args)
 	}()
 	return utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? AND to_user_id ", formUserID, toUserID).Updates(args).Error, "")
 }
 
+// 更新多条记录 （非零值）
 func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...*gorm.DB) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friendRequests", friendRequests)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendRequests", friendRequests)
 	}()
-	return utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Updates(&friendRequests).Error, "")
+	return utils.Wrap(getDBConn(f.DB, tx).Updates(&friendRequests).Error, "")
 }
 
-func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID string) (friend *relation.FriendRequestModel, err error) {
-	friend = &relation.FriendRequestModel{}
-	defer tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
-	return friend, utils.Wrap(f.DB.Model(&relation.FriendRequestModel{}).Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friend).Error, "")
-}
-
-func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (friend *relation.FriendRequestModel, err error) {
-	friend = &relation.FriendRequestModel{}
-	defer tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
-	return friend, utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Find(friend).Error, "")
-}
-
-func (f *FriendRequestGorm) FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friends []*relation.FriendRequestModel, total int64, err error) {
+// 获取来指定用户的好友申请  未找到 不返回错误
+func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (friendRequest *relation.FriendRequestModel, err error) {
+	friendRequest = &relation.FriendRequestModel{}
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "toUserID", toUserID, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID, "friendRequest", *friendRequest)
+	}()
+	utils.Wrap(getDBConn(f.DB, tx).Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Find(friendRequest).Error, "")
+	return
+}
+
+func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (friendRequest *relation.FriendRequestModel, err error) {
+	friendRequest = &relation.FriendRequestModel{}
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID, "friendRequest", *friendRequest)
+	}()
+	utils.Wrap(getDBConn(f.DB, tx).Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friendRequest).Error, "")
+	return
+}
+
+// 获取toUserID收到的好友申请列表
+func (f *FriendRequestGorm) FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "toUserID", toUserID, "friendRequests", friendRequests)
 	}()
 
 	err = getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("to_user_id = ? ", toUserID).Count(&total).Error
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("to_user_id = ? ", toUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friends).Error, "")
+	err = utils.Wrap(getDBConn(f.DB, tx).Where("to_user_id = ? ", toUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friendRequests).Error, "")
 	return
 }
 
-func (f *FriendRequestGorm) FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friends []*relation.FriendRequestModel, total int64, err error) {
+// 获取fromUserID发出去的好友申请列表
+func (f *FriendRequestGorm) FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "friendRequests", friendRequests)
 	}()
-
 	err = getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? ", fromUserID).Count(&total).Error
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? ", fromUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friends).Error, "")
+	err = utils.Wrap(getDBConn(f.DB, tx).Where("from_user_id = ? ", fromUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friendRequests).Error, "")
 	return
 }

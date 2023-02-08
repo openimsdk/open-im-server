@@ -3,22 +3,22 @@ import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
-message getFriendsInfoReq{
+message getPaginationFriendsReq{
   string ownerUserID = 1;
   repeated string friendUserIDs = 2;
 }
-message getFriendsInfoResp{
+message getPaginationFriendsResp{
   repeated server_api_params.FriendInfo friendsInfo = 1;
 }
 
 
-message addFriendReq{
+message applyToAddFriendReq{
   string fromUserID = 1;
   string toUserID = 2;
   string reqMsg = 3;
   string ex = 4;
 }
-message addFriendResp{
+message applyToAddFriendResp{
 }
 
 
@@ -31,22 +31,22 @@ message importFriendResp{
 }
 
 
-message getToFriendsApplyReq{
+message getPaginationFriendsApplyToReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 
 }
-message getToFriendsApplyResp{
+message getPaginationFriendsApplyToResp{
   repeated server_api_params.FriendRequest FriendRequests = 1;
   int32 total = 2;
 }
 
 
-message getFriendsReq{
+message getDesignatedFriendsReq{
   server_api_params.RequestPagination pagination = 1;
   string userID = 2;
 }
-message getFriendsResp{
+message getDesignatedFriendsResp{
   repeated server_api_params.FriendInfo FriendsInfo = 1;
   int32 total = 2;
 }
@@ -67,11 +67,11 @@ message removeBlackReq{
 message removeBlackResp{
 }
 
-message getBlacksReq{
+message getPaginationBlacksReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 }
-message getBlacksResp{
+message getPaginationBlacksResp{
   repeated server_api_params.BlackInfo blacks= 1;
   int32 total = 2;
 }
@@ -122,24 +122,22 @@ message setFriendRemarkReq{
 message setFriendRemarkResp{
 }
 
-message getFromFriendsApplyReq{
+message getPaginationFriendsApplyFromReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 }
-message getFromFriendsApplyResp{
+message getPaginationFriendsApplyFromResp{
   repeated server_api_params.FriendRequest friendRequests = 1;
   int32 total = 2;
 }
 
 service friend{
   //申请加好友
-  rpc addFriend(addFriendReq) returns(addFriendResp);
+  rpc applyToAddFriend(applyToAddFriendReq) returns(applyToAddFriendResp);
   //获取收到的好友申请列表
-  rpc getToFriendsApply(getToFriendsApplyReq) returns(getToFriendsApplyResp);
+  rpc getPaginationFriendsApplyTo(getPaginationFriendsApplyToReq) returns(getPaginationFriendsApplyToResp);
   //获取主动发出去的好友申请列表
-  rpc getFromFriendsApply(getFromFriendsApplyReq) returns(getFromFriendsApplyResp);
-  //获取好友列表
-  rpc getFriends(getFriendsReq) returns(getFriendsResp);
+  rpc getPaginationFriendsApplyFrom(getPaginationFriendsApplyFromReq) returns(getPaginationFriendsApplyFromResp);
   //添加黑名单
   rpc addBlack(addBlackReq) returns(addBlackResp);
   //移除黑名单
@@ -149,7 +147,7 @@ service friend{
   //判断是否在黑名单中
   rpc isBlack(isBlackReq) returns(isBlackResp);
   //获取黑名单列表
-  rpc getBlacks(getBlacksReq) returns(getBlacksResp);
+  rpc getPaginationBlacks(getPaginationBlacksReq) returns(getPaginationBlacksResp);
   //删除好友
   rpc deleteFriend(deleteFriendReq) returns(deleteFriendResp);
   //对好友申请响应（同意或拒绝）
@@ -158,6 +156,8 @@ service friend{
   rpc setFriendRemark(setFriendRemarkReq) returns(setFriendRemarkResp);
   //导入好友关系
   rpc importFriends(importFriendReq)  returns(importFriendResp);
-  //获取指定好友信息
-  rpc getFriendsInfo(getFriendsInfoReq) returns (getFriendsInfoResp);
+  //翻页获取好友列表 无结果不返回错误
+  rpc getDesignatedFriends(getDesignatedFriendsReq) returns(getDesignatedFriendsResp);
+  //获取指定好友信息 有id不存在也返回错误
+  rpc getPaginationFriends(getPaginationFriendsReq) returns (getPaginationFriendsResp);
 }

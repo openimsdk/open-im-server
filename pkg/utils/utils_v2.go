@@ -144,6 +144,16 @@ func SliceSetAny[E any, K comparable](es []E, fn func(e E) K) map[K]struct{} {
 	})
 }
 
+func Filter[E any](es []E, fn func(e E) bool) []E {
+	rs := make([]E, 0, len(es))
+	for i := 0; i < len(es); i++ {
+		if e := es[i]; fn(e) {
+			rs = append(rs, e)
+		}
+	}
+	return rs
+}
+
 // Slice 批量转换切片类型
 func Slice[E any, T any](es []E, fn func(e E) T) []T {
 	v := make([]T, len(es))

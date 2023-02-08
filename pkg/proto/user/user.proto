@@ -28,10 +28,10 @@ message accountCheckResp{
 }
 
 
-message getUsersInfoReq{
+message getDesignateUsersReq{
   repeated string userIDs = 1;
 }
-message getUsersInfoResp{
+message getDesignateUsersResp{
   repeated server_api_params.UserInfo usersInfo = 1;
 }
 
@@ -112,14 +112,11 @@ message batchSetConversationsResp{
 }
 
 
-message getUsersReq {
+message getPaginationUsersReq {
   server_api_params.RequestPagination pagination = 2;
-  string userName = 3;
-  string userID = 4;
-  string content = 5;
 }
 
-message getUsersResp{
+message getPaginationUsersResp{
   int32 total = 1;
   repeated server_api_params.UserInfo users = 2;
 }
@@ -135,7 +132,7 @@ message userRegisterResp {
 
 service user {
   //获取指定的用户信息 全字段
-  rpc getUsersInfo(getUsersInfoReq) returns(getUsersInfoResp);
+  rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
   //更新用户信息
   rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
   //设置用户消息接收选项
@@ -143,7 +140,7 @@ service user {
   //检查userID是否存在
   rpc accountCheck(accountCheckReq)returns(accountCheckResp);
   //翻页（或指定userID，昵称）拉取用户信息 全字段
-  rpc getUsers(getUsersReq) returns (getUsersResp);
+  rpc getPaginationUsers(getPaginationUsersReq) returns (getPaginationUsersResp);
   //用户注册
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
 }
