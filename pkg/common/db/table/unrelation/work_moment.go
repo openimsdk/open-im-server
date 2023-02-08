@@ -1,5 +1,7 @@
 package unrelation
 
+import "context"
+
 const (
 	CWorkMoment = "work_moment"
 )
@@ -31,4 +33,16 @@ type Comment struct {
 
 func (WorkMoment) TableName() string {
 	return CWorkMoment
+}
+
+type WorkMomentModelInterface interface {
+	CreateOneWorkMoment(ctx context.Context, workMoment *WorkMoment) error
+	DeleteOneWorkMoment(ctx context.Context, workMomentID string) error
+	DeleteComment(ctx context.Context, workMomentID, contentID, opUserID string) error
+	GetWorkMomentByID(ctx context.Context, workMomentID string) (*WorkMoment, error)
+	LikeOneWorkMoment(ctx context.Context, likeUserID, userName, workMomentID string) (*WorkMoment, bool, error)
+	CommentOneWorkMoment(ctx context.Context, comment *Comment, workMomentID string) (*WorkMoment, error)
+	GetUserSelfWorkMoments(ctx context.Context, userID string, showNumber, pageNumber int32) ([]*WorkMoment, error)
+	GetUserWorkMoments(ctx context.Context, opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]*WorkMoment, error)
+	GetUserFriendWorkMoments(ctx context.Context, showNumber, pageNumber int32, userID string, friendIDList []string) ([]*WorkMoment, error)
 }

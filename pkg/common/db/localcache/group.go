@@ -1,18 +1,23 @@
 package localcache
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/proto/group"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 	"sync"
 )
 
+type GroupLocalCacheInterface interface {
+	GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error)
+}
+
 type GroupLocalCache struct {
-	lock  sync.Mutex
-	cache map[string]GroupMemberIDsHash
-	rpc   *grpc.ClientConn
-	group group.GroupClient
+	lock     sync.Mutex
+	cache    map[string]GroupMemberIDsHash
+	zkClient *openKeeper.ZkClient
 }
 
 type GroupMemberIDsHash struct {
@@ -20,18 +25,22 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupMemberIDsLocalCache(rpc *grpc.ClientConn) GroupLocalCache {
+func NewGroupMemberIDsLocalCache(zkClient *openKeeper.ZkClient) GroupLocalCache {
 	return GroupLocalCache{
-		cache: make(map[string]GroupMemberIDsHash, 0),
-		rpc:   rpc,
-		group: group.NewGroupClient(rpc),
+		cache:    make(map[string]GroupMemberIDsHash, 0),
+		zkClient: zkClient,
 	}
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	resp, err := g.group.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
+	conn, err := g.zkClient.GetConn(config.Config.RpcRegisterName.OpenImGroupName, nil)
+	if err != nil {
+		return nil, err
+	}
+	client := group.NewGroupClient(conn)
+	resp, err := client.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
 		GroupIDs: []string{groupID},
 	})
 	if err != nil {
@@ -44,7 +53,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {
 		return localHashInfo.userIDs, nil
 	}
-	groupMembersResp, err := g.group.GetGroupMemberList(ctx, &group.GetGroupMemberListReq{
+	groupMembersResp, err := client.GetGroupMemberList(ctx, &group.GetGroupMemberListReq{
 		GroupID: groupID,
 	})
 	if err != nil {

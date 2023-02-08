@@ -154,12 +154,11 @@ type config struct {
 		OpenImCacheName        string `yaml:"openImCacheName"`
 		OpenImRealTimeCommName string `yaml:"openImRealTimeCommName"`
 	}
-	Etcd struct {
-		EtcdSchema string   `yaml:"etcdSchema"`
-		EtcdAddr   []string `yaml:"etcdAddr"`
-		UserName   string   `yaml:"userName"`
-		Password   string   `yaml:"password"`
-		Secret     string   `yaml:"secret"`
+	Zookeeper struct {
+		Schema   string   `yaml:"schema"`
+		ZkAddr   []string `yaml:"zkAddr"`
+		UserName string   `yaml:"userName"`
+		Password string   `yaml:"password"`
 	}
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
