@@ -66,9 +66,9 @@ func (g *GroupGorm) Take(ctx context.Context, groupID string, tx ...*gorm.DB) (g
 	return group, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Take(group).Error, "")
 }
 
-func (g *GroupGorm) Search(ctx context.Context, name string, pageNumber, showNumber int32, tx ...*gorm.DB) (total int32, groups []*relation.GroupModel, err error) {
+func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...*gorm.DB) (total int32, groups []*relation.GroupModel, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "name", name, "pageNumber", pageNumber, "showNumber", showNumber, "total", total, "groups", groups)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "keyword", keyword, "pageNumber", pageNumber, "showNumber", showNumber, "total", total, "groups", groups)
 	}()
-	return gormSearch[relation.GroupModel](getDBConn(g.DB, tx), "name", name, pageNumber, showNumber)
+	return gormSearch[relation.GroupModel](getDBConn(g.DB, tx), []string{"name"}, keyword, pageNumber, showNumber)
 }

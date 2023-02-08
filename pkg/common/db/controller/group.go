@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/relation"
 	relation2 "Open_IM/pkg/common/db/table/relation"
@@ -9,6 +10,8 @@ import (
 	"context"
 	"github.com/dtm-labs/rockscache"
 	_ "github.com/dtm-labs/rockscache"
+	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
 
@@ -66,7 +69,7 @@ type GroupDataBaseInterface interface {
 	TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relation2.GroupMemberModel, error)
 	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
-	SearchGroupMember(ctx context.Context, name string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
+	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	MapGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error)
@@ -109,26 +112,6 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.C
 	return database
 }
 
-//func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
-//	return g.cache.GetGroupsInfo(ctx, groupIDs)
-//}
-//
-//func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMembers []*relation2.GroupMemberModel) error {
-//	return g.db.Transaction(func(tx *gorm.DB) error {
-//		if len(groups) > 0 {
-//			if err := g.groupDB.Create(ctx, groups, tx); err != nil {
-//				return err
-//			}
-//		}
-//		if len(groupMembers) > 0 {
-//			if err := g.groupMemberDB.Create(ctx, groupMembers, tx); err != nil {
-//				return err
-//			}
-//		}
-//		return nil
-//	})
-//}
-//
 //func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
 //	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
 //		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
@@ -308,53 +291,48 @@ func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation2.Gro
 }
 
 func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupDB.Take(ctx, groupID)
 }
 
 func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupDB.Find(ctx, groupIDs)
 }
 
 func (g *GroupDataBase) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupDB.Search(ctx, keyword, pageNumber, showNumber)
 }
 
 func (g *GroupDataBase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
-	//TODO implement me
-	panic("implement me")
+	return g.groupDB.UpdateMap(ctx, groupID, data)
 }
 
 func (g *GroupDataBase) DismissGroup(ctx context.Context, groupID string) error {
-	//TODO implement me
-	panic("implement me")
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.UpdateStatus(ctx, groupID, constant.GroupStatusDismissed, tx); err != nil {
+			return err
+		}
+		return g.groupMemberDB.DeleteGroup(ctx, []string{groupID}, tx)
+	})
 }
 
 func (g *GroupDataBase) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupMemberDB.Take(ctx, groupID, userID)
 }
 
 func (g *GroupDataBase) TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupMemberDB.TakeOwner(ctx, groupID)
 }
 
 func (g *GroupDataBase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relation2.GroupMemberModel, error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
 func (g *GroupDataBase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
-	//TODO implement me
-	panic("implement me")
+	return g.groupMemberDB.SearchMember(ctx, "", groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
-func (g *GroupDataBase) SearchGroupMember(ctx context.Context, name string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
-	//TODO implement me
-	panic("implement me")
+func (g *GroupDataBase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+	return g.groupMemberDB.SearchMember(ctx, keyword, groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
 func (g *GroupDataBase) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error {
