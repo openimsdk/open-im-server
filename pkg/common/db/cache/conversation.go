@@ -2,6 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
+	relation2 "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -71,7 +72,7 @@ func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUse
 	//	return nil, utils.Wrap(err, "")
 	//}
 	//return conversationIDs, nil
-	return GetCache(c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, func() ([]string, error) {
+	return GetCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, func(ctx context.Context) ([]string, error) {
 		return f(ownerUserID)
 	})
 }
@@ -100,32 +101,32 @@ func (c *ConversationCache) GetUserConversationIDs1(ctx context.Context, ownerUs
 	return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, fn)
 }
 
-func GetCache1[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (any, error)) (T, error) {
-	v, err := rcClient.Fetch(key, expire, func() (string, error) {
-		v, err := fn()
-		if err != nil {
-			return "", err
-		}
-		bs, err := json.Marshal(v)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bs), nil
-	})
-	var t T
-	if err != nil {
-		return t, err
-	}
-	err = json.Unmarshal([]byte(v), &t)
-	if err != nil {
-		return t, utils.Wrap(err, "")
-	}
-	return t, nil
-}
+//func GetCache1[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (any, error)) (T, error) {
+//	v, err := rcClient.Fetch(key, expire, func() (string, error) {
+//		v, err := fn()
+//		if err != nil {
+//			return "", err
+//		}
+//		bs, err := json.Marshal(v)
+//		if err != nil {
+//			return "", utils.Wrap(err, "")
+//		}
+//		return string(bs), nil
+//	})
+//	var t T
+//	if err != nil {
+//		return t, err
+//	}
+//	err = json.Unmarshal([]byte(v), &t)
+//	if err != nil {
+//		return t, utils.Wrap(err, "")
+//	}
+//	return t, nil
+//}
 
-func GetCache[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (T, error)) (T, error) {
+func GetCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
 	v, err := rcClient.Fetch(key, expire, func() (string, error) {
-		v, err := fn()
+		v, err := fn(ctx)
 		if err != nil {
 			return "", err
 		}
