@@ -19,7 +19,6 @@ import (
 	pbRtc "Open_IM/pkg/proto/rtc"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"strings"
 
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -179,16 +178,6 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			return
 		}
 		pushToUserIDList = userIDList
-	}
-	if pushMsg.MsgData.ContentType == constant.SuperGroupUpdateNotification {
-		m := make(map[string]bool)
-		_ = json.Unmarshal(pushMsg.MsgData.Content, &m)
-		if value, ok := m["kicked"]; ok {
-			if value {
-				pushToUserIDList = append(pushToUserIDList, pushMsg.MsgData.SendID)
-			}
-		}
-
 	}
 
 	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)

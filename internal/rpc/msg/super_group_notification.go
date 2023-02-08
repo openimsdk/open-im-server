@@ -9,9 +9,7 @@ import (
 	//"github.com/golang/protobuf/proto"
 )
 
-func SuperGroupNotification(operationID, sendID, recvID string, isKicked bool) {
-	m := make(map[string]bool)
-	m["kicked"] = isKicked
+func SuperGroupNotification(operationID, sendID, recvID string) {
 	n := &NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
@@ -20,7 +18,6 @@ func SuperGroupNotification(operationID, sendID, recvID string, isKicked bool) {
 		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
-	n.Content = utils.StructToJsonBytes(m)
 
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
 	Notification(n)
