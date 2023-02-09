@@ -38,5 +38,5 @@ type GroupModelInterface interface {
 	UpdateStatus(ctx context.Context, groupID string, status int32, tx ...any) (err error)
 	Find(ctx context.Context, groupIDs []string, tx ...any) (groups []*GroupModel, err error)
 	Take(ctx context.Context, groupID string, tx ...any) (group *GroupModel, err error)
-	Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...any) (total int32, groups []*GroupModel, err error)
+	Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupModel, err error)
 }

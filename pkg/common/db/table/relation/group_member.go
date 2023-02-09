@@ -38,7 +38,7 @@ type GroupMemberModelInterface interface {
 	//FindGroupUser(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, tx ...any) (groupList []*GroupMemberModel, err error)
 	Take(ctx context.Context, groupID string, userID string, tx ...any) (groupMember *GroupMemberModel, err error)
 	TakeOwner(ctx context.Context, groupID string, tx ...any) (groupMember *GroupMemberModel, err error)
-	SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32, tx ...any) (total int32, groupList []*GroupMemberModel, err error)
+	SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32, tx ...any) (total uint32, groupList []*GroupMemberModel, err error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string, tx ...any) (count map[string]uint32, err error)
 	FindJoinUserID(ctx context.Context, groupIDs []string, tx ...any) (groupUsers map[string][]string, err error)
 }

@@ -114,7 +114,7 @@ func (g *GroupMemberGorm) TakeOwner(ctx context.Context, groupID string, tx ...a
 	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
 }
 
-func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32, tx ...any) (total int32, groupList []*relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32, tx ...any) (total uint32, groupList []*relation.GroupMemberModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "keyword", keyword, "groupIDs", groupIDs, "userIDs", userIDs, "roleLevels", roleLevels, "pageNumber", pageNumber, "showNumber", showNumber, "total", total, "groupList", groupList)
 	}()

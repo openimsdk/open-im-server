@@ -35,5 +35,5 @@ type GroupRequestModelInterface interface {
 	//Update(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (err error)
 	//Find(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (resultGroupRequests []*GroupRequestModel, err error)
 	Take(ctx context.Context, groupID string, userID string, tx ...any) (groupRequest *GroupRequestModel, err error)
-	Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total int32, groups []*GroupRequestModel, err error)
+	Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupRequestModel, err error)
 }

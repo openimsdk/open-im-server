@@ -77,7 +77,7 @@ func (g *GroupRequestGorm) Take(ctx context.Context, groupID string, userID stri
 	return groupRequest, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error, utils.GetSelfFuncName())
 }
 
-func (g *GroupRequestGorm) Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total int32, groups []*relation.GroupRequestModel, err error) {
+func (g *GroupRequestGorm) Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*relation.GroupRequestModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "total", total, "groups", groups)
 	}()
