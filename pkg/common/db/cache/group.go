@@ -3,7 +3,7 @@ package cache
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
@@ -28,18 +28,25 @@ const (
 	groupMemberNumKey    = "GROUP_MEMBER_NUM_CACHE:"
 )
 
-type GroupCache struct {
-	group        relation2.GroupModelInterface
-	groupMember  relation2.GroupMemberModelInterface
-	groupRequest relation2.GroupRequestModelInterface
+type GroupCache interface {
+	GetGroupsInfo(ctx context.Context, groupIDs []string, fn func(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)) (groups []*relationTb.GroupModel, err error)
+	DelGroupsInfo(ctx context.Context, groupID string) (err error)
+	GetGroupInfo(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)) (group *relationTb.GroupModel, err error)
+	DelGroupInfo(ctx context.Context, groupID string) (err error)
+}
+
+type GroupCacheRedis struct {
+	group        *relation.GroupGorm
+	groupMember  *relation.GroupMemberGorm
+	groupRequest *relation.GroupRequestGorm
 	mongoDB      *unrelation.SuperGroupMongoDriver
 	expireTime   time.Duration
 	redisClient  *RedisClient
 	rcClient     *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, groupDB relation2.GroupModelInterface, groupMemberDB relation2.GroupMemberModelInterface, groupRequestDB relation2.GroupRequestModelInterface, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
-	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
+func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCacheRedis {
+	return &GroupCacheRedis{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient,
 	}

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -44,7 +44,7 @@ func (u *UserCache) getUserGlobalRecvMsgOptKey(userID string) string {
 	return userGlobalRecvMsgOptKey + userID
 }
 
-func (u *UserCache) GetUserInfo(ctx context.Context, userID string) (userInfo *relation2.UserModel, err error) {
+func (u *UserCache) GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error) {
 	getUserInfo := func() (string, error) {
 		userInfo, err := u.userDB.Take(ctx, userID)
 		if err != nil {
@@ -63,13 +63,13 @@ func (u *UserCache) GetUserInfo(ctx context.Context, userID string) (userInfo *r
 	if err != nil {
 		return nil, err
 	}
-	userInfo = &relation2.UserModel{}
+	userInfo = &relationTb.UserModel{}
 	err = json.Unmarshal([]byte(userInfoStr), userInfo)
 	return userInfo, utils.Wrap(err, "")
 }
 
-func (u *UserCache) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relation2.UserModel, error) {
-	var users []*relation2.UserModel
+func (u *UserCache) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error) {
+	var users []*relationTb.UserModel
 	for _, userID := range userIDs {
 		user, err := GetUserInfoFromCache(ctx, userID)
 		if err != nil {

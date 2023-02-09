@@ -23,15 +23,15 @@ type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMembers []*relation2.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
-	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
+	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relation2.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relation2.GroupMemberModel, error)
-	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
-	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
+	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error)
+	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
@@ -41,7 +41,7 @@ type GroupInterface interface {
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
-	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
+	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relation2.GroupRequestModel, error)
 	// SuperGroup
 	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error)
 	FindJoinSuperGroup(ctx context.Context, userID string) (superGroup *unrelation2.UserToSuperGroupModel, err error)
@@ -52,6 +52,10 @@ type GroupInterface interface {
 }
 
 var _ GroupInterface = (*GroupController)(nil)
+
+func NewGroupInterface(database GroupDataBaseInterface) GroupInterface {
+	return &GroupController{database: database}
+}
 
 type GroupController struct {
 	database GroupDataBaseInterface
@@ -69,7 +73,7 @@ func (g *GroupController) FindGroup(ctx context.Context, groupIDs []string) (gro
 	return g.database.FindGroup(ctx, groupIDs)
 }
 
-func (g *GroupController) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error) {
+func (g *GroupController) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relation2.GroupModel, error) {
 	return g.database.SearchGroup(ctx, keyword, pageNumber, showNumber)
 }
 
@@ -93,11 +97,11 @@ func (g *GroupController) FindGroupMember(ctx context.Context, groupIDs []string
 	return g.database.FindGroupMember(ctx, groupIDs, userIDs, roleLevels)
 }
 
-func (g *GroupController) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+func (g *GroupController) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error) {
 	return g.database.PageGroupMember(ctx, groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
-func (g *GroupController) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+func (g *GroupController) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error) {
 	return g.database.SearchGroupMember(ctx, keyword, groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
@@ -133,7 +137,7 @@ func (g *GroupController) TakeGroupRequest(ctx context.Context, groupID string, 
 	return g.database.TakeGroupRequest(ctx, groupID, userID)
 }
 
-func (g *GroupController) PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error) {
+func (g *GroupController) PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relation2.GroupRequestModel, error) {
 	return g.database.PageGroupRequestUser(ctx, userID, pageNumber, showNumber)
 }
 
@@ -168,15 +172,15 @@ type GroupDataBaseInterface interface {
 	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMembers []*relation2.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
-	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
+	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relation2.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relation2.GroupMemberModel, error)
-	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
-	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
+	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error)
+	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
@@ -186,7 +190,7 @@ type GroupDataBaseInterface interface {
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
-	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
+	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relation2.GroupRequestModel, error)
 	// SuperGroup
 	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelation2.SuperGroupModel, error)
 	FindJoinSuperGroup(ctx context.Context, userID string) (*unrelation2.UserToSuperGroupModel, error)
@@ -196,7 +200,7 @@ type GroupDataBaseInterface interface {
 	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 }
 
-func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupDataBaseInterface {
+func NewGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupDataBaseInterface {
 	groupDB := relation.NewGroupDB(db)
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)
@@ -256,7 +260,7 @@ func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (group
 	return g.groupDB.Find(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error) {
+func (g *GroupDataBase) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relation2.GroupModel, error) {
 	return g.groupDB.Search(ctx, keyword, pageNumber, showNumber)
 }
 
@@ -285,11 +289,11 @@ func (g *GroupDataBase) FindGroupMember(ctx context.Context, groupIDs []string, 
 	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
-func (g *GroupDataBase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+func (g *GroupDataBase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error) {
 	return g.groupMemberDB.SearchMember(ctx, "", groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
-func (g *GroupDataBase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+func (g *GroupDataBase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relation2.GroupMemberModel, error) {
 	return g.groupMemberDB.SearchMember(ctx, keyword, groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
@@ -349,7 +353,7 @@ func (g *GroupDataBase) TakeGroupRequest(ctx context.Context, groupID string, us
 	return g.groupRequestDB.Take(ctx, groupID, userID)
 }
 
-func (g *GroupDataBase) PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error) {
+func (g *GroupDataBase) PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relation2.GroupRequestModel, error) {
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
 }
 
