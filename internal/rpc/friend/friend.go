@@ -1,7 +1,9 @@
 package friend
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
+	"Open_IM/internal/common/rpc_server"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -14,52 +16,24 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"net"
-	"strconv"
-	"strings"
-
-	"Open_IM/internal/common/check"
-	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
 )
 
 type friendServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	*rpc_server.RpcServer
+
 	controller.FriendInterface
 	controller.BlackInterface
-
-	userRpc pbUser.UserClient
 }
 
 func NewFriendServer(port int) *friendServer {
-	log.NewPrivateLog(constant.LogFileName)
-	f := friendServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
-	}
-	ttl := 10
-	etcdClient, err := getcdv3.NewEtcdConn(config.Config.Etcd.EtcdSchema, strings.Join(f.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImFriendName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
-		panic("NewEtcdConn failed" + err.Error())
+		panic(err)
 	}
-	err = etcdClient.RegisterEtcd("", f.rpcRegisterName)
-	if err != nil {
-		panic("NewEtcdConn failed" + err.Error())
-	}
-
-	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImUserName, config.Config.RpcPort.OpenImUserPort)
-	conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
-	f.userRpc = pbUser.NewUserClient(conn)
-
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.FriendGorm
@@ -71,7 +45,6 @@ func NewFriendServer(port int) *friendServer {
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
-
 	err = mysql.InitConn().AutoMigrateModel(&relationTb.BlackModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
@@ -81,28 +54,22 @@ func NewFriendServer(port int) *friendServer {
 	} else {
 		panic("db init err:" + "conn is nil")
 	}
-	f.FriendInterface = controller.NewFriendController(model.DB)
-	f.BlackInterface = controller.NewBlackController(model.DB)
-	return &f
+	return &friendServer{
+		RpcServer:       r,
+		FriendInterface: controller.NewFriendController(model.DB),
+		BlackInterface:  controller.NewBlackController(model.DB),
+	}
 }
 
 func (s *friendServer) Run() {
-	log.NewInfo("0", "friendServer run...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
-
-	//listener network
-	listener, err := net.Listen("tcp", address)
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "friendServer run...")
+	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
+		panic(err)
 	}
-	log.NewInfo("0", "listen ok ", address)
+
+	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
 	//grpc server
 	var grpcOpts []grpc.ServerOption
@@ -122,7 +89,7 @@ func (s *friendServer) Run() {
 	pbFriend.RegisterFriendServer(srv, s)
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("0", "Serve failed ", err.Error(), listener)
+		log.NewError(operationID, "Serve failed ", err.Error(), listener)
 		return
 	}
 }
@@ -240,7 +207,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 }
 
 // ok
-func (s *friendServer) GetDesignatedFriendsReq(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
+func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
 	resp = &pbFriend.GetDesignatedFriendsResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err

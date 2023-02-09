@@ -38,8 +38,12 @@ func GetSelfFuncName() string {
 	return cleanUpFuncName(runtime.FuncForPC(pc).Name())
 }
 
-func GetFuncName(skip int) string {
-	pc, _, _, _ := runtime.Caller(skip + 1)
+func GetFuncName(skips ...int) string {
+	skip := 1
+	if len(skips) > 0 {
+		skip = skips[0] + 1
+	}
+	pc, _, _, _ := runtime.Caller(skip)
 	return cleanUpFuncName(runtime.FuncForPC(pc).Name())
 }
 

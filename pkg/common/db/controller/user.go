@@ -29,7 +29,12 @@ type UserController struct {
 	database UserDatabaseInterface
 }
 
-func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
+// 获取指定用户的信息 如有userID未找到 也返回错误
+func (u *UserController) FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+	return u.database.FindWithError(ctx, userIDs)
+}
+
+func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
 	return u.database.Find(ctx, userIDs)
 }
 func (u *UserController) Create(ctx context.Context, users []*relationTb.UserModel) error {
@@ -43,8 +48,8 @@ func (u *UserController) UpdateByMap(ctx context.Context, userID string, args ma
 	return u.database.UpdateByMap(ctx, userID, args)
 }
 
-func (u *UserController) Get(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error) {
-	return u.database.Get(ctx, pageNumber, showNumber)
+func (u *UserController) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error) {
+	return u.database.Page(ctx, pageNumber, showNumber)
 }
 
 func (u *UserController) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
@@ -56,11 +61,19 @@ func NewUserController(db *gorm.DB) *UserController {
 }
 
 type UserDatabaseInterface interface {
+	//获取指定用户的信息 如有userID未找到 也返回错误
+	FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
+	//获取指定用户的信息 如有userID未找到 不返回错误
 	Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
-	Create(ctx context.Context, users []*relationTb.UserModel) error
+	//插入多条 外部保证userID 不重复 且在db中不存在
+	Create(ctx context.Context, users []*relationTb.UserModel) (err error)
+	//更新（非零值） 外部保证userID存在
 	Update(ctx context.Context, users []*relationTb.UserModel) (err error)
+	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	Get(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
+	//如果没找到，不返回错误
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
+	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 
@@ -77,7 +90,7 @@ func newUserDatabase(db *gorm.DB) *UserDatabase {
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
-func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
+func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
 	users, err = u.user.Find(ctx, userIDs)
 	if err != nil {
 		return
@@ -85,6 +98,12 @@ func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	if len(users) != len(userIDs) {
 		err = constant.ErrRecordNotFound.Wrap()
 	}
+	return
+}
+
+// 获取指定用户的信息 如有userID未找到 不返回错误
+func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+	users, err = u.user.Find(ctx, userIDs)
 	return
 }
 
@@ -104,8 +123,8 @@ func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // 获取，如果没找到，不返回错误
-func (u *UserDatabase) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relationTb.UserModel, count int64, err error) {
-	return u.user.Get(ctx, showNumber, pageNumber)
+func (u *UserDatabase) Page(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
+	return u.user.Page(ctx, showNumber, pageNumber)
 }
 
 // userIDs是否存在 只要有一个存在就为true
