@@ -4,8 +4,10 @@ import (
 	"Open_IM/pkg/api_struct"
 	"Open_IM/pkg/proto/group"
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"reflect"
 	"testing"
 )
 
@@ -67,7 +69,8 @@ func KickGroupMember(c *gin.Context) {
 	// 默认 全部自动
 	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Execute()
 	// 可以自定义编辑请求和响应
-	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Before(func(apiReq *api_struct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
+	a := NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
+	a.Before(func(apiReq *api_struct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
 		return bind()
 	}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *api_struct.KickGroupMemberResp, bind func() error) error {
 		return bind()
@@ -102,6 +105,22 @@ func (a *RpcRun[A, B, C, D, Z]) After(fn func(rpcResp D, apiResp *B, bind func()
 	return a
 }
 
+func (a *RpcRun[A, B, C, D, Z]) execute() (*B, error) {
+	userID, err := a.bind.OpUserID()
+	if err != nil {
+		return nil, err
+	}
+	opID := a.bind.OperationID()
+	var rpcReq C // C type => *Struct
+	rpcReq = reflect.New(reflect.TypeOf(rpcReq).Elem()).Interface().(C)
+
+	return nil, nil
+}
+
 func (a *RpcRun[A, B, C, D, Z]) Execute() {
 
+}
+
+func GetGrpcConn(name string) (*grpc.ClientConn, error) {
+	return nil, errors.New("todo")
 }
