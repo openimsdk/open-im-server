@@ -166,7 +166,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 		return nil, err
 	}
 
-	if utils.Contain(req.FriendUserIDs, req.OwnerUserID) {
+	if utils.Contain(req.OwnerUserID, req.FriendUserIDs...) {
 		return nil, constant.ErrCanNotAddYourself.Wrap()
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
@@ -211,7 +211,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	_, err = s.FindFriends(ctx, req.OwnerUserID, []string{req.FriendUserID})
+	_, err = s.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +228,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	_, err = s.FindFriends(ctx, req.OwnerUserID, []string{req.FriendUserID})
+	_, err = s.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ func (s *friendServer) GetDesignatedFriendsReq(ctx context.Context, req *pbFrien
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friends, total, err := s.FriendInterface.FindOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friends, total, err := s.FriendInterface.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +263,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbF
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, total, err := s.FriendInterface.FindFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friendRequests, total, err := s.FriendInterface.PageFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, total, err := s.FriendInterface.FindFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friendRequests, total, err := s.FriendInterface.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +309,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbFriend.G
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, constant.ErrArgs.Wrap("friend userID repeated")
 	}
-	friends, err := s.FriendInterface.FindFriends(ctx, req.OwnerUserID, req.FriendUserIDs)
+	friends, err := s.FriendInterface.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}

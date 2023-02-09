@@ -10,6 +10,8 @@ import (
 
 type UserInterface interface {
 	//获取指定用户的信息 如有userID未找到 也返回错误
+	FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
+	//获取指定用户的信息 如有userID未找到 不返回错误
 	Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
 	//插入多条 外部保证userID 不重复 且在db中不存在
 	Create(ctx context.Context, users []*relation2.UserModel) (err error)
@@ -17,9 +19,9 @@ type UserInterface interface {
 	Update(ctx context.Context, users []*relation2.UserModel) (err error)
 	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	//获取，如果没找到，不返回错误
-	Get(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
-	//userIDs是否存在 只要有一个存在就为true
+	//如果没找到，不返回错误
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
+	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 

@@ -2,17 +2,19 @@ package auth
 
 import (
 	"Open_IM/internal/common/check"
+	"Open_IM/internal/common/network"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/getcdv3"
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	pbAuth "Open_IM/pkg/proto/auth"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
 	"net"
 	"strconv"
 	"strings"
@@ -85,7 +87,10 @@ func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
+	grpcCons, err := s.dr.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
+	if err != nil {
+		return err
+	}
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
@@ -102,6 +107,7 @@ type rpcAuth struct {
 	etcdSchema      string
 	etcdAddr        []string
 	controller.AuthInterface
+	dr discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewRpcAuthServer(port int) *rpcAuth {
@@ -109,8 +115,6 @@ func NewRpcAuthServer(port int) *rpcAuth {
 	return &rpcAuth{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 }
 
@@ -148,23 +152,18 @@ func (s *rpcAuth) Run() {
 
 	//service registers with etcd
 	pbAuth.RegisterAuthServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 
-	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
+	zkClient, err := openKeeper.NewClient([]string{"43.154.157.177:2181"}, config.Config.Etcd.EtcdSchema, 10, "", "")
 	if err != nil {
-		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
-			s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		panic(utils.Wrap(err, "register auth module  rpc to etcd err"))
-
+		panic(err.Error())
 	}
-	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
+	registerIP, err := network.GetRpcIP(config.Config.RpcRegisterIP)
+	err = zkClient.Register(s.rpcRegisterName, registerIP, s.rpcPort)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), registerIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError(operationID, "Serve failed ", err.Error())
