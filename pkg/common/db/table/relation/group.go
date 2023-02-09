@@ -1,6 +1,9 @@
 package relation
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const (
 	GroupModelTableName = "groups"
@@ -29,4 +32,11 @@ func (GroupModel) TableName() string {
 }
 
 type GroupModelInterface interface {
+	Create(ctx context.Context, groups []*GroupModel, tx ...any) (err error)
+	//Delete(ctx context.Context, groupIDs []string, tx ...any) (err error)
+	UpdateMap(ctx context.Context, groupID string, args map[string]interface{}, tx ...any) (err error)
+	UpdateStatus(ctx context.Context, groupID string, status int32, tx ...any) (err error)
+	Find(ctx context.Context, groupIDs []string, tx ...any) (groups []*GroupModel, err error)
+	Take(ctx context.Context, groupID string, tx ...any) (group *GroupModel, err error)
+	Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupModel, err error)
 }

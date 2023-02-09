@@ -1,6 +1,9 @@
 package relation
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const (
 	GroupRequestModelTableName = "group_requests"
@@ -25,4 +28,12 @@ func (GroupRequestModel) TableName() string {
 }
 
 type GroupRequestModelInterface interface {
+	Create(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (err error)
+	//Delete(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (err error)
+	//UpdateMap(ctx context.Context, groupID string, userID string, args map[string]interface{}, tx ...any) (err error)
+	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, tx ...any) (err error)
+	//Update(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (err error)
+	//Find(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (resultGroupRequests []*GroupRequestModel, err error)
+	Take(ctx context.Context, groupID string, userID string, tx ...any) (groupRequest *GroupRequestModel, err error)
+	Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupRequestModel, err error)
 }
