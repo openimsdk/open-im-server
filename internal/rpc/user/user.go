@@ -2,7 +2,7 @@ package user
 
 import (
 	"Open_IM/internal/common/convert"
-	"Open_IM/internal/common/network"
+	"Open_IM/internal/common/rpc_server"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -13,16 +13,10 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
-	"net"
-	"strconv"
-	"strings"
-
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
@@ -31,30 +25,15 @@ import (
 type userServer struct {
 	rpcPort         int
 	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	*rpc_server.RpcServer
 	controller.UserInterface
-	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewUserServer(port int) *userServer {
-	log.NewPrivateLog(constant.LogFileName)
-	u := userServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
-	}
-
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImUserName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
-	err = zkClient.Register(u.rpcRegisterName, registerIP, u.rpcPort)
-	if err != nil {
-		panic(err.Error())
-	}
-	u.registerCenter = zkClient
-
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.UserGorm
@@ -67,20 +46,17 @@ func NewUserServer(port int) *userServer {
 	} else {
 		panic("db init err:" + "conn is nil")
 	}
-	u.UserInterface = controller.NewUserController(model.DB)
-	return &u
+	return &userServer{RpcServer: r, UserInterface: controller.NewUserController(model.DB)}
 }
 
 func (s *userServer) Run() {
-	log.NewInfo("", "rpc user start...")
-	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
-
-	//listener network
-	listener, err := net.Listen("tcp", address)
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "rpc user start...")
+	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
+		panic(err)
 	}
-	log.NewInfo("", "listen network success, address ", address, listener)
+	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
 	//grpc server
 	var grpcOpts []grpc.ServerOption
@@ -98,24 +74,12 @@ func (s *userServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbUser.RegisterUserServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
-	if err != nil {
-		log.NewError("", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		panic(utils.Wrap(err, "register user module  rpc to etcd err"))
-	}
+
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("", "Serve failed ", err.Error())
-		return
+		panic(err)
 	}
-	log.NewInfo("", "rpc  user success")
+	log.NewInfo(operationID, "rpc  user success")
 }
 
 // ok

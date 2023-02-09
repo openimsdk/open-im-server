@@ -3,7 +3,6 @@ package friend
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	"Open_IM/internal/common/network"
 	"Open_IM/internal/common/rpc_server"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
@@ -16,15 +15,11 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
-	"net"
-	"strconv"
 )
 
 type friendServer struct {
@@ -35,7 +30,7 @@ type friendServer struct {
 }
 
 func NewFriendServer(port int) *friendServer {
-	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImFriendName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
 		panic(err)
 	}
@@ -60,9 +55,9 @@ func NewFriendServer(port int) *friendServer {
 		panic("db init err:" + "conn is nil")
 	}
 	return &friendServer{
-		RpcServer: r,
-		FriendInterface : controller.NewFriendController(model.DB),
-		BlackInterface : controller.NewBlackController(model.DB)
+		RpcServer:       r,
+		FriendInterface: controller.NewFriendController(model.DB),
+		BlackInterface:  controller.NewBlackController(model.DB),
 	}
 }
 
@@ -73,7 +68,6 @@ func (s *friendServer) Run() {
 	if err != nil {
 		panic(err)
 	}
-
 
 	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
