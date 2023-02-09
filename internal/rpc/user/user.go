@@ -2,6 +2,7 @@ package user
 
 import (
 	"Open_IM/internal/common/convert"
+	"Open_IM/internal/common/network"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -12,10 +13,12 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
 	"net"
 	"strconv"
 	"strings"
@@ -31,6 +34,7 @@ type userServer struct {
 	etcdSchema      string
 	etcdAddr        []string
 	controller.UserInterface
+	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewUserServer(port int) *userServer {
@@ -38,9 +42,19 @@ func NewUserServer(port int) *userServer {
 	u := userServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+
+	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	if err != nil {
+		panic(err.Error())
+	}
+	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+	err = zkClient.Register(u.rpcRegisterName, registerIP, u.rpcPort)
+	if err != nil {
+		panic(err.Error())
+	}
+	u.registerCenter = zkClient
+
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.UserGorm
@@ -59,14 +73,7 @@ func NewUserServer(port int) *userServer {
 
 func (s *userServer) Run() {
 	log.NewInfo("", "rpc user start...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
 
 	//listener network
 	listener, err := net.Listen("tcp", address)

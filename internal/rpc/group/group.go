@@ -80,20 +80,15 @@ func NewGroupServer(port int) *groupServer {
 }
 
 func (s *groupServer) Run() {
-	log.NewInfo("", "group rpc start ")
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "group rpc start ")
+	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
 	//listener network
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
-	log.NewInfo("", "listen network success, ", address, listener)
+	log.NewInfo(operationID, "listen network success, ", address, listener)
 
 	defer listener.Close()
 	//grpc server
@@ -120,10 +115,10 @@ func (s *groupServer) Run() {
 	pbGroup.RegisterGroupServer(srv, s)
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("", "Serve failed ", err.Error())
+		log.NewError(operationID, "Serve failed ", err.Error())
 		return
 	}
-	log.NewInfo("", "group rpc success")
+	log.NewInfo(operationID, "group rpc success")
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {

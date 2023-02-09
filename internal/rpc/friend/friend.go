@@ -1,7 +1,9 @@
 package friend
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
+	"Open_IM/internal/common/network"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -13,18 +15,15 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	pbFriend "Open_IM/pkg/proto/friend"
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc"
 	"net"
 	"strconv"
-	"strings"
-
-	"Open_IM/internal/common/check"
-	"github.com/OpenIMSDK/getcdv3"
-	"google.golang.org/grpc"
 )
 
 type friendServer struct {
@@ -35,7 +34,7 @@ type friendServer struct {
 	controller.FriendInterface
 	controller.BlackInterface
 
-	userRpc pbUser.UserClient
+	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewFriendServer(port int) *friendServer {
@@ -43,22 +42,18 @@ func NewFriendServer(port int) *friendServer {
 	f := friendServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
-	}
-	ttl := 10
-	etcdClient, err := getcdv3.NewEtcdConn(config.Config.Etcd.EtcdSchema, strings.Join(f.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
-	if err != nil {
-		panic("NewEtcdConn failed" + err.Error())
-	}
-	err = etcdClient.RegisterEtcd("", f.rpcRegisterName)
-	if err != nil {
-		panic("NewEtcdConn failed" + err.Error())
 	}
 
-	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImUserName, config.Config.RpcPort.OpenImUserPort)
-	conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
-	f.userRpc = pbUser.NewUserClient(conn)
+	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	if err != nil {
+		panic(err.Error())
+	}
+	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+	err = zkClient.Register(f.rpcRegisterName, registerIP, f.rpcPort)
+	if err != nil {
+		panic(err.Error())
+	}
+	f.registerCenter = zkClient
 
 	//mysql init
 	var mysql relation.Mysql
@@ -87,22 +82,16 @@ func NewFriendServer(port int) *friendServer {
 }
 
 func (s *friendServer) Run() {
-	log.NewInfo("0", "friendServer run...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "friendServer run...")
+	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
 
 	//listener network
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
-	log.NewInfo("0", "listen ok ", address)
+	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
 	//grpc server
 	var grpcOpts []grpc.ServerOption
@@ -122,7 +111,7 @@ func (s *friendServer) Run() {
 	pbFriend.RegisterFriendServer(srv, s)
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("0", "Serve failed ", err.Error(), listener)
+		log.NewError(operationID, "Serve failed ", err.Error(), listener)
 		return
 	}
 }
@@ -240,7 +229,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 }
 
 // ok
-func (s *friendServer) GetDesignatedFriendsReq(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
+func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
 	resp = &pbFriend.GetDesignatedFriendsResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err

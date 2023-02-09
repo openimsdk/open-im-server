@@ -112,18 +112,29 @@ type rpcAuth struct {
 
 func NewRpcAuthServer(port int) *rpcAuth {
 	log.NewPrivateLog(constant.LogFileName)
-	return &rpcAuth{
+	s := &rpcAuth{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
 	}
+
+	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	if err != nil {
+		panic(err.Error())
+	}
+	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+	err = zkClient.Register(s.rpcRegisterName, registerIP, s.rpcPort)
+	if err != nil {
+		panic(err.Error())
+	}
+	s.registerCenter = zkClient
+	return s
+
 }
 
 func (s *rpcAuth) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc auth start...")
-
-	listenIP := network.GetListenIP(config.Config.ListenIP)
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		panic("listening err:" + err.Error() + s.rpcRegisterName)
@@ -148,16 +159,6 @@ func (s *rpcAuth) Run() {
 	//service registers with etcd
 	pbAuth.RegisterAuthServer(srv, s)
 
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
-	if err != nil {
-		panic(err.Error())
-	}
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
-	err = zkClient.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, s.rpcPort)
-	if err != nil {
-		panic(err.Error())
-	}
-	s.registerCenter = zkClient
 	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), registerIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
