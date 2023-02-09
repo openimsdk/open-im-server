@@ -1,6 +1,7 @@
 package controller
 
 import (
+	relation2 "Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table/relation"
 	"context"
 	"errors"
@@ -27,12 +28,12 @@ func NewBlackController(db *gorm.DB) *BlackController {
 }
 
 // Create 增加黑名单
-func (b *BlackController) Create(ctx context.Context, blacks []*relation.Black) (err error) {
+func (b *BlackController) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	return b.database.Create(ctx, blacks)
 }
 
 // Delete 删除黑名单
-func (b *BlackController) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
+func (b *BlackController) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	return b.database.Delete(ctx, blacks)
 }
 
@@ -48,9 +49,9 @@ func (b *BlackController) CheckIn(ctx context.Context, userID1, userID2 string) 
 
 type BlackDatabaseInterface interface {
 	// Create 增加黑名单
-	Create(ctx context.Context, blacks []*relation.Black) (err error)
+	Create(ctx context.Context, blacks []*relation.BlackModel) (err error)
 	// Delete 删除黑名单
-	Delete(ctx context.Context, blacks []*relation.Black) (err error)
+	Delete(ctx context.Context, blacks []*relation.BlackModel) (err error)
 	// FindOwnerBlacks 获取黑名单列表
 	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.Black, total int64, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
@@ -58,11 +59,11 @@ type BlackDatabaseInterface interface {
 }
 
 type BlackDatabase struct {
-	sqlDB *relation.Black
+	sqlDB *relation2.BlackGorm
 }
 
 func NewBlackDatabase(db *gorm.DB) *BlackDatabase {
-	sqlDB := relation.NewBlack(db)
+	sqlDB := relation2.NewBlackGorm(db)
 	database := &BlackDatabase{
 		sqlDB: sqlDB,
 	}
@@ -70,17 +71,17 @@ func NewBlackDatabase(db *gorm.DB) *BlackDatabase {
 }
 
 // Create 增加黑名单
-func (b *BlackDatabase) Create(ctx context.Context, blacks []*relation.Black) (err error) {
+func (b *BlackDatabase) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	return b.sqlDB.Create(ctx, blacks)
 }
 
 // Delete 删除黑名单
-func (b *BlackDatabase) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
+func (b *BlackDatabase) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	return b.sqlDB.Delete(ctx, blacks)
 }
 
 // FindOwnerBlacks 获取黑名单列表
-func (b *BlackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.Black, total int64, err error) {
+func (b *BlackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error) {
 	return b.sqlDB.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
 }
 
