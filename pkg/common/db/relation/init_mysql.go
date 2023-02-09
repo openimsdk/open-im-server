@@ -63,6 +63,9 @@ func (m *Mysql) InitConn() *Mysql {
 	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
 	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
+	if db == nil {
+		panic("db is nil")
+	}
 	m.SetGormConn(db)
 	return m
 }
@@ -89,8 +92,8 @@ func (w Writer) Printf(format string, args ...interface{}) {
 
 func getDBConn(db *gorm.DB, tx []any) *gorm.DB {
 	if len(tx) > 0 {
-		if txDb, ok := tx[0].(*gorm.DB); ok {
-			return txDb
+		if txDB, ok := tx[0].(*gorm.DB); ok {
+			return txDB
 		}
 	}
 	return db

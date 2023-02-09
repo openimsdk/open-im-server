@@ -67,11 +67,12 @@ func NewGroupServer(port int) *groupServer {
 		panic(err.Error())
 	}
 	registerIP, err := network.GetRpcIP(config.Config.RpcRegisterIP)
-	err = zkClient.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
+	g.registerCenter = zkClient
+	err = g.registerCenter.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
 	if err != nil {
 		panic(err.Error())
 	}
-	g.registerCenter = zkClient
+
 	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
 
 	g.GroupInterface = controller.NewGroupInterface(controller.NewGroupDatabase(mysql.GormConn(), redis.GetClient(), mongo.GetClient()))
