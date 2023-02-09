@@ -7,12 +7,12 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	http2 "net/http"
 )
 
-func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string) cbApi.CommonCallbackResp {
+func callbackOfflinePush(operationID string, userIDList []string, msg *common.MsgData, offlinePushUserIDList *[]string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
@@ -60,7 +60,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 	return callbackResp
 }
 
-func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.MsgData) cbApi.CommonCallbackResp {
+func callbackOnlinePush(operationID string, userIDList []string, msg *common.MsgData) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.IsContain(msg.SendID, userIDList) {
 		return callbackResp
@@ -104,7 +104,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 	return callbackResp
 }
 
-func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg *commonPb.MsgData, pushToUserList *[]string) cbApi.CommonCallbackResp {
+func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg *common.MsgData, pushToUserList *[]string) cbApi.CommonCallbackResp {
 	log.Debug(operationID, utils.GetSelfFuncName(), groupID, msg.String(), pushToUserList)
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {

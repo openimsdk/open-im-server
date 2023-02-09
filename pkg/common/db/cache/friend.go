@@ -19,12 +19,14 @@ const (
 	friendKey           = "FRIEND_INFO:"
 )
 
+// args fn will exec when no data in cache
 type FriendCache interface {
 	GetFriendIDs(ctx context.Context, ownerUserID string, fn func(ctx context.Context, ownerUserID string) (friendIDs []string, err error)) (friendIDs []string, err error)
 	// call when friendID List changed
 	DelFriendIDs(ctx context.Context, ownerUserID string) (err error)
+	// get single friendInfo from cache
 	GetFriend(ctx context.Context, ownerUserID, friendUserID string, fn func(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error)) (friend *relationTb.FriendModel, err error)
-	// del friend when friend info changed or remove it
+	// del friend when friend info changed
 	DelFriend(ctx context.Context, ownerUserID, friendUserID string) (err error)
 }
 
@@ -54,7 +56,7 @@ func (f *FriendCacheRedis) getFriendKey(ownerUserID, friendUserID string) string
 	return friendKey + ownerUserID + "-" + friendUserID
 }
 
-func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
+func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string, fn func(ctx context.Context, ownerUserID string) (friendIDs []string, err error)) (friendIDs []string, err error) {
 	getFriendIDs := func() (string, error) {
 		friendIDs, err := f.friendDB.GetFriendIDs(ctx, ownerUserID)
 		if err != nil {
@@ -108,7 +110,7 @@ func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID s
 	return f.rcClient.TagAsDeleted(f.getTwoWayFriendsIDsKey(ownerUserID))
 }
 
-func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error) {
+func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string, fn func(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error)) (friend *relationTb.FriendModel, err error) {
 	getFriend := func() (string, error) {
 		friend, err = f.friendDB.Take(ctx, ownerUserID, friendUserID)
 		if err != nil {

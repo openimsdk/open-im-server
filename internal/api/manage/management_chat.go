@@ -12,7 +12,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -174,7 +174,7 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, data, params)
 	token := c.Request.Header.Get("token")
-	claims, err := token_verify.ParseToken(token, params.OperationID)
+	claims, err := tokenverify.ParseToken(token, params.OperationID)
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error(), token)
 		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
@@ -307,7 +307,7 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, data, params)
 	token := c.Request.Header.Get("token")
-	claims, err := token_verify.ParseToken(token, params.OperationID)
+	claims, err := tokenverify.ParseToken(token, params.OperationID)
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})

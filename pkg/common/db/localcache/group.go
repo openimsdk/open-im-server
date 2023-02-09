@@ -3,7 +3,7 @@ package localcache
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/group"
 	"context"
 	"sync"
@@ -52,6 +52,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {
 		return localHashInfo.userIDs, nil
 	}
+
 	groupMembersResp, err := client.GetGroupMemberList(ctx, &group.GetGroupMemberListReq{
 		GroupID: groupID,
 	})

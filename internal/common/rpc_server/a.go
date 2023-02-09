@@ -4,7 +4,7 @@ import (
 	"Open_IM/internal/common/network"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
 	"net"
 	"strconv"

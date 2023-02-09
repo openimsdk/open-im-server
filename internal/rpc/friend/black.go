@@ -5,7 +5,7 @@ import (
 	"Open_IM/internal/common/convert"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
@@ -53,7 +53,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) (*pbFriend.AddBlackResp, error) {
 	resp := &pbFriend.AddBlackResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}

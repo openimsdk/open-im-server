@@ -8,6 +8,7 @@ package group
 //	"Open_IM/pkg/common/log"
 //	"Open_IM/pkg/common/token_verify"
 //	"Open_IM/pkg/common/tracelog"
+//	"Open_IM/pkg/getcdv3"
 //	rpc "Open_IM/pkg/proto/group"
 //	"Open_IM/pkg/utils"
 //	"context"
@@ -18,92 +19,22 @@ package group
 //
 //	"net/http"
 //	"strings"
+//
+//	jsonData "Open_IM/internal/utils"
 //)
 
-//func NewApiNotReqData[B any](c *gin.Context, name string) *ApiRpc[struct{}, B] {
-//	return NewApiRpc[struct{}, B](c, name).IgnoreRequest()
-//}
-//
-//func NewApiNotRespData[B any](c *gin.Context, name string) *ApiRpc[struct{}, B] {
-//	return NewApiRpc[struct{}, B](c, name).IgnoreResponse()
-//}
-//
-//func NewApiNotReqRespData(c *gin.Context, name string) *ApiRpc[struct{}, struct{}] {
-//	return NewApiRpc[struct{}, struct{}](c, name).IgnoreRequest().IgnoreResponse()
-//}
-
-//func NewApiRpc[A, B any, C, D any, Z any](c *gin.Context, name string, client func(conn *grpc.ClientConn) Z, rpc func(client Z, ctx context.Context, req A, options ...grpc.CallOption) (B, error)) *ApiRpc[A, B, C, D, Z] {
-//	return &ApiRpc[A, B, C, D, Z]{
-//		c:      c,
-//		name:   name,
-//		client: client,
-//		rpc:    rpc,
-//	}
-//}
-//
-//type ApiRpc[A, B any, C, D any, Z any] struct {
-//	c      *gin.Context
-//	name   string
-//	client func(conn *grpc.ClientConn) Z
-//	rpc    func(client Z, ctx context.Context, req A, options ...grpc.CallOption) (B, error)
-//	before func(apiReq *C, rpcReq *C, bind func() error) error
-//	after  func(rpcResp *B, apiResp *D, bind func() error) error
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) Before(fn func(apiReq *C, rpcReq *C, bind func() error) error) {
-//	a.before = fn
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) After(fn func(rpcResp *B, apiResp *D, bind func() error) error) {
-//	a.after = fn
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) Execute() {
-//
-//}
-
-//func NewApiRpc[A, B any, C, D any, Z any](c *gin.Context, name string, client func(conn *grpc.ClientConn) Z, rpc func(client Z, ctx context.Context, req A, options ...grpc.CallOption) (B, error)) *ApiRpc[A, B, C, D, Z] {
-//	return &ApiRpc[A, B, C, D, Z]{
-//		c:      c,
-//		name:   name,
-//		client: client,
-//		rpc:    rpc,
-//	}
-//}
-//
-//type ApiRpc[A, B any, C, D any, Z any] struct {
-//	c      *gin.Context
-//	name   string
-//	client func(conn *grpc.ClientConn) Z
-//	rpc    func(client Z, ctx context.Context, req A, options ...grpc.CallOption) (B, error)
-//	before func(apiReq *C, rpcReq *C, bind func() error) error
-//	after  func(rpcResp *B, apiResp *D, bind func() error) error
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) Before(fn func(apiReq *C, rpcReq *C, bind func() error) error) {
-//	a.before = fn
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) After(fn func(rpcResp *B, apiResp *D, bind func() error) error) {
-//	a.after = fn
-//}
-//
-//func (a *ApiRpc[A, B, C, D, Z]) Execute() {
-//
-//}
-
-//func KickGroupMember(c *gin.Context) {
-//	//bind := NewApiBind[Ignore, Ignore](c)
-//
-//	//bind:= ApiBind[Ignore, Ignore](nil)
-//
-//	//var bind ApiBind[int, int]
-//	//
-//	//NewRpc(bind, "", group.NewGroupClient, group.GroupClient.KickGroupMember)
-//
-//	//common.ApiToRpc(c, &api.KickGroupMemberReq{}, nil, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetFuncName())
-//}
-
+// @Summary 把用户踢出群组
+// @Description 把用户踢出群组
+// @Tags 群组相关
+// @ID KickGroupMember
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.KickGroupMemberReq true "GroupID为要操作的群ID <br> kickedUserIDList为要踢出的群用户ID <br> reason为原因"
+// @Produce json
+// @Success 0 {object} api.KickGroupMemberResp "result为结果码, -1为失败, 0为成功"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /group/kick_group [post]
 //func KickGroupMember(c *gin.Context) {
 //	params := api.KickGroupMemberReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -160,6 +91,18 @@ package group
 //	c.JSON(http.StatusOK, memberListResp)
 //}
 //
+//// @Summary 获取群成员信息
+//// @Description 获取群成员信息
+//// @Tags 群组相关
+//// @ID GetGroupMembersInfo
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetGroupMembersInfoReq true "groupID为要获取的群ID <br> memberList为要获取群成员的群ID列表"
+//// @Produce json
+//// @Success 0 {object} api.GetGroupMembersInfoResp{data=[]open_im_sdk.GroupMemberFullInfo}
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_group_members_info [post]
 //func GetGroupMembersInfo(c *gin.Context) {
 //	params := api.GetGroupMembersInfoReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -249,6 +192,18 @@ package group
 //	c.JSON(http.StatusOK, memberListResp)
 //}
 //
+//// @Summary 获取全部群成员列表
+//// @Description 获取全部群成员列表
+//// @Tags 群组相关
+//// @ID GetGroupAllMemberList
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetGroupAllMemberReq true "GroupID为要获取群成员的群ID"
+//// @Produce json
+//// @Success 0 {object} api.GetGroupAllMemberResp{data=[]open_im_sdk.GroupMemberFullInfo}
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_group_all_member_list [post]
 //func GetGroupAllMemberList(c *gin.Context) {
 //	params := api.GetGroupAllMemberReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -293,6 +248,18 @@ package group
 //	c.JSON(http.StatusOK, memberListResp)
 //}
 //
+//// @Summary 获取用户加入群列表
+//// @Description 获取用户加入群列表
+//// @Tags 群组相关
+//// @ID GetJoinedGroupList
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetJoinedGroupListReq true "fromUserID为要获取的用户ID"
+//// @Produce json
+//// @Success 0 {object} api.GetJoinedGroupListResp{data=[]open_im_sdk.GroupInfo}
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_joined_group_list [post]
 //func GetJoinedGroupList(c *gin.Context) {
 //	params := api.GetJoinedGroupListReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -336,6 +303,18 @@ package group
 //	c.JSON(http.StatusOK, GroupListResp)
 //}
 //
+//// @Summary 将用户拉入群组
+//// @Description 将用户拉入群组
+//// @Tags 群组相关
+//// @ID InviteUserToGroup
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.InviteUserToGroupReq true "groupID为要拉进的群组ID <br> invitedUserIDList为要获取群成员的群ID列表 <br> reason为原因"
+//// @Produce json
+//// @Success 0 {object} api.InviteUserToGroupResp "result为结果码, -1为失败, 0为成功""
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/invite_user_to_group [post]
 //func InviteUserToGroup(c *gin.Context) {
 //	params := api.InviteUserToGroupReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -469,6 +448,18 @@ package group
 //		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "CreateGroup")
 //}
 //
+//// @Summary 获取用户收到的加群信息列表
+//// @Description 获取用户收到的加群信息列表
+//// @Tags 群组相关
+//// @ID GetRecvGroupApplicationList
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetGroupApplicationListReq true "fromUserID为要获取的用户ID"
+//// @Produce json
+//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_recv_group_applicationList [post]
 //func GetRecvGroupApplicationList(c *gin.Context) {
 //	params := api.GetGroupApplicationListReq{}
 //	if err := c.BindJSON(&params); err != nil {
@@ -510,11 +501,35 @@ package group
 //	c.JSON(http.StatusOK, resp)
 //}
 //
+//// @Summary 获取用户加群申请列表
+//// @Description 获取用户加群申请列表
+//// @Tags 群组相关
+//// @ID GetUserReqGroupApplicationList
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetUserReqGroupApplicationListReq true "userID为要获取的用户ID"
+//// @Produce json
+//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_user_req_group_applicationList [post]
 //func GetUserReqGroupApplicationList(c *gin.Context) {
 //	common.ApiToRpc(c, &api.GetUserReqGroupApplicationListReq{}, &api.GetUserRespGroupApplicationResp{},
 //		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList")
 //}
 //
+//// @Summary 通过群ID列表获取群信息
+//// @Description 通过群ID列表获取群信息
+//// @Tags 群组相关
+//// @ID GetGroupsInfo
+//// @Accept json
+//// @Param token header string true "im token"
+//// @Param req body api.GetGroupInfoReq true "groupIDList为群ID列表"
+//// @Produce json
+//// @Success 0 {object} api.GetGroupInfoResp
+//// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+//// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+//// @Router /group/get_groups_info [post]
 //func GetGroupsInfo(c *gin.Context) {
 //	params := api.GetGroupInfoReq{}
 //	if err := c.BindJSON(&params); err != nil {

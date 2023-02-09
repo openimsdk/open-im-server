@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/auth"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -165,7 +165,7 @@ func ParseToken(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var expireTime int64
-	ok, _, errInfo, expireTime = token_verify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
+	ok, _, errInfo, expireTime = tokenverify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
 	if !ok {
 		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo
 		log.NewError(params.OperationID, errMsg)
@@ -204,7 +204,7 @@ func ForceLogout(c *gin.Context) {
 
 	var ok bool
 	var errInfo string
-	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, req.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

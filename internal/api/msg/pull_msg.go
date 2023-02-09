@@ -3,7 +3,7 @@ package msg
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -39,7 +39,7 @@ func PullMsgBySeqList(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
+	if ok, err := tokenverify.VerifyToken(token, params.SendID); !ok {
 		if err != nil {
 			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error(), token, params.SendID)
 		}

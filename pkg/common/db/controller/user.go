@@ -3,24 +3,24 @@ package controller
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"context"
 	"gorm.io/gorm"
 )
 
 type UserInterface interface {
 	//获取指定用户的信息 如有userID未找到 也返回错误
-	FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
+	FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
 	//获取指定用户的信息 如有userID未找到 不返回错误
-	Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
+	Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
 	//插入多条 外部保证userID 不重复 且在db中不存在
-	Create(ctx context.Context, users []*relation2.UserModel) (err error)
+	Create(ctx context.Context, users []*relationTb.UserModel) (err error)
 	//更新（非零值） 外部保证userID存在
-	Update(ctx context.Context, users []*relation2.UserModel) (err error)
+	Update(ctx context.Context, users []*relationTb.UserModel) (err error)
 	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	//如果没找到，不返回错误
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
@@ -32,23 +32,23 @@ type UserController struct {
 // 获取指定用户的信息 如有userID未找到 也返回错误
 func (u *UserController) FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
 	return u.database.FindWithError(ctx, userIDs)
-
 }
+
 func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
 	return u.database.Find(ctx, userIDs)
 }
-func (u *UserController) Create(ctx context.Context, users []*relation2.UserModel) error {
+func (u *UserController) Create(ctx context.Context, users []*relationTb.UserModel) error {
 	return u.database.Create(ctx, users)
 }
 
-func (u *UserController) Update(ctx context.Context, users []*relation2.UserModel) (err error) {
+func (u *UserController) Update(ctx context.Context, users []*relationTb.UserModel) (err error) {
 	return u.database.Update(ctx, users)
 }
 func (u *UserController) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	return u.database.UpdateByMap(ctx, userID, args)
 }
 
-func (u *UserController) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error) {
+func (u *UserController) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error) {
 	return u.database.Page(ctx, pageNumber, showNumber)
 }
 
@@ -62,17 +62,17 @@ func NewUserController(db *gorm.DB) *UserController {
 
 type UserDatabaseInterface interface {
 	//获取指定用户的信息 如有userID未找到 也返回错误
-	FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
+	FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
 	//获取指定用户的信息 如有userID未找到 不返回错误
-	Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
+	Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
 	//插入多条 外部保证userID 不重复 且在db中不存在
-	Create(ctx context.Context, users []*relation2.UserModel) (err error)
+	Create(ctx context.Context, users []*relationTb.UserModel) (err error)
 	//更新（非零值） 外部保证userID存在
-	Update(ctx context.Context, users []*relation2.UserModel) (err error)
+	Update(ctx context.Context, users []*relationTb.UserModel) (err error)
 	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	//如果没找到，不返回错误
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
@@ -108,12 +108,12 @@ func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 }
 
 // 插入多条 外部保证userID 不重复 且在db中不存在
-func (u *UserDatabase) Create(ctx context.Context, users []*relation2.UserModel) (err error) {
+func (u *UserDatabase) Create(ctx context.Context, users []*relationTb.UserModel) (err error) {
 	return u.user.Create(ctx, users)
 }
 
 // 更新（非零值） 外部保证userID存在
-func (u *UserDatabase) Update(ctx context.Context, users []*relation2.UserModel) (err error) {
+func (u *UserDatabase) Update(ctx context.Context, users []*relationTb.UserModel) (err error) {
 	return u.user.Update(ctx, users)
 }
 

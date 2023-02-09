@@ -8,11 +8,10 @@ import (
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/getcdv3"
 	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
@@ -45,15 +44,15 @@ func NewAdminCMSServer(port int) *adminCMSServer {
 	admin := &adminCMSServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAdminCMSName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
+		etcdSchema:      config.Config.Zookeeper.Schema,
+		etcdAddr:        config.Config.Zookeeper.ZkAddr,
 	}
 	var mysql relation.Mysql
 	var redis cache.RedisClient
 	mysql.InitConn()
 	redis.InitRedis()
 	admin.userInterface = controller.NewUserController(mysql.GormConn())
-	admin.groupInterface = controller.NewGroupController(mysql.GormConn(), redis.GetClient(), nil)
+	admin.groupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), nil)
 	admin.adminCMSInterface = controller.NewAdminCMSController(mysql.GormConn())
 	admin.chatLogInterface = controller.NewChatLogController(mysql.GormConn())
 	return admin
@@ -68,7 +67,6 @@ func (s *adminCMSServer) Run() {
 		listenIP = config.Config.ListenIP
 	}
 	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
-
 	//listener network
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -116,7 +114,7 @@ func (s *adminCMSServer) AdminLogin(ctx context.Context, req *pbAdminCMS.AdminLo
 	resp := &pbAdminCMS.AdminLoginResp{}
 	for i, adminID := range config.Config.Manager.AppManagerUid {
 		if adminID == req.AdminID && config.Config.Manager.Secrets[i] == req.Secret {
-			token, expTime, err := token_verify.CreateToken(adminID, constant.LinuxPlatformID)
+			token, expTime, err := tokenverify.CreateToken(adminID, constant.LinuxPlatformID)
 			if err != nil {
 				log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID, err.Error())
 				return nil, err
@@ -140,7 +138,7 @@ func (s *adminCMSServer) AdminLogin(ctx context.Context, req *pbAdminCMS.AdminLo
 }
 
 func (s *adminCMSServer) GetUserToken(ctx context.Context, req *pbAdminCMS.GetUserTokenReq) (*pbAdminCMS.GetUserTokenResp, error) {
-	token, expTime, err := token_verify.CreateToken(req.UserID, int(req.PlatformID))
+	token, expTime, err := tokenverify.CreateToken(req.UserID, int(req.PlatformID))
 	if err != nil {
 		return nil, err
 	}
@@ -529,8 +527,8 @@ func (s *adminCMSServer) GetUserFriends(ctx context.Context, req *pbAdminCMS.Get
 		resp.FriendNums = int32(count)
 	}
 	for _, v := range friendList {
-		friendInfo := &server_api_params.FriendInfo{}
-		userInfo := &server_api_params.UserInfo{UserID: v.FriendUserID, Nickname: v.Nickname}
+		friendInfo := &common.FriendInfo{}
+		userInfo := &common.UserInfo{UserID: v.FriendUserID, Nickname: v.Nickname}
 		utils.CopyStructFields(friendInfo, v)
 		friendInfo.FriendUser = userInfo
 		resp.FriendInfoList = append(resp.FriendInfoList, friendInfo)

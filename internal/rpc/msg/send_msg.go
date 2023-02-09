@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
@@ -182,7 +182,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 			log.NewError(data.OperationID, errMsg)
 			return false, 201, errMsg, nil
 		}
-		if token_verify.IsManagerUserID(data.MsgData.SendID) {
+		if tokenverify.IsManagerUserID(data.MsgData.SendID) {
 			return true, 0, "", userIDList
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
@@ -256,7 +256,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 				log.NewError(data.OperationID, errMsg)
 				return false, 201, errMsg, nil
 			}
-			if token_verify.IsManagerUserID(data.MsgData.SendID) {
+			if tokenverify.IsManagerUserID(data.MsgData.SendID) {
 				return true, 0, "", userIDList
 			}
 			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {

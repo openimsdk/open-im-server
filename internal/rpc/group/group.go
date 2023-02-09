@@ -13,9 +13,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -122,7 +122,7 @@ func (s *groupServer) Run() {
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
-	if !token_verify.IsAppManagerUid(ctx) {
+	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupInterface.TakeGroupMember(ctx, groupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return err
@@ -136,7 +136,7 @@ func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
-	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if req.OwnerUserID == "" {
@@ -210,7 +210,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	total, members, err := s.GroupInterface.PageGroupMember(ctx, nil, []string{req.FromUserID}, nil, req.Pagination.PageNumber, req.Pagination.ShowNumber)
@@ -280,7 +280,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return nil, constant.ErrArgs.Wrap("user not found " + strings.Join(ids, ","))
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
-		if !token_verify.IsAppManagerUid(ctx) {
+		if !tokenverify.IsAppManagerUid(ctx) {
 			opUserID := tracelog.GetOpUserID(ctx)
 			member, ok := memberMap[opUserID]
 			if !ok {
@@ -412,7 +412,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				return nil, constant.ErrUserIDNotFound.Wrap(userID)
 			}
 		}
-		if !token_verify.IsAppManagerUid(ctx) {
+		if !tokenverify.IsAppManagerUid(ctx) {
 			member := memberMap[opUserID]
 			if member == nil {
 				return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("opUserID %s no in group", opUserID))
@@ -543,7 +543,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, constant.ErrArgs.Wrap("HandleResult unknown")
 	}
-	if !token_verify.IsAppManagerUid(ctx) {
+	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
 		if err != nil {
 			return nil, err
@@ -676,7 +676,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
 	resp := &pbGroup.SetGroupInfoResp{}
-	if !token_verify.IsAppManagerUid(ctx) {
+	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -735,7 +735,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		return nil, constant.ErrArgs.Wrap("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
 	oldOwner := memberMap[req.OldOwnerUserID]
-	if token_verify.IsAppManagerUid(ctx) {
+	if tokenverify.IsAppManagerUid(ctx) {
 		if oldOwner == nil {
 			oldOwner, err = s.GroupInterface.TakeGroupOwner(ctx, req.OldOwnerUserID)
 			if err != nil {
@@ -887,7 +887,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err != nil {
 		return nil, err
 	}
-	if !(tracelog.GetOpUserID(ctx) == req.UserID || token_verify.IsAppManagerUid(ctx)) {
+	if !(tracelog.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
 		opMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, req.UserID)
 		if err != nil {
 			return nil, err
@@ -910,7 +910,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err != nil {
 		return nil, err
 	}
-	if !(tracelog.GetOpUserID(ctx) == req.UserID || token_verify.IsAppManagerUid(ctx)) {
+	if !(tracelog.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
 		opMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -979,7 +979,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		if req.RoleLevel != nil {
 			return nil, constant.ErrArgs.Wrap("update role level")
 		}
-	} else if !token_verify.IsAppManagerUid(ctx) {
+	} else if !tokenverify.IsAppManagerUid(ctx) {
 		opMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
