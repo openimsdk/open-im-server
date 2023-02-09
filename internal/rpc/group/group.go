@@ -1,6 +1,7 @@
 package group
 
 import (
+	"Open_IM/internal/common/network"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -66,7 +67,7 @@ func NewGroupServer(port int) *groupServer {
 	if err != nil {
 		panic(err.Error())
 	}
-	registerIP, err := utils.GetRpcIP()
+	registerIP, err := network.GetRpcIP(config.Config.RpcRegisterIP)
 	err = zkClient.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
 	if err != nil {
 		panic(err.Error())
