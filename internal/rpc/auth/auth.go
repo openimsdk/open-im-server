@@ -87,7 +87,7 @@ func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	grpcCons, err := s.dr.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons, err := s.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
 	if err != nil {
 		return err
 	}

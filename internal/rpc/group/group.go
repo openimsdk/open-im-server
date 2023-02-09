@@ -66,7 +66,7 @@ func NewGroupServer(port int) *groupServer {
 	if err != nil {
 		panic(err.Error())
 	}
-	registerIP, err := network.GetRpcIP(config.Config.RpcRegisterIP)
+	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
 	g.registerCenter = zkClient
 	err = g.registerCenter.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
 	if err != nil {
