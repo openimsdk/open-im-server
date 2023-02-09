@@ -36,6 +36,7 @@ func NewRpcServer(registerIPInConfig string, port int, registerName string, zkSe
 		return nil, err
 	}
 	s.RegisterCenter = zkClient
+
 	return s, nil
 }
 

@@ -665,15 +665,6 @@ func initConfig(config interface{}, configName, configPath string) {
 func InitConfig(configPath string) {
 	initConfig(&Config, "config.yaml", configPath)
 	initConfig(&UsualConfig, "usualConfig.yaml", configPath)
-	if Config.Etcd.UserName == "" {
-		Config.Etcd.UserName = UsualConfig.Etcd.UserName
-	}
-	if Config.Etcd.Password == "" {
-		Config.Etcd.Password = UsualConfig.Etcd.Password
-	}
-	if Config.Etcd.Secret == "" {
-		Config.Etcd.Secret = UsualConfig.Etcd.Secret
-	}
 
 	if Config.Mysql.DBUserName == "" {
 		Config.Mysql.DBUserName = UsualConfig.Mysql.DBUserName

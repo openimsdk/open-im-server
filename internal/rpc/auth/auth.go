@@ -5,6 +5,7 @@ import (
 	"Open_IM/internal/common/rpc_server"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -23,8 +24,11 @@ func NewRpcAuthServer(port int) *rpcAuth {
 	if err != nil {
 		panic(err)
 	}
+	var redis cache.RedisClient
+	redis.InitRedis()
 	return &rpcAuth{
-		RpcServer: r,
+		RpcServer:     r,
+		AuthInterface: controller.NewAuthController(redis.GetClient(), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
 	}
 }
 
@@ -64,7 +68,7 @@ func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbA
 	if _, err := check.GetUsersInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	token, err := s.CreateToken(ctx, req.UserID, int(req.PlatformID), config.Config.TokenPolicy.AccessExpire)
+	token, err := s.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))
 	if err != nil {
 		return nil, err
 	}
@@ -73,39 +77,41 @@ func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbA
 	return &resp, nil
 }
 
-func (s *rpcAuth) parseToken(ctx context.Context, tokensString, operationID string) (claims *tokenverify.Claims, err error) {
+func (s *rpcAuth) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
 	claims, err = tokenverify.GetClaimFromToken(tokensString)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	m, err := s.GetTokens(ctx, claims.UID, claims.Platform)
+	m, err := s.GetTokensWithoutError(ctx, claims.UID, claims.Platform)
 	if err != nil {
 		return nil, err
 	}
-
+	if len(m) == 0 {
+		return nil, constant.ErrTokenNotExist.Wrap()
+	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
 			return claims, nil
 		case constant.KickedToken:
-			return nil, utils.Wrap(constant.ErrTokenKicked, "this token has been kicked by other same terminal ")
+			return nil, constant.ErrTokenKicked.Wrap()
 		default:
 			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 		}
 	}
-	return nil, utils.Wrap(constant.ErrTokenNotExist, "redis token map not find")
+	return nil, constant.ErrTokenNotExist.Wrap()
 }
 
-func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (*pbAuth.ParseTokenResp, error) {
-	resp := pbAuth.ParseTokenResp{}
-	claims, err := s.parseToken(ctx, req.Token, req.OperationID)
+func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
+	resp = &pbAuth.ParseTokenResp{}
+	claims, err := s.parseToken(ctx, req.Token)
 	if err != nil {
 		return nil, err
 	}
 	resp.UserID = claims.UID
 	resp.Platform = claims.Platform
 	resp.ExpireTimeSeconds = claims.ExpiresAt.Unix()
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
