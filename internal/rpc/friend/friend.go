@@ -4,6 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	"Open_IM/internal/common/network"
+	"Open_IM/internal/common/rpc_server"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -27,34 +28,17 @@ import (
 )
 
 type friendServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	*rpc_server.RpcServer
+
 	controller.FriendInterface
 	controller.BlackInterface
-
-	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewFriendServer(port int) *friendServer {
-	log.NewPrivateLog(constant.LogFileName)
-	f := friendServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,
-	}
-
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
-	err = zkClient.Register(f.rpcRegisterName, registerIP, f.rpcPort)
-	if err != nil {
-		panic(err.Error())
-	}
-	f.registerCenter = zkClient
-
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.FriendGorm
@@ -66,7 +50,6 @@ func NewFriendServer(port int) *friendServer {
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
-
 	err = mysql.InitConn().AutoMigrateModel(&relationTb.BlackModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
@@ -76,21 +59,22 @@ func NewFriendServer(port int) *friendServer {
 	} else {
 		panic("db init err:" + "conn is nil")
 	}
-	f.FriendInterface = controller.NewFriendController(model.DB)
-	f.BlackInterface = controller.NewBlackController(model.DB)
-	return &f
+	return &friendServer{
+		RpcServer: r,
+		FriendInterface : controller.NewFriendController(model.DB),
+		BlackInterface : controller.NewBlackController(model.DB)
+	}
 }
 
 func (s *friendServer) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "friendServer run...")
-	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
-
-	//listener network
-	listener, err := net.Listen("tcp", address)
+	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
+		panic(err)
 	}
+
+
 	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
 	//grpc server
