@@ -37,17 +37,17 @@ message GetGroupApplicationListReq {
   string fromUserID = 2; //owner or admin
 }
 message GetGroupApplicationListResp {
-  int32 total = 1;
+  uint32 total = 1;
   repeated server_api_params.GroupRequest groupRequests = 2;
 }
 
 message GetUserReqApplicationListReq{
-  string userID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  server_api_params.RequestPagination pagination = 1;
+  string userID = 2;
 }
 
 message GetUserReqApplicationListResp{
-  int32 total = 1;
+  uint32 total = 1;
   repeated server_api_params.GroupRequest groupRequests = 2;
 }
 
@@ -90,15 +90,14 @@ message QuitGroupResp{
 }
 
 
-
 message GetGroupMemberListReq {
-  string groupID = 1;
-  int32 filter = 2;
-  server_api_params.RequestPagination pagination = 4;
+  server_api_params.RequestPagination pagination = 1;
+  string groupID = 2;
+  int32 filter = 3;
 }
 
 message GetGroupMemberListResp {
-  int32 total = 1;
+  uint32 total = 1;
   repeated server_api_params.GroupMemberFullInfo members = 2;
 }
 
@@ -124,11 +123,11 @@ message KickGroupMemberResp {
 
 
 message GetJoinedGroupListReq {
-  string fromUserID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  server_api_params.RequestPagination pagination = 1;
+  string fromUserID = 2;
 }
 message GetJoinedGroupListResp{
-  int32 total = 1;
+  uint32 total = 1;
   repeated  server_api_params.GroupInfo groups = 2;
 }
 
@@ -144,17 +143,17 @@ message InviteUserToGroupResp {
 
 
 message GetGroupAllMemberReq {
-  string groupID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  server_api_params.RequestPagination pagination = 1;
+  string groupID = 2;
 }
 message GetGroupAllMemberResp {
   repeated server_api_params.GroupMemberFullInfo members = 1;
 }
 
 message CMSGroup {
-    server_api_params.GroupInfo groupInfo = 1;
-    string groupOwnerUserName = 2;
-    string groupOwnerUserID = 3;
+  server_api_params.GroupInfo groupInfo = 1;
+  string groupOwnerUserName = 2;
+  string groupOwnerUserID = 3;
 }
 
 
@@ -165,23 +164,23 @@ message GetGroupsReq {
 }
 
 message GetGroupsResp {
-    repeated CMSGroup groups = 1;
-    int32 GroupNum = 2;
+  uint32 total = 1;
+  repeated CMSGroup groups = 2;
 }
 
 message GetGroupMemberReq {
-    string groupID = 1;
+  string groupID = 1;
 }
 
 message GetGroupMembersCMSReq {
-   string groupID = 1;
-   string userName = 2;
-   server_api_params.RequestPagination pagination = 3;
+  server_api_params.RequestPagination pagination = 1;
+  string groupID = 2;
+  string userName = 3;
 }
 
 message GetGroupMembersCMSResp {
-   repeated server_api_params.GroupMemberFullInfo members = 1;
-   int32 memberNums = 2;
+  uint32 total = 1;
+  repeated server_api_params.GroupMemberFullInfo members = 2;
 }
 
 message DismissGroupReq{
@@ -240,13 +239,11 @@ message SetGroupMemberNicknameResp{
 }
 
 message GetJoinedSuperGroupListReq {
-  server_api_params.RequestPagination pagination = 1;
-  string userID = 2;
+  string userID = 1;
 }
 
 message GetJoinedSuperGroupListResp {
-  int32 total = 1;
-  repeated server_api_params.GroupInfo groups = 2;
+  repeated server_api_params.GroupInfo groups = 1;
 }
 
 message GetSuperGroupsInfoReq {
@@ -271,12 +268,12 @@ message SetGroupMemberInfoResp{
 }
 
 message GetGroupAbstractInfoReq{
-   repeated string groupIDs = 1;
+  repeated string groupIDs = 1;
 }
 
 message GroupAbstractInfo{
   string groupID = 1;
-  int32 groupMemberNumber = 2;
+  uint32 groupMemberNumber = 2;
   uint64 groupMemberListHash = 3;
 }
 
