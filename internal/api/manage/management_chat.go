@@ -13,7 +13,6 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
@@ -165,7 +164,7 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
 		c.JSON(http.StatusOK, gin.H{"errCode": 401, "errMsg": err.Error()})
-		log.Error(c.PostForm("operationID"), "content to Data struct  err", err.Error())
+		log.Error(c.PostForm("operationID"), "content to Map struct  err", err.Error())
 		return
 	} else if err := validate.Struct(data); err != nil {
 		c.JSON(http.StatusOK, gin.H{"errCode": 403, "errMsg": err.Error()})
@@ -298,7 +297,7 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": err.Error()})
-		log.Error(c.PostForm("operationID"), "content to Data struct  err", err.Error())
+		log.Error(c.PostForm("operationID"), "content to Map struct  err", err.Error())
 		return
 	} else if err := validate.Struct(data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 403, "errMsg": err.Error()})

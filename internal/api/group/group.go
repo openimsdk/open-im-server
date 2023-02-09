@@ -142,7 +142,7 @@ package group
 //	}
 //
 //	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList}
-//	memberListResp.Data = jsonData.JsonDataList(RpcResp.MemberList)
+//	memberListResp.Map = jsonData.JsonDataList(RpcResp.MemberList)
 //	log.NewInfo(req.OperationID, "GetGroupMembersInfo api return ", memberListResp)
 //	c.JSON(http.StatusOK, memberListResp)
 //}
@@ -186,7 +186,7 @@ package group
 //	}
 //
 //	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
-//	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
+//	memberListResp.Map = jsonData.JsonDataList(memberListResp.MemberList)
 //
 //	log.NewInfo(req.OperationID, "FindGroupMemberAll api return ", memberListResp)
 //	c.JSON(http.StatusOK, memberListResp)
@@ -243,7 +243,7 @@ package group
 //	}
 //
 //	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList}
-//	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
+//	memberListResp.Map = jsonData.JsonDataList(memberListResp.MemberList)
 //	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", len(memberListResp.MemberList))
 //	c.JSON(http.StatusOK, memberListResp)
 //}
@@ -298,7 +298,7 @@ package group
 //	}
 //
 //	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
-//	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
+//	GroupListResp.Map = jsonData.JsonDataList(GroupListResp.GroupInfoList)
 //	log.NewInfo(req.OperationID, "FindJoinedGroup api return ", GroupListResp)
 //	c.JSON(http.StatusOK, GroupListResp)
 //}
@@ -437,7 +437,7 @@ package group
 ////	resp := api.CreateGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 ////	if RpcResp.ErrCode == 0 {
 ////		utils.CopyStructFields(&resp.GroupInfo, RpcResp.GroupInfo)
-////		resp.Data = jsonData.JsonDataOne(&resp.GroupInfo)
+////		resp.Map = jsonData.JsonDataOne(&resp.GroupInfo)
 ////	}
 ////	log.NewInfo(req.OperationID, "CreateGroup api return ", resp)
 ////	c.JSON(http.StatusOK, resp)
@@ -496,7 +496,7 @@ package group
 //	}
 //
 //	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}, GroupRequestList: reply.GroupRequestList}
-//	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
+//	resp.Map = jsonData.JsonDataList(resp.GroupRequestList)
 //	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}
@@ -567,7 +567,7 @@ package group
 //	}
 //
 //	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
-//	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
+//	resp.Map = jsonData.JsonDataList(resp.GroupInfoList)
 //	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}

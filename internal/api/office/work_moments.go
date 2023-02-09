@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	pbOffice "Open_IM/pkg/proto/office"
 	pbCommon "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
@@ -565,7 +564,7 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+	//if err := utils.CopyStructFields(&resp.Map.WorkMoments, respPb.WorkMoments); err != nil {
 	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	//}
 	resp.Data.WorkMoments = []*api.WorkMoment{}

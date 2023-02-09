@@ -62,7 +62,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 	case constant.WSGetNewestSeq:
 		data := open_im_sdk.GetMaxAndMinSeqReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
@@ -74,7 +74,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 	case constant.WSSendMsg:
 		data := open_im_sdk.MsgData{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
@@ -86,7 +86,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 	case constant.WSSendSignalMsg:
 		data := pbRtc.SignalReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
@@ -98,7 +98,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 	case constant.WSPullMsgBySeqList:
 		data := open_im_sdk.PullMessageBySeqListReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
@@ -110,7 +110,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 	case constant.WsSetBackgroundStatus:
 		data := open_im_sdk.SetAppBackgroundStatusReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {

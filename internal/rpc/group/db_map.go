@@ -44,7 +44,7 @@ func UpdateGroupMemberMutedTimeMap(t time.Time) map[string]any {
 	}
 }
 
-func UpdateGroupMemberMap(req *pbGroup.SetGroupMemberInfoReq) map[string]any {
+func UpdateGroupMemberMap(req *pbGroup.SetGroupMemberInfo) map[string]any {
 	m := make(map[string]any)
 	if req.Nickname != nil {
 		m["nickname"] = req.Nickname.Value

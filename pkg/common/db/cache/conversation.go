@@ -148,29 +148,6 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 //	return t, nil
 //}
 
-func GetCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
-	v, err := rcClient.Fetch(key, expire, func() (string, error) {
-		v, err := fn(ctx)
-		if err != nil {
-			return "", err
-		}
-		bs, err := json.Marshal(v)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bs), nil
-	})
-	var t T
-	if err != nil {
-		return t, err
-	}
-	err = json.Unmarshal([]byte(v), &t)
-	if err != nil {
-		return t, utils.Wrap(err, "")
-	}
-	return t, nil
-}
-
 func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)

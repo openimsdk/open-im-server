@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken        = "DEVICE_TOKEN"
-	userMinSeq              = "REDIS_USER_MIN_SEQ:"
-	uidPidToken             = "UID_PID_TOKEN_STATUS:"
+	userIncrSeq      = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken = "DEVICE_TOKEN"
+	userMinSeq       = "REDIS_USER_MIN_SEQ:"
+
 	getuiToken              = "GETUI_TOKEN"
 	getuiTaskID             = "GETUI_TASK_ID"
 	messageCache            = "MESSAGE_CACHE:"
@@ -94,33 +94,33 @@ func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
 	return &RedisClient{rdb: rdb}
 }
 
-//Perform seq auto-increment operation of user messages
+// Perform seq auto-increment operation of user messages
 func (r *RedisClient) IncrUserSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
 	seq, err := r.rdb.Incr(context.Background(), key).Result()
 	return uint64(seq), err
 }
 
-//Get the largest Seq
+// Get the largest Seq
 func (r *RedisClient) GetUserMaxSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
 	seq, err := r.rdb.Get(context.Background(), key).Result()
 	return uint64(utils.StringToInt(seq)), err
 }
 
-//set the largest Seq
+// set the largest Seq
 func (r *RedisClient) SetUserMaxSeq(uid string, maxSeq uint64) error {
 	key := userIncrSeq + uid
 	return r.rdb.Set(context.Background(), key, maxSeq, 0).Err()
 }
 
-//Set the user's minimum seq
+// Set the user's minimum seq
 func (r *RedisClient) SetUserMinSeq(uid string, minSeq uint32) (err error) {
 	key := userMinSeq + uid
 	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
 }
 
-//Get the smallest Seq
+// Get the smallest Seq
 func (r *RedisClient) GetUserMinSeq(uid string) (uint64, error) {
 	key := userMinSeq + uid
 	seq, err := r.rdb.Get(context.Background(), key).Result()
@@ -159,7 +159,7 @@ func (r *RedisClient) SetGroupMinSeq(groupID string, minSeq uint32) error {
 	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
 }
 
-//Store userid and platform class to redis
+// Store userid and platform class to redis
 func (r *RedisClient) AddTokenFlag(userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	log2.NewDebug("", "add token key is ", key)

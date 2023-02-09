@@ -46,7 +46,7 @@ package group
 //		return
 //	}
 //	GroupListResp := api.GetJoinedSuperGroupListResp{GetJoinedGroupListResp: api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: rpcResp.CommonResp.ErrCode, ErrMsg: rpcResp.CommonResp.ErrMsg}, GroupInfoList: rpcResp.GroupList}}
-//	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
+//	GroupListResp.Map = jsonData.JsonDataList(GroupListResp.GroupInfoList)
 //	log.NewInfo(req.OperationID, "GetJoinedSuperGroupList api return ", GroupListResp)
 //	c.JSON(http.StatusOK, GroupListResp)
 //}
@@ -83,7 +83,7 @@ package group
 //	}
 //
 //	resp := api.GetSuperGroupsInfoResp{GetGroupInfoResp: api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: rpcResp.CommonResp.ErrCode, ErrMsg: rpcResp.CommonResp.ErrMsg}, GroupInfoList: rpcResp.GroupInfoList}}
-//	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
+//	resp.Map = jsonData.JsonDataList(resp.GroupInfoList)
 //	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}

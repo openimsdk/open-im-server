@@ -343,7 +343,7 @@ package friend
 //		utils.CopyStructFields(&black, v)
 //		resp.BlackUserInfoList = append(resp.BlackUserInfoList, &black)
 //	}
-//	resp.Data = jsonData.JsonDataList(resp.BlackUserInfoList)
+//	resp.Map = jsonData.JsonDataList(resp.BlackUserInfoList)
 //	log.NewInfo(req.CommID.OperationID, "GetBlacklist api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}
@@ -561,7 +561,7 @@ package friend
 //	}
 //
 //	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
-//	resp.Data = jsonData.JsonDataList(resp.FriendInfoList)
+//	resp.Map = jsonData.JsonDataList(resp.FriendInfoList)
 //	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //	//c.JSON(http.StatusOK, resp)
@@ -618,7 +618,7 @@ package friend
 //	}
 //
 //	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
-//	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
+//	resp.Map = jsonData.JsonDataList(resp.FriendRequestList)
 //	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}
@@ -672,7 +672,7 @@ package friend
 //		return
 //	}
 //	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
-//	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
+//	resp.Map = jsonData.JsonDataList(resp.FriendRequestList)
 //	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
 //	c.JSON(http.StatusOK, resp)
 //}

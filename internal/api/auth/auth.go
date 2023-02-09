@@ -6,7 +6,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/auth"
 	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
@@ -149,7 +148,7 @@ func UserToken(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.ParseTokenReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段<br>platform为平台ID"
 // @Produce json
-// @Success 0 {object} api.ParseTokenResp{Data=api.ExpireTime}
+// @Success 0 {object} api.ParseTokenResp{Map=api.ExpireTime}
 // @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /auth/parse_token [post]

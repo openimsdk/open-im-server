@@ -227,17 +227,6 @@ message CancelMuteGroupReq{
 message CancelMuteGroupResp{
 }
 
-
-
-
-message SetGroupMemberNicknameReq{
-  string groupID = 1;
-  string nickname = 2;
-  string userID = 3;
-}
-message SetGroupMemberNicknameResp{
-}
-
 message GetJoinedSuperGroupListReq {
   string userID = 1;
 }
@@ -254,13 +243,17 @@ message GetSuperGroupsInfoResp {
   repeated sdkws.GroupInfo groupInfos = 1;
 }
 
-message SetGroupMemberInfoReq{
+message SetGroupMemberInfo{
   string groupID = 1;
   string userID = 2;
   google.protobuf.StringValue nickname = 3;
   google.protobuf.StringValue faceURL = 4;
   google.protobuf.Int32Value roleLevel = 5;
   google.protobuf.StringValue ex = 6;
+}
+
+message SetGroupMemberInfoReq{
+  repeated SetGroupMemberInfo members = 1;
 }
 
 message SetGroupMemberInfoResp{
@@ -281,13 +274,24 @@ message GetGroupAbstractInfoResp{
   repeated GroupAbstractInfo groupAbstractInfos = 1;
 }
 
-message getUserInGroupMembersReq {
+message GetUserInGroupMembersReq {
   string userID = 1;
   repeated string groupIDs = 2;
 }
+
 message getUserInGroupMembersResp{
   repeated sdkws.GroupMemberFullInfo members = 1;
 }
+
+message GetGroupMemberUserIDReq{
+  string groupID = 1;
+}
+
+message GetGroupMemberUserIDResp{
+  repeated string userIDs = 1;
+}
+
+
 
 service group{
   //创建群
@@ -338,13 +342,14 @@ service group{
   //获取指定的超级群信息
   rpc getSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
   //设置群成员昵称
-  rpc setGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
   //设置群成员信息
   rpc setGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
   //获取群信息hash值
   rpc getGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
   //获取某个用户在指定群中的信息
-  rpc getUserInGroupMembers(getUserInGroupMembersReq) returns (getUserInGroupMembersResp);
+  rpc getUserInGroupMembers(GetUserInGroupMembersReq) returns (GetUserInGroupMembersResp);
+  //获取群成员用户ID
+  rpc getGroupMemberUserID(GetGroupMemberUserIDReq) returns (GetGroupMemberUserIDResp);
 }
 
 

@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbRelay "Open_IM/pkg/proto/relay"
 	open_im_sdk "Open_IM/pkg/proto/sdkws"
@@ -156,7 +155,7 @@ func GetBlackIDListFromCache(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetUsersInfoReq true "请求体"
 // @Produce json
-// @Success 0 {object} api.GetUsersInfoResp{Data=[]open_im_sdk.PublicUserInfo}
+// @Success 0 {object} api.GetUsersInfoResp{Map=[]open_im_sdk.PublicUserInfo}
 // @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_users_info [post]
