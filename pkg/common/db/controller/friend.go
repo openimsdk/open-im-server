@@ -101,8 +101,8 @@ func (f *FriendController) PageFriendRequestToMe(ctx context.Context, userID str
 }
 
 // FindFriends 获取某人指定好友的信息
-func (f *FriendController) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
-	return f.database.FindFriends(ctx, ownerUserID, friendUserIDs)
+func (f *FriendController) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
+	return f.database.FindFriendsWithError(ctx, ownerUserID, friendUserIDs)
 }
 
 type FriendDatabaseInterface interface {
@@ -129,7 +129,7 @@ type FriendDatabaseInterface interface {
 	// 获取我收到的的好友申请
 	PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	// 获取某人指定好友的信息
-	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
+	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
 }
 
 type FriendDatabase struct {
@@ -322,7 +322,7 @@ func (f *FriendDatabase) PageFriendRequestToMe(ctx context.Context, userID strin
 }
 
 // 获取某人指定好友的信息 如果有好友不存在，也返回错误
-func (f *FriendDatabase) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
+func (f *FriendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
 	friends, err = f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 	if err != nil {
 		return

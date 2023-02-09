@@ -38,7 +38,7 @@ func (b *BlackController) Delete(ctx context.Context, blacks []*relation.BlackMo
 }
 
 // FindOwnerBlacks 获取黑名单列表
-func (b *BlackController) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, total int64, err error) {
+func (b *BlackController) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.BlackModel, total int64, err error) {
 	return b.database.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
 }
 
@@ -53,7 +53,7 @@ type BlackDatabaseInterface interface {
 	// Delete 删除黑名单
 	Delete(ctx context.Context, blacks []*relation.BlackModel) (err error)
 	// FindOwnerBlacks 获取黑名单列表
-	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.Black, total int64, err error)
+	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 	CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error)
 }
