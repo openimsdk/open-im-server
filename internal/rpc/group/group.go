@@ -75,7 +75,7 @@ func NewGroupServer(port int) *groupServer {
 
 	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
 
-	g.GroupInterface = controller.NewGroupInterface(controller.NewGroupDatabase(mysql.GormConn(), redis.GetClient(), mongo.GetClient()))
+	g.GroupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), mongo.GetClient())
 	return &g
 }
 
