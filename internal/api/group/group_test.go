@@ -67,9 +67,9 @@ func KickGroupMember(c *gin.Context) {
 	// 默认 全部自动
 	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Execute()
 	// 可以自定义编辑请求和响应
-	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Before(func(apiReq *interface{}, rpcReq *interface{}, bind func() error) error {
+	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Before(func(apiReq *api_struct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
 		return bind()
-	}).After(func(rpcResp api_struct.KickGroupMemberResp, apiResp *interface{}, bind func() error) error {
+	}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *api_struct.KickGroupMemberResp, bind func() error) error {
 		return bind()
 	}).Execute()
 }
@@ -88,16 +88,16 @@ type RpcRun[A, B any, C, D any, Z any] struct {
 	name   string
 	client func(conn *grpc.ClientConn) Z
 	rpc    func(client Z, ctx context.Context, req C, options ...grpc.CallOption) (D, error)
-	before func(apiReq C, rpcReq C, bind func() error) error
-	after  func(rpcResp B, apiResp D, bind func() error) error
+	before func(apiReq *A, rpcReq C, bind func() error) error
+	after  func(rpcResp D, apiResp *B, bind func() error) error
 }
 
-func (a *RpcRun[A, B, C, D, Z]) Before(fn func(apiReq C, rpcReq C, bind func() error) error) *RpcRun[A, B, C, D, Z] {
+func (a *RpcRun[A, B, C, D, Z]) Before(fn func(apiReq *A, rpcReq C, bind func() error) error) *RpcRun[A, B, C, D, Z] {
 	a.before = fn
 	return a
 }
 
-func (a *RpcRun[A, B, C, D, Z]) After(fn func(rpcResp B, apiResp D, bind func() error) error) *RpcRun[A, B, C, D, Z] {
+func (a *RpcRun[A, B, C, D, Z]) After(fn func(rpcResp D, apiResp *B, bind func() error) error) *RpcRun[A, B, C, D, Z] {
 	a.after = fn
 	return a
 }
