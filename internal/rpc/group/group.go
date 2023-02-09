@@ -21,7 +21,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/getcdv3"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"math/big"
 	"net"

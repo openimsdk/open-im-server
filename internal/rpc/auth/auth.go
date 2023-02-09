@@ -107,7 +107,7 @@ type rpcAuth struct {
 	etcdSchema      string
 	etcdAddr        []string
 	controller.AuthInterface
-	dr discoveryRegistry.SvcDiscoveryRegistry
+	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
 func NewRpcAuthServer(port int) *rpcAuth {
@@ -122,12 +122,7 @@ func (s *rpcAuth) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc auth start...")
 
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
+	listenIP := network.GetListenIP(config.Config.ListenIP)
 	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -153,16 +148,16 @@ func (s *rpcAuth) Run() {
 	//service registers with etcd
 	pbAuth.RegisterAuthServer(srv, s)
 
-	zkClient, err := openKeeper.NewClient([]string{"43.154.157.177:2181"}, config.Config.Etcd.EtcdSchema, 10, "", "")
+	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
 	if err != nil {
 		panic(err.Error())
 	}
-	registerIP, err := network.GetRpcIP(config.Config.RpcRegisterIP)
-	err = zkClient.Register(s.rpcRegisterName, registerIP, s.rpcPort)
+	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+	err = zkClient.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, s.rpcPort)
 	if err != nil {
 		panic(err.Error())
 	}
-
+	s.registerCenter = zkClient
 	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), registerIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
