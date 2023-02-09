@@ -56,7 +56,7 @@ func (f *FriendCacheRedis) getFriendKey(ownerUserID, friendUserID string) string
 	return friendKey + ownerUserID + "-" + friendUserID
 }
 
-func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
+func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string, fn func(ctx context.Context, ownerUserID string) (friendIDs []string, err error)) (friendIDs []string, err error) {
 	getFriendIDs := func() (string, error) {
 		friendIDs, err := f.friendDB.GetFriendIDs(ctx, ownerUserID)
 		if err != nil {
@@ -110,7 +110,7 @@ func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID s
 	return f.rcClient.TagAsDeleted(f.getTwoWayFriendsIDsKey(ownerUserID))
 }
 
-func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error) {
+func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string, fn func(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error)) (friend *relationTb.FriendModel, err error) {
 	getFriend := func() (string, error) {
 		friend, err = f.friendDB.Take(ctx, ownerUserID, friendUserID)
 		if err != nil {
