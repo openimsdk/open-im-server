@@ -3,7 +3,6 @@ package api_struct
 import (
 	pbRelay "Open_IM/pkg/proto/relay"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
-	pbUser "Open_IM/pkg/proto/user"
 )
 
 type DeleteUsersReq struct {
@@ -35,7 +34,7 @@ type AccountCheckReq struct {
 }
 type AccountCheckResp struct {
 	CommResp
-	ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
+	//ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
 }
 
 type ManagementSendMsg struct {
