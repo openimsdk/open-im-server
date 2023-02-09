@@ -236,12 +236,34 @@ type GroupDataBase struct {
 	groupRequestDB relationTb.GroupRequestModelInterface
 	db             *gorm.DB
 
-	cache   *cache.GroupCache
+	//cache   cache.GroupCache
+	cache   *cache.GroupCacheRedis
 	mongoDB *unrelation.SuperGroupMongoDriver
 }
 
+func (g *GroupDataBase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
+	for _, userID := range userIDs {
+		if err := g.cache.DelJoinedGroupIDs(ctx, userID); err != nil {
+			return err
+		}
+		if err := g.cache.DelJoinedSuperGroupIDs(ctx, userID); err != nil {
+			return err
+		}
+	}
+	if err := g.cache.DelGroupMemberIDs(ctx, groupID); err != nil {
+		return err
+	}
+	if err := g.cache.DelGroupMemberNum(ctx, groupID); err != nil {
+		return err
+	}
+	if err := g.cache.DelGroupMembersHash(ctx, groupID); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (g *GroupDataBase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
-	return g.groupMemberDB.FindMemberUserID(ctx, groupID)
+	return g.cache.GetGroupMemberIDs(ctx, groupID)
 }
 
 func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error {
@@ -263,11 +285,11 @@ func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 }
 
 func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
-	return g.groupDB.Take(ctx, groupID)
+	return g.cache.GetGroupInfo(ctx, groupID)
 }
 
 func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
-	return g.groupDB.Find(ctx, groupIDs)
+	return g.cache.GetGroupsInfo(ctx, groupIDs)
 }
 
 func (g *GroupDataBase) SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error) {
@@ -275,7 +297,15 @@ func (g *GroupDataBase) SearchGroup(ctx context.Context, keyword string, pageNum
 }
 
 func (g *GroupDataBase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
-	return g.groupDB.UpdateMap(ctx, groupID, data)
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.UpdateMap(ctx, groupID, data, tx); err != nil {
+			return err
+		}
+		if err := g.cache.DelGroupInfo(ctx, groupID); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (g *GroupDataBase) DismissGroup(ctx context.Context, groupID string) error {
@@ -283,13 +313,22 @@ func (g *GroupDataBase) DismissGroup(ctx context.Context, groupID string) error 
 		if err := g.groupDB.UpdateStatus(ctx, groupID, constant.GroupStatusDismissed, tx); err != nil {
 			return err
 		}
-		return g.groupMemberDB.DeleteGroup(ctx, []string{groupID}, tx)
-
+		if err := g.groupMemberDB.DeleteGroup(ctx, []string{groupID}, tx); err != nil {
+			return err
+		}
+		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
+		if err != nil {
+			return err
+		}
+		if err := g.delGroupMemberCache(ctx, groupID, userIDs); err != nil {
+			return err
+		}
+		return nil
 	})
 }
 
 func (g *GroupDataBase) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error) {
-	return g.groupMemberDB.Take(ctx, groupID, userID)
+	return g.cache.GetGroupMemberInfo(ctx, groupID, userID)
 }
 
 func (g *GroupDataBase) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
@@ -297,6 +336,7 @@ func (g *GroupDataBase) TakeGroupOwner(ctx context.Context, groupID string) (*re
 }
 
 func (g *GroupDataBase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
+	//g.cache.GetGroupMembersInfo()
 	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
@@ -309,19 +349,32 @@ func (g *GroupDataBase) SearchGroupMember(ctx context.Context, keyword string, g
 }
 
 func (g *GroupDataBase) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error {
-	if member == nil {
-		return g.groupRequestDB.UpdateHandler(ctx, groupID, userID, handledMsg, handleResult)
-	}
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		if err := g.groupRequestDB.UpdateHandler(ctx, groupID, userID, handledMsg, handleResult, tx); err != nil {
 			return err
 		}
-		return g.groupMemberDB.Create(ctx, []*relationTb.GroupMemberModel{member}, tx)
+		if member != nil {
+			if err := g.groupMemberDB.Create(ctx, []*relationTb.GroupMemberModel{member}, tx); err != nil {
+				return err
+			}
+			if err := g.delGroupMemberCache(ctx, groupID, []string{userID}); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
 func (g *GroupDataBase) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.groupMemberDB.Delete(ctx, groupID, userIDs)
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupMemberDB.Delete(ctx, groupID, userIDs, tx); err != nil {
+			return err
+		}
+		if err := g.delGroupMemberCache(ctx, groupID, userIDs); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error) {
@@ -348,12 +401,23 @@ func (g *GroupDataBase) TransferGroupOwner(ctx context.Context, groupID string, 
 		if rowsAffected != 1 {
 			return utils.Wrap(fmt.Errorf("newOwnerUserID %s rowsAffected = %d", newOwnerUserID, rowsAffected), "")
 		}
+		if err := g.delGroupMemberCache(ctx, groupID, []string{oldOwnerUserID, newOwnerUserID}); err != nil {
+			return err
+		}
 		return nil
 	})
 }
 
 func (g *GroupDataBase) UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error {
-	return g.groupMemberDB.Update(ctx, groupID, userID, data)
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupMemberDB.Update(ctx, groupID, userID, data, tx); err != nil {
+			return err
+		}
+		if err := g.cache.DelGroupMemberInfo(ctx, groupID, userID); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (g *GroupDataBase) CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error {

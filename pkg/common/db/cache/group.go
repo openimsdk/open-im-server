@@ -37,19 +37,18 @@ type GroupCache interface {
 	BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string, fn func(ctx context.Context, userIDs []string) error) (err error)
 
 	GetJoinedSuperGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error)) (joinedSuperGroupIDs []string, err error)
-	DelJoinedSuperGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) error) (err error)
+	DelJoinedSuperGroupIDs(ctx context.Context, userID string) (err error)
 
 	GetGroupMembersHash(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error)) (hashCodeUint64 uint64, err error)
 	DelGroupMembersHash(ctx context.Context, groupID string) (err error)
 
 	GetGroupMemberIDs(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (groupMemberIDs []string, err error)) (groupMemberIDs []string, err error)
-	DelGroupMemberIDs(ctx context.Context, groupID string)
+	DelGroupMemberIDs(ctx context.Context, groupID string) error
 
 	GetJoinedGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedGroupIDs []string, err error)) (joinedGroupIDs []string, err error)
 	DelJoinedGroupIDs(ctx context.Context, userID string) (err error)
 
 	GetGroupMemberInfo(ctx context.Context, groupID, userID string, fn func(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)) (groupMember *relationTb.GroupMemberModel, err error)
-	GetGroupMembersInfo(ctx context.Context, count, offset int32, groupID string, fn func(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error)) (groupMembers []*relationTb.GroupMemberModel, err error)
 	DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error)
 
 	GetGroupMemberNum(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (num int, err error)) (num int, err error)
@@ -117,7 +116,7 @@ func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) 
 	return groups, nil
 }
 
-func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (group *relation.GroupGorm, err error) {
+func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
 	getGroup := func() (string, error) {
 		groupInfo, err := g.group.Take(ctx, groupID)
 		if err != nil {
@@ -129,7 +128,7 @@ func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (gro
 		}
 		return string(bytes), nil
 	}
-	group = &relation.GroupGorm{}
+	group = &relationTb.GroupModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()
@@ -337,6 +336,11 @@ func (g *GroupCacheRedis) GetGroupMemberInfo(ctx context.Context, groupID, userI
 	groupMember = &relation.GroupMember{}
 	err = json.Unmarshal([]byte(groupMemberInfoStr), groupMember)
 	return groupMember, utils.Wrap(err, "")
+}
+
+func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID, userIDs []string) (groupMember *relationTb.GroupMemberModel, err error) {
+
+	return nil, err
 }
 
 func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relation.GroupMember, err error) {
