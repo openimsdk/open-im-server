@@ -5,7 +5,7 @@ go 1.18
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/getcdv3 v1.0.4
-	github.com/OpenIMSDK/openKeeper v0.9.8
+	github.com/OpenIMSDK/openKeeper v0.9.7
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
