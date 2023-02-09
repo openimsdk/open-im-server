@@ -171,14 +171,15 @@ message SetMessageReactionExtensionsReq {
   string operationID = 1;
   string sourceID = 2;
   string opUserID = 3;
-  int32 sessionType = 4;
-  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
-  string clientMsgID = 6;
-  google.protobuf.StringValue ex = 7;
-  google.protobuf.StringValue attachedInfo = 8;
-  bool isReact = 9;
-  bool isExternalExtensions = 10;
-  int64 msgFirstModifyTime = 11;
+  int32 opUserIDPlatformID = 4;
+  int32 sessionType = 5;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 6;
+  string clientMsgID = 7;
+  google.protobuf.StringValue ex = 8;
+  google.protobuf.StringValue attachedInfo = 9;
+  bool isReact = 10;
+  bool isExternalExtensions = 11;
+  int64 msgFirstModifyTime = 12;
 }
 message SetMessageReactionExtensionsResp {
   int32 errCode = 1;
@@ -192,14 +193,15 @@ message AddMessageReactionExtensionsReq {
   string operationID = 1;
   string sourceID = 2;
   string opUserID = 3;
-  int32 sessionType = 4;
-  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
-  string clientMsgID = 6;
-  google.protobuf.StringValue ex = 7;
-  google.protobuf.StringValue attachedInfo = 8;
-  bool isReact = 9;
-  bool isExternalExtensions = 10;
-  int64 msgFirstModifyTime = 11;
+  int32 opUserIDPlatformID = 4;
+  int32 sessionType = 5;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 6;
+  string clientMsgID = 7;
+  google.protobuf.StringValue ex = 8;
+  google.protobuf.StringValue attachedInfo = 9;
+  bool isReact = 10;
+  bool isExternalExtensions = 11;
+  int64 msgFirstModifyTime = 12;
 }
 message AddMessageReactionExtensionsResp {
   int32 errCode = 1;
@@ -249,11 +251,12 @@ message DeleteMessageListReactionExtensionsReq {
   string operationID = 1;
   string opUserID = 2;
   string sourceID = 3;
-  int32 sessionType = 4;
-  string clientMsgID = 5;
-  bool isExternalExtensions = 6;
-  int64 msgFirstModifyTime = 7;
-  repeated server_api_params.KeyValue reactionExtensionList = 8;
+  int32  opUserIDPlatformID = 4;
+  int32 sessionType = 5;
+  string clientMsgID = 6;
+  bool isExternalExtensions = 7;
+  int64 msgFirstModifyTime = 8;
+  repeated server_api_params.KeyValue reactionExtensionList = 9;
 }
 
 message DeleteMessageListReactionExtensionsResp {
