@@ -8,7 +8,7 @@ type SvcDiscoveryRegistry interface {
 	Register(serviceName, host string, port int, opts ...grpc.DialOption) error
 	UnRegister() error
 	GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
-	GetConn(serviceName string, strategy func(slice []*grpc.ClientConn) int, opts ...grpc.DialOption) (*grpc.ClientConn, error)
+	GetConn(serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error)
 	//RegisterConf(conf []byte) error
 	//LoadConf() ([]byte, error)
 }

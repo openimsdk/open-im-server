@@ -2,6 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -12,16 +13,39 @@ import (
 	"time"
 )
 
-type DBFun func() (string, error)
+const (
+	conversationKey                      = "CONVERSATION:"
+	conversationIDsKey                   = "CONVERSATION_IDS:"
+	recvMsgOptKey                        = "RECV_MSG_OPT:"
+	superGroupRecvMsgNotNotifyUserIDsKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
+	conversationExpireTime               = time.Second * 60 * 60 * 12
+)
 
 type ConversationCache interface {
-	GetUserConversationIDListFromCache(userID string, fn DBFun) ([]string, error)
-	DelUserConversationIDListFromCache(userID string) error
-	GetConversationFromCache(ownerUserID, conversationID string, fn DBFun) (*table.ConversationModel, error)
-	GetConversationsFromCache(ownerUserID string, conversationIDList []string, fn DBFun) ([]*table.ConversationModel, error)
-	GetUserAllConversationList(ownerUserID string, fn DBFun) ([]*table.ConversationModel, error)
-	DelConversationFromCache(ownerUserID, conversationID string) error
+	// get user's conversationIDs from cache
+	GetUserConversationIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) ([]string, error)
+	// del user's conversationIDs from cache, call when a user add or reduce a conversation
+	DelUserConversationIDs(ctx context.Context, userID string) error
+	// get one conversation from cache
+	GetConversation(ctx context.Context, ownerUserID, conversationID string, fn func(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)) (*relationTb.ConversationModel, error)
+	// get one conversation from cache
+	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string, fn func(ctx context.Context, ownerUserID, conversationIDs []string) ([]*relationTb.ConversationModel, error)) ([]*relationTb.ConversationModel, error)
+	// get one user's all conversations from cache
+	GetUserAllConversations(ctx context.Context, ownerUserID string, fn func(ctx context.Context, ownerUserIDs string) ([]*relationTb.ConversationModel, error)) ([]*relationTb.ConversationModel, error)
+	// del one conversation from cache, call when one user's conversation Info changed
+	DelConversation(ctx context.Context, ownerUserID, conversationID string) error
+	// get user conversation recv msg from cache
+	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string, fn func(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)) (opt int, err error)
+	// del user recv msg opt from cache, call when user's conversation recv msg opt changed
+	DelUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) error
+	// get one super group recv msg but do not notification userID list
+	GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (userIDs []string, err error)) (userIDs []string, err error)
+	// del one super group recv msg but do not notification userID list, call it when this list changed
+	DelSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) error
+	//GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint32, err error)
+	//DelSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string)
 }
+
 type ConversationRedis struct {
 	rcClient *rockscache.Client
 }
@@ -30,27 +54,27 @@ func NewConversationRedis(rcClient *rockscache.Client) *ConversationRedis {
 	return &ConversationRedis{rcClient: rcClient}
 }
 
-func NewConversationCache(rdb redis.UniversalClient, conversationDB *relation.ConversationGorm, options rockscache.Options) *ConversationCache {
-	return &ConversationCache{conversationDB: conversationDB, expireTime: conversationExpireTime, rcClient: rockscache.NewClient(rdb, options)}
+func NewNewConversationRedis(rdb redis.UniversalClient, conversationDB *relation.ConversationGorm, options rockscache.Options) *ConversationRedis {
+	return &ConversationRedis{conversationDB: conversationDB, expireTime: conversationExpireTime, rcClient: rockscache.NewClient(rdb, options)}
 }
 
-func (c *ConversationCache) getConversationKey(ownerUserID, conversationID string) string {
+func (c *ConversationRedis) getConversationKey(ownerUserID, conversationID string) string {
 	return conversationKey + ownerUserID + ":" + conversationID
 }
 
-func (c *ConversationCache) getConversationIDsKey(ownerUserID string) string {
+func (c *ConversationRedis) getConversationIDsKey(ownerUserID string) string {
 	return conversationIDsKey + ownerUserID
 }
 
-func (c *ConversationCache) getRecvMsgOptKey(ownerUserID, conversationID string) string {
+func (c *ConversationRedis) getRecvMsgOptKey(ownerUserID, conversationID string) string {
 	return recvMsgOptKey + ownerUserID + ":" + conversationID
 }
 
-func (c *ConversationCache) getSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
+func (c *ConversationRedis) getSuperGroupRecvNotNotifyUserIDsKey(groupID string) string {
 	return superGroupRecvMsgNotNotifyUserIDsKey + groupID
 }
 
-func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(userID string) ([]string, error)) (conversationIDs []string, err error) {
+func (c *ConversationRedis) GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(userID string) ([]string, error)) (conversationIDs []string, err error) {
 	//getConversationIDs := func() (string, error) {
 	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
 	//	if err != nil {
@@ -76,7 +100,7 @@ func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUse
 	})
 }
 
-func (c *ConversationCache) GetUserConversationIDs1(ctx context.Context, ownerUserID string) (conversationIDs []string, err error) {
+func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUserID string) (conversationIDs []string, err error) {
 	//getConversationIDs := func() (string, error) {
 	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
 	//	if err != nil {
@@ -146,14 +170,14 @@ func GetCache[T any](rcClient *rockscache.Client, key string, expire time.Durati
 	return t, nil
 }
 
-func (c *ConversationCache) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
+func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)
 	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationIDsKey(ownerUserID)), "DelUserConversationIDs err")
 }
 
-func (c *ConversationCache) GetConversation(ctx context.Context, ownerUserID, conversationID string) (conversation *relationTb.ConversationModel, err error) {
+func (c *ConversationRedis) GetConversation(ctx context.Context, ownerUserID, conversationID string) (conversation *relationTb.Conversation, err error) {
 	getConversation := func() (string, error) {
 		conversation, err := relation.GetConversation(ownerUserID, conversationID)
 		if err != nil {
@@ -177,14 +201,14 @@ func (c *ConversationCache) GetConversation(ctx context.Context, ownerUserID, co
 	return conversation, utils.Wrap(err, "Unmarshal failed")
 }
 
-func (c *ConversationCache) DelConversation(ctx context.Context, ownerUserID, conversationID string) (err error) {
+func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, conversationID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationID", conversationID)
 	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationKey(ownerUserID, conversationID)), "DelConversation err")
 }
 
-func (c *ConversationCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []relationTb.ConversationModel, err error) {
+func (c *ConversationRedis) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []relationTb.ConversationModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs, "conversations", conversations)
 	}()
@@ -198,7 +222,7 @@ func (c *ConversationCache) GetConversations(ctx context.Context, ownerUserID st
 	return conversations, nil
 }
 
-func (c *ConversationCache) GetUserAllConversations(ctx context.Context, ownerUserID string) (conversations []relationTb.ConversationModel, err error) {
+func (c *ConversationRedis) GetUserAllConversations(ctx context.Context, ownerUserID string) (conversations []relationTb.ConversationModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversations", conversations)
 	}()
@@ -217,7 +241,7 @@ func (c *ConversationCache) GetUserAllConversations(ctx context.Context, ownerUs
 	return conversationIDs, nil
 }
 
-func (c *ConversationCache) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error) {
+func (c *ConversationRedis) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error) {
 	getConversation := func() (string, error) {
 		conversation, err := relation.GetConversation(ownerUserID, conversationID)
 		if err != nil {
@@ -235,22 +259,22 @@ func (c *ConversationCache) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, 
 	return strconv.Atoi(optStr)
 }
 
-func (c *ConversationCache) DelUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) error {
+func (c *ConversationRedis) DelUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) error {
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationKey(ownerUserID, conversationID)), "DelUserRecvMsgOpt failed")
 }
 
-func (c *ConversationCache) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error) {
+func (c *ConversationRedis) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error) {
 	return nil, nil
 }
 
-func (c *ConversationCache) DelSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (err error) {
+func (c *ConversationRedis) DelSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (err error) {
 	return nil
 }
 
-func (c *ConversationCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint32, err error) {
+func (c *ConversationRedis) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint32, err error) {
 	return
 }
 
-func (c *ConversationCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) {
+func (c *ConversationRedis) DelSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) {
 	return
 }

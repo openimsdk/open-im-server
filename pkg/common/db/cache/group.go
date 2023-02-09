@@ -2,8 +2,8 @@ package cache
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/db/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
@@ -14,7 +14,6 @@ import (
 	"math/big"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -29,7 +28,14 @@ const (
 	groupMemberNumKey    = "GROUP_MEMBER_NUM_CACHE:"
 )
 
-type GroupCache struct {
+type GroupCache interface {
+	GetGroupsInfo(ctx context.Context, groupIDs []string, fn func(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)) (groups []*relationTb.GroupModel, err error)
+	DelGroupsInfo(ctx context.Context, groupID string) (err error)
+	GetGroupInfo(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)) (group *relationTb.GroupModel, err error)
+	DelGroupInfo(ctx context.Context, groupID string) (err error)
+}
+
+type GroupCacheRedis struct {
 	group        *relation.GroupGorm
 	groupMember  *relation.GroupMemberGorm
 	groupRequest *relation.GroupRequestGorm
@@ -39,8 +45,8 @@ type GroupCache struct {
 	rcClient     *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
-	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
+func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCacheRedis {
+	return &GroupCacheRedis{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient,
 	}
