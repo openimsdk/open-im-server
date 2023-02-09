@@ -5,7 +5,7 @@ package friend
 //	api "Open_IM/pkg/api_struct"
 //	"Open_IM/pkg/common/config"
 //	"Open_IM/pkg/common/log"
-//	"Open_IM/pkg/common/token_verify"
+//	"Open_IM/pkg/common/tokenverify"
 //	"Open_IM/pkg/getcdv3"
 //	rpc "Open_IM/pkg/proto/friend"
 //	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -39,7 +39,7 @@ package friend
 //	utils.CopyStructFields(req.CommID, &params)
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -84,7 +84,7 @@ package friend
 //	utils.CopyStructFields(req, &params)
 //	var ok bool
 //	var errInfo string
-//	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+//	ok, req.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 //	if !ok {
 //		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.OperationID, errMsg)
@@ -146,7 +146,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -202,7 +202,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -258,7 +258,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -312,7 +312,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -373,7 +373,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -427,7 +427,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -480,7 +480,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -535,7 +535,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -591,7 +591,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)
@@ -647,7 +647,7 @@ package friend
 //
 //	var ok bool
 //	var errInfo string
-//	ok, req.CommID.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
+//	ok, req.CommID.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 //	if !ok {
 //		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 //		log.NewError(req.CommID.OperationID, errMsg)

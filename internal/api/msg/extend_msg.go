@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
@@ -33,7 +33,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -82,7 +82,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -128,7 +128,7 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -173,7 +173,7 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

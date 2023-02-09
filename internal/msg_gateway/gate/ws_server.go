@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
@@ -444,7 +444,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
-		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
+		if ok, err, msg := tokenverify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
 			if errors.Is(err, constant.ErrTokenExpired) {
 				status = int(constant.ErrTokenExpired.ErrCode)
 			}

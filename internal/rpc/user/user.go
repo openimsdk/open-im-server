@@ -10,7 +10,7 @@ import (
 	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
@@ -179,7 +179,7 @@ func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) 
 // ok
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (resp *pbUser.UpdateUserInfoResp, err error) {
 	resp = &pbUser.UpdateUserInfoResp{}
-	err = token_verify.CheckAccessV3(ctx, req.UserInfo.UserID)
+	err = tokenverify.CheckAccessV3(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	if utils.Duplicate(req.CheckUserIDs) {
 		return nil, constant.ErrArgs.Wrap("userID repeated")
 	}
-	err = token_verify.CheckAdmin(ctx)
+	err = tokenverify.CheckAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type ConversationLocalCacheInterface interface {
-	GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) []string
+	GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 }
 
 type ConversationLocalCache struct {
@@ -23,7 +23,7 @@ func NewConversationLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) Co
 	}
 }
 
-func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) []string {
+func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.client.GetConn()
 	return []string{}
 }

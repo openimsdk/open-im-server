@@ -4,17 +4,17 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/proto/msg"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"time"
 )
 
-func (rpc *rpcChat) DelMsgList(_ context.Context, req *commonPb.DelMsgListReq) (*commonPb.DelMsgListResp, error) {
+func (rpc *rpcChat) DelMsgList(_ context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &commonPb.DelMsgListResp{}
+	resp := &common.DelMsgListResp{}
 	select {
 	case rpc.delMsgCh <- deleteMsg{
 		UserID:      req.UserID,
@@ -32,7 +32,7 @@ func (rpc *rpcChat) DelMsgList(_ context.Context, req *commonPb.DelMsgListReq) (
 }
 func (rpc *rpcChat) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	if !token_verify.CheckAccess(ctx, req.OpUserID, req.UserID) {
+	if !tokenverify.CheckAccess(ctx, req.OpUserID, req.UserID) {
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.UserID)
 		return &msg.DelSuperGroupMsgResp{ErrCode: constant.ErrNoPermission.ErrCode, ErrMsg: constant.ErrNoPermission.ErrMsg}, nil
 	}

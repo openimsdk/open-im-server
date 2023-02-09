@@ -1,10 +1,10 @@
 package callback_struct
 
-import commonPb "Open_IM/pkg/proto/sdk_ws"
+import common "Open_IM/pkg/proto/sdk_ws"
 
 type CallbackBeforePushReq struct {
 	UserStatusBatchCallbackReq
-	*commonPb.OfflinePushInfo
+	*common.OfflinePushInfo
 	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`
 	GroupID      string   `json:"groupID"`
@@ -16,12 +16,12 @@ type CallbackBeforePushReq struct {
 
 type CallbackBeforePushResp struct {
 	*CommonCallbackResp
-	UserIDList      []string                  `json:"userIDList"`
-	OfflinePushInfo *commonPb.OfflinePushInfo `json:"offlinePushInfo"`
+	UserIDList      []string                `json:"userIDList"`
+	OfflinePushInfo *common.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
 type CallbackBeforeSuperGroupOnlinePushReq struct {
-	//*commonPb.OfflinePushInfo
+	//*common.OfflinePushInfo
 	UserStatusBaseCallback
 	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`
@@ -35,6 +35,6 @@ type CallbackBeforeSuperGroupOnlinePushReq struct {
 
 type CallbackBeforeSuperGroupOnlinePushResp struct {
 	*CommonCallbackResp
-	UserIDList      []string                  `json:"userIDList"`
-	OfflinePushInfo *commonPb.OfflinePushInfo `json:"offlinePushInfo"`
+	UserIDList      []string                `json:"userIDList"`
+	OfflinePushInfo *common.OfflinePushInfo `json:"offlinePushInfo"`
 }

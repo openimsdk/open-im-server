@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
@@ -145,7 +145,7 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 }
 func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUsersOnlineStatusReq) (*pbRelay.GetUsersOnlineStatusResp, error) {
 	log.NewInfo(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
+	if !tokenverify.IsManagerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "no permission GetUsersOnlineStatus ", req.OpUserID)
 		return &pbRelay.GetUsersOnlineStatusResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}

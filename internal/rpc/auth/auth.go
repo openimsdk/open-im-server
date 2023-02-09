@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	pbAuth "Open_IM/pkg/proto/auth"
@@ -40,8 +40,8 @@ func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbA
 	return &resp, nil
 }
 
-func (s *rpcAuth) parseToken(ctx context.Context, tokensString, operationID string) (claims *token_verify.Claims, err error) {
-	claims, err = token_verify.GetClaimFromToken(tokensString)
+func (s *rpcAuth) parseToken(ctx context.Context, tokensString, operationID string) (claims *tokenverify.Claims, err error) {
+	claims, err = tokenverify.GetClaimFromToken(tokensString)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -77,7 +77,7 @@ func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (*p
 
 func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
 	resp := pbAuth.ForceLogoutResp{}
-	if err := token_verify.CheckAdmin(ctx); err != nil {
+	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, tracelog.GetOperationID(ctx)); err != nil {

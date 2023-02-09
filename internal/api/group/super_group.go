@@ -5,7 +5,7 @@ import (
 	api "Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
@@ -23,7 +23,7 @@ func GetJoinedSuperGroupList(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, opUserID, errInfo := tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -59,7 +59,7 @@ func GetSuperGroupsInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, opUserID, errInfo := tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

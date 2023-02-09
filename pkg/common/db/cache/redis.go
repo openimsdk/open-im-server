@@ -20,27 +20,35 @@ import (
 )
 
 const (
-	accountTempCode               = "ACCOUNT_TEMP_CODE"
-	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
-	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken              = "DEVICE_TOKEN"
-	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
-	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
-	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
-	getuiToken                    = "GETUI_TOKEN"
-	getuiTaskID                   = "GETUI_TASK_ID"
-	messageCache                  = "MESSAGE_CACHE:"
-	SignalCache                   = "SIGNAL_CACHE:"
-	SignalListCache               = "SIGNAL_LIST_CACHE:"
-	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
-	FcmToken                      = "FCM_TOKEN:"
-	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq                   = "GROUP_MAX_SEQ:"
-	groupMinSeq                   = "GROUP_MIN_SEQ:"
-	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
-	userBadgeUnreadCountSum       = "USER_BADGE_UNREAD_COUNT_SUM:"
-	exTypeKeyLocker               = "EX_LOCK:"
+	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken        = "DEVICE_TOKEN"
+	userMinSeq              = "REDIS_USER_MIN_SEQ:"
+	uidPidToken             = "UID_PID_TOKEN_STATUS:"
+	getuiToken              = "GETUI_TOKEN"
+	getuiTaskID             = "GETUI_TASK_ID"
+	messageCache            = "MESSAGE_CACHE:"
+	signalCache             = "SIGNAL_CACHE:"
+	signalListCache         = "SIGNAL_LIST_CACHE:"
+	FcmToken                = "FCM_TOKEN:"
+	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
+	groupMaxSeq             = "GROUP_MAX_SEQ:"
+	groupMinSeq             = "GROUP_MIN_SEQ:"
+	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
+	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
+	exTypeKeyLocker         = "EX_LOCK:"
 )
+
+type Cache interface {
+	IncrUserSeq(uid string) (uint64, error)
+	GetUserMaxSeq(uid string) (uint64, error)
+	SetUserMaxSeq(uid string, maxSeq uint64) error
+	SetUserMinSeq(uid string, minSeq uint32) (err error)
+	GetUserMinSeq(uid string) (uint64, error)
+	SetGroupUserMinSeq(groupID, userID string, minSeq uint64) (err error)
+	GetGroupUserMinSeq(groupID, userID string) (uint64, error)
+}
+
+// native redis operate
 
 type RedisClient struct {
 	rdb redis.UniversalClient
@@ -84,25 +92,6 @@ func (r *RedisClient) GetClient() redis.UniversalClient {
 
 func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
 	return &RedisClient{rdb: rdb}
-}
-
-func (r *RedisClient) JudgeAccountEXISTS(account string) (bool, error) {
-	key := accountTempCode + account
-	n, err := r.rdb.Exists(context.Background(), key).Result()
-	if n > 0 {
-		return true, err
-	} else {
-		return false, err
-	}
-}
-
-func (r *RedisClient) SetAccountCode(account string, code, ttl int) (err error) {
-	key := accountTempCode + account
-	return r.rdb.Set(context.Background(), key, code, time.Duration(ttl)*time.Second).Err()
-}
-func (r *RedisClient) GetAccountCode(account string) (string, error) {
-	key := accountTempCode + account
-	return r.rdb.Get(context.Background(), key).Result()
 }
 
 //Perform seq auto-increment operation of user messages
@@ -195,36 +184,12 @@ func (r *RedisClient) SetTokenMapByUidPid(userID string, platformID int, m map[s
 	}
 	return r.rdb.HSet(context.Background(), key, mm).Err()
 }
+
 func (r *RedisClient) DeleteTokenByUidPid(userID string, platformID int, fields []string) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
-func (r *RedisClient) SetSingleConversationRecvMsgOpt(userID, conversationID string, opt int32) error {
-	key := conversationReceiveMessageOpt + userID
-	return r.rdb.HSet(context.Background(), key, conversationID, opt).Err()
-}
 
-func (r *RedisClient) GetSingleConversationRecvMsgOpt(userID, conversationID string) (int, error) {
-	key := conversationReceiveMessageOpt + userID
-	result, err := r.rdb.HGet(context.Background(), key, conversationID).Result()
-	return utils.StringToInt(result), err
-}
-func (r *RedisClient) SetUserGlobalMsgRecvOpt(userID string, opt int32) error {
-	key := conversationReceiveMessageOpt + userID
-	return r.rdb.HSet(context.Background(), key, GlobalMsgRecvOpt, opt).Err()
-}
-func (r *RedisClient) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
-	key := conversationReceiveMessageOpt + userID
-	result, err := r.rdb.HGet(context.Background(), key, GlobalMsgRecvOpt).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return 0, nil
-		} else {
-			return 0, err
-		}
-	}
-	return utils.StringToInt(result), err
-}
 func (r *RedisClient) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
@@ -336,7 +301,7 @@ func (r *RedisClient) HandleSignalInfo(operationID string, msg *pbCommon.MsgData
 			if err != nil {
 				return false, err
 			}
-			keyList := SignalListCache + userID
+			keyList := signalListCache + userID
 			err = r.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
 			if err != nil {
 				return false, err
@@ -345,7 +310,7 @@ func (r *RedisClient) HandleSignalInfo(operationID string, msg *pbCommon.MsgData
 			if err != nil {
 				return false, err
 			}
-			key := SignalCache + msg.ClientMsgID
+			key := signalCache + msg.ClientMsgID
 			err = r.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
 				return false, err
@@ -356,7 +321,7 @@ func (r *RedisClient) HandleSignalInfo(operationID string, msg *pbCommon.MsgData
 }
 
 func (r *RedisClient) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
-	key := SignalCache + clientMsgID
+	key := signalCache + clientMsgID
 	invitationInfo = &pbRtc.SignalInviteReq{}
 	bytes, err := r.rdb.Get(context.Background(), key).Bytes()
 	if err != nil {
@@ -378,7 +343,7 @@ func (r *RedisClient) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (i
 }
 
 func (r *RedisClient) GetAvailableSignalInvitationInfo(userID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
-	keyList := SignalListCache + userID
+	keyList := signalListCache + userID
 	result := r.rdb.LPop(context.Background(), keyList)
 	if err = result.Err(); err != nil {
 		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
@@ -400,7 +365,7 @@ func (r *RedisClient) GetAvailableSignalInvitationInfo(userID string) (invitatio
 }
 
 func (r *RedisClient) DelUserSignalList(userID string) error {
-	keyList := SignalListCache + userID
+	keyList := signalListCache + userID
 	err := r.rdb.Del(context.Background(), keyList).Err()
 	return err
 }
@@ -516,17 +481,19 @@ func (r *RedisClient) SetMessageReactionExpire(clientMsgID string, sessionType i
 	key := getMessageReactionExPrefix(clientMsgID, sessionType)
 	return r.rdb.Expire(context.Background(), key, expiration).Result()
 }
+
 func (r *RedisClient) GetMessageTypeKeyValue(clientMsgID string, sessionType int32, typeKey string) (string, error) {
 	key := getMessageReactionExPrefix(clientMsgID, sessionType)
 	result, err := r.rdb.HGet(context.Background(), key, typeKey).Result()
 	return result, err
-
 }
+
 func (r *RedisClient) SetMessageTypeKeyValue(clientMsgID string, sessionType int32, typeKey, value string) error {
 	key := getMessageReactionExPrefix(clientMsgID, sessionType)
 	return r.rdb.HSet(context.Background(), key, typeKey, value).Err()
 
 }
+
 func (r *RedisClient) LockMessageTypeKey(clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
 	return r.rdb.SetNX(context.Background(), key, 1, time.Minute).Err()
@@ -537,7 +504,7 @@ func (r *RedisClient) UnLockMessageTypeKey(clientMsgID string, TypeKey string) e
 
 }
 
-func getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
+func (r *RedisClient) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
 	switch sessionType {
 	case constant.SingleChatType:
 		return "EX_SINGLE_" + clientMsgID

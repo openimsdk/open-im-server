@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	pbChat "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	"context"
@@ -12,7 +12,7 @@ import (
 
 func (rpc *rpcChat) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbChat.ClearMsgResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc req: ", req.String())
-	if req.OpUserID != req.UserID && !token_verify.IsManagerUserID(req.UserID) {
+	if req.OpUserID != req.UserID && !tokenverify.IsManagerUserID(req.UserID) {
 		errMsg := "No permission" + req.OpUserID + req.UserID
 		log.Error(req.OperationID, errMsg)
 		return &pbChat.ClearMsgResp{ErrCode: constant.ErrNoPermission.ErrCode, ErrMsg: errMsg}, nil
@@ -39,7 +39,7 @@ func (rpc *rpcChat) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbCha
 
 func (rpc *rpcChat) SetMsgMinSeq(_ context.Context, req *pbChat.SetMsgMinSeqReq) (*pbChat.SetMsgMinSeqResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc req: ", req.String())
-	if req.OpUserID != req.UserID && !token_verify.IsManagerUserID(req.UserID) {
+	if req.OpUserID != req.UserID && !tokenverify.IsManagerUserID(req.UserID) {
 		errMsg := "No permission" + req.OpUserID + req.UserID
 		log.Error(req.OperationID, errMsg)
 		return &pbChat.SetMsgMinSeqResp{ErrCode: constant.ErrNoPermission.ErrCode, ErrMsg: errMsg}, nil

@@ -11,7 +11,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbUser "Open_IM/pkg/proto/user"
@@ -130,7 +130,7 @@ func (s *friendServer) Run() {
 // ok
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) (resp *pbFriend.ApplyToAddFriendResp, err error) {
 	resp = &pbFriend.ApplyToAddFriendResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	if err := callbackBeforeAddFriendV1(ctx, req); err != nil {
@@ -159,7 +159,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbFriend.Apply
 // ok
 func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFriendReq) (resp *pbFriend.ImportFriendResp, err error) {
 	resp = &pbFriend.ImportFriendResp{}
-	if err := token_verify.CheckAdmin(ctx); err != nil {
+	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if _, err := check.GetUsersInfo(ctx, req.OwnerUserID, req.FriendUserIDs); err != nil {

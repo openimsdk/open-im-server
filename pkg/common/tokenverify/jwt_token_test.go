@@ -1,4 +1,4 @@
-package token_verify
+package tokenverify
 
 import (
 	"github.com/stretchr/testify/assert"

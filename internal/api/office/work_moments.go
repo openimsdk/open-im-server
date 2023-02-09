@@ -4,7 +4,7 @@ import (
 	api "Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbOffice "Open_IM/pkg/proto/office"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
@@ -44,7 +44,7 @@ func CreateOneWorkMoment(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -108,7 +108,7 @@ func DeleteOneWorkMoment(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -171,7 +171,7 @@ func LikeOneWorkMoment(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -233,7 +233,7 @@ func CommentOneWorkMoment(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -297,7 +297,7 @@ func DeleteComment(c *gin.Context) {
 
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -355,7 +355,7 @@ func GetWorkMomentByID(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -421,7 +421,7 @@ func GetUserWorkMoments(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var opUserID string
-	ok, opUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, opUserID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -534,7 +534,7 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -637,7 +637,7 @@ func SetUserWorkMomentsLevel(c *gin.Context) {
 	var ok bool
 	var errInfo string
 	var userID string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/getcdv3"
 	pbAdminCms "Open_IM/pkg/proto/admin_cms"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 	pb "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"

@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/getcdv3"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
@@ -29,7 +29,7 @@ func GetGroups(c *gin.Context) {
 	}
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb.Pagination = &commonPb.RequestPagination{}
+	reqPb.Pagination = &common.RequestPagination{}
 	utils.CopyStructFields(&reqPb.Pagination, req)
 	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, reqPb.OperationID)
 	if etcdConn == nil {
@@ -74,7 +74,7 @@ func GetGroupMembers(c *gin.Context) {
 	}
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb.Pagination = &commonPb.RequestPagination{
+	reqPb.Pagination = &common.RequestPagination{
 		PageNumber: int32(req.PageNumber),
 		ShowNumber: int32(req.ShowNumber),
 	}

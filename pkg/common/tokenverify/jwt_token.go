@@ -1,4 +1,4 @@
-package token_verify
+package tokenverify
 
 import (
 	"Open_IM/pkg/common/config"

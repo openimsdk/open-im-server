@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	sts20150401 "github.com/alibabacloud-go/sts-20150401/client"
@@ -58,7 +58,7 @@ func AliOSSCredential(c *gin.Context) {
 	var ok bool
 	var userID string
 	var errInfo string
-	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo = tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

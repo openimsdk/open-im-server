@@ -21,6 +21,7 @@ const (
 	conversationExpireTime               = time.Second * 60 * 60 * 12
 )
 
+// args fn will exec when no data in cache
 type ConversationCache interface {
 	// get user's conversationIDs from cache
 	GetUserConversationIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) ([]string, error)

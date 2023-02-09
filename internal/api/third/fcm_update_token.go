@@ -4,7 +4,7 @@ import (
 	api "Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/utils"
 	"net/http"
 
@@ -23,7 +23,7 @@ func FcmUpdateToken(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
 
-	ok, UserId, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, UserId, errInfo := tokenverify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)

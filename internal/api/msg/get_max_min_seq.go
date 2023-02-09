@@ -3,7 +3,7 @@ package msg
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
@@ -28,7 +28,7 @@ func GetSeq(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
+	if ok, err := tokenverify.VerifyToken(token, params.SendID); !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
 		return
 	}

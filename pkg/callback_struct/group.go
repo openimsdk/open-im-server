@@ -2,13 +2,13 @@ package callback_struct
 
 import (
 	"Open_IM/pkg/proto/group"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdk_ws"
 )
 
 type CallbackBeforeCreateGroupReq struct {
 	CallbackCommand string `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
-	commonPb.GroupInfo
+	common.GroupInfo
 	InitMemberList []*group.GroupAddMemberInfo `json:"initMemberList"`
 }
 

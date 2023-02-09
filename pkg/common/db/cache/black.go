@@ -15,6 +15,7 @@ const (
 	blackExpireTime = time.Second * 60 * 60 * 12
 )
 
+// args fn will exec when no data in cache
 type BlackCache interface {
 	//get blackIDs from cache
 	GetBlackIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) (blackIDs []string, err error)
