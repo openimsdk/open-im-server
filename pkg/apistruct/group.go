@@ -92,7 +92,7 @@ type GetGroupAllMemberResp struct {
 //type GetGroupAllMemberListBySplitResp struct {
 //	CommResp
 //	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-//	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
+//	Map       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 //}
 
 type CreateGroupReq struct {

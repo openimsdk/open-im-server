@@ -49,7 +49,7 @@ func GenSign(timeStamp uint64, accessId string, secretKey, requestBody string) s
 	signBody := strconv.Itoa(int(timeStamp)) + accessId + requestBody
 	// Create a new HMAC by defining the hash type and the key (as byte array)
 	h := hmac.New(sha256.New, []byte(secretKey))
-	// Write Data to it
+	// Write Map to it
 	h.Write([]byte(signBody))
 
 	// Get result and encode as hexadecimal string

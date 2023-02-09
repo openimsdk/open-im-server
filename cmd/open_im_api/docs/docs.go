@@ -117,7 +117,7 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "Data": {
+                                        "Map": {
                                             "$ref": "#/definitions/api_struct.ExpireTime"
                                         }
                                     }
@@ -4369,7 +4369,7 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "Data": {
+                                        "Map": {
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/definitions/server_api_params.PublicUserInfo"

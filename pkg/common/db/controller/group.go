@@ -19,6 +19,12 @@ import (
 
 //type GroupInterface GroupDataBaseInterface
 
+type BatchUpdateGroupMember struct {
+	GroupID string
+	UserID  string
+	Map     map[string]any
+}
+
 type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
@@ -38,7 +44,8 @@ type GroupInterface interface {
 	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
-	UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error
+	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
+	UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
@@ -130,7 +137,11 @@ func (g *GroupController) TransferGroupOwner(ctx context.Context, groupID string
 	return g.database.TransferGroupOwner(ctx, groupID, oldOwnerUserID, newOwnerUserID, roleLevel)
 }
 
-func (g *GroupController) UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error {
+func (g *GroupController) UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error {
+	return g.database.UpdateGroupMembers(ctx, data)
+}
+
+func (g *GroupController) UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error {
 	return g.database.UpdateGroupMember(ctx, groupID, userID, data)
 }
 
@@ -146,9 +157,6 @@ func (g *GroupController) PageGroupRequestUser(ctx context.Context, userID strin
 	return g.database.PageGroupRequestUser(ctx, userID, pageNumber, showNumber)
 }
 
-//	func (g *GroupController) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelationTb.SuperGroupModel, err error) {
-//		return g.database.TakeSuperGroup(ctx, groupID)
-//	}
 func (g *GroupController) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error) {
 	return g.database.FindSuperGroup(ctx, groupIDs)
 }
@@ -192,7 +200,8 @@ type GroupDataBaseInterface interface {
 	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
-	UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error
+	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
+	UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
@@ -217,7 +226,7 @@ func NewGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.C
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		db:             &newDB,
-		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, SuperGroupMongoDriver, rockscache.Options{
+		cache: cache.NewGroupCacheRedis(rdb, groupDB, groupMemberDB, groupRequestDB, SuperGroupMongoDriver, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
@@ -408,13 +417,27 @@ func (g *GroupDataBase) TransferGroupOwner(ctx context.Context, groupID string, 
 	})
 }
 
-func (g *GroupDataBase) UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error {
+func (g *GroupDataBase) UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		if err := g.groupMemberDB.Update(ctx, groupID, userID, data, tx); err != nil {
 			return err
 		}
 		if err := g.cache.DelGroupMemberInfo(ctx, groupID, userID); err != nil {
 			return err
+		}
+		return nil
+	})
+}
+
+func (g *GroupDataBase) UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		for _, item := range data {
+			if err := g.groupMemberDB.Update(ctx, item.GroupID, item.UserID, item.Map, tx); err != nil {
+				return err
+			}
+			if err := g.cache.DelGroupMemberInfo(ctx, item.GroupID, item.UserID); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

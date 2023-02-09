@@ -24,7 +24,7 @@ func (f *fileHook) Levels() []logrus.Level {
 }
 
 //func (f *fileHook) Fire(entry *logrus.Entry) error {
-//	entry.Data["FilePath"] = findCaller(6)
+//	entry.Map["FilePath"] = findCaller(6)
 //	utils.GetSelfFuncName()
 //	return nil
 //}

@@ -119,7 +119,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, grou
 	return err
 }
 
-func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (err error) {
+func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfo) (err error) {
 	defer func() {
 		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", *req)
 	}()

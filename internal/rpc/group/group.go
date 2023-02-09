@@ -30,7 +30,6 @@ import (
 
 	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type groupServer struct {
@@ -951,50 +950,79 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	return resp, nil
 }
 
-func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
-	_, err := s.SetGroupMemberInfo(ctx, &pbGroup.SetGroupMemberInfoReq{GroupID: req.GroupID, UserID: req.UserID, Nickname: wrapperspb.String(req.Nickname)})
-	if err != nil {
-		return nil, err
-	}
-	return &pbGroup.SetGroupMemberNicknameResp{}, nil
-}
-
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (*pbGroup.SetGroupMemberInfoResp, error) {
 	resp := &pbGroup.SetGroupMemberInfoResp{}
-	if req.RoleLevel != nil && req.RoleLevel.Value == constant.GroupOwner {
-		return nil, constant.ErrNoPermission.Wrap("set group owner")
+	if len(req.Members) == 0 {
+		return nil, constant.ErrArgs.Wrap("members empty")
 	}
-	group, err := s.GroupInterface.TakeGroup(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
-	if group.Status == constant.GroupStatusDismissed {
-		return nil, constant.ErrArgs.Wrap("group status is dismissed")
-	}
-	member, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if tracelog.GetOpUserID(ctx) == req.UserID {
-		if req.RoleLevel != nil {
-			return nil, constant.ErrArgs.Wrap("update role level")
+	duplicateMap := make(map[[2]string]struct{})
+	userIDMap := make(map[string]struct{})
+	groupIDMap := make(map[string]struct{})
+	for _, member := range req.Members {
+		key := [...]string{member.GroupID, member.UserID}
+		if _, ok := duplicateMap[key]; ok {
+			return nil, constant.ErrArgs.Wrap("group user duplicate")
 		}
-	} else if !tokenverify.IsAppManagerUid(ctx) {
-		opMember, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
-		if err != nil {
+		duplicateMap[key] = struct{}{}
+		userIDMap[member.UserID] = struct{}{}
+		groupIDMap[member.GroupID] = struct{}{}
+	}
+	groupIDs := utils.Keys(groupIDMap)
+	userIDs := utils.Keys(userIDMap)
+	members, err := s.GroupInterface.FindGroupMember(ctx, groupIDs, append(userIDs, tracelog.GetOpUserID(ctx)), nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range members {
+		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
+	}
+	if len(duplicateMap) > 0 {
+		return nil, constant.ErrArgs.Wrap("group not found or user not in group")
+	}
+	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) [2]string {
+		return [...]string{e.GroupID, e.UserID}
+	})
+	if !tokenverify.IsAppManagerUid(ctx) {
+		opUserID := tracelog.GetOpUserID(ctx)
+		for _, member := range members {
+			if member.UserID == opUserID {
+				continue
+			}
+			opMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
+			if !ok {
+				return nil, constant.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+			}
+			if member.RoleLevel >= opMember.RoleLevel {
+				return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("group %s : %s RoleLevel %d >= %s RoleLevel %d", member.GroupID, member.UserID, member.RoleLevel, opMember.UserID, opMember.RoleLevel))
+			}
+		}
+	}
+	for _, member := range req.Members {
+		if member.RoleLevel == nil {
+			continue
+		}
+		if memberMap[[...]string{member.GroupID, member.UserID}].RoleLevel == constant.GroupOwner {
+			return nil, constant.ErrArgs.Wrap(fmt.Sprintf("group %s user %s is owner", member.GroupID, member.UserID))
+		}
+	}
+	for i := 0; i < len(req.Members); i++ {
+		if err := CallbackBeforeSetGroupMemberInfo(ctx, req.Members[i]); err != nil {
 			return nil, err
 		}
-		if opMember.RoleLevel <= member.RoleLevel {
-			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+	}
+	err = s.GroupInterface.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbGroup.SetGroupMemberInfo) *controller.BatchUpdateGroupMember {
+		return &controller.BatchUpdateGroupMember{
+			GroupID: e.GroupID,
+			UserID:  e.UserID,
+			Map:     UpdateGroupMemberMap(e),
 		}
-	}
-	if err := CallbackBeforeSetGroupMemberInfo(ctx, req); err != nil {
+	}))
+	if err != nil {
 		return nil, err
 	}
-	if err := s.GroupInterface.UpdateGroupMember(ctx, req.GroupID, req.UserID, UpdateGroupMemberMap(req)); err != nil {
-		return nil, err
+	for _, member := range req.Members {
+		chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), member.GroupID, member.UserID)
 	}
-	chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
 	return resp, nil
 }
 
