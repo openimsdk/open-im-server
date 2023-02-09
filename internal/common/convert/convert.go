@@ -35,11 +35,25 @@ func NewPBFriend(friendInfo *sdk.FriendInfo) *PBFriend {
 }
 
 func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*relation.FriendModel, err error) {
-
+	for _, v := range friends {
+		u, err := NewPBFriend(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBFriends = append(DBFriends, u)
+	}
+	return
 }
 
 func (*DBFriend) DB2PB(friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
-
+	for _, v := range friends {
+		u, err := NewDBFriend(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBFriends = append(PBFriends, u)
+	}
+	return
 }
 
 func (db *DBFriend) Convert() (*sdk.FriendInfo, error) {
@@ -81,11 +95,25 @@ func NewPBFriendRequest(friendRequest *sdk.FriendRequest) *PBFriendRequest {
 }
 
 func (*PBFriendRequest) PB2DB(friendRequests []*sdk.FriendRequest) (DBFriendRequests []*relation.FriendRequestModel, err error) {
-
+	for _, v := range friendRequests {
+		u, err := NewPBFriendRequest(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBFriendRequests = append(DBFriendRequests, u)
+	}
+	return
 }
 
 func (*DBFriendRequest) DB2PB(friendRequests []*relation.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
-
+	for _, v := range friendRequests {
+		u, err := NewDBFriendRequest(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBFriendRequests = append(PBFriendRequests, u)
+	}
+	return
 }
 
 func (pb *PBFriendRequest) Convert() (*relation.FriendRequestModel, error) {
@@ -122,11 +150,25 @@ type DBBlack struct {
 }
 
 func (*PBBlack) PB2DB(blacks []*sdk.BlackInfo) (DBBlacks []*relation.BlackModel, err error) {
-
+	for _, v := range blacks {
+		u, err := NewPBBlack(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBBlacks = append(DBBlacks, u)
+	}
+	return
 }
 
 func (*DBBlack) DB2PB(blacks []*relation.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
-
+	for _, v := range blacks {
+		u, err := NewDBBlack(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBBlacks = append(PBBlacks, u)
+	}
+	return
 }
 
 func NewDBBlack(black *relation.BlackModel) *DBBlack {
@@ -164,11 +206,25 @@ type DBGroup struct {
 }
 
 func (*PBGroup) PB2DB(groups []*sdk.GroupInfo) (DBGroups []*relation.GroupModel, err error) {
-
+	for _, v := range groups {
+		u, err := NewPBGroup(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBGroups = append(DBGroups, u)
+	}
+	return
 }
 
 func (*DBGroup) DB2PB(groups []*relation.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
-
+	for _, v := range groups {
+		u, err := NewDBGroup(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBGroups = append(PBGroups, u)
+	}
+	return
 }
 
 func NewDBGroup(group *relation.GroupModel) *DBGroup {
@@ -183,10 +239,10 @@ func NewPBGroup(groupInfo *sdk.GroupInfo) *PBGroup {
 	return &PBGroup{GroupInfo: groupInfo}
 }
 
-func (pb *PBGroup) Convert() *relation.GroupModel {
+func (pb *PBGroup) Convert() (*relation.GroupModel, error) {
 	dst := &relation.GroupModel{}
-	_ = utils.CopyStructFields(dst, pb)
-	return dst
+	err := utils.CopyStructFields(dst, pb)
+	return dst, err
 }
 func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 	dst := &sdk.GroupInfo{}
@@ -215,11 +271,25 @@ type DBGroupMember struct {
 }
 
 func (*PBGroupMember) PB2DB(groupMembers []*sdk.GroupMemberFullInfo) (DBGroupMembers []*relation.GroupMemberModel, err error) {
-
+	for _, v := range groupMembers {
+		u, err := NewPBGroupMember(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBGroupMembers = append(DBGroupMembers, u)
+	}
+	return
 }
 
 func (*DBGroupMember) DB2PB(groupMembers []*relation.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
-
+	for _, v := range groupMembers {
+		u, err := NewDBGroupMember(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBGroupMembers = append(PBGroupMembers, u)
+	}
+	return
 }
 
 func NewDBGroupMember(groupMember *relation.GroupMemberModel) *DBGroupMember {
@@ -267,11 +337,25 @@ type DBGroupRequest struct {
 }
 
 func (*PBGroupRequest) PB2DB(groupRequests []*sdk.GroupRequest) (DBGroupRequests []*relation.GroupRequestModel, err error) {
-
+	for _, v := range groupRequests {
+		u, err := NewPBGroupRequest(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBGroupRequests = append(DBGroupRequests, u)
+	}
+	return
 }
 
 func (*DBGroupRequest) DB2PB(groupRequests []*relation.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
-
+	for _, v := range groupRequests {
+		u, err := NewDBGroupRequest(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBGroupRequests = append(PBGroupRequests, u)
+	}
+	return
 }
 
 func NewDBGroupRequest(groupRequest *relation.GroupRequestModel) *DBGroupRequest {

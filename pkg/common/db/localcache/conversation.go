@@ -1,8 +1,8 @@
 package localcache
 
 import (
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"sync"
 )
 
@@ -13,16 +13,17 @@ type ConversationLocalCacheInterface interface {
 type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	SuperGroupRecvMsgNotNotifyUserIDs map[string][]string
-	zkClient                          *openKeeper.ZkClient
+	client                            discoveryRegistry.SvcDiscoveryRegistry
 }
 
-func NewConversationLocalCache(zkClient *openKeeper.ZkClient) ConversationLocalCache {
+func NewConversationLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) ConversationLocalCache {
 	return ConversationLocalCache{
 		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string][]string, 0),
-		zkClient:                          zkClient,
+		client:                            client,
 	}
 }
 
 func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) []string {
+	g.client.GetConn()
 	return []string{}
 }

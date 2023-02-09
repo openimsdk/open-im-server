@@ -26,15 +26,15 @@ type FriendInterface interface {
 	//  更新好友备注 零值也支持
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
 	//  获取ownerUserID的好友列表 无结果不返回错误
-	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
+	PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
 	//  friendUserID在哪些人的好友列表中
-	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
+	PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
 	//  获取我发出去的好友申请  无结果不返回错误
-	FindFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
+	PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	//  获取我收到的的好友申请 无结果不返回错误
-	FindFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
+	PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	//  获取某人指定好友的信息 如果有一个不存在也返回错误
-	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
+	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
 }
 
 type FriendController struct {
@@ -81,28 +81,28 @@ func (f *FriendController) UpdateRemark(ctx context.Context, ownerUserID, friend
 }
 
 // FindOwnerFriends 获取ownerUserID的好友列表
-func (f *FriendController) FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
-	return f.database.FindOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
+func (f *FriendController) PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+	return f.database.PageOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
 }
 
 // FindInWhoseFriends friendUserID在哪些人的好友列表中
-func (f *FriendController) FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
-	return f.database.FindInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
+func (f *FriendController) PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+	return f.database.PageInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
 }
 
 // FindFriendRequestFromMe 获取我发出去的好友申请
-func (f *FriendController) FindFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
-	return f.database.FindFriendRequestFromMe(ctx, userID, pageNumber, showNumber)
+func (f *FriendController) PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+	return f.database.PageFriendRequestFromMe(ctx, userID, pageNumber, showNumber)
 }
 
 // FindFriendRequestToMe 获取我收到的的好友申请
-func (f *FriendController) FindFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
-	return f.database.FindFriendRequestToMe(ctx, userID, pageNumber, showNumber)
+func (f *FriendController) PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+	return f.database.PageFriendRequestToMe(ctx, userID, pageNumber, showNumber)
 }
 
 // FindFriends 获取某人指定好友的信息
-func (f *FriendController) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
-	return f.database.FindFriends(ctx, ownerUserID, friendUserIDs)
+func (f *FriendController) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
+	return f.database.FindFriendsWithError(ctx, ownerUserID, friendUserIDs)
 }
 
 type FriendDatabaseInterface interface {
@@ -121,15 +121,15 @@ type FriendDatabaseInterface interface {
 	// 更新好友备注
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
 	// 获取ownerUserID的好友列表
-	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
+	PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
 	// friendUserID在哪些人的好友列表中
-	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
+	PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
 	// 获取我发出去的好友申请
-	FindFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
+	PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	// 获取我收到的的好友申请
-	FindFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
+	PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	// 获取某人指定好友的信息
-	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
+	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
 }
 
 type FriendDatabase struct {
@@ -302,27 +302,27 @@ func (f *FriendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUs
 }
 
 // 获取ownerUserID的好友列表 无结果不返回错误
-func (f *FriendDatabase) FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+func (f *FriendDatabase) PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
 	return f.friend.FindOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
 }
 
 // friendUserID在哪些人的好友列表中
-func (f *FriendDatabase) FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+func (f *FriendDatabase) PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
 	return f.friend.FindInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
 }
 
 // 获取我发出去的好友申请  无结果不返回错误
-func (f *FriendDatabase) FindFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+func (f *FriendDatabase) PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
 	return f.friendRequest.FindFromUserID(ctx, userID, pageNumber, showNumber)
 }
 
 // 获取我收到的的好友申请 无结果不返回错误
-func (f *FriendDatabase) FindFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+func (f *FriendDatabase) PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
 	return f.friendRequest.FindToUserID(ctx, userID, pageNumber, showNumber)
 }
 
 // 获取某人指定好友的信息 如果有好友不存在，也返回错误
-func (f *FriendDatabase) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
+func (f *FriendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
 	friends, err = f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 	if err != nil {
 		return

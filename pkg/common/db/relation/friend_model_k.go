@@ -31,7 +31,7 @@ type FriendUser struct {
 }
 
 // 插入多条记录
-func (f *FriendGorm) Create(ctx context.Context, friends []*relation.FriendModel, tx ...*gorm.DB) (err error) {
+func (f *FriendGorm) Create(ctx context.Context, friends []*relation.FriendModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friends", friends)
 	}()
@@ -39,7 +39,7 @@ func (f *FriendGorm) Create(ctx context.Context, friends []*relation.FriendModel
 }
 
 // 删除ownerUserID指定的好友
-func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string, tx ...*gorm.DB) (err error) {
+func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserIDs", friendUserIDs)
 	}()
@@ -48,7 +48,7 @@ func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserI
 }
 
 // 更新ownerUserID单个好友信息 更新零值
-func (f *FriendGorm) UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
+func (f *FriendGorm) UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "args", args)
 	}()
@@ -56,7 +56,7 @@ func (f *FriendGorm) UpdateByMap(ctx context.Context, ownerUserID string, friend
 }
 
 // 更新好友信息的非零值
-func (f *FriendGorm) Update(ctx context.Context, friends []*relation.FriendModel, tx ...*gorm.DB) (err error) {
+func (f *FriendGorm) Update(ctx context.Context, friends []*relation.FriendModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friends", friends)
 	}()
@@ -64,7 +64,7 @@ func (f *FriendGorm) Update(ctx context.Context, friends []*relation.FriendModel
 }
 
 // 更新好友备注（也支持零值 ）
-func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string, tx ...*gorm.DB) (err error) {
+func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "remark", remark)
 	}()
@@ -78,14 +78,14 @@ func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID
 }
 
 // 获取单个好友信息，如没找到 返回错误
-func (f *FriendGorm) Take(ctx context.Context, ownerUserID, friendUserID string, tx ...*gorm.DB) (friend *relation.FriendModel, err error) {
+func (f *FriendGorm) Take(ctx context.Context, ownerUserID, friendUserID string, tx ...any) (friend *relation.FriendModel, err error) {
 	friend = &relation.FriendModel{}
 	defer tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "friend", *friend)
 	return friend, utils.Wrap(getDBConn(f.DB, tx).Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error, "")
 }
 
 // 查找好友关系，如果是双向关系，则都返回
-func (f *FriendGorm) FindUserState(ctx context.Context, userID1, userID2 string, tx ...*gorm.DB) (friends []*relation.FriendModel, err error) {
+func (f *FriendGorm) FindUserState(ctx context.Context, userID1, userID2 string, tx ...any) (friends []*relation.FriendModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID1", userID1, "userID2", userID2, "friends", friends)
 	}()
@@ -93,7 +93,7 @@ func (f *FriendGorm) FindUserState(ctx context.Context, userID1, userID2 string,
 }
 
 // 获取 owner指定的好友列表 如果有friendUserIDs不存在，也不返回错误
-func (f *FriendGorm) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, tx ...*gorm.DB) (friends []*relation.FriendModel, err error) {
+func (f *FriendGorm) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, tx ...any) (friends []*relation.FriendModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserIDs", friendUserIDs, "friends", friends)
 	}()
@@ -101,7 +101,7 @@ func (f *FriendGorm) FindFriends(ctx context.Context, ownerUserID string, friend
 }
 
 // 获取哪些人添加了friendUserID 如果有ownerUserIDs不存在，也不返回错误
-func (f *FriendGorm) FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string, tx ...*gorm.DB) (friends []*relation.FriendModel, err error) {
+func (f *FriendGorm) FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string, tx ...any) (friends []*relation.FriendModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendUserID", friendUserID, "ownerUserIDs", ownerUserIDs, "friends", friends)
 	}()
@@ -109,7 +109,7 @@ func (f *FriendGorm) FindReversalFriends(ctx context.Context, friendUserID strin
 }
 
 // 获取ownerUserID好友列表 支持翻页
-func (f *FriendGorm) FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friends []*relation.FriendModel, total int64, err error) {
+func (f *FriendGorm) FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32, tx ...any) (friends []*relation.FriendModel, total int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "pageNumber", pageNumber, "showNumber", showNumber, "friends", friends, "total", total)
 	}()
@@ -122,7 +122,7 @@ func (f *FriendGorm) FindOwnerFriends(ctx context.Context, ownerUserID string, p
 }
 
 // 获取哪些人添加了friendUserID 支持翻页
-func (f *FriendGorm) FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friends []*relation.FriendModel, total int64, err error) {
+func (f *FriendGorm) FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32, tx ...any) (friends []*relation.FriendModel, total int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendUserID", friendUserID, "pageNumber", pageNumber, "showNumber", showNumber, "friends", friends, "total", total)
 	}()

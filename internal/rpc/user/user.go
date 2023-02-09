@@ -2,27 +2,21 @@ package user
 
 import (
 	"Open_IM/internal/common/convert"
+	"Open_IM/internal/common/rpc_server"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relation2 "Open_IM/pkg/common/db/table/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	pbFriend "Open_IM/pkg/proto/friend"
-	pbGroup "Open_IM/pkg/proto/group"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/golang/protobuf/ptypes/wrappers"
-	"net"
-	"strconv"
-	"strings"
-
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
@@ -31,23 +25,19 @@ import (
 type userServer struct {
 	rpcPort         int
 	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	*rpc_server.RpcServer
 	controller.UserInterface
 }
 
 func NewUserServer(port int) *userServer {
-	log.NewPrivateLog(constant.LogFileName)
-	u := userServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImUserName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	if err != nil {
+		panic(err)
 	}
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.UserGorm
-	err := mysql.InitConn().AutoMigrateModel(&model)
+	err = mysql.InitConn().AutoMigrateModel(&model)
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -56,27 +46,17 @@ func NewUserServer(port int) *userServer {
 	} else {
 		panic("db init err:" + "conn is nil")
 	}
-	u.UserInterface = controller.NewUserController(model.DB)
-	return &u
+	return &userServer{RpcServer: r, UserInterface: controller.NewUserController(model.DB)}
 }
 
 func (s *userServer) Run() {
-	log.NewInfo("", "rpc user start...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
-
-	//listener network
-	listener, err := net.Listen("tcp", address)
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "rpc user start...")
+	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
+		panic(err)
 	}
-	log.NewInfo("", "listen network success, address ", address, listener)
+	log.NewInfo(operationID, "listen ok ", address)
 	defer listener.Close()
 	//grpc server
 	var grpcOpts []grpc.ServerOption
@@ -94,41 +74,22 @@ func (s *userServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbUser.RegisterUserServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
-	if err != nil {
-		log.NewError("", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		panic(utils.Wrap(err, "register user module  rpc to etcd err"))
-	}
+
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("", "Serve failed ", err.Error())
-		return
+		panic(err)
 	}
-	log.NewInfo("", "rpc  user success")
+	log.NewInfo(operationID, "rpc  user success")
 }
 
+// ok
 func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID string, faceURL string, operationID string, opUserID string) {
-	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	members, err := s.GetJoinedGroupMembers(ctx, userID)
 	if err != nil {
 		return
 	}
-	client := pbGroup.NewGroupClient(etcdConn)
-	newReq := &pbGroup.GetJoinedGroupListReq{FromUserID: userID}
-	rpcResp, err := client.GetJoinedGroupList(ctx, newReq)
-	if err != nil {
-		return
-	}
-
-	for _, group := range rpcResp.Groups {
-		req := &pbGroup.SetGroupMemberInfoReq{GroupID: group.GroupID, UserID: userID, FaceURL: &wrappers.StringValue{Value: faceURL}}
-		_, err := client.SetGroupMemberInfo(ctx, req)
+	for _, group := range members {
+		err := s.SetGroupMemberFaceURL(ctx, faceURL, group.GroupID, userID)
 		if err != nil {
 			return
 		}
@@ -136,29 +97,15 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID st
 	}
 }
 
+// ok
 func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID string, newNickname, oldNickname string, operationID string, opUserID string) {
-	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	members, err := s.GetJoinedGroupMembers(ctx, userID)
 	if err != nil {
 		return
 	}
-	client := pbGroup.NewGroupClient(etcdConn)
-	newReq := &pbGroup.GetJoinedGroupListReq{FromUserID: userID}
-	rpcResp, err := client.GetJoinedGroupList(ctx, newReq)
-	if err != nil {
-		return
-	}
-	req := pbGroup.GetUserInGroupMembersReq{UserID: userID}
-	for _, group := range rpcResp.Groups {
-		req.GroupIDs = append(req.GroupIDs, group.GroupID)
-	}
-	resp, err := client.GetUserInGroupMembers(ctx, &req)
-	if err != nil {
-		return
-	}
-	for _, v := range resp.Members {
+	for _, v := range members {
 		if v.Nickname == oldNickname {
-			req := pbGroup.SetGroupMemberNicknameReq{Nickname: newNickname, GroupID: v.GroupID, UserID: v.UserID}
-			_, err := client.SetGroupMemberNickname(ctx, &req)
+			err := s.SetGroupMemberNickname(ctx, newNickname, v.GroupID, v.UserID)
 			if err != nil {
 				return
 			}
@@ -167,10 +114,25 @@ func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID s
 	}
 }
 
+// 设置群昵称
+func (s *userServer) SetGroupMemberNickname(ctx context.Context, nickname string, groupID string, userID string) (err error) {
+	return
+}
+
+// 设置群头像
+func (s *userServer) SetGroupMemberFaceURL(ctx context.Context, faceURL string, groupID string, userID string) (err error) {
+	return
+}
+
+// 获取加入的群成员信息
+func (s *userServer) GetJoinedGroupMembers(ctx context.Context, userID string) (members []*server_api_params.GroupMemberFullInfo, err error) {
+	return
+}
+
 // ok
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbUser.GetDesignateUsersReq) (resp *pbUser.GetDesignateUsersResp, err error) {
 	resp = &pbUser.GetDesignateUsersResp{}
-	users, err := s.Find(ctx, req.UserIDs)
+	users, err := s.FindWithError(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -181,15 +143,20 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbUser.GetDesig
 	return resp, nil
 }
 
-func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.UpdateUserInfoResp, error) {
-	resp := pbUser.UpdateUserInfoResp{}
-	err := token_verify.CheckAccessV3(ctx, req.UserInfo.UserID)
+func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*server_api_params.FriendInfo, err error) {
+	return
+}
+
+// ok
+func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (resp *pbUser.UpdateUserInfoResp, err error) {
+	resp = &pbUser.UpdateUserInfoResp{}
+	err = token_verify.CheckAccessV3(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	oldNickname := ""
 	if req.UserInfo.Nickname != "" {
-		u, err := s.Find(ctx, []string{req.UserInfo.UserID})
+		u, err := s.FindWithError(ctx, []string{req.UserInfo.UserID})
 		if err != nil {
 			return nil, err
 		}
@@ -199,40 +166,34 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	err = s.Update(ctx, []*relation2.UserModel{user})
+	err = s.Update(ctx, []*relationTb.UserModel{user})
 	if err != nil {
 		return nil, err
 	}
-	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
-	if err != nil {
-		return nil, err
-	}
-	client := pbFriend.NewFriendClient(etcdConn)
-	newReq := &pbFriend.GetFriendsReq{UserID: req.UserInfo.UserID}
-	rpcResp, err := client.GetFriends(context.Background(), newReq)
+	friends, err := s.GetAllPageFriends(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	go func() {
-		for _, v := range rpcResp.FriendsInfo {
+		for _, v := range friends {
 			chat.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
 
 	chat.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
 	if req.UserInfo.FaceURL != "" {
-		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
+		go s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
 	}
 	if req.UserInfo.Nickname != "" {
-		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
+		go s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
 	}
-	return &resp, nil
+	return resp, nil
 }
 
+// ok
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (resp *pbUser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbUser.SetGlobalRecvMessageOptResp{}
-
-	if _, err := s.Find(ctx, []string{req.UserID}); err != nil {
+	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
 	m := make(map[string]interface{}, 1)
@@ -244,18 +205,22 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 	return resp, nil
 }
 
+// ok
 func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (resp *pbUser.AccountCheckResp, err error) {
 	resp = &pbUser.AccountCheckResp{}
+	if utils.Duplicate(req.CheckUserIDs) {
+		return nil, constant.ErrArgs.Wrap("userID repeated")
+	}
 	err = token_verify.CheckAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.Find(ctx, req.CheckUserIDs)
+	users, err := s.Find(ctx, req.CheckUserIDs)
 	if err != nil {
 		return nil, err
 	}
 	userIDs := make(map[string]interface{}, 0)
-	for _, v := range user {
+	for _, v := range users {
 		userIDs[v.UserID] = nil
 	}
 	for _, v := range req.CheckUserIDs {
@@ -270,25 +235,19 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	return resp, nil
 }
 
+// ok
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbUser.GetPaginationUsersReq) (resp *pbUser.GetPaginationUsersResp, err error) {
 	resp = &pbUser.GetPaginationUsersResp{}
-	usersDB, total, err := s.Get(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	usersDB, total, err := s.Page(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-
 	resp.Total = int32(total)
-
-	for _, userDB := range usersDB {
-		u, err := convert.NewDBUser(userDB).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.Users = append(resp.Users, u)
-	}
+	resp.Users, err = (*convert.DBUser)(nil).DB2PB(usersDB)
 	return resp, nil
 }
 
+// ok
 func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (resp *pbUser.UserRegisterResp, err error) {
 	resp = &pbUser.UserRegisterResp{}
 	if utils.DuplicateAny(req.Users, func(e *server_api_params.UserInfo) string { return e.UserID }) {
@@ -304,7 +263,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterR
 		return nil, err
 	}
 	if exist {
-		return nil, constant.ErrRegisteredAlready.Wrap("userID exist in db")
+		return nil, constant.ErrRegisteredAlready.Wrap("userID registered already")
 	}
 	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
 	if err != nil {

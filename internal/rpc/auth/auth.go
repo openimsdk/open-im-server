@@ -2,27 +2,62 @@ package auth
 
 import (
 	"Open_IM/internal/common/check"
+	"Open_IM/internal/common/rpc_server"
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
-	"net"
-	"strconv"
-	"strings"
-
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-
-	"Open_IM/pkg/common/config"
-
 	"google.golang.org/grpc"
 )
+
+func NewRpcAuthServer(port int) *rpcAuth {
+	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	if err != nil {
+		panic(err)
+	}
+	return &rpcAuth{
+		RpcServer: r,
+	}
+}
+
+func (s *rpcAuth) Run() {
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "rpc auth start...")
+	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
+	if err != nil {
+		panic(err)
+	}
+	log.NewInfo(operationID, "listen network success ", listener, address)
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		promePkg.NewUserRegisterCounter()
+		promePkg.NewUserLoginCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
+	defer srv.GracefulStop()
+	pbAuth.RegisterAuthServer(srv, s)
+	err = srv.Serve(listener)
+	if err != nil {
+		panic(err)
+	}
+	log.NewInfo(operationID, "rpc auth ok")
+}
 
 func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
@@ -85,7 +120,10 @@ func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
+	grpcCons, err := s.RegisterCenter.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
+	if err != nil {
+		return err
+	}
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
@@ -97,78 +135,6 @@ func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID in
 }
 
 type rpcAuth struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	*rpc_server.RpcServer
 	controller.AuthInterface
-}
-
-func NewRpcAuthServer(port int) *rpcAuth {
-	log.NewPrivateLog(constant.LogFileName)
-	return &rpcAuth{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
-	}
-}
-
-func (s *rpcAuth) Run() {
-	operationID := utils.OperationIDGenerator()
-	log.NewInfo(operationID, "rpc auth start...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
-	}
-	log.NewInfo(operationID, "listen network success, ", address, listener)
-	var grpcOpts []grpc.ServerOption
-	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
-		promePkg.NewUserRegisterCounter()
-		promePkg.NewUserLoginCounter()
-		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(grpcOpts...)
-	defer srv.GracefulStop()
-
-	//service registers with etcd
-	pbAuth.RegisterAuthServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-
-	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
-	if err != nil {
-		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
-			s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		panic(utils.Wrap(err, "register auth module  rpc to etcd err"))
-
-	}
-	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-	err = srv.Serve(listener)
-	if err != nil {
-		log.NewError(operationID, "Serve failed ", err.Error())
-		return
-	}
-	log.NewInfo(operationID, "rpc auth ok")
 }

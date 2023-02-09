@@ -5,7 +5,7 @@ go 1.18
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/getcdv3 v1.0.4
-	github.com/OpenIMSDK/openKeeper v0.9.8
+	github.com/OpenIMSDK/openKeeper v0.9.7
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
@@ -46,7 +46,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.428
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.428
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
-	go.etcd.io/etcd/client/v3 v3.5.6
+	go.etcd.io/etcd/client/v3 v3.5.6 // indirect
 	go.mongodb.org/mongo-driver v1.8.3
 	golang.org/x/image v0.3.0
 	golang.org/x/net v0.5.0
