@@ -53,16 +53,11 @@ func NewGroupServer(port int) *groupServer {
 	//mysql init
 	var mysql relation.Mysql
 	var mongo unrelation.Mongo
-	var groupModel relation.GroupModel
+	var groupModel relationTb.GroupModel
 	var redis cache.RedisClient
-	err = mysql.InitConn().AutoMigrateModel(&groupModel)
+	err := mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
 		panic("db init err:" + err.Error())
-	}
-	if mysql.GormConn() != nil {
-		groupModel.DB = mysql.GormConn()
-	} else {
-		panic("db init err:" + "conn is nil")
 	}
 	mongo.InitMongo()
 	redis.InitRedis()
@@ -77,7 +72,7 @@ func NewGroupServer(port int) *groupServer {
 		panic(err.Error())
 	}
 	g.registerCenter = zkClient
-	conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
+	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
 
 	g.GroupInterface = controller.NewGroupInterface(controller.NewGroupDatabase(mysql.GormConn(), redis.GetClient(), mongo.GetClient()))
 	return &g
