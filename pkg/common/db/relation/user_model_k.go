@@ -20,7 +20,7 @@ func NewUserGorm(db *gorm.DB) *UserGorm {
 }
 
 // 插入多条
-func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx ...*gorm.DB) (err error) {
+func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
@@ -28,7 +28,7 @@ func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx .
 }
 
 // 更新用户信息 零值
-func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
+func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
@@ -36,7 +36,7 @@ func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[stri
 }
 
 // 更新多个用户信息 非零值
-func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel, tx ...*gorm.DB) (err error) {
+func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
@@ -44,7 +44,7 @@ func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel, tx .
 }
 
 // 获取指定用户信息  不存在，也不返回错误
-func (u *UserGorm) Find(ctx context.Context, userIDs []string, tx ...*gorm.DB) (users []*relation.UserModel, err error) {
+func (u *UserGorm) Find(ctx context.Context, userIDs []string, tx ...any) (users []*relation.UserModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
@@ -53,7 +53,7 @@ func (u *UserGorm) Find(ctx context.Context, userIDs []string, tx ...*gorm.DB) (
 }
 
 // 获取某个用户信息  不存在，则返回错误
-func (u *UserGorm) Take(ctx context.Context, userID string, tx ...*gorm.DB) (user *relation.UserModel, err error) {
+func (u *UserGorm) Take(ctx context.Context, userID string, tx ...any) (user *relation.UserModel, err error) {
 	user = &relation.UserModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
@@ -63,7 +63,7 @@ func (u *UserGorm) Take(ctx context.Context, userID string, tx ...*gorm.DB) (use
 }
 
 // 通过名字查找用户 不存在，不返回错误
-func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
+func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
@@ -76,7 +76,7 @@ func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, s
 }
 
 // 通过名字或userID查找用户 不存在，不返回错误
-func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
+func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
@@ -89,7 +89,7 @@ func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumbe
 }
 
 // 获取用户信息 不存在，不返回错误
-func (u *UserGorm) Get(ctx context.Context, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
+func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
