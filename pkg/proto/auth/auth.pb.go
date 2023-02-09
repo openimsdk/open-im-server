@@ -6,7 +6,7 @@ package pbAuth // import "Open_IM/pkg/proto/auth"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import _ "Open_IM/pkg/proto/sdk_ws"
+import _ "Open_IM/pkg/proto/sdkws"
 
 import (
 	context "golang.org/x/net/context"

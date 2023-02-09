@@ -4,10 +4,13 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/table/unrelation"
+	"Open_IM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -20,8 +23,16 @@ func NewWorkMomentMongoDriver(mgoDB *mongo.Database) *WorkMomentMongoDriver {
 	return &WorkMomentMongoDriver{mgoDB: mgoDB, WorkMomentCollection: mgoDB.Collection(unrelation.CWorkMoment)}
 }
 
+func (db *WorkMomentMongoDriver) generateWorkMomentID(userID string) string {
+	return utils.Md5(userID + strconv.Itoa(rand.Int()) + time.Now().String())
+}
+
+func (db *WorkMomentMongoDriver) generateWorkMomentCommentID(workMomentID string) string {
+	return utils.Md5(workMomentID + strconv.Itoa(rand.Int()) + time.Now().String())
+}
+
 func (db *WorkMomentMongoDriver) CreateOneWorkMoment(ctx context.Context, workMoment *unrelation.WorkMoment) error {
-	workMomentID := generateWorkMomentID(workMoment.UserID)
+	workMomentID := db.generateWorkMomentID(workMoment.UserID)
 	workMoment.WorkMomentID = workMomentID
 	workMoment.CreateTime = int32(time.Now().Unix())
 	_, err := db.WorkMomentCollection.InsertOne(ctx, workMoment)

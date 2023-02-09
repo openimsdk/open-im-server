@@ -2,7 +2,7 @@ package group
 
 import (
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"time"
 )
 

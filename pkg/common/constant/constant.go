@@ -94,8 +94,6 @@ const (
 	ConversationPrivateChatNotification = 1701
 	ConversationUnreadNotification      = 1702
 
-	OrganizationChangedNotification = 1801
-
 	WorkMomentNotificationBegin = 1900
 	WorkMomentNotification      = 1901
 

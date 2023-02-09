@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/tracelog"
 	pbConversation "Open_IM/pkg/proto/conversation"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
@@ -13,34 +13,34 @@ import (
 	"time"
 )
 
-func GetPublicUserInfoOne(ctx context.Context, userID string) (*sdk_ws.PublicUserInfo, error) {
+func GetPublicUserInfoOne(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	return nil, errors.New("todo")
 }
 
-func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
+func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
 	return nil, errors.New("todo")
 }
 
-func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
+func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdk_ws.UserInfo) string {
+	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
 }
 
-func GetPublicUserInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.PublicUserInfo, error) {
+func GetPublicUserInfo(ctx context.Context, userIDs []string) ([]*sdkws.PublicUserInfo, error) {
 	return nil, errors.New("todo")
 }
 
-func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.PublicUserInfo, error) {
+func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.PublicUserInfo, error) {
 	users, err := GetPublicUserInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMap(users, func(e *sdk_ws.PublicUserInfo) string {
+	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
 }

@@ -1,11 +1,11 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 option go_package = "Open_IM/pkg/proto/relay;pbRelay";
 package relay;
 
 message OnlinePushMsgReq {
   string OperationID = 1;
-  server_api_params.MsgData msgData = 2;
+  sdkws.MsgData msgData = 2;
   string pushToUserID = 3;
 }
 message OnlinePushMsgResp{
@@ -19,7 +19,7 @@ message SingelMsgToUserResultList{
 }
 message OnlineBatchPushOneMsgReq{
   string OperationID = 1;
-  server_api_params.MsgData msgData = 2;
+  sdkws.MsgData msgData = 2;
   repeated string pushToUserIDList = 3;
 }
 message OnlineBatchPushOneMsgResp{

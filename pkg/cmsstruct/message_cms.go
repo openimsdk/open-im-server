@@ -1,7 +1,7 @@
 package cmsstruct
 
 import (
-	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	pbCommon "Open_IM/pkg/proto/sdkws"
 )
 
 type GetChatLogsReq struct {

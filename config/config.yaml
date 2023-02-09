@@ -185,7 +185,6 @@ rpcregistername: #rpc注册服务名，默认即可
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
   openImConversationName: Conversation
-  openImCacheName: Cache
   openImRealTimeCommName: RealTimeComm
 log:
   storageLocation: ../logs/

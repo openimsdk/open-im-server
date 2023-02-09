@@ -17,7 +17,7 @@ import (
 	"Open_IM/pkg/common/tracelog"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"

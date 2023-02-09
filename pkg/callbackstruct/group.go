@@ -2,7 +2,7 @@ package callbackstruct
 
 import (
 	"Open_IM/pkg/proto/group"
-	common "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdkws"
 )
 
 type CallbackBeforeCreateGroupReq struct {

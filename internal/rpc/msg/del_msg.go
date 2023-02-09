@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/proto/msg"
-	common "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"time"

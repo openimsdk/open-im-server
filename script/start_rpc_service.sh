@@ -17,9 +17,7 @@ service_filename=(
   open_im_admin_cms
   ${msg_name}
   open_im_office
-  open_im_organization
   open_im_conversation
-  open_im_cache
 )
 
 #service config port name
@@ -35,9 +33,7 @@ service_port_name=(
   openImAdminCmsPort
   openImMessagePort
   openImOfficePort
-  openImOrganizationPort
   openImConversationPort
-  openImCachePort
 )
 
 service_prometheus_port_name=(
@@ -52,9 +48,7 @@ service_prometheus_port_name=(
   adminCmsPrometheusPort
   messagePrometheusPort
   officePrometheusPort
-  organizationPrometheusPort
   conversationPrometheusPort
-  cachePrometheusPort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do

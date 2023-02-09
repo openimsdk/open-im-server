@@ -6,7 +6,7 @@ import (
 	log2 "Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/msg"
 	pbRtc "Open_IM/pkg/proto/rtc"
-	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	pbCommon "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"

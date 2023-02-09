@@ -1,11 +1,11 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 option go_package = "Open_IM/pkg/proto/push;pbPush";
 package push;
 
 message PushMsgReq {
   string operationID = 1;
-  server_api_params.MsgData msgData = 2;
+  sdkws.MsgData msgData = 2;
   string pushToUserID = 3;
 }
 message PushMsgResp{

@@ -133,7 +133,6 @@ type config struct {
 		OpenImPushPort           []int `yaml:"openImPushPort"`
 		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
 		OpenImOfficePort         []int `yaml:"openImOfficePort"`
-		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
 		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
@@ -149,7 +148,6 @@ type config struct {
 		OpenImAuthName         string `yaml:"openImAuthName"`
 		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName       string `yaml:"openImOfficeName"`
-		OpenImOrganizationName string `yaml:"openImOrganizationName"`
 		OpenImConversationName string `yaml:"openImConversationName"`
 		OpenImCacheName        string `yaml:"openImCacheName"`
 		OpenImRealTimeCommName string `yaml:"openImRealTimeCommName"`
@@ -404,11 +402,6 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberSetToOrdinaryUser"`
-		OrganizationChanged struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"organizationChanged"`
 
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {
@@ -496,44 +489,7 @@ type config struct {
 			} `yaml:"offlinePush"`
 		} `yaml:"signal"`
 	}
-	Demo struct {
-		Port         []int  `yaml:"openImDemoPort"`
-		ListenIP     string `yaml:"listenIP"`
-		AliSMSVerify struct {
-			AccessKeyID                  string `yaml:"accessKeyId"`
-			AccessKeySecret              string `yaml:"accessKeySecret"`
-			SignName                     string `yaml:"signName"`
-			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
-			Enable                       bool   `yaml:"enable"`
-		}
-		TencentSMS struct {
-			AppID                        string `yaml:"appID"`
-			Region                       string `yaml:"region"`
-			SecretID                     string `yaml:"secretID"`
-			SecretKey                    string `yaml:"secretKey"`
-			SignName                     string `yaml:"signName"`
-			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
-			Enable                       bool   `yaml:"enable"`
-		}
-		SuperCode    string `yaml:"superCode"`
-		CodeTTL      int    `yaml:"codeTTL"`
-		UseSuperCode bool   `yaml:"useSuperCode"`
-		Mail         struct {
-			Title                   string `yaml:"title"`
-			SenderMail              string `yaml:"senderMail"`
-			SenderAuthorizationCode string `yaml:"senderAuthorizationCode"`
-			SmtpAddr                string `yaml:"smtpAddr"`
-			SmtpPort                int    `yaml:"smtpPort"`
-		}
-		TestDepartMentID                        string   `yaml:"testDepartMentID"`
-		ImAPIURL                                string   `yaml:"imAPIURL"`
-		NeedInvitationCode                      bool     `yaml:"needInvitationCode"`
-		OnboardProcess                          bool     `yaml:"onboardProcess"`
-		JoinDepartmentIDList                    []string `yaml:"joinDepartmentIDList"`
-		JoinDepartmentGroups                    bool     `yaml:"joinDepartmentGroups"`
-		OaNotification                          bool     `yaml:"oaNotification"`
-		CreateOrganizationUserAndJoinDepartment bool     `yaml:"createOrganizationUserAndJoinDepartment"`
-	}
+
 	WorkMoment struct {
 		OnlyFriendCanSee bool `yaml:"onlyFriendCanSee"`
 	} `yaml:"workMoment"`

@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/log"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"math"
 	"strconv"
@@ -109,7 +109,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) > utils.GetCurrentTimestampByMill() && msgListIsFull(msgs) {
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
-		lastMsgPb := &server_api_params.MsgData{}
+		lastMsgPb := &sdkws.MsgData{}
 		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
@@ -119,7 +119,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	} else {
 		var hasMarkDelFlag bool
 		for _, msg := range msgs.Msg {
-			msgPb := &server_api_params.MsgData{}
+			msgPb := &sdkws.MsgData{}
 			err = proto.Unmarshal(msg.Msg, msgPb)
 			if err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)

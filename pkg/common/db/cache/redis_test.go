@@ -3,7 +3,7 @@ package cache
 import (
 	"Open_IM/pkg/common/constant"
 	pbChat "Open_IM/pkg/proto/msg"
-	common "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdkws"
 	"context"
 	"flag"
 	"fmt"

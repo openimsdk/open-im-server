@@ -8,7 +8,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	utils2 "Open_IM/pkg/common/utils"
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"

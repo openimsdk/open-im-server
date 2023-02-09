@@ -10,7 +10,7 @@ api_address=$(cat $config_path | grep openImApiAddress | awk -F '[ ]' '{print $N
 list3=$(cat $config_path | grep openImSdkWsPort | awk -F '[:]' '{print $NF}')
 logLevel=$(cat $config_path | grep remainLogLevel | awk -F '[:]' '{print $NF}')
 list_to_string $list3
-sdk_ws_ports=($ports_array)
+sdkws_ports=($ports_array)
 
 
 
@@ -24,7 +24,7 @@ fi
 #Waiting port recycling
 sleep 1
 cd ${sdk_server_binary_root}
-  nohup ./${sdk_server_name}  -openIM_ws_address ${ws_address}  -sdk_ws_port ${sdk_ws_ports[0]} -openIM_api_address ${api_address} -openIM_log_level ${logLevel} >>../logs/openIM.log 2>&1 &
+  nohup ./${sdk_server_name}  -openIM_ws_address ${ws_address}  -sdkws_port ${sdkws_ports[0]} -openIM_api_address ${api_address} -openIM_log_level ${logLevel} >>../logs/openIM.log 2>&1 &
 
 #Check launched service process
 sleep 3

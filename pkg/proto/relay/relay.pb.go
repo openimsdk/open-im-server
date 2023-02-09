@@ -6,7 +6,7 @@ package pbRelay // import "Open_IM/pkg/proto/relay"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 
 import (
 	context "golang.org/x/net/context"
@@ -25,12 +25,12 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type OnlinePushMsgReq struct {
-	OperationID          string          `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
-	PushToUserID         string          `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	OperationID          string         `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
+	PushToUserID         string         `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *OnlinePushMsgReq) Reset()         { *m = OnlinePushMsgReq{} }
@@ -64,7 +64,7 @@ func (m *OnlinePushMsgReq) GetOperationID() string {
 	return ""
 }
 
-func (m *OnlinePushMsgReq) GetMsgData() *sdk_ws.MsgData {
+func (m *OnlinePushMsgReq) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -171,12 +171,12 @@ func (m *SingelMsgToUserResultList) GetOnlinePush() bool {
 }
 
 type OnlineBatchPushOneMsgReq struct {
-	OperationID          string          `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
-	PushToUserIDList     []string        `protobuf:"bytes,3,rep,name=pushToUserIDList" json:"pushToUserIDList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	OperationID          string         `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
+	PushToUserIDList     []string       `protobuf:"bytes,3,rep,name=pushToUserIDList" json:"pushToUserIDList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *OnlineBatchPushOneMsgReq) Reset()         { *m = OnlineBatchPushOneMsgReq{} }
@@ -210,7 +210,7 @@ func (m *OnlineBatchPushOneMsgReq) GetOperationID() string {
 	return ""
 }
 
-func (m *OnlineBatchPushOneMsgReq) GetMsgData() *sdk_ws.MsgData {
+func (m *OnlineBatchPushOneMsgReq) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}

@@ -6,7 +6,7 @@ package group // import "Open_IM/pkg/proto/group"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 import wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 import (
@@ -26,13 +26,13 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type CreateGroupReq struct {
-	InitMembers          []string          `protobuf:"bytes,1,rep,name=initMembers" json:"initMembers,omitempty"`
-	GroupInfo            *sdk_ws.GroupInfo `protobuf:"bytes,2,opt,name=groupInfo" json:"groupInfo,omitempty"`
-	AdminUserIDs         []string          `protobuf:"bytes,3,rep,name=adminUserIDs" json:"adminUserIDs,omitempty"`
-	OwnerUserID          string            `protobuf:"bytes,4,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	InitMembers          []string         `protobuf:"bytes,1,rep,name=initMembers" json:"initMembers,omitempty"`
+	GroupInfo            *sdkws.GroupInfo `protobuf:"bytes,2,opt,name=groupInfo" json:"groupInfo,omitempty"`
+	AdminUserIDs         []string         `protobuf:"bytes,3,rep,name=adminUserIDs" json:"adminUserIDs,omitempty"`
+	OwnerUserID          string           `protobuf:"bytes,4,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *CreateGroupReq) Reset()         { *m = CreateGroupReq{} }
@@ -66,7 +66,7 @@ func (m *CreateGroupReq) GetInitMembers() []string {
 	return nil
 }
 
-func (m *CreateGroupReq) GetGroupInfo() *sdk_ws.GroupInfo {
+func (m *CreateGroupReq) GetGroupInfo() *sdkws.GroupInfo {
 	if m != nil {
 		return m.GroupInfo
 	}
@@ -88,10 +88,10 @@ func (m *CreateGroupReq) GetOwnerUserID() string {
 }
 
 type CreateGroupResp struct {
-	GroupInfo            *sdk_ws.GroupInfo `protobuf:"bytes,1,opt,name=groupInfo" json:"groupInfo,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	GroupInfo            *sdkws.GroupInfo `protobuf:"bytes,1,opt,name=groupInfo" json:"groupInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *CreateGroupResp) Reset()         { *m = CreateGroupResp{} }
@@ -118,7 +118,7 @@ func (m *CreateGroupResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateGroupResp proto.InternalMessageInfo
 
-func (m *CreateGroupResp) GetGroupInfo() *sdk_ws.GroupInfo {
+func (m *CreateGroupResp) GetGroupInfo() *sdkws.GroupInfo {
 	if m != nil {
 		return m.GroupInfo
 	}
@@ -164,10 +164,10 @@ func (m *GetGroupsInfoReq) GetGroupIDs() []string {
 }
 
 type GetGroupsInfoResp struct {
-	GroupInfos           []*sdk_ws.GroupInfo `protobuf:"bytes,1,rep,name=groupInfos" json:"groupInfos,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	GroupInfos           []*sdkws.GroupInfo `protobuf:"bytes,1,rep,name=groupInfos" json:"groupInfos,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetGroupsInfoResp) Reset()         { *m = GetGroupsInfoResp{} }
@@ -194,7 +194,7 @@ func (m *GetGroupsInfoResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupsInfoResp proto.InternalMessageInfo
 
-func (m *GetGroupsInfoResp) GetGroupInfos() []*sdk_ws.GroupInfo {
+func (m *GetGroupsInfoResp) GetGroupInfos() []*sdkws.GroupInfo {
 	if m != nil {
 		return m.GroupInfos
 	}
@@ -202,10 +202,10 @@ func (m *GetGroupsInfoResp) GetGroupInfos() []*sdk_ws.GroupInfo {
 }
 
 type SetGroupInfoReq struct {
-	GroupInfoForSet      *sdk_ws.GroupInfoForSet `protobuf:"bytes,1,opt,name=groupInfoForSet" json:"groupInfoForSet,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	GroupInfoForSet      *sdkws.GroupInfoForSet `protobuf:"bytes,1,opt,name=groupInfoForSet" json:"groupInfoForSet,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
 }
 
 func (m *SetGroupInfoReq) Reset()         { *m = SetGroupInfoReq{} }
@@ -232,7 +232,7 @@ func (m *SetGroupInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetGroupInfoReq proto.InternalMessageInfo
 
-func (m *SetGroupInfoReq) GetGroupInfoForSet() *sdk_ws.GroupInfoForSet {
+func (m *SetGroupInfoReq) GetGroupInfoForSet() *sdkws.GroupInfoForSet {
 	if m != nil {
 		return m.GroupInfoForSet
 	}
@@ -270,11 +270,11 @@ func (m *SetGroupInfoResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_SetGroupInfoResp proto.InternalMessageInfo
 
 type GetGroupApplicationListReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	FromUserID           string                    `protobuf:"bytes,2,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	FromUserID           string                   `protobuf:"bytes,2,opt,name=fromUserID" json:"fromUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetGroupApplicationListReq) Reset()         { *m = GetGroupApplicationListReq{} }
@@ -301,7 +301,7 @@ func (m *GetGroupApplicationListReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupApplicationListReq proto.InternalMessageInfo
 
-func (m *GetGroupApplicationListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetGroupApplicationListReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -316,11 +316,11 @@ func (m *GetGroupApplicationListReq) GetFromUserID() string {
 }
 
 type GetGroupApplicationListResp struct {
-	Total                uint32                 `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	GroupRequests        []*sdk_ws.GroupRequest `protobuf:"bytes,2,rep,name=groupRequests" json:"groupRequests,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	Total                uint32                `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	GroupRequests        []*sdkws.GroupRequest `protobuf:"bytes,2,rep,name=groupRequests" json:"groupRequests,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
 }
 
 func (m *GetGroupApplicationListResp) Reset()         { *m = GetGroupApplicationListResp{} }
@@ -354,7 +354,7 @@ func (m *GetGroupApplicationListResp) GetTotal() uint32 {
 	return 0
 }
 
-func (m *GetGroupApplicationListResp) GetGroupRequests() []*sdk_ws.GroupRequest {
+func (m *GetGroupApplicationListResp) GetGroupRequests() []*sdkws.GroupRequest {
 	if m != nil {
 		return m.GroupRequests
 	}
@@ -362,11 +362,11 @@ func (m *GetGroupApplicationListResp) GetGroupRequests() []*sdk_ws.GroupRequest 
 }
 
 type GetUserReqApplicationListReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	UserID               string                    `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	UserID               string                   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetUserReqApplicationListReq) Reset()         { *m = GetUserReqApplicationListReq{} }
@@ -393,7 +393,7 @@ func (m *GetUserReqApplicationListReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetUserReqApplicationListReq proto.InternalMessageInfo
 
-func (m *GetUserReqApplicationListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetUserReqApplicationListReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -408,11 +408,11 @@ func (m *GetUserReqApplicationListReq) GetUserID() string {
 }
 
 type GetUserReqApplicationListResp struct {
-	Total                uint32                 `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	GroupRequests        []*sdk_ws.GroupRequest `protobuf:"bytes,2,rep,name=groupRequests" json:"groupRequests,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	Total                uint32                `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	GroupRequests        []*sdkws.GroupRequest `protobuf:"bytes,2,rep,name=groupRequests" json:"groupRequests,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
 }
 
 func (m *GetUserReqApplicationListResp) Reset()         { *m = GetUserReqApplicationListResp{} }
@@ -446,7 +446,7 @@ func (m *GetUserReqApplicationListResp) GetTotal() uint32 {
 	return 0
 }
 
-func (m *GetUserReqApplicationListResp) GetGroupRequests() []*sdk_ws.GroupRequest {
+func (m *GetUserReqApplicationListResp) GetGroupRequests() []*sdkws.GroupRequest {
 	if m != nil {
 		return m.GroupRequests
 	}
@@ -790,12 +790,12 @@ func (m *QuitGroupResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_QuitGroupResp proto.InternalMessageInfo
 
 type GetGroupMemberListReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	GroupID              string                    `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
-	Filter               int32                     `protobuf:"varint,3,opt,name=filter" json:"filter,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	GroupID              string                   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	Filter               int32                    `protobuf:"varint,3,opt,name=filter" json:"filter,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetGroupMemberListReq) Reset()         { *m = GetGroupMemberListReq{} }
@@ -822,7 +822,7 @@ func (m *GetGroupMemberListReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupMemberListReq proto.InternalMessageInfo
 
-func (m *GetGroupMemberListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetGroupMemberListReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -844,11 +844,11 @@ func (m *GetGroupMemberListReq) GetFilter() int32 {
 }
 
 type GetGroupMemberListResp struct {
-	Total                uint32                        `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	Members              []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,2,rep,name=members" json:"members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
-	XXX_unrecognized     []byte                        `json:"-"`
-	XXX_sizecache        int32                         `json:"-"`
+	Total                uint32                       `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	Members              []*sdkws.GroupMemberFullInfo `protobuf:"bytes,2,rep,name=members" json:"members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *GetGroupMemberListResp) Reset()         { *m = GetGroupMemberListResp{} }
@@ -882,7 +882,7 @@ func (m *GetGroupMemberListResp) GetTotal() uint32 {
 	return 0
 }
 
-func (m *GetGroupMemberListResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
+func (m *GetGroupMemberListResp) GetMembers() []*sdkws.GroupMemberFullInfo {
 	if m != nil {
 		return m.Members
 	}
@@ -936,10 +936,10 @@ func (m *GetGroupMembersInfoReq) GetMembers() []string {
 }
 
 type GetGroupMembersInfoResp struct {
-	Members              []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
-	XXX_unrecognized     []byte                        `json:"-"`
-	XXX_sizecache        int32                         `json:"-"`
+	Members              []*sdkws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *GetGroupMembersInfoResp) Reset()         { *m = GetGroupMembersInfoResp{} }
@@ -966,7 +966,7 @@ func (m *GetGroupMembersInfoResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupMembersInfoResp proto.InternalMessageInfo
 
-func (m *GetGroupMembersInfoResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
+func (m *GetGroupMembersInfoResp) GetMembers() []*sdkws.GroupMemberFullInfo {
 	if m != nil {
 		return m.Members
 	}
@@ -1058,11 +1058,11 @@ func (m *KickGroupMemberResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_KickGroupMemberResp proto.InternalMessageInfo
 
 type GetJoinedGroupListReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	FromUserID           string                    `protobuf:"bytes,2,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	FromUserID           string                   `protobuf:"bytes,2,opt,name=fromUserID" json:"fromUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetJoinedGroupListReq) Reset()         { *m = GetJoinedGroupListReq{} }
@@ -1089,7 +1089,7 @@ func (m *GetJoinedGroupListReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetJoinedGroupListReq proto.InternalMessageInfo
 
-func (m *GetJoinedGroupListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetJoinedGroupListReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1104,11 +1104,11 @@ func (m *GetJoinedGroupListReq) GetFromUserID() string {
 }
 
 type GetJoinedGroupListResp struct {
-	Total                uint32              `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	Groups               []*sdk_ws.GroupInfo `protobuf:"bytes,2,rep,name=groups" json:"groups,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	Total                uint32             `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	Groups               []*sdkws.GroupInfo `protobuf:"bytes,2,rep,name=groups" json:"groups,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetJoinedGroupListResp) Reset()         { *m = GetJoinedGroupListResp{} }
@@ -1142,7 +1142,7 @@ func (m *GetJoinedGroupListResp) GetTotal() uint32 {
 	return 0
 }
 
-func (m *GetJoinedGroupListResp) GetGroups() []*sdk_ws.GroupInfo {
+func (m *GetJoinedGroupListResp) GetGroups() []*sdkws.GroupInfo {
 	if m != nil {
 		return m.Groups
 	}
@@ -1234,11 +1234,11 @@ func (m *InviteUserToGroupResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_InviteUserToGroupResp proto.InternalMessageInfo
 
 type GetGroupAllMemberReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	GroupID              string                    `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	GroupID              string                   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetGroupAllMemberReq) Reset()         { *m = GetGroupAllMemberReq{} }
@@ -1265,7 +1265,7 @@ func (m *GetGroupAllMemberReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupAllMemberReq proto.InternalMessageInfo
 
-func (m *GetGroupAllMemberReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetGroupAllMemberReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1280,10 +1280,10 @@ func (m *GetGroupAllMemberReq) GetGroupID() string {
 }
 
 type GetGroupAllMemberResp struct {
-	Members              []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
-	XXX_unrecognized     []byte                        `json:"-"`
-	XXX_sizecache        int32                         `json:"-"`
+	Members              []*sdkws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *GetGroupAllMemberResp) Reset()         { *m = GetGroupAllMemberResp{} }
@@ -1310,7 +1310,7 @@ func (m *GetGroupAllMemberResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupAllMemberResp proto.InternalMessageInfo
 
-func (m *GetGroupAllMemberResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
+func (m *GetGroupAllMemberResp) GetMembers() []*sdkws.GroupMemberFullInfo {
 	if m != nil {
 		return m.Members
 	}
@@ -1318,12 +1318,12 @@ func (m *GetGroupAllMemberResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
 }
 
 type CMSGroup struct {
-	GroupInfo            *sdk_ws.GroupInfo `protobuf:"bytes,1,opt,name=groupInfo" json:"groupInfo,omitempty"`
-	GroupOwnerUserName   string            `protobuf:"bytes,2,opt,name=groupOwnerUserName" json:"groupOwnerUserName,omitempty"`
-	GroupOwnerUserID     string            `protobuf:"bytes,3,opt,name=groupOwnerUserID" json:"groupOwnerUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	GroupInfo            *sdkws.GroupInfo `protobuf:"bytes,1,opt,name=groupInfo" json:"groupInfo,omitempty"`
+	GroupOwnerUserName   string           `protobuf:"bytes,2,opt,name=groupOwnerUserName" json:"groupOwnerUserName,omitempty"`
+	GroupOwnerUserID     string           `protobuf:"bytes,3,opt,name=groupOwnerUserID" json:"groupOwnerUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *CMSGroup) Reset()         { *m = CMSGroup{} }
@@ -1350,7 +1350,7 @@ func (m *CMSGroup) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CMSGroup proto.InternalMessageInfo
 
-func (m *CMSGroup) GetGroupInfo() *sdk_ws.GroupInfo {
+func (m *CMSGroup) GetGroupInfo() *sdkws.GroupInfo {
 	if m != nil {
 		return m.GroupInfo
 	}
@@ -1372,12 +1372,12 @@ func (m *CMSGroup) GetGroupOwnerUserID() string {
 }
 
 type GetGroupsReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	GroupName            string                    `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`
-	GroupID              string                    `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	GroupName            string                   `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`
+	GroupID              string                   `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetGroupsReq) Reset()         { *m = GetGroupsReq{} }
@@ -1404,7 +1404,7 @@ func (m *GetGroupsReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupsReq proto.InternalMessageInfo
 
-func (m *GetGroupsReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetGroupsReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1510,12 +1510,12 @@ func (m *GetGroupMemberReq) GetGroupID() string {
 }
 
 type GetGroupMembersCMSReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	GroupID              string                    `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
-	UserName             string                    `protobuf:"bytes,3,opt,name=userName" json:"userName,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	GroupID              string                   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	UserName             string                   `protobuf:"bytes,3,opt,name=userName" json:"userName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetGroupMembersCMSReq) Reset()         { *m = GetGroupMembersCMSReq{} }
@@ -1542,7 +1542,7 @@ func (m *GetGroupMembersCMSReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetGroupMembersCMSReq proto.InternalMessageInfo
 
-func (m *GetGroupMembersCMSReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetGroupMembersCMSReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1564,11 +1564,11 @@ func (m *GetGroupMembersCMSReq) GetUserName() string {
 }
 
 type GetGroupMembersCMSResp struct {
-	Total                uint32                        `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	Members              []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,2,rep,name=members" json:"members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
-	XXX_unrecognized     []byte                        `json:"-"`
-	XXX_sizecache        int32                         `json:"-"`
+	Total                uint32                       `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	Members              []*sdkws.GroupMemberFullInfo `protobuf:"bytes,2,rep,name=members" json:"members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *GetGroupMembersCMSResp) Reset()         { *m = GetGroupMembersCMSResp{} }
@@ -1602,7 +1602,7 @@ func (m *GetGroupMembersCMSResp) GetTotal() uint32 {
 	return 0
 }
 
-func (m *GetGroupMembersCMSResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
+func (m *GetGroupMembersCMSResp) GetMembers() []*sdkws.GroupMemberFullInfo {
 	if m != nil {
 		return m.Members
 	}
@@ -2096,10 +2096,10 @@ func (m *GetJoinedSuperGroupListReq) GetUserID() string {
 }
 
 type GetJoinedSuperGroupListResp struct {
-	Groups               []*sdk_ws.GroupInfo `protobuf:"bytes,1,rep,name=groups" json:"groups,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	Groups               []*sdkws.GroupInfo `protobuf:"bytes,1,rep,name=groups" json:"groups,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetJoinedSuperGroupListResp) Reset()         { *m = GetJoinedSuperGroupListResp{} }
@@ -2126,7 +2126,7 @@ func (m *GetJoinedSuperGroupListResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetJoinedSuperGroupListResp proto.InternalMessageInfo
 
-func (m *GetJoinedSuperGroupListResp) GetGroups() []*sdk_ws.GroupInfo {
+func (m *GetJoinedSuperGroupListResp) GetGroups() []*sdkws.GroupInfo {
 	if m != nil {
 		return m.Groups
 	}
@@ -2172,10 +2172,10 @@ func (m *GetSuperGroupsInfoReq) GetGroupIDs() []string {
 }
 
 type GetSuperGroupsInfoResp struct {
-	GroupInfos           []*sdk_ws.GroupInfo `protobuf:"bytes,1,rep,name=groupInfos" json:"groupInfos,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	GroupInfos           []*sdkws.GroupInfo `protobuf:"bytes,1,rep,name=groupInfos" json:"groupInfos,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetSuperGroupsInfoResp) Reset()         { *m = GetSuperGroupsInfoResp{} }
@@ -2202,7 +2202,7 @@ func (m *GetSuperGroupsInfoResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetSuperGroupsInfoResp proto.InternalMessageInfo
 
-func (m *GetSuperGroupsInfoResp) GetGroupInfos() []*sdk_ws.GroupInfo {
+func (m *GetSuperGroupsInfoResp) GetGroupInfos() []*sdkws.GroupInfo {
 	if m != nil {
 		return m.GroupInfos
 	}
@@ -2494,10 +2494,10 @@ func (m *GetUserInGroupMembersReq) GetGroupIDs() []string {
 }
 
 type GetUserInGroupMembersResp struct {
-	Members              []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
-	XXX_unrecognized     []byte                        `json:"-"`
-	XXX_sizecache        int32                         `json:"-"`
+	Members              []*sdkws.GroupMemberFullInfo `protobuf:"bytes,1,rep,name=members" json:"members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *GetUserInGroupMembersResp) Reset()         { *m = GetUserInGroupMembersResp{} }
@@ -2524,7 +2524,7 @@ func (m *GetUserInGroupMembersResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetUserInGroupMembersResp proto.InternalMessageInfo
 
-func (m *GetUserInGroupMembersResp) GetMembers() []*sdk_ws.GroupMemberFullInfo {
+func (m *GetUserInGroupMembersResp) GetMembers() []*sdkws.GroupMemberFullInfo {
 	if m != nil {
 		return m.Members
 	}

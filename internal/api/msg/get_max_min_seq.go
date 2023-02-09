@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -32,7 +32,7 @@ func GetSeq(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
 		return
 	}
-	pbData := sdk_ws.GetMaxAndMinSeqReq{}
+	pbData := sdkws.GetMaxAndMinSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
 	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)

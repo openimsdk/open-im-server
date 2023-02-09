@@ -1,24 +1,24 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
-import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
 option go_package = "Open_IM/pkg/proto/msg;msg";
 package msg;
 
 message MsgDataToMQ{
   string token =1;
   string operationID = 2;
-  server_api_params.MsgData msgData = 3;
+  sdkws.MsgData msgData = 3;
 }
 
 
 message MsgDataToDB {
-  server_api_params.MsgData msgData = 1;
+  sdkws.MsgData msgData = 1;
   string operationID = 2;
 
 }
 message PushMsgDataToMQ{
   string OperationID = 1;
-  server_api_params.MsgData msgData = 2;
+  sdkws.MsgData msgData = 2;
   string pushToUserID = 3;
 }
 message MsgDataToMongoByMQ{
@@ -65,7 +65,7 @@ message SendMsgReq {
 
 string token =1;
 string operationID = 2;
-server_api_params.MsgData msgData = 3;
+sdkws.MsgData msgData = 3;
 
 
 }
@@ -141,7 +141,7 @@ message GetSuperGroupMsgReq{
 message GetSuperGroupMsgResp{
   int32 errCode = 1;
   string errMsg = 2;
-  server_api_params.MsgData msgData = 3;
+  sdkws.MsgData msgData = 3;
 }
 message GetWriteDiffMsgReq{
     string operationID = 1;
@@ -151,7 +151,7 @@ message GetWriteDiffMsgReq{
 message GetWriteDiffMsgResp{
   int32 errCode = 1;
   string errMsg = 2;
-  server_api_params.MsgData msgData = 3;
+  sdkws.MsgData msgData = 3;
 }
 
 message ModifyMessageReactionExtensionsReq {
@@ -159,7 +159,7 @@ message ModifyMessageReactionExtensionsReq {
   string sourceID = 2;
   string opUserID = 3;
   int32 sessionType = 4;
-  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  map <string, sdkws.KeyValue>reactionExtensionList = 5;
   string clientMsgID = 6;
   google.protobuf.StringValue ex = 7;
   google.protobuf.StringValue attachedInfo = 8;
@@ -172,7 +172,7 @@ message SetMessageReactionExtensionsReq {
   string sourceID = 2;
   string opUserID = 3;
   int32 sessionType = 4;
-  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  map <string, sdkws.KeyValue>reactionExtensionList = 5;
   string clientMsgID = 6;
   google.protobuf.StringValue ex = 7;
   google.protobuf.StringValue attachedInfo = 8;
@@ -210,7 +210,7 @@ message GetMessageListReactionExtensionsResp{
 message SingleMessageExtensionResult {
   int32 errCode = 1;
   string errMsg = 2;
-  map <string,  server_api_params.KeyValue>reactionExtensionList = 3;
+  map <string,  sdkws.KeyValue>reactionExtensionList = 3;
   string clientMsgID = 4;
 }
 
@@ -230,7 +230,7 @@ message DeleteMessageListReactionExtensionsReq {
   string clientMsgID = 5;
   bool isExternalExtensions = 6;
   int64 msgFirstModifyTime = 7;
-  repeated server_api_params.KeyValue reactionExtensionList = 8;
+  repeated sdkws.KeyValue reactionExtensionList = 8;
 }
 
 message DeleteMessageListReactionExtensionsResp {
@@ -254,7 +254,7 @@ message ExtendMsg {
 }
 
 message KeyValueResp {
-  server_api_params.KeyValue keyValue = 1;
+  sdkws.KeyValue keyValue = 1;
   int32 errCode = 2;
   string errMsg = 3;
 }
@@ -267,10 +267,10 @@ message MsgDataToModifyByMQ{
 
 
 service msg {
-  rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
-  rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
+  rpc GetMaxAndMinSeq(sdkws.GetMaxAndMinSeqReq) returns(sdkws.GetMaxAndMinSeqResp);
+  rpc PullMessageBySeqList(sdkws.PullMessageBySeqListReq) returns(sdkws.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
-  rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
+  rpc DelMsgList(sdkws.DelMsgListReq) returns(sdkws.DelMsgListResp);
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);

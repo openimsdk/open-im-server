@@ -1,11 +1,11 @@
 package check
 
 import (
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 	"errors"
 )
 
-func GetFriendsInfo(ctx context.Context, ownerUserID, friendUserID string) (*server_api_params.FriendInfo, error) {
+func GetFriendsInfo(ctx context.Context, ownerUserID, friendUserID string) (*sdkws.FriendInfo, error) {
 	return nil, errors.New("TODO:GetUserInfo")
 }

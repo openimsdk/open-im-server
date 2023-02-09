@@ -16,7 +16,7 @@ start cmd /C .\open_im_conversation.exe -port 10230
 start cmd /C .\open_im_cache.exe -port 10240
 start cmd /C .\open_im_push.exe -port 10170
 start cmd /C .\open_im_msg_transfer.exe
-start cmd /C .\open_im_sdk_server.exe -openIM_api_port 10002 -openIM_ws_port 10001 -sdk_ws_port 10003 -openIM_log_level 6
+start cmd /C .\open_im_sdk_server.exe -openIM_api_port 10002 -openIM_ws_port 10001 -sdkws_port 10003 -openIM_log_level 6
 start cmd /C .\open_im_msg_gateway.exe -rpc_port 10140 -ws_port 10001
 start cmd /C .\open_im_demo.exe -port 10004
 cd %ROOT%

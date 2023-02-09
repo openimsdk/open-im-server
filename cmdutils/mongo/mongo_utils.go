@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"Open_IM/pkg/common/config"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/proto"
@@ -42,7 +42,7 @@ func GetUserAllChat(uid string) {
 	}
 	for _, userChat := range userChatList {
 		for _, msg := range userChat.Msg {
-			msgData := &server_api_params.MsgData{}
+			msgData := &sdkws.MsgData{}
 			err := proto.Unmarshal(msg.Msg, msgData)
 			if err != nil {
 				fmt.Println(err.Error(), msg)

@@ -2,13 +2,13 @@ package utils
 
 import (
 	"Open_IM/pkg/common/constant"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"github.com/golang/protobuf/proto"
 )
 
-func GetContent(msg *server_api_params.MsgData) string {
+func GetContent(msg *sdkws.MsgData) string {
 	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
-		var tips server_api_params.TipsComm
+		var tips sdkws.TipsComm
 		_ = proto.Unmarshal(msg.Content, &tips)
 		content := tips.JsonDetail
 		return content

@@ -7,7 +7,7 @@ import (
 
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 
 	promePkg "Open_IM/pkg/common/prometheus"
 )

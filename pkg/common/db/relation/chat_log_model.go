@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/table/relation"
 	pbMsg "Open_IM/pkg/proto/msg"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
@@ -31,7 +31,7 @@ func (c *ChatLogGorm) Create(msg pbMsg.MsgDataToMQ) error {
 		chatLog.RecvID = msg.MsgData.RecvID
 	}
 	if msg.MsgData.ContentType >= constant.NotificationBegin && msg.MsgData.ContentType <= constant.NotificationEnd {
-		var tips server_api_params.TipsComm
+		var tips sdkws.TipsComm
 		_ = proto.Unmarshal(msg.MsgData.Content, &tips)
 		marshaler := jsonpb.Marshaler{
 			OrigName:     true,

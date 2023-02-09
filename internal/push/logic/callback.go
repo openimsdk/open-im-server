@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	common "Open_IM/pkg/proto/sdk_ws"
+	common "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	http2 "net/http"
 )

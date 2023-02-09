@@ -7,6 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"math/rand"
+	"strconv"
+	"time"
 )
 
 type TagMongoDriver struct {
@@ -17,6 +20,10 @@ type TagMongoDriver struct {
 
 func NewTagMongoDriver(mgoDB *mongo.Database) *TagMongoDriver {
 	return &TagMongoDriver{mgoDB: mgoDB, TagCollection: mgoDB.Collection(unrelation.CTag), TagSendLogCollection: mgoDB.Collection(unrelation.CSendLog)}
+}
+
+func (db *TagMongoDriver) generateTagID(tagName, userID string) string {
+	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
 
 func (db *TagMongoDriver) GetUserTags(ctx context.Context, userID string) ([]unrelation.TagModel, error) {

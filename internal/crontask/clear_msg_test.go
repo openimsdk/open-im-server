@@ -3,7 +3,7 @@ package cronTask
 import (
 	"Open_IM/pkg/common/constant"
 	mongo2 "Open_IM/pkg/common/db/mongo"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 	"fmt"
 	"strconv"
@@ -25,7 +25,7 @@ var (
 func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *mongo2.UserChat {
 	chat := &mongo2.UserChat{UID: userID + strconv.Itoa(int(index))}
 	for i := startSeq; i <= stopSeq; i++ {
-		msg := server_api_params.MsgData{
+		msg := sdkws.MsgData{
 			SendID:           "sendID1",
 			RecvID:           "recvID1",
 			GroupID:          "",

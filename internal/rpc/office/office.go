@@ -13,7 +13,7 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	pbCache "Open_IM/pkg/proto/cache"
 	pbOffice "Open_IM/pkg/proto/office"
-	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	pbCommon "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/OpenIMSDK/getcdv3"

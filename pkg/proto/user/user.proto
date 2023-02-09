@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 import "Open-IM-Server/pkg/proto/conversation/conversation.proto";
 option go_package = "Open_IM/pkg/proto/user;user";
 package user;
@@ -8,7 +8,7 @@ package user;
 
 
 message getAllUserIDReq{
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
 }
 message getAllUserIDResp{
   int32 total = 1;
@@ -32,11 +32,11 @@ message getDesignateUsersReq{
   repeated string userIDs = 1;
 }
 message getDesignateUsersResp{
-  repeated server_api_params.UserInfo usersInfo = 1;
+  repeated sdkws.UserInfo usersInfo = 1;
 }
 
 message updateUserInfoReq{
-  server_api_params.UserInfo userInfo = 1;
+  sdkws.UserInfo userInfo = 1;
 }
 message updateUserInfoResp{
 }
@@ -113,16 +113,16 @@ message batchSetConversationsResp{
 
 
 message getPaginationUsersReq {
-  server_api_params.RequestPagination pagination = 2;
+  sdkws.RequestPagination pagination = 2;
 }
 
 message getPaginationUsersResp{
   int32 total = 1;
-  repeated server_api_params.UserInfo users = 2;
+  repeated sdkws.UserInfo users = 2;
 }
 
 message userRegisterReq {
-  repeated server_api_params.UserInfo users = 1;
+  repeated sdkws.UserInfo users = 1;
 }
 message userRegisterResp {
 }

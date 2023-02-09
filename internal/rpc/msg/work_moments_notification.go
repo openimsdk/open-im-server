@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbOffice "Open_IM/pkg/proto/office"
-	sdk "Open_IM/pkg/proto/sdk_ws"
+	sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

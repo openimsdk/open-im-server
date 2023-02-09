@@ -22,7 +22,7 @@ for ((i = 0; i < ${#filelist[*]}; i++)); do
   cp $proto  ${proto#*./Open_IM/pkg/proto/}
 done
 rm Open_IM -rf
-#find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdk_ws\"/\"Open_IM\/pkg\/proto\/sdk_ws\"/g'
+#find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdkws\"/\"Open_IM\/pkg\/proto\/sdkws\"/g'
 
 
 

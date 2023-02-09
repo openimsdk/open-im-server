@@ -1,11 +1,5 @@
 package apistruct
 
-import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
 type ApiUserInfo struct {
 	UserID      string `json:"userID" binding:"required,min=1,max=64" swaggo:"true,用户ID,"`
 	Nickname    string `json:"nickname" binding:"omitempty,min=1,max=64" swaggo:"true,my id,19"`
@@ -21,10 +15,4 @@ type ApiUserInfo struct {
 type GroupAddMemberInfo struct {
 	UserID    string `json:"userID" binding:"required"`
 	RoleLevel int32  `json:"roleLevel" binding:"required,oneof= 1 3"`
-}
-
-func SetErrCodeMsg(c *gin.Context, status int) *CommResp {
-	resp := CommResp{ErrCode: int32(status), ErrMsg: http.StatusText(status)}
-	c.JSON(status, resp)
-	return &resp
 }

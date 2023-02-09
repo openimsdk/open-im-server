@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
@@ -116,10 +116,10 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				}
 				return &rResp, nil
 			}
-			setValue := make(map[string]*server_api_params.KeyValue)
+			setValue := make(map[string]*sdkws.KeyValue)
 			for k, v := range req.ReactionExtensionList {
 
-				temp := new(server_api_params.KeyValue)
+				temp := new(sdkws.KeyValue)
 				if vv, ok := mongoValue.ReactionExtensionList[k]; ok {
 					utils.CopyStructFields(temp, &vv)
 					if v.LatestUpdateTime != vv.LatestUpdateTime {
@@ -168,7 +168,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				setKeyResultInfo(&rResp, 200, err.Error(), req.ClientMsgID, k, v)
 				continue
 			}
-			temp := new(server_api_params.KeyValue)
+			temp := new(sdkws.KeyValue)
 			utils.JsonStringToStruct(redisValue, temp)
 			if v.LatestUpdateTime != temp.LatestUpdateTime {
 				setKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, k, temp)
@@ -198,7 +198,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	return &rResp, nil
 
 }
-func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *server_api_params.KeyValue) {
+func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *sdkws.KeyValue) {
 	temp := new(msg.KeyValueResp)
 	temp.KeyValue = keyValue
 	temp.ErrCode = errCode
@@ -206,7 +206,7 @@ func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, er
 	r.Result = append(r.Result, temp)
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
-func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *server_api_params.KeyValue) {
+func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *sdkws.KeyValue) {
 	temp := new(msg.KeyValueResp)
 	temp.KeyValue = keyValue
 	temp.ErrCode = errCode
@@ -236,10 +236,10 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 				rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
 				continue
 			}
-			keyMap := make(map[string]*server_api_params.KeyValue)
+			keyMap := make(map[string]*sdkws.KeyValue)
 
 			for k, v := range redisValue {
-				temp := new(server_api_params.KeyValue)
+				temp := new(sdkws.KeyValue)
 				utils.JsonStringToStruct(v, temp)
 				keyMap[k] = temp
 			}
@@ -253,10 +253,10 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 				rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
 				continue
 			}
-			keyMap := make(map[string]*server_api_params.KeyValue)
+			keyMap := make(map[string]*sdkws.KeyValue)
 
 			for k, v := range mongoValue.ReactionExtensionList {
-				temp := new(server_api_params.KeyValue)
+				temp := new(sdkws.KeyValue)
 				temp.TypeKey = v.TypeKey
 				temp.Value = v.Value
 				temp.LatestUpdateTime = v.LatestUpdateTime
@@ -300,7 +300,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	}
 	for _, v := range callbackResp.ResultReactionExtensionList {
 		if v.ErrCode != 0 {
-			func(req *[]*server_api_params.KeyValue, typeKey string) {
+			func(req *[]*sdkws.KeyValue, typeKey string) {
 				for i := 0; i < len(*req); i++ {
 					if (*req)[i].TypeKey == typeKey {
 						*req = append((*req)[:i], (*req)[i+1:]...)
@@ -338,7 +338,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 				setDeleteKeyResultInfo(&rResp, 200, err.Error(), req.ClientMsgID, v.TypeKey, v)
 				continue
 			}
-			temp := new(server_api_params.KeyValue)
+			temp := new(sdkws.KeyValue)
 			utils.JsonStringToStruct(redisValue, temp)
 			if v.LatestUpdateTime != temp.LatestUpdateTime {
 				setDeleteKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, v.TypeKey, temp)
@@ -379,10 +379,10 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 			}
 			return &rResp, nil
 		}
-		setValue := make(map[string]*server_api_params.KeyValue)
+		setValue := make(map[string]*sdkws.KeyValue)
 		for _, v := range req.ReactionExtensionList {
 
-			temp := new(server_api_params.KeyValue)
+			temp := new(sdkws.KeyValue)
 			if vv, ok := mongoValue.ReactionExtensionList[v.TypeKey]; ok {
 				utils.CopyStructFields(temp, &vv)
 				if v.LatestUpdateTime != vv.LatestUpdateTime {

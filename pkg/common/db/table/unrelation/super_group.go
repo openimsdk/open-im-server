@@ -2,6 +2,7 @@ package unrelation
 
 import (
 	"context"
+	"strconv"
 )
 
 const (
@@ -37,13 +38,6 @@ type SuperGroupModelInterface interface {
 	RemoveGroupFromUser(ctx context.Context, groupID string, userIDs []string, tx ...any) error
 }
 
-//type SuperGroupModelInterface interface {
-//	// tx is your transaction object
-//	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string, tx ...interface{}) error
-//	FindSuperGroup(ctx context.Context, groupIDs []string, tx ...interface{}) ([]*SuperGroupModel, error)
-//	//GetSuperGroup(ctx context.Context, groupID string) (SuperGroupModel, error)
-//	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...interface{}) error
-//	RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...interface{}) error
-//	GetSuperGroupByUserID(ctx context.Context, userID string, tx ...interface{}) (*UserToSuperGroupModel, error)
-//	DeleteSuperGroup(ctx context.Context, groupID string, tx ...interface{}) error
-//}
+func superGroupIndexGen(groupID string, seqSuffix uint32) string {
+	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}

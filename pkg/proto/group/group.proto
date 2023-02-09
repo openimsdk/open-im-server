@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
-import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
 option go_package = "Open_IM/pkg/proto/group;group";
 package group;
 
@@ -8,12 +8,12 @@ package group;
 
 message CreateGroupReq{
   repeated string initMembers = 1;
-  server_api_params.GroupInfo groupInfo = 2;
+  sdkws.GroupInfo groupInfo = 2;
   repeated string adminUserIDs = 3;
   string ownerUserID = 4; //owner
 }
 message CreateGroupResp{
-  server_api_params.GroupInfo groupInfo = 1;
+  sdkws.GroupInfo groupInfo = 1;
 }
 
 
@@ -21,34 +21,34 @@ message GetGroupsInfoReq{
   repeated string groupIDs = 1;
 }
 message GetGroupsInfoResp{
-  repeated server_api_params.GroupInfo groupInfos = 1;
+  repeated sdkws.GroupInfo groupInfos = 1;
 }
 
 
 message SetGroupInfoReq{
-  server_api_params.GroupInfoForSet groupInfoForSet = 1;
+  sdkws.GroupInfoForSet groupInfoForSet = 1;
 }
 message SetGroupInfoResp{
 }
 
 
 message GetGroupApplicationListReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string fromUserID = 2; //owner or admin
 }
 message GetGroupApplicationListResp {
   uint32 total = 1;
-  repeated server_api_params.GroupRequest groupRequests = 2;
+  repeated sdkws.GroupRequest groupRequests = 2;
 }
 
 message GetUserReqApplicationListReq{
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string userID = 2;
 }
 
 message GetUserReqApplicationListResp{
   uint32 total = 1;
-  repeated server_api_params.GroupRequest groupRequests = 2;
+  repeated sdkws.GroupRequest groupRequests = 2;
 }
 
 
@@ -91,14 +91,14 @@ message QuitGroupResp{
 
 
 message GetGroupMemberListReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string groupID = 2;
   int32 filter = 3;
 }
 
 message GetGroupMemberListResp {
   uint32 total = 1;
-  repeated server_api_params.GroupMemberFullInfo members = 2;
+  repeated sdkws.GroupMemberFullInfo members = 2;
 }
 
 
@@ -108,7 +108,7 @@ message GetGroupMembersInfoReq {
 }
 
 message GetGroupMembersInfoResp {
-  repeated server_api_params.GroupMemberFullInfo members = 1;
+  repeated sdkws.GroupMemberFullInfo members = 1;
 }
 
 message KickGroupMemberReq {
@@ -123,12 +123,12 @@ message KickGroupMemberResp {
 
 
 message GetJoinedGroupListReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string fromUserID = 2;
 }
 message GetJoinedGroupListResp{
   uint32 total = 1;
-  repeated  server_api_params.GroupInfo groups = 2;
+  repeated  sdkws.GroupInfo groups = 2;
 }
 
 
@@ -143,22 +143,22 @@ message InviteUserToGroupResp {
 
 
 message GetGroupAllMemberReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string groupID = 2;
 }
 message GetGroupAllMemberResp {
-  repeated server_api_params.GroupMemberFullInfo members = 1;
+  repeated sdkws.GroupMemberFullInfo members = 1;
 }
 
 message CMSGroup {
-  server_api_params.GroupInfo groupInfo = 1;
+  sdkws.GroupInfo groupInfo = 1;
   string groupOwnerUserName = 2;
   string groupOwnerUserID = 3;
 }
 
 
 message GetGroupsReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string groupName = 2;
   string groupID = 3;
 }
@@ -173,14 +173,14 @@ message GetGroupMemberReq {
 }
 
 message GetGroupMembersCMSReq {
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string groupID = 2;
   string userName = 3;
 }
 
 message GetGroupMembersCMSResp {
   uint32 total = 1;
-  repeated server_api_params.GroupMemberFullInfo members = 2;
+  repeated sdkws.GroupMemberFullInfo members = 2;
 }
 
 message DismissGroupReq{
@@ -243,7 +243,7 @@ message GetJoinedSuperGroupListReq {
 }
 
 message GetJoinedSuperGroupListResp {
-  repeated server_api_params.GroupInfo groups = 1;
+  repeated sdkws.GroupInfo groups = 1;
 }
 
 message GetSuperGroupsInfoReq {
@@ -251,7 +251,7 @@ message GetSuperGroupsInfoReq {
 }
 
 message GetSuperGroupsInfoResp {
-  repeated server_api_params.GroupInfo groupInfos = 1;
+  repeated sdkws.GroupInfo groupInfos = 1;
 }
 
 message SetGroupMemberInfoReq{
@@ -286,7 +286,7 @@ message getUserInGroupMembersReq {
   repeated string groupIDs = 2;
 }
 message getUserInGroupMembersResp{
-  repeated server_api_params.GroupMemberFullInfo members = 1;
+  repeated sdkws.GroupMemberFullInfo members = 1;
 }
 
 service group{

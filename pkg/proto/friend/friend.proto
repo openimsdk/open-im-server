@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
@@ -8,7 +8,7 @@ message getPaginationFriendsReq{
   repeated string friendUserIDs = 2;
 }
 message getPaginationFriendsResp{
-  repeated server_api_params.FriendInfo friendsInfo = 1;
+  repeated sdkws.FriendInfo friendsInfo = 1;
 }
 
 
@@ -33,21 +33,21 @@ message importFriendResp{
 
 message getPaginationFriendsApplyToReq{
   string userID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  sdkws.RequestPagination pagination = 2;
 
 }
 message getPaginationFriendsApplyToResp{
-  repeated server_api_params.FriendRequest FriendRequests = 1;
+  repeated sdkws.FriendRequest FriendRequests = 1;
   int32 total = 2;
 }
 
 
 message getDesignatedFriendsReq{
-  server_api_params.RequestPagination pagination = 1;
+  sdkws.RequestPagination pagination = 1;
   string userID = 2;
 }
 message getDesignatedFriendsResp{
-  repeated server_api_params.FriendInfo FriendsInfo = 1;
+  repeated sdkws.FriendInfo FriendsInfo = 1;
   int32 total = 2;
 }
 
@@ -69,10 +69,10 @@ message removeBlackResp{
 
 message getPaginationBlacksReq{
   string userID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  sdkws.RequestPagination pagination = 2;
 }
 message getPaginationBlacksResp{
-  repeated server_api_params.BlackInfo blacks= 1;
+  repeated sdkws.BlackInfo blacks= 1;
   int32 total = 2;
 }
 
@@ -124,10 +124,10 @@ message setFriendRemarkResp{
 
 message getPaginationFriendsApplyFromReq{
   string userID = 1;
-  server_api_params.RequestPagination pagination = 2;
+  sdkws.RequestPagination pagination = 2;
 }
 message getPaginationFriendsApplyFromResp{
-  repeated server_api_params.FriendRequest friendRequests = 1;
+  repeated sdkws.FriendRequest friendRequests = 1;
   int32 total = 2;
 }
 

@@ -13,7 +13,7 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -125,7 +125,7 @@ func (s *userServer) SetGroupMemberFaceURL(ctx context.Context, faceURL string, 
 }
 
 // 获取加入的群成员信息
-func (s *userServer) GetJoinedGroupMembers(ctx context.Context, userID string) (members []*server_api_params.GroupMemberFullInfo, err error) {
+func (s *userServer) GetJoinedGroupMembers(ctx context.Context, userID string) (members []*sdkws.GroupMemberFullInfo, err error) {
 	return
 }
 
@@ -143,7 +143,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbUser.GetDesig
 	return resp, nil
 }
 
-func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*server_api_params.FriendInfo, err error) {
+func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
 	return
 }
 
@@ -250,7 +250,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbUser.GetPagi
 // ok
 func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (resp *pbUser.UserRegisterResp, err error) {
 	resp = &pbUser.UserRegisterResp{}
-	if utils.DuplicateAny(req.Users, func(e *server_api_params.UserInfo) string { return e.UserID }) {
+	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, constant.ErrArgs.Wrap("userID repeated")
 	}
 	userIDs := make([]string, 0)

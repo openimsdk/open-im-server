@@ -13,7 +13,7 @@ import (
 	pbChat "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
@@ -293,7 +293,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 	}
 
 }
-func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
+func (rpc *rpcChat) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	msg.SendTime = utils.GetCurrentTimestampByMill()
 	switch msg.ContentType {
@@ -449,8 +449,8 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
-			var tips sdk_ws.TipsComm
-			var memberKickedTips sdk_ws.MemberKickedTips
+			var tips sdkws.TipsComm
+			var memberKickedTips sdkws.MemberKickedTips
 			err := proto.Unmarshal(pb.MsgData.Content, &tips)
 			if err != nil {
 				log.Error(pb.OperationID, "Unmarshal err", err.Error())
@@ -761,8 +761,8 @@ type NotificationMsg struct {
 
 func Notification(n *NotificationMsg) {
 	var req pbChat.SendMsgReq
-	var msg sdk_ws.MsgData
-	var offlineInfo sdk_ws.OfflinePushInfo
+	var msg sdkws.MsgData
+	var offlineInfo sdkws.OfflinePushInfo
 	var title, desc, ex string
 	var pushSwitch, unReadCount bool
 	var reliabilityLevel int
@@ -975,14 +975,6 @@ func Notification(n *NotificationMsg) {
 		reliabilityLevel = config.Config.Notification.GroupMemberInfoSet.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.GroupMemberInfoSet.Conversation.UnreadCount
 
-	case constant.OrganizationChangedNotification:
-		pushSwitch = config.Config.Notification.OrganizationChanged.OfflinePush.PushSwitch
-		title = config.Config.Notification.OrganizationChanged.OfflinePush.Title
-		desc = config.Config.Notification.OrganizationChanged.OfflinePush.Desc
-		ex = config.Config.Notification.OrganizationChanged.OfflinePush.Ext
-		reliabilityLevel = config.Config.Notification.OrganizationChanged.Conversation.ReliabilityLevel
-		unReadCount = config.Config.Notification.OrganizationChanged.Conversation.UnreadCount
-
 	case constant.WorkMomentNotification:
 		pushSwitch = config.Config.Notification.WorkMomentsNotification.OfflinePush.PushSwitch
 		title = config.Config.Notification.WorkMomentsNotification.OfflinePush.Title
@@ -1087,11 +1079,11 @@ func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, o
 }
 
 func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
-	offlinePushInfo := sdk_ws.OfflinePushInfo{}
+	offlinePushInfo := sdkws.OfflinePushInfo{}
 	if pb.MsgData.OfflinePushInfo != nil {
 		offlinePushInfo = *pb.MsgData.OfflinePushInfo
 	}
-	msgData := sdk_ws.MsgData{}
+	msgData := sdkws.MsgData{}
 	msgData = *pb.MsgData
 	msgData.OfflinePushInfo = &offlinePushInfo
 
@@ -1105,11 +1097,11 @@ func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
 
 func (rpc *rpcChat) sendMsgToGroup(ctx context.Context, list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	//	log.Debug(pb.OperationID, "split userID ", list)
-	offlinePushInfo := sdk_ws.OfflinePushInfo{}
+	offlinePushInfo := sdkws.OfflinePushInfo{}
 	if pb.MsgData.OfflinePushInfo != nil {
 		offlinePushInfo = *pb.MsgData.OfflinePushInfo
 	}
-	msgData := sdk_ws.MsgData{}
+	msgData := sdkws.MsgData{}
 	msgData = *pb.MsgData
 	msgData.OfflinePushInfo = &offlinePushInfo
 

@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/table/unrelation"
 	pbGroup "Open_IM/pkg/proto/group"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -48,7 +48,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	superGroupMemberMap := utils.SliceToMapAny(superGroupMembers, func(e *unrelation.SuperGroupModel) (string, []string) {
 		return e.GroupID, e.MemberIDs
 	})
-	resp.Groups = utils.Slice(joinSuperGroup.GroupIDs, func(groupID string) *sdk_ws.GroupInfo {
+	resp.Groups = utils.Slice(joinSuperGroup.GroupIDs, func(groupID string) *sdkws.GroupInfo {
 		return DbToPbGroupInfo(groupMap[groupID], ownerMap[groupID].UserID, uint32(len(superGroupMemberMap)))
 	})
 	return resp, nil
@@ -77,7 +77,7 @@ func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSu
 	ownerMap := utils.SliceToMap(owners, func(e *relation.GroupMemberModel) string {
 		return e.GroupID
 	})
-	resp.GroupInfos = utils.Slice(groups, func(e *relation.GroupModel) *sdk_ws.GroupInfo {
+	resp.GroupInfos = utils.Slice(groups, func(e *relation.GroupModel) *sdkws.GroupInfo {
 		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, uint32(len(superGroupMemberMap[e.GroupID])))
 	})
 	return resp, nil

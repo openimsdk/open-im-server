@@ -56,7 +56,7 @@ func NewConversationRedis(rcClient *rockscache.Client) *ConversationRedis {
 }
 
 func NewNewConversationRedis(rdb redis.UniversalClient, conversationDB *relation.ConversationGorm, options rockscache.Options) *ConversationRedis {
-	return &ConversationRedis{conversationDB: conversationDB, expireTime: conversationExpireTime, rcClient: rockscache.NewClient(rdb, options)}
+	return &ConversationRedis{rcClient: rockscache.NewClient(rdb, options)}
 }
 
 func (c *ConversationRedis) getConversationKey(ownerUserID, conversationID string) string {

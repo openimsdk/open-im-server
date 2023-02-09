@@ -7,7 +7,7 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import conversation "Open_IM/pkg/proto/conversation"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 
 import (
 	context "golang.org/x/net/context"
@@ -26,10 +26,10 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type GetAllUserIDReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetAllUserIDReq) Reset()         { *m = GetAllUserIDReq{} }
@@ -56,7 +56,7 @@ func (m *GetAllUserIDReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllUserIDReq proto.InternalMessageInfo
 
-func (m *GetAllUserIDReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetAllUserIDReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -270,10 +270,10 @@ func (m *GetDesignateUsersReq) GetUserIDs() []string {
 }
 
 type GetDesignateUsersResp struct {
-	UsersInfo            []*sdk_ws.UserInfo `protobuf:"bytes,1,rep,name=usersInfo" json:"usersInfo,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
-	XXX_unrecognized     []byte             `json:"-"`
-	XXX_sizecache        int32              `json:"-"`
+	UsersInfo            []*sdkws.UserInfo `protobuf:"bytes,1,rep,name=usersInfo" json:"usersInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *GetDesignateUsersResp) Reset()         { *m = GetDesignateUsersResp{} }
@@ -300,7 +300,7 @@ func (m *GetDesignateUsersResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetDesignateUsersResp proto.InternalMessageInfo
 
-func (m *GetDesignateUsersResp) GetUsersInfo() []*sdk_ws.UserInfo {
+func (m *GetDesignateUsersResp) GetUsersInfo() []*sdkws.UserInfo {
 	if m != nil {
 		return m.UsersInfo
 	}
@@ -308,10 +308,10 @@ func (m *GetDesignateUsersResp) GetUsersInfo() []*sdk_ws.UserInfo {
 }
 
 type UpdateUserInfoReq struct {
-	UserInfo             *sdk_ws.UserInfo `protobuf:"bytes,1,opt,name=userInfo" json:"userInfo,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
-	XXX_unrecognized     []byte           `json:"-"`
-	XXX_sizecache        int32            `json:"-"`
+	UserInfo             *sdkws.UserInfo `protobuf:"bytes,1,opt,name=userInfo" json:"userInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *UpdateUserInfoReq) Reset()         { *m = UpdateUserInfoReq{} }
@@ -338,7 +338,7 @@ func (m *UpdateUserInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UpdateUserInfoReq proto.InternalMessageInfo
 
-func (m *UpdateUserInfoReq) GetUserInfo() *sdk_ws.UserInfo {
+func (m *UpdateUserInfoReq) GetUserInfo() *sdkws.UserInfo {
 	if m != nil {
 		return m.UserInfo
 	}
@@ -1012,10 +1012,10 @@ func (m *BatchSetConversationsResp) GetFailed() []string {
 }
 
 type GetPaginationUsersReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetPaginationUsersReq) Reset()         { *m = GetPaginationUsersReq{} }
@@ -1042,7 +1042,7 @@ func (m *GetPaginationUsersReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetPaginationUsersReq proto.InternalMessageInfo
 
-func (m *GetPaginationUsersReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetPaginationUsersReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1050,11 +1050,11 @@ func (m *GetPaginationUsersReq) GetPagination() *sdk_ws.RequestPagination {
 }
 
 type GetPaginationUsersResp struct {
-	Total                int32              `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
-	Users                []*sdk_ws.UserInfo `protobuf:"bytes,2,rep,name=users" json:"users,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
-	XXX_unrecognized     []byte             `json:"-"`
-	XXX_sizecache        int32              `json:"-"`
+	Total                int32             `protobuf:"varint,1,opt,name=total" json:"total,omitempty"`
+	Users                []*sdkws.UserInfo `protobuf:"bytes,2,rep,name=users" json:"users,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *GetPaginationUsersResp) Reset()         { *m = GetPaginationUsersResp{} }
@@ -1088,7 +1088,7 @@ func (m *GetPaginationUsersResp) GetTotal() int32 {
 	return 0
 }
 
-func (m *GetPaginationUsersResp) GetUsers() []*sdk_ws.UserInfo {
+func (m *GetPaginationUsersResp) GetUsers() []*sdkws.UserInfo {
 	if m != nil {
 		return m.Users
 	}
@@ -1096,10 +1096,10 @@ func (m *GetPaginationUsersResp) GetUsers() []*sdk_ws.UserInfo {
 }
 
 type UserRegisterReq struct {
-	Users                []*sdk_ws.UserInfo `protobuf:"bytes,1,rep,name=users" json:"users,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
-	XXX_unrecognized     []byte             `json:"-"`
-	XXX_sizecache        int32              `json:"-"`
+	Users                []*sdkws.UserInfo `protobuf:"bytes,1,rep,name=users" json:"users,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *UserRegisterReq) Reset()         { *m = UserRegisterReq{} }
@@ -1126,7 +1126,7 @@ func (m *UserRegisterReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UserRegisterReq proto.InternalMessageInfo
 
-func (m *UserRegisterReq) GetUsers() []*sdk_ws.UserInfo {
+func (m *UserRegisterReq) GetUsers() []*sdkws.UserInfo {
 	if m != nil {
 		return m.Users
 	}

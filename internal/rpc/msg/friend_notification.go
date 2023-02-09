@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"

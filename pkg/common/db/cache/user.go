@@ -19,7 +19,10 @@ const (
 	userGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 )
 
-type UserCache struct {
+type UserCache interface {
+}
+
+type UserCacheRedis struct {
 	userDB *relation.UserGorm
 
 	expireTime  time.Duration
@@ -27,8 +30,8 @@ type UserCache struct {
 	rcClient    *rockscache.Client
 }
 
-func NewUserCache(rdb redis.UniversalClient, userDB *relation.UserGorm, options rockscache.Options) *UserCache {
-	return &UserCache{
+func NewUserCacheRedis(rdb redis.UniversalClient, userDB *relation.UserGorm, options rockscache.Options) *UserCacheRedis {
+	return &UserCacheRedis{
 		userDB:      userDB,
 		expireTime:  userExpireTime,
 		redisClient: NewRedisClient(rdb),
@@ -36,15 +39,15 @@ func NewUserCache(rdb redis.UniversalClient, userDB *relation.UserGorm, options 
 	}
 }
 
-func (u *UserCache) getUserInfoKey(userID string) string {
+func (u *UserCacheRedis) getUserInfoKey(userID string) string {
 	return userInfoKey + userID
 }
 
-func (u *UserCache) getUserGlobalRecvMsgOptKey(userID string) string {
+func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
 	return userGlobalRecvMsgOptKey + userID
 }
 
-func (u *UserCache) GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error) {
+func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error) {
 	getUserInfo := func() (string, error) {
 		userInfo, err := u.userDB.Take(ctx, userID)
 		if err != nil {
@@ -68,7 +71,7 @@ func (u *UserCache) GetUserInfo(ctx context.Context, userID string) (userInfo *r
 	return userInfo, utils.Wrap(err, "")
 }
 
-func (u *UserCache) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error) {
+func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error) {
 	var users []*relationTb.UserModel
 	for _, userID := range userIDs {
 		user, err := GetUserInfoFromCache(ctx, userID)
@@ -80,14 +83,14 @@ func (u *UserCache) GetUsersInfo(ctx context.Context, userIDs []string) ([]*rela
 	return users, nil
 }
 
-func (u *UserCache) DelUserInfo(ctx context.Context, userID string) (err error) {
+func (u *UserCacheRedis) DelUserInfo(ctx context.Context, userID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()
 	return u.rcClient.TagAsDeleted(u.getUserInfoKey(userID))
 }
 
-func (u *UserCache) DelUsersInfo(ctx context.Context, userIDs []string) (err error) {
+func (u *UserCacheRedis) DelUsersInfo(ctx context.Context, userIDs []string) (err error) {
 	for _, userID := range userIDs {
 		if err := u.DelUserInfo(ctx, userID); err != nil {
 			return err
@@ -96,7 +99,7 @@ func (u *UserCache) DelUsersInfo(ctx context.Context, userIDs []string) (err err
 	return nil
 }
 
-func (u *UserCache) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
+func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
 	getUserGlobalRecvMsgOpt := func() (string, error) {
 		userInfo, err := u.userDB.Take(ctx, userID)
 		if err != nil {
@@ -114,7 +117,7 @@ func (u *UserCache) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) 
 	return strconv.Atoi(optStr)
 }
 
-func (u *UserCache) DelUserGlobalRecvMsgOpt(ctx context.Context, userID string) (err error) {
+func (u *UserCacheRedis) DelUserGlobalRecvMsgOpt(ctx context.Context, userID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()

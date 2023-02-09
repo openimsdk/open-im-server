@@ -2,7 +2,7 @@ package cmsstruct
 
 import (
 	"Open_IM/pkg/api_struct"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 )
 
 type AdminLoginRequest struct {
@@ -51,6 +51,6 @@ type GetUserRegisterAddFriendIDListRequest struct {
 }
 
 type GetUserRegisterAddFriendIDListResponse struct {
-	Users []*server_api_params.UserInfo `json:"users"`
+	Users []*sdkws.UserInfo `json:"users"`
 	apistruct.ResponsePagination
 }

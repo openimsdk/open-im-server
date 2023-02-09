@@ -6,7 +6,7 @@ package friend // import "Open_IM/pkg/proto/friend"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 
 import (
 	context "golang.org/x/net/context"
@@ -71,10 +71,10 @@ func (m *GetPaginationFriendsReq) GetFriendUserIDs() []string {
 }
 
 type GetPaginationFriendsResp struct {
-	FriendsInfo          []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=friendsInfo" json:"friendsInfo,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
-	XXX_unrecognized     []byte               `json:"-"`
-	XXX_sizecache        int32                `json:"-"`
+	FriendsInfo          []*sdkws.FriendInfo `protobuf:"bytes,1,rep,name=friendsInfo" json:"friendsInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *GetPaginationFriendsResp) Reset()         { *m = GetPaginationFriendsResp{} }
@@ -101,7 +101,7 @@ func (m *GetPaginationFriendsResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetPaginationFriendsResp proto.InternalMessageInfo
 
-func (m *GetPaginationFriendsResp) GetFriendsInfo() []*sdk_ws.FriendInfo {
+func (m *GetPaginationFriendsResp) GetFriendsInfo() []*sdkws.FriendInfo {
 	if m != nil {
 		return m.FriendsInfo
 	}
@@ -277,11 +277,11 @@ func (m *ImportFriendResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_ImportFriendResp proto.InternalMessageInfo
 
 type GetPaginationFriendsApplyToReq struct {
-	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	UserID               string                   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetPaginationFriendsApplyToReq) Reset()         { *m = GetPaginationFriendsApplyToReq{} }
@@ -315,7 +315,7 @@ func (m *GetPaginationFriendsApplyToReq) GetUserID() string {
 	return ""
 }
 
-func (m *GetPaginationFriendsApplyToReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetPaginationFriendsApplyToReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -323,11 +323,11 @@ func (m *GetPaginationFriendsApplyToReq) GetPagination() *sdk_ws.RequestPaginati
 }
 
 type GetPaginationFriendsApplyToResp struct {
-	FriendRequests       []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=FriendRequests" json:"FriendRequests,omitempty"`
-	Total                int32                   `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	FriendRequests       []*sdkws.FriendRequest `protobuf:"bytes,1,rep,name=FriendRequests" json:"FriendRequests,omitempty"`
+	Total                int32                  `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
 }
 
 func (m *GetPaginationFriendsApplyToResp) Reset()         { *m = GetPaginationFriendsApplyToResp{} }
@@ -354,7 +354,7 @@ func (m *GetPaginationFriendsApplyToResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetPaginationFriendsApplyToResp proto.InternalMessageInfo
 
-func (m *GetPaginationFriendsApplyToResp) GetFriendRequests() []*sdk_ws.FriendRequest {
+func (m *GetPaginationFriendsApplyToResp) GetFriendRequests() []*sdkws.FriendRequest {
 	if m != nil {
 		return m.FriendRequests
 	}
@@ -369,11 +369,11 @@ func (m *GetPaginationFriendsApplyToResp) GetTotal() int32 {
 }
 
 type GetDesignatedFriendsReq struct {
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
-	UserID               string                    `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	UserID               string                   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetDesignatedFriendsReq) Reset()         { *m = GetDesignatedFriendsReq{} }
@@ -400,7 +400,7 @@ func (m *GetDesignatedFriendsReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetDesignatedFriendsReq proto.InternalMessageInfo
 
-func (m *GetDesignatedFriendsReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetDesignatedFriendsReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -415,11 +415,11 @@ func (m *GetDesignatedFriendsReq) GetUserID() string {
 }
 
 type GetDesignatedFriendsResp struct {
-	FriendsInfo          []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=FriendsInfo" json:"FriendsInfo,omitempty"`
-	Total                int32                `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
-	XXX_unrecognized     []byte               `json:"-"`
-	XXX_sizecache        int32                `json:"-"`
+	FriendsInfo          []*sdkws.FriendInfo `protobuf:"bytes,1,rep,name=FriendsInfo" json:"FriendsInfo,omitempty"`
+	Total                int32               `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *GetDesignatedFriendsResp) Reset()         { *m = GetDesignatedFriendsResp{} }
@@ -446,7 +446,7 @@ func (m *GetDesignatedFriendsResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetDesignatedFriendsResp proto.InternalMessageInfo
 
-func (m *GetDesignatedFriendsResp) GetFriendsInfo() []*sdk_ws.FriendInfo {
+func (m *GetDesignatedFriendsResp) GetFriendsInfo() []*sdkws.FriendInfo {
 	if m != nil {
 		return m.FriendsInfo
 	}
@@ -613,11 +613,11 @@ func (m *RemoveBlackResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_RemoveBlackResp proto.InternalMessageInfo
 
 type GetPaginationBlacksReq struct {
-	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	UserID               string                   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetPaginationBlacksReq) Reset()         { *m = GetPaginationBlacksReq{} }
@@ -651,7 +651,7 @@ func (m *GetPaginationBlacksReq) GetUserID() string {
 	return ""
 }
 
-func (m *GetPaginationBlacksReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetPaginationBlacksReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -659,11 +659,11 @@ func (m *GetPaginationBlacksReq) GetPagination() *sdk_ws.RequestPagination {
 }
 
 type GetPaginationBlacksResp struct {
-	Blacks               []*sdk_ws.BlackInfo `protobuf:"bytes,1,rep,name=blacks" json:"blacks,omitempty"`
-	Total                int32               `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	Blacks               []*sdkws.BlackInfo `protobuf:"bytes,1,rep,name=blacks" json:"blacks,omitempty"`
+	Total                int32              `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetPaginationBlacksResp) Reset()         { *m = GetPaginationBlacksResp{} }
@@ -690,7 +690,7 @@ func (m *GetPaginationBlacksResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetPaginationBlacksResp proto.InternalMessageInfo
 
-func (m *GetPaginationBlacksResp) GetBlacks() []*sdk_ws.BlackInfo {
+func (m *GetPaginationBlacksResp) GetBlacks() []*sdkws.BlackInfo {
 	if m != nil {
 		return m.Blacks
 	}
@@ -1142,11 +1142,11 @@ func (m *SetFriendRemarkResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_SetFriendRemarkResp proto.InternalMessageInfo
 
 type GetPaginationFriendsApplyFromReq struct {
-	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
-	XXX_unrecognized     []byte                    `json:"-"`
-	XXX_sizecache        int32                     `json:"-"`
+	UserID               string                   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Pagination           *sdkws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
 }
 
 func (m *GetPaginationFriendsApplyFromReq) Reset()         { *m = GetPaginationFriendsApplyFromReq{} }
@@ -1180,7 +1180,7 @@ func (m *GetPaginationFriendsApplyFromReq) GetUserID() string {
 	return ""
 }
 
-func (m *GetPaginationFriendsApplyFromReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetPaginationFriendsApplyFromReq) GetPagination() *sdkws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
@@ -1188,11 +1188,11 @@ func (m *GetPaginationFriendsApplyFromReq) GetPagination() *sdk_ws.RequestPagina
 }
 
 type GetPaginationFriendsApplyFromResp struct {
-	FriendRequests       []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=friendRequests" json:"friendRequests,omitempty"`
-	Total                int32                   `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	FriendRequests       []*sdkws.FriendRequest `protobuf:"bytes,1,rep,name=friendRequests" json:"friendRequests,omitempty"`
+	Total                int32                  `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
 }
 
 func (m *GetPaginationFriendsApplyFromResp) Reset()         { *m = GetPaginationFriendsApplyFromResp{} }
@@ -1219,7 +1219,7 @@ func (m *GetPaginationFriendsApplyFromResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetPaginationFriendsApplyFromResp proto.InternalMessageInfo
 
-func (m *GetPaginationFriendsApplyFromResp) GetFriendRequests() []*sdk_ws.FriendRequest {
+func (m *GetPaginationFriendsApplyFromResp) GetFriendRequests() []*sdkws.FriendRequest {
 	if m != nil {
 		return m.FriendRequests
 	}

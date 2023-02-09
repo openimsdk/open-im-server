@@ -111,20 +111,6 @@ type SuperGroupMongoDriver struct {
 //		panic("implement me")
 //	}
 
-func (s *SuperGroupMongoDriver) Transaction(ctx context.Context, fn func(s unrelation.SuperGroupModelInterface, tx any) error) error {
-	sess, err := s.MgoClient.StartSession()
-	if err != nil {
-		return err
-	}
-	txCtx := mongo.NewSessionContext(ctx, sess)
-	defer sess.EndSession(txCtx)
-	if err := fn(s, txCtx); err != nil {
-		_ = sess.AbortTransaction(txCtx)
-		return err
-	}
-	return utils.Wrap(sess.CommitTransaction(txCtx), "")
-}
-
 func (s *SuperGroupMongoDriver) getTxCtx(ctx context.Context, tx []any) context.Context {
 	if len(tx) > 0 {
 		if ctx, ok := tx[0].(mongo.SessionContext); ok {

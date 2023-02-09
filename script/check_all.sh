@@ -7,7 +7,6 @@ service_port_name=(
   openImWsPort
   openImApiPort
   openImSdkWsPort
-  openImDemoPort
   openImCmsApiPort
   openImUserPort
   openImFriendPort
@@ -18,9 +17,7 @@ service_port_name=(
   openImPushPort
   openImAdminCmsPort
   openImOfficePort
-  openImOrganizationPort
   openImConversationPort
-  openImCachePort
 )
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 for i in ${service_port_name[*]}; do

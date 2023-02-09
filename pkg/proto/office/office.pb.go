@@ -7,7 +7,7 @@
 package office
 
 import (
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -817,9 +817,9 @@ type GetTagSendLogsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Pagination  *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
-	UserID      string                    `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
-	OperationID string                    `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	Pagination  *sdkws.RequestPagination `protobuf:"bytes,1,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	UserID      string                   `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+	OperationID string                   `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
 }
 
 func (x *GetTagSendLogsReq) Reset() {
@@ -854,7 +854,7 @@ func (*GetTagSendLogsReq) Descriptor() ([]byte, []int) {
 	return file_office_office_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *GetTagSendLogsReq) GetPagination() *sdk_ws.RequestPagination {
+func (x *GetTagSendLogsReq) GetPagination() *sdkws.RequestPagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -943,9 +943,9 @@ type GetTagSendLogsResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommonResp  *CommonResp                `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
-	Pagination  *sdk_ws.ResponsePagination `protobuf:"bytes,2,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
-	TagSendLogs []*TagSendLog              `protobuf:"bytes,3,rep,name=tagSendLogs,proto3" json:"tagSendLogs,omitempty"`
+	CommonResp  *CommonResp               `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
+	Pagination  *sdkws.ResponsePagination `protobuf:"bytes,2,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	TagSendLogs []*TagSendLog             `protobuf:"bytes,3,rep,name=tagSendLogs,proto3" json:"tagSendLogs,omitempty"`
 }
 
 func (x *GetTagSendLogsResp) Reset() {
@@ -987,7 +987,7 @@ func (x *GetTagSendLogsResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
-func (x *GetTagSendLogsResp) GetPagination() *sdk_ws.ResponsePagination {
+func (x *GetTagSendLogsResp) GetPagination() *sdkws.ResponsePagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -2392,10 +2392,10 @@ type GetUserWorkMomentsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID      string                    `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	OpUserID    string                    `protobuf:"bytes,2,opt,name=opUserID,proto3" json:"opUserID,omitempty"`
-	Pagination  *sdk_ws.RequestPagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
-	OperationID string                    `protobuf:"bytes,4,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	UserID      string                   `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	OpUserID    string                   `protobuf:"bytes,2,opt,name=opUserID,proto3" json:"opUserID,omitempty"`
+	Pagination  *sdkws.RequestPagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	OperationID string                   `protobuf:"bytes,4,opt,name=operationID,proto3" json:"operationID,omitempty"`
 }
 
 func (x *GetUserWorkMomentsReq) Reset() {
@@ -2444,7 +2444,7 @@ func (x *GetUserWorkMomentsReq) GetOpUserID() string {
 	return ""
 }
 
-func (x *GetUserWorkMomentsReq) GetPagination() *sdk_ws.RequestPagination {
+func (x *GetUserWorkMomentsReq) GetPagination() *sdkws.RequestPagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -2463,9 +2463,9 @@ type GetUserWorkMomentsResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommonResp  *CommonResp                `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
-	WorkMoments []*WorkMoment              `protobuf:"bytes,2,rep,name=workMoments,proto3" json:"workMoments,omitempty"`
-	Pagination  *sdk_ws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	CommonResp  *CommonResp               `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
+	WorkMoments []*WorkMoment             `protobuf:"bytes,2,rep,name=workMoments,proto3" json:"workMoments,omitempty"`
+	Pagination  *sdkws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
 }
 
 func (x *GetUserWorkMomentsResp) Reset() {
@@ -2514,7 +2514,7 @@ func (x *GetUserWorkMomentsResp) GetWorkMoments() []*WorkMoment {
 	return nil
 }
 
-func (x *GetUserWorkMomentsResp) GetPagination() *sdk_ws.ResponsePagination {
+func (x *GetUserWorkMomentsResp) GetPagination() *sdkws.ResponsePagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -2526,9 +2526,9 @@ type GetUserFriendWorkMomentsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID      string                    `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	Pagination  *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
-	OperationID string                    `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	UserID      string                   `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	Pagination  *sdkws.RequestPagination `protobuf:"bytes,2,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	OperationID string                   `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
 }
 
 func (x *GetUserFriendWorkMomentsReq) Reset() {
@@ -2570,7 +2570,7 @@ func (x *GetUserFriendWorkMomentsReq) GetUserID() string {
 	return ""
 }
 
-func (x *GetUserFriendWorkMomentsReq) GetPagination() *sdk_ws.RequestPagination {
+func (x *GetUserFriendWorkMomentsReq) GetPagination() *sdkws.RequestPagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -2589,9 +2589,9 @@ type GetUserFriendWorkMomentsResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommonResp  *CommonResp                `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
-	WorkMoments []*WorkMoment              `protobuf:"bytes,2,rep,name=workMoments,proto3" json:"workMoments,omitempty"`
-	Pagination  *sdk_ws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
+	CommonResp  *CommonResp               `protobuf:"bytes,1,opt,name=commonResp,proto3" json:"commonResp,omitempty"`
+	WorkMoments []*WorkMoment             `protobuf:"bytes,2,rep,name=workMoments,proto3" json:"workMoments,omitempty"`
+	Pagination  *sdkws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination,proto3" json:"Pagination,omitempty"`
 }
 
 func (x *GetUserFriendWorkMomentsResp) Reset() {
@@ -2640,7 +2640,7 @@ func (x *GetUserFriendWorkMomentsResp) GetWorkMoments() []*WorkMoment {
 	return nil
 }
 
-func (x *GetUserFriendWorkMomentsResp) GetPagination() *sdk_ws.ResponsePagination {
+func (x *GetUserFriendWorkMomentsResp) GetPagination() *sdkws.ResponsePagination {
 	if x != nil {
 		return x.Pagination
 	}
@@ -3419,8 +3419,8 @@ var file_office_office_proto_goTypes = []interface{}{
 	(*WorkMomentNotificationMsg)(nil),      // 42: office.WorkMomentNotificationMsg
 	(*SetUserWorkMomentsLevelReq)(nil),     // 43: office.SetUserWorkMomentsLevelReq
 	(*SetUserWorkMomentsLevelResp)(nil),    // 44: office.SetUserWorkMomentsLevelResp
-	(*sdk_ws.RequestPagination)(nil),       // 45: server_api_params.RequestPagination
-	(*sdk_ws.ResponsePagination)(nil),      // 46: server_api_params.ResponsePagination
+	(*sdkws.RequestPagination)(nil),        // 45: sdkws.RequestPagination
+	(*sdkws.ResponsePagination)(nil),       // 46: sdkws.ResponsePagination
 }
 var file_office_office_proto_depIdxs = []int32{
 	1,  // 0: office.Tag.userList:type_name -> office.TagUser
@@ -3430,10 +3430,10 @@ var file_office_office_proto_depIdxs = []int32{
 	0,  // 4: office.DeleteTagResp.commonResp:type_name -> office.CommonResp
 	0,  // 5: office.SetTagResp.commonResp:type_name -> office.CommonResp
 	0,  // 6: office.SendMsg2TagResp.commonResp:type_name -> office.CommonResp
-	45, // 7: office.GetTagSendLogsReq.Pagination:type_name -> server_api_params.RequestPagination
+	45, // 7: office.GetTagSendLogsReq.Pagination:type_name -> sdkws.RequestPagination
 	1,  // 8: office.TagSendLog.userList:type_name -> office.TagUser
 	0,  // 9: office.GetTagSendLogsResp.commonResp:type_name -> office.CommonResp
-	46, // 10: office.GetTagSendLogsResp.Pagination:type_name -> server_api_params.ResponsePagination
+	46, // 10: office.GetTagSendLogsResp.Pagination:type_name -> sdkws.ResponsePagination
 	14, // 11: office.GetTagSendLogsResp.tagSendLogs:type_name -> office.TagSendLog
 	0,  // 12: office.GetUserTagByIDResp.commonResp:type_name -> office.CommonResp
 	2,  // 13: office.GetUserTagByIDResp.tag:type_name -> office.Tag
@@ -3451,14 +3451,14 @@ var file_office_office_proto_depIdxs = []int32{
 	0,  // 25: office.GetWorkMomentByIDResp.commonResp:type_name -> office.CommonResp
 	23, // 26: office.GetWorkMomentByIDResp.workMoment:type_name -> office.WorkMoment
 	0,  // 27: office.ChangeWorkMomentPermissionResp.commonResp:type_name -> office.CommonResp
-	45, // 28: office.GetUserWorkMomentsReq.Pagination:type_name -> server_api_params.RequestPagination
+	45, // 28: office.GetUserWorkMomentsReq.Pagination:type_name -> sdkws.RequestPagination
 	0,  // 29: office.GetUserWorkMomentsResp.commonResp:type_name -> office.CommonResp
 	23, // 30: office.GetUserWorkMomentsResp.workMoments:type_name -> office.WorkMoment
-	46, // 31: office.GetUserWorkMomentsResp.Pagination:type_name -> server_api_params.ResponsePagination
-	45, // 32: office.GetUserFriendWorkMomentsReq.Pagination:type_name -> server_api_params.RequestPagination
+	46, // 31: office.GetUserWorkMomentsResp.Pagination:type_name -> sdkws.ResponsePagination
+	45, // 32: office.GetUserFriendWorkMomentsReq.Pagination:type_name -> sdkws.RequestPagination
 	0,  // 33: office.GetUserFriendWorkMomentsResp.commonResp:type_name -> office.CommonResp
 	23, // 34: office.GetUserFriendWorkMomentsResp.workMoments:type_name -> office.WorkMoment
-	46, // 35: office.GetUserFriendWorkMomentsResp.Pagination:type_name -> server_api_params.ResponsePagination
+	46, // 35: office.GetUserFriendWorkMomentsResp.Pagination:type_name -> sdkws.ResponsePagination
 	0,  // 36: office.SetUserWorkMomentsLevelResp.commonResp:type_name -> office.CommonResp
 	3,  // 37: office.OfficeService.GetUserTags:input_type -> office.GetUserTagsReq
 	5,  // 38: office.OfficeService.CreateTag:input_type -> office.CreateTagReq

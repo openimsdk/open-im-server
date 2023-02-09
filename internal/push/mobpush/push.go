@@ -26,23 +26,21 @@ func newGetuiClient() *MobPush {
 }
 
 func (j *MobPush) Push(accounts []string, alert, detailContent, operationID string, opts push.PushOpts) (string, error) {
-
-	var target requestParams.PushTarget
-
+	var target requestparams.PushTarget
 	target.SetAlias(accounts)
 	target.SetTarget(2)
 
-	var no requestParams.PushNotify
+	var no requestparams.PushNotify
 	no.SetType(1)
 	no.SetIosProduction(1)
 	no.SetPlats([]int{1, 2})
 	no.SetContent(alert)
 
-	var forward requestParams.PushForward
+	var forward requestparams.PushForward
 	forward.SetNextType(2)
 	forward.SetScheme(config.Config.Push.Mob.Scheme)
 
-	var po requestParams.PushObj
+	var po requestparams.PushObj
 	po.SetSource("webapi")
 	po.SetAppkey(config.Config.Push.Mob.AppKey)
 	po.SetPushTarget(&target)

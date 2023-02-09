@@ -8,7 +8,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/msg"
-	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	pbCommon "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"

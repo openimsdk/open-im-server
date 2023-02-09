@@ -2,7 +2,7 @@ package convert
 
 import (
 	"Open_IM/pkg/common/db/table/relation"
-	sdk "Open_IM/pkg/proto/sdk_ws"
+	sdk "Open_IM/pkg/proto/sdkws"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"
 )

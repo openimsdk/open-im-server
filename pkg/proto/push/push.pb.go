@@ -6,7 +6,7 @@ package pbPush // import "Open_IM/pkg/proto/push"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 
 import (
 	context "golang.org/x/net/context"
@@ -25,12 +25,12 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type PushMsgReq struct {
-	OperationID          string          `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
-	PushToUserID         string          `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	OperationID          string         `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
+	PushToUserID         string         `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *PushMsgReq) Reset()         { *m = PushMsgReq{} }
@@ -64,7 +64,7 @@ func (m *PushMsgReq) GetOperationID() string {
 	return ""
 }
 
-func (m *PushMsgReq) GetMsgData() *sdk_ws.MsgData {
+func (m *PushMsgReq) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}

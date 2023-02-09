@@ -10,7 +10,7 @@ import (
 	"Open_IM/pkg/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbRelay "Open_IM/pkg/proto/relay"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"

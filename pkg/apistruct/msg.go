@@ -2,7 +2,7 @@ package apistruct
 
 import (
 	"Open_IM/pkg/proto/msg"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 )
 
 type DelMsgReq struct {
@@ -54,16 +54,16 @@ type SetMsgMinSeqResp struct {
 }
 
 type ModifyMessageReactionExtensionsReq struct {
-	OperationID           string                      `json:"operationID" binding:"required"`
-	SourceID              string                      `json:"sourceID"  binding:"required"`
-	SessionType           int32                       `json:"sessionType" binding:"required"`
-	ReactionExtensionList map[string]*sdk_ws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID           string                      `json:"clientMsgID" binding:"required"`
-	Ex                    *string                     `json:"ex"`
-	AttachedInfo          *string                     `json:"attachedInfo"`
-	IsReact               bool                        `json:"isReact"`
-	IsExternalExtensions  bool                        `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64                       `json:"msgFirstModifyTime"`
+	OperationID           string                     `json:"operationID" binding:"required"`
+	SourceID              string                     `json:"sourceID"  binding:"required"`
+	SessionType           int32                      `json:"sessionType" binding:"required"`
+	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
+	ClientMsgID           string                     `json:"clientMsgID" binding:"required"`
+	Ex                    *string                    `json:"ex"`
+	AttachedInfo          *string                    `json:"attachedInfo"`
+	IsReact               bool                       `json:"isReact"`
+	IsExternalExtensions  bool                       `json:"isExternalExtensions"`
+	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
 }
 
 type ModifyMessageReactionExtensionsResp struct {
@@ -106,13 +106,13 @@ type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 
 type DeleteMessageReactionExtensionsReq struct {
-	OperationID           string             `json:"operationID" binding:"required"`
-	SourceID              string             `json:"sourceID" binding:"required"`
-	SessionType           int32              `json:"sessionType" binding:"required"`
-	ClientMsgID           string             `json:"clientMsgID" binding:"required"`
-	IsExternalExtensions  bool               `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64              `json:"msgFirstModifyTime" binding:"required"`
-	ReactionExtensionList []*sdk_ws.KeyValue `json:"reactionExtensionList" binding:"required"`
+	OperationID           string            `json:"operationID" binding:"required"`
+	SourceID              string            `json:"sourceID" binding:"required"`
+	SessionType           int32             `json:"sessionType" binding:"required"`
+	ClientMsgID           string            `json:"clientMsgID" binding:"required"`
+	IsExternalExtensions  bool              `json:"isExternalExtensions"`
+	MsgFirstModifyTime    int64             `json:"msgFirstModifyTime" binding:"required"`
+	ReactionExtensionList []*sdkws.KeyValue `json:"reactionExtensionList" binding:"required"`
 }
 
 type DeleteMessageReactionExtensionsResp struct {
@@ -121,21 +121,21 @@ type DeleteMessageReactionExtensionsResp struct {
 }
 
 type ReactionMessageModifierNotification struct {
-	SourceID                     string                      `json:"sourceID"  binding:"required"`
-	OpUserID                     string                      `json:"opUserID"  binding:"required"`
-	SessionType                  int32                       `json:"sessionType" binding:"required"`
-	SuccessReactionExtensionList map[string]*sdk_ws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID                  string                      `json:"clientMsgID" binding:"required"`
-	IsReact                      bool                        `json:"isReact"`
-	IsExternalExtensions         bool                        `json:"isExternalExtensions"`
-	MsgFirstModifyTime           int64                       `json:"msgFirstModifyTime"`
+	SourceID                     string                     `json:"sourceID"  binding:"required"`
+	OpUserID                     string                     `json:"opUserID"  binding:"required"`
+	SessionType                  int32                      `json:"sessionType" binding:"required"`
+	SuccessReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
+	ClientMsgID                  string                     `json:"clientMsgID" binding:"required"`
+	IsReact                      bool                       `json:"isReact"`
+	IsExternalExtensions         bool                       `json:"isExternalExtensions"`
+	MsgFirstModifyTime           int64                      `json:"msgFirstModifyTime"`
 }
 
 type ReactionMessageDeleteNotification struct {
-	SourceID                     string                      `json:"sourceID"  binding:"required"`
-	OpUserID                     string                      `json:"opUserID"  binding:"required"`
-	SessionType                  int32                       `json:"sessionType" binding:"required"`
-	SuccessReactionExtensionList map[string]*sdk_ws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID                  string                      `json:"clientMsgID" binding:"required"`
-	MsgFirstModifyTime           int64                       `json:"msgFirstModifyTime"`
+	SourceID                     string                     `json:"sourceID"  binding:"required"`
+	OpUserID                     string                     `json:"opUserID"  binding:"required"`
+	SessionType                  int32                      `json:"sessionType" binding:"required"`
+	SuccessReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
+	ClientMsgID                  string                     `json:"clientMsgID" binding:"required"`
+	MsgFirstModifyTime           int64                      `json:"msgFirstModifyTime"`
 }

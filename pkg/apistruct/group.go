@@ -1,7 +1,7 @@
 package apistruct
 
 import (
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdkws"
 )
 
 type CommResp struct {

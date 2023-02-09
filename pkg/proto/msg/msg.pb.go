@@ -6,7 +6,7 @@ package msg // import "Open_IM/pkg/proto/msg"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import sdkws "Open_IM/pkg/proto/sdkws"
 import wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 import (
@@ -26,12 +26,12 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type MsgDataToMQ struct {
-	Token                string          `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
-	OperationID          string          `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	Token                string         `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
@@ -72,7 +72,7 @@ func (m *MsgDataToMQ) GetOperationID() string {
 	return ""
 }
 
-func (m *MsgDataToMQ) GetMsgData() *sdk_ws.MsgData {
+func (m *MsgDataToMQ) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -80,11 +80,11 @@ func (m *MsgDataToMQ) GetMsgData() *sdk_ws.MsgData {
 }
 
 type MsgDataToDB struct {
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,1,opt,name=msgData" json:"msgData,omitempty"`
-	OperationID          string          `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData" json:"msgData,omitempty"`
+	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
@@ -111,7 +111,7 @@ func (m *MsgDataToDB) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDataToDB proto.InternalMessageInfo
 
-func (m *MsgDataToDB) GetMsgData() *sdk_ws.MsgData {
+func (m *MsgDataToDB) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -126,12 +126,12 @@ func (m *MsgDataToDB) GetOperationID() string {
 }
 
 type PushMsgDataToMQ struct {
-	OperationID          string          `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
-	PushToUserID         string          `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	OperationID          string         `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
+	PushToUserID         string         `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
@@ -165,7 +165,7 @@ func (m *PushMsgDataToMQ) GetOperationID() string {
 	return ""
 }
 
-func (m *PushMsgDataToMQ) GetMsgData() *sdk_ws.MsgData {
+func (m *PushMsgDataToMQ) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -370,12 +370,12 @@ func (m *GetMaxAndMinSeqResp) GetMinSeq() uint32 {
 }
 
 type SendMsgReq struct {
-	Token                string          `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
-	OperationID          string          `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	Token                string         `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
@@ -416,7 +416,7 @@ func (m *SendMsgReq) GetOperationID() string {
 	return ""
 }
 
-func (m *SendMsgReq) GetMsgData() *sdk_ws.MsgData {
+func (m *SendMsgReq) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -1056,12 +1056,12 @@ func (m *GetSuperGroupMsgReq) GetGroupID() string {
 }
 
 type GetSuperGroupMsgResp struct {
-	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	ErrCode              int32          `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string         `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *GetSuperGroupMsgResp) Reset()         { *m = GetSuperGroupMsgResp{} }
@@ -1102,7 +1102,7 @@ func (m *GetSuperGroupMsgResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetSuperGroupMsgResp) GetMsgData() *sdk_ws.MsgData {
+func (m *GetSuperGroupMsgResp) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -1156,12 +1156,12 @@ func (m *GetWriteDiffMsgReq) GetSeq() uint32 {
 }
 
 type GetWriteDiffMsgResp struct {
-	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	ErrCode              int32          `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string         `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *GetWriteDiffMsgResp) Reset()         { *m = GetWriteDiffMsgResp{} }
@@ -1202,7 +1202,7 @@ func (m *GetWriteDiffMsgResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetWriteDiffMsgResp) GetMsgData() *sdk_ws.MsgData {
+func (m *GetWriteDiffMsgResp) GetMsgData() *sdkws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -1210,20 +1210,20 @@ func (m *GetWriteDiffMsgResp) GetMsgData() *sdk_ws.MsgData {
 }
 
 type ModifyMessageReactionExtensionsReq struct {
-	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
-	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
-	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
-	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
-	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
-	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
-	XXX_unrecognized      []byte                      `json:"-"`
-	XXX_sizecache         int32                       `json:"-"`
+	OperationID           string                     `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                     `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                     `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                      `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                     `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue    `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue    `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                       `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                       `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                      `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
+	XXX_unrecognized      []byte                     `json:"-"`
+	XXX_sizecache         int32                      `json:"-"`
 }
 
 func (m *ModifyMessageReactionExtensionsReq) Reset()         { *m = ModifyMessageReactionExtensionsReq{} }
@@ -1278,7 +1278,7 @@ func (m *ModifyMessageReactionExtensionsReq) GetSessionType() int32 {
 	return 0
 }
 
-func (m *ModifyMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+func (m *ModifyMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdkws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1328,20 +1328,20 @@ func (m *ModifyMessageReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
 }
 
 type SetMessageReactionExtensionsReq struct {
-	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
-	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
-	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
-	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
-	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
-	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
-	XXX_unrecognized      []byte                      `json:"-"`
-	XXX_sizecache         int32                       `json:"-"`
+	OperationID           string                     `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                     `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                     `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                      `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                     `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue    `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue    `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                       `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                       `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                      `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
+	XXX_unrecognized      []byte                     `json:"-"`
+	XXX_sizecache         int32                      `json:"-"`
 }
 
 func (m *SetMessageReactionExtensionsReq) Reset()         { *m = SetMessageReactionExtensionsReq{} }
@@ -1396,7 +1396,7 @@ func (m *SetMessageReactionExtensionsReq) GetSessionType() int32 {
 	return 0
 }
 
-func (m *SetMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+func (m *SetMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdkws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1698,13 +1698,13 @@ func (m *GetMessageListReactionExtensionsResp) GetSingleMessageResult() []*Singl
 }
 
 type SingleMessageExtensionResult struct {
-	ErrCode               int32                       `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg                string                      `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,3,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                      `protobuf:"bytes,4,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
-	XXX_unrecognized      []byte                      `json:"-"`
-	XXX_sizecache         int32                       `json:"-"`
+	ErrCode               int32                      `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg                string                     `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,3,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                     `protobuf:"bytes,4,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
+	XXX_unrecognized      []byte                     `json:"-"`
+	XXX_sizecache         int32                      `json:"-"`
 }
 
 func (m *SingleMessageExtensionResult) Reset()         { *m = SingleMessageExtensionResult{} }
@@ -1745,7 +1745,7 @@ func (m *SingleMessageExtensionResult) GetErrMsg() string {
 	return ""
 }
 
-func (m *SingleMessageExtensionResult) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+func (m *SingleMessageExtensionResult) GetReactionExtensionList() map[string]*sdkws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1822,17 +1822,17 @@ func (m *ModifyMessageReactionExtensionsResp) GetFailedList() []*ExtendMsgResp {
 }
 
 type DeleteMessageListReactionExtensionsReq struct {
-	OperationID           string             `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID              string             `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
-	SourceID              string             `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
-	SessionType           int32              `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ClientMsgID           string             `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	IsExternalExtensions  bool               `protobuf:"varint,6,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64              `protobuf:"varint,7,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	ReactionExtensionList []*sdk_ws.KeyValue `protobuf:"bytes,8,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}           `json:"-"`
-	XXX_unrecognized      []byte             `json:"-"`
-	XXX_sizecache         int32              `json:"-"`
+	OperationID           string            `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID              string            `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
+	SourceID              string            `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
+	SessionType           int32             `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ClientMsgID           string            `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	IsExternalExtensions  bool              `protobuf:"varint,6,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64             `protobuf:"varint,7,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	ReactionExtensionList []*sdkws.KeyValue `protobuf:"bytes,8,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}          `json:"-"`
+	XXX_unrecognized      []byte            `json:"-"`
+	XXX_sizecache         int32             `json:"-"`
 }
 
 func (m *DeleteMessageListReactionExtensionsReq) Reset() {
@@ -1910,7 +1910,7 @@ func (m *DeleteMessageListReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
 	return 0
 }
 
-func (m *DeleteMessageListReactionExtensionsReq) GetReactionExtensionList() []*sdk_ws.KeyValue {
+func (m *DeleteMessageListReactionExtensionsReq) GetReactionExtensionList() []*sdkws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -2098,12 +2098,12 @@ func (m *ExtendMsg) GetEx() string {
 }
 
 type KeyValueResp struct {
-	KeyValue             *sdk_ws.KeyValue `protobuf:"bytes,1,opt,name=keyValue" json:"keyValue,omitempty"`
-	ErrCode              int32            `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string           `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
-	XXX_unrecognized     []byte           `json:"-"`
-	XXX_sizecache        int32            `json:"-"`
+	KeyValue             *sdkws.KeyValue `protobuf:"bytes,1,opt,name=keyValue" json:"keyValue,omitempty"`
+	ErrCode              int32           `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string          `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *KeyValueResp) Reset()         { *m = KeyValueResp{} }
@@ -2130,7 +2130,7 @@ func (m *KeyValueResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_KeyValueResp proto.InternalMessageInfo
 
-func (m *KeyValueResp) GetKeyValue() *sdk_ws.KeyValue {
+func (m *KeyValueResp) GetKeyValue() *sdkws.KeyValue {
 	if m != nil {
 		return m.KeyValue
 	}
@@ -2229,15 +2229,15 @@ func init() {
 	proto.RegisterType((*GetWriteDiffMsgReq)(nil), "msg.GetWriteDiffMsgReq")
 	proto.RegisterType((*GetWriteDiffMsgResp)(nil), "msg.GetWriteDiffMsgResp")
 	proto.RegisterType((*ModifyMessageReactionExtensionsReq)(nil), "msg.ModifyMessageReactionExtensionsReq")
-	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.ModifyMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.ModifyMessageReactionExtensionsReq.ReactionExtensionListEntry")
 	proto.RegisterType((*SetMessageReactionExtensionsReq)(nil), "msg.SetMessageReactionExtensionsReq")
-	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SetMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.SetMessageReactionExtensionsReq.ReactionExtensionListEntry")
 	proto.RegisterType((*SetMessageReactionExtensionsResp)(nil), "msg.SetMessageReactionExtensionsResp")
 	proto.RegisterType((*GetMessageListReactionExtensionsReq)(nil), "msg.GetMessageListReactionExtensionsReq")
 	proto.RegisterType((*GetMessageListReactionExtensionsReq_MessageReactionKey)(nil), "msg.GetMessageListReactionExtensionsReq.MessageReactionKey")
 	proto.RegisterType((*GetMessageListReactionExtensionsResp)(nil), "msg.GetMessageListReactionExtensionsResp")
 	proto.RegisterType((*SingleMessageExtensionResult)(nil), "msg.SingleMessageExtensionResult")
-	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SingleMessageExtensionResult.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.SingleMessageExtensionResult.ReactionExtensionListEntry")
 	proto.RegisterType((*ModifyMessageReactionExtensionsResp)(nil), "msg.ModifyMessageReactionExtensionsResp")
 	proto.RegisterType((*DeleteMessageListReactionExtensionsReq)(nil), "msg.DeleteMessageListReactionExtensionsReq")
 	proto.RegisterType((*DeleteMessageListReactionExtensionsResp)(nil), "msg.DeleteMessageListReactionExtensionsResp")
@@ -2259,10 +2259,10 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Msg service
 
 type MsgClient interface {
-	GetMaxAndMinSeq(ctx context.Context, in *sdk_ws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdk_ws.GetMaxAndMinSeqResp, error)
-	PullMessageBySeqList(ctx context.Context, in *sdk_ws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdk_ws.PullMessageBySeqListResp, error)
+	GetMaxAndMinSeq(ctx context.Context, in *sdkws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdkws.GetMaxAndMinSeqResp, error)
+	PullMessageBySeqList(ctx context.Context, in *sdkws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdkws.PullMessageBySeqListResp, error)
 	SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgResp, error)
-	DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, opts ...grpc.CallOption) (*sdk_ws.DelMsgListResp, error)
+	DelMsgList(ctx context.Context, in *sdkws.DelMsgListReq, opts ...grpc.CallOption) (*sdkws.DelMsgListResp, error)
 	DelSuperGroupMsg(ctx context.Context, in *DelSuperGroupMsgReq, opts ...grpc.CallOption) (*DelSuperGroupMsgResp, error)
 	ClearMsg(ctx context.Context, in *ClearMsgReq, opts ...grpc.CallOption) (*ClearMsgResp, error)
 	SetMsgMinSeq(ctx context.Context, in *SetMsgMinSeqReq, opts ...grpc.CallOption) (*SetMsgMinSeqResp, error)
@@ -2285,8 +2285,8 @@ func NewMsgClient(cc *grpc.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdk_ws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdk_ws.GetMaxAndMinSeqResp, error) {
-	out := new(sdk_ws.GetMaxAndMinSeqResp)
+func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdkws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdkws.GetMaxAndMinSeqResp, error) {
+	out := new(sdkws.GetMaxAndMinSeqResp)
 	err := grpc.Invoke(ctx, "/msg.msg/GetMaxAndMinSeq", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2294,8 +2294,8 @@ func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdk_ws.GetMaxAndMin
 	return out, nil
 }
 
-func (c *msgClient) PullMessageBySeqList(ctx context.Context, in *sdk_ws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdk_ws.PullMessageBySeqListResp, error) {
-	out := new(sdk_ws.PullMessageBySeqListResp)
+func (c *msgClient) PullMessageBySeqList(ctx context.Context, in *sdkws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdkws.PullMessageBySeqListResp, error) {
+	out := new(sdkws.PullMessageBySeqListResp)
 	err := grpc.Invoke(ctx, "/msg.msg/PullMessageBySeqList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2312,8 +2312,8 @@ func (c *msgClient) SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *msgClient) DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, opts ...grpc.CallOption) (*sdk_ws.DelMsgListResp, error) {
-	out := new(sdk_ws.DelMsgListResp)
+func (c *msgClient) DelMsgList(ctx context.Context, in *sdkws.DelMsgListReq, opts ...grpc.CallOption) (*sdkws.DelMsgListResp, error) {
+	out := new(sdkws.DelMsgListResp)
 	err := grpc.Invoke(ctx, "/msg.msg/DelMsgList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2423,10 +2423,10 @@ func (c *msgClient) DeleteMessageReactionExtensions(ctx context.Context, in *Del
 // Server API for Msg service
 
 type MsgServer interface {
-	GetMaxAndMinSeq(context.Context, *sdk_ws.GetMaxAndMinSeqReq) (*sdk_ws.GetMaxAndMinSeqResp, error)
-	PullMessageBySeqList(context.Context, *sdk_ws.PullMessageBySeqListReq) (*sdk_ws.PullMessageBySeqListResp, error)
+	GetMaxAndMinSeq(context.Context, *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error)
+	PullMessageBySeqList(context.Context, *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error)
 	SendMsg(context.Context, *SendMsgReq) (*SendMsgResp, error)
-	DelMsgList(context.Context, *sdk_ws.DelMsgListReq) (*sdk_ws.DelMsgListResp, error)
+	DelMsgList(context.Context, *sdkws.DelMsgListReq) (*sdkws.DelMsgListResp, error)
 	DelSuperGroupMsg(context.Context, *DelSuperGroupMsgReq) (*DelSuperGroupMsgResp, error)
 	ClearMsg(context.Context, *ClearMsgReq) (*ClearMsgResp, error)
 	SetMsgMinSeq(context.Context, *SetMsgMinSeqReq) (*SetMsgMinSeqResp, error)
@@ -2446,7 +2446,7 @@ func RegisterMsgServer(s *grpc.Server, srv MsgServer) {
 }
 
 func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdk_ws.GetMaxAndMinSeqReq)
+	in := new(sdkws.GetMaxAndMinSeqReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2458,13 +2458,13 @@ func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/msg.msg/GetMaxAndMinSeq",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GetMaxAndMinSeq(ctx, req.(*sdk_ws.GetMaxAndMinSeqReq))
+		return srv.(MsgServer).GetMaxAndMinSeq(ctx, req.(*sdkws.GetMaxAndMinSeqReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdk_ws.PullMessageBySeqListReq)
+	in := new(sdkws.PullMessageBySeqListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2476,7 +2476,7 @@ func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/msg.msg/PullMessageBySeqList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).PullMessageBySeqList(ctx, req.(*sdk_ws.PullMessageBySeqListReq))
+		return srv.(MsgServer).PullMessageBySeqList(ctx, req.(*sdkws.PullMessageBySeqListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2500,7 +2500,7 @@ func _Msg_SendMsg_Handler(srv interface{}, ctx context.Context, dec func(interfa
 }
 
 func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdk_ws.DelMsgListReq)
+	in := new(sdkws.DelMsgListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2512,7 +2512,7 @@ func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/msg.msg/DelMsgList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).DelMsgList(ctx, req.(*sdk_ws.DelMsgListReq))
+		return srv.(MsgServer).DelMsgList(ctx, req.(*sdkws.DelMsgListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
