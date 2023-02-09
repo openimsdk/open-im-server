@@ -281,13 +281,23 @@ message GetGroupAbstractInfoResp{
   repeated GroupAbstractInfo groupAbstractInfos = 1;
 }
 
-message getUserInGroupMembersReq {
+message GetUserInGroupMembersReq {
   string userID = 1;
   repeated string groupIDs = 2;
 }
-message getUserInGroupMembersResp{
+message GetUserInGroupMembersResp{
   repeated server_api_params.GroupMemberFullInfo members = 1;
 }
+
+message GetGroupMemberUserIDReq{
+  string groupID = 1;
+}
+
+message GetGroupMemberUserIDResp{
+  repeated string userIDs = 1;
+}
+
+
 
 service group{
   //创建群
@@ -344,7 +354,9 @@ service group{
   //获取群信息hash值
   rpc getGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
   //获取某个用户在指定群中的信息
-  rpc getUserInGroupMembers(getUserInGroupMembersReq) returns (getUserInGroupMembersResp);
+  rpc getUserInGroupMembers(GetUserInGroupMembersReq) returns (GetUserInGroupMembersResp);
+  //获取群成员用户ID
+  rpc getGroupMemberUserID(GetGroupMemberUserIDReq) returns (GetGroupMemberUserIDResp);
 }
 
 

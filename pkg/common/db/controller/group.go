@@ -30,6 +30,7 @@ type GroupInterface interface {
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error)
+	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
@@ -59,6 +60,10 @@ func NewGroupInterface(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.
 
 type GroupController struct {
 	database GroupDataBaseInterface
+}
+
+func (g *GroupController) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
+	return g.database.FindGroupMemberUserID(ctx, groupID)
 }
 
 func (g *GroupController) CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error {
@@ -179,6 +184,7 @@ type GroupDataBaseInterface interface {
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error)
+	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
 	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
@@ -232,6 +238,10 @@ type GroupDataBase struct {
 
 	cache   *cache.GroupCache
 	mongoDB *unrelation.SuperGroupMongoDriver
+}
+
+func (g *GroupDataBase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
+	return g.groupMemberDB.FindMemberUserID(ctx, groupID)
 }
 
 func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error {

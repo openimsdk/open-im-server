@@ -191,7 +191,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}
 	}
-	if err := s.GroupInterface.CreateGroup(ctx, []*relation.GroupModel{group}, groupMembers); err != nil {
+	if err := s.GroupInterface.CreateGroup(ctx, []*relationTb.GroupModel{group}, groupMembers); err != nil {
 		return nil, err
 	}
 	resp.GroupInfo = DbToPbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
@@ -287,9 +287,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 				return nil, constant.ErrNoPermission.Wrap("not in group")
 			}
 			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
-				var requests []*relation.GroupRequestModel
+				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
-					requests = append(requests, &relation.GroupRequestModel{
+					requests = append(requests, &relationTb.GroupRequestModel{
 						UserID:        userID,
 						GroupID:       req.GroupID,
 						JoinSource:    constant.JoinByInvitation,
@@ -1036,5 +1036,15 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
 		return DbToPbGroupMembersCMSResp(e)
 	})
+	return resp, nil
+}
+
+func (s *groupServer) GetGroupMemberUserID(ctx context.Context, req *pbGroup.GetGroupMemberUserIDReq) (*pbGroup.GetGroupMemberUserIDResp, error) {
+	resp := &pbGroup.GetGroupMemberUserIDResp{}
+	userIDs, err := s.GroupInterface.FindGroupMemberUserID(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	resp.UserIDs = userIDs
 	return resp, nil
 }
