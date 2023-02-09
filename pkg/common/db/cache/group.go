@@ -33,6 +33,27 @@ type GroupCache interface {
 	DelGroupsInfo(ctx context.Context, groupID string) (err error)
 	GetGroupInfo(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)) (group *relationTb.GroupModel, err error)
 	DelGroupInfo(ctx context.Context, groupID string) (err error)
+
+	BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string, fn func(ctx context.Context, userIDs []string) error) (err error)
+
+	GetJoinedSuperGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error)) (joinedSuperGroupIDs []string, err error)
+	DelJoinedSuperGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) error) (err error)
+
+	GetGroupMembersHash(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error)) (hashCodeUint64 uint64, err error)
+	DelGroupMembersHash(ctx context.Context, groupID string) (err error)
+
+	GetGroupMemberIDs(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (groupMemberIDs []string, err error)) (groupMemberIDs []string, err error)
+	DelGroupMemberIDs(ctx context.Context, groupID string)
+
+	GetJoinedGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedGroupIDs []string, err error)) (joinedGroupIDs []string, err error)
+	DelJoinedGroupIDs(ctx context.Context, userID string) (err error)
+
+	GetGroupMemberInfo(ctx context.Context, groupID, userID string, fn func(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)) (groupMember *relationTb.GroupMemberModel, err error)
+	GetGroupMembersInfo(ctx context.Context, count, offset int32, groupID string, fn func(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error)) (groupMembers []*relationTb.GroupMemberModel, err error)
+	DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error)
+
+	GetGroupMemberNum(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (num int, err error)) (num int, err error)
+	DelGroupMemberNum(ctx context.Context, groupID string) (err error)
 }
 
 type GroupCacheRedis struct {

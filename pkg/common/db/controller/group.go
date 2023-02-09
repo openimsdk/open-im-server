@@ -274,6 +274,7 @@ func (g *GroupDataBase) DismissGroup(ctx context.Context, groupID string) error 
 			return err
 		}
 		return g.groupMemberDB.DeleteGroup(ctx, []string{groupID}, tx)
+
 	})
 }
 

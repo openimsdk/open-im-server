@@ -14,7 +14,7 @@ import (
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m api_struct.ReactionMessageModifierNotification
+	var m apistruct.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType
@@ -37,7 +37,7 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 }
 func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string, sessionType int32,
 	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m api_struct.ReactionMessageDeleteNotification
+	var m apistruct.ReactionMessageDeleteNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType

@@ -1,7 +1,7 @@
 package localcache
 
 import (
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"context"
 	"sync"
 )

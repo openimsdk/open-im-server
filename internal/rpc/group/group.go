@@ -15,7 +15,7 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discovery_registry"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"

@@ -59,13 +59,13 @@ func TestName(t *testing.T) {
 	//NewRpc(bind, "", group.NewGroupClient, temp)
 
 	var c *gin.Context
-	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
+	NewRpc(NewApiBind[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
 
 }
 
 func KickGroupMember(c *gin.Context) {
 	// 默认 全部自动
-	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Execute()
+	NewRpc(NewApiBind[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Execute()
 	// 可以自定义编辑请求和响应
 	NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Before(func(apiReq *api_struct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
 		return bind()
