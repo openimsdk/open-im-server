@@ -33,7 +33,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo, reqPb.OpUserIDPlatformID = token_verify.GetUserIDAndPlatformIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -129,7 +129,7 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	}
 	var ok bool
 	var errInfo string
-	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.OpUserID, errInfo, reqPb.OpUserIDPlatformID = token_verify.GetUserIDAndPlatformIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -154,8 +154,8 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
 	resp.Data.ResultKeyValue = respPb.Result
-	resp.Data.MsgFirstModifyTime = reqPb.MsgFirstModifyTime
-	resp.Data.IsReact = reqPb.IsReact
+	resp.Data.MsgFirstModifyTime = respPb.MsgFirstModifyTime
+	resp.Data.IsReact = respPb.IsReact
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }

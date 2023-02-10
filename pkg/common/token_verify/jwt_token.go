@@ -159,6 +159,16 @@ func GetUserIDFromToken(token string, operationID string) (bool, string, string)
 	return true, claims.UID, ""
 }
 
+func GetUserIDAndPlatformIDFromToken(token string, operationID string) (bool, string, string, int32) {
+	claims, err := ParseToken(token, operationID)
+	if err != nil {
+		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
+		return false, "", err.Error(), 0
+	}
+	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Unix())
+	return true, claims.UID, "", int32(constant.PlatformNameToID(claims.Platform))
+}
+
 func GetUserIDFromTokenExpireTime(token string, operationID string) (bool, string, string, int64) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {

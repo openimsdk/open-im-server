@@ -41,7 +41,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		}
 		rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, isHistory, false)
 		return &rResp, nil
 	}
 	for _, v := range callbackResp.ResultReactionExtensionList {
@@ -187,12 +187,12 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	}
 	if !isExists {
 		if !req.IsReact {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
+			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, true, true)
 		} else {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, false, false)
 		}
 	} else {
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
+		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, false, true)
 	}
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
@@ -323,7 +323,8 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 	rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 	rResp.Result = callbackResp.ResultReactionExtensionList
 	rResp.IsReact = callbackResp.IsReact
-	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, isHistory, false)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", resp.String())
 	return &rResp, nil
 }
 
@@ -346,7 +347,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//if ExternalExtension
 	if req.IsExternalExtensions {
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+		ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, false, false)
 		return &rResp, nil
 
 	}
@@ -470,7 +471,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 		}
 
 	}
-	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, isExists)
+	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.OpUserIDPlatformID, req.SessionType, req, &rResp, false, isExists)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
 }

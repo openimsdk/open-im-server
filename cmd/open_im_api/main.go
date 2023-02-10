@@ -175,8 +175,10 @@ func main() {
 		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
 		conversationGroup.POST("/get_conversation", conversation.GetConversation)
 		conversationGroup.POST("/get_conversations", conversation.GetConversations)
+		//deprecated
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
+		//deprecated
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
