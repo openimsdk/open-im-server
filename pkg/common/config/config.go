@@ -37,10 +37,6 @@ type config struct {
 		GinPort  []int  `yaml:"openImApiPort"`
 		ListenIP string `yaml:"listenIP"`
 	}
-	CmsApi struct {
-		GinPort  []int  `yaml:"openImCmsApiPort"`
-		ListenIP string `yaml:"listenIP"`
-	}
 	Sdk struct {
 		WsPort  []int    `yaml:"openImSdkWsPort"`
 		DataDir []string `yaml:"dataDir"`
@@ -131,8 +127,6 @@ type config struct {
 		OpenImGroupPort          []int `yaml:"openImGroupPort"`
 		OpenImAuthPort           []int `yaml:"openImAuthPort"`
 		OpenImPushPort           []int `yaml:"openImPushPort"`
-		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
-		OpenImOfficePort         []int `yaml:"openImOfficePort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
 		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
@@ -146,8 +140,6 @@ type config struct {
 		OpenImRelayName        string `yaml:"openImRelayName"`
 		OpenImGroupName        string `yaml:"openImGroupName"`
 		OpenImAuthName         string `yaml:"openImAuthName"`
-		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
-		OpenImOfficeName       string `yaml:"openImOfficeName"`
 		OpenImConversationName string `yaml:"openImConversationName"`
 		OpenImCacheName        string `yaml:"openImCacheName"`
 		OpenImRealTimeCommName string `yaml:"openImRealTimeCommName"`
@@ -473,16 +465,6 @@ type config struct {
 				CloseTips string `yaml:"closeTips"`
 			} `yaml:"defaultTips"`
 		} `yaml:"conversationSetPrivate"`
-		WorkMomentsNotification struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"workMomentsNotification"`
-		JoinDepartmentNotification struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"joinDepartmentNotification"`
 		Signal struct {
 			OfflinePush struct {
 				Title string `yaml:"title"`
@@ -490,9 +472,6 @@ type config struct {
 		} `yaml:"signal"`
 	}
 
-	WorkMoment struct {
-		OnlyFriendCanSee bool `yaml:"onlyFriendCanSee"`
-	} `yaml:"workMoment"`
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
@@ -506,11 +485,7 @@ type config struct {
 		GroupPrometheusPort           []int `yaml:"groupPrometheusPort"`
 		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
 		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
-		AdminCmsPrometheusPort        []int `yaml:"adminCmsPrometheusPort"`
-		OfficePrometheusPort          []int `yaml:"officePrometheusPort"`
-		OrganizationPrometheusPort    []int `yaml:"organizationPrometheusPort"`
 		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
-		CachePrometheusPort           []int `yaml:"cachePrometheusPort"`
 		RealTimeCommPrometheusPort    []int `yaml:"realTimeCommPrometheusPort"`
 		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
 	} `yaml:"prometheus"`

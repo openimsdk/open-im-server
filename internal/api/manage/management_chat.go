@@ -14,7 +14,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	pbChat "Open_IM/pkg/proto/msg"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
@@ -76,7 +76,7 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 
 	pbData := pbChat.SendMsgReq{
 		OperationID: params.OperationID,
-		MsgData: &open_im_sdk.MsgData{
+		MsgData: &sdkws.MsgData{
 			SendID:           params.SendID,
 			GroupID:          params.GroupID,
 			ClientMsgID:      utils.GetMsgID(params.SendID),
@@ -95,7 +95,7 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 		},
 	}
 	if params.ContentType == constant.OANotification {
-		var tips open_im_sdk.TipsComm
+		var tips sdkws.TipsComm
 		tips.JsonDetail = utils.StructToJsonString(params.Content)
 		pbData.MsgData.Content, err = proto.Marshal(&tips)
 		if err != nil {
@@ -231,7 +231,7 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 
 	log.Info(params.OperationID, "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
-	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: open_im_sdk.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
+	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: sdkws.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
 	log.Info(params.OperationID, "ManagementSendMsg return", resp)
 	c.JSON(http.StatusOK, resp)
 }

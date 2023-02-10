@@ -1,7 +1,7 @@
 package apistruct
 
 import (
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 )
 
 type GetUsersInfoReq struct {
@@ -10,8 +10,8 @@ type GetUsersInfoReq struct {
 }
 type GetUsersInfoResp struct {
 	CommResp
-	UserInfoList []*open_im_sdk.PublicUserInfo `json:"-"`
-	Data         []map[string]interface{}      `json:"data" swaggerignore:"true"`
+	UserInfoList []*sdkws.PublicUserInfo  `json:"-"`
+	Data         []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type UpdateSelfUserInfoReq struct {
@@ -35,7 +35,7 @@ type GetSelfUserInfoReq struct {
 }
 type GetSelfUserInfoResp struct {
 	CommResp
-	UserInfo *open_im_sdk.UserInfo  `json:"-"`
+	UserInfo *sdkws.UserInfo        `json:"-"`
 	Data     map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 

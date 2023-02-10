@@ -99,7 +99,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.GetGroupMembersInfoReq true "groupID为要获取的群ID <br> memberList为要获取群成员的群ID列表"
 //// @Produce json
-//// @Success 0 {object} api.GetGroupMembersInfoResp{data=[]open_im_sdk.GroupMemberFullInfo}
+//// @Success 0 {object} api.GetGroupMembersInfoResp{data=[]sdkws.GroupMemberFullInfo}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/get_group_members_info [post]
@@ -200,7 +200,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.GetGroupAllMemberReq true "GroupID为要获取群成员的群ID"
 //// @Produce json
-//// @Success 0 {object} api.GetGroupAllMemberResp{data=[]open_im_sdk.GroupMemberFullInfo}
+//// @Success 0 {object} api.GetGroupAllMemberResp{data=[]sdkws.GroupMemberFullInfo}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/get_group_all_member_list [post]
@@ -256,7 +256,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.GetJoinedGroupListReq true "fromUserID为要获取的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetJoinedGroupListResp{data=[]open_im_sdk.GroupInfo}
+//// @Success 0 {object} api.GetJoinedGroupListResp{data=[]sdkws.GroupInfo}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/get_joined_group_list [post]
@@ -379,7 +379,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.CreateGroupReq true "groupType这里填0代表普通群 <br>groupName为群名称<br> introduction为群介绍<br> notification为群公共<br>ownerUserID为群主ID <br> ex为群扩展字段 <br> memberList中对象roleLevel为群员角色,1为普通用户 2为群主 3为管理员"
 //// @Produce json
-//// @Success 0 {object} api.CreateGroupResp{data=open_im_sdk.GroupInfo}
+//// @Success 0 {object} api.CreateGroupResp{data=sdkws.GroupInfo}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/create_group [post]
@@ -397,7 +397,7 @@ package group
 ////		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errMsg})
 ////		return
 ////	}
-////	req := &rpc.CreateGroupReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+////	req := &rpc.CreateGroupReq{GroupInfo: &sdkws.GroupInfo{}}
 ////	utils.CopyStructFields(req.GroupInfo, &params)
 ////
 ////	for _, v := range params.MemberList {
@@ -456,7 +456,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.GetGroupApplicationListReq true "fromUserID为要获取的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]sdkws.GroupRequest}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/get_recv_group_applicationList [post]
@@ -509,7 +509,7 @@ package group
 //// @Param token header string true "im token"
 //// @Param req body api.GetUserReqGroupApplicationListReq true "userID为要获取的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+//// @Success 0 {object} api.GetGroupApplicationListResp{data=[]sdkws.GroupRequest}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /group/get_user_req_group_applicationList [post]
@@ -572,7 +572,7 @@ package group
 //	c.JSON(http.StatusOK, resp)
 //}
 //
-////func transferGroupInfo(input []*open_im_sdk.GroupInfo) []*api.GroupInfoAlias {
+////func transferGroupInfo(input []*sdkws.GroupInfo) []*api.GroupInfoAlias {
 ////	var result []*api.GroupInfoAlias
 ////	for _, v := range input {
 ////		t := &api.GroupInfoAlias{}
@@ -766,7 +766,7 @@ package group
 ////		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 ////		return
 ////	}
-////	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &open_im_sdk.GroupInfoForSet{}}
+////	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &sdkws.GroupInfoForSet{}}
 ////	utils.CopyStructFields(req.GroupInfoForSet, &params)
 ////	req.OperationID = params.OperationID
 ////	argsHandle(&params, req)

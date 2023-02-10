@@ -750,7 +750,7 @@ func modifyMessageByUserMessageReceiveOptoptimization(userID, sourceID string, s
 type NotificationMsg struct {
 	SendID         string
 	RecvID         string
-	Content        []byte //  open_im_sdk.TipsComm
+	Content        []byte //  sdkws.TipsComm
 	MsgFrom        int32
 	ContentType    int32
 	SessionType    int32
@@ -974,14 +974,6 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.GroupMemberInfoSet.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.GroupMemberInfoSet.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.GroupMemberInfoSet.Conversation.UnreadCount
-
-	case constant.WorkMomentNotification:
-		pushSwitch = config.Config.Notification.WorkMomentsNotification.OfflinePush.PushSwitch
-		title = config.Config.Notification.WorkMomentsNotification.OfflinePush.Title
-		desc = config.Config.Notification.WorkMomentsNotification.OfflinePush.Desc
-		ex = config.Config.Notification.WorkMomentsNotification.OfflinePush.Ext
-		reliabilityLevel = config.Config.Notification.WorkMomentsNotification.Conversation.ReliabilityLevel
-		unReadCount = config.Config.Notification.WorkMomentsNotification.Conversation.UnreadCount
 
 	case constant.ConversationPrivateChatNotification:
 		pushSwitch = config.Config.Notification.ConversationSetPrivate.OfflinePush.PushSwitch

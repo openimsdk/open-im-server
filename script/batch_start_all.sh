@@ -9,7 +9,6 @@ need_to_start_server_shell=(
   push_start.sh
   msg_transfer_start.sh
   sdk_svr_start.sh
-  demo_svr_start.sh
 )
 time=`date +"%Y-%m-%d %H:%M:%S"`
 echo "==========================================================">>../logs/openIM.log 2>&1 &

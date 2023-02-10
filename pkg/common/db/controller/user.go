@@ -30,11 +30,11 @@ type UserController struct {
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
-func (u *UserController) FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+func (u *UserController) FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
 	return u.database.FindWithError(ctx, userIDs)
 }
 
-func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
 	return u.database.Find(ctx, userIDs)
 }
 func (u *UserController) Create(ctx context.Context, users []*relationTb.UserModel) error {
@@ -90,7 +90,7 @@ func newUserDatabase(db *gorm.DB) *UserDatabase {
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
-func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
 	users, err = u.user.Find(ctx, userIDs)
 	if err != nil {
 		return
@@ -102,7 +102,7 @@ func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 }
 
 // 获取指定用户的信息 如有userID未找到 不返回错误
-func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
+func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
 	users, err = u.user.Find(ctx, userIDs)
 	return
 }
@@ -123,7 +123,7 @@ func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // 获取，如果没找到，不返回错误
-func (u *UserDatabase) Page(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
+func (u *UserDatabase) Page(ctx context.Context, showNumber, pageNumber int32) (users []*relationTb.UserModel, count int64, err error) {
 	return u.user.Page(ctx, showNumber, pageNumber)
 }
 

@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/proto/msg"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -46,7 +46,7 @@ func PullMsgBySeqList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
 		return
 	}
-	pbData := open_im_sdk.PullMessageBySeqListReq{}
+	pbData := sdkws.PullMessageBySeqListReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
 	pbData.SeqList = params.SeqList

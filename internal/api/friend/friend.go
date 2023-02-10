@@ -8,7 +8,7 @@ package friend
 //	"Open_IM/pkg/common/tokenverify"
 //	"Open_IM/pkg/getcdv3"
 //	rpc "Open_IM/pkg/proto/friend"
-//	open_im_sdk "Open_IM/pkg/proto/sdkws"
+//	sdkws "Open_IM/pkg/proto/sdkws"
 //	"Open_IM/pkg/utils"
 //	"context"
 //	"github.com/gin-gonic/gin"
@@ -296,7 +296,7 @@ package friend
 //// @Param token header string true "im token"
 //// @Param req body api.GetBlackListReq true "fromUserID要获取黑名单的用户"
 //// @Produce json
-//// @Success 0 {object} api.GetBlackListResp{data=[]open_im_sdk.PublicUserInfo}
+//// @Success 0 {object} api.GetBlackListResp{data=[]sdkws.PublicUserInfo}
 //// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger500Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /friend/get_black_list [post]
@@ -339,7 +339,7 @@ package friend
 //
 //	resp := api.GetBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 //	for _, v := range RpcResp.BlackUserInfoList {
-//		black := open_im_sdk.PublicUserInfo{}
+//		black := sdkws.PublicUserInfo{}
 //		utils.CopyStructFields(&black, v)
 //		resp.BlackUserInfoList = append(resp.BlackUserInfoList, &black)
 //	}
@@ -519,7 +519,7 @@ package friend
 //// @Param token header string true "im token"
 //// @Param req body api.GetFriendListReq true "fromUserID为要获取好友列表的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetFriendListResp{data=[]open_im_sdk.FriendInfo}
+//// @Success 0 {object} api.GetFriendListResp{data=[]sdkws.FriendInfo}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /friend/get_friend_list [post]
@@ -575,7 +575,7 @@ package friend
 //// @Param token header string true "im token"
 //// @Param req body api.GetFriendApplyListReq true "fromUserID为要获取申请列表的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetFriendApplyListResp{data=[]open_im_sdk.FriendRequest}
+//// @Success 0 {object} api.GetFriendApplyListResp{data=[]sdkws.FriendRequest}
 //// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /friend/get_friend_apply_list [post]
@@ -631,7 +631,7 @@ package friend
 //// @Param token header string true "im token"
 //// @Param req body api.GetSelfApplyListReq true "fromUserID为自己的用户ID"
 //// @Produce json
-//// @Success 0 {object} api.GetSelfApplyListResp{data=[]open_im_sdk.FriendRequest}
+//// @Success 0 {object} api.GetSelfApplyListResp{data=[]sdkws.FriendRequest}
 //// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 //// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 //// @Router /friend/get_self_friend_apply_list [post]

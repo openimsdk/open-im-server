@@ -2,11 +2,11 @@ package group
 
 import (
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"time"
 )
 
-func UpdateGroupInfoMap(group *open_im_sdk.GroupInfoForSet) map[string]any {
+func UpdateGroupInfoMap(group *sdkws.GroupInfoForSet) map[string]any {
 	m := make(map[string]any)
 	if group.GroupName != "" {
 		m["group_name"] = group.GroupName

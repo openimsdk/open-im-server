@@ -15,8 +15,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"math/big"
-	"strings"
 )
 
 //type GroupInterface GroupDataBaseInterface
@@ -248,7 +246,7 @@ type GroupDataBase struct {
 
 func (g *GroupDataBase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
 	for _, userID := range userIDs {
-		if err := g.cache.DelJoinedGroupIDs(ctx, userID); err != nil {
+		if err := g.cache.DelJoinedGroupID(ctx, userID); err != nil {
 			return err
 		}
 		if err := g.cache.DelJoinedSuperGroupIDs(ctx, userID); err != nil {
@@ -272,21 +270,24 @@ func (g *GroupDataBase) FindGroupMemberUserID(ctx context.Context, groupID strin
 }
 
 func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error {
-	if len(groups) > 0 && len(groupMembers) > 0 {
-		return g.db.Transaction(func(tx *gorm.DB) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if len(groups) > 0 {
 			if err := g.groupDB.Create(ctx, groups, tx); err != nil {
 				return err
 			}
-			return g.groupMemberDB.Create(ctx, groupMembers, tx)
-		})
-	}
-	if len(groups) > 0 {
-		return g.groupDB.Create(ctx, groups)
-	}
-	if len(groupMembers) > 0 {
-		return g.groupMemberDB.Create(ctx, groupMembers)
-	}
-	return nil
+		}
+		if len(groupMembers) > 0 {
+			if err := g.groupMemberDB.Create(ctx, groupMembers, tx); err != nil {
+				return err
+			}
+			//if err := g.cache.DelJoinedGroupIDs(ctx, utils.Slice(groupMembers, func(e *relationTb.GroupMemberModel) string {
+			//	return e.UserID
+			//})); err != nil {
+			//	return err
+			//}
+		}
+		return nil
+	})
 }
 
 func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
@@ -337,12 +338,11 @@ func (g *GroupDataBase) TakeGroupMember(ctx context.Context, groupID string, use
 }
 
 func (g *GroupDataBase) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
-	return g.groupMemberDB.TakeOwner(ctx, groupID)
+	return g.groupMemberDB.TakeOwner(ctx, groupID) // todo cache group owner
 }
 
 func (g *GroupDataBase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
-	//g.cache.GetGroupMembersInfo()
-	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
+	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels) // todo cache group find
 }
 
 func (g *GroupDataBase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
@@ -383,23 +383,7 @@ func (g *GroupDataBase) DeleteGroupMember(ctx context.Context, groupID string, u
 }
 
 func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
-	mapGroupUserIDs, err := g.groupMemberDB.FindJoinUserID(ctx, groupIDs)
-	if err != nil {
-		return nil, err
-	}
-	res := make(map[string]*relationTb.GroupSimpleUserID)
-	for _, groupID := range groupIDs {
-		userIDs := mapGroupUserIDs[groupID]
-		users := &relationTb.GroupSimpleUserID{}
-		if len(userIDs) > 0 {
-			utils.Sort(userIDs, true)
-			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
-			users.Hash = bi.Uint64()
-		}
-		res[groupID] = users
-	}
-	return res, nil
+	return g.cache.GetGroupMemberHash1(ctx, groupIDs)
 }
 
 func (g *GroupDataBase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
