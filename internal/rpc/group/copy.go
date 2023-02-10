@@ -3,12 +3,12 @@ package group
 import (
 	"Open_IM/pkg/common/db/table/relation"
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"time"
 )
 
-func DbToPbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *open_im_sdk.GroupInfo {
-	return &open_im_sdk.GroupInfo{
+func DbToPbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {
+	return &sdkws.GroupInfo{
 		GroupID:                m.GroupID,
 		GroupName:              m.GroupName,
 		Notification:           m.Notification,
@@ -48,8 +48,8 @@ func DbToPbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName st
 	}
 }
 
-func DbToPbGroupMembersCMSResp(m *relation.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
-	return &open_im_sdk.GroupMemberFullInfo{
+func DbToPbGroupMembersCMSResp(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
+	return &sdkws.GroupMemberFullInfo{
 		GroupID:   m.GroupID,
 		UserID:    m.UserID,
 		RoleLevel: m.RoleLevel,
@@ -65,8 +65,8 @@ func DbToPbGroupMembersCMSResp(m *relation.GroupMemberModel) *open_im_sdk.GroupM
 	}
 }
 
-func DbToPbGroupRequest(m *relation.GroupRequestModel, user *open_im_sdk.PublicUserInfo, group *open_im_sdk.GroupInfo) *open_im_sdk.GroupRequest {
-	return &open_im_sdk.GroupRequest{
+func DbToPbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+	return &sdkws.GroupRequest{
 		UserInfo:      user,
 		GroupInfo:     group,
 		HandleResult:  m.HandleResult,
@@ -89,7 +89,7 @@ func DbToPbGroupAbstractInfo(groupID string, groupMemberNumber uint32, groupMemb
 	}
 }
 
-func PbToDBGroupInfo(m *open_im_sdk.GroupInfo) *relation.GroupModel {
+func PbToDBGroupInfo(m *sdkws.GroupInfo) *relation.GroupModel {
 	return &relation.GroupModel{
 		GroupID:                m.GroupID,
 		GroupName:              m.GroupName,
@@ -109,7 +109,7 @@ func PbToDBGroupInfo(m *open_im_sdk.GroupInfo) *relation.GroupModel {
 	}
 }
 
-func PbToDbGroupMember(m *open_im_sdk.UserInfo) *relation.GroupMemberModel {
+func PbToDbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
 	return &relation.GroupMemberModel{
 		UserID:   m.UserID,
 		Nickname: m.Nickname,

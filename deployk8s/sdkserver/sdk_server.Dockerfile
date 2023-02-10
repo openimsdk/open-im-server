@@ -6,7 +6,7 @@ ENV CMDDIR $WORKDIR/cmd
 ENV CONFIG_NAME $WORKDIR/config/config.yaml
 
 # 将可执行文件复制到目标目录
-ADD ./open_im_sdk_server $WORKDIR/main
+ADD ./sdkws_server $WORKDIR/main
 
 # 创建用于挂载的几个目录，添加可执行权限
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \

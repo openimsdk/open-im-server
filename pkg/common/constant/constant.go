@@ -94,9 +94,6 @@ const (
 	ConversationPrivateChatNotification = 1701
 	ConversationUnreadNotification      = 1702
 
-	WorkMomentNotificationBegin = 1900
-	WorkMomentNotification      = 1901
-
 	BusinessNotificationBegin = 2000
 	BusinessNotification      = 2001
 	BusinessNotificationEnd   = 2099
@@ -217,17 +214,6 @@ const (
 	OtherType = 1
 	VideoType = 2
 	ImageType = 3
-
-	// workMoment permission
-	WorkMomentPublic            = 0
-	WorkMomentPrivate           = 1
-	WorkMomentPermissionCanSee  = 2
-	WorkMomentPermissionCantSee = 3
-
-	// workMoment sdk notification type
-	WorkMomentCommentNotification = 0
-	WorkMomentLikeNotification    = 1
-	WorkMomentAtUserNotification  = 2
 
 	// sendMsgStaus
 	MsgStatusNotExist = 0

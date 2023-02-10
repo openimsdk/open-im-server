@@ -69,7 +69,7 @@ package unrelation
 //	return nil
 //}
 
-//func (d *db.DataBases) ReplaceMsgByIndex(suffixUserID string, msg *open_im_sdk.MsgData, operationID string, seqIndex int) error {
+//func (d *db.DataBases) ReplaceMsgByIndex(suffixUserID string, msg *sdkws.MsgData, operationID string, seqIndex int) error {
 //	log.NewInfo(operationID, utils.GetSelfFuncName(), suffixUserID, *msg)
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 //	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -90,7 +90,7 @@ package unrelation
 //	return nil
 //}
 
-//func (d *db.DataBases) ReplaceMsgBySeq(uid string, msg *open_im_sdk.MsgData, operationID string) error {
+//func (d *db.DataBases) ReplaceMsgBySeq(uid string, msg *sdkws.MsgData, operationID string) error {
 //	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, *msg)
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 //	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -122,7 +122,7 @@ package unrelation
 //	return err
 //}
 //
-//func (d *db.DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+//func (d *db.DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, err error) {
 //	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, seqList)
 //	var hasSeqList []uint32
 //	singleCount := 0
@@ -153,7 +153,7 @@ package unrelation
 //		}
 //		singleCount = 0
 //		for i := 0; i < len(sChat.Msg); i++ {
-//			msg := new(open_im_sdk.MsgData)
+//			msg := new(sdkws.MsgData)
 //			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 //				log.NewError(operationID, "Unmarshal err", seqUid, value, uid, seqList, err.Error())
 //				return nil, err
@@ -217,11 +217,11 @@ package unrelation
 //	}
 //	for i, msg := range userChat.Msg {
 //		if i <= index {
-//			msgPb := &open_im_sdk.MsgData{}
+//			msgPb := &sdkws.MsgData{}
 //			if err = proto.Unmarshal(msg.Msg, msgPb); err != nil {
 //				continue
 //			}
-//			newMsgPb := &open_im_sdk.MsgData{Seq: msgPb.Seq}
+//			newMsgPb := &sdkws.MsgData{Seq: msgPb.Seq}
 //			bytes, err := proto.Marshal(newMsgPb)
 //			if err != nil {
 //				continue
@@ -235,7 +235,7 @@ package unrelation
 //	return replaceMaxSeq, err
 //}
 //
-//func (d *db.DataBases) GetNewestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
+//func (d *db.DataBases) GetNewestMsg(ID string) (msg *sdkws.MsgData, err error) {
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 //	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 //	regex := fmt.Sprintf("^%s", ID)
@@ -251,7 +251,7 @@ package unrelation
 //	}
 //	if len(userChats) > 0 {
 //		if len(userChats[0].Msg) > 0 {
-//			msgPb := &open_im_sdk.MsgData{}
+//			msgPb := &sdkws.MsgData{}
 //			err = proto.Unmarshal(userChats[0].Msg[len(userChats[0].Msg)-1].Msg, msgPb)
 //			if err != nil {
 //				return nil, utils.Wrap(err, "")
@@ -263,7 +263,7 @@ package unrelation
 //	return nil, nil
 //}
 //
-//func (d *db.DataBases) GetOldestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
+//func (d *db.DataBases) GetOldestMsg(ID string) (msg *sdkws.MsgData, err error) {
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 //	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 //	regex := fmt.Sprintf("^%s", ID)
@@ -288,7 +288,7 @@ package unrelation
 //		if len(oldestMsg) == 0 {
 //			oldestMsg = userChats[0].Msg[len(userChats[0].Msg)-1].Msg
 //		}
-//		msgPb := &open_im_sdk.MsgData{}
+//		msgPb := &sdkws.MsgData{}
 //		err = proto.Unmarshal(oldestMsg, msgPb)
 //		if err != nil {
 //			return nil, utils.Wrap(err, "")
@@ -298,7 +298,7 @@ package unrelation
 //	return nil, nil
 //}
 //
-//func (d *db.DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+//func (d *db.DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, err error) {
 //	var hasSeqList []uint32
 //	singleCount := 0
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
@@ -325,7 +325,7 @@ package unrelation
 //		}
 //		singleCount = 0
 //		for i := 0; i < len(sChat.Msg); i++ {
-//			msg := new(open_im_sdk.MsgData)
+//			msg := new(sdkws.MsgData)
 //			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 //				log.NewError(operationID, "Unmarshal err", seqUid, value, uid, seqList, err.Error())
 //				return nil, err
@@ -349,7 +349,7 @@ package unrelation
 //	}
 //	return seqMsg, nil
 //}
-//func (d *db.DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+//func (d *db.DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, err error) {
 //	var hasSeqList []uint32
 //	singleCount := 0
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
@@ -376,7 +376,7 @@ package unrelation
 //		}
 //		singleCount = 0
 //		for i := 0; i < len(sChat.Msg); i++ {
-//			msg := new(open_im_sdk.MsgData)
+//			msg := new(sdkws.MsgData)
 //			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 //				log.NewError(operationID, "Unmarshal err", seqUid, value, groupID, seqList, err.Error())
 //				return nil, err
@@ -401,7 +401,7 @@ package unrelation
 //	return seqMsg, nil
 //}
 //
-//func (d *db.DataBases) GetMsgAndIndexBySeqListInOneMongo2(suffixUserID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, indexList []int, unexistSeqList []uint32, err error) {
+//func (d *db.DataBases) GetMsgAndIndexBySeqListInOneMongo2(suffixUserID string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, indexList []int, unexistSeqList []uint32, err error) {
 //	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 //	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 //	sChat := UserChat{}
@@ -412,7 +412,7 @@ package unrelation
 //	singleCount := 0
 //	var hasSeqList []uint32
 //	for i := 0; i < len(sChat.Msg); i++ {
-//		msg := new(open_im_sdk.MsgData)
+//		msg := new(sdkws.MsgData)
 //		if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 //			log.NewError(operationID, "Unmarshal err", msg.String(), err.Error())
 //			return nil, nil, nil, err
@@ -436,18 +436,18 @@ package unrelation
 //	return seqMsg, indexList, unexistSeqList, nil
 //}
 //
-//func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*open_im_sdk.MsgData) {
+//func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*sdkws.MsgData) {
 //	for _, v := range seqList {
-//		msg := new(open_im_sdk.MsgData)
+//		msg := new(sdkws.MsgData)
 //		msg.Seq = v
 //		exceptionMsg = append(exceptionMsg, msg)
 //	}
 //	return exceptionMsg
 //}
 //
-//func genExceptionSuperGroupMessageBySeqList(seqList []uint32, groupID string) (exceptionMsg []*open_im_sdk.MsgData) {
+//func genExceptionSuperGroupMessageBySeqList(seqList []uint32, groupID string) (exceptionMsg []*sdkws.MsgData) {
 //	for _, v := range seqList {
-//		msg := new(open_im_sdk.MsgData)
+//		msg := new(sdkws.MsgData)
 //		msg.Seq = v
 //		msg.GroupID = groupID
 //		msg.SessionType = constant.SuperGroupChatType
@@ -598,13 +598,7 @@ package unrelation
 //	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 //}
 
-//func generateWorkMomentID(userID string) string {
-//	return utils.Md5(userID + strconv.Itoa(rand.Int()) + time.Now().String())
-//}
 
-//func generateWorkMomentCommentID(workMomentID string) string {
-//	return utils.Md5(workMomentID + strconv.Itoa(rand.Int()) + time.Now().String())
-//}
 
 //func getCurrentTimestampByMill() int64 {
 //	return time.Now().UnixNano() / 1e6

@@ -10,7 +10,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbRtc "Open_IM/pkg/proto/rtc"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -60,7 +60,7 @@ type SeqListData struct {
 func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass bool, errCode int32, errMsg string, returnData interface{}) {
 	switch r {
 	case constant.WSGetNewestSeq:
-		data := open_im_sdk.GetMaxAndMinSeqReq{}
+		data := sdkws.GetMaxAndMinSeqReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
@@ -72,7 +72,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 		}
 		return true, 0, "", data
 	case constant.WSSendMsg:
-		data := open_im_sdk.MsgData{}
+		data := sdkws.MsgData{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
@@ -96,7 +96,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 		}
 		return true, 0, "", &data
 	case constant.WSPullMsgBySeqList:
-		data := open_im_sdk.PullMessageBySeqListReq{}
+		data := sdkws.PullMessageBySeqListReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
@@ -108,7 +108,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 		}
 		return true, 0, "", data
 	case constant.WsSetBackgroundStatus:
-		data := open_im_sdk.SetAppBackgroundStatusReq{}
+		data := sdkws.SetAppBackgroundStatusReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.Error(operationID, "Decode Map struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil

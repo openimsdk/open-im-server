@@ -8,12 +8,10 @@ out-test
 .idea
 
 
-deploy/open_im_demo
 deploy/open_im_api
 deploy/open_im_msg_gateway
 deploy/open_im_msg_transfer
 deploy/open_im_push
-deploy/open_im_timer_task
 deploy/open_im_rpc_user
 deploy/open_im_rpc_friend
 deploy/open_im_rpc_group

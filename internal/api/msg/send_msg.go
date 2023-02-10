@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/msg"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 
 	"Open_IM/pkg/getcdv3"
@@ -20,17 +20,17 @@ type paramsUserSendMsg struct {
 	SenderFaceURL    string `json:"senderFaceUrl"`
 	OperationID      string `json:"operationID" binding:"required"`
 	Data             struct {
-		SessionType int32                        `json:"sessionType" binding:"required"`
-		MsgFrom     int32                        `json:"msgFrom" binding:"required"`
-		ContentType int32                        `json:"contentType" binding:"required"`
-		RecvID      string                       `json:"recvID" `
-		GroupID     string                       `json:"groupID" `
-		ForceList   []string                     `json:"forceList"`
-		Content     []byte                       `json:"content" binding:"required"`
-		Options     map[string]bool              `json:"options" `
-		ClientMsgID string                       `json:"clientMsgID" binding:"required"`
-		CreateTime  int64                        `json:"createTime" binding:"required"`
-		OffLineInfo *open_im_sdk.OfflinePushInfo `json:"offlineInfo" `
+		SessionType int32                  `json:"sessionType" binding:"required"`
+		MsgFrom     int32                  `json:"msgFrom" binding:"required"`
+		ContentType int32                  `json:"contentType" binding:"required"`
+		RecvID      string                 `json:"recvID" `
+		GroupID     string                 `json:"groupID" `
+		ForceList   []string               `json:"forceList"`
+		Content     []byte                 `json:"content" binding:"required"`
+		Options     map[string]bool        `json:"options" `
+		ClientMsgID string                 `json:"clientMsgID" binding:"required"`
+		CreateTime  int64                  `json:"createTime" binding:"required"`
+		OffLineInfo *sdkws.OfflinePushInfo `json:"offlineInfo" `
 	}
 }
 
@@ -38,7 +38,7 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.SendMsgR
 	pbData := pbChat.SendMsgReq{
 		Token:       token,
 		OperationID: params.OperationID,
-		MsgData: &open_im_sdk.MsgData{
+		MsgData: &sdkws.MsgData{
 			SendID:           params.SendID,
 			RecvID:           params.Data.RecvID,
 			GroupID:          params.Data.GroupID,
