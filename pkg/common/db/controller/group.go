@@ -15,6 +15,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"math/big"
+	"strings"
 )
 
 //type GroupInterface GroupDataBaseInterface
@@ -23,6 +25,11 @@ type BatchUpdateGroupMember struct {
 	GroupID string
 	UserID  string
 	Map     map[string]any
+}
+
+type GroupSimpleUserID struct {
+	Hash    uint64
+	UserIDs []string
 }
 
 type GroupInterface interface {
@@ -41,7 +48,7 @@ type GroupInterface interface {
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
+	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
 	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
@@ -125,7 +132,7 @@ func (g *GroupController) DeleteGroupMember(ctx context.Context, groupID string,
 	return g.database.DeleteGroupMember(ctx, groupID, userIDs)
 }
 
-func (g *GroupController) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error) {
+func (g *GroupController) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error) {
 	return g.database.MapGroupMemberUserID(ctx, groupIDs)
 }
 
@@ -197,7 +204,7 @@ type GroupDataBaseInterface interface {
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error)
+	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
 	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
@@ -386,8 +393,24 @@ func (g *GroupDataBase) DeleteGroupMember(ctx context.Context, groupID string, u
 	})
 }
 
-func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string][]string, error) {
-	return g.groupMemberDB.FindJoinUserID(ctx, groupIDs)
+func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error) {
+	mapGroupUserIDs, err := g.groupMemberDB.FindJoinUserID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]*GroupSimpleUserID)
+	for _, groupID := range groupIDs {
+		users := &GroupSimpleUserID{
+			UserIDs: mapGroupUserIDs[groupID],
+		}
+		if len(users.UserIDs) > 0 {
+			utils.Sort(users.UserIDs, true)
+			bi := big.NewInt(0)
+			bi.SetString(utils.Md5(strings.Join(users.UserIDs, ";"))[0:8], 16)
+		}
+		res[groupID] = users
+	}
+	return res, nil
 }
 
 func (g *GroupDataBase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {

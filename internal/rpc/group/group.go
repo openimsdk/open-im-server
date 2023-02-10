@@ -22,7 +22,6 @@ import (
 	"context"
 	"fmt"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -977,7 +976,9 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
 	}
 	if len(duplicateMap) > 0 {
-		return nil, constant.ErrArgs.Wrap("group not found or user not in group")
+		return nil, constant.ErrArgs.Wrap("group not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
+			return fmt.Sprintf("[group: %s user: %s]", e[0], e[1])
+		}), ","))
 	}
 	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) [2]string {
 		return [...]string{e.GroupID, e.UserID}
@@ -1038,16 +1039,21 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	if err != nil {
 		return nil, err
 	}
+	if ids := utils.Single(req.GroupIDs, utils.Slice(groups, func(group *relationTb.GroupModel) string {
+		return group.GroupID
+	})); len(ids) > 0 {
+		return nil, constant.ErrGroupIDNotFound.Wrap("not found group " + strings.Join(ids, ","))
+	}
 	groupUserMap, err := s.GroupInterface.MapGroupMemberUserID(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp.GroupAbstractInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
-		userIDs := groupUserMap[e.GroupID]
-		utils.Sort(userIDs, true)
-		bi := big.NewInt(0)
-		bi.SetString(utils.Md5(strings.Join(userIDs, ";;"))[0:8], 16)
-		return DbToPbGroupAbstractInfo(e.GroupID, int32(len(userIDs)), bi.Uint64())
+	if ids := utils.Single(req.GroupIDs, utils.Keys(groupUserMap)); len(ids) > 0 {
+		return nil, constant.ErrGroupIDNotFound.Wrap(fmt.Sprintf("group %s not found member", strings.Join(ids, ",")))
+	}
+	resp.GroupAbstractInfos = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
+		users := groupUserMap[group.GroupID]
+		return DbToPbGroupAbstractInfo(group.GroupID, uint32(len(users.UserIDs)), users.Hash)
 	})
 	return resp, nil
 }

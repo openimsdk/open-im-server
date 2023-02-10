@@ -36,7 +36,7 @@ func GetCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	return t, nil
 }
 
-func GetCacheFor[E any, T any](ctx context.Context, rcClient *rockscache.Client, list []E, fn func(ctx context.Context, item E) (T, error)) ([]T, error) {
+func GetCacheFor[E any, T any](ctx context.Context, list []E, fn func(ctx context.Context, item E) (T, error)) ([]T, error) {
 	rs := make([]T, 0, len(list))
 	for _, e := range list {
 		r, err := fn(ctx, e)

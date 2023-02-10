@@ -106,7 +106,7 @@ func (g *GroupCacheRedis) getGroupMemberNumKey(groupID string) string {
 
 // / groupInfo
 func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
-	return GetCacheFor(ctx, g.rcClient, groupIDs, func(ctx context.Context, groupID string) (*relationTb.GroupModel, error) {
+	return GetCacheFor(ctx, groupIDs, func(ctx context.Context, groupID string) (*relationTb.GroupModel, error) {
 		return g.GetGroupInfo(ctx, groupID)
 	})
 }
@@ -151,27 +151,19 @@ func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(ctx context.Context, userID str
 }
 
 func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error) {
-	getJoinedSuperGroupIDList := func() (string, error) {
-		userToSuperGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
+	return GetCache(ctx, g.rcClient, g.getJoinedSuperGroupsIDKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		userGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "joinedSuperGroupIDs", joinedSuperGroupIDs)
-	}()
-	joinedSuperGroupListStr, err := g.rcClient.Fetch(g.getJoinedSuperGroupsIDKey(userID), time.Second*30*60, getJoinedSuperGroupIDList)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(joinedSuperGroupListStr), &joinedSuperGroupIDs)
-	return joinedSuperGroupIDs, utils.Wrap(err, "")
+		return userGroup.GroupIDs, nil
+	})
 }
+
+//// groupMembersHash
+//func (g *GroupCacheRedis) GetGroupsMembersHash(ctx context.Context, groupIDs []string) (map[string]uint64, error) {
+//	return GetCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, "")
+//}
 
 // groupMembersHash
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error) {

@@ -81,10 +81,10 @@ func DbToPbGroupRequest(m *relation.GroupRequestModel, user *open_im_sdk.PublicU
 	}
 }
 
-func DbToPbGroupAbstractInfo(groupID string, groupMemberNumber int32, groupMemberListHash uint64) *pbGroup.GroupAbstractInfo {
+func DbToPbGroupAbstractInfo(groupID string, groupMemberNumber uint32, groupMemberListHash uint64) *pbGroup.GroupAbstractInfo {
 	return &pbGroup.GroupAbstractInfo{
 		GroupID:             groupID,
-		GroupMemberNumber:   uint32(groupMemberNumber),
+		GroupMemberNumber:   groupMemberNumber,
 		GroupMemberListHash: groupMemberListHash,
 	}
 }
