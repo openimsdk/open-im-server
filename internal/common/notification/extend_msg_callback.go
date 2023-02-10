@@ -1,4 +1,4 @@
-package msg
+package notification
 
 import (
 	cbApi "Open_IM/pkg/callback_struct"

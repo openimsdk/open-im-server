@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -152,7 +153,7 @@ func (rpc *rpcChat) runCh() {
 				continue
 			}
 			if len(unexistSeqList) > 0 {
-				DeleteMessageNotification(msg.OpUserID, msg.UserID, unexistSeqList, msg.OperationID)
+				notification.DeleteMessageNotification(msg.OpUserID, msg.UserID, unexistSeqList, msg.OperationID)
 			}
 		}
 	}

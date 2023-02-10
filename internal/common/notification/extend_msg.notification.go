@@ -1,11 +1,9 @@
-package msg
+package notification
 
 import (
-	"Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"

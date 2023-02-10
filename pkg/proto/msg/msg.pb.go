@@ -6,7 +6,7 @@ package msg // import "Open_IM/pkg/proto/msg"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdkws "Open_IM/pkg/proto/sdkws"
+import sdk_ws "Open_IM/pkg/proto/sdk_ws"
 import wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 import (
@@ -26,19 +26,19 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type MsgDataToMQ struct {
-	Token                string         `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
-	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	Token                string          `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	OperationID          string          `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
 func (m *MsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMQ) ProtoMessage()    {}
 func (*MsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{0}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{0}
 }
 func (m *MsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMQ.Unmarshal(m, b)
@@ -72,7 +72,7 @@ func (m *MsgDataToMQ) GetOperationID() string {
 	return ""
 }
 
-func (m *MsgDataToMQ) GetMsgData() *sdkws.MsgData {
+func (m *MsgDataToMQ) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -80,18 +80,18 @@ func (m *MsgDataToMQ) GetMsgData() *sdkws.MsgData {
 }
 
 type MsgDataToDB struct {
-	MsgData              *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData" json:"msgData,omitempty"`
-	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,1,opt,name=msgData" json:"msgData,omitempty"`
+	OperationID          string          `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
 func (m *MsgDataToDB) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToDB) ProtoMessage()    {}
 func (*MsgDataToDB) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{1}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{1}
 }
 func (m *MsgDataToDB) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToDB.Unmarshal(m, b)
@@ -111,7 +111,7 @@ func (m *MsgDataToDB) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDataToDB proto.InternalMessageInfo
 
-func (m *MsgDataToDB) GetMsgData() *sdkws.MsgData {
+func (m *MsgDataToDB) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -126,19 +126,19 @@ func (m *MsgDataToDB) GetOperationID() string {
 }
 
 type PushMsgDataToMQ struct {
-	OperationID          string         `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	MsgData              *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
-	PushToUserID         string         `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	OperationID          string          `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,2,opt,name=msgData" json:"msgData,omitempty"`
+	PushToUserID         string          `protobuf:"bytes,3,opt,name=pushToUserID" json:"pushToUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
 func (m *PushMsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*PushMsgDataToMQ) ProtoMessage()    {}
 func (*PushMsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{2}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{2}
 }
 func (m *PushMsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgDataToMQ.Unmarshal(m, b)
@@ -165,7 +165,7 @@ func (m *PushMsgDataToMQ) GetOperationID() string {
 	return ""
 }
 
-func (m *PushMsgDataToMQ) GetMsgData() *sdkws.MsgData {
+func (m *PushMsgDataToMQ) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -193,7 +193,7 @@ func (m *MsgDataToMongoByMQ) Reset()         { *m = MsgDataToMongoByMQ{} }
 func (m *MsgDataToMongoByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMongoByMQ) ProtoMessage()    {}
 func (*MsgDataToMongoByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{3}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{3}
 }
 func (m *MsgDataToMongoByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMongoByMQ.Unmarshal(m, b)
@@ -241,26 +241,6 @@ func (m *MsgDataToMongoByMQ) GetTriggerID() string {
 	return ""
 }
 
-// message PullMessageReq {
-//  string UserID = 1;
-//  int64 SeqBegin = 2;
-//  int64 SeqEnd = 3;
-//  string OperationID = 4;
-// }
-//
-// message PullMessageResp {
-//  int32 ErrCode = 1;
-//  string ErrMsg = 2;
-//  int64 MaxSeq = 3;
-//  int64 MinSeq = 4;
-//  repeated GatherFormat SingleUserMsg = 5;
-//  repeated GatherFormat GroupUserMsg = 6;
-// }
-// message PullMessageBySeqListReq{
-//  string UserID = 1;
-//  string OperationID = 2;
-//  repeated int64 seqList =3;
-// }
 type GetMaxAndMinSeqReq struct {
 	UserID               string   `protobuf:"bytes,1,opt,name=UserID" json:"UserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
@@ -273,7 +253,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{4}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{4}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -321,7 +301,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{5}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{5}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -370,19 +350,17 @@ func (m *GetMaxAndMinSeqResp) GetMinSeq() uint32 {
 }
 
 type SendMsgReq struct {
-	Token                string         `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
-	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
 func (m *SendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsgReq) ProtoMessage()    {}
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{6}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{6}
 }
 func (m *SendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgReq.Unmarshal(m, b)
@@ -402,21 +380,7 @@ func (m *SendMsgReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SendMsgReq proto.InternalMessageInfo
 
-func (m *SendMsgReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
-
-func (m *SendMsgReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-func (m *SendMsgReq) GetMsgData() *sdkws.MsgData {
+func (m *SendMsgReq) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -424,8 +388,6 @@ func (m *SendMsgReq) GetMsgData() *sdkws.MsgData {
 }
 
 type SendMsgResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	ServerMsgID          string   `protobuf:"bytes,4,opt,name=serverMsgID" json:"serverMsgID,omitempty"`
 	ClientMsgID          string   `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
 	SendTime             int64    `protobuf:"varint,6,opt,name=sendTime" json:"sendTime,omitempty"`
@@ -438,7 +400,7 @@ func (m *SendMsgResp) Reset()         { *m = SendMsgResp{} }
 func (m *SendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsgResp) ProtoMessage()    {}
 func (*SendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{7}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{7}
 }
 func (m *SendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgResp.Unmarshal(m, b)
@@ -457,20 +419,6 @@ func (m *SendMsgResp) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_SendMsgResp proto.InternalMessageInfo
-
-func (m *SendMsgResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *SendMsgResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
 
 func (m *SendMsgResp) GetServerMsgID() string {
 	if m != nil {
@@ -495,8 +443,6 @@ func (m *SendMsgResp) GetSendTime() int64 {
 
 type ClearMsgReq struct {
 	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -506,7 +452,7 @@ func (m *ClearMsgReq) Reset()         { *m = ClearMsgReq{} }
 func (m *ClearMsgReq) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgReq) ProtoMessage()    {}
 func (*ClearMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{8}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{8}
 }
 func (m *ClearMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgReq.Unmarshal(m, b)
@@ -533,23 +479,7 @@ func (m *ClearMsgReq) GetUserID() string {
 	return ""
 }
 
-func (m *ClearMsgReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
-func (m *ClearMsgReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
 type ClearMsgResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -559,7 +489,7 @@ func (m *ClearMsgResp) Reset()         { *m = ClearMsgResp{} }
 func (m *ClearMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgResp) ProtoMessage()    {}
 func (*ClearMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{9}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{9}
 }
 func (m *ClearMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgResp.Unmarshal(m, b)
@@ -579,26 +509,10 @@ func (m *ClearMsgResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ClearMsgResp proto.InternalMessageInfo
 
-func (m *ClearMsgResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *ClearMsgResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type SetMsgMinSeqReq struct {
 	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
 	GroupID              string   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
 	MinSeq               uint32   `protobuf:"varint,3,opt,name=minSeq" json:"minSeq,omitempty"`
-	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,5,opt,name=opUserID" json:"opUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -608,7 +522,7 @@ func (m *SetMsgMinSeqReq) Reset()         { *m = SetMsgMinSeqReq{} }
 func (m *SetMsgMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqReq) ProtoMessage()    {}
 func (*SetMsgMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{10}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{10}
 }
 func (m *SetMsgMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqReq.Unmarshal(m, b)
@@ -649,23 +563,7 @@ func (m *SetMsgMinSeqReq) GetMinSeq() uint32 {
 	return 0
 }
 
-func (m *SetMsgMinSeqReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-func (m *SetMsgMinSeqReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
 type SetMsgMinSeqResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -675,7 +573,7 @@ func (m *SetMsgMinSeqResp) Reset()         { *m = SetMsgMinSeqResp{} }
 func (m *SetMsgMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqResp) ProtoMessage()    {}
 func (*SetMsgMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{11}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{11}
 }
 func (m *SetMsgMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqResp.Unmarshal(m, b)
@@ -695,22 +593,7 @@ func (m *SetMsgMinSeqResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetMsgMinSeqResp proto.InternalMessageInfo
 
-func (m *SetMsgMinSeqResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *SetMsgMinSeqResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type SetSendMsgStatusReq struct {
-	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
 	Status               int32    `protobuf:"varint,2,opt,name=status" json:"status,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -721,7 +604,7 @@ func (m *SetSendMsgStatusReq) Reset()         { *m = SetSendMsgStatusReq{} }
 func (m *SetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusReq) ProtoMessage()    {}
 func (*SetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{12}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{12}
 }
 func (m *SetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusReq.Unmarshal(m, b)
@@ -741,13 +624,6 @@ func (m *SetSendMsgStatusReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetSendMsgStatusReq proto.InternalMessageInfo
 
-func (m *SetSendMsgStatusReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
 func (m *SetSendMsgStatusReq) GetStatus() int32 {
 	if m != nil {
 		return m.Status
@@ -756,8 +632,6 @@ func (m *SetSendMsgStatusReq) GetStatus() int32 {
 }
 
 type SetSendMsgStatusResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -767,7 +641,7 @@ func (m *SetSendMsgStatusResp) Reset()         { *m = SetSendMsgStatusResp{} }
 func (m *SetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusResp) ProtoMessage()    {}
 func (*SetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{13}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{13}
 }
 func (m *SetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusResp.Unmarshal(m, b)
@@ -787,20 +661,6 @@ func (m *SetSendMsgStatusResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetSendMsgStatusResp proto.InternalMessageInfo
 
-func (m *SetSendMsgStatusResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *SetSendMsgStatusResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type GetSendMsgStatusReq struct {
 	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -812,7 +672,7 @@ func (m *GetSendMsgStatusReq) Reset()         { *m = GetSendMsgStatusReq{} }
 func (m *GetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusReq) ProtoMessage()    {}
 func (*GetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{14}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{14}
 }
 func (m *GetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusReq.Unmarshal(m, b)
@@ -852,7 +712,7 @@ func (m *GetSendMsgStatusResp) Reset()         { *m = GetSendMsgStatusResp{} }
 func (m *GetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusResp) ProtoMessage()    {}
 func (*GetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{15}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{15}
 }
 func (m *GetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusResp.Unmarshal(m, b)
@@ -894,10 +754,8 @@ func (m *GetSendMsgStatusResp) GetStatus() int32 {
 }
 
 type DelSuperGroupMsgReq struct {
-	OpUserID             string   `protobuf:"bytes,1,opt,name=opUserID" json:"opUserID,omitempty"`
 	UserID               string   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
 	GroupID              string   `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
-	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -907,7 +765,7 @@ func (m *DelSuperGroupMsgReq) Reset()         { *m = DelSuperGroupMsgReq{} }
 func (m *DelSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgReq) ProtoMessage()    {}
 func (*DelSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{16}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{16}
 }
 func (m *DelSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgReq.Unmarshal(m, b)
@@ -927,13 +785,6 @@ func (m *DelSuperGroupMsgReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DelSuperGroupMsgReq proto.InternalMessageInfo
 
-func (m *DelSuperGroupMsgReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
 func (m *DelSuperGroupMsgReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
@@ -948,16 +799,7 @@ func (m *DelSuperGroupMsgReq) GetGroupID() string {
 	return ""
 }
 
-func (m *DelSuperGroupMsgReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
 type DelSuperGroupMsgResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -967,7 +809,7 @@ func (m *DelSuperGroupMsgResp) Reset()         { *m = DelSuperGroupMsgResp{} }
 func (m *DelSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgResp) ProtoMessage()    {}
 func (*DelSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{17}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{17}
 }
 func (m *DelSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgResp.Unmarshal(m, b)
@@ -987,20 +829,6 @@ func (m *DelSuperGroupMsgResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DelSuperGroupMsgResp proto.InternalMessageInfo
 
-func (m *DelSuperGroupMsgResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *DelSuperGroupMsgResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type GetSuperGroupMsgReq struct {
 	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
 	Seq                  uint32   `protobuf:"varint,2,opt,name=Seq" json:"Seq,omitempty"`
@@ -1014,7 +842,7 @@ func (m *GetSuperGroupMsgReq) Reset()         { *m = GetSuperGroupMsgReq{} }
 func (m *GetSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgReq) ProtoMessage()    {}
 func (*GetSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{18}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{18}
 }
 func (m *GetSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgReq.Unmarshal(m, b)
@@ -1056,19 +884,19 @@ func (m *GetSuperGroupMsgReq) GetGroupID() string {
 }
 
 type GetSuperGroupMsgResp struct {
-	ErrCode              int32          `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string         `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *GetSuperGroupMsgResp) Reset()         { *m = GetSuperGroupMsgResp{} }
 func (m *GetSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgResp) ProtoMessage()    {}
 func (*GetSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{19}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{19}
 }
 func (m *GetSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgResp.Unmarshal(m, b)
@@ -1102,7 +930,7 @@ func (m *GetSuperGroupMsgResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetSuperGroupMsgResp) GetMsgData() *sdkws.MsgData {
+func (m *GetSuperGroupMsgResp) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -1121,7 +949,7 @@ func (m *GetWriteDiffMsgReq) Reset()         { *m = GetWriteDiffMsgReq{} }
 func (m *GetWriteDiffMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgReq) ProtoMessage()    {}
 func (*GetWriteDiffMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{20}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{20}
 }
 func (m *GetWriteDiffMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgReq.Unmarshal(m, b)
@@ -1156,19 +984,19 @@ func (m *GetWriteDiffMsgReq) GetSeq() uint32 {
 }
 
 type GetWriteDiffMsgResp struct {
-	ErrCode              int32          `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string         `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	MsgData              *sdkws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	MsgData              *sdk_ws.MsgData `protobuf:"bytes,3,opt,name=msgData" json:"msgData,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *GetWriteDiffMsgResp) Reset()         { *m = GetWriteDiffMsgResp{} }
 func (m *GetWriteDiffMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgResp) ProtoMessage()    {}
 func (*GetWriteDiffMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{21}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{21}
 }
 func (m *GetWriteDiffMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgResp.Unmarshal(m, b)
@@ -1202,7 +1030,7 @@ func (m *GetWriteDiffMsgResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetWriteDiffMsgResp) GetMsgData() *sdkws.MsgData {
+func (m *GetWriteDiffMsgResp) GetMsgData() *sdk_ws.MsgData {
 	if m != nil {
 		return m.MsgData
 	}
@@ -1210,27 +1038,27 @@ func (m *GetWriteDiffMsgResp) GetMsgData() *sdkws.MsgData {
 }
 
 type ModifyMessageReactionExtensionsReq struct {
-	OperationID           string                     `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	SourceID              string                     `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
-	OpUserID              string                     `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
-	SessionType           int32                      `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                     `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	Ex                    *wrapperspb.StringValue    `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
-	AttachedInfo          *wrapperspb.StringValue    `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
-	IsReact               bool                       `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
-	IsExternalExtensions  bool                       `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64                      `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
-	XXX_unrecognized      []byte                     `json:"-"`
-	XXX_sizecache         int32                      `json:"-"`
+	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
 }
 
 func (m *ModifyMessageReactionExtensionsReq) Reset()         { *m = ModifyMessageReactionExtensionsReq{} }
 func (m *ModifyMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*ModifyMessageReactionExtensionsReq) ProtoMessage()    {}
 func (*ModifyMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{22}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{22}
 }
 func (m *ModifyMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyMessageReactionExtensionsReq.Unmarshal(m, b)
@@ -1278,7 +1106,7 @@ func (m *ModifyMessageReactionExtensionsReq) GetSessionType() int32 {
 	return 0
 }
 
-func (m *ModifyMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdkws.KeyValue {
+func (m *ModifyMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1328,27 +1156,27 @@ func (m *ModifyMessageReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
 }
 
 type SetMessageReactionExtensionsReq struct {
-	OperationID           string                     `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	SourceID              string                     `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
-	OpUserID              string                     `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
-	SessionType           int32                      `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                     `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	Ex                    *wrapperspb.StringValue    `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
-	AttachedInfo          *wrapperspb.StringValue    `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
-	IsReact               bool                       `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
-	IsExternalExtensions  bool                       `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64                      `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
-	XXX_unrecognized      []byte                     `json:"-"`
-	XXX_sizecache         int32                      `json:"-"`
+	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
 }
 
 func (m *SetMessageReactionExtensionsReq) Reset()         { *m = SetMessageReactionExtensionsReq{} }
 func (m *SetMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*SetMessageReactionExtensionsReq) ProtoMessage()    {}
 func (*SetMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{23}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{23}
 }
 func (m *SetMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMessageReactionExtensionsReq.Unmarshal(m, b)
@@ -1396,7 +1224,7 @@ func (m *SetMessageReactionExtensionsReq) GetSessionType() int32 {
 	return 0
 }
 
-func (m *SetMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdkws.KeyValue {
+func (m *SetMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1461,7 +1289,7 @@ func (m *SetMessageReactionExtensionsResp) Reset()         { *m = SetMessageReac
 func (m *SetMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*SetMessageReactionExtensionsResp) ProtoMessage()    {}
 func (*SetMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{24}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{24}
 }
 func (m *SetMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMessageReactionExtensionsResp.Unmarshal(m, b)
@@ -1538,7 +1366,7 @@ func (m *GetMessageListReactionExtensionsReq) Reset()         { *m = GetMessageL
 func (m *GetMessageListReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*GetMessageListReactionExtensionsReq) ProtoMessage()    {}
 func (*GetMessageListReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{25}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{25}
 }
 func (m *GetMessageListReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessageListReactionExtensionsReq.Unmarshal(m, b)
@@ -1609,7 +1437,7 @@ func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) String() string
 }
 func (*GetMessageListReactionExtensionsReq_MessageReactionKey) ProtoMessage() {}
 func (*GetMessageListReactionExtensionsReq_MessageReactionKey) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{25, 0}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{25, 0}
 }
 func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.Unmarshal(m, b)
@@ -1656,7 +1484,7 @@ func (m *GetMessageListReactionExtensionsResp) Reset()         { *m = GetMessage
 func (m *GetMessageListReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*GetMessageListReactionExtensionsResp) ProtoMessage()    {}
 func (*GetMessageListReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{26}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{26}
 }
 func (m *GetMessageListReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessageListReactionExtensionsResp.Unmarshal(m, b)
@@ -1698,20 +1526,20 @@ func (m *GetMessageListReactionExtensionsResp) GetSingleMessageResult() []*Singl
 }
 
 type SingleMessageExtensionResult struct {
-	ErrCode               int32                      `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg                string                     `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `protobuf:"bytes,3,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ClientMsgID           string                     `protobuf:"bytes,4,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}                   `json:"-"`
-	XXX_unrecognized      []byte                     `json:"-"`
-	XXX_sizecache         int32                      `json:"-"`
+	ErrCode               int32                       `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg                string                      `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,3,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,4,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
 }
 
 func (m *SingleMessageExtensionResult) Reset()         { *m = SingleMessageExtensionResult{} }
 func (m *SingleMessageExtensionResult) String() string { return proto.CompactTextString(m) }
 func (*SingleMessageExtensionResult) ProtoMessage()    {}
 func (*SingleMessageExtensionResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{27}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{27}
 }
 func (m *SingleMessageExtensionResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SingleMessageExtensionResult.Unmarshal(m, b)
@@ -1745,7 +1573,7 @@ func (m *SingleMessageExtensionResult) GetErrMsg() string {
 	return ""
 }
 
-func (m *SingleMessageExtensionResult) GetReactionExtensionList() map[string]*sdkws.KeyValue {
+func (m *SingleMessageExtensionResult) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1773,7 +1601,7 @@ func (m *ModifyMessageReactionExtensionsResp) Reset()         { *m = ModifyMessa
 func (m *ModifyMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*ModifyMessageReactionExtensionsResp) ProtoMessage()    {}
 func (*ModifyMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{28}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{28}
 }
 func (m *ModifyMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyMessageReactionExtensionsResp.Unmarshal(m, b)
@@ -1822,17 +1650,17 @@ func (m *ModifyMessageReactionExtensionsResp) GetFailedList() []*ExtendMsgResp {
 }
 
 type DeleteMessageListReactionExtensionsReq struct {
-	OperationID           string            `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID              string            `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
-	SourceID              string            `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
-	SessionType           int32             `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
-	ClientMsgID           string            `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
-	IsExternalExtensions  bool              `protobuf:"varint,6,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
-	MsgFirstModifyTime    int64             `protobuf:"varint,7,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
-	ReactionExtensionList []*sdkws.KeyValue `protobuf:"bytes,8,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}          `json:"-"`
-	XXX_unrecognized      []byte            `json:"-"`
-	XXX_sizecache         int32             `json:"-"`
+	OperationID           string             `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID              string             `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
+	SourceID              string             `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
+	SessionType           int32              `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ClientMsgID           string             `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	IsExternalExtensions  bool               `protobuf:"varint,6,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64              `protobuf:"varint,7,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	ReactionExtensionList []*sdk_ws.KeyValue `protobuf:"bytes,8,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}           `json:"-"`
+	XXX_unrecognized      []byte             `json:"-"`
+	XXX_sizecache         int32              `json:"-"`
 }
 
 func (m *DeleteMessageListReactionExtensionsReq) Reset() {
@@ -1841,7 +1669,7 @@ func (m *DeleteMessageListReactionExtensionsReq) Reset() {
 func (m *DeleteMessageListReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteMessageListReactionExtensionsReq) ProtoMessage()    {}
 func (*DeleteMessageListReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{29}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{29}
 }
 func (m *DeleteMessageListReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteMessageListReactionExtensionsReq.Unmarshal(m, b)
@@ -1910,7 +1738,7 @@ func (m *DeleteMessageListReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
 	return 0
 }
 
-func (m *DeleteMessageListReactionExtensionsReq) GetReactionExtensionList() []*sdkws.KeyValue {
+func (m *DeleteMessageListReactionExtensionsReq) GetReactionExtensionList() []*sdk_ws.KeyValue {
 	if m != nil {
 		return m.ReactionExtensionList
 	}
@@ -1932,7 +1760,7 @@ func (m *DeleteMessageListReactionExtensionsResp) Reset() {
 func (m *DeleteMessageListReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteMessageListReactionExtensionsResp) ProtoMessage()    {}
 func (*DeleteMessageListReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{30}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{30}
 }
 func (m *DeleteMessageListReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteMessageListReactionExtensionsResp.Unmarshal(m, b)
@@ -1986,7 +1814,7 @@ func (m *ExtendMsgResp) Reset()         { *m = ExtendMsgResp{} }
 func (m *ExtendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ExtendMsgResp) ProtoMessage()    {}
 func (*ExtendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{31}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{31}
 }
 func (m *ExtendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExtendMsgResp.Unmarshal(m, b)
@@ -2042,7 +1870,7 @@ func (m *ExtendMsg) Reset()         { *m = ExtendMsg{} }
 func (m *ExtendMsg) String() string { return proto.CompactTextString(m) }
 func (*ExtendMsg) ProtoMessage()    {}
 func (*ExtendMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{32}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{32}
 }
 func (m *ExtendMsg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExtendMsg.Unmarshal(m, b)
@@ -2098,19 +1926,19 @@ func (m *ExtendMsg) GetEx() string {
 }
 
 type KeyValueResp struct {
-	KeyValue             *sdkws.KeyValue `protobuf:"bytes,1,opt,name=keyValue" json:"keyValue,omitempty"`
-	ErrCode              int32           `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string          `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	KeyValue             *sdk_ws.KeyValue `protobuf:"bytes,1,opt,name=keyValue" json:"keyValue,omitempty"`
+	ErrCode              int32            `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string           `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *KeyValueResp) Reset()         { *m = KeyValueResp{} }
 func (m *KeyValueResp) String() string { return proto.CompactTextString(m) }
 func (*KeyValueResp) ProtoMessage()    {}
 func (*KeyValueResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{33}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{33}
 }
 func (m *KeyValueResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KeyValueResp.Unmarshal(m, b)
@@ -2130,7 +1958,7 @@ func (m *KeyValueResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_KeyValueResp proto.InternalMessageInfo
 
-func (m *KeyValueResp) GetKeyValue() *sdkws.KeyValue {
+func (m *KeyValueResp) GetKeyValue() *sdk_ws.KeyValue {
 	if m != nil {
 		return m.KeyValue
 	}
@@ -2164,7 +1992,7 @@ func (m *MsgDataToModifyByMQ) Reset()         { *m = MsgDataToModifyByMQ{} }
 func (m *MsgDataToModifyByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToModifyByMQ) ProtoMessage()    {}
 func (*MsgDataToModifyByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_4f5a59ae8be91efc, []int{34}
+	return fileDescriptor_msg_69316330d19ec9fa, []int{34}
 }
 func (m *MsgDataToModifyByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToModifyByMQ.Unmarshal(m, b)
@@ -2229,15 +2057,15 @@ func init() {
 	proto.RegisterType((*GetWriteDiffMsgReq)(nil), "msg.GetWriteDiffMsgReq")
 	proto.RegisterType((*GetWriteDiffMsgResp)(nil), "msg.GetWriteDiffMsgResp")
 	proto.RegisterType((*ModifyMessageReactionExtensionsReq)(nil), "msg.ModifyMessageReactionExtensionsReq")
-	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.ModifyMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.ModifyMessageReactionExtensionsReq.ReactionExtensionListEntry")
 	proto.RegisterType((*SetMessageReactionExtensionsReq)(nil), "msg.SetMessageReactionExtensionsReq")
-	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.SetMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SetMessageReactionExtensionsReq.ReactionExtensionListEntry")
 	proto.RegisterType((*SetMessageReactionExtensionsResp)(nil), "msg.SetMessageReactionExtensionsResp")
 	proto.RegisterType((*GetMessageListReactionExtensionsReq)(nil), "msg.GetMessageListReactionExtensionsReq")
 	proto.RegisterType((*GetMessageListReactionExtensionsReq_MessageReactionKey)(nil), "msg.GetMessageListReactionExtensionsReq.MessageReactionKey")
 	proto.RegisterType((*GetMessageListReactionExtensionsResp)(nil), "msg.GetMessageListReactionExtensionsResp")
 	proto.RegisterType((*SingleMessageExtensionResult)(nil), "msg.SingleMessageExtensionResult")
-	proto.RegisterMapType((map[string]*sdkws.KeyValue)(nil), "msg.SingleMessageExtensionResult.ReactionExtensionListEntry")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SingleMessageExtensionResult.ReactionExtensionListEntry")
 	proto.RegisterType((*ModifyMessageReactionExtensionsResp)(nil), "msg.ModifyMessageReactionExtensionsResp")
 	proto.RegisterType((*DeleteMessageListReactionExtensionsReq)(nil), "msg.DeleteMessageListReactionExtensionsReq")
 	proto.RegisterType((*DeleteMessageListReactionExtensionsResp)(nil), "msg.DeleteMessageListReactionExtensionsResp")
@@ -2259,18 +2087,23 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Msg service
 
 type MsgClient interface {
-	GetMaxAndMinSeq(ctx context.Context, in *sdkws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdkws.GetMaxAndMinSeqResp, error)
-	PullMessageBySeqList(ctx context.Context, in *sdkws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdkws.PullMessageBySeqListResp, error)
+	// 获取最小最大seq（包括用户的，以及指定群组的）
+	GetMaxAndMinSeq(ctx context.Context, in *sdk_ws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdk_ws.GetMaxAndMinSeqResp, error)
+	// 拉取历史消息（包括用户的，以及指定群组的）
+	PullMessageBySeqList(ctx context.Context, in *sdk_ws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdk_ws.PullMessageBySeqListResp, error)
+	// 发送消息
 	SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgResp, error)
-	DelMsgList(ctx context.Context, in *sdkws.DelMsgListReq, opts ...grpc.CallOption) (*sdkws.DelMsgListResp, error)
+	// 删除某人消息
+	DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, opts ...grpc.CallOption) (*sdk_ws.DelMsgListResp, error)
+	// 删除某个用户某个大群消息
 	DelSuperGroupMsg(ctx context.Context, in *DelSuperGroupMsgReq, opts ...grpc.CallOption) (*DelSuperGroupMsgResp, error)
+	// 清空某人所有消息
 	ClearMsg(ctx context.Context, in *ClearMsgReq, opts ...grpc.CallOption) (*ClearMsgResp, error)
-	SetMsgMinSeq(ctx context.Context, in *SetMsgMinSeqReq, opts ...grpc.CallOption) (*SetMsgMinSeqResp, error)
+	// 设置消息是否发送成功-针对api发送的消息
 	SetSendMsgStatus(ctx context.Context, in *SetSendMsgStatusReq, opts ...grpc.CallOption) (*SetSendMsgStatusResp, error)
+	// 获取消息发送状态
 	GetSendMsgStatus(ctx context.Context, in *GetSendMsgStatusReq, opts ...grpc.CallOption) (*GetSendMsgStatusResp, error)
-	GetSuperGroupMsg(ctx context.Context, in *GetSuperGroupMsgReq, opts ...grpc.CallOption) (*GetSuperGroupMsgResp, error)
-	GetWriteDiffMsg(ctx context.Context, in *GetWriteDiffMsgReq, opts ...grpc.CallOption) (*GetWriteDiffMsgResp, error)
-	// modify msg
+	// 修改消息
 	SetMessageReactionExtensions(ctx context.Context, in *SetMessageReactionExtensionsReq, opts ...grpc.CallOption) (*SetMessageReactionExtensionsResp, error)
 	GetMessageListReactionExtensions(ctx context.Context, in *GetMessageListReactionExtensionsReq, opts ...grpc.CallOption) (*GetMessageListReactionExtensionsResp, error)
 	AddMessageReactionExtensions(ctx context.Context, in *ModifyMessageReactionExtensionsReq, opts ...grpc.CallOption) (*ModifyMessageReactionExtensionsResp, error)
@@ -2285,8 +2118,8 @@ func NewMsgClient(cc *grpc.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdkws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdkws.GetMaxAndMinSeqResp, error) {
-	out := new(sdkws.GetMaxAndMinSeqResp)
+func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdk_ws.GetMaxAndMinSeqReq, opts ...grpc.CallOption) (*sdk_ws.GetMaxAndMinSeqResp, error) {
+	out := new(sdk_ws.GetMaxAndMinSeqResp)
 	err := grpc.Invoke(ctx, "/msg.msg/GetMaxAndMinSeq", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2294,8 +2127,8 @@ func (c *msgClient) GetMaxAndMinSeq(ctx context.Context, in *sdkws.GetMaxAndMinS
 	return out, nil
 }
 
-func (c *msgClient) PullMessageBySeqList(ctx context.Context, in *sdkws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdkws.PullMessageBySeqListResp, error) {
-	out := new(sdkws.PullMessageBySeqListResp)
+func (c *msgClient) PullMessageBySeqList(ctx context.Context, in *sdk_ws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdk_ws.PullMessageBySeqListResp, error) {
+	out := new(sdk_ws.PullMessageBySeqListResp)
 	err := grpc.Invoke(ctx, "/msg.msg/PullMessageBySeqList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2312,8 +2145,8 @@ func (c *msgClient) SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *msgClient) DelMsgList(ctx context.Context, in *sdkws.DelMsgListReq, opts ...grpc.CallOption) (*sdkws.DelMsgListResp, error) {
-	out := new(sdkws.DelMsgListResp)
+func (c *msgClient) DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, opts ...grpc.CallOption) (*sdk_ws.DelMsgListResp, error) {
+	out := new(sdk_ws.DelMsgListResp)
 	err := grpc.Invoke(ctx, "/msg.msg/DelMsgList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2339,15 +2172,6 @@ func (c *msgClient) ClearMsg(ctx context.Context, in *ClearMsgReq, opts ...grpc.
 	return out, nil
 }
 
-func (c *msgClient) SetMsgMinSeq(ctx context.Context, in *SetMsgMinSeqReq, opts ...grpc.CallOption) (*SetMsgMinSeqResp, error) {
-	out := new(SetMsgMinSeqResp)
-	err := grpc.Invoke(ctx, "/msg.msg/SetMsgMinSeq", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *msgClient) SetSendMsgStatus(ctx context.Context, in *SetSendMsgStatusReq, opts ...grpc.CallOption) (*SetSendMsgStatusResp, error) {
 	out := new(SetSendMsgStatusResp)
 	err := grpc.Invoke(ctx, "/msg.msg/SetSendMsgStatus", in, out, c.cc, opts...)
@@ -2360,24 +2184,6 @@ func (c *msgClient) SetSendMsgStatus(ctx context.Context, in *SetSendMsgStatusRe
 func (c *msgClient) GetSendMsgStatus(ctx context.Context, in *GetSendMsgStatusReq, opts ...grpc.CallOption) (*GetSendMsgStatusResp, error) {
 	out := new(GetSendMsgStatusResp)
 	err := grpc.Invoke(ctx, "/msg.msg/GetSendMsgStatus", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) GetSuperGroupMsg(ctx context.Context, in *GetSuperGroupMsgReq, opts ...grpc.CallOption) (*GetSuperGroupMsgResp, error) {
-	out := new(GetSuperGroupMsgResp)
-	err := grpc.Invoke(ctx, "/msg.msg/GetSuperGroupMsg", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) GetWriteDiffMsg(ctx context.Context, in *GetWriteDiffMsgReq, opts ...grpc.CallOption) (*GetWriteDiffMsgResp, error) {
-	out := new(GetWriteDiffMsgResp)
-	err := grpc.Invoke(ctx, "/msg.msg/GetWriteDiffMsg", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2423,18 +2229,23 @@ func (c *msgClient) DeleteMessageReactionExtensions(ctx context.Context, in *Del
 // Server API for Msg service
 
 type MsgServer interface {
-	GetMaxAndMinSeq(context.Context, *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error)
-	PullMessageBySeqList(context.Context, *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error)
+	// 获取最小最大seq（包括用户的，以及指定群组的）
+	GetMaxAndMinSeq(context.Context, *sdk_ws.GetMaxAndMinSeqReq) (*sdk_ws.GetMaxAndMinSeqResp, error)
+	// 拉取历史消息（包括用户的，以及指定群组的）
+	PullMessageBySeqList(context.Context, *sdk_ws.PullMessageBySeqListReq) (*sdk_ws.PullMessageBySeqListResp, error)
+	// 发送消息
 	SendMsg(context.Context, *SendMsgReq) (*SendMsgResp, error)
-	DelMsgList(context.Context, *sdkws.DelMsgListReq) (*sdkws.DelMsgListResp, error)
+	// 删除某人消息
+	DelMsgList(context.Context, *sdk_ws.DelMsgListReq) (*sdk_ws.DelMsgListResp, error)
+	// 删除某个用户某个大群消息
 	DelSuperGroupMsg(context.Context, *DelSuperGroupMsgReq) (*DelSuperGroupMsgResp, error)
+	// 清空某人所有消息
 	ClearMsg(context.Context, *ClearMsgReq) (*ClearMsgResp, error)
-	SetMsgMinSeq(context.Context, *SetMsgMinSeqReq) (*SetMsgMinSeqResp, error)
+	// 设置消息是否发送成功-针对api发送的消息
 	SetSendMsgStatus(context.Context, *SetSendMsgStatusReq) (*SetSendMsgStatusResp, error)
+	// 获取消息发送状态
 	GetSendMsgStatus(context.Context, *GetSendMsgStatusReq) (*GetSendMsgStatusResp, error)
-	GetSuperGroupMsg(context.Context, *GetSuperGroupMsgReq) (*GetSuperGroupMsgResp, error)
-	GetWriteDiffMsg(context.Context, *GetWriteDiffMsgReq) (*GetWriteDiffMsgResp, error)
-	// modify msg
+	// 修改消息
 	SetMessageReactionExtensions(context.Context, *SetMessageReactionExtensionsReq) (*SetMessageReactionExtensionsResp, error)
 	GetMessageListReactionExtensions(context.Context, *GetMessageListReactionExtensionsReq) (*GetMessageListReactionExtensionsResp, error)
 	AddMessageReactionExtensions(context.Context, *ModifyMessageReactionExtensionsReq) (*ModifyMessageReactionExtensionsResp, error)
@@ -2446,7 +2257,7 @@ func RegisterMsgServer(s *grpc.Server, srv MsgServer) {
 }
 
 func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdkws.GetMaxAndMinSeqReq)
+	in := new(sdk_ws.GetMaxAndMinSeqReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2458,13 +2269,13 @@ func _Msg_GetMaxAndMinSeq_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/msg.msg/GetMaxAndMinSeq",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GetMaxAndMinSeq(ctx, req.(*sdkws.GetMaxAndMinSeqReq))
+		return srv.(MsgServer).GetMaxAndMinSeq(ctx, req.(*sdk_ws.GetMaxAndMinSeqReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdkws.PullMessageBySeqListReq)
+	in := new(sdk_ws.PullMessageBySeqListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2476,7 +2287,7 @@ func _Msg_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/msg.msg/PullMessageBySeqList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).PullMessageBySeqList(ctx, req.(*sdkws.PullMessageBySeqListReq))
+		return srv.(MsgServer).PullMessageBySeqList(ctx, req.(*sdk_ws.PullMessageBySeqListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2500,7 +2311,7 @@ func _Msg_SendMsg_Handler(srv interface{}, ctx context.Context, dec func(interfa
 }
 
 func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(sdkws.DelMsgListReq)
+	in := new(sdk_ws.DelMsgListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2512,7 +2323,7 @@ func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/msg.msg/DelMsgList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).DelMsgList(ctx, req.(*sdkws.DelMsgListReq))
+		return srv.(MsgServer).DelMsgList(ctx, req.(*sdk_ws.DelMsgListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2553,24 +2364,6 @@ func _Msg_ClearMsg_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_SetMsgMinSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetMsgMinSeqReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).SetMsgMinSeq(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/msg.msg/SetMsgMinSeq",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).SetMsgMinSeq(ctx, req.(*SetMsgMinSeqReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Msg_SetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetSendMsgStatusReq)
 	if err := dec(in); err != nil {
@@ -2603,42 +2396,6 @@ func _Msg_GetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).GetSendMsgStatus(ctx, req.(*GetSendMsgStatusReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Msg_GetSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSuperGroupMsgReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).GetSuperGroupMsg(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/msg.msg/GetSuperGroupMsg",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GetSuperGroupMsg(ctx, req.(*GetSuperGroupMsgReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Msg_GetWriteDiffMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWriteDiffMsgReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).GetWriteDiffMsg(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/msg.msg/GetWriteDiffMsg",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GetWriteDiffMsg(ctx, req.(*GetWriteDiffMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2744,24 +2501,12 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_ClearMsg_Handler,
 		},
 		{
-			MethodName: "SetMsgMinSeq",
-			Handler:    _Msg_SetMsgMinSeq_Handler,
-		},
-		{
 			MethodName: "SetSendMsgStatus",
 			Handler:    _Msg_SetSendMsgStatus_Handler,
 		},
 		{
 			MethodName: "GetSendMsgStatus",
 			Handler:    _Msg_GetSendMsgStatus_Handler,
-		},
-		{
-			MethodName: "GetSuperGroupMsg",
-			Handler:    _Msg_GetSuperGroupMsg_Handler,
-		},
-		{
-			MethodName: "GetWriteDiffMsg",
-			Handler:    _Msg_GetWriteDiffMsg_Handler,
 		},
 		{
 			MethodName: "SetMessageReactionExtensions",
@@ -2784,113 +2529,107 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	Metadata: "msg/msg.proto",
 }
 
-func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_4f5a59ae8be91efc) }
+func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_69316330d19ec9fa) }
 
-var fileDescriptor_msg_4f5a59ae8be91efc = []byte{
-	// 1672 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcd, 0x6e, 0xdb, 0xc6,
-	0x16, 0x06, 0x49, 0x4b, 0xb6, 0x8f, 0xec, 0xd8, 0x19, 0x3b, 0xbe, 0x0a, 0x63, 0x20, 0x0a, 0xf3,
-	0xa7, 0xdc, 0x24, 0x32, 0xae, 0xef, 0x05, 0x72, 0xd1, 0x14, 0x68, 0xe2, 0xc8, 0x55, 0x8c, 0x94,
-	0x75, 0x4c, 0xb9, 0x2d, 0xd0, 0x2e, 0x1c, 0x46, 0x1a, 0x33, 0x84, 0x25, 0x92, 0xe6, 0x50, 0xb1,
-	0xd5, 0xbf, 0x5d, 0x8b, 0x02, 0x45, 0x16, 0x5d, 0x76, 0xd5, 0x5d, 0x77, 0x7d, 0x88, 0x3e, 0x40,
-	0xd1, 0x07, 0xe9, 0x33, 0xb4, 0x28, 0x66, 0x86, 0x92, 0x86, 0x7f, 0x16, 0x2d, 0x17, 0x41, 0x0a,
-	0x74, 0xa7, 0x99, 0x39, 0x73, 0xe6, 0xfb, 0xce, 0xf9, 0xe6, 0x87, 0x47, 0x30, 0xdf, 0x25, 0xd6,
-	0x5a, 0x97, 0x58, 0x35, 0xcf, 0x77, 0x03, 0x17, 0x29, 0x5d, 0x62, 0xa9, 0xd5, 0x6d, 0x0f, 0x3b,
-	0x77, 0xb7, 0xf4, 0xbb, 0x4d, 0xec, 0xbf, 0xc4, 0xfe, 0x9a, 0x77, 0x60, 0xad, 0xb1, 0xe1, 0x35,
-	0xd2, 0x3e, 0xd8, 0x3b, 0x22, 0x6b, 0x47, 0x84, 0x9b, 0xab, 0xb5, 0xb1, 0x96, 0xbe, 0xe9, 0x79,
-	0xd8, 0x0f, 0xed, 0xb5, 0xcf, 0xa0, 0xa4, 0x13, 0xab, 0x6e, 0x06, 0xe6, 0xae, 0xab, 0xef, 0xa0,
-	0x65, 0x28, 0x04, 0xee, 0x01, 0x76, 0xca, 0x52, 0x45, 0xaa, 0xce, 0x1a, 0xbc, 0x81, 0x2a, 0x50,
-	0x72, 0x3d, 0xec, 0x9b, 0x81, 0xed, 0x3a, 0x5b, 0xf5, 0xb2, 0xcc, 0xc6, 0xc4, 0x2e, 0xf4, 0x3f,
-	0x98, 0xee, 0x72, 0x37, 0x65, 0xa5, 0x22, 0x55, 0x4b, 0xeb, 0x6a, 0x8d, 0x30, 0x00, 0x7b, 0xa6,
-	0x67, 0xef, 0x79, 0xa6, 0x6f, 0x76, 0x49, 0x2d, 0x5c, 0xc8, 0x18, 0x98, 0x6a, 0x58, 0x58, 0xbc,
-	0xbe, 0x21, 0x3a, 0x91, 0x72, 0x3b, 0x19, 0x0f, 0x4e, 0x7b, 0x25, 0xc1, 0xc2, 0xd3, 0x1e, 0x79,
-	0x21, 0x12, 0xad, 0x40, 0x69, 0x5b, 0x98, 0xc5, 0xe9, 0x8a, 0x5d, 0x22, 0x1a, 0x39, 0x3f, 0x1a,
-	0x0d, 0xe6, 0xbc, 0x1e, 0x79, 0xb1, 0xeb, 0x7e, 0x40, 0xb0, 0xbf, 0x55, 0x67, 0xd1, 0x98, 0x35,
-	0x22, 0x7d, 0xda, 0x8f, 0x12, 0xa0, 0x11, 0x16, 0xd7, 0xb1, 0xdc, 0x8d, 0xbe, 0xbe, 0x83, 0xca,
-	0x30, 0xdd, 0x31, 0x49, 0xd0, 0xc4, 0x87, 0x0c, 0xce, 0x94, 0x31, 0x68, 0xa2, 0x6b, 0x30, 0x6f,
-	0x5a, 0x96, 0x8f, 0xad, 0x28, 0xc9, 0x68, 0x27, 0x5a, 0x87, 0x52, 0x17, 0x13, 0x62, 0x5a, 0xf8,
-	0x3d, 0x9b, 0x04, 0x65, 0xa5, 0xa2, 0x54, 0x4b, 0xeb, 0x8b, 0x35, 0x2a, 0x25, 0x81, 0xb9, 0x21,
-	0x1a, 0xa1, 0x55, 0x98, 0x0d, 0x7c, 0xdb, 0xb2, 0x18, 0xd6, 0x29, 0xe6, 0x75, 0xd4, 0xa1, 0xbd,
-	0x0f, 0xa8, 0x81, 0x03, 0xdd, 0x3c, 0x7e, 0xe8, 0xb4, 0x75, 0xdb, 0x69, 0xe2, 0x43, 0x03, 0x1f,
-	0xa2, 0x15, 0x28, 0x86, 0xe4, 0x78, 0xd4, 0xc2, 0x56, 0x3c, 0xa4, 0x72, 0x22, 0xa4, 0xda, 0x11,
-	0x2c, 0x25, 0xfc, 0x11, 0x8f, 0x12, 0xdf, 0xf4, 0xfd, 0x47, 0x6e, 0x1b, 0x33, 0x8f, 0x05, 0x63,
-	0xd0, 0xa4, 0x4b, 0x6d, 0xfa, 0xbe, 0x4e, 0xac, 0xd0, 0x5b, 0xd8, 0xa2, 0xfd, 0xba, 0x79, 0x4c,
-	0x23, 0x45, 0xe3, 0x3b, 0x6f, 0x84, 0x2d, 0xd6, 0xcf, 0xfc, 0x32, 0x2e, 0xb4, 0x9f, 0xb5, 0xb4,
-	0x4f, 0x01, 0x9a, 0xd8, 0x69, 0xeb, 0xc4, 0xa2, 0x04, 0x5e, 0xaf, 0xc8, 0x7f, 0x90, 0xa0, 0x34,
-	0x5c, 0x9c, 0xb3, 0xc5, 0x51, 0xb6, 0x78, 0xc4, 0x16, 0x47, 0xd8, 0xf2, 0x16, 0x45, 0xc6, 0xd7,
-	0xd1, 0x89, 0x35, 0x4c, 0x93, 0xd8, 0x45, 0x2d, 0x5a, 0x1d, 0x1b, 0x3b, 0x01, 0xb7, 0x28, 0x70,
-	0x0b, 0xa1, 0x0b, 0xa9, 0x30, 0x43, 0xb0, 0xd3, 0xde, 0xb5, 0xbb, 0xb8, 0x5c, 0xac, 0x48, 0x55,
-	0xc5, 0x18, 0xb6, 0xb5, 0x16, 0x94, 0x1e, 0x75, 0xb0, 0xe9, 0x87, 0xe1, 0x59, 0x81, 0x62, 0x2f,
-	0x92, 0x5f, 0xde, 0xa2, 0x2e, 0x5c, 0x2f, 0xcc, 0x3c, 0x07, 0x38, 0x6c, 0xc7, 0x83, 0xa7, 0x24,
-	0x37, 0xe1, 0x03, 0x98, 0x1b, 0x2d, 0x32, 0x49, 0x18, 0xb4, 0xef, 0x25, 0x58, 0x68, 0x62, 0xca,
-	0x27, 0xa2, 0xc5, 0x54, 0xac, 0x65, 0x98, 0xb6, 0x7c, 0xb7, 0xe7, 0x0d, 0xa1, 0x0e, 0x9a, 0x74,
-	0x46, 0x97, 0x4b, 0x24, 0x94, 0x0e, 0x6f, 0xc5, 0x19, 0x4c, 0x25, 0xd3, 0x2f, 0xf2, 0x2f, 0x44,
-	0xf9, 0x6b, 0x75, 0x58, 0x8c, 0x42, 0x9b, 0x88, 0xe1, 0x36, 0x2c, 0x35, 0x71, 0x10, 0x8a, 0xa5,
-	0x19, 0x98, 0x41, 0x8f, 0x18, 0x49, 0x68, 0x52, 0x12, 0xda, 0x0a, 0x14, 0x09, 0x33, 0x67, 0x0e,
-	0x0b, 0x46, 0xd8, 0xd2, 0x1e, 0xc3, 0x72, 0xd2, 0xe1, 0x44, 0xd0, 0xee, 0xb1, 0xad, 0x7b, 0x7a,
-	0x68, 0xda, 0x33, 0x58, 0x6e, 0xfc, 0x25, 0x10, 0x04, 0x92, 0x4a, 0x84, 0xe4, 0x57, 0x12, 0x2c,
-	0xd5, 0x71, 0xa7, 0xd9, 0xf3, 0xb0, 0xdf, 0xa0, 0x59, 0x0e, 0x75, 0x2c, 0xe6, 0x4b, 0x8a, 0xe9,
-	0x75, 0xa4, 0x1b, 0x39, 0x4b, 0x37, 0x4a, 0x54, 0x37, 0x63, 0xf5, 0x41, 0x83, 0x9d, 0x84, 0x31,
-	0x51, 0xb0, 0x5b, 0x3c, 0xd8, 0x71, 0x42, 0xe3, 0x75, 0xb0, 0x08, 0x0a, 0x55, 0xb6, 0xcc, 0x94,
-	0x4d, 0x7f, 0x66, 0x13, 0xd2, 0xbe, 0xe4, 0x89, 0x39, 0x3b, 0xdc, 0x09, 0xcf, 0xc5, 0xc7, 0xec,
-	0x72, 0xf9, 0xc8, 0xb7, 0x03, 0x5c, 0xb7, 0xf7, 0xf7, 0x27, 0xe7, 0xa8, 0x7d, 0xc1, 0xc2, 0x15,
-	0xf5, 0xf4, 0x1a, 0x89, 0x7c, 0x57, 0x00, 0x4d, 0x77, 0xdb, 0xf6, 0x7e, 0x5f, 0xe7, 0x37, 0xab,
-	0x81, 0xcd, 0x16, 0x05, 0xbb, 0x79, 0x1c, 0x60, 0x87, 0xd8, 0xae, 0x93, 0x73, 0x17, 0xd3, 0x33,
-	0xda, 0xed, 0xf9, 0x2d, 0x3c, 0x3a, 0x60, 0x07, 0xed, 0x88, 0x98, 0x95, 0xe4, 0xe1, 0x4b, 0x30,
-	0xa1, 0x0b, 0xed, 0xf6, 0x3d, 0xcc, 0xa4, 0x59, 0x30, 0xc4, 0x2e, 0x74, 0x0c, 0x17, 0xfc, 0x38,
-	0x28, 0xf6, 0x48, 0x28, 0xb0, 0x47, 0xc2, 0x06, 0x7f, 0x24, 0x8c, 0xe5, 0x50, 0x33, 0xd2, 0x9c,
-	0x6c, 0x3a, 0x81, 0xdf, 0x37, 0xd2, 0x17, 0x88, 0xdf, 0x4c, 0xc5, 0xe4, 0xcd, 0x74, 0x07, 0x64,
-	0x7c, 0x5c, 0x9e, 0x66, 0xf1, 0x5e, 0xad, 0x59, 0xae, 0x6b, 0x75, 0x30, 0x7f, 0x9c, 0x3e, 0xef,
-	0xed, 0xd7, 0x9a, 0x81, 0x6f, 0x3b, 0xd6, 0x87, 0x66, 0xa7, 0x87, 0x0d, 0x19, 0x1f, 0xa3, 0x07,
-	0x30, 0x67, 0x06, 0x81, 0xd9, 0x7a, 0x81, 0xdb, 0x5b, 0xce, 0xbe, 0x5b, 0x9e, 0xc9, 0x31, 0x2f,
-	0x32, 0x83, 0xca, 0xc2, 0x26, 0x8c, 0x48, 0x79, 0xb6, 0x22, 0x55, 0x67, 0x8c, 0x41, 0x13, 0xad,
-	0xc3, 0xb2, 0x4d, 0x28, 0x7c, 0xdf, 0x31, 0x3b, 0x23, 0xe2, 0x65, 0x60, 0x66, 0xa9, 0x63, 0xa8,
-	0x06, 0xa8, 0x4b, 0xac, 0x77, 0x6d, 0x9f, 0x04, 0x3c, 0x7e, 0xec, 0x86, 0x2d, 0xb1, 0x1b, 0x36,
-	0x65, 0x44, 0xc5, 0xa0, 0x66, 0x07, 0x91, 0x6a, 0xfb, 0x00, 0xf7, 0x43, 0x6d, 0xd0, 0x9f, 0xe8,
-	0x3f, 0x50, 0x78, 0x49, 0x49, 0x84, 0x6f, 0xd0, 0x4b, 0x29, 0x82, 0x7c, 0x82, 0xfb, 0x9c, 0x27,
-	0xb7, 0x7c, 0x4b, 0xfe, 0xbf, 0xa4, 0x7d, 0x5b, 0x80, 0xcb, 0xf4, 0x42, 0x7a, 0x53, 0x05, 0xd9,
-	0x3b, 0x59, 0x90, 0xef, 0x30, 0x41, 0x8e, 0x21, 0xf0, 0x8f, 0x1a, 0xff, 0x2e, 0x6a, 0xfc, 0x4d,
-	0x82, 0xca, 0xc9, 0xc9, 0x9c, 0xf4, 0x5d, 0x2c, 0x66, 0x53, 0x49, 0x66, 0x33, 0x3d, 0x1e, 0x53,
-	0x59, 0xf1, 0x10, 0xb3, 0x51, 0x88, 0x66, 0xe3, 0x16, 0x14, 0x7d, 0x4c, 0x7a, 0x9d, 0xa0, 0x5c,
-	0x64, 0x0a, 0x3d, 0xcf, 0x14, 0x3a, 0x24, 0x8b, 0x89, 0x67, 0x84, 0x06, 0xda, 0x1f, 0x32, 0x5c,
-	0x6d, 0x0c, 0xd9, 0xd2, 0x70, 0x9e, 0x61, 0xff, 0x65, 0xbe, 0xb8, 0xc5, 0xbd, 0xa9, 0xc4, 0xf6,
-	0xe6, 0xf8, 0xfd, 0x47, 0x60, 0xa5, 0x1b, 0xcd, 0xc6, 0x13, 0xdc, 0x17, 0x36, 0xe0, 0x7d, 0x46,
-	0x2f, 0x07, 0x8b, 0x9a, 0x9e, 0x70, 0x63, 0x64, 0xb8, 0x56, 0xf7, 0x01, 0x25, 0xad, 0xe3, 0x59,
-	0x94, 0xf2, 0x66, 0x51, 0xce, 0xca, 0xa2, 0xf6, 0x93, 0x04, 0xd7, 0xc6, 0x43, 0x9f, 0x48, 0x72,
-	0x4d, 0x58, 0x22, 0xb6, 0x63, 0x75, 0xf0, 0x90, 0x08, 0xd3, 0x04, 0xff, 0xd6, 0xbe, 0xc2, 0x4f,
-	0x2d, 0x71, 0x7c, 0xb8, 0x20, 0x37, 0x34, 0xd2, 0x66, 0x6b, 0xbf, 0xc8, 0xb0, 0x7a, 0xd2, 0xac,
-	0x09, 0x70, 0xfa, 0x59, 0xe7, 0x2b, 0x47, 0xfa, 0xf6, 0x58, 0xa4, 0x67, 0x3f, 0x5c, 0xa7, 0x12,
-	0x89, 0x7c, 0x5d, 0xc7, 0xcd, 0xcf, 0x12, 0x5c, 0x1d, 0xfb, 0x98, 0x99, 0xf0, 0x81, 0x58, 0x22,
-	0xbd, 0x56, 0x0b, 0x13, 0x22, 0x04, 0x13, 0xb1, 0x60, 0x32, 0xdf, 0x83, 0x8f, 0x7c, 0x43, 0x34,
-	0x43, 0xeb, 0x00, 0xfb, 0xa6, 0xdd, 0xc1, 0x6d, 0x36, 0x69, 0x2a, 0x73, 0x92, 0x60, 0xa5, 0xfd,
-	0x2e, 0xc3, 0x8d, 0x3a, 0xee, 0xe0, 0x00, 0xbf, 0xd1, 0xe7, 0xc8, 0xf8, 0xc2, 0x43, 0xd6, 0x35,
-	0x56, 0x3c, 0xf5, 0x35, 0x36, 0x9d, 0x79, 0x6c, 0xef, 0x64, 0xa9, 0x7d, 0x86, 0xc5, 0xfa, 0x44,
-	0xdd, 0xa4, 0xcf, 0xd4, 0xbe, 0x96, 0xe0, 0x66, 0xae, 0xf8, 0x4f, 0xa4, 0xa3, 0x53, 0xdc, 0x26,
-	0x2e, 0xcc, 0x47, 0x54, 0x82, 0xee, 0xc0, 0x2c, 0x1e, 0x74, 0x84, 0x75, 0xd2, 0x73, 0x31, 0x31,
-	0x8d, 0x0c, 0x44, 0x6c, 0x72, 0x16, 0x36, 0x25, 0xf2, 0xf1, 0xf9, 0xab, 0x0c, 0xb3, 0x43, 0x57,
-	0x68, 0x2f, 0x2b, 0xb4, 0x12, 0x03, 0x7e, 0x2b, 0xba, 0xf2, 0xd9, 0x4f, 0x0d, 0x39, 0xef, 0xf1,
-	0xaf, 0x64, 0xaa, 0x41, 0x8b, 0x3d, 0xca, 0xf8, 0x41, 0x14, 0x7d, 0x76, 0x9d, 0x63, 0xcf, 0x3c,
-	0x2e, 0x57, 0x19, 0x1f, 0xab, 0x9f, 0x9c, 0xf2, 0x64, 0xba, 0x19, 0x3d, 0x99, 0x52, 0xf2, 0x27,
-	0x9c, 0x47, 0x7d, 0x98, 0x13, 0x87, 0xd0, 0x3d, 0x98, 0x39, 0x08, 0xdb, 0x61, 0x02, 0x4f, 0x54,
-	0xe8, 0xd0, 0x78, 0x82, 0x64, 0xbe, 0x92, 0x60, 0x49, 0x28, 0x35, 0xd3, 0x18, 0xb1, 0x5a, 0x73,
-	0xa2, 0xa2, 0x2c, 0xe5, 0xa8, 0x28, 0xcb, 0xa7, 0xae, 0x28, 0x2b, 0xb1, 0x8a, 0xf2, 0xfa, 0x37,
-	0x00, 0x4a, 0x97, 0x58, 0xe8, 0x19, 0x2c, 0xc4, 0x2a, 0xc1, 0xe8, 0x7a, 0x4a, 0x0c, 0x92, 0xd5,
-	0x67, 0xf5, 0x46, 0x1e, 0x33, 0xe2, 0x21, 0x17, 0x96, 0x9f, 0xf6, 0x3a, 0x9d, 0x70, 0xf7, 0x6e,
-	0xf4, 0x9b, 0xf8, 0x90, 0xe1, 0xfb, 0x77, 0xca, 0xfc, 0x34, 0x43, 0xba, 0xd6, 0xed, 0xdc, 0xb6,
-	0x6c, 0x5f, 0x4e, 0x87, 0x55, 0x2e, 0xb4, 0x10, 0x7e, 0xbe, 0x0c, 0x2a, 0xce, 0xea, 0x62, 0xb4,
-	0x83, 0x78, 0x68, 0x07, 0xa0, 0x8e, 0x3b, 0x3a, 0xb1, 0xf8, 0x26, 0x48, 0x59, 0x68, 0x34, 0x4c,
-	0x3d, 0x5c, 0x19, 0x63, 0x41, 0x3c, 0xd4, 0x80, 0xc5, 0x78, 0xfd, 0x09, 0x95, 0xd9, 0xc2, 0x29,
-	0xd5, 0x31, 0xf5, 0x62, 0xc6, 0x08, 0xf1, 0xd0, 0x1a, 0xcc, 0x0c, 0x4a, 0xb5, 0x88, 0x23, 0x17,
-	0xca, 0xc3, 0xea, 0xf9, 0x58, 0x0f, 0xf1, 0xd0, 0x7d, 0x98, 0x13, 0xab, 0x9f, 0x68, 0x79, 0xf8,
-	0xf9, 0x26, 0xd4, 0x6a, 0xd5, 0x0b, 0x29, 0xbd, 0x1c, 0x76, 0xbc, 0x46, 0x19, 0xc2, 0x4e, 0xa9,
-	0x85, 0x86, 0xb0, 0x53, 0x8b, 0x9a, 0x0d, 0x58, 0x6c, 0xa4, 0x3b, 0x6a, 0x64, 0x3a, 0x6a, 0x9c,
-	0xe0, 0x28, 0x25, 0x90, 0x29, 0x55, 0x39, 0xc1, 0x51, 0x22, 0x90, 0x75, 0xa6, 0x72, 0xb1, 0x30,
-	0x85, 0xfe, 0x35, 0xb0, 0x8e, 0x15, 0xbe, 0xd4, 0x72, 0xfa, 0x00, 0xf1, 0xd0, 0x01, 0xac, 0x9e,
-	0xf4, 0xf1, 0x84, 0xae, 0xe5, 0xf9, 0x58, 0x56, 0xaf, 0xe7, 0xb0, 0x22, 0x1e, 0x3a, 0x82, 0xca,
-	0xb8, 0xa7, 0x33, 0xaa, 0xe6, 0xfd, 0x38, 0x50, 0x6f, 0xe5, 0xb4, 0x24, 0x1e, 0x3a, 0x84, 0xd5,
-	0x87, 0xed, 0x76, 0x36, 0xcb, 0x9b, 0x39, 0x6b, 0x54, 0x6a, 0x35, 0x9f, 0x21, 0xf1, 0xd0, 0xe7,
-	0x70, 0x39, 0x72, 0xc5, 0xa7, 0xac, 0x7a, 0x7b, 0xb0, 0x4b, 0x72, 0x3c, 0xc4, 0xd4, 0x3b, 0xf9,
-	0x8d, 0x89, 0xb7, 0x71, 0xe9, 0xe3, 0x8b, 0xdb, 0x1e, 0x76, 0xf6, 0xb6, 0x74, 0xe1, 0x4f, 0xda,
-	0x2e, 0xb1, 0xee, 0x77, 0x89, 0xf5, 0xbc, 0xc8, 0x9a, 0xff, 0xfd, 0x33, 0x00, 0x00, 0xff, 0xff,
-	0xd4, 0xae, 0xa9, 0xee, 0x0d, 0x1e, 0x00, 0x00,
+var fileDescriptor_msg_69316330d19ec9fa = []byte{
+	// 1572 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0x06, 0x49, 0x4b, 0xb6, 0x47, 0x76, 0xec, 0xac, 0x1d, 0x43, 0x61, 0x8d, 0x46, 0x65, 0x92,
+	0x46, 0x41, 0x12, 0x19, 0x70, 0x8b, 0xfe, 0xa5, 0x40, 0x1b, 0x47, 0xae, 0x62, 0xa4, 0x6c, 0x12,
+	0xca, 0x6d, 0x90, 0xe6, 0x90, 0x32, 0xd6, 0x9a, 0x21, 0xc4, 0x3f, 0x73, 0xa9, 0x58, 0x02, 0x7a,
+	0xe9, 0xa1, 0xbd, 0xf5, 0x35, 0x7a, 0xeb, 0x43, 0xe4, 0x09, 0xfa, 0x20, 0x3d, 0x15, 0xe8, 0xb9,
+	0x2d, 0x76, 0xb9, 0xa2, 0xf8, 0x2b, 0xd1, 0x0a, 0x02, 0xe4, 0xd0, 0x9b, 0x67, 0x76, 0x76, 0x7e,
+	0xbf, 0x19, 0x2d, 0xc7, 0xb0, 0x6a, 0x13, 0x63, 0xc7, 0x26, 0x46, 0xcb, 0xf3, 0xdd, 0xc0, 0x45,
+	0x92, 0x4d, 0x0c, 0xb9, 0xf9, 0xc0, 0xc3, 0xce, 0xad, 0x03, 0xf5, 0x56, 0x17, 0xfb, 0x2f, 0xb1,
+	0xbf, 0xe3, 0xf5, 0x8d, 0x1d, 0x76, 0xbc, 0x43, 0x7a, 0xfd, 0x67, 0xa7, 0x64, 0xe7, 0x94, 0x84,
+	0xe2, 0x72, 0x6b, 0xa6, 0xa4, 0xaf, 0x7b, 0x1e, 0xf6, 0xb9, 0xbc, 0xe2, 0x42, 0x4d, 0x25, 0x46,
+	0x5b, 0x0f, 0xf4, 0x43, 0x57, 0x7d, 0x84, 0x36, 0xa1, 0x12, 0xb8, 0x7d, 0xec, 0xd4, 0x85, 0x86,
+	0xd0, 0x5c, 0xd6, 0x42, 0x02, 0x35, 0xa0, 0xe6, 0x7a, 0xd8, 0xd7, 0x03, 0xd3, 0x75, 0x0e, 0xda,
+	0x75, 0x91, 0x9d, 0xc5, 0x59, 0xa8, 0x09, 0x8b, 0x76, 0xa8, 0xa6, 0x2e, 0x35, 0x84, 0x66, 0x6d,
+	0xf7, 0x5c, 0x8b, 0xf4, 0xfa, 0xa7, 0xa4, 0xc5, 0x95, 0x6b, 0xe3, 0x63, 0xe5, 0x49, 0xcc, 0x60,
+	0x7b, 0x2f, 0x7e, 0x51, 0x98, 0x7a, 0x71, 0xb6, 0x13, 0xca, 0x4f, 0x02, 0xac, 0x3d, 0x1c, 0x90,
+	0x17, 0xf1, 0x80, 0x1a, 0x50, 0x7b, 0x10, 0xbb, 0x15, 0x86, 0x15, 0x67, 0xc5, 0x3d, 0x10, 0xa7,
+	0x7b, 0xa0, 0xc0, 0x8a, 0x37, 0x20, 0x2f, 0x0e, 0xdd, 0x6f, 0x09, 0xf6, 0x0f, 0xda, 0x2c, 0xd2,
+	0x65, 0x2d, 0xc1, 0x53, 0x7e, 0x13, 0x00, 0x4d, 0xec, 0xbb, 0x8e, 0xe1, 0xee, 0x8d, 0xd4, 0x47,
+	0xa8, 0x0e, 0x8b, 0x96, 0x4e, 0x82, 0x2e, 0x3e, 0x61, 0x2e, 0x2c, 0x68, 0x63, 0x12, 0x5d, 0x81,
+	0x55, 0xdd, 0x30, 0x7c, 0x6c, 0x24, 0x03, 0x4b, 0x32, 0xd1, 0x2e, 0xd4, 0x6c, 0x4c, 0x88, 0x6e,
+	0xe0, 0xaf, 0x4d, 0x12, 0xd4, 0xa5, 0x86, 0xd4, 0xac, 0xed, 0xae, 0xb7, 0x28, 0x4c, 0x62, 0xd1,
+	0x6a, 0x71, 0x21, 0xb4, 0x0d, 0xcb, 0x81, 0x6f, 0x1a, 0x06, 0xf3, 0x75, 0x81, 0x69, 0x9d, 0x30,
+	0x94, 0x6f, 0x00, 0x75, 0x70, 0xa0, 0xea, 0xc3, 0x3b, 0x4e, 0x4f, 0x35, 0x9d, 0x2e, 0x3e, 0xd1,
+	0xf0, 0x09, 0xda, 0x82, 0x2a, 0x0f, 0x2e, 0xcc, 0x14, 0xa7, 0xd2, 0x69, 0x14, 0x33, 0x69, 0x54,
+	0x4e, 0x61, 0x23, 0xa3, 0x8f, 0x78, 0x34, 0xf0, 0x7d, 0xdf, 0xbf, 0xeb, 0xf6, 0x30, 0xd3, 0x58,
+	0xd1, 0xc6, 0x24, 0x35, 0xb5, 0xef, 0xfb, 0x2a, 0x31, 0xb8, 0x36, 0x4e, 0x51, 0xbe, 0xaa, 0x0f,
+	0x69, 0xa6, 0x68, 0x7e, 0x57, 0x35, 0x4e, 0x31, 0x3e, 0xd3, 0xcb, 0x62, 0xa1, 0x7c, 0x46, 0x29,
+	0x1f, 0x01, 0x74, 0xb1, 0xd3, 0x53, 0x89, 0x41, 0x03, 0x28, 0x0f, 0x44, 0x1b, 0x6a, 0xd1, 0x3d,
+	0xe2, 0xd1, 0x08, 0x09, 0x6b, 0x19, 0x95, 0x18, 0x51, 0xbe, 0xe2, 0x2c, 0x2a, 0x71, 0x64, 0x99,
+	0xd8, 0x09, 0x42, 0x89, 0x4a, 0x28, 0x11, 0x63, 0x21, 0x19, 0x96, 0x08, 0x76, 0x7a, 0x87, 0xa6,
+	0x8d, 0xeb, 0xd5, 0x86, 0xd0, 0x94, 0xb4, 0x88, 0x56, 0xae, 0x42, 0xed, 0xae, 0x85, 0x75, 0x9f,
+	0xfb, 0xb9, 0x05, 0xd5, 0x41, 0x22, 0xd1, 0x21, 0xa5, 0x9c, 0x83, 0x95, 0x89, 0x18, 0xf1, 0x94,
+	0xa7, 0xb0, 0xd6, 0xc5, 0x54, 0x7d, 0xa2, 0x46, 0x79, 0x57, 0x69, 0xaa, 0x0d, 0xdf, 0x1d, 0x78,
+	0x51, 0x7d, 0xc6, 0x24, 0xbd, 0x61, 0x87, 0xa9, 0xe3, 0x29, 0x0d, 0x29, 0x05, 0xc1, 0x7a, 0x52,
+	0x39, 0xf1, 0x94, 0x5b, 0xb0, 0xd1, 0xc5, 0x01, 0xcf, 0x4c, 0x37, 0xd0, 0x83, 0x01, 0xe1, 0x46,
+	0x09, 0x23, 0x98, 0xee, 0x8a, 0xc6, 0x29, 0x65, 0x0b, 0x36, 0xb3, 0xe2, 0xc4, 0x53, 0x3e, 0x66,
+	0x70, 0xc8, 0xa8, 0x49, 0x35, 0xb1, 0x90, 0x6d, 0xe2, 0x1f, 0x60, 0xb3, 0x93, 0xa3, 0x90, 0x46,
+	0x87, 0x93, 0x40, 0xc2, 0x13, 0x20, 0xe1, 0x04, 0x90, 0x70, 0x04, 0x24, 0xee, 0xb2, 0x94, 0x70,
+	0xb9, 0x03, 0x1b, 0x6d, 0x6c, 0x75, 0x07, 0x1e, 0xf6, 0x3b, 0x34, 0x41, 0x99, 0x8a, 0x88, 0x45,
+	0x69, 0x95, 0x12, 0x69, 0xa5, 0xb1, 0x67, 0x15, 0x11, 0x4f, 0x39, 0x0a, 0x63, 0x4f, 0x1b, 0x98,
+	0x19, 0x3b, 0x5a, 0x07, 0x89, 0x16, 0x49, 0x64, 0x45, 0xa2, 0x7f, 0x4e, 0x31, 0xee, 0x87, 0x79,
+	0x4a, 0x1b, 0x9f, 0x23, 0x4f, 0xe5, 0x5b, 0xe6, 0x1e, 0x9b, 0x19, 0x8f, 0x7d, 0x33, 0xc0, 0x6d,
+	0xf3, 0xf8, 0x78, 0xfe, 0xb8, 0x94, 0x13, 0x96, 0xa2, 0xa4, 0xa6, 0x37, 0xec, 0xfc, 0xcf, 0x15,
+	0x50, 0x54, 0xb7, 0x67, 0x1e, 0x8f, 0xd4, 0x70, 0x48, 0x6a, 0x58, 0x3f, 0xa2, 0x0e, 0xee, 0x0f,
+	0x03, 0xec, 0x10, 0xd3, 0x75, 0xca, 0x21, 0x94, 0x75, 0xb9, 0x3b, 0xf0, 0x8f, 0x70, 0x04, 0x95,
+	0x88, 0xa6, 0x67, 0xae, 0x97, 0xf8, 0x79, 0x88, 0xe8, 0x70, 0xc2, 0x10, 0x6a, 0xe8, 0x70, 0xe4,
+	0x61, 0x36, 0x61, 0x2a, 0x5a, 0x9c, 0x85, 0x86, 0x70, 0xc1, 0x4f, 0x3b, 0xc5, 0xe6, 0x7d, 0x85,
+	0xcd, 0xfb, 0xbd, 0x70, 0xde, 0xcf, 0x8c, 0xa1, 0xa5, 0xe5, 0x29, 0xd9, 0x77, 0x02, 0x7f, 0xa4,
+	0xe5, 0x1b, 0x48, 0xcf, 0xb6, 0x6a, 0x76, 0xb6, 0xdd, 0x04, 0x11, 0x0f, 0xeb, 0x8b, 0x2c, 0xc7,
+	0xdb, 0x2d, 0xc3, 0x75, 0x0d, 0x0b, 0x87, 0x6f, 0x88, 0xe7, 0x83, 0xe3, 0x56, 0x37, 0xf0, 0x4d,
+	0xc7, 0xf8, 0x4e, 0xb7, 0x06, 0x58, 0x13, 0xf1, 0x10, 0x7d, 0x09, 0x2b, 0x7a, 0x10, 0xe8, 0x47,
+	0x2f, 0x70, 0xef, 0xc0, 0x39, 0x76, 0xeb, 0x4b, 0x25, 0xee, 0x25, 0x6e, 0x50, 0x28, 0x98, 0x84,
+	0x05, 0x52, 0x5f, 0x6e, 0x08, 0xcd, 0x25, 0x6d, 0x4c, 0xa2, 0x5d, 0xd8, 0x34, 0x09, 0x75, 0xdf,
+	0x77, 0x74, 0x6b, 0x12, 0x78, 0x1d, 0x98, 0x58, 0xee, 0x19, 0x6a, 0x01, 0xb2, 0x89, 0xf1, 0x95,
+	0xe9, 0x93, 0x20, 0xcc, 0x1f, 0x9b, 0xd1, 0x35, 0x36, 0xa3, 0x73, 0x4e, 0xe4, 0x27, 0x20, 0x17,
+	0x27, 0x91, 0xe2, 0xb9, 0x8f, 0x47, 0x1c, 0x1b, 0xf4, 0x4f, 0x74, 0x15, 0x2a, 0x2f, 0x69, 0x10,
+	0xfc, 0x09, 0xb1, 0xc6, 0x41, 0x78, 0x1f, 0x8f, 0xc2, 0xd8, 0xc2, 0xd3, 0xcf, 0xc4, 0x4f, 0x04,
+	0xe5, 0xdf, 0x05, 0xb8, 0x44, 0xa7, 0xee, 0xdb, 0x0a, 0xc2, 0xc1, 0x74, 0x10, 0x7e, 0xc1, 0x40,
+	0x38, 0x23, 0x80, 0xff, 0x11, 0xf8, 0x36, 0x23, 0xf0, 0x4f, 0x01, 0x1a, 0xd3, 0x0b, 0x38, 0xd7,
+	0x28, 0x4e, 0x55, 0x50, 0xca, 0x56, 0x30, 0x3f, 0x07, 0x0b, 0x45, 0x39, 0x88, 0x57, 0xa0, 0x92,
+	0xac, 0xc0, 0x75, 0xa8, 0xfa, 0x98, 0x0c, 0xac, 0xa0, 0x5e, 0x65, 0xa8, 0x3c, 0xcf, 0x50, 0x19,
+	0x05, 0x8b, 0x89, 0xa7, 0x71, 0x01, 0xe5, 0x1f, 0x11, 0x2e, 0x77, 0xa2, 0x68, 0x69, 0x0a, 0x5f,
+	0xa3, 0xe7, 0xa2, 0xbe, 0x12, 0x53, 0x7d, 0x15, 0xef, 0x47, 0x29, 0xd5, 0x8f, 0xb3, 0x7b, 0x8e,
+	0xc0, 0x96, 0x9d, 0xac, 0xc6, 0x7d, 0x3c, 0x8a, 0x35, 0xdd, 0x6d, 0x16, 0x5e, 0x89, 0x28, 0x5a,
+	0x6a, 0x46, 0x8d, 0x56, 0xa0, 0x5a, 0x3e, 0x06, 0x94, 0x95, 0x4e, 0x57, 0x51, 0x28, 0x5b, 0x45,
+	0xb1, 0xa8, 0x8a, 0xca, 0xef, 0x02, 0x5c, 0x99, 0xed, 0xfa, 0x5c, 0x90, 0xeb, 0xc2, 0x06, 0x31,
+	0x1d, 0xc3, 0xc2, 0x51, 0x20, 0x0c, 0x13, 0xe1, 0xe7, 0xd1, 0x7b, 0xe1, 0xa4, 0x8a, 0x9f, 0x47,
+	0x06, 0x43, 0x41, 0x2d, 0xef, 0xb6, 0xf2, 0x4a, 0x84, 0xed, 0x69, 0xb7, 0xe6, 0xf0, 0xd3, 0x2f,
+	0x9a, 0xa9, 0xa1, 0xa7, 0x9f, 0xcf, 0xf4, 0xf4, 0xf5, 0x07, 0xea, 0x42, 0xa6, 0x90, 0x6f, 0x72,
+	0xc4, 0xbc, 0x12, 0xe0, 0xf2, 0xcc, 0x87, 0xca, 0x5c, 0x25, 0xff, 0x10, 0x6a, 0x64, 0x70, 0x74,
+	0x84, 0x09, 0x89, 0x25, 0x10, 0xb1, 0x04, 0x32, 0xdd, 0xe3, 0x0f, 0x3a, 0x2d, 0x2e, 0x86, 0x76,
+	0x01, 0x8e, 0x75, 0xd3, 0xc2, 0x3d, 0x76, 0x69, 0xa1, 0xf0, 0x52, 0x4c, 0x4a, 0xf9, 0x4b, 0x84,
+	0xf7, 0xdb, 0xd8, 0xc2, 0x01, 0x7e, 0xab, 0x67, 0xc7, 0xec, 0xcf, 0xd2, 0xa2, 0x9f, 0xab, 0xea,
+	0x99, 0x7f, 0xae, 0x16, 0x0b, 0x47, 0xf5, 0x7e, 0x11, 0xc2, 0x97, 0x58, 0xae, 0x33, 0x58, 0xc9,
+	0x97, 0x56, 0x7e, 0x11, 0xe0, 0x5a, 0xa9, 0x9c, 0xcf, 0x85, 0x9d, 0x33, 0xfc, 0x6a, 0xb8, 0xb0,
+	0x9a, 0x40, 0x06, 0xba, 0x09, 0xcb, 0x78, 0xcc, 0x88, 0x56, 0x55, 0x49, 0x00, 0x4d, 0x04, 0xe2,
+	0xbe, 0x89, 0x45, 0xbe, 0x49, 0x71, 0xdf, 0x94, 0x3f, 0x44, 0x58, 0x8e, 0x54, 0xa1, 0x67, 0x45,
+	0xe9, 0x14, 0x98, 0xe3, 0xd7, 0x93, 0x96, 0x5f, 0x7f, 0x3a, 0x88, 0x65, 0xc7, 0xbc, 0x54, 0x88,
+	0x00, 0x25, 0xf5, 0xe0, 0x0a, 0x07, 0x4e, 0xf2, 0x49, 0x75, 0x8e, 0x3d, 0xe1, 0x42, 0x88, 0x8a,
+	0x78, 0x28, 0x3f, 0x3d, 0xe3, 0x04, 0xba, 0x96, 0x9c, 0x40, 0x39, 0xf5, 0x8b, 0xcd, 0x20, 0x1b,
+	0x56, 0xe2, 0x47, 0xe8, 0x06, 0x2c, 0xf5, 0x39, 0xcd, 0x0b, 0x98, 0x41, 0x65, 0x24, 0x30, 0x47,
+	0x01, 0x7f, 0x15, 0x60, 0x23, 0xb6, 0xf9, 0xa3, 0x79, 0x61, 0xab, 0xbf, 0xcc, 0x82, 0x4f, 0x28,
+	0xb1, 0xe0, 0x13, 0xcf, 0xbc, 0xe0, 0x93, 0x52, 0x0b, 0xbe, 0xdd, 0xbf, 0x17, 0x41, 0xb2, 0x89,
+	0x81, 0xee, 0xc1, 0x5a, 0x6a, 0x31, 0x87, 0x2e, 0xf2, 0xb8, 0xb3, 0x0b, 0x40, 0x59, 0x2e, 0x3a,
+	0x22, 0x1e, 0x7a, 0x0c, 0x9b, 0x0f, 0x07, 0x96, 0xc5, 0x3b, 0x73, 0x6f, 0xd4, 0xc5, 0x27, 0xcc,
+	0x8f, 0x77, 0xf9, 0x9d, 0xbc, 0x43, 0xaa, 0xf3, 0xd2, 0xd4, 0x73, 0xd6, 0x5b, 0x8b, 0x7c, 0xe1,
+	0x83, 0xd6, 0xf8, 0xe7, 0xc5, 0x78, 0xa1, 0x27, 0xaf, 0x27, 0x19, 0xc4, 0x43, 0x9f, 0x02, 0xb4,
+	0xb1, 0xa5, 0x12, 0x83, 0x19, 0xdf, 0xe4, 0xca, 0x27, 0x2c, 0x7a, 0xeb, 0x42, 0x0e, 0x97, 0x78,
+	0xa8, 0x03, 0xeb, 0xe9, 0x8d, 0x0d, 0xaa, 0x33, 0x03, 0x39, 0x1b, 0x21, 0xf9, 0x62, 0xc1, 0x09,
+	0xf1, 0xd0, 0x0e, 0x2c, 0x8d, 0xd7, 0x74, 0x28, 0xf4, 0x30, 0xb6, 0xdc, 0x93, 0xcf, 0xa7, 0x38,
+	0xa1, 0xe5, 0xf4, 0x9e, 0x8c, 0x5b, 0xce, 0xd9, 0xb6, 0x71, 0xcb, 0x79, 0x8b, 0x35, 0xaa, 0xa8,
+	0x93, 0xaf, 0xa8, 0x53, 0xa8, 0x28, 0x77, 0xa1, 0xd6, 0x87, 0xed, 0x69, 0x1f, 0x01, 0xe8, 0x4a,
+	0x99, 0x0f, 0x3d, 0xf9, 0x6a, 0x09, 0x29, 0xe2, 0xa1, 0x53, 0x68, 0xcc, 0x7a, 0x02, 0xa2, 0x66,
+	0xd9, 0x47, 0xae, 0x7c, 0xbd, 0xa4, 0x24, 0xf1, 0xd0, 0x09, 0x6c, 0xdf, 0xe9, 0xf5, 0x8a, 0xa3,
+	0xbc, 0x56, 0x72, 0xa7, 0x22, 0x37, 0xcb, 0x09, 0x12, 0x0f, 0xfd, 0x08, 0x97, 0x12, 0x3f, 0x61,
+	0x39, 0x56, 0x6f, 0x8c, 0x91, 0x55, 0xe2, 0x71, 0x21, 0xdf, 0x2c, 0x2f, 0x4c, 0xbc, 0xbd, 0x77,
+	0xbe, 0xbf, 0xf8, 0xc0, 0xc3, 0xce, 0xb3, 0x03, 0x35, 0xf6, 0xbf, 0x1f, 0x9b, 0x18, 0xb7, 0x6d,
+	0x62, 0x3c, 0xaf, 0x32, 0xf2, 0x83, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x01, 0x9d, 0x0b, 0x79,
+	0x64, 0x1a, 0x00, 0x00,
 }

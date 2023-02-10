@@ -1,6 +1,7 @@
-package msg
+package notification
 
 import (
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	open_im_sdk "Open_IM/pkg/proto/sdkws"
@@ -31,7 +32,7 @@ func MessageNotification(operationID, sendID, recvID string, contentType int32, 
 	}
 
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-	var n NotificationMsg
+	var n msg.NotificationMsg
 	n.SendID = sendID
 	n.RecvID = recvID
 	n.ContentType = contentType
@@ -43,5 +44,5 @@ func MessageNotification(operationID, sendID, recvID string, contentType int32, 
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	msg.Notification(&n)
 }

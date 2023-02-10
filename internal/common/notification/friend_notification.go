@@ -1,7 +1,8 @@
-package msg
+package notification
 
 import (
 	"Open_IM/internal/common/check"
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -76,7 +77,7 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 		return
 	}
 
-	var n NotificationMsg
+	var n msg.NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
 	n.ContentType = contentType
@@ -88,7 +89,7 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	msg.Notification(&n)
 }
 
 func FriendApplicationAddNotification(ctx context.Context, req *pbFriend.AddFriendReq) {

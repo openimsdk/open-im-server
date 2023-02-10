@@ -2,7 +2,7 @@ package auth
 
 import (
 	"Open_IM/internal/common/check"
-	"Open_IM/internal/common/rpc_server"
+	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"

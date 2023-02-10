@@ -1,13 +1,13 @@
 package friend
 
 import (
-	cbApi "Open_IM/pkg/callback_struct"
+	cbapi "Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
-	pbFriend "Open_IM/pkg/proto/friend"
+	pbfriend "Open_IM/pkg/proto/friend"
 	"context"
 
 	//"Open_IM/pkg/proto/msg"
@@ -15,7 +15,7 @@ import (
 	http2 "net/http"
 )
 
-func callbackBeforeAddFriendV1(ctx context.Context, req *pbFriend.AddFriendReq) error {
+func callbackBeforeAddFriendV1(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {
 	resp := callbackBeforeAddFriend(ctx, req)
 	if resp.ErrCode != 0 {
 		return (&constant.ErrInfo{
@@ -26,20 +26,20 @@ func callbackBeforeAddFriendV1(ctx context.Context, req *pbFriend.AddFriendReq) 
 	return nil
 }
 
-func callbackBeforeAddFriend(ctx context.Context, req *pbFriend.AddFriendReq) cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: tracelog.GetOperationID(ctx)}
+func callbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) cbapi.CommonCallbackResp {
+	callbackResp := cbapi.CommonCallbackResp{OperationID: tracelog.GetOperationID(ctx)}
 	if !config.Config.Callback.CallbackBeforeAddFriend.Enable {
 		return callbackResp
 	}
 
-	commonCallbackReq := &cbApi.CallbackBeforeAddFriendReq{
+	commonCallbackReq := &cbapi.CallbackBeforeAddFriendReq{
 		CallbackCommand: constant.CallbackBeforeAddFriendCommand,
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
 		OperationID:     tracelog.GetOperationID(ctx),
 	}
-	resp := &cbApi.CallbackBeforeAddFriendResp{
+	resp := &cbapi.CallbackBeforeAddFriendResp{
 		CommonCallbackResp: &callbackResp,
 	}
 	//utils.CopyStructFields(req, msg.MsgData)

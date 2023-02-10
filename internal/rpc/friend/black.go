@@ -3,7 +3,7 @@ package friend
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	chat "Open_IM/internal/rpc/msg"
+	chat "Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"

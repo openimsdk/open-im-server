@@ -1,8 +1,7 @@
 package msg
 
 import (
-	cbApi "Open_IM/pkg/callback_struct"
-	"Open_IM/pkg/common/callback"
+	cbapi "Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -12,8 +11,8 @@ import (
 	http2 "net/http"
 )
 
-func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq {
-	req := cbApi.CommonCallbackReq{
+func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbapi.CommonCallbackReq {
+	req := cbapi.CommonCallbackReq{
 		SendID:           msg.MsgData.SendID,
 		ServerMsgID:      msg.MsgData.ServerMsgID,
 		ClientMsgID:      msg.MsgData.ClientMsgID,
@@ -27,35 +26,35 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 		CreateTime:       msg.MsgData.CreateTime,
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
-		Content:          callback.GetContent(msg.MsgData),
+		Content:          utils.GetContent(msg.MsgData),
 		Seq:              msg.MsgData.Seq,
 		Ex:               msg.MsgData.Ex,
 	}
 	return req
 }
 
-func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return callbackResp
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendSingleMsgCommand
-	req := cbApi.CallbackBeforeSendSingleMsgReq{
+	req := cbapi.CallbackBeforeSendSingleMsgReq{
 		CommonCallbackReq: commonCallbackReq,
 		RecvID:            msg.MsgData.RecvID,
 	}
-	resp := &cbApi.CallbackBeforeSendSingleMsgResp{
+	resp := &cbapi.CallbackBeforeSendSingleMsgResp{
 		CommonCallbackResp: &callbackResp,
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendSingleMsgCommand,
-		req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut, &config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue); err != nil {
+		req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
+		if !*config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {
@@ -66,22 +65,22 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackRes
 	return callbackResp
 }
 
-func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return callbackResp
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackAfterSendSingleMsgCommand
-	req := cbApi.CallbackAfterSendSingleMsgReq{
+	req := cbapi.CallbackAfterSendSingleMsgReq{
 		CommonCallbackReq: commonCallbackReq,
 		RecvID:            msg.MsgData.RecvID,
 	}
-	resp := &cbApi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: &callbackResp}
+	resp := &cbapi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendSingleMsgCommand,
-		req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut, &config.Config.Callback.CallbackAfterSendSingleMsg.CallbackFailedContinue); err != nil {
+		req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		return callbackResp
@@ -89,25 +88,25 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp
 	return callbackResp
 }
 
-func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return callbackResp
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendGroupMsgCommand
-	req := cbApi.CallbackAfterSendGroupMsgReq{
+	req := cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
 		GroupID:           msg.MsgData.GroupID,
 	}
-	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: &callbackResp}
+	resp := &cbapi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendGroupMsgCommand,
-		req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut, &config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue); err != nil {
+		req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
+		if !*config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {
@@ -118,22 +117,22 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp
 	return callbackResp
 }
 
-func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return callbackResp
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackAfterSendGroupMsgCommand
-	req := cbApi.CallbackAfterSendGroupMsgReq{
+	req := cbapi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
 		GroupID:           msg.MsgData.GroupID,
 	}
-	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: &callbackResp}
+	resp := &cbapi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendGroupMsgCommand, req, resp,
-		config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut, nil); err != nil {
+		config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		return callbackResp
@@ -141,24 +140,24 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp 
 	return callbackResp
 }
 
-func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
+func callbackMsgModify(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackMsgModify.Enable || msg.MsgData.ContentType != constant.Text {
 		return callbackResp
 	}
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackMsgModifyCommand
-	req := cbApi.CallbackMsgModifyCommandReq{
+	req := cbapi.CallbackMsgModifyCommandReq{
 		CommonCallbackReq: commonCallbackReq,
 	}
-	resp := &cbApi.CallbackMsgModifyCommandResp{CommonCallbackResp: &callbackResp}
+	resp := &cbapi.CallbackMsgModifyCommandResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackMsgModifyCommand, req, resp,
-		config.Config.Callback.CallbackMsgModify.CallbackTimeOut, &config.Config.Callback.CallbackMsgModify.CallbackFailedContinue); err != nil {
+		config.Config.Callback.CallbackMsgModify); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackMsgModify.CallbackFailedContinue {
+		if !*config.Config.Callback.CallbackMsgModify.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {

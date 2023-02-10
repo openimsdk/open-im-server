@@ -1,6 +1,7 @@
-package msg
+package notification
 
 import (
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -25,7 +26,7 @@ func SetConversationNotification(operationID, sendID, recvID string, contentType
 		EmitDefaults: false,
 	}
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-	var n NotificationMsg
+	var n msg.NotificationMsg
 	n.SendID = sendID
 	n.RecvID = recvID
 	n.ContentType = int32(contentType)
@@ -37,7 +38,7 @@ func SetConversationNotification(operationID, sendID, recvID string, contentType
 		log.Error(operationID, utils.GetSelfFuncName(), "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	msg.Notification(&n)
 }
 
 // SetPrivate调用
@@ -70,7 +71,7 @@ func ConversationChangeNotification(ctx context.Context, userID string) {
 	SetConversationNotification(operationID, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
 }
 
-//会话未读数同步
+// 会话未读数同步
 func ConversationUnreadChangeNotification(operationID, userID, conversationID string, updateUnreadCountTime int64) {
 	log.NewInfo(operationID, utils.GetSelfFuncName())
 	ConversationChangedTips := &open_im_sdk.ConversationUpdateTips{

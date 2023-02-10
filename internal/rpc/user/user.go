@@ -2,8 +2,8 @@ package user
 
 import (
 	"Open_IM/internal/common/convert"
-	"Open_IM/internal/common/rpc_server"
-	chat "Open_IM/internal/rpc/msg"
+	chat "Open_IM/internal/common/notification"
+	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"

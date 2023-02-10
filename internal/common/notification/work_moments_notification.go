@@ -1,6 +1,7 @@
-package msg
+package notification
 
 import (
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbOffice "Open_IM/pkg/proto/office"
@@ -24,7 +25,7 @@ func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message)
 		EmitDefaults: false,
 	}
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-	n := &NotificationMsg{
+	n := &msg.NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
 		MsgFrom:     constant.UserMsgType,
@@ -38,5 +39,5 @@ func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message)
 		return
 	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
-	Notification(n)
+	msg.Notification(n)
 }

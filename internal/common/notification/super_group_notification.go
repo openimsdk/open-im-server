@@ -1,6 +1,7 @@
-package msg
+package notification
 
 import (
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	//sdk "Open_IM/pkg/proto/sdkws"
@@ -10,7 +11,7 @@ import (
 )
 
 func SuperGroupNotification(operationID, sendID, recvID string) {
-	n := &NotificationMsg{
+	n := &msg.NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
 		MsgFrom:     constant.SysMsgType,
@@ -19,5 +20,5 @@ func SuperGroupNotification(operationID, sendID, recvID string) {
 		OperationID: operationID,
 	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
-	Notification(n)
+	msg.Notification(n)
 }

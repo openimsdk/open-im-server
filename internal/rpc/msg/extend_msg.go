@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
@@ -18,7 +19,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	var rResp msg.SetMessageReactionExtensionsResp
 	rResp.ClientMsgID = req.ClientMsgID
 	rResp.MsgFirstModifyTime = req.MsgFirstModifyTime
-	callbackResp := callbackSetMessageReactionExtensions(req)
+	callbackResp := notification.callbackSetMessageReactionExtensions(req)
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
 		rResp.ErrMsg = callbackResp.ErrMsg
@@ -41,7 +42,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		}
 		rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
 		return &rResp, nil
 	}
 	for _, v := range callbackResp.ResultReactionExtensionList {
@@ -187,12 +188,12 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	}
 	if !isExists {
 		if !req.IsReact {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
 		} else {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
 		}
 	} else {
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
 	}
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
@@ -278,7 +279,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.DeleteMessageListReactionExtensionsResp
-	callbackResp := callbackDeleteMessageReactionExtensions(req)
+	callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
 		rResp.ErrMsg = callbackResp.ErrMsg
@@ -294,7 +295,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//if ExternalExtension
 	if req.IsExternalExtensions {
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+		notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
 		return &rResp, nil
 
 	}
@@ -418,7 +419,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 		}
 
 	}
-	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, isExists)
+	notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, isExists)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
 }

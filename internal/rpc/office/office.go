@@ -1,11 +1,11 @@
 package office
 
 import (
+	"Open_IM/internal/common/notification"
 	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
@@ -437,7 +437,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			UserName:            createUser.Nickname,
 			CreateTime:          workMoment.CreateTime,
 		}
-		msg.WorkMomentSendNotification(req.OperationID, atUser.UserID, workMomentNotificationMsg)
+		notification.WorkMomentSendNotification(req.OperationID, atUser.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -546,7 +546,7 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 	}
 	// send notification
 	if like && workMoment.UserID != req.UserID {
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
+		notification.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -599,10 +599,10 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "msg: ", *workMomentNotificationMsg)
 	if req.UserID != workMoment.UserID {
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
+		notification.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
 	}
 	if req.ReplyUserID != "" && req.ReplyUserID != workMoment.UserID && req.ReplyUserID != req.UserID {
-		msg.WorkMomentSendNotification(req.OperationID, req.ReplyUserID, workMomentNotificationMsg)
+		notification.WorkMomentSendNotification(req.OperationID, req.ReplyUserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

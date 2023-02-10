@@ -1,6 +1,7 @@
-package msg
+package notification
 
 import (
+	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
@@ -181,7 +182,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		return
 	}
 
-	var n NotificationMsg
+	var n msg.NotificationMsg
 	n.SendID = sendID
 	if groupID != "" {
 		n.RecvID = groupID
@@ -206,7 +207,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	msg.Notification(&n)
 }
 
 // 创建群后调用
