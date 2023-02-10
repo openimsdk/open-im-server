@@ -144,11 +144,12 @@ func SliceSetAny[E any, K comparable](es []E, fn func(e E) K) map[K]struct{} {
 	})
 }
 
-func Filter[E any](es []E, fn func(e E) bool) []E {
-	rs := make([]E, 0, len(es))
+func Filter[E, T any](es []E, fn func(e E) (T, bool)) []T {
+	rs := make([]T, 0, len(es))
 	for i := 0; i < len(es); i++ {
-		if e := es[i]; fn(e) {
-			rs = append(rs, e)
+		e := es[i]
+		if t, ok := fn(e); ok {
+			rs = append(rs, t)
 		}
 	}
 	return rs

@@ -21,17 +21,6 @@ import (
 
 //type GroupInterface GroupDataBaseInterface
 
-type BatchUpdateGroupMember struct {
-	GroupID string
-	UserID  string
-	Map     map[string]any
-}
-
-type GroupSimpleUserID struct {
-	Hash    uint64
-	UserIDs []string
-}
-
 type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
@@ -48,11 +37,11 @@ type GroupInterface interface {
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error)
+	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
 	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
-	UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error
+	UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
@@ -132,7 +121,7 @@ func (g *GroupController) DeleteGroupMember(ctx context.Context, groupID string,
 	return g.database.DeleteGroupMember(ctx, groupID, userIDs)
 }
 
-func (g *GroupController) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error) {
+func (g *GroupController) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
 	return g.database.MapGroupMemberUserID(ctx, groupIDs)
 }
 
@@ -144,7 +133,7 @@ func (g *GroupController) TransferGroupOwner(ctx context.Context, groupID string
 	return g.database.TransferGroupOwner(ctx, groupID, oldOwnerUserID, newOwnerUserID, roleLevel)
 }
 
-func (g *GroupController) UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error {
+func (g *GroupController) UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error {
 	return g.database.UpdateGroupMembers(ctx, data)
 }
 
@@ -204,11 +193,11 @@ type GroupDataBaseInterface interface {
 	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
 	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error)
+	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error)
 	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
 	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
-	UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error
+	UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
@@ -393,20 +382,20 @@ func (g *GroupDataBase) DeleteGroupMember(ctx context.Context, groupID string, u
 	})
 }
 
-func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*GroupSimpleUserID, error) {
+func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
 	mapGroupUserIDs, err := g.groupMemberDB.FindJoinUserID(ctx, groupIDs)
 	if err != nil {
 		return nil, err
-	} // 批量cache
-	res := make(map[string]*GroupSimpleUserID)
+	}
+	res := make(map[string]*relationTb.GroupSimpleUserID)
 	for _, groupID := range groupIDs {
-		users := &GroupSimpleUserID{
-			UserIDs: mapGroupUserIDs[groupID],
-		}
-		if len(users.UserIDs) > 0 {
-			utils.Sort(users.UserIDs, true)
+		userIDs := mapGroupUserIDs[groupID]
+		users := &relationTb.GroupSimpleUserID{}
+		if len(userIDs) > 0 {
+			utils.Sort(userIDs, true)
 			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(users.UserIDs, ";"))[0:8], 16)
+			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
+			users.Hash = bi.Uint64()
 		}
 		res[groupID] = users
 	}
@@ -452,7 +441,7 @@ func (g *GroupDataBase) UpdateGroupMember(ctx context.Context, groupID string, u
 	})
 }
 
-func (g *GroupDataBase) UpdateGroupMembers(ctx context.Context, data []*BatchUpdateGroupMember) error {
+func (g *GroupDataBase) UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		for _, item := range data {
 			if err := g.groupMemberDB.Update(ctx, item.GroupID, item.UserID, item.Map, tx); err != nil {
@@ -487,25 +476,25 @@ func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
-	return g.mongoDB.Transaction(ctx, func(s unrelationTb.SuperGroupModelInterface, tx any) error {
-		return s.CreateSuperGroup(ctx, groupID, initMemberIDList, tx)
+	return unrelation.MongoTransaction(ctx, g.mongoDB.MgoClient, func(tx mongo.SessionContext) error {
+		return g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, tx)
 	})
 }
 
 func (g *GroupDataBase) DeleteSuperGroup(ctx context.Context, groupID string) error {
-	return g.mongoDB.Transaction(ctx, func(s unrelationTb.SuperGroupModelInterface, tx any) error {
-		return s.DeleteSuperGroup(ctx, groupID, tx)
+	return unrelation.MongoTransaction(ctx, g.mongoDB.MgoClient, func(tx mongo.SessionContext) error {
+		return g.mongoDB.DeleteSuperGroup(ctx, groupID, tx)
 	})
 }
 
 func (g *GroupDataBase) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.mongoDB.Transaction(ctx, func(s unrelationTb.SuperGroupModelInterface, tx any) error {
-		return s.RemoverUserFromSuperGroup(ctx, groupID, userIDs, tx)
+	return unrelation.MongoTransaction(ctx, g.mongoDB.MgoClient, func(tx mongo.SessionContext) error {
+		return g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs, tx)
 	})
 }
 
 func (g *GroupDataBase) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.mongoDB.Transaction(ctx, func(s unrelationTb.SuperGroupModelInterface, tx any) error {
-		return s.AddUserToSuperGroup(ctx, groupID, userIDs, tx)
+	return unrelation.MongoTransaction(ctx, g.mongoDB.MgoClient, func(tx mongo.SessionContext) error {
+		return g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs, tx)
 	})
 }
