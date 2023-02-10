@@ -8,15 +8,18 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
+	tablerelation "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	pbUser "Open_IM/pkg/proto/user"
+	"Open_IM/pkg/proto/group"
+	pbgroup "Open_IM/pkg/proto/group"
+	"Open_IM/pkg/proto/sdkws"
+	pbuser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
@@ -61,9 +64,9 @@ func (s *userServer) Run() {
 	//grpc server
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
 			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
@@ -73,7 +76,7 @@ func (s *userServer) Run() {
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
-	pbUser.RegisterUserServer(srv, s)
+	pbuser.RegisterUserServer(srv, s)
 
 	err = srv.Serve(listener)
 	if err != nil {
@@ -88,12 +91,15 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID st
 	if err != nil {
 		return
 	}
-	for _, group := range members {
-		err := s.SetGroupMemberFaceURL(ctx, faceURL, group.GroupID, userID)
-		if err != nil {
-			return
-		}
-		chat.GroupMemberInfoSetNotification(operationID, opUserID, group.GroupID, userID)
+	groupIDs := make([]string, 0)
+	for _, v := range members {
+		groupIDs = append(groupIDs, v.GroupID)
+	}
+	if s.SetGroupMemberInfo(ctx, "", faceURL, "", 0, groupIDs, userID) != nil {
+		return
+	}
+	for _, v := range groupIDs {
+		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
 	}
 }
 
@@ -103,24 +109,57 @@ func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID s
 	if err != nil {
 		return
 	}
+	groupIDs := make([]string, 0)
 	for _, v := range members {
 		if v.Nickname == oldNickname {
-			err := s.SetGroupMemberNickname(ctx, newNickname, v.GroupID, v.UserID)
-			if err != nil {
-				return
-			}
-			chat.GroupMemberInfoSetNotification(operationID, opUserID, v.GroupID, userID)
+			groupIDs = append(groupIDs, v.GroupID)
 		}
+	}
+	s.SetGroupMemberInfo(ctx, newNickname, "", "", 0, groupIDs, userID)
+	for _, v := range groupIDs {
+		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
 	}
 }
 
 // 设置群昵称
-func (s *userServer) SetGroupMemberNickname(ctx context.Context, nickname string, groupID string, userID string) (err error) {
-	return
-}
+//func (s *userServer) SetGroupMemberNickname(ctx context.Context, nickname string, groupID string, userID string) (err error) {
+//	conn, err := s.RegisterCenter.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+//	if err != nil {
+//		return err
+//	}
+//	client := group.NewGroupClient(conn)
+//	req := &pbgroup.SetGroupMemberNicknameReq{GroupID: groupID, Nickname: nickname, UserID: userID}
+//	_, err = client.SetGroupMemberNickname(ctx, req)
+//	return
+//}
 
 // 设置群头像
-func (s *userServer) SetGroupMemberFaceURL(ctx context.Context, faceURL string, groupID string, userID string) (err error) {
+func (s *userServer) SetGroupMemberInfo(ctx context.Context, nickname, faceURL, ex string, roleLevel int32, groupIDs []string, userID string) (err error) {
+	conn, err := s.RegisterCenter.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+	if err != nil {
+		return err
+	}
+	req := pbgroup.SetGroupMemberInfo{UserID: userID}
+	if nickname != "" {
+		req.Nickname = &wrappers.StringValue{Value: nickname}
+	}
+	if faceURL != "" {
+		req.FaceURL = &wrappers.StringValue{Value: faceURL}
+	}
+	if ex != "" {
+		req.Ex = &wrappers.StringValue{Value: ex}
+	}
+	if roleLevel != 0 {
+		req.RoleLevel = &wrappers.Int32Value{Value: roleLevel}
+	}
+
+	setGroupMemberInfoReq := &pbgroup.SetGroupMemberInfoReq{}
+	for _, v := range groupIDs {
+		req.GroupID = v
+		setGroupMemberInfoReq.Members = append(setGroupMemberInfoReq.Members, &req)
+	}
+	client := group.NewGroupClient(conn)
+	_, err = client.SetGroupMemberInfo(ctx, setGroupMemberInfoReq)
 	return
 }
 
@@ -130,8 +169,8 @@ func (s *userServer) GetJoinedGroupMembers(ctx context.Context, userID string) (
 }
 
 // ok
-func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbUser.GetDesignateUsersReq) (resp *pbUser.GetDesignateUsersResp, err error) {
-	resp = &pbUser.GetDesignateUsersResp{}
+func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
+	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.FindWithError(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -148,8 +187,8 @@ func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) 
 }
 
 // ok
-func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (resp *pbUser.UpdateUserInfoResp, err error) {
-	resp = &pbUser.UpdateUserInfoResp{}
+func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
+	resp = &pbuser.UpdateUserInfoResp{}
 	err = tokenverify.CheckAccessV3(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
@@ -166,7 +205,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	err = s.Update(ctx, []*relationTb.UserModel{user})
+	err = s.Update(ctx, []*tablerelation.UserModel{user})
 	if err != nil {
 		return nil, err
 	}
@@ -191,8 +230,8 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 }
 
 // ok
-func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (resp *pbUser.SetGlobalRecvMessageOptResp, err error) {
-	resp = &pbUser.SetGlobalRecvMessageOptResp{}
+func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
+	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
 	}
@@ -206,8 +245,8 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 }
 
 // ok
-func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (resp *pbUser.AccountCheckResp, err error) {
-	resp = &pbUser.AccountCheckResp{}
+func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
+	resp = &pbuser.AccountCheckResp{}
 	if utils.Duplicate(req.CheckUserIDs) {
 		return nil, constant.ErrArgs.Wrap("userID repeated")
 	}
@@ -224,7 +263,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 		userIDs[v.UserID] = nil
 	}
 	for _, v := range req.CheckUserIDs {
-		temp := &pbUser.AccountCheckRespSingleUserStatus{UserID: v}
+		temp := &pbuser.AccountCheckRespSingleUserStatus{UserID: v}
 		if _, ok := userIDs[v]; ok {
 			temp.AccountStatus = constant.Registered
 		} else {
@@ -236,8 +275,8 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 }
 
 // ok
-func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbUser.GetPaginationUsersReq) (resp *pbUser.GetPaginationUsersResp, err error) {
-	resp = &pbUser.GetPaginationUsersResp{}
+func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
+	resp = &pbuser.GetPaginationUsersResp{}
 	usersDB, total, err := s.Page(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
@@ -248,8 +287,8 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbUser.GetPagi
 }
 
 // ok
-func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (resp *pbUser.UserRegisterResp, err error) {
-	resp = &pbUser.UserRegisterResp{}
+func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
+	resp = &pbuser.UserRegisterResp{}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, constant.ErrArgs.Wrap("userID repeated")
 	}
