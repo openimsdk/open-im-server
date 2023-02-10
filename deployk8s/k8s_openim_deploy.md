@@ -9,8 +9,7 @@
 6. 将rpcRegisterIP修改为空, 此地址为每个rpc注册到ETCD的地址, 置空每个rpc将会将pod地址注册到ETCD, 才能正确rpc请求(重要)
 7. 如果使用minio作为对象存储, 还需要修改minio的地址
 8. 其他如果使用离线推送,需要修改push离线推送配置
-9. 修改demo中的imAPIURL字段为openIM api的ingress或者service地址, 需要让demo的pod能正确请求到(重要)
-10. 其他非必须配置修改, 如短信,推送等
+9. 其他非必须配置修改, 如短信,推送等
 
 ### 2. 项目根目录创建im configMap到k8s openim namespace
 1. 为open-IM项目创建单独命名空间
@@ -75,8 +74,6 @@ kubectl 启动所有deployment, services, ingress
     telnet msg-gateway.openim.xxx.com {{your_ingress_port}}
     telnet sdk-server.openim.xxx.com {{your_ingress_port}}
     telnet api.openim.xxx.com {{your_ingress_port}}
-    telnet cms-api.openim.xxx.com {{your_ingress_port}}
-    telnet demo.openim.xxx.com {{your_ingress_port}}
  ```
 
 #### openIM k8s更新

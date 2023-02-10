@@ -1,7 +1,7 @@
 package apistruct
 
 import (
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 )
 
 type CommResp struct {
@@ -32,8 +32,8 @@ type GetGroupMembersInfoReq struct {
 }
 type GetGroupMembersInfoResp struct {
 	CommResp
-	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
+	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
+	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
 
 type InviteUserToGroupReq struct {
@@ -53,7 +53,7 @@ type GetJoinedGroupListReq struct {
 }
 type GetJoinedGroupListResp struct {
 	CommResp
-	GroupInfoList []*open_im_sdk.GroupInfo `json:"-"`
+	GroupInfoList []*sdkws.GroupInfo       `json:"-"`
 	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
@@ -65,9 +65,9 @@ type GetGroupMemberListReq struct {
 }
 type GetGroupMemberListResp struct {
 	CommResp
-	NextSeq    int32                              `json:"nextSeq"`
-	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
+	NextSeq    int32                        `json:"nextSeq"`
+	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
+	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
 
 type GetGroupAllMemberReq struct {
@@ -78,8 +78,8 @@ type GetGroupAllMemberReq struct {
 }
 type GetGroupAllMemberResp struct {
 	CommResp
-	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
+	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
+	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
 
 //
@@ -91,7 +91,7 @@ type GetGroupAllMemberResp struct {
 //}
 //type GetGroupAllMemberListBySplitResp struct {
 //	CommResp
-//	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
+//	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
 //	Map       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 //}
 
@@ -109,7 +109,7 @@ type CreateGroupReq struct {
 }
 type CreateGroupResp struct {
 	CommResp
-	GroupInfo open_im_sdk.GroupInfo  `json:"-"`
+	GroupInfo sdkws.GroupInfo        `json:"-"`
 	Data      map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
@@ -119,8 +119,8 @@ type GetGroupApplicationListReq struct {
 }
 type GetGroupApplicationListResp struct {
 	CommResp
-	GroupRequestList []*open_im_sdk.GroupRequest `json:"-"`
-	Data             []map[string]interface{}    `json:"data" swaggerignore:"true"`
+	GroupRequestList []*sdkws.GroupRequest    `json:"-"`
+	Data             []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type GetUserReqGroupApplicationListReq struct {
@@ -129,7 +129,7 @@ type GetUserReqGroupApplicationListReq struct {
 }
 
 type GetUserRespGroupApplicationResp struct {
-	GroupRequestList []*open_im_sdk.GroupRequest `json:"data"`
+	GroupRequestList []*sdkws.GroupRequest `json:"data"`
 }
 
 type GetGroupInfoReq struct {
@@ -138,12 +138,12 @@ type GetGroupInfoReq struct {
 }
 type GetGroupInfoResp struct {
 	CommResp
-	GroupInfoList []*open_im_sdk.GroupInfo `json:"-"`
+	GroupInfoList []*sdkws.GroupInfo       `json:"-"`
 	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 //type GroupInfoAlias struct {
-//	open_im_sdk.GroupInfo
+//	sdkws.GroupInfo
 //	NeedVerification int32 `protobuf:"bytes,13,opt,name=needVerification" json:"needVerification,omitempty"`
 //}
 

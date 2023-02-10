@@ -17,11 +17,6 @@ scrape_configs:
         labels:
           group: 'api'
 
-      - targets: ['localhost:10006']
-        labels:
-          group: 'cms-api'
-          
-
       - targets: ['localhost:20110']
         labels:
           group: 'user'
@@ -52,27 +47,13 @@ scrape_configs:
 
       - targets: ['localhost:20120']
         labels:
-          group: 'friend'    
+          group: 'friend'
 
-      - targets: ['localhost:20200']
-        labels:
-          group: 'admin-cms' 
-      
-      - targets: ['localhost:20120']
-        labels:
-          group: 'office' 
-      
-      - targets: ['localhost:20220']
-        labels:
-          group: 'organization' 
       
       - targets: ['localhost:20230']
         labels:
           group: 'conversation' 
-      
-      - targets: ['localhost:20240']
-        labels:
-          group: 'cache' 
+
       
       - targets: ['localhost:21400', 'localhost:21401', 'localhost:21402', 'localhost:21403']
         labels:

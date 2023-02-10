@@ -8,19 +8,16 @@ import (
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
 	apiChat "Open_IM/internal/api/msg"
-	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
 
-	//_ "github.com/razeencheng/demo-go/swaggo-gin/docs"
 	"io"
 	"os"
 	"strconv"
@@ -49,7 +46,6 @@ func main() {
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(utils.CorsHandler())
 	r.Use(middleware.GinParseOperationID)
 	log.Info("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -191,30 +187,7 @@ func main() {
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
-	//// office
-	officeGroup := r.Group("/office")
-	{
-		officeGroup.POST("/get_user_tags", office.GetUserTags)
-		officeGroup.POST("/get_user_tag_by_id", office.GetUserTagByID)
-		officeGroup.POST("/create_tag", office.CreateTag)
-		officeGroup.POST("/delete_tag", office.DeleteTag)
-		officeGroup.POST("/set_tag", office.SetTag)
-		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
-		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 
-		officeGroup.POST("/create_one_work_moment", office.CreateOneWorkMoment)
-		officeGroup.POST("/delete_one_work_moment", office.DeleteOneWorkMoment)
-		officeGroup.POST("/like_one_work_moment", office.LikeOneWorkMoment)
-		officeGroup.POST("/comment_one_work_moment", office.CommentOneWorkMoment)
-		officeGroup.POST("/get_work_moment_by_id", office.GetWorkMomentByID)
-		officeGroup.POST("/get_user_work_moments", office.GetUserWorkMoments)
-		officeGroup.POST("/get_user_friend_work_moments", office.GetUserFriendWorkMoments)
-		officeGroup.POST("/set_user_work_moments_level", office.SetUserWorkMomentsLevel)
-		officeGroup.POST("/delete_comment", office.DeleteComment)
-	}
-	//
-
-	go rpc.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")

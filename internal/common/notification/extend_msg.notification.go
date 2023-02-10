@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/msg"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 )
@@ -16,7 +16,7 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType
-	keyMap := make(map[string]*open_im_sdk.KeyValue)
+	keyMap := make(map[string]*sdkws.KeyValue)
 	for _, valueResp := range resp.Result {
 		if valueResp.ErrCode == 0 {
 			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
@@ -39,7 +39,7 @@ func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType
-	keyMap := make(map[string]*open_im_sdk.KeyValue)
+	keyMap := make(map[string]*sdkws.KeyValue)
 	for _, valueResp := range resp.Result {
 		if valueResp.ErrCode == 0 {
 			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
@@ -68,7 +68,7 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	}
 	pbData := msg.SendMsgReq{
 		OperationID: operationID,
-		MsgData: &open_im_sdk.MsgData{
+		MsgData: &sdkws.MsgData{
 			SendID:      sendID,
 			ClientMsgID: utils.GetMsgID(sendID),
 			SessionType: sessionType,

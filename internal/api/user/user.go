@@ -9,7 +9,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbRelay "Open_IM/pkg/proto/relay"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -52,10 +52,10 @@ func GetUsersInfoFromCache(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	var publicUserInfoList []*open_im_sdk.PublicUserInfo
+	var publicUserInfoList []*sdkws.PublicUserInfo
 	for _, v := range RpcResp.UserInfoList {
 		publicUserInfoList = append(publicUserInfoList,
-			&open_im_sdk.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
+			&sdkws.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
 	}
 	resp := api.GetUsersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: publicUserInfoList}
 	resp.Data = jsonData.JsonDataList(resp.UserInfoList)
@@ -155,7 +155,7 @@ func GetBlackIDListFromCache(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetUsersInfoReq true "请求体"
 // @Produce json
-// @Success 0 {object} api.GetUsersInfoResp{Map=[]open_im_sdk.PublicUserInfo}
+// @Success 0 {object} api.GetUsersInfoResp{Map=[]sdkws.PublicUserInfo}
 // @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_users_info [post]
@@ -195,10 +195,10 @@ func GetUsersPublicInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	var publicUserInfoList []*open_im_sdk.PublicUserInfo
+	var publicUserInfoList []*sdkws.PublicUserInfo
 	for _, v := range RpcResp.UserInfoList {
 		publicUserInfoList = append(publicUserInfoList,
-			&open_im_sdk.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
+			&sdkws.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
 	}
 
 	resp := api.GetUsersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: publicUserInfoList}
@@ -226,7 +226,7 @@ func UpdateUserInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.UpdateUserInfoReq{UserInfo: &open_im_sdk.UserInfo{}}
+	req := &rpc.UpdateUserInfoReq{UserInfo: &sdkws.UserInfo{}}
 	utils.CopyStructFields(req.UserInfo, &params)
 	req.OperationID = params.OperationID
 	var ok bool
@@ -317,7 +317,7 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetSelfUserInfoReq true "请求体"
 // @Produce json
-// @Success 0 {object} api.GetSelfUserInfoResp{data=open_im_sdk.UserInfo}
+// @Success 0 {object} api.GetSelfUserInfoResp{data=sdkws.UserInfo}
 // @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_self_user_info [post]
@@ -482,7 +482,7 @@ func GetUsers(c *gin.Context) {
 	reqPb.UserID = req.UserID
 	reqPb.UserName = req.UserName
 	reqPb.Content = req.Content
-	reqPb.Pagination = &open_im_sdk.RequestPagination{ShowNumber: req.ShowNumber, PageNumber: req.PageNumber}
+	reqPb.Pagination = &sdkws.RequestPagination{ShowNumber: req.ShowNumber, PageNumber: req.PageNumber}
 	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"

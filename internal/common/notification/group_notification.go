@@ -107,7 +107,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType, sendID, groupID, recvUserID)
 
 	var err error
-	var tips open_im_sdk.TipsComm
+	var tips sdkws.TipsComm
 	tips.Detail, err = proto.Marshal(m)
 	if err != nil {
 		log.Error(operationID, "Marshal failed ", err.Error(), m.String())
@@ -212,8 +212,8 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 
 // 创建群后调用
 func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberList []string) {
-	GroupCreatedTips := sdkws.GroupCreatedTips{Group: &open_im_sdk.GroupInfo{},
-		OpUser: &open_im_sdk.GroupMemberFullInfo{}, GroupOwnerUser: &open_im_sdk.GroupMemberFullInfo{}}
+	GroupCreatedTips := sdkws.GroupCreatedTips{Group: &sdkws.GroupInfo{},
+		OpUser: &sdkws.GroupMemberFullInfo{}, GroupOwnerUser: &sdkws.GroupMemberFullInfo{}}
 	if err := setOpUserInfo(opUserID, groupID, GroupCreatedTips.OpUser); err != nil {
 		log.NewError(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID, GroupCreatedTips.OpUser)
 		return
@@ -229,7 +229,7 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 		return
 	}
 	for _, v := range initMemberList {
-		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
+		var groupMemberInfo sdkws.GroupMemberFullInfo
 		if err := setGroupMemberInfo(groupID, v, &groupMemberInfo); err != nil {
 			log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, v)
 			continue

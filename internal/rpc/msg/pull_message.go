@@ -7,15 +7,15 @@ import (
 
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 
 	promePkg "Open_IM/pkg/common/prometheus"
 )
 
-func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAndMinSeqReq) (*open_im_sdk.GetMaxAndMinSeqResp, error) {
+func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
 	log.NewInfo(in.OperationID, "rpc getMaxAndMinSeq is arriving", in.String())
-	resp := new(open_im_sdk.GetMaxAndMinSeqResp)
-	m := make(map[string]*open_im_sdk.MaxAndMinSeq)
+	resp := new(sdkws.GetMaxAndMinSeqResp)
+	m := make(map[string]*sdkws.MaxAndMinSeq)
 	var maxSeq, minSeq uint64
 	var err1, err2 error
 	maxSeq, err1 = commonDB.DB.GetUserMaxSeq(in.UserID)
@@ -35,7 +35,7 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 	resp.MaxSeq = uint32(maxSeq)
 	resp.MinSeq = uint32(minSeq)
 	for _, groupID := range in.GroupIDList {
-		x := new(open_im_sdk.MaxAndMinSeq)
+		x := new(sdkws.MaxAndMinSeq)
 		maxSeq, _ := commonDB.DB.GetGroupMaxSeq(groupID)
 		minSeq, _ := commonDB.DB.GetGroupUserMinSeq(groupID, in.UserID)
 		x.MaxSeq = uint32(maxSeq)
@@ -46,10 +46,10 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 	return resp, nil
 }
 
-func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
+func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
 	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
-	resp := new(open_im_sdk.PullMessageBySeqListResp)
-	m := make(map[string]*open_im_sdk.MsgDataList)
+	resp := new(sdkws.PullMessageBySeqListResp)
+	m := make(map[string]*sdkws.MsgDataList)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
 		if err != go_redis.Nil {
@@ -76,7 +76,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	}
 
 	for k, v := range in.GroupSeqList {
-		x := new(open_im_sdk.MsgDataList)
+		x := new(sdkws.MsgDataList)
 		redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, in.OperationID)
 		if err != nil {
 			if err != go_redis.Nil {
@@ -108,7 +108,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	return resp, nil
 }
 
-type MsgFormats []*open_im_sdk.MsgData
+type MsgFormats []*sdkws.MsgData
 
 // Implement the sort.Interface interface to get the number of elements method
 func (s MsgFormats) Len() int {

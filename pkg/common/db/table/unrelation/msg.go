@@ -49,6 +49,20 @@ func (u UserMsgDocModel) GetSeqUid(uid string, seq uint32) string {
 	return u.getSeqUid(uid, seq)
 }
 
+func (u UserMsgDocModel) GetDocIDSeqsMap(uid string, seqs []uint32) map[string][]uint32 {
+	t := make(map[string][]uint32)
+	for i := 0; i < len(seqs); i++ {
+		seqUid := u.getSeqUid(uid, seqs[i])
+		if value, ok := t[seqUid]; !ok {
+			var temp []uint32
+			t[seqUid] = append(temp, seqs[i])
+		} else {
+			t[seqUid] = append(value, seqs[i])
+		}
+	}
+	return t
+}
+
 func (UserMsgDocModel) getMsgIndex(seq uint32) int {
 	seqSuffix := seq / singleGocMsgNum
 	var index uint32

@@ -1,7 +1,7 @@
 package callbackstruct
 
 import (
-	"Open_IM/pkg/proto/group"
+	"Open_IM/pkg/apistruct"
 	common "Open_IM/pkg/proto/sdkws"
 )
 
@@ -9,7 +9,7 @@ type CallbackBeforeCreateGroupReq struct {
 	CallbackCommand string `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
 	common.GroupInfo
-	InitMemberList []*group.GroupAddMemberInfo `json:"initMemberList"`
+	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
 }
 
 type CallbackBeforeCreateGroupResp struct {
