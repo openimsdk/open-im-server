@@ -1,6 +1,7 @@
 package group
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/network"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
@@ -22,6 +23,9 @@ import (
 	"context"
 	"fmt"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"gorm.io/gorm"
+	"math/big"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -38,6 +42,7 @@ type groupServer struct {
 	zkAddr          []string
 	GroupInterface  controller.GroupInterface
 	registerCenter  discoveryRegistry.SvcDiscoveryRegistry
+	user            *check.UserCheck
 }
 
 func NewGroupServer(port int) *groupServer {
@@ -72,8 +77,8 @@ func NewGroupServer(port int) *groupServer {
 	}
 
 	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
-
 	g.GroupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), mongo.GetClient())
+	g.user = check.NewUserCheck()
 	return &g
 }
 
@@ -132,6 +137,69 @@ func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 	return nil
 }
 
+func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, complete bool) (map[string]string, error) {
+	if len(userIDs) == 0 {
+		return map[string]string{}, nil
+	}
+	users, err := s.user.GetPublicUserInfos(ctx, userIDs, complete)
+	if err != nil {
+		return nil, err
+	}
+	return utils.SliceToMapAny(users, func(e *open_im_sdk.PublicUserInfo) (string, string) {
+		return e.UserID, e.Nickname
+	}), nil
+}
+
+func (s *groupServer) GroupNotification(ctx context.Context, groupID string) {
+	// todo 群公告修改通知
+	//var conversationReq pbConversation.ModifyConversationFieldReq
+	//conversation := pbConversation.Conversation{
+	//	OwnerUserID:      tracelog.GetOpUserID(ctx),
+	//	ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
+	//	ConversationType: constant.GroupChatType,
+	//	GroupID:          groupID,
+	//}
+	//conversationReq.Conversation = &conversation
+	//conversationReq.FieldType = constant.FieldGroupAtType
+	//conversation.GroupAtType = constant.GroupNotification
+	//conversationReq.UserIDList = userIDs
+	//_, err := pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
+	//tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
+}
+
+func (s *groupServer) IsNotFound(err error) bool {
+	return utils.Unwrap(err) == gorm.ErrRecordNotFound
+}
+
+func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
+	if *groupID != "" {
+		_, err := s.GroupInterface.TakeGroup(ctx, *groupID)
+		if err == nil {
+			return constant.ErrGroupIDExisted.Wrap("group id existed " + *groupID)
+		} else if s.IsNotFound(err) {
+			return nil
+		} else {
+			return err
+		}
+	}
+	for i := 0; i < 10; i++ {
+		id := utils.Md5(strings.Join([]string{tracelog.GetOperationID(ctx), strconv.FormatInt(time.Now().UnixNano(), 10), strconv.Itoa(rand.Int())}, ",;,"))
+		bi := big.NewInt(0)
+		bi.SetString(id[0:8], 16)
+		id = bi.String()
+		_, err := s.GroupInterface.TakeGroup(ctx, id)
+		if err == nil {
+			continue
+		} else if s.IsNotFound(err) {
+			*groupID = id
+			return nil
+		} else {
+			return err
+		}
+	}
+	return constant.ErrData.Wrap("group id gen error")
+}
+
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
@@ -144,19 +212,18 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if utils.Duplicate(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member repeated")
 	}
-	userMap, err := GetUserInfoMap(ctx, userIDs)
+	userMap, err := s.user.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
-	if ids := utils.Single(userIDs, utils.Keys(userMap)); len(ids) > 0 {
-		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
-	}
-	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
+	if err := CallbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
 	var groupMembers []*relationTb.GroupMemberModel
 	group := PbToDBGroupInfo(req.GroupInfo)
-	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
+	if err := s.GenGroupID(ctx, &group.GroupID); err != nil {
+		return nil, err
+	}
 	joinGroup := func(userID string, roleLevel int32) error {
 		groupMember := PbToDbGroupMember(userMap[userID])
 		groupMember.Nickname = ""
@@ -165,7 +232,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -271,12 +338,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
 		return nil, constant.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
-	userMap, err := GetUserInfoMap(ctx, req.InvitedUserIDs)
+	userMap, err := s.user.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
 	if err != nil {
 		return nil, err
-	}
-	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(userMap)); len(ids) > 0 {
-		return nil, constant.ErrArgs.Wrap("user not found " + strings.Join(ids, ","))
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !tokenverify.IsAppManagerUid(ctx) {
@@ -328,7 +392,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			member.OperatorUserID = opUserID
 			member.InviterUserID = opUserID
 			member.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), member, group.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
 				return nil, err
 			}
 			groupMembers = append(groupMembers, member)
@@ -354,9 +418,9 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		return nil, err
 	}
-	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == ""
-	}))
+	}), true)
 	if err != nil {
 		return nil, err
 	}
@@ -376,9 +440,9 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
-	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == ""
-	}))
+	}), true)
 	if err != nil {
 		return nil, err
 	}
@@ -470,9 +534,9 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	if err != nil {
 		return nil, err
 	}
-	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == ""
-	}))
+	}), true)
 	if err != nil {
 		return nil, err
 	}
@@ -505,12 +569,9 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	}
 	userIDs = utils.Distinct(userIDs)
 	groupIDs = utils.Distinct(groupIDs)
-	userMap, err := GetPublicUserInfoMap(ctx, userIDs)
+	userMap, err := s.user.GetPublicUserInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
-	}
-	if ids := utils.Single(utils.Keys(userMap), userIDs); len(ids) > 0 {
-		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	groups, err := s.GroupInterface.FindGroup(ctx, utils.Distinct(groupIDs))
 	if err != nil {
@@ -590,19 +651,18 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if groupRequest.HandleResult != 0 {
 		return nil, constant.ErrArgs.Wrap("group request already processed")
 	}
-	if _, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err != nil {
-		if !IsNotFound(err) {
-			return nil, err
-		}
-	} else {
-		return nil, constant.ErrArgs.Wrap("already in group")
+	var join bool
+	if _, err = s.GroupInterface.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
+		join = true // 已经在群里了
+	} else if !s.IsNotFound(err) {
+		return nil, err
 	}
-	user, err := GetPublicUserInfoOne(ctx, req.FromUserID)
+	user, err := s.user.GetPublicUserInfo(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
-	if req.HandleResult == constant.GroupResponseAgree {
+	if (!join) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
 			UserID:         user.UserID,
@@ -615,25 +675,27 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			OperatorUserID: tracelog.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-		if err = CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), member, group.Ex); err != nil {
+		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
 			return nil, err
 		}
 	}
 	if err := s.GroupInterface.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
-	if req.HandleResult == constant.GroupResponseAgree {
-		chat.GroupApplicationAcceptedNotification(req)
-		chat.MemberEnterNotification(req)
-	} else if req.HandleResult == constant.GroupResponseRefuse {
-		chat.GroupApplicationRejectedNotification(req)
+	if !join {
+		if req.HandleResult == constant.GroupResponseAgree {
+			chat.GroupApplicationAcceptedNotification(req)
+			chat.MemberEnterNotification(ctx, req)
+		} else if req.HandleResult == constant.GroupResponseRefuse {
+			chat.GroupApplicationRejectedNotification(req)
+		}
 	}
 	return resp, nil
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
-	if _, err := GetPublicUserInfoOne(ctx, tracelog.GetOpUserID(ctx)); err != nil {
+	if _, err := s.user.GetPublicUserInfo(ctx, tracelog.GetOpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	group, err := s.GroupInterface.TakeGroup(ctx, req.GroupID)
@@ -657,7 +719,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
 		if err := s.GroupInterface.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
@@ -732,7 +794,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	chat.GroupInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
 	if req.GroupInfoForSet.Notification != "" {
-		GroupNotification(ctx, group.GroupID)
+		s.GroupNotification(ctx, group.GroupID)
 	}
 	return resp, nil
 }
@@ -830,9 +892,9 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
-	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == ""
-	}))
+	}), true)
 	if err != nil {
 		return nil, err
 	}
@@ -847,7 +909,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
 	resp := &pbGroup.GetUserReqApplicationListResp{}
-	user, err := GetPublicUserInfoOne(ctx, req.UserID)
+	user, err := s.user.GetPublicUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -1105,9 +1167,9 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	if err != nil {
 		return nil, err
 	}
-	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
 		return e.UserID, e.Nickname == ""
-	}))
+	}), true)
 	if err != nil {
 		return nil, err
 	}
