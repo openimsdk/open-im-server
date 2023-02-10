@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/db/table"
+	tableRelation "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -50,7 +50,7 @@ func NewConversationServer(port int) *conversationServer {
 	var cCache cache.ConversationCache
 	//mysql init
 	var mysql relation.Mysql
-	err := mysql.InitConn().AutoMigrateModel(&table.ConversationModel{})
+	err := mysql.InitConn().AutoMigrateModel(&tableRelation.ConversationModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -173,7 +173,7 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbConver
 
 func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbConversation.BatchSetConversationsReq) (*pbConversation.BatchSetConversationsResp, error) {
 	resp := &pbConversation.BatchSetConversationsResp{}
-	var conversations []*table.ConversationModel
+	var conversations []*tableRelation.ConversationModel
 	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
 		return nil, err
 	}
@@ -206,16 +206,16 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 			return nil, err
 		}
 	}
-	var conversation table.ConversationModel
+	var conversation tableRelation.ConversationModel
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.ConversationInterface.SyncPeerUserPrivateConversationTx(ctx, req.Conversation)
+		err := c.ConversationInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
 		if err != nil {
 			return nil, err
 		}
-		chat.ConversationSetPrivateNotification(req.OperationID, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
+		chat.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
 	//haveUserID, err := c.ConversationInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
@@ -242,29 +242,18 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	c.ConversationInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
-	err = c.ConversationInterface.UpdateUsersConversationFiled(ctx, haveUserID, req.Conversation.ConversationID, filedMap)
+	err = c.ConversationInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}
-	var conversations []*pbConversation.Conversation
-	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
-		temp := new(pbConversation.Conversation)
-		_ = utils.CopyStructFields(temp, req.Conversation)
-		temp.OwnerUserID = v
-		conversations = append(conversations, temp)
-	}
-	err = c.ConversationInterface.CreateConversation(ctx, conversations)
-	if err != nil {
-		return nil, err
-	}
+
 	if isSyncConversation {
 		for _, v := range req.UserIDList {
-			chat.ConversationChangeNotification(req.OperationID, v)
+			chat.ConversationChangeNotification(ctx, v)
 		}
 	} else {
 		for _, v := range req.UserIDList {
-			chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
+			chat.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
 		}
 	}
 	return resp, nil

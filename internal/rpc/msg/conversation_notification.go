@@ -41,7 +41,7 @@ func SetConversationNotification(operationID, sendID, recvID string, contentType
 }
 
 // SetPrivate调用
-func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPrivateChat bool) {
+func ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) {
 	log.NewInfo(operationID, utils.GetSelfFuncName())
 	conversationSetPrivateTips := &open_im_sdk.ConversationSetPrivateTips{
 		RecvID:    recvID,
@@ -71,7 +71,7 @@ func ConversationChangeNotification(ctx context.Context, userID string) {
 }
 
 //会话未读数同步
-func ConversationUnreadChangeNotification(operationID, userID, conversationID string, updateUnreadCountTime int64) {
+func ConversationUnreadChangeNotification(context context.Context, userID, conversationID string, updateUnreadCountTime int64) {
 	log.NewInfo(operationID, utils.GetSelfFuncName())
 	ConversationChangedTips := &open_im_sdk.ConversationUpdateTips{
 		UserID:                userID,
