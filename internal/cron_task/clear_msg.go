@@ -34,9 +34,7 @@ func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) erro
 			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupUserMinSeq failed", groupID, userID, err.Error())
 			continue
 		}
-		if userMinSeq > uint64(minSeq) {
-			err = db.DB.SetGroupUserMinSeq(groupID, userID, userMinSeq)
-		} else {
+		if userMinSeq < uint64(minSeq) {
 			err = db.DB.SetGroupUserMinSeq(groupID, userID, uint64(minSeq))
 		}
 		if err != nil {
@@ -56,6 +54,19 @@ func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 		return nil
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDStruct: ", delStruct, "minSeq", minSeq)
+
+	userCurrentMinSeq, err := db.DB.GetUserMinSeq(userID)
+	if err != nil && err != goRedis.Nil {
+		return err
+	}
+	userCurrentMaxSeq, err := db.DB.GetUserMaxSeq(userID)
+	if err != nil && err != goRedis.Nil {
+		return err
+	}
+	if userCurrentMinSeq > userCurrentMaxSeq {
+		minSeq = uint32(userCurrentMaxSeq)
+	}
+
 	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return utils.Wrap(err, "")
 }
