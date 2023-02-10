@@ -470,26 +470,6 @@ func (d *db.DataBases) GetMsgAndIndexBySeqListInOneMongo2(suffixUserID string, s
 	return seqMsg, indexList, unexistSeqList, nil
 }
 
-func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*sdkws.MsgData) {
-	for _, v := range seqList {
-		msg := new(sdkws.MsgData)
-		msg.Seq = v
-		exceptionMsg = append(exceptionMsg, msg)
-	}
-	return exceptionMsg
-}
-
-func genExceptionSuperGroupMessageBySeqList(seqList []uint32, groupID string) (exceptionMsg []*sdkws.MsgData) {
-	for _, v := range seqList {
-		msg := new(sdkws.MsgData)
-		msg.Seq = v
-		msg.GroupID = groupID
-		msg.SessionType = constant.SuperGroupChatType
-		exceptionMsg = append(exceptionMsg, msg)
-	}
-	return exceptionMsg
-}
-
 func (d *db.DataBases) SaveUserChatMongo2(uid string, sendTime int64, m *pbMsg.MsgDataToDB) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -558,22 +538,6 @@ func (d *db.DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgData
 	}
 	log.NewDebug("", "insert mgo data cost time", getCurrentTimestampByMill()-newTime)
 	return nil
-}
-
-func (d *db.DataBases) DelUserChatMongo2(uid string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	filter := bson.M{"uid": uid}
-
-	delTime := time.Now().Unix() - int64(config.Config.Mongo.DBRetainChatRecords)*24*3600
-	if _, err := c.UpdateOne(ctx, filter, bson.M{"$pull": bson.M{"msg": bson.M{"sendtime": bson.M{"$lte": delTime}}}}); err != nil {
-		return utils.Wrap(err, "")
-	}
-	return nil
-}
-
-func (d *db.DataBases) MgoSkipUID(count int) (string, error) {
-	return "", nil
 }
 
 func (d *db.DataBases) CleanUpUserMsgFromMongo(userID string, operationID string) error {
