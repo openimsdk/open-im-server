@@ -23,14 +23,14 @@ import (
 )
 
 type friendServer struct {
-	*rpc_server.RpcServer
+	*rpcserver.RpcServer
 
 	controller.FriendInterface
 	controller.BlackInterface
 }
 
 func NewFriendServer(port int) *friendServer {
-	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImFriendName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	r, err := rpcserver.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImFriendName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func NewFriendServer(port int) *friendServer {
 func (s *friendServer) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "friendServer run...")
-	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
+	listener, address, err := rpcserver.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
 		panic(err)
 	}

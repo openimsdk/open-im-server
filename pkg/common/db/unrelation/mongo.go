@@ -150,3 +150,12 @@ func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.
 	}
 	return utils.Wrap(sess.CommitTransaction(sCtx), "")
 }
+
+func getTxCtx(ctx context.Context, tx []any) context.Context {
+	if len(tx) > 0 {
+		if ctx, ok := tx[0].(mongo.SessionContext); ok {
+			return ctx
+		}
+	}
+	return ctx
+}

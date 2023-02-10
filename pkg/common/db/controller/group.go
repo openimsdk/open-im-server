@@ -397,7 +397,7 @@ func (g *GroupDataBase) MapGroupMemberUserID(ctx context.Context, groupIDs []str
 	mapGroupUserIDs, err := g.groupMemberDB.FindJoinUserID(ctx, groupIDs)
 	if err != nil {
 		return nil, err
-	}
+	} // 批量cache
 	res := make(map[string]*GroupSimpleUserID)
 	for _, groupID := range groupIDs {
 		users := &GroupSimpleUserID{
