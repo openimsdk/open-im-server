@@ -349,12 +349,6 @@ message GroupMemberInfoSetTips{
 }
 
 
-message OrganizationChangedTips{
-  UserInfo opUser = 2;
-  int64 operationTime = 3;
-}
-
-
 //////////////////////friend/////////////////////
 
 message FriendApplication{

@@ -1,42 +1,15 @@
 package cache
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"math/big"
-	"sort"
-	"strconv"
+	"github.com/dtm-labs/rockscache"
 	"time"
 )
 
-const (
-	//userInfoCache       = "USER_INFO_CACHE:"
-	//friendRelationCache = "FRIEND_RELATION_CACHE:"
-	blackListCache = "BLACK_LIST_CACHE:"
-	//groupCache          = "GROUP_CACHE:"
-	//groupInfoCache            = "GROUP_INFO_CACHE:"
-	//groupOwnerIDCache         = "GROUP_OWNER_ID:"
-	//joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
-	//groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
-	//groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
-	//allFriendInfoCache = "ALL_FRIEND_INFO_CACHE:"
-	//joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
-	//groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
-	//groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
-	conversationCache       = "CONVERSATION_CACHE:"
-	conversationIDListCache = "CONVERSATION_ID_LIST_CACHE:"
-
-	extendMsgSetCache = "EXTEND_MSG_SET_CACHE:"
-	extendMsgCache    = "EXTEND_MSG_CACHE:"
-)
-
 const scanCount = 3000
-const RandomExpireAdjustment = 0.2
+
 
 func (rc *RcClient) DelKeys() {
 	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE", groupOwnerIDCache, joinedGroupListCache,
@@ -67,4 +40,45 @@ func (rc *RcClient) DelKeys() {
 			}
 		}
 	}
+}
+
+
+func GetCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
+	var t T
+	var write bool
+	v, err := rcClient.Fetch(key, expire, func() (s string, err error) {
+		t, err = fn(ctx)
+		if err != nil {
+			return "", err
+		}
+		bs, err := json.Marshal(t)
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		write = true
+		return string(bs), nil
+	})
+	if err != nil {
+		return t, err
+	}
+	if write {
+		return t, nil
+	}
+	err = json.Unmarshal([]byte(v), &t)
+	if err != nil {
+		return t, utils.Wrap(err, "")
+	}
+	return t, nil
+}
+
+func GetCacheFor[E any, T any](ctx context.Context, list []E, fn func(ctx context.Context, item E) (T, error)) ([]T, error) {
+	rs := make([]T, 0, len(list))
+	for _, e := range list {
+		r, err := fn(ctx, e)
+		if err != nil {
+			return nil, err
+		}
+		rs = append(rs, r)
+	}
+	return rs, nil
 }

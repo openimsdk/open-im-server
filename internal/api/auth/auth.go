@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	rpc "Open_IM/pkg/proto/auth"
-	open_im_sdk "Open_IM/pkg/proto/sdkws"
+	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
@@ -43,7 +43,7 @@ func UserRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": errMsg})
 		return
 	}
-	req := &rpc.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
+	req := &rpc.UserRegisterReq{UserInfo: &sdkws.UserInfo{}}
 	utils.CopyStructFields(req.UserInfo, &params)
 	//copier.Copy(req.UserInfo, &params)
 	req.OperationID = params.OperationID

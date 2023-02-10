@@ -61,21 +61,9 @@ func (m *Mongo) GetClient() *mongo.Client {
 	return m.db
 }
 
-func (m *Mongo) CreateTagIndex() {
-	if err := m.createMongoIndex(unrelation.CSendLog, false, "send_id", "-send_time"); err != nil {
-		panic(err.Error() + " index create failed " + unrelation.CSendLog + " send_id, -send_time")
-	}
-	if err := m.createMongoIndex(unrelation.CTag, false, "user_id", "-create_time"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CTag + " user_id, -create_time")
-	}
-	if err := m.createMongoIndex(unrelation.CTag, true, "tag_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CTag + " tag_id")
-	}
-}
-
 func (m *Mongo) CreateMsgIndex() {
-	if err := m.createMongoIndex(cChat, false, "uid"); err != nil {
-		fmt.Println(err.Error() + " index create failed " + cChat + " uid, please create index by yourself in field uid")
+	if err := m.createMongoIndex(unrelation, false, "uid"); err != nil {
+		fmt.Println(err.Error() + " index create failed " + unrelation.CChat + " uid, please create index by yourself in field uid")
 	}
 }
 
@@ -88,21 +76,9 @@ func (m *Mongo) CreateSuperGroupIndex() {
 	}
 }
 
-func (m *Mongo) CreateWorkMomentIndex() {
-	if err := m.createMongoIndex(unrelation.CWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CWorkMoment + " -create_time, work_moment_id")
-	}
-	if err := m.createMongoIndex(unrelation.CWorkMoment, true, "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CWorkMoment + " work_moment_id ")
-	}
-	if err := m.createMongoIndex(unrelation.CWorkMoment, false, "user_id", "-create_time"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CWorkMoment + "user_id, -create_time")
-	}
-}
-
 func (m *Mongo) CreateExtendMsgSetIndex() {
 	if err := m.createMongoIndex(unrelation.CExtendMsgSet, true, "-create_time", "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CWorkMoment + " -create_time, work_moment_id")
+		panic(err.Error() + "index create failed " + unrelation.CExtendMsgSet + " -create_time, work_moment_id")
 	}
 }
 
@@ -149,4 +125,13 @@ func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.
 		return err
 	}
 	return utils.Wrap(sess.CommitTransaction(sCtx), "")
+}
+
+func getTxCtx(ctx context.Context, tx []any) context.Context {
+	if len(tx) > 0 {
+		if ctx, ok := tx[0].(mongo.SessionContext); ok {
+			return ctx
+		}
+	}
+	return ctx
 }

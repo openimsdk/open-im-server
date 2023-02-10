@@ -1,0 +1,359 @@
+
+notification:
+  groupCreated:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "create group title" # xx create the group
+      desc: "create group desc"
+      ext: "create group ext"
+    defaultTips:
+      tips: "create the group"  # xx create the group
+
+  groupInfoSet:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupInfoSet title"
+      desc: "groupInfoSet desc"
+      ext: "groupInfoSet ext"
+    defaultTips:
+      tips: "modified the group profile"  # group info changed by xx
+
+  joinGroupApplication:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "joinGroupApplication title"
+      desc: "joinGroupApplication desc"
+      ext: "joinGroupApplication ext"
+    defaultTips:
+      tips: "apply to join the group"  # group info changed by xx
+
+  memberQuit:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberQuit title"
+      desc: "memberQuit desc"
+      ext: "memberQuit ext"
+    defaultTips:
+      tips: "quit group msg"  # group info changed by xx
+
+  groupApplicationAccepted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupApplicationAccepted title"
+      desc: "groupApplicationAccepted desc"
+      ext: "groupApplicationAccepted ext"
+    defaultTips:
+      tips: "was allowed to join the group"  # group info changed by xx
+
+  groupApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: " title"
+      desc: " desc"
+      ext: " ext"
+    defaultTips:
+      tips: "was rejected into the group"  # group info changed by xx
+
+  groupOwnerTransferred:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupOwnerTransferred title"
+      desc: "groupOwnerTransferred desc"
+      ext: "groupOwnerTransferred ext"
+    defaultTips:
+      tips: "become a new group owner"  # group info changed by xx
+
+  memberKicked:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberKicked title"
+      desc: "memberKicked desc"
+      ext: "memberKicked ext"
+    defaultTips:
+      tips: "was kicked out of the group"  # group info changed by xx
+
+  memberInvited:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberInvited title"
+      desc: "memberInvited desc"
+      ext: "memberInvited ext"
+    defaultTips:
+      tips: "was invited into the group"  # group info changed by xx
+
+  memberEnter:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberEnter title"
+      desc: "memberEnter desc"
+      ext: "memberEnter ext"
+    defaultTips:
+      tips: "entered the group"  # group info changed by xx
+
+  groupDismissed:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupDismissed title"
+      desc: "groupDismissed desc"
+      ext: "groupDismissed ext"
+    defaultTips:
+      tips: "group dismissed"
+
+
+  groupMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMuted title"
+      desc: "groupMuted desc"
+      ext: "groupMuted ext"
+    defaultTips:
+      tips: "group Muted"
+
+  groupCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupCancelMuted title"
+      desc: "groupCancelMuted desc"
+      ext: "groupCancelMuted ext"
+    defaultTips:
+      tips: "group Cancel Muted"
+
+
+  groupMemberMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberMuted title"
+      desc: "groupMemberMuted desc"
+      ext: "groupMemberMuted ext"
+    defaultTips:
+      tips: "group Member Muted"
+
+  groupMemberCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberCancelMuted title"
+      desc: "groupMemberCancelMuted desc"
+      ext: "groupMemberCancelMuted ext"
+    defaultTips:
+      tips: "group Member Cancel Muted"
+
+  groupMemberInfoSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "groupMemberInfoSet title"
+      desc: "groupMemberInfoSet desc"
+      ext: "groupMemberInfoSet ext"
+    defaultTips:
+      tips: "group member info set"
+
+
+
+  #############################friend#################################
+
+  friendApplicationAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Somebody applies to add you as a friend"
+      desc: "Somebody applies to add you as a friend"
+      ext: "Somebody applies to add you as a friend"
+    defaultTips:
+      tips: "I applies to add you as a friend"  #
+
+  friendApplicationApproved:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone applies to add your friend application"
+      desc: "Someone applies to add your friend application"
+      ext: "Someone applies to add your friend application"
+    defaultTips:
+      tips: "I applies to add your friend application"  #
+
+
+  friendApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone rejected your friend application"
+      desc: "Someone rejected your friend application"
+      ext: "Someone rejected your friend application"
+    defaultTips:
+      tips: "I rejected your friend application"  #
+
+
+
+
+
+  friendAdded:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "We have become friends"
+      desc: "We have become friends"
+      ext: "We have become friends"
+    defaultTips:
+      tips: "We have become friends"  #
+
+
+
+  friendDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "deleted a friend"
+      desc: "deleted a friend"
+      ext: "deleted a friend"
+    defaultTips:
+      tips: "deleted a friend"  #
+
+
+  friendRemarkSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Your friend's profile has been changed"
+      desc: "Your friend's profile has been changed"
+      ext: "Your friend's profile has been changed"
+    defaultTips:
+      tips: "Your friend's profile has been changed"  #
+
+
+
+  blackAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "blocked a user"
+      desc: "blocked a user"
+      ext: "blocked a user"
+    defaultTips:
+      tips: "blocked a user"  #
+
+
+  blackDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+  friendInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "friend info updated"
+      desc: "friend info updated"
+      ext: "friend info updated"
+    defaultTips:
+      tips: "friend info updated"
+
+
+  #####################user#########################
+  userInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "remove a blocked user"
+
+  #####################conversation#########################
+  conversationOptUpdate:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        switch: true
+        title: "conversation opt update"
+        desc: "conversation opt update"
+        ext: "conversation opt update"
+      defaultTips:
+        tips: "conversation opt update"
+
+  conversationSetPrivate:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "burn after reading"
+      desc: "burn after reading"
+      ext: "burn after reading"
+    defaultTips:
+      openTips: "burn after reading was opened"
+      closeTips: "burn after reading was closed"
+

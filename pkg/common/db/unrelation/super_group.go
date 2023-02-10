@@ -111,15 +111,6 @@ type SuperGroupMongoDriver struct {
 //		panic("implement me")
 //	}
 
-func (s *SuperGroupMongoDriver) getTxCtx(ctx context.Context, tx []any) context.Context {
-	if len(tx) > 0 {
-		if ctx, ok := tx[0].(mongo.SessionContext); ok {
-			return ctx
-		}
-	}
-	return ctx
-}
-
 //func (s *SuperGroupMongoDriver) Transaction(ctx context.Context, fn func(ctx mongo.SessionContext) error) error {
 //	sess, err := s.MgoClient.StartSession()
 //	if err != nil {

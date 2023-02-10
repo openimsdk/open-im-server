@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+const (
+	extendMsgSetCache = "EXTEND_MSG_SET_CACHE:"
+	extendMsgCache    = "EXTEND_MSG_CACHE:"
+)
+
 type ExtendMsgSetCache struct {
 	expireTime time.Duration
 	rcClient   *rockscache.Client
