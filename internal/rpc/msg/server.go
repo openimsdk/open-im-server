@@ -2,9 +2,10 @@ package msg
 
 import (
 	"Open_IM/internal/common/notification"
+	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -15,25 +16,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
-
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
 )
 
-type MessageWriter interface {
-	SendMessage(m proto.Message, key string, operationID string) (int32, int64, error)
-}
-type rpcChat struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
-	messageWriter   MessageWriter
-	//offlineProducer *kafka.Producer
-	delMsgCh       chan deleteMsg
-	dMessageLocker MessageLocker
+type msgServer struct {
+	*rpcserver.RpcServer
 }
 
 type deleteMsg struct {

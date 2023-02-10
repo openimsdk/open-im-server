@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
-import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
 option go_package = "Open_IM/pkg/proto/msg;msg";
 package msg;
 

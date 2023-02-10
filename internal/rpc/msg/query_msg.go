@@ -45,7 +45,3 @@ func (rpc *rpcChat) GetSuperGroupMsg(context context.Context, req *msg.GetSuperG
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
-
-func (rpc *rpcChat) GetWriteDiffMsg(context context.Context, req *msg.GetWriteDiffMsgReq) (*msg.GetWriteDiffMsgResp, error) {
-	panic("implement me")
-}

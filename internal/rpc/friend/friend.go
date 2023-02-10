@@ -24,7 +24,6 @@ import (
 
 type friendServer struct {
 	*rpcserver.RpcServer
-
 	controller.FriendInterface
 	controller.BlackInterface
 }
