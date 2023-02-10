@@ -1,5 +1,4 @@
 # The class cannot be named by Pascal or camel case.
-# The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
 serverversion: 2.3.7
@@ -155,15 +154,7 @@ rpcport: #rpc服务端口 默认即可
   openImPushPort: [ 10170 ]
   openImConversationPort: [ 10230 ]
   openImRealTimeCommPort: [ 11300 ]
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
+
 
 rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
@@ -175,6 +166,7 @@ rpcregistername: #rpc注册服务名，默认即可
   openImAuthName: Auth
   openImConversationName: Conversation
   openImRealTimeCommName: RealTimeComm
+
 log:
   storageLocation: ../logs/
   rotationTime: 24
@@ -263,15 +255,6 @@ tokenpolicy:
 messageverify:
   friendVerify:
 
-#  c2c:
-#    callbackBeforeSendMsg:
-#      switch: false
-#      timeoutStrategy: 1 #1:send
-#    callbackAfterSendMsg:
-#      switch: false
-#  state:
-#    stateChange:
-#      switch: false
 #ios系统推送声音以及标记计数
 iospush:
   pushSound: "xxx"
