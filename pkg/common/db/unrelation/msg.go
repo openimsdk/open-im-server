@@ -209,10 +209,11 @@ func (d *db.DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID
 	return seqMsg, nil
 }
 
-func (d *db.DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, error) {
+// model
+func (d *db.DataBases) GetUserMsgListByIndex(docID string, index int64) (*UserChat, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	regex := fmt.Sprintf("^%s", ID)
+	regex := fmt.Sprintf("^%s", docID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
 	//primitive.Regex{Pattern: regex}
@@ -231,6 +232,7 @@ func (d *db.DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat,
 	}
 }
 
+// model
 func (d *db.DataBases) DelMongoMsgs(IDList []string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -238,6 +240,7 @@ func (d *db.DataBases) DelMongoMsgs(IDList []string) error {
 	return err
 }
 
+// model
 func (d *db.DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) (replaceMaxSeq uint32, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)

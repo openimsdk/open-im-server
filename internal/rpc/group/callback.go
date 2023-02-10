@@ -21,7 +21,6 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
 		return nil
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	commonCallbackReq := &cbApi.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
 		OperationID:     req.OperationID,

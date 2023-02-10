@@ -10,8 +10,9 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
-	common "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/admincms"
+	"Open_IM/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/openKeeper"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
@@ -20,7 +21,6 @@ import (
 	"errors"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -37,6 +37,8 @@ type adminCMSServer struct {
 	groupInterface    controller.GroupInterface
 	userInterface     controller.UserInterface
 	chatLogInterface  controller.ChatLogInterface
+
+	AuthInterface controller.AuthController
 }
 
 func NewAdminCMSServer(port int) *adminCMSServer {
@@ -88,20 +90,12 @@ func (s *adminCMSServer) Run() {
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
-	pbAdminCMS.RegisterAdminCMSServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	log.NewInfo("", "rpcRegisterIP ", rpcRegisterIP)
-	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
+	admincms.RegisterAdminCMSServer(srv, s)
+	zkClient, err := openKeeper.NewClient(config.Config)
 	if err != nil {
-		log.NewError("0", "RegisterEtcd failed ", err.Error())
-		panic(utils.Wrap(err, "register admin module  rpc to etcd err"))
+		panic(err.Error())
 	}
+
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("0", "Serve failed ", err.Error())
@@ -110,11 +104,11 @@ func (s *adminCMSServer) Run() {
 	log.NewInfo("0", "message cms rpc success")
 }
 
-func (s *adminCMSServer) AdminLogin(ctx context.Context, req *pbAdminCMS.AdminLoginReq) (*pbAdminCMS.AdminLoginResp, error) {
-	resp := &pbAdminCMS.AdminLoginResp{}
+func (s *adminCMSServer) AdminLogin(ctx context.Context, req *admincms.AdminLoginReq) (*admincms.AdminLoginResp, error) {
+	resp := &admincms.AdminLoginResp{}
 	for i, adminID := range config.Config.Manager.AppManagerUid {
 		if adminID == req.AdminID && config.Config.Manager.Secrets[i] == req.Secret {
-			token, expTime, err := tokenverify.CreateToken(adminID, constant.LinuxPlatformID)
+			token, err := s.AuthInterface.CreateToken(ctx, adminID, constant.LinuxPlatformID)
 			if err != nil {
 				log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID, err.Error())
 				return nil, err
@@ -147,7 +141,7 @@ func (s *adminCMSServer) GetUserToken(ctx context.Context, req *pbAdminCMS.GetUs
 }
 
 func (s *adminCMSServer) GetChatLogs(ctx context.Context, req *pbAdminCMS.GetChatLogsReq) (*pbAdminCMS.GetChatLogsResp, error) {
-	chatLog := relation.ChatLog{
+	chatLog := relationTb.ChatLog{
 		Content:     req.Content,
 		ContentType: req.ContentType,
 		SessionType: req.SessionType,
