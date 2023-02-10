@@ -7,9 +7,9 @@ const (
 	CChat           = "msg"
 )
 
-type UserChatModel struct {
-	UID string         `bson:"uid"`
-	Msg []MsgInfoModel `bson:"msg"`
+type UserMsgDocModel struct {
+	DocID string         `bson:"uid"`
+	Msg   []MsgInfoModel `bson:"msg"`
 }
 
 type MsgInfoModel struct {
@@ -17,20 +17,20 @@ type MsgInfoModel struct {
 	Msg      []byte `bson:"msg"`
 }
 
-func (UserChatModel) TableName() string {
+func (UserMsgDocModel) TableName() string {
 	return CChat
 }
 
-func (UserChatModel) GetSingleGocMsgNum() int {
+func (UserMsgDocModel) GetSingleDocMsgNum() int {
 	return singleGocMsgNum
 }
 
-func (u UserChatModel) getSeqUid(uid string, seq uint32) string {
+func (u UserMsgDocModel) getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return u.indexGen(uid, seqSuffix)
 }
 
-func (u UserChatModel) getSeqUserIDList(userID string, maxSeq uint32) []string {
+func (u UserMsgDocModel) getSeqUserIDList(userID string, maxSeq uint32) []string {
 	seqMaxSuffix := maxSeq / singleGocMsgNum
 	var seqUserIDList []string
 	for i := 0; i <= int(seqMaxSuffix); i++ {
@@ -40,16 +40,16 @@ func (u UserChatModel) getSeqUserIDList(userID string, maxSeq uint32) []string {
 	return seqUserIDList
 }
 
-func (UserChatModel) getSeqSuperGroupID(groupID string, seq uint32) string {
+func (UserMsgDocModel) getSeqSuperGroupID(groupID string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return superGroupIndexGen(groupID, seqSuffix)
 }
 
-func (u UserChatModel) GetSeqUid(uid string, seq uint32) string {
+func (u UserMsgDocModel) GetSeqUid(uid string, seq uint32) string {
 	return u.getSeqUid(uid, seq)
 }
 
-func (UserChatModel) getMsgIndex(seq uint32) int {
+func (UserMsgDocModel) getMsgIndex(seq uint32) int {
 	seqSuffix := seq / singleGocMsgNum
 	var index uint32
 	if seqSuffix == 0 {
@@ -60,6 +60,6 @@ func (UserChatModel) getMsgIndex(seq uint32) int {
 	return int(index)
 }
 
-func (UserChatModel) indexGen(uid string, seqSuffix uint32) string {
+func (UserMsgDocModel) indexGen(uid string, seqSuffix uint32) string {
 	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }

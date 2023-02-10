@@ -27,6 +27,16 @@ func NewMsgMongoDriver(mgoDB *mongo.Database) *MsgMongoDriver {
 	return &MsgMongoDriver{mgoDB: mgoDB, MsgCollection: mgoDB.Collection(unrelation.CChat)}
 }
 
+func (m *MsgMongoDriver) FindOneAndUpdate(ctx context.Context, filter, update, output interface{}, opts ...*options.FindOneAndUpdateOptions) error {
+	return m.MsgCollection.FindOneAndUpdate(ctx, filter, update, opts...).Decode(output)
+}
+
+func (m *MsgMongoDriver) UpdateOne(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) error {
+	_, err := m.MsgCollection.UpdateOne(ctx, filter, update, opts...)
+	return err
+}
+
+// database controller
 func (m *MsgMongoDriver) DelMsgBySeqList(ctx context.Context, userID string, seqList []uint32) (totalUnExistSeqList []uint32, err error) {
 	sortkeys.Uint32s(seqList)
 	suffixUserID2SubSeqList := func(uid string, seqList []uint32) map[string][]uint32 {
@@ -73,6 +83,7 @@ func (m *MsgMongoDriver) DelMsgBySeqListInOneDoc(ctx context.Context, suffixUser
 	return unexistSeqList, nil
 }
 
+// database
 func (m *MsgMongoDriver) DelMsgLogic(ctx context.Context, uid string, seqList []uint32) error {
 	sortkeys.Uint32s(seqList)
 	seqMsgs, err := d.GetMsgBySeqListMongo2(ctx, uid, seqList)
@@ -88,6 +99,7 @@ func (m *MsgMongoDriver) DelMsgLogic(ctx context.Context, uid string, seqList []
 	return nil
 }
 
+// model
 func (m *MsgMongoDriver) ReplaceMsgByIndex(ctx context.Context, suffixUserID string, msg *sdkws.MsgData, seqIndex int) error {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), suffixUserID, *msg)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)

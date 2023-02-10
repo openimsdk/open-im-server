@@ -74,8 +74,8 @@ func (m *Mongo) CreateTagIndex() {
 }
 
 func (m *Mongo) CreateMsgIndex() {
-	if err := m.createMongoIndex(cChat, false, "uid"); err != nil {
-		fmt.Println(err.Error() + " index create failed " + cChat + " uid, please create index by yourself in field uid")
+	if err := m.createMongoIndex(unrelation.CChat, false, "uid"); err != nil {
+		fmt.Println(err.Error() + " index create failed " + unrelation.CChat + " uid, please create index by yourself in field uid")
 	}
 }
 
