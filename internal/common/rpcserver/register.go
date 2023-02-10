@@ -1,4 +1,4 @@
-package rpc_server
+package rpcserver
 
 import (
 	"Open_IM/internal/common/network"
@@ -31,12 +31,11 @@ func NewRpcServer(registerIPInConfig string, port int, registerName string, zkSe
 	if err != nil {
 		return nil, err
 	}
-	err = zkClient.Register(s.RegisterName, registerIP, s.Port)
+	s.RegisterCenter = zkClient
+	err = s.RegisterCenter.Register(s.RegisterName, registerIP, s.Port)
 	if err != nil {
 		return nil, err
 	}
-	s.RegisterCenter = zkClient
-
 	return s, nil
 }
 

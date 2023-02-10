@@ -10,6 +10,7 @@ import (
 	"errors"
 	"math/big"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -42,6 +43,24 @@ func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sd
 	}
 	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
+	}), nil
+}
+
+func GetUsername(ctx context.Context, userIDs []string) (map[string]string, error) {
+	if len(userIDs) == 0 {
+		return map[string]string{}, nil
+	}
+	users, err := GetPublicUserInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	if ids := utils.Single(userIDs, utils.Slice(users, func(e *sdkws.PublicUserInfo) string {
+		return e.UserID
+	})); len(ids) > 0 {
+		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
+	}
+	return utils.SliceToMapAny(users, func(e *sdkws.PublicUserInfo) (string, string) {
+		return e.UserID, e.Nickname
 	}), nil
 }
 

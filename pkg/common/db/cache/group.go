@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/relation"
 	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
@@ -12,8 +11,8 @@ import (
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"math/big"
-	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -117,22 +116,6 @@ func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (gro
 	})
 }
 
-func (g *GroupCacheRedis) DelGroupInfo(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
-	return g.rcClient.TagAsDeleted(g.getGroupInfoKey(groupID))
-}
-
-func (g *GroupCacheRedis) DelGroupsInfo(ctx context.Context, groupIDs []string) error {
-	for _, groupID := range groupIDs {
-		if err := g.DelGroupInfo(ctx, groupID); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // userJoinSuperGroup
 func (g *GroupCacheRedis) BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string) (err error) {
 	for _, userID := range userIDs {
@@ -160,43 +143,18 @@ func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(ctx context.Context, userID str
 	})
 }
 
-//// groupMembersHash
-//func (g *GroupCacheRedis) GetGroupsMembersHash(ctx context.Context, groupIDs []string) (map[string]uint64, error) {
-//	return GetCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, "")
-//}
-
 // groupMembersHash
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error) {
-	generateHash := func() (string, error) {
-		groupInfo, err := g.GetGroupInfo(ctx, groupID)
+	return GetCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
+		userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 		if err != nil {
-			return "", err
+			return 0, err
 		}
-		if groupInfo.Status == constant.GroupStatusDismissed {
-			return "0", nil
-		}
-		groupMemberIDList, err := g.GetGroupMemberIDs(ctx, groupID)
-		if err != nil {
-			return "", err
-		}
-		sort.Strings(groupMemberIDList)
-		var all string
-		for _, v := range groupMemberIDList {
-			all += v
-		}
+		utils.Sort(userIDs, true)
 		bi := big.NewInt(0)
-		bi.SetString(utils.Md5(all)[0:8], 16)
-		return strconv.Itoa(int(bi.Uint64())), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "hashCodeUint64", hashCodeUint64)
-	}()
-	hashCodeStr, err := g.rcClient.Fetch(g.getGroupMembersHashKey(groupID), time.Second*30*60, generateHash)
-	if err != nil {
-		return 0, utils.Wrap(err, "fetch failed")
-	}
-	hashCode, err := strconv.Atoi(hashCodeStr)
-	return uint64(hashCode), err
+		bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
+		return bi.Uint64(), nil
+	})
 }
 
 func (g *GroupCacheRedis) DelGroupMembersHash(ctx context.Context, groupID string) (err error) {
@@ -207,41 +165,10 @@ func (g *GroupCacheRedis) DelGroupMembersHash(ctx context.Context, groupID strin
 }
 
 // groupMemberIDs
-// from redis
 func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-	f := func() (string, error) {
-		groupInfo, err := g.GetGroupInfo(ctx, groupID)
-		if err != nil {
-			return "", err
-		}
-		var groupMemberIDList []string
-		if groupInfo.GroupType == constant.SuperGroup {
-			superGroup, err := g.mongoDB.GetSuperGroup(ctx, groupID)
-			if err != nil {
-				return "", err
-			}
-			groupMemberIDList = superGroup.MemberIDList
-		} else {
-			groupMemberIDList, err = relation.GetGroupMemberIDListByGroupID(groupID)
-			if err != nil {
-				return "", err
-			}
-		}
-		bytes, err := json.Marshal(groupMemberIDList)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMemberIDList", groupMemberIDs)
-	}()
-	groupIDListStr, err := g.rcClient.Fetch(g.getGroupMemberIDsKey(groupID), time.Second*30*60, f)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(groupIDListStr), &groupMemberIDs)
-	return groupMemberIDs, nil
+	return GetCache(ctx, g.rcClient, g.getGroupMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		return g.groupMember.FindMemberUserID(ctx, groupID)
+	})
 }
 
 func (g *GroupCacheRedis) DelGroupMemberIDs(ctx context.Context, groupID string) (err error) {
@@ -388,4 +315,20 @@ func (g *GroupCacheRedis) DelGroupMemberNum(ctx context.Context, groupID string)
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMemberNumKey(groupID))
+}
+
+func (g *GroupCacheRedis) DelGroupInfo(ctx context.Context, groupID string) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
+	}()
+	return g.rcClient.TagAsDeleted(g.getGroupInfoKey(groupID))
+}
+
+func (g *GroupCacheRedis) DelGroupsInfo(ctx context.Context, groupIDs []string) error {
+	for _, groupID := range groupIDs {
+		if err := g.DelGroupInfo(ctx, groupID); err != nil {
+			return err
+		}
+	}
+	return nil
 }

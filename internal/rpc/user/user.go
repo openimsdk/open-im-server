@@ -25,12 +25,12 @@ import (
 type userServer struct {
 	rpcPort         int
 	rpcRegisterName string
-	*rpc_server.RpcServer
+	*rpcserver.RpcServer
 	controller.UserInterface
 }
 
 func NewUserServer(port int) *userServer {
-	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImUserName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	r, err := rpcserver.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImUserName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func NewUserServer(port int) *userServer {
 func (s *userServer) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc user start...")
-	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
+	listener, address, err := rpcserver.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
 		panic(err)
 	}

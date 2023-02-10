@@ -159,6 +159,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	joinGroup := func(userID string, roleLevel int32) error {
 		groupMember := PbToDbGroupMember(userMap[userID])
+		groupMember.Nickname = ""
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = roleLevel
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
@@ -240,7 +241,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
 	}), func(group *relationTb.GroupModel) *open_im_sdk.GroupInfo {
-		return DbToPbGroupInfo(group, ownerMap[group.GroupID].UserID, uint32(groupMemberNum[group.GroupID]))
+		return DbToPbGroupInfo(group, ownerMap[group.GroupID].UserID, groupMemberNum[group.GroupID])
 	})
 	return resp, nil
 }
@@ -321,6 +322,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		var groupMembers []*relationTb.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
 			member := PbToDbGroupMember(userMap[userID])
+			member.Nickname = ""
 			member.GroupID = req.GroupID
 			member.RoleLevel = constant.GroupOrdinaryUsers
 			member.OperatorUserID = opUserID
@@ -352,7 +354,16 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		return nil, err
 	}
+	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}))
+	if err != nil {
+		return nil, err
+	}
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -365,7 +376,16 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
+	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}))
+	if err != nil {
+		return nil, err
+	}
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -450,7 +470,16 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	if err != nil {
 		return nil, err
 	}
+	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}))
+	if err != nil {
+		return nil, err
+	}
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -801,7 +830,16 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		return nil, err
 	}
 	resp.Total = total
+	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}))
+	if err != nil {
+		return nil, err
+	}
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -1011,8 +1049,8 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			return nil, err
 		}
 	}
-	err = s.GroupInterface.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbGroup.SetGroupMemberInfo) *controller.BatchUpdateGroupMember {
-		return &controller.BatchUpdateGroupMember{
+	err = s.GroupInterface.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbGroup.SetGroupMemberInfo) *relationTb.BatchUpdateGroupMember {
+		return &relationTb.BatchUpdateGroupMember{
 			GroupID: e.GroupID,
 			UserID:  e.UserID,
 			Map:     UpdateGroupMemberMap(e),
@@ -1053,7 +1091,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	}
 	resp.GroupAbstractInfos = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
 		users := groupUserMap[group.GroupID]
-		return DbToPbGroupAbstractInfo(group.GroupID, uint32(len(users.UserIDs)), users.Hash)
+		return DbToPbGroupAbstractInfo(group.GroupID, users.MemberNum, users.Hash)
 	})
 	return resp, nil
 }
@@ -1067,7 +1105,16 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	if err != nil {
 		return nil, err
 	}
+	nameMap, err := GetUsername(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}))
+	if err != nil {
+		return nil, err
+	}
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
 		return DbToPbGroupMembersCMSResp(e)
 	})
 	return resp, nil
@@ -1075,10 +1122,10 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 
 func (s *groupServer) GetGroupMemberUserID(ctx context.Context, req *pbGroup.GetGroupMemberUserIDReq) (*pbGroup.GetGroupMemberUserIDResp, error) {
 	resp := &pbGroup.GetGroupMemberUserIDResp{}
-	userIDs, err := s.GroupInterface.FindGroupMemberUserID(ctx, req.GroupID)
+	var err error
+	resp.UserIDs, err = s.GroupInterface.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	resp.UserIDs = userIDs
 	return resp, nil
 }

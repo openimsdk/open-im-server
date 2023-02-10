@@ -74,8 +74,8 @@ func (m *Mongo) CreateTagIndex() {
 }
 
 func (m *Mongo) CreateMsgIndex() {
-	if err := m.createMongoIndex(cChat, false, "uid"); err != nil {
-		fmt.Println(err.Error() + " index create failed " + cChat + " uid, please create index by yourself in field uid")
+	if err := m.createMongoIndex(unrelation.CChat, false, "uid"); err != nil {
+		fmt.Println(err.Error() + " index create failed " + unrelation.CChat + " uid, please create index by yourself in field uid")
 	}
 }
 
@@ -149,4 +149,13 @@ func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.
 		return err
 	}
 	return utils.Wrap(sess.CommitTransaction(sCtx), "")
+}
+
+func getTxCtx(ctx context.Context, tx []any) context.Context {
+	if len(tx) > 0 {
+		if ctx, ok := tx[0].(mongo.SessionContext); ok {
+			return ctx
+		}
+	}
+	return ctx
 }

@@ -20,7 +20,7 @@ import (
 )
 
 func NewRpcAuthServer(port int) *rpcAuth {
-	r, err := rpc_server.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	r, err := rpcserver.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func NewRpcAuthServer(port int) *rpcAuth {
 func (s *rpcAuth) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc auth start...")
-	listener, address, err := rpc_server.GetTcpListen(config.Config.ListenIP, s.Port)
+	listener, address, err := rpcserver.GetTcpListen(config.Config.ListenIP, s.Port)
 	if err != nil {
 		panic(err)
 	}
@@ -141,6 +141,6 @@ func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID in
 }
 
 type rpcAuth struct {
-	*rpc_server.RpcServer
+	*rpcserver.RpcServer
 	controller.AuthInterface
 }
