@@ -37,7 +37,6 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	producer, err := sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
 	if err != nil {
 		panic(err.Error())
-		return nil
 	}
 	p.producer = producer
 	return &p

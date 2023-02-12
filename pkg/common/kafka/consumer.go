@@ -28,14 +28,12 @@ func NewKafkaConsumer(addr []string, topic string) *Consumer {
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
 		panic(err.Error())
-		return nil
 	}
 	p.Consumer = consumer
 
 	partitionList, err := consumer.Partitions(p.Topic)
 	if err != nil {
 		panic(err.Error())
-		return nil
 	}
 	p.PartitionList = partitionList
 
