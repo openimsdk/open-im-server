@@ -11,14 +11,12 @@ import (
 	cacheRpc "Open_IM/pkg/proto/cache"
 	"Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
-	pbRelay "Open_IM/pkg/proto/relay"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"math/rand"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -415,48 +413,7 @@ func modifyMessageByUserMessageReceiveOptoptimization(userID, sourceID string, s
 	return true
 }
 
-func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, operationID string) {
-	var onllUserIDList, offlUserIDList []string
-	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
-	req := &pbRelay.GetUsersOnlineStatusReq{}
-	req.UserIDList = memberList
-	req.OperationID = operationID
-	req.OpUserID = config.Config.Manager.AppManagerUid[0]
-	flag := false
-	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
-	for _, v := range grpcCons {
-		client := pbRelay.NewRelayClient(v)
-		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
-		if err != nil {
-			log.NewError(operationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())
-			continue
-		} else {
-			if reply.ErrCode == 0 {
-				wsResult = append(wsResult, reply.SuccessResult...)
-			}
-		}
-	}
-	log.NewInfo(operationID, "call GetUsersOnlineStatus rpc server is success", wsResult)
-	//Online data merge of each node
-	for _, v1 := range memberList {
-		flag = false
-
-		for _, v2 := range wsResult {
-			if v2.UserID == v1 {
-				flag = true
-				onllUserIDList = append(onllUserIDList, v1)
-			}
-
-		}
-		if !flag {
-			offlUserIDList = append(offlUserIDList, v1)
-		}
-	}
-	m[constant.OnlineStatus] = onllUserIDList
-	m[constant.OfflineStatus] = offlUserIDList
-}
-
-func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
+func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
 	offlinePushInfo := sdkws.OfflinePushInfo{}
 	if pb.MsgData.OfflinePushInfo != nil {
 		offlinePushInfo = *pb.MsgData.OfflinePushInfo
@@ -470,7 +427,7 @@ func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
 		options[key] = value
 	}
 	msgData.Options = options
-	return &pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
+	return &msg.SendMsgReq{MsgData: &msgData}
 }
 
 func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, wg *sync.WaitGroup) error {
