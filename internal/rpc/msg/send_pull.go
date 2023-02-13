@@ -10,7 +10,6 @@ import (
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
-	"strings"
 	"sync"
 )
 
@@ -142,12 +141,21 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	var sendTag bool
 	var split = 20
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	mErr := make(map[string]error, 0)
+	mErr := make([]error, 0)
+	var mutex sync.RWMutex
 	remain := len(memberUserIDList) % split
 	for i := 0; i < len(memberUserIDList)/split; i++ {
 		wg.Add(1)
 		tmp := valueCopy(req)
-		go m.sendMsgToGroupOptimization(ctx, memberUserIDList[i*split:(i+1)*split], tmp, &sendTag, &wg)
+		go func() {
+			err := m.sendMsgToGroupOptimization(ctx, memberUserIDList[i*split:(i+1)*split], tmp, &sendTag, &wg)
+			if err != nil {
+				mutex.Lock()
+				mErr = append(mErr, err)
+				mutex.Unlock()
+			}
+
+		}()
 	}
 	if remain > 0 {
 		wg.Add(1)
@@ -176,16 +184,15 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 			var atUserID []string
 			conversation := pbConversation.Conversation{
 				OwnerUserID:      req.MsgData.SendID,
-				ConversationID:   utils.GetConversationIDBySessionType(pb.MsgData.GroupID, constant.GroupChatType),
+				ConversationID:   utils.GetConversationIDBySessionType(req.MsgData.GroupID, constant.GroupChatType),
 				ConversationType: constant.GroupChatType,
 				GroupID:          req.MsgData.GroupID,
 			}
 			conversationReq.Conversation = &conversation
-			conversationReq.OperationID = pb.OperationID
 			conversationReq.FieldType = constant.FieldGroupAtType
 			tagAll := utils.IsContain(constant.AtAllString, req.MsgData.AtUserIDList)
 			if tagAll {
-				atUserID = utils.DifferenceString([]string{constant.AtAllString}, pb.MsgData.AtUserIDList)
+				atUserID = utils.DifferenceString([]string{constant.AtAllString}, req.MsgData.AtUserIDList)
 				if len(atUserID) == 0 { //just @everyone
 					conversationReq.UserIDList = memberUserIDList
 					conversation.GroupAtType = constant.AtAll
@@ -198,46 +205,35 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 				conversationReq.UserIDList = req.MsgData.AtUserIDList
 				conversation.GroupAtType = constant.AtMe
 			}
-			etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+
+			_, err := m.ModifyConversationField(context.Background(), &conversationReq)
 			if err != nil {
-				errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
-				log.NewError(pb.OperationID, errMsg)
 				return
 			}
-			client := pbConversation.NewConversationClient(etcdConn)
-			conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
-			if err != nil {
-				log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
-			} else if conversationReply.CommonResp.ErrCode != 0 {
-				log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
-			}
+
 			if tag {
 				conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 				conversation.GroupAtType = constant.AtAll
-				etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
-				if etcdConn == nil {
-					errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
-					log.NewError(pb.OperationID, errMsg)
-					return
-				}
-				client := pbConversation.NewConversationClient(etcdConn)
-				conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
+				_, err := m.ModifyConversationField(context.Background(), &conversationReq)
 				if err != nil {
-					log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
-				} else if conversationReply.CommonResp.ErrCode != 0 {
-					log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
+					return
 				}
 			}
 		}()
 	}
+	//
 
 	promePkg.PromeInc(promePkg.GroupChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
 	return resp, nil
+}
+
+func (m *msgServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
 
 }
+
 func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
 	resp = &msg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)

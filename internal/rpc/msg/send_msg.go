@@ -7,6 +7,7 @@ import (
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
+	"Open_IM/pkg/common/tracelog"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	"Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
@@ -359,7 +360,7 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 	return replay, nil
 }
 
-func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) (bool, error) {
+func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
 	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
 	if err != nil {
 		log.NewError(pb.OperationID, "GetUserGlobalMsgRecvOpt from redis err", userID, pb.String(), err.Error())
@@ -481,44 +482,8 @@ func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
 	return &pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
 }
 
-func (rpc *msgServer) sendMsgToGroup(ctx context.Context, list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
-	//	log.Debug(pb.OperationID, "split userID ", list)
-	offlinePushInfo := sdkws.OfflinePushInfo{}
-	if pb.MsgData.OfflinePushInfo != nil {
-		offlinePushInfo = *pb.MsgData.OfflinePushInfo
-	}
-	msgData := sdkws.MsgData{}
-	msgData = *pb.MsgData
-	msgData.OfflinePushInfo = &offlinePushInfo
-
-	groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
-	msgToMQGroup := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
-	for _, v := range list {
-		options := make(map[string]bool, 10)
-		for key, value := range pb.MsgData.Options {
-			options[key] = value
-		}
-		groupPB.MsgData.RecvID = v
-		groupPB.MsgData.Options = options
-		isSend := modifyMessageByUserMessageReceiveOpt(v, msgData.GroupID, constant.GroupChatType, &groupPB)
-		if isSend {
-			msgToMQGroup.MsgData = groupPB.MsgData
-			//	log.Debug(groupPB.OperationID, "sendMsgToWriter, ", v, groupID, msgToMQGroup.String())
-			err := rpc.sendMsgToWriter(ctx, &msgToMQGroup, v, status)
-			if err != nil {
-				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
-			} else {
-				*sendTag = true
-			}
-		} else {
-			log.Debug(groupPB.OperationID, "not sendMsgToWriter, ", v)
-		}
-	}
-	wg.Done()
-}
-
-func (rpc *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, sendTag *bool, wg *sync.WaitGroup) {
-	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, wg *sync.WaitGroup) error {
+	msgToMQGroup := msg.MsgDataToMQ{OperationID: tracelog.GetOperationID(ctx), MsgData: groupPB.MsgData}
 	tempOptions := make(map[string]bool, 1)
 	for k, v := range groupPB.MsgData.Options {
 		tempOptions[k] = v
@@ -530,21 +495,22 @@ func (rpc *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []str
 			options[k] = v
 		}
 		groupPB.MsgData.Options = options
-		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
+		isSend, err := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
+		if err != nil {
+			wg.Done()
+			return err
+		}
 		if isSend {
 			if v == "" || groupPB.MsgData.SendID == "" {
-				log.Error(msgToMQGroup.OperationID, "sendMsgToGroupOptimization userID nil ", msgToMQGroup.String())
-				continue
+				return constant.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
 			}
-			err := rpc.sendMsgToWriter(ctx, &msgToMQGroup, v, status)
+			err := m.MsgInterface.MsgToMQ(ctx, v, &msgToMQGroup)
 			if err != nil {
-				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
-			} else {
-				*sendTag = true
+				wg.Done()
+				return err
 			}
-		} else {
-			log.Debug(groupPB.OperationID, "not sendMsgToWriter, ", v)
 		}
 	}
 	wg.Done()
+	return nil
 }
