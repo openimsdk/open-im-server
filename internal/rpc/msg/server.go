@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/notification"
 	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
@@ -25,6 +26,7 @@ import (
 type msgServer struct {
 	*rpcserver.RpcServer
 	MsgInterface controller.MsgInterface
+	Group        *check.GroupChecker
 }
 
 type deleteMsg struct {

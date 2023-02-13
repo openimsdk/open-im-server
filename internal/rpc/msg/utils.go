@@ -4,6 +4,9 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/utils"
+	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
 )
 
 func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
@@ -22,4 +25,13 @@ func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
 		}
 	}
 	return true
+}
+
+func IsNotFound(err error) bool {
+	switch utils.Unwrap(err) {
+	case redis.Nil, gorm.ErrRecordNotFound:
+		return true
+	default:
+		return false
+	}
 }

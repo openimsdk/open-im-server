@@ -36,7 +36,7 @@ func Start(server *grpc.Server) {
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupInterface: controller.NewGroupInterface(nil, cache.NewRedis().GetClient(), unrelation.NewMongo().GetClient()),
 		registerCenter: nil,
-		user:           check.NewUserCheck(),
+		user:           check.NewUserCheck(nil),
 	})
 }
 

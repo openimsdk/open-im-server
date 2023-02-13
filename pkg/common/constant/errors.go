@@ -14,6 +14,7 @@ var (
 	ErrUserIDNotFound  = &ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
 	ErrGroupIDNotFound = &ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
 	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
+	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
 
 	ErrRecordNotFound = &ErrInfo{RecordNotFoundError, "RecordNotFoundError", ""}
 
