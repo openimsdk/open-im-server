@@ -3,6 +3,7 @@ package controller
 import (
 	"Open_IM/pkg/proto/msg"
 	pbMsg "Open_IM/pkg/proto/msg"
+	"Open_IM/pkg/proto/sdkws"
 	"context"
 )
 
@@ -25,8 +26,13 @@ type MsgInterface interface {
 	// delete
 	DelMsgFromCache(ctx context.Context, userID string, seqs []uint32) error
 	GetGroupMaxSeq(ctx context.Context, groupID string) (uint32, error)
+	GetGroupMinSeq(ctx context.Context, groupID string) (uint32, error)
 	SetGroupUserMinSeq(ctx context.Context, groupID string, seq uint32) error
 	DelUserAllSeq(ctx context.Context, userID string) error // redis and mongodb
+	GetUserMaxSeq(ctx context.Context, userID string) (uint32, error)
+	GetUserMinSeq(ctx context.Context, userID string) (uint32, error)
+
+	GetMessageListBySeq(ctx context.Context, userID string, seqs []uint32) ([]*sdkws.MsgData, error)
 }
 
 type MsgDatabaseInterface interface {
