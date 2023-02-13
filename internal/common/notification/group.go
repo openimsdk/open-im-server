@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
+	"Open_IM/pkg/common/tracelog"
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
@@ -86,17 +87,16 @@ func (c *Check) setGroupOwnerInfo(groupID string, groupMemberInfo *sdkws.GroupMe
 }
 
 func (c *Check) setPublicUserInfo(userID string, publicUserInfo *sdkws.PublicUserInfo) error {
-	user, err := imdb.GetUserByUserID(userID)
+	user, err := c.user.GetPublicUserInfos(context.Background(), []string{userID}, true)
 	if err != nil {
-		return utils.Wrap(err, "")
+		return err
 	}
-	utils2.UserDBCopyOpenIMPublicUser(publicUserInfo, user)
+	*publicUserInfo = *user[0]
 	return nil
 }
 
 func (c *Check) groupNotification(contentType int32, m proto.Message, sendID, groupID, recvUserID, operationID string) {
 	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType, sendID, groupID, recvUserID)
-
 	var err error
 	var tips sdkws.TipsComm
 	tips.Detail, err = proto.Marshal(m)
@@ -109,25 +109,22 @@ func (c *Check) groupNotification(contentType int32, m proto.Message, sendID, gr
 		EnumsAsInts:  false,
 		EmitDefaults: false,
 	}
-
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-	var nickname string
+	var nickname, toNickname string
+	if sendID != "" {
 
-	from, err := imdb.GetUserByUserID(sendID)
-	if err != nil {
-		log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
+		from, err := c.user.GetUsersInfos(context.Background(), []string{sendID}, true)
+		if err != nil {
+			return
+		}
+		nickname = from[0].Nickname
 	}
-	if from != nil {
-		nickname = from.Nickname
-	}
-
-	to, err := imdb.GetUserByUserID(recvUserID)
-	if err != nil {
-		log.NewWarn(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
-	}
-	toNickname := ""
-	if to != nil {
-		toNickname = to.Nickname
+	if recvUserID != "" {
+		to, err := c.user.GetUsersInfos(context.Background(), []string{recvUserID}, true)
+		if err != nil {
+			return
+		}
+		toNickname = to[0].Nickname
 	}
 
 	cn := config.Config.Notification
@@ -177,9 +174,10 @@ func (c *Check) groupNotification(contentType int32, m proto.Message, sendID, gr
 	n.SendID = sendID
 	if groupID != "" {
 		n.RecvID = groupID
-		group, err := imdb.GetGroupInfoByGroupID(groupID)
+
+		group, err := c.group.GetGroupInfo(context.Background(), groupID)
 		if err != nil {
-			log.NewError(operationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
+			return
 		}
 		switch group.GroupType {
 		case constant.NormalGroup:
@@ -214,7 +212,7 @@ func (c *Check) GroupCreatedNotification(operationID, opUserID, groupID string, 
 		log.Error(operationID, "setGroupInfo failed ", groupID, GroupCreatedTips.Group)
 		return
 	}
-	imdb.GetGroupOwnerInfoByGroupID(groupID)
+
 	if err := c.setGroupOwnerInfo(groupID, GroupCreatedTips.GroupOwnerUser); err != nil {
 		log.Error(operationID, "setGroupOwnerInfo failed", err.Error(), groupID)
 		return
@@ -380,38 +378,37 @@ func (c *Check) JoinGroupApplicationNotification(ctx context.Context, req *pbGro
 	JoinGroupApplicationTips := sdkws.JoinGroupApplicationTips{Group: &sdkws.GroupInfo{}, Applicant: &sdkws.PublicUserInfo{}}
 	err := c.setGroupInfo(req.GroupID, JoinGroupApplicationTips.Group)
 	if err != nil {
-		log.Error(utils.OperationID(ctx), "setGroupInfo failed ", err.Error(), req.GroupID)
+
 		return
 	}
-	if err = c.setPublicUserInfo(utils.OpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
-		log.Error(utils.OperationID(ctx), "setPublicUserInfo failed ", err.Error(), utils.OpUserID(ctx))
+	if err = c.setPublicUserInfo(tracelog.GetOpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
+
 		return
 	}
 	JoinGroupApplicationTips.ReqMsg = req.ReqMessage
 
 	managerList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
 	if err != nil {
-		log.NewError(utils.OperationID(ctx), "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
+
 		return
 	}
 	for _, v := range managerList {
-		c.groupNotification(constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, utils.OpUserID(ctx), "", v.UserID, utils.OperationID(ctx))
-		log.NewInfo(utils.OperationID(ctx), "Notification ", v)
+		c.groupNotification(constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, tracelog.GetOpUserID(ctx), "", v.UserID, utils.OperationID(ctx))
+
 	}
 }
 
 func (c *Check) MemberQuitNotification(req *pbGroup.QuitGroupReq) {
 	MemberQuitTips := sdkws.MemberQuitTips{Group: &sdkws.GroupInfo{}, QuitUser: &sdkws.GroupMemberFullInfo{}}
 	if err := c.setGroupInfo(req.GroupID, MemberQuitTips.Group); err != nil {
-		log.Error(req.OperationID, "setGroupInfo failed ", err.Error(), req.GroupID)
+
 		return
 	}
-	if err := c.setOpUserInfo(req.OpUserID, req.GroupID, MemberQuitTips.QuitUser); err != nil {
-		log.Error(req.OperationID, "setOpUserInfo failed ", err.Error(), req.OpUserID, req.GroupID)
+	if err := c.setOpUserInfo(tracelog.GetOpUserID(), req.GroupID, MemberQuitTips.QuitUser); err != nil {
 		return
 	}
 
-	c.groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, req.GroupID, "", req.OperationID)
+	c.groupNotification(constant.MemberQuitNotification, &MemberQuitTips, tracelog.GetOpUserID(), req.GroupID, "", req.OperationID)
 }
 
 //	message ApplicationProcessedTips{
