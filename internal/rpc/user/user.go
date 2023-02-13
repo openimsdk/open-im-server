@@ -23,8 +23,6 @@ import (
 )
 
 type userServer struct {
-	rpcPort         int
-	rpcRegisterName string
 	*rpcserver.RpcServer
 	controller.UserInterface
 }

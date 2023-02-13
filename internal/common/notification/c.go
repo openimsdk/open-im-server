@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/proto/msg"
@@ -8,6 +9,11 @@ import (
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 )
+
+type Check struct {
+	user  *check.UserCheck
+	group *check.GroupChecker
+}
 
 type NotificationMsg struct {
 	SendID         string
@@ -21,7 +27,7 @@ type NotificationMsg struct {
 	SenderFaceURL  string
 }
 
-func Notification(n *NotificationMsg) {
+func (c *Check) Notification(n *NotificationMsg) {
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo

@@ -3,18 +3,18 @@ package notification
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
-func DeleteMessageNotification(opUserID, userID string, seqList []uint32, operationID string) {
+func (c *Check) DeleteMessageNotification(opUserID, userID string, seqList []uint32, operationID string) {
 	DeleteMessageTips := sdkws.DeleteMessageTips{OpUserID: opUserID, UserID: userID, SeqList: seqList}
-	MessageNotification(operationID, userID, userID, constant.DeleteMessageNotification, &DeleteMessageTips)
+	c.MessageNotification(operationID, userID, userID, constant.DeleteMessageNotification, &DeleteMessageTips)
 }
 
-func MessageNotification(operationID, sendID, recvID string, contentType int32, m proto.Message) {
+func (c *Check) MessageNotification(operationID, sendID, recvID string, contentType int32, m proto.Message) {
 	log.Debug(operationID, utils.GetSelfFuncName(), "args: ", m.String(), contentType)
 	var err error
 	var tips sdkws.TipsComm
@@ -43,5 +43,5 @@ func MessageNotification(operationID, sendID, recvID string, contentType int32, 
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	c.Notification(&n)
 }

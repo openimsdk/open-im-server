@@ -9,7 +9,7 @@ import (
 	//"github.com/golang/protobuf/proto"
 )
 
-func SuperGroupNotification(operationID, sendID, recvID string) {
+func (c *Check) SuperGroupNotification(operationID, sendID, recvID string) {
 	n := &NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
@@ -19,5 +19,5 @@ func SuperGroupNotification(operationID, sendID, recvID string) {
 		OperationID: operationID,
 	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
-	Notification(n)
+	c.Notification(n)
 }

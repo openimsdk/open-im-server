@@ -27,6 +27,7 @@ type msgServer struct {
 	*rpcserver.RpcServer
 	MsgInterface controller.MsgInterface
 	Group        *check.GroupChecker
+	User         *check.UserCheck
 }
 
 type deleteMsg struct {
