@@ -75,7 +75,7 @@ func (rpc *rpcChat) initPrometheus() {
 	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
-func (rpc *msgServer) Run() {
+func (m *msgServer) Run() {
 	log.Info("", "rpcChat init...")
 	listenIP := ""
 	if config.Config.ListenIP == "" {
@@ -83,10 +83,10 @@ func (rpc *msgServer) Run() {
 	} else {
 		listenIP = config.Config.ListenIP
 	}
-	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
+	address := listenIP + ":" + strconv.Itoa(m.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
+		panic("listening err:" + err.Error() + m.rpcRegisterName)
 	}
 	log.Info("", "listen network success, address ", address)
 	recvSize := 1024 * 1024 * 30
@@ -109,26 +109,26 @@ func (rpc *msgServer) Run() {
 	defer srv.GracefulStop()
 
 	rpcRegisterIP := config.Config.RpcRegisterIP
-	msg.RegisterMsgServer(srv, rpc)
+	msg.RegisterMsgServer(srv, m)
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10, "")
+	err = getcdv3.RegisterEtcd(m.etcdSchema, strings.Join(m.etcdAddr, ","), rpcRegisterIP, m.rpcPort, m.rpcRegisterName, 10, "")
 	if err != nil {
 		log.Error("", "register rpcChat to etcd failed ", err.Error())
-		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))
+		panic(utils.Wrap(err, "register chat module  m to etcd err"))
 	}
-	go rpc.runCh()
-	rpc.initPrometheus()
+	go m.runCh()
+	m.initPrometheus()
 	err = srv.Serve(listener)
 	if err != nil {
-		log.Error("", "rpc rpcChat failed ", err.Error())
+		log.Error("", "m rpcChat failed ", err.Error())
 		return
 	}
-	log.Info("", "rpc rpcChat init success")
+	log.Info("", "m rpcChat init success")
 }
 
 func (rpc *rpcChat) runCh() {
