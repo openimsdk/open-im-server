@@ -18,6 +18,10 @@ type MsgInterface interface {
 	DelMsgLogic(ctx context.Context, userID string, seqList []uint32) error
 	DelMsgBySeqListInOneDoc(ctx context.Context, docID string, seqList []uint32) (unExistSeqList []uint32, err error)
 	ReplaceMsgToBlankByIndex(docID string, index int) (replaceMaxSeq uint32, err error)
+
+	// status
+	SetSendMsgStatus(ctx context.Context, id string, status int32) error
+	GetSendMsgStatus(ctx context.Context, id string) (int32, error) // 不存在返回 constant.MsgStatusNotExist
 }
 
 type MsgDatabaseInterface interface {

@@ -5,6 +5,7 @@ import (
 	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/controller"
 
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
@@ -23,6 +24,7 @@ import (
 
 type msgServer struct {
 	*rpcserver.RpcServer
+	MsgInterface controller.MsgInterface
 }
 
 type deleteMsg struct {
