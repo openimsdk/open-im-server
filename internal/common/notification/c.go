@@ -1,9 +1,12 @@
 package notification
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	pbChat "Open_IM/pkg/proto/msg"
-	"strings"
+	"Open_IM/pkg/proto/msg"
+	"Open_IM/pkg/proto/sdkws"
+	"context"
+	utils "github.com/OpenIMSDK/open_utils"
 )
 
 type NotificationMsg struct {
@@ -19,13 +22,12 @@ type NotificationMsg struct {
 }
 
 func Notification(n *NotificationMsg) {
-	var req pbChat.SendMsgReq
+	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo
 	var title, desc, ex string
 	var pushSwitch, unReadCount bool
 	var reliabilityLevel int
-	req.OperationID = n.OperationID
 	msg.SendID = n.SendID
 	msg.RecvID = n.RecvID
 	msg.Content = n.Content
@@ -272,18 +274,10 @@ func Notification(n *NotificationMsg) {
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		return
-	}
 
-	client := pbChat.NewMsgClient(etcdConn)
-	reply, err := client.SendMsg(context.Background(), &req)
-	if err != nil {
-		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), err.Error())
-	} else if reply.ErrCode != 0 {
-		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), reply.ErrCode, reply.ErrMsg)
-	}
+	_, err := sendMsg(context.Background(), &req)
+}
+
+func sendMsg(ctx context.Context, req *msg.SendMsgReq) (msg.SendMsgResp, error) {
+
 }

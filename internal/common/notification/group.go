@@ -1,13 +1,10 @@
 package notification
 
 import (
-	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	utils2 "Open_IM/pkg/common/utils"
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
@@ -16,13 +13,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
-
-//message GroupCreatedTips{
-//  GroupInfo Group = 1;
-//  GroupMemberFullInfo Creator = 2;
-//  repeated GroupMemberFullInfo MemberList = 3;
-//  uint64 OperationTime = 4;
-//} creator->group
 
 func setOpUserInfo(opUserID, groupID string, groupMemberInfo *sdkws.GroupMemberFullInfo) error {
 	if tokenverify.IsManagerUserID(opUserID) {
@@ -182,7 +172,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		return
 	}
 
-	var n msg.NotificationMsg
+	var n NotificationMsg
 	n.SendID = sendID
 	if groupID != "" {
 		n.RecvID = groupID
@@ -207,7 +197,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	msg.Notification(&n)
+	Notification(&n)
 }
 
 // 创建群后调用
@@ -574,26 +564,6 @@ func MemberInvitedNotification(operationID, groupID, opUserID, reason string, in
 	groupNotification(constant.MemberInvitedNotification, &MemberInvitedTips, opUserID, groupID, "", operationID)
 }
 
-//message GroupInfoChangedTips{
-//  int32 ChangedType = 1; //bitwise operators: 1:groupName; 10:Notification  100:Introduction; 1000:FaceUrl
-//  GroupInfo Group = 2;
-//  GroupMemberFullInfo OpUser = 3;
-//}
-
-//message MemberLeaveTips{
-//  GroupInfo Group = 1;
-//  GroupMemberFullInfo LeaverUser = 2;
-//  uint64 OperationTime = 3;
-//}
-
-//群成员退群后调用
-
-//	message MemberEnterTips{
-//	 GroupInfo Group = 1;
-//	 GroupMemberFullInfo EntrantUser = 2;
-//	 uint64 OperationTime = 3;
-//	}
-//
 // 群成员主动申请进群，管理员同意后调用，
 func MemberEnterNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) {
 	MemberEnterTips := sdkws.MemberEnterTips{Group: &sdkws.GroupInfo{}, EntrantUser: &sdkws.GroupMemberFullInfo{}}

@@ -2,13 +2,12 @@ package notification
 
 import (
 	"Open_IM/internal/common/check"
-	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"
@@ -16,15 +15,11 @@ import (
 )
 
 func getFromToUserNickname(fromUserID, toUserID string) (string, string, error) {
-	users, err := check.GetUsersInfo(context.Background(), fromUserID, toUserID)
+	users, err := check.NewUserCheck().GetUsersInfoMap(context.Background(), []string{fromUserID, toUserID}, true)
 	if err != nil {
 		return "", "", nil
 	}
-	if users[0].UserID == fromUserID {
-		return users[0].Nickname, users[1].Nickname, nil
-	}
-	return users[1].Nickname, users[0].Nickname, nil
-
+	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
 }
 
 func friendNotification(operationID, fromUserID, toUserID string, contentType int32, m proto.Message) {
@@ -77,7 +72,7 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 		return
 	}
 
-	var n msg.NotificationMsg
+	var n NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
 	n.ContentType = contentType
@@ -89,10 +84,10 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	msg.Notification(&n)
+	Notification(&n)
 }
 
-func FriendApplicationAddNotification(ctx context.Context, req *pbFriend.AddFriendReq) {
+func FriendApplicationAddNotification(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) {
 	FriendApplicationTips := sdkws.FriendApplicationTips{FromToUserID: &sdkws.FromToUserID{}}
 	FriendApplicationTips.FromToUserID.FromUserID = req.FromUserID
 	FriendApplicationTips.FromToUserID.ToUserID = req.ToUserID
@@ -117,7 +112,7 @@ func FriendApplicationRefusedNotification(ctx context.Context, req *pbFriend.Res
 
 func FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) {
 	friendAddedTips := sdkws.FriendAddedTips{Friend: &sdkws.FriendInfo{}, OpUser: &sdkws.PublicUserInfo{}}
-	user, err := check.GetUsersInfo(context.Background(), opUserID)
+	user, err := check.NewUserCheck().GetUsersInfos(context.Background(), []string{opUserID}, true)
 	if err != nil {
 		return
 	}

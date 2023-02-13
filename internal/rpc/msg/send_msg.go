@@ -95,6 +95,7 @@ func GetGroupInfo(ctx context.Context, groupID string) (sdkws.GroupInfo, error) 
 func GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
 
 }
+
 func GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error) {
 
 }

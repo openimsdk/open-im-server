@@ -128,7 +128,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := check.GetUsersInfo(ctx, req.OwnerUserID, req.FriendUserIDs); err != nil {
+	if _, err := check.NewUserCheck().GetUsersInfos(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...), true); err != nil {
 		return nil, err
 	}
 
