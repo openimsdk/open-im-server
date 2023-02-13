@@ -21,7 +21,7 @@ func (m *msgServer) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
 	t1 := time.Now()
-	rpc.encapsulateMsgData(pb.MsgData)
+	m.encapsulateMsgData(pb.MsgData)
 	log.Debug(pb.OperationID, "encapsulateMsgData ", " cost time: ", time.Since(t1))
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
 	// callback

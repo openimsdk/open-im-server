@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (rpc *rpcChat) DelMsgList(_ context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
+func (rpc *msgServer) DelMsgList(_ context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &common.DelMsgListResp{}
 	select {
@@ -30,7 +30,7 @@ func (rpc *rpcChat) DelMsgList(_ context.Context, req *common.DelMsgListReq) (*c
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
-func (rpc *rpcChat) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
+func (rpc *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	if !tokenverify.CheckAccess(ctx, req.OpUserID, req.UserID) {
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.UserID)
@@ -55,7 +55,7 @@ func (rpc *rpcChat) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroup
 	return resp, nil
 }
 
-func (rpc *rpcChat) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbChat.ClearMsgResp, error) {
+func (rpc *msgServer) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbChat.ClearMsgResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc req: ", req.String())
 	if req.OpUserID != req.UserID && !tokenverify.IsManagerUserID(req.UserID) {
 		errMsg := "No permission" + req.OpUserID + req.UserID

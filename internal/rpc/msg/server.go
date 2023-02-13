@@ -32,9 +32,9 @@ type deleteMsg struct {
 	OperationID string
 }
 
-func NewRpcChatServer(port int) *rpcChat {
+func NewRpcChatServer(port int) *msgServer {
 	log.NewPrivateLog(constant.LogFileName)
-	rc := rpcChat{
+	rc := msgServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImMsgName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
@@ -73,7 +73,7 @@ func (rpc *rpcChat) initPrometheus() {
 	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
-func (rpc *rpcChat) Run() {
+func (rpc *msgServer) Run() {
 	log.Info("", "rpcChat init...")
 	listenIP := ""
 	if config.Config.ListenIP == "" {

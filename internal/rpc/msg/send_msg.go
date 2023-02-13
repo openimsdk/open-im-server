@@ -107,7 +107,7 @@ func groupIsMuted(ctx context.Context, groupID string) (bool, error) {
 	return false, nil
 }
 
-func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMsgReq) (bool, int32, string, []string) {
+func (rpc *msgServer) messageVerification(ctx context.Context, data *pbChat.SendMsgReq) (bool, int32, string, []string) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
@@ -282,7 +282,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 	}
 
 }
-func (rpc *rpcChat) encapsulateMsgData(msg *sdkws.MsgData) {
+func (rpc *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	msg.SendTime = utils.GetCurrentTimestampByMill()
 	switch msg.ContentType {
@@ -331,7 +331,7 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdkws.MsgData) {
 	}
 }
 
-func (rpc *rpcChat) sendMsgToWriter(ctx context.Context, m *pbChat.MsgDataToMQ, key string, status string) error {
+func (rpc *msgServer) sendMsgToWriter(ctx context.Context, m *pbChat.MsgDataToMQ, key string, status string) error {
 	switch status {
 	case constant.OnlineStatus:
 		if m.MsgData.ContentType == constant.SignalingNotification {
@@ -502,7 +502,7 @@ func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
 	return &pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
 }
 
-func (rpc *rpcChat) sendMsgToGroup(ctx context.Context, list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+func (rpc *msgServer) sendMsgToGroup(ctx context.Context, list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	//	log.Debug(pb.OperationID, "split userID ", list)
 	offlinePushInfo := sdkws.OfflinePushInfo{}
 	if pb.MsgData.OfflinePushInfo != nil {
@@ -538,7 +538,7 @@ func (rpc *rpcChat) sendMsgToGroup(ctx context.Context, list []string, pb pbChat
 	wg.Done()
 }
 
-func (rpc *rpcChat) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+func (rpc *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
 	tempOptions := make(map[string]bool, 1)
 	for k, v := range groupPB.MsgData.Options {

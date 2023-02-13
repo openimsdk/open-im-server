@@ -10,7 +10,7 @@ import (
 	go_redis "github.com/go-redis/redis/v8"
 )
 
-func (rpc *rpcChat) GetSuperGroupMsg(context context.Context, req *msg.GetSuperGroupMsgReq) (*msg.GetSuperGroupMsgResp, error) {
+func (rpc *msgServer) GetSuperGroupMsg(context context.Context, req *msg.GetSuperGroupMsgReq) (*msg.GetSuperGroupMsgResp, error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := new(msg.GetSuperGroupMsgResp)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(req.GroupID, []uint32{req.Seq}, req.OperationID)

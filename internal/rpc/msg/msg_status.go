@@ -11,7 +11,7 @@ import (
 	goRedis "github.com/go-redis/redis/v8"
 )
 
-func (rpc *rpcChat) SetSendMsgStatus(_ context.Context, req *pbMsg.SetSendMsgStatusReq) (resp *pbMsg.SetSendMsgStatusResp, err error) {
+func (rpc *msgServer) SetSendMsgStatus(_ context.Context, req *pbMsg.SetSendMsgStatusReq) (resp *pbMsg.SetSendMsgStatusResp, err error) {
 	resp = &pbMsg.SetSendMsgStatusResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	if err := db.DB.SetSendMsgStatus(req.Status, req.OperationID); err != nil {
@@ -24,7 +24,7 @@ func (rpc *rpcChat) SetSendMsgStatus(_ context.Context, req *pbMsg.SetSendMsgSta
 	return resp, nil
 }
 
-func (rpc *rpcChat) GetSendMsgStatus(_ context.Context, req *pbMsg.GetSendMsgStatusReq) (resp *pbMsg.GetSendMsgStatusResp, err error) {
+func (rpc *msgServer) GetSendMsgStatus(_ context.Context, req *pbMsg.GetSendMsgStatusReq) (resp *pbMsg.GetSendMsgStatusResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp = &pbMsg.GetSendMsgStatusResp{}
 	status, err := db.DB.GetSendMsgStatus(req.OperationID)

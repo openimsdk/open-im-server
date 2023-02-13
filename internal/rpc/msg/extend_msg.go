@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
+func (rpc *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.SetMessageReactionExtensionsResp
 	rResp.ClientMsgID = req.ClientMsgID
@@ -216,7 +216,7 @@ func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errC
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 
-func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+func (rpc *msgServer) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
 	for _, messageValue := range req.MessageReactionKeyList {
@@ -272,11 +272,11 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 
 }
 
-func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
+func (rpc *msgServer) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
 	return
 }
 
-func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
+func (rpc *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.DeleteMessageListReactionExtensionsResp
 	callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
