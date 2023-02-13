@@ -33,6 +33,7 @@ type MsgInterface interface {
 	GetUserMinSeq(ctx context.Context, userID string) (uint32, error)
 
 	GetMessageListBySeq(ctx context.Context, userID string, seqs []uint32) ([]*sdkws.MsgData, error)
+	GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error)
 }
 
 type MsgDatabaseInterface interface {

@@ -1,4 +1,4 @@
-package msg
+package notification
 
 import (
 	"Open_IM/pkg/common/config"
@@ -70,7 +70,7 @@ func ConversationChangeNotification(ctx context.Context, userID string) {
 	SetConversationNotification(operationID, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
 }
 
-//会话未读数同步
+// 会话未读数同步
 func ConversationUnreadChangeNotification(context context.Context, userID, conversationID string, updateUnreadCountTime int64) {
 	log.NewInfo(operationID, utils.GetSelfFuncName())
 	ConversationChangedTips := &sdkws.ConversationUpdateTips{

@@ -7,17 +7,17 @@ import (
 	"context"
 )
 
-func (s *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgStatusReq) (*pbMsg.SetSendMsgStatusResp, error) {
+func (m *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgStatusReq) (*pbMsg.SetSendMsgStatusResp, error) {
 	resp := &pbMsg.SetSendMsgStatusResp{}
-	if err := s.MsgInterface.SetSendMsgStatus(ctx, tracelog.GetOperationID(ctx), req.Status); err != nil {
+	if err := m.MsgInterface.SetSendMsgStatus(ctx, tracelog.GetOperationID(ctx), req.Status); err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (s *msgServer) GetSendMsgStatus(ctx context.Context, req *pbMsg.GetSendMsgStatusReq) (*pbMsg.GetSendMsgStatusResp, error) {
+func (m *msgServer) GetSendMsgStatus(ctx context.Context, req *pbMsg.GetSendMsgStatusReq) (*pbMsg.GetSendMsgStatusResp, error) {
 	resp := &pbMsg.GetSendMsgStatusResp{}
-	status, err := s.MsgInterface.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
+	status, err := m.MsgInterface.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
 	if IsNotFound(err) {
 		resp.Status = constant.MsgStatusNotExist
 		return resp, nil

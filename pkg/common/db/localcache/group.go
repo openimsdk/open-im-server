@@ -24,8 +24,8 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupMemberIDsLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) GroupLocalCache {
-	return GroupLocalCache{
+func NewGroupMemberIDsLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) *GroupLocalCache {
+	return &GroupLocalCache{
 		cache:  make(map[string]GroupMemberIDsHash, 0),
 		client: client,
 	}

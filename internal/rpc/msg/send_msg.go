@@ -1,11 +1,13 @@
 package msg
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"math/rand"
@@ -57,7 +59,7 @@ type MsgCallBackResp struct {
 }
 
 func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
-	groupMemberInfo, err := GetGroupMemberInfo(ctx, groupID, userID)
+	groupMemberInfo, err := check.NewGroupChecker().GetGroupMemberInfo(ctx, groupID, userID)
 	if err != nil {
 		return false, err
 	}
@@ -69,13 +71,13 @@ func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (i
 
 // 如果禁言了，再看下是否群管理员
 func groupIsMuted(ctx context.Context, groupID string, userID string) (bool, bool, error) {
-	groupInfo, err := GetGroupInfo(ctx, groupID)
+	groupInfo, err := check.NewGroupChecker().GetGroupInfo(ctx, groupID)
 	if err != nil {
 		return false, false, err
 	}
 
 	if groupInfo.Status == constant.GroupStatusMuted {
-		groupMemberInfo, err := GetGroupMemberInfo(ctx, groupID, userID)
+		groupMemberInfo, err := check.NewGroupChecker().GetGroupMemberInfo(ctx, groupID, userID)
 		if err != nil {
 			return false, false, err
 		}
@@ -85,20 +87,24 @@ func groupIsMuted(ctx context.Context, groupID string, userID string) (bool, boo
 }
 
 func GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-
+	return localcache.NewGroupMemberIDsLocalCache().GetGroupMemberIDs(ctx, groupID)
 }
 
-func GetGroupInfo(ctx context.Context, groupID string) (sdkws.GroupInfo, error) {
+//func GetGroupInfo(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
+//	return check.NewGroupChecker().GetGroupInfo(ctx, groupID)
+//
+//
+//}
 
-}
+//func GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+//	check.NewGroupChecker().GetGroupMemberInfo
+//}
 
-func GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+//func (m *msgServer)GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error) {
+//	return m.MsgInterface.GetSuperGroupMsg(ctx, groupID, seq)
+//}
 
-}
-func GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error) {
-
-}
-func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
+func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
@@ -163,7 +169,7 @@ func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsg
 		}
 		return userIDList, nil
 	case constant.SuperGroupChatType:
-		groupInfo, err := GetGroupInfo(ctx, data.MsgData.GroupID)
+		groupInfo, err := check.NewGroupChecker().GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -175,7 +181,7 @@ func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsg
 			}
 
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				resp, err := GetSuperGroupMsg(ctx, data.MsgData.GroupID, revokeMessage.Seq)
+				resp, err := m.MsgInterface.GetSuperGroupMsg(ctx, data.MsgData.GroupID, revokeMessage.Seq)
 				if err != nil {
 					return nil, err
 				}
@@ -231,7 +237,7 @@ func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsg
 		return nil, nil
 	}
 }
-func (rpc *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
+func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	msg.SendTime = utils.GetCurrentTimestampByMill()
 	switch msg.ContentType {
