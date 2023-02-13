@@ -22,6 +22,11 @@ type MsgInterface interface {
 	// status
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error) // 不存在返回 constant.MsgStatusNotExist
+	// delete
+	DelMsgFromCache(ctx context.Context, userID string, seqs []uint32) error
+	GetGroupMaxSeq(ctx context.Context, groupID string) (uint32, error)
+	SetGroupUserMinSeq(ctx context.Context, groupID string, seq uint32) error
+	DelUserAllSeq(ctx context.Context, userID string) error // redis and mongodb
 }
 
 type MsgDatabaseInterface interface {

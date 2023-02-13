@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/tracelog"
 	pbMsg "Open_IM/pkg/proto/msg"
 	"context"
@@ -14,11 +15,15 @@ func (s *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgS
 	return resp, nil
 }
 
-func (s *msgServer) GetSendMsgStatus(ctx context.Context, req *pbMsg.GetSendMsgStatusReq) (resp *pbMsg.GetSendMsgStatusResp, err error) {
-	resp = &pbMsg.GetSendMsgStatusResp{}
-	resp.Status, err = s.MsgInterface.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
-	if err != nil {
+func (s *msgServer) GetSendMsgStatus(ctx context.Context, req *pbMsg.GetSendMsgStatusReq) (*pbMsg.GetSendMsgStatusResp, error) {
+	resp := &pbMsg.GetSendMsgStatusResp{}
+	status, err := s.MsgInterface.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
+	if IsNotFound(err) {
+		resp.Status = constant.MsgStatusNotExist
+		return resp, nil
+	} else if err != nil {
 		return nil, err
 	}
+	resp.Status = status
 	return resp, nil
 }

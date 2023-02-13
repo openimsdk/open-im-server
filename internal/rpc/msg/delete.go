@@ -1,83 +1,43 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/proto/msg"
 	common "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
 	"context"
-	"time"
 )
 
-func (rpc *msgServer) DelMsgList(_ context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+func (s *msgServer) DelMsgList(ctx context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
 	resp := &common.DelMsgListResp{}
-	select {
-	case rpc.delMsgCh <- deleteMsg{
-		UserID:      req.UserID,
-		OpUserID:    req.OpUserID,
-		SeqList:     req.SeqList,
-		OperationID: req.OperationID,
-	}:
-	case <-time.After(1 * time.Second):
-		resp.ErrCode = constant.ErrSendLimit.ErrCode
-		resp.ErrMsg = constant.ErrSendLimit.ErrMsg
-		return resp, nil
+	if err := s.MsgInterface.DelMsgFromCache(ctx, req.UserID, req.SeqList); err != nil {
+		return nil, err
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	DeleteMessageNotification(ctx, req.UserID, req.SeqList)
 	return resp, nil
 }
-func (rpc *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	if !tokenverify.CheckAccess(ctx, req.OpUserID, req.UserID) {
-		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.UserID)
-		return &msg.DelSuperGroupMsgResp{ErrCode: constant.ErrNoPermission.ErrCode, ErrMsg: constant.ErrNoPermission.ErrMsg}, nil
-	}
+
+func (s *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
 	resp := &msg.DelSuperGroupMsgResp{}
-	groupMaxSeq, err := db.DB.GetGroupMaxSeq(req.GroupID)
-	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMaxSeq false ", req.OpUserID, req.UserID, req.GroupID)
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = err.Error()
-		return resp, nil
+	if err := tokenverify.CheckAdmin(ctx); err != nil {
+		return nil, err
 	}
-	err = db.DB.SetGroupUserMinSeq(req.GroupID, req.UserID, groupMaxSeq)
+	maxSeq, err := s.MsgInterface.GetGroupMaxSeq(ctx, req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, "SetGroupUserMinSeq false ", req.OpUserID, req.UserID, req.GroupID)
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = err.Error()
-		return resp, nil
+		return nil, err
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	if err := s.MsgInterface.SetGroupUserMinSeq(ctx, req.GroupID, maxSeq); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
-func (rpc *msgServer) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbChat.ClearMsgResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc req: ", req.String())
-	if req.OpUserID != req.UserID && !tokenverify.IsManagerUserID(req.UserID) {
-		errMsg := "No permission" + req.OpUserID + req.UserID
-		log.Error(req.OperationID, errMsg)
-		return &pbChat.ClearMsgResp{ErrCode: constant.ErrNoPermission.ErrCode, ErrMsg: errMsg}, nil
+func (s *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.ClearMsgResp, error) {
+	resp := &msg.ClearMsgResp{}
+	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+		return nil, err
 	}
-	log.Debug(req.OperationID, "CleanUpOneUserAllMsgFromRedis args", req.UserID)
-	err := db.DB.CleanUpOneUserAllMsgFromRedis(req.UserID, req.OperationID)
-	if err != nil {
-		errMsg := "CleanUpOneUserAllMsgFromRedis failed " + err.Error() + req.OperationID + req.UserID
-		log.Error(req.OperationID, errMsg)
-		return &pbChat.ClearMsgResp{ErrCode: constant.ErrDatabase.ErrCode, ErrMsg: errMsg}, nil
+	if err := s.MsgInterface.DelUserAllSeq(ctx, req.UserID); err != nil {
+		return nil, err
 	}
-	log.Debug(req.OperationID, "CleanUpUserMsgFromMongo args", req.UserID)
-	err = db.DB.CleanUpUserMsgFromMongo(req.UserID, req.OperationID)
-	if err != nil {
-		errMsg := "CleanUpUserMsgFromMongo failed " + err.Error() + req.OperationID + req.UserID
-		log.Error(req.OperationID, errMsg)
-		return &pbChat.ClearMsgResp{ErrCode: constant.ErrDatabase.ErrCode, ErrMsg: errMsg}, nil
-	}
-
-	resp := pbChat.ClearMsgResp{ErrCode: 0}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return &resp, nil
+	return resp, nil
 }
