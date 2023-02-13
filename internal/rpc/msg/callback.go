@@ -33,7 +33,7 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbapi.CommonCallbackReq
 	return req
 }
 
-func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) error {
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return callbackResp
@@ -65,7 +65,7 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackRes
 	return callbackResp
 }
 
-func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return callbackResp
@@ -88,7 +88,7 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp
 	return callbackResp
 }
 
-func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return callbackResp
@@ -117,7 +117,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp
 	return callbackResp
 }
 
-func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return callbackResp
@@ -140,7 +140,7 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp 
 	return callbackResp
 }
 
-func callbackMsgModify(msg *pbChat.SendMsgReq) cbapi.CommonCallbackResp {
+func callbackMsgModify(msg *pbChat.SendMsgReq) (err error) {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackMsgModify.Enable || msg.MsgData.ContentType != constant.Text {

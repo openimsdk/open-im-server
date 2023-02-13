@@ -66,24 +66,6 @@ type MsgCallBackResp struct {
 	}
 }
 
-func isMessageHasReadEnabled(pb *msg.SendMsgReq) (bool, int32, string) {
-	switch pb.MsgData.ContentType {
-	case constant.HasReadReceipt:
-		if config.Config.SingleMessageHasReadReceiptEnable {
-			return true, 0, ""
-		} else {
-			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
-		}
-	case constant.GroupHasReadReceipt:
-		if config.Config.GroupMessageHasReadReceiptEnable {
-			return true, 0, ""
-		} else {
-			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
-		}
-	}
-	return true, 0, ""
-}
-
 func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, isAdmin bool, err error) {
 	groupMemberInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, groupID, userID)
 	if err != nil {
@@ -107,7 +89,7 @@ func groupIsMuted(ctx context.Context, groupID string) (bool, error) {
 	return false, nil
 }
 
-func (rpc *msgServer) messageVerification(ctx context.Context, data *pbChat.SendMsgReq) (bool, int32, string, []string) {
+func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
@@ -314,12 +296,10 @@ func (rpc *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 	case constant.HasReadReceipt:
-		log.Info("", "this is a test start", msg, msg.Options)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
-		log.Info("", "this is a test end", msg, msg.Options)
 	case constant.Typing:
 		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
@@ -379,11 +359,10 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 	return replay, nil
 }
 
-func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) bool {
+func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) (bool, error) {
 	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
 	if err != nil {
 		log.NewError(pb.OperationID, "GetUserGlobalMsgRecvOpt from redis err", userID, pb.String(), err.Error())
-
 	}
 	switch opt {
 	case constant.ReceiveMessage:
@@ -538,7 +517,7 @@ func (rpc *msgServer) sendMsgToGroup(ctx context.Context, list []string, pb pbCh
 	wg.Done()
 }
 
-func (rpc *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+func (rpc *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, sendTag *bool, wg *sync.WaitGroup) {
 	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
 	tempOptions := make(map[string]bool, 1)
 	for k, v := range groupPB.MsgData.Options {
