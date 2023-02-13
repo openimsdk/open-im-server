@@ -351,19 +351,10 @@ func GetMsgID(sendID string) string {
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32, errMsg, serverMsgID string, sendTime int64) (*pbChat.SendMsgResp, error) {
-	replay.ErrCode = errCode
-	replay.ErrMsg = errMsg
-	replay.ServerMsgID = serverMsgID
-	replay.ClientMsgID = pb.MsgData.ClientMsgID
-	replay.SendTime = sendTime
-	return replay, nil
-}
-
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
 	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
 	if err != nil {
-		log.NewError(pb.OperationID, "GetUserGlobalMsgRecvOpt from redis err", userID, pb.String(), err.Error())
+		return false, err
 	}
 	switch opt {
 	case constant.ReceiveMessage:

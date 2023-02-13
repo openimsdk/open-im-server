@@ -138,7 +138,6 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 
 	//split  parallel send
 	var wg sync.WaitGroup
-	var sendTag bool
 	var split = 20
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
 	mErr := make([]error, 0)
@@ -148,7 +147,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 		wg.Add(1)
 		tmp := valueCopy(req)
 		go func() {
-			err := m.sendMsgToGroupOptimization(ctx, memberUserIDList[i*split:(i+1)*split], tmp, &sendTag, &wg)
+			err := m.sendMsgToGroupOptimization(ctx, memberUserIDList[i*split:(i+1)*split], tmp, &wg)
 			if err != nil {
 				mutex.Lock()
 				mErr = append(mErr, err)
@@ -160,7 +159,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	if remain > 0 {
 		wg.Add(1)
 		tmp := valueCopy(req)
-		go m.sendMsgToGroupOptimization(ctx, memberUserIDList[split*(len(memberUserIDList)/split):], tmp, &sendTag, &wg)
+		go m.sendMsgToGroupOptimization(ctx, memberUserIDList[split*(len(memberUserIDList)/split):], tmp, &wg)
 	}
 
 	wg.Wait()
