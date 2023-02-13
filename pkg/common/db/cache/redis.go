@@ -50,6 +50,12 @@ type Cache interface {
 
 // native redis operate
 
+func NewRedis() *RedisClient {
+	o := &RedisClient{}
+	o.InitRedis()
+	return o
+}
+
 type RedisClient struct {
 	rdb redis.UniversalClient
 }

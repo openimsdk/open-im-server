@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+func NewMongo() *Mongo {
+	mgo := &Mongo{}
+	mgo.InitMongo()
+	return mgo
+}
+
 type Mongo struct {
 	db *mongo.Client
 }

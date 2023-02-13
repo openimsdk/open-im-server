@@ -2,18 +2,13 @@ package group
 
 import (
 	"Open_IM/internal/common/check"
-	"Open_IM/internal/common/network"
 	chat "Open_IM/internal/rpc/msg"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/db/unrelation"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/middleware"
-	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
@@ -22,107 +17,128 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"math/big"
 	"math/rand"
-	"net"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/OpenIMSDK/openKeeper"
-	"google.golang.org/grpc"
 )
 
+func Start(server *grpc.Server) {
+	//err := mysql.InitConn().AutoMigrateModel(&groupModel)
+	//if err != nil {
+	//	panic("db init err:" + err.Error())
+	//}
+	//mongo.InitMongo()
+	//redis.InitRedis()
+	pbGroup.RegisterGroupServer(server, &groupServer{
+		GroupInterface: controller.NewGroupInterface(nil, cache.NewRedis().GetClient(), unrelation.NewMongo().GetClient()),
+		registerCenter: nil,
+		user:           check.NewUserCheck(),
+	})
+}
+
 type groupServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	schema          string
-	zkAddr          []string
-	GroupInterface  controller.GroupInterface
-	registerCenter  discoveryRegistry.SvcDiscoveryRegistry
-	user            *check.UserCheck
+	//rpcPort         int
+	//rpcRegisterName string
+	//schema          string
+	//zkAddr          []string
+	GroupInterface controller.GroupInterface
+	registerCenter discoveryRegistry.SvcDiscoveryRegistry
+	user           *check.UserCheck
 }
 
-func NewGroupServer(port int) *groupServer {
-	log.NewPrivateLog(constant.LogFileName)
-	g := groupServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
-		schema:          config.Config.Zookeeper.Schema,
-		zkAddr:          config.Config.Zookeeper.ZkAddr,
-	}
-	//mysql init
-	var mysql relation.Mysql
-	var mongo unrelation.Mongo
-	var groupModel relationTb.GroupModel
-	var redis cache.RedisClient
-	err := mysql.InitConn().AutoMigrateModel(&groupModel)
-	if err != nil {
-		panic("db init err:" + err.Error())
-	}
-	mongo.InitMongo()
-	redis.InitRedis()
-	mongo.CreateSuperGroupIndex()
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
-	if err != nil {
-		panic(err.Error())
-	}
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
-	g.registerCenter = zkClient
-	err = g.registerCenter.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
-	g.GroupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), mongo.GetClient())
-	g.user = check.NewUserCheck()
-	return &g
-}
-
-func (s *groupServer) Run() {
-	operationID := utils.OperationIDGenerator()
-	log.NewInfo(operationID, "group rpc start ")
-	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
-	//listener network
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		panic("listening err:" + err.Error() + s.rpcRegisterName)
-	}
-	log.NewInfo(operationID, "listen network success, ", address, listener)
-
-	defer listener.Close()
-	//grpc server
-	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
-	sendSize := 1024 * 1024 * constant.GroupRPCSendSize
-	var grpcOpts = []grpc.ServerOption{
-		grpc.MaxRecvMsgSize(recvSize),
-		grpc.MaxSendMsgSize(sendSize),
-		grpc.UnaryInterceptor(middleware.RpcServerInterceptor),
-	}
-	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
-		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(grpcOpts...)
-	defer srv.GracefulStop()
-	//Service registers with etcd
-	pbGroup.RegisterGroupServer(srv, s)
-	err = srv.Serve(listener)
-	if err != nil {
-		log.NewError(operationID, "Serve failed ", err.Error())
-		return
-	}
-	log.NewInfo(operationID, "group rpc success")
-}
+//
+//type groupServer struct {
+//	rpcPort         int
+//	rpcRegisterName string
+//	schema          string
+//	zkAddr          []string
+//	GroupInterface  controller.GroupInterface
+//	registerCenter  discoveryRegistry.SvcDiscoveryRegistry
+//	user            *check.UserCheck
+//}
+//
+//func NewGroupServer(port int) *groupServer {
+//	log.NewPrivateLog(constant.LogFileName)
+//	g := groupServer{
+//		rpcPort:         port,
+//		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
+//		schema:          config.Config.Zookeeper.Schema,
+//		zkAddr:          config.Config.Zookeeper.ZkAddr,
+//	}
+//	//mysql init
+//	var mysql relation.Mysql
+//	var mongo unrelation.Mongo
+//	var groupModel relationTb.GroupModel
+//	var redis cache.RedisClient
+//	err := mysql.InitConn().AutoMigrateModel(&groupModel)
+//	if err != nil {
+//		panic("db init err:" + err.Error())
+//	}
+//	mongo.InitMongo()
+//	redis.InitRedis()
+//	mongo.CreateSuperGroupIndex()
+//	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+//	if err != nil {
+//		panic(err.Error())
+//	}
+//	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+//	g.registerCenter = zkClient
+//	err = g.registerCenter.Register(config.Config.RpcRegisterName.OpenImGroupName, registerIP, port)
+//	if err != nil {
+//		panic(err.Error())
+//	}
+//
+//	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
+//	g.GroupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), mongo.GetClient())
+//	g.user = check.NewUserCheck()
+//	return &g
+//}
+//
+//func (s *groupServer) Run() {
+//	operationID := utils.OperationIDGenerator()
+//	log.NewInfo(operationID, "group rpc start ")
+//	address := network.GetListenIP(config.Config.ListenIP) + ":" + strconv.Itoa(s.rpcPort)
+//	//listener network
+//	listener, err := net.Listen("tcp", address)
+//	if err != nil {
+//		panic("listening err:" + err.Error() + s.rpcRegisterName)
+//	}
+//	log.NewInfo(operationID, "listen network success, ", address, listener)
+//
+//	defer listener.Close()
+//	//grpc server
+//	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
+//	sendSize := 1024 * 1024 * constant.GroupRPCSendSize
+//	var grpcOpts = []grpc.ServerOption{
+//		grpc.MaxRecvMsgSize(recvSize),
+//		grpc.MaxSendMsgSize(sendSize),
+//		grpc.UnaryInterceptor(middleware.RpcServerInterceptor),
+//	}
+//	if config.Config.Prometheus.Enable {
+//		promePkg.NewGrpcRequestCounter()
+//		promePkg.NewGrpcRequestFailedCounter()
+//		promePkg.NewGrpcRequestSuccessCounter()
+//		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+//			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+//			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+//			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+//		}...)
+//	}
+//	srv := grpc.NewServer(grpcOpts...)
+//	defer srv.GracefulStop()
+//	//Service registers with etcd
+//	pbGroup.RegisterGroupServer(srv, s)
+//	err = srv.Serve(listener)
+//	if err != nil {
+//		log.NewError(operationID, "Serve failed ", err.Error())
+//		return
+//	}
+//	log.NewInfo(operationID, "group rpc success")
+//}
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !tokenverify.IsAppManagerUid(ctx) {
@@ -145,7 +161,7 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceToMapAny(users, func(e *open_im_sdk.PublicUserInfo) (string, string) {
+	return utils.SliceToMapAny(users, func(e *sdkws.PublicUserInfo) (string, string) {
 		return e.UserID, e.Nickname
 	}), nil
 }
