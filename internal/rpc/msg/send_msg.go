@@ -3,23 +3,15 @@ package msg
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	rocksCache "Open_IM/pkg/common/db/rocks_cache"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	cacheRpc "Open_IM/pkg/proto/cache"
 	"Open_IM/pkg/proto/msg"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
-
-	go_redis "github.com/go-redis/redis/v8"
 )
 
 var (
@@ -64,203 +56,180 @@ type MsgCallBackResp struct {
 	}
 }
 
-func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, isAdmin bool, err error) {
-	groupMemberInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, groupID, userID)
+func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
+	groupMemberInfo, err := GetGroupMemberInfo(ctx, groupID, userID)
 	if err != nil {
-		return false, false, utils.Wrap(err, "")
+		return false, err
 	}
-
-	if groupMemberInfo.MuteEndTime.Unix() >= time.Now().Unix() {
-		return true, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
-	}
-	return false, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
-}
-
-func groupIsMuted(ctx context.Context, groupID string) (bool, error) {
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
-	if err != nil {
-		return false, utils.Wrap(err, "GetGroupInfoFromCache failed")
-	}
-	if groupInfo.Status == constant.GroupStatusMuted {
+	if groupMemberInfo.MuteEndTime >= time.Now().Unix() {
 		return true, nil
 	}
 	return false, nil
 }
 
+// 如果禁言了，再看下是否群管理员
+func groupIsMuted(ctx context.Context, groupID string, userID string) (bool, bool, error) {
+	groupInfo, err := GetGroupInfo(ctx, groupID)
+	if err != nil {
+		return false, false, err
+	}
+
+	if groupInfo.Status == constant.GroupStatusMuted {
+		groupMemberInfo, err := GetGroupMemberInfo(ctx, groupID, userID)
+		if err != nil {
+			return false, false, err
+		}
+		return true, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
+	}
+	return false, false, nil
+}
+
+func GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
+
+}
+
+func GetGroupInfo(ctx context.Context, groupID string) (sdkws.GroupInfo, error) {
+
+}
+
+func GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+
+}
+func GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error) {
+
+}
 func (rpc *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return true, 0, "", nil
+			return nil, nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return true, 0, "", nil
+			return nil, nil
 		}
-		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
-		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-		etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
+		black, err := IsBlocked(data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
-			errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
-			log.NewError(data.OperationID, errMsg)
-			return true, 0, "", nil
+			return nil, err
 		}
-
-		cacheClient := cacheRpc.NewCacheClient(etcdConn)
-		cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
-		if err != nil {
-			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
-		} else {
-			if cacheResp.CommonResp.ErrCode != 0 {
-				log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
-			} else {
-				if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-					return false, 600, "in black list", nil
-				}
-			}
+		if black {
+			return nil, constant.ErrBlockedByPeer.Wrap()
 		}
-		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
 		if *config.Config.MessageVerify.FriendVerify {
-			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-			etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
+			friend, err := IsFriend(data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
-				errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
-				log.NewError(data.OperationID, errMsg)
-				return true, 0, "", nil
+				return nil, err
 			}
-			cacheClient := cacheRpc.NewCacheClient(etcdConn)
-			cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
-			if err != nil {
-				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
-			} else {
-				if cacheResp.CommonResp.ErrCode != 0 {
-					log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
-				} else {
-					if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-						return false, 601, "not friend", nil
-					}
-				}
+			if !friend {
+				return nil, constant.ErrNotPeersFriend.Wrap()
 			}
-			return true, 0, "", nil
-		} else {
-			return true, 0, "", nil
+			return nil, nil
 		}
+		return nil, nil
 	case constant.GroupChatType:
-		userIDList, err := utils.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
-		if err != nil {
-			errMsg := data.OperationID + err.Error()
-			log.NewError(data.OperationID, errMsg)
-			return false, 201, errMsg, nil
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			return nil, nil
 		}
-		if tokenverify.IsManagerUserID(data.MsgData.SendID) {
-			return true, 0, "", userIDList
+		userIDList, err := GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			return userIDList, nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return true, 0, "", userIDList
-		} else {
-			if !utils.IsContain(data.MsgData.SendID, userIDList) {
-				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
-				return false, 202, "you are not in group", nil
-			}
+			return userIDList, nil
 		}
-		isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		if !utils.IsContain(data.MsgData.SendID, userIDList) {
+			return nil, constant.ErrNotInGroupYet.Wrap()
+		}
+		isMute, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
-			errMsg := data.OperationID + err.Error()
-			return false, 223, errMsg, nil
+			return nil, err
 		}
 		if isMute {
-			return false, 224, "you are muted", nil
+			return nil, constant.ErrMutedInGroup.Wrap()
+		}
+
+		isMute, isAdmin, err := groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		if err != nil {
+			return nil, err
 		}
 		if isAdmin {
-			return true, 0, "", userIDList
-		}
-		isMute, err = groupIsMuted(ctx, data.MsgData.GroupID)
-		if err != nil {
-			errMsg := data.OperationID + err.Error()
-			return false, 223, errMsg, nil
-		}
-		if isMute {
-			return false, 225, "group id muted", nil
-		}
-		return true, 0, "", userIDList
-	case constant.SuperGroupChatType:
-		groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, data.MsgData.GroupID)
-		if err != nil {
-			return false, 201, err.Error(), nil
+			return userIDList, nil
 		}
 
+		if isMute {
+			return nil, constant.ErrMutedGroup.Wrap()
+		}
+		return userIDList, nil
+	case constant.SuperGroupChatType:
+		groupInfo, err := GetGroupInfo(ctx, data.MsgData.GroupID)
+		if err != nil {
+			return nil, err
+		}
 		if data.MsgData.ContentType == constant.AdvancedRevoke {
 			revokeMessage := new(MessageRevoked)
 			err := utils.JsonStringToStruct(string(data.MsgData.Content), revokeMessage)
 			if err != nil {
-				log.Error(data.OperationID, "json unmarshal err:", err.Error())
-				return false, 201, err.Error(), nil
+				return nil, constant.ErrArgs.Wrap()
 			}
-			log.Debug(data.OperationID, "revoke message is", *revokeMessage)
+
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				req := pbChat.GetSuperGroupMsgReq{OperationID: data.OperationID, Seq: revokeMessage.Seq, GroupID: data.MsgData.GroupID}
-				resp, err := rpc.GetSuperGroupMsg(context.Background(), &req)
+				resp, err := GetSuperGroupMsg(ctx, data.MsgData.GroupID, revokeMessage.Seq)
 				if err != nil {
-					log.Error(data.OperationID, "GetSuperGroupMsgReq err:", err.Error())
-				} else if resp.ErrCode != 0 {
-					log.Error(data.OperationID, "GetSuperGroupMsgReq err:", resp.ErrCode, resp.ErrMsg)
+					return nil, err
+				}
+				if resp.ClientMsgID == revokeMessage.ClientMsgID && resp.Seq == revokeMessage.Seq {
+					revokeMessage.SourceMessageSendTime = resp.SendTime
+					revokeMessage.SourceMessageSenderNickname = resp.SenderNickname
+					revokeMessage.SourceMessageSendID = resp.SendID
+					data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
 				} else {
-					if resp.MsgData != nil && resp.MsgData.ClientMsgID == revokeMessage.ClientMsgID && resp.MsgData.Seq == revokeMessage.Seq {
-						revokeMessage.SourceMessageSendTime = resp.MsgData.SendTime
-						revokeMessage.SourceMessageSenderNickname = resp.MsgData.SenderNickname
-						revokeMessage.SourceMessageSendID = resp.MsgData.SendID
-						log.Debug(data.OperationID, "new revoke message is ", revokeMessage)
-						data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
-					} else {
-						return false, 201, errors.New("msg err").Error(), nil
-					}
+					return nil, constant.ErrData.Wrap("MsgData")
 				}
 			}
 		}
 		if groupInfo.GroupType == constant.SuperGroup {
-			return true, 0, "", nil
-		} else {
-			userIDList, err := utils.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
-			if err != nil {
-				errMsg := data.OperationID + err.Error()
-				log.NewError(data.OperationID, errMsg)
-				return false, 201, errMsg, nil
-			}
-			if tokenverify.IsManagerUserID(data.MsgData.SendID) {
-				return true, 0, "", userIDList
-			}
-			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-				return true, 0, "", userIDList
-			} else {
-				if !utils.IsContain(data.MsgData.SendID, userIDList) {
-					//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
-					return false, 202, "you are not in group", nil
-				}
-			}
-			isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
-			if err != nil {
-				errMsg := data.OperationID + err.Error()
-				return false, 223, errMsg, nil
-			}
-			if isMute {
-				return false, 224, "you are muted", nil
-			}
-			if isAdmin {
-				return true, 0, "", userIDList
-			}
-			isMute, err = groupIsMuted(ctx, data.MsgData.GroupID)
-			if err != nil {
-				errMsg := data.OperationID + err.Error()
-				return false, 223, errMsg, nil
-			}
-			if isMute {
-				return false, 225, "group id muted", nil
-			}
-			return true, 0, "", userIDList
+			return nil, nil
 		}
-	default:
-		return true, 0, "", nil
-	}
 
+		userIDList, err := GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			return nil, nil
+		}
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+			return userIDList, nil
+		} else {
+			if !utils.IsContain(data.MsgData.SendID, userIDList) {
+				return nil, constant.ErrNotInGroupYet.Wrap()
+			}
+		}
+		isMute, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		if err != nil {
+			return nil, err
+		}
+		if isMute {
+			return nil, constant.ErrMutedInGroup.Wrap()
+		}
+
+		isMute, isAdmin, err := groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		if err != nil {
+			return nil, err
+		}
+		if isAdmin {
+			return userIDList, nil
+		}
+		if isMute {
+			return nil, constant.ErrMutedGroup.Wrap()
+		}
+		return userIDList, nil
+
+	default:
+		return nil, nil
+	}
 }
 func (rpc *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
@@ -314,45 +283,63 @@ func GetMsgID(sendID string) string {
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
+func GetUserGlobalMsgRecvOpt(userID string) (int32, error) {
+
+}
+
+// possibleBlackUserID是否被userID拉黑，也就是是否在userID的黑名单中
+func IsBlocked(possibleBlackUserID, userID string) (bool, error) {
+
+}
+
+// possibleFriendUserID是否在userID的好友中
+func IsFriend(possibleFriendUserID, userID string) (bool, error) {
+
+}
+
+// 没找到不返回错误
+func GetSingleConversationRecvMsgOpt(userID, conversationID string) (int32, error) {
+
+}
+
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
-	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
+	opt, err := GetUserGlobalMsgRecvOpt(userID)
 	if err != nil {
 		return false, err
 	}
 	switch opt {
 	case constant.ReceiveMessage:
 	case constant.NotReceiveMessage:
-		return false
+		return false, nil
 	case constant.ReceiveNotNotifyMessage:
 		if pb.MsgData.Options == nil {
 			pb.MsgData.Options = make(map[string]bool, 10)
 		}
 		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
-		return true
+		return true, nil
 	}
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
-	singleOpt, sErr := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
-	if sErr != nil && sErr != go_redis.Nil {
-		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), sErr.Error())
-		return true
+	singleOpt, err := GetSingleConversationRecvMsgOpt(userID, conversationID)
+	if err != nil {
+		return false, err
 	}
 	switch singleOpt {
 	case constant.ReceiveMessage:
-		return true
+		return true, nil
 	case constant.NotReceiveMessage:
 		if utils.IsContainInt(int(pb.MsgData.ContentType), ExcludeContentType) {
 			return true
 		}
-		return false
+		return false, nil
 	case constant.ReceiveNotNotifyMessage:
 		if pb.MsgData.Options == nil {
 			pb.MsgData.Options = make(map[string]bool, 10)
 		}
 		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
-		return true
+		return true, nil
 	}
 
-	return true
+	return true, nil
 }
 
 func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
