@@ -80,21 +80,5 @@ func CallBackPostReturn(url, callbackCommand string, input interface{}, output c
 }
 
 func CallBackPostReturnV2(url string, req cbapi.CallbackReq, resp cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
-	v := urlLib.Values{}
-	v.Set("callbackCommand", req.GetCallbackCommand())
-	url = url + "?" + v.Encode()
-	b, err := Post(url, req, callbackConfig.CallbackTimeOut)
-	if err != nil {
-		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return constant.ErrCallbackContinue
-		}
-		return constant.NewErrNetwork(err)
-	}
-	if err = json.Unmarshal(b, resp); err != nil {
-		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return constant.ErrCallbackContinue
-		}
-		return constant.NewErrData(err)
-	}
-	return resp.Parse()
+	return CallBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }
