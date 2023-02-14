@@ -4,8 +4,10 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"
+	utils2 "Open_IM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 )
@@ -13,6 +15,7 @@ import (
 type Check struct {
 	user  *check.UserCheck
 	group *check.GroupChecker
+	msg   *check.MsgCheck
 }
 
 type NotificationMsg struct {
@@ -22,33 +25,37 @@ type NotificationMsg struct {
 	MsgFrom        int32
 	ContentType    int32
 	SessionType    int32
-	OperationID    string
 	SenderNickname string
 	SenderFaceURL  string
 }
 
-func (c *Check) Notification(n *NotificationMsg) {
+func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationMsg) {
+	var err error
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils2.GetFuncName(1), err, "notificationMsg", notificationMsg)
+	}()
+
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo
 	var title, desc, ex string
 	var pushSwitch, unReadCount bool
 	var reliabilityLevel int
-	msg.SendID = n.SendID
-	msg.RecvID = n.RecvID
-	msg.Content = n.Content
-	msg.MsgFrom = n.MsgFrom
-	msg.ContentType = n.ContentType
-	msg.SessionType = n.SessionType
+	msg.SendID = notificationMsg.SendID
+	msg.RecvID = notificationMsg.RecvID
+	msg.Content = notificationMsg.Content
+	msg.MsgFrom = notificationMsg.MsgFrom
+	msg.ContentType = notificationMsg.ContentType
+	msg.SessionType = notificationMsg.SessionType
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
-	msg.ClientMsgID = utils.GetMsgID(n.SendID)
+	msg.ClientMsgID = utils.GetMsgID(notificationMsg.SendID)
 	msg.Options = make(map[string]bool, 7)
-	msg.SenderNickname = n.SenderNickname
-	msg.SenderFaceURL = n.SenderFaceURL
-	switch n.SessionType {
+	msg.SenderNickname = notificationMsg.SenderNickname
+	msg.SenderFaceURL = notificationMsg.SenderFaceURL
+	switch notificationMsg.SessionType {
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		msg.RecvID = ""
-		msg.GroupID = n.RecvID
+		msg.GroupID = notificationMsg.RecvID
 	}
 	offlineInfo.IOSBadgeCount = config.Config.IOSPush.BadgeCount
 	offlineInfo.IOSPushSound = config.Config.IOSPush.PushSound
@@ -281,9 +288,5 @@ func (c *Check) Notification(n *NotificationMsg) {
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 
-	_, err := sendMsg(context.Background(), &req)
-}
-
-func sendMsg(ctx context.Context, req *msg.SendMsgReq) (msg.SendMsgResp, error) {
-
+	_, err = c.msg.SendMsg(ctx, &req)
 }
