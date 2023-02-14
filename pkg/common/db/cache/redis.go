@@ -50,20 +50,14 @@ type Cache interface {
 
 // native redis operate
 
-func NewRedis() *RedisClient {
-	o := &RedisClient{}
-	o.InitRedis()
-	return o
-}
+//func NewRedis() *RedisClient {
+//	o := &RedisClient{}
+//	o.InitRedis()
+//	return o
+//}
 
-type RedisClient struct {
-	rdb redis.UniversalClient
-}
-
-func (r *RedisClient) InitRedis() {
+func NewRedis() (*RedisClient, error) {
 	var rdb redis.UniversalClient
-	var err error
-	ctx := context.Background()
 	if config.Config.Redis.EnableCluster {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    config.Config.Redis.DBAddress,
@@ -71,11 +65,10 @@ func (r *RedisClient) InitRedis() {
 			Password: config.Config.Redis.DBPassWord, // no password set
 			PoolSize: 50,
 		})
-		_, err = rdb.Ping(ctx).Result()
-		if err != nil {
-			fmt.Println("redis cluster failed address ", config.Config.Redis.DBAddress)
-			panic(err.Error() + " redis cluster " + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
-		}
+		//if err := rdb.Ping(ctx).Err();err != nil {
+		//	return nil, fmt.Errorf("redis ping %w", err)
+		//}
+		//return &RedisClient{rdb: rdb}, nil
 	} else {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     config.Config.Redis.DBAddress[0],
@@ -84,21 +77,63 @@ func (r *RedisClient) InitRedis() {
 			DB:       0,                              // use default DB
 			PoolSize: 100,                            // 连接池大小
 		})
-		_, err = rdb.Ping(ctx).Result()
-		if err != nil {
-			panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
-		}
+		//err := rdb.Ping(ctx).Err()
+		//if err != nil {
+		//	panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
+		//}
 	}
-	r.rdb = rdb
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	err := rdb.Ping(ctx).Err()
+	if err != nil {
+		return nil, fmt.Errorf("redis ping %w", err)
+	}
+	return &RedisClient{rdb: rdb}, nil
 }
+
+type RedisClient struct {
+	rdb redis.UniversalClient
+}
+
+//func (r *RedisClient) InitRedis() {
+//	var rdb redis.UniversalClient
+//	var err error
+//	ctx := context.Background()
+//	if config.Config.Redis.EnableCluster {
+//		rdb = redis.NewClusterClient(&redis.ClusterOptions{
+//			Addrs:    config.Config.Redis.DBAddress,
+//			Username: config.Config.Redis.DBUserName,
+//			Password: config.Config.Redis.DBPassWord, // no password set
+//			PoolSize: 50,
+//		})
+//		_, err = rdb.Ping(ctx).Result()
+//		if err != nil {
+//			fmt.Println("redis cluster failed address ", config.Config.Redis.DBAddress)
+//			panic(err.Error() + " redis cluster " + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
+//		}
+//	} else {
+//		rdb = redis.NewClient(&redis.Options{
+//			Addr:     config.Config.Redis.DBAddress[0],
+//			Username: config.Config.Redis.DBUserName,
+//			Password: config.Config.Redis.DBPassWord, // no password set
+//			DB:       0,                              // use default DB
+//			PoolSize: 100,                            // 连接池大小
+//		})
+//		_, err = rdb.Ping(ctx).Result()
+//		if err != nil {
+//			panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
+//		}
+//	}
+//	r.rdb = rdb
+//}
 
 func (r *RedisClient) GetClient() redis.UniversalClient {
 	return r.rdb
 }
 
-func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
-	return &RedisClient{rdb: rdb}
-}
+//func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
+//	return &RedisClient{rdb: rdb}
+//}
 
 // Perform seq auto-increment operation of user messages
 func (r *RedisClient) IncrUserSeq(uid string) (uint64, error) {

@@ -203,7 +203,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 				conversation.GroupAtType = constant.AtMe
 			}
 
-			_, err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
+			err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
 			if err != nil {
 				return
 			}
@@ -211,7 +211,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 			if tag {
 				conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 				conversation.GroupAtType = constant.AtAll
-				_, err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
+				err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
 				if err != nil {
 					return
 				}

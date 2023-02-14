@@ -17,13 +17,13 @@ func NewConversationChecker(zk discoveryRegistry.SvcDiscoveryRegistry) *Conversa
 	return &ConversationChecker{zk: zk}
 }
 
-func (c *ConversationChecker) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (resp *pbConversation.ModifyConversationFieldResp, err error) {
+func (c *ConversationChecker) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) error {
 	cc, err := c.getConn()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	resp, err = conversation.NewConversationClient(cc).ModifyConversationField(ctx, req)
-	return
+	_, err = conversation.NewConversationClient(cc).ModifyConversationField(ctx, req)
+	return err
 }
 
 func (c *ConversationChecker) getConn() (*grpc.ClientConn, error) {

@@ -11,12 +11,13 @@ import (
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"math/big"
@@ -26,20 +27,35 @@ import (
 	"time"
 )
 
-func Start(server *grpc.Server) error {
+func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+	mysql, err := relation.NewGormDB()
+	if err != nil {
+		return err
+	}
+	if err := mysql.AutoMigrate(&relationTb.GroupModel{}, &relationTb.GroupMemberModel{}, &relationTb.GroupRequestModel{}); err != nil {
+		return err
+	}
+	redis, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupInterface: controller.NewGroupInterface(nil, cache.NewRedis().GetClient(), unrelation.NewMongo().GetClient()),
-		registerCenter: nil,
-		user:           check.NewUserCheck(nil),
+		GroupInterface:      controller.NewGroupInterface(mysql, redis.GetClient(), mongo.GetClient()),
+		UserCheck:           check.NewUserCheck(client),
+		ConversationChecker: check.NewConversationChecker(client),
 	})
 	return nil
 }
 
 type groupServer struct {
-	GroupInterface controller.GroupInterface
-	registerCenter discoveryRegistry.SvcDiscoveryRegistry
-	user           *check.UserCheck
-	notification   *notification.Check
+	GroupInterface      controller.GroupInterface
+	UserCheck           *check.UserCheck
+	Notification        *notification.Check
+	ConversationChecker *check.ConversationChecker
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
@@ -59,7 +75,7 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 	if len(userIDs) == 0 {
 		return map[string]string{}, nil
 	}
-	users, err := s.user.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := s.UserCheck.GetPublicUserInfos(ctx, userIDs, complete)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +84,19 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 	}), nil
 }
 
-func (s *groupServer) GroupNotification(ctx context.Context, groupID string) {
+func (s *groupServer) GroupNotification(ctx context.Context, groupID string, userIDs []string) {
+
+	s.ConversationChecker.ModifyConversationField(ctx, &pbConversation.ModifyConversationFieldReq{
+		Conversation: &pbConversation.Conversation{
+			OwnerUserID:      tracelog.GetOpUserID(ctx),
+			ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
+			ConversationType: constant.GroupChatType,
+			GroupID:          groupID,
+		},
+		FieldType:  constant.FieldGroupAtType,
+		UserIDList: userIDs,
+	})
+
 	// todo 群公告修改通知
 	//var conversationReq pbConversation.ModifyConversationFieldReq
 	//conversation := pbConversation.Conversation{
@@ -130,7 +158,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if utils.Duplicate(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member repeated")
 	}
-	userMap, err := s.user.GetUsersInfoMap(ctx, userIDs, true)
+	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
@@ -183,11 +211,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
 			for _, userID := range userIDs {
-				s.notification.SuperGroupNotification(ctx, userID, userID)
+				s.Notification.SuperGroupNotification(ctx, userID, userID)
 			}
 		}()
 	} else {
-		s.notification.GroupCreatedNotification(ctx, group.GroupID, userIDs)
+		s.Notification.GroupCreatedNotification(ctx, group.GroupID, userIDs)
 	}
 	return resp, nil
 }
@@ -256,7 +284,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
 		return nil, constant.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
-	userMap, err := s.user.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
+	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +309,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 					return nil, err
 				}
 				for _, request := range requests {
-					s.notification.JoinGroupApplicationNotification(ctx, &pbGroup.JoinGroupReq{
+					s.Notification.JoinGroupApplicationNotification(ctx, &pbGroup.JoinGroupReq{
 						GroupID:       request.GroupID,
 						ReqMessage:    request.ReqMsg,
 						JoinSource:    request.JoinSource,
@@ -297,7 +325,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			return nil, err
 		}
 		for _, userID := range req.InvitedUserIDs {
-			s.notification.SuperGroupNotification(ctx, userID, userID)
+			s.Notification.SuperGroupNotification(ctx, userID, userID)
 		}
 	} else {
 		opUserID := tracelog.GetOpUserID(ctx)
@@ -318,7 +346,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		if err := s.GroupInterface.CreateGroup(ctx, nil, groupMembers); err != nil {
 			return nil, err
 		}
-		s.notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
+		s.Notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
 	}
 	return resp, nil
 }
@@ -395,7 +423,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		go func() {
 			for _, userID := range req.KickedUserIDs {
-				s.notification.SuperGroupNotification(ctx, userID, userID)
+				s.Notification.SuperGroupNotification(ctx, userID, userID)
 			}
 		}()
 	} else {
@@ -435,7 +463,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		if err := s.GroupInterface.DeleteGroupMember(ctx, group.GroupID, req.KickedUserIDs); err != nil {
 			return nil, err
 		}
-		s.notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
+		s.Notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
 	}
 	return resp, nil
 }
@@ -487,7 +515,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	}
 	userIDs = utils.Distinct(userIDs)
 	groupIDs = utils.Distinct(groupIDs)
-	userMap, err := s.user.GetPublicUserInfoMap(ctx, userIDs, true)
+	userMap, err := s.UserCheck.GetPublicUserInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
@@ -575,7 +603,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	user, err := s.user.GetPublicUserInfo(ctx, req.FromUserID)
+	user, err := s.UserCheck.GetPublicUserInfo(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -602,10 +630,10 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	}
 	if !join {
 		if req.HandleResult == constant.GroupResponseAgree {
-			s.notification.GroupApplicationAcceptedNotification(ctx, req)
-			s.notification.MemberEnterNotification(ctx, req)
+			s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+			s.Notification.MemberEnterNotification(ctx, req)
 		} else if req.HandleResult == constant.GroupResponseRefuse {
-			s.notification.GroupApplicationRejectedNotification(ctx, req)
+			s.Notification.GroupApplicationRejectedNotification(ctx, req)
 		}
 	}
 	return resp, nil
@@ -613,7 +641,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
-	if _, err := s.user.GetPublicUserInfo(ctx, tracelog.GetOpUserID(ctx)); err != nil {
+	if _, err := s.UserCheck.GetPublicUserInfo(ctx, tracelog.GetOpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	group, err := s.GroupInterface.TakeGroup(ctx, req.GroupID)
@@ -643,7 +671,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.GroupInterface.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
-		s.notification.MemberEnterDirectlyNotification(ctx, req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
+		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
@@ -656,7 +684,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if err := s.GroupInterface.CreateGroupRequest(ctx, []*relationTb.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
 	}
-	s.notification.JoinGroupApplicationNotification(ctx, req)
+	s.Notification.JoinGroupApplicationNotification(ctx, req)
 	return resp, nil
 }
 
@@ -670,13 +698,13 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err := s.GroupInterface.DeleteSuperGroupMember(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		s.notification.SuperGroupNotification(ctx, tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
+		s.Notification.SuperGroupNotification(ctx, tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
 	} else {
 		_, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		s.notification.MemberQuitNotification(ctx, req)
+		s.Notification.MemberQuitNotification(ctx, req)
 	}
 	return resp, nil
 }
@@ -699,6 +727,10 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
 	}
+	userIDs, err := s.GroupInterface.FindGroupMemberUserID(ctx, group.GroupID)
+	if err != nil {
+		return nil, err
+	}
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) > 0 {
 		return resp, nil
@@ -710,9 +742,21 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	s.notification.GroupInfoSetNotification(ctx, req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
+	s.Notification.GroupInfoSetNotification(ctx, req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
 	if req.GroupInfoForSet.Notification != "" {
-		s.GroupNotification(ctx, group.GroupID)
+		args := pbConversation.ModifyConversationFieldReq{
+			Conversation: &pbConversation.Conversation{
+				OwnerUserID:      tracelog.GetOpUserID(ctx),
+				ConversationID:   utils.GetConversationIDBySessionType(group.GroupID, constant.GroupChatType),
+				ConversationType: constant.GroupChatType,
+				GroupID:          group.GroupID,
+			},
+			FieldType:  constant.FieldGroupAtType,
+			UserIDList: userIDs,
+		}
+		if err := s.ConversationChecker.ModifyConversationField(ctx, &args); err != nil {
+			tracelog.SetCtxWarn(ctx, "ModifyConversationField", err, args)
+		}
 	}
 	return resp, nil
 }
@@ -760,7 +804,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	if err := s.GroupInterface.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
 		return nil, err
 	}
-	s.notification.GroupOwnerTransferredNotification(ctx, req)
+	s.Notification.GroupOwnerTransferredNotification(ctx, req)
 	return resp, nil
 }
 
@@ -827,7 +871,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
 	resp := &pbGroup.GetUserReqApplicationListResp{}
-	user, err := s.user.GetPublicUserInfo(ctx, req.UserID)
+	user, err := s.UserCheck.GetPublicUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -892,7 +936,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			return nil, err
 		}
 	} else {
-		s.notification.GroupDismissedNotification(ctx, req)
+		s.Notification.GroupDismissedNotification(ctx, req)
 	}
 	return resp, nil
 }
@@ -916,7 +960,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
-	s.notification.GroupMemberMutedNotification(ctx, req.GroupID, req.UserID, req.MutedSeconds)
+	s.Notification.GroupMemberMutedNotification(ctx, req.GroupID, req.UserID, req.MutedSeconds)
 	return resp, nil
 }
 
@@ -939,7 +983,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
-	s.notification.GroupMemberCancelMutedNotification(ctx, req.GroupID, req.UserID)
+	s.Notification.GroupMemberCancelMutedNotification(ctx, req.GroupID, req.UserID)
 	return resp, nil
 }
 
@@ -951,7 +995,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupStatusMuted)); err != nil {
 		return nil, err
 	}
-	s.notification.GroupMutedNotification(ctx, req.GroupID)
+	s.Notification.GroupMutedNotification(ctx, req.GroupID)
 	return resp, nil
 }
 
@@ -963,7 +1007,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupOk)); err != nil {
 		return nil, err
 	}
-	s.notification.GroupCancelMutedNotification(ctx, req.GroupID)
+	s.Notification.GroupCancelMutedNotification(ctx, req.GroupID)
 	return resp, nil
 }
 
@@ -1040,7 +1084,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		return nil, err
 	}
 	for _, member := range req.Members {
-		s.notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+		s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 	}
 	return resp, nil
 }

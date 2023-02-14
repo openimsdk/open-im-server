@@ -15,7 +15,7 @@ import (
 	"net"
 )
 
-func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(server *grpc.Server) error, options []grpc.ServerOption) error {
+func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options []grpc.ServerOption) error {
 	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
 	flagPrometheusPort := flag.Int("prometheus_port", prometheusPort, "groupPrometheusPort default listen port")
 	flag.Parse()
@@ -60,10 +60,10 @@ func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(s
 			return err
 		}
 	}
-	return rpcFn(srv)
+	return rpcFn(zkClient, srv)
 }
 
-func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(server *grpc.Server) error, options ...grpc.ServerOption) {
+func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options ...grpc.ServerOption) {
 	err := start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
 	fmt.Println("end", err)
 }
