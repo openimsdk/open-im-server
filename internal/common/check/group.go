@@ -104,3 +104,7 @@ func (g *GroupChecker) GetGroupMemberInfoMap(ctx context.Context, groupID string
 		return e.UserID
 	}), nil
 }
+
+func (g *GroupChecker) GetOwnerAndAdminInfos(ctx context.Context, groupID string) ([]*sdkws.GroupMemberFullInfo, error) {
+
+}

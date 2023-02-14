@@ -5,11 +5,12 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
+	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
-func (c *Check) DeleteMessageNotification(opUserID, userID string, seqList []uint32, operationID string) {
+func (c *Check) DeleteMessageNotification(ctx context.Context, userID string, seqList []uint32, operationID string) {
 	DeleteMessageTips := sdkws.DeleteMessageTips{OpUserID: opUserID, UserID: userID, SeqList: seqList}
 	c.MessageNotification(operationID, userID, userID, constant.DeleteMessageNotification, &DeleteMessageTips)
 }
@@ -37,7 +38,6 @@ func (c *Check) MessageNotification(operationID, sendID, recvID string, contentT
 	n.ContentType = contentType
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = operationID
 	n.Content, err = proto.Marshal(&tips)
 	if err != nil {
 		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())

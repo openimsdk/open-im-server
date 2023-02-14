@@ -22,12 +22,11 @@ type NotificationMsg struct {
 	MsgFrom        int32
 	ContentType    int32
 	SessionType    int32
-	OperationID    string
 	SenderNickname string
 	SenderFaceURL  string
 }
 
-func (c *Check) Notification(n *NotificationMsg) {
+func (c *Check) Notification(ctx context.Context, n *NotificationMsg) {
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo
@@ -284,6 +283,6 @@ func (c *Check) Notification(n *NotificationMsg) {
 	_, err := sendMsg(context.Background(), &req)
 }
 
-func sendMsg(ctx context.Context, req *msg.SendMsgReq) (msg.SendMsgResp, error) {
+func sendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 
 }
