@@ -15,7 +15,7 @@ import (
 	"net"
 )
 
-func StartRpc(rpcPort int, rpcRegisterName string, prometheusPort int, fn func(server *grpc.Server), options ...grpc.ServerOption) {
+func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(server *grpc.Server) error, options []grpc.ServerOption) error {
 	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
 	flagPrometheusPort := flag.Int("prometheus_port", prometheusPort, "groupPrometheusPort default listen port")
 	flag.Parse()
@@ -25,16 +25,17 @@ func StartRpc(rpcPort int, rpcRegisterName string, prometheusPort int, fn func(s
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer listener.Close()
 	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
+	defer zkClient.Close()
 	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	options = append(options, grpc.UnaryInterceptor(middleware.RpcServerInterceptor)) // ctx 中间件
 	if config.Config.Prometheus.Enable {
@@ -49,18 +50,20 @@ func StartRpc(rpcPort int, rpcRegisterName string, prometheusPort int, fn func(s
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
-	fn(srv)
 	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	if config.Config.Prometheus.Enable {
 		err := promePkg.StartPromeSrv(prometheusPort)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
-	if err := srv.Serve(listener); err != nil {
-		panic(err)
-	}
+	return rpcFn(srv)
+}
+
+func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(server *grpc.Server) error, options ...grpc.ServerOption) {
+	err := start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
+	fmt.Println("end", err)
 }
