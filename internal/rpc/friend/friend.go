@@ -235,7 +235,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbF
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(ctx, s.RegisterCenter, friendRequests)
+	resp.FriendRequests, err = (*convert.NewDBFriendRequest(nil, s.RegisterCenter)).DB2PB(ctx, friendRequests)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(ctx, s.RegisterCenter, friendRequests)
+	resp.FriendRequests, err = (*convert.NewDBFriendRequest(nil, s.RegisterCenter)).DB2PB(ctx, friendRequests)
 	if err != nil {
 		return nil, err
 	}

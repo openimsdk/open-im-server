@@ -99,13 +99,26 @@ func (*PBFriendRequest) PB2DB(friendRequests []*sdk.FriendRequest) (DBFriendRequ
 	return
 }
 
-func (*DBFriendRequest) DB2PB(ctx context.Context, zk discoveryRegistry.SvcDiscoveryRegistry, friendRequests []*relation.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
+func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
+	userIDs := make([]string, 0)
+	if len(friendRequests) > 0 {
+		userIDs = append(userIDs, friendRequests[0].FromUserID)
+	}
+	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
+	if err != nil {
+		return nil, err
+	}
 	for _, v := range friendRequests {
-		u, err := NewDBFriendRequest(v, zk).Convert(ctx)
-		if err != nil {
-			return nil, err
-		}
-		PBFriendRequests = append(PBFriendRequests, u)
+		pbFriendRequest := &sdk.FriendRequest{}
+		pbFriendRequest.FromNickname = users[v.FromUserID].Nickname
+		pbFriendRequest.FromFaceURL = users[v.FromUserID].FaceURL
+		pbFriendRequest.FromGender = users[v.FromUserID].Gender
+		pbFriendRequest.ToNickname = users[v.ToUserID].Nickname
+		pbFriendRequest.ToFaceURL = users[v.ToUserID].FaceURL
+		pbFriendRequest.ToGender = users[v.ToUserID].Gender
+		pbFriendRequest.CreateTime = db.CreateTime.Unix()
+		pbFriendRequest.HandleTime = db.HandleTime.Unix()
+		PBFriendRequests = append(PBFriendRequests, pbFriendRequest)
 	}
 	return
 }
@@ -155,13 +168,25 @@ func (*PBBlack) PB2DB(blacks []*sdk.BlackInfo) (DBBlacks []*relation.BlackModel,
 	return
 }
 
-func (*DBBlack) DB2PB(ctx context.Context, zk discoveryRegistry.SvcDiscoveryRegistry, blacks []*relation.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
+func (db *DBBlack) DB2PB(ctx context.Context, blacks []*relation.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
+	userIDs := make([]string, 0)
 	for _, v := range blacks {
-		u, err := NewDBBlack(v, zk).Convert(ctx)
-		if err != nil {
-			return nil, err
-		}
-		PBBlacks = append(PBBlacks, u)
+		userIDs = append(userIDs, v.BlockUserID)
+	}
+	if len(blacks) > 0 {
+		userIDs = append(userIDs, blacks[0].OwnerUserID)
+	}
+
+	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range blacks {
+		pbBlack := &sdk.BlackInfo{}
+		utils.CopyStructFields(pbBlack, users[v.OwnerUserID])
+		utils.CopyStructFields(pbBlack.BlackUserInfo, users[v.BlockUserID])
+		PBBlacks = append(PBBlacks, pbBlack)
 	}
 	return
 }
@@ -181,7 +206,7 @@ func NewPBBlack(blackInfo *sdk.BlackInfo) *PBBlack {
 func (pb *PBBlack) Convert() (*relation.BlackModel, error) {
 	dbBlack := &relation.BlackModel{}
 	dbBlack.BlockUserID = pb.BlackUserInfo.UserID
-	dbBlack.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
+	dbBlack.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
 	return dbBlack, nil
 }
 func (db *DBBlack) Convert(ctx context.Context) (*sdk.BlackInfo, error) {
