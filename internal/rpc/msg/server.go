@@ -28,6 +28,7 @@ type msgServer struct {
 	MsgInterface controller.MsgInterface
 	Group        *check.GroupChecker
 	User         *check.UserCheck
+	Conversation *check.ConversationChecker
 }
 
 type deleteMsg struct {

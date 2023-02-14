@@ -33,7 +33,7 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbapi.CommonCallbackReq
 	return req
 }
 
-func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) error {
+func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (err error) {
 	callbackResp := cbapi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return callbackResp

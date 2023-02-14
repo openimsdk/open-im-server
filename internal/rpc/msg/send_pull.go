@@ -116,13 +116,12 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 		var memberKickedTips sdkws.MemberKickedTips
 		err := proto.Unmarshal(req.MsgData.Content, &tips)
 		if err != nil {
-
+			return nil, err
 		}
 		err = proto.Unmarshal(tips.Detail, &memberKickedTips)
 		if err != nil {
-
+			return nil, err
 		}
-
 		for _, v := range memberKickedTips.KickedUserList {
 			addUidList = append(addUidList, v.UserID)
 		}
@@ -204,7 +203,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 				conversation.GroupAtType = constant.AtMe
 			}
 
-			_, err := m.ModifyConversationField(context.Background(), &conversationReq)
+			_, err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
 			if err != nil {
 				return
 			}
@@ -212,7 +211,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 			if tag {
 				conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 				conversation.GroupAtType = constant.AtAll
-				_, err := m.ModifyConversationField(context.Background(), &conversationReq)
+				_, err := m.Conversation.ModifyConversationField(ctx, &conversationReq)
 				if err != nil {
 					return
 				}
@@ -226,10 +225,6 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
 	return resp, nil
-}
-
-func (m *msgServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
-
 }
 
 func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
@@ -305,60 +300,5 @@ func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 			MsgDataList: msgs,
 		}
 	}
-
-	//redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(req.UserID, req.SeqList, req.OperationID)
-	//if err != nil {
-	//	if err != go_redis.Nil {
-	//		promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
-	//		log.Error(req.OperationID, "get message from redis exception", err.Error(), failedSeqList)
-	//	} else {
-	//		log.Debug(req.OperationID, "get message from redis is nil", failedSeqList)
-	//	}
-	//	msgList, err1 := commonDB.DB.GetMsgBySeqListMongo2(req.UserID, failedSeqList, req.OperationID)
-	//	if err1 != nil {
-	//		promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
-	//		log.Error(req.OperationID, "PullMessageBySeqList data error", req.String(), err1.Error())
-	//		resp.ErrCode = 201
-	//		resp.ErrMsg = err1.Error()
-	//		return resp, nil
-	//	} else {
-	//		promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
-	//		redisMsgList = append(redisMsgList, msgList...)
-	//		resp.List = redisMsgList
-	//	}
-	//} else {
-	//	promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
-	//	resp.List = redisMsgList
-	//}
-	//
-	//for k, v := range req.GroupSeqList {
-	//	x := new(sdkws.MsgDataList)
-	//	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, req.OperationID)
-	//	if err != nil {
-	//		if err != go_redis.Nil {
-	//			promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
-	//			log.Error(req.OperationID, "get message from redis exception", err.Error(), failedSeqList)
-	//		} else {
-	//			log.Debug(req.OperationID, "get message from redis is nil", failedSeqList)
-	//		}
-	//		msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, req.OperationID)
-	//		if err1 != nil {
-	//			promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
-	//			log.Error(req.OperationID, "PullMessageBySeqList data error", req.String(), err1.Error())
-	//			resp.ErrCode = 201
-	//			resp.ErrMsg = err1.Error()
-	//			return resp, nil
-	//		} else {
-	//			promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
-	//			redisMsgList = append(redisMsgList, msgList...)
-	//			x.MsgDataList = redisMsgList
-	//			m[k] = x
-	//		}
-	//	} else {
-	//		promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
-	//		x.MsgDataList = redisMsgList
-	//		m[k] = x
-	//	}
-	//}
 	return resp, nil
 }

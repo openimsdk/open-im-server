@@ -106,5 +106,13 @@ func (g *GroupChecker) GetGroupMemberInfoMap(ctx context.Context, groupID string
 }
 
 func (g *GroupChecker) GetOwnerAndAdminInfos(ctx context.Context, groupID string) ([]*sdkws.GroupMemberFullInfo, error) {
-
+	cc, err := g.getConn()
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
+		GroupID:    groupID,
+		RoleLevels: []int32{constant.GroupOwner, constant.GroupAdmin},
+	})
+	return resp.Members, err
 }
