@@ -84,35 +84,6 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 	}), nil
 }
 
-func (s *groupServer) GroupNotification(ctx context.Context, groupID string, userIDs []string) {
-
-	s.ConversationChecker.ModifyConversationField(ctx, &pbConversation.ModifyConversationFieldReq{
-		Conversation: &pbConversation.Conversation{
-			OwnerUserID:      tracelog.GetOpUserID(ctx),
-			ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
-			ConversationType: constant.GroupChatType,
-			GroupID:          groupID,
-		},
-		FieldType:  constant.FieldGroupAtType,
-		UserIDList: userIDs,
-	})
-
-	// todo 群公告修改通知
-	//var conversationReq pbConversation.ModifyConversationFieldReq
-	//conversation := pbConversation.Conversation{
-	//	OwnerUserID:      tracelog.GetOpUserID(ctx),
-	//	ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
-	//	ConversationType: constant.GroupChatType,
-	//	GroupID:          groupID,
-	//}
-	//conversationReq.Conversation = &conversation
-	//conversationReq.FieldType = constant.FieldGroupAtType
-	//conversation.GroupAtType = constant.GroupNotification
-	//conversationReq.UserIDList = userIDs
-	//_, err := pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
-	//tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
-}
-
 func (s *groupServer) IsNotFound(err error) bool {
 	return utils.Unwrap(err) == gorm.ErrRecordNotFound
 }
