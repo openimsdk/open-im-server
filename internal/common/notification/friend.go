@@ -1,7 +1,6 @@
 package notification
 
 import (
-	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -112,7 +111,7 @@ func (c *Check) FriendAddedNotification(ctx context.Context, operationID, opUser
 	friendAddedTips.OpUser.Nickname = user[0].Nickname
 	friendAddedTips.OpUser.FaceURL = user[0].FaceURL
 
-	friend, err := check.GetFriendsInfo(ctx, fromUserID, toUserID)
+	friend, err := c.friend.GetFriendsInfo(ctx, fromUserID, toUserID)
 	if err != nil {
 		return
 	}

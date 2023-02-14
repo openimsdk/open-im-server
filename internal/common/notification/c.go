@@ -13,9 +13,10 @@ import (
 )
 
 type Check struct {
-	user  *check.UserCheck
-	group *check.GroupChecker
-	msg   *check.MsgCheck
+	user   *check.UserCheck
+	group  *check.GroupChecker
+	msg    *check.MsgCheck
+	friend *check.FriendChecker
 }
 
 type NotificationMsg struct {
