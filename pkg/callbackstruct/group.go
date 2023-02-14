@@ -5,15 +5,21 @@ import (
 	common "Open_IM/pkg/proto/sdkws"
 )
 
+type CallbackCommand string
+
+func (c CallbackCommand) GetCallbackCommand() string {
+	return string(c)
+}
+
 type CallbackBeforeCreateGroupReq struct {
-	CallbackCommand string `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
+	CallbackCommand `json:"callbackCommand"`
 	common.GroupInfo
 	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
 }
 
 type CallbackBeforeCreateGroupResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 	GroupID           *string `json:"groupID"`
 	GroupName         *string `json:"groupName"`
 	Notification      *string `json:"notification"`
@@ -30,7 +36,7 @@ type CallbackBeforeCreateGroupResp struct {
 }
 
 type CallbackBeforeMemberJoinGroupReq struct {
-	CallbackCommand string `json:"callbackCommand"`
+	CallbackCommand `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
 	GroupID         string `json:"groupID"`
 	UserID          string `json:"userID"`
@@ -39,8 +45,8 @@ type CallbackBeforeMemberJoinGroupReq struct {
 }
 
 type CallbackBeforeMemberJoinGroupResp struct {
-	*CommonCallbackResp
-	NickName    *string `json:"nickName"`
+	CommonCallbackResp
+	Nickname    *string `json:"nickname"`
 	FaceURL     *string `json:"faceURL"`
 	RoleLevel   *int32  `json:"roleLevel"`
 	MuteEndTime *int64  `json:"muteEndTime"`
@@ -48,18 +54,18 @@ type CallbackBeforeMemberJoinGroupResp struct {
 }
 
 type CallbackBeforeSetGroupMemberInfoReq struct {
-	CallbackCommand string `json:"callbackCommand"`
-	OperationID     string `json:"operationID"`
-	GroupID         string `json:"groupID"`
-	UserID          string `json:"userID"`
-	Nickname        string `json:"nickName"`
-	FaceURL         string `json:"faceURL"`
-	RoleLevel       int32  `json:"roleLevel"`
-	Ex              string `json:"ex"`
+	CallbackCommand `json:"callbackCommand"`
+	OperationID     string  `json:"operationID"`
+	GroupID         string  `json:"groupID"`
+	UserID          string  `json:"userID"`
+	Nickname        *string `json:"nickName"`
+	FaceURL         *string `json:"faceURL"`
+	RoleLevel       *int32  `json:"roleLevel"`
+	Ex              *string `json:"ex"`
 }
 
 type CallbackBeforeSetGroupMemberInfoResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 	Ex        *string `json:"ex"`
 	Nickname  *string `json:"nickName"`
 	FaceURL   *string `json:"faceURL"`

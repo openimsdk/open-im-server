@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	startrpc.Start(config.Config.RpcPort.OpenImGroupPort[0], config.Config.RpcRegisterName.OpenImGroupName, config.Config.Prometheus.GroupPrometheusPort[0], group.Start)
+	startrpc.Start(config.Config.RpcPort.OpenImGroupPort, config.Config.RpcRegisterName.OpenImGroupName, config.Config.Prometheus.GroupPrometheusPort, group.Start)
 }

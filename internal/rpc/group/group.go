@@ -28,11 +28,11 @@ import (
 )
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
-	mysql, err := relation.NewGormDB()
+	db, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&relationTb.GroupModel{}, &relationTb.GroupMemberModel{}, &relationTb.GroupRequestModel{}); err != nil {
+	if err := db.AutoMigrate(&relationTb.GroupModel{}, &relationTb.GroupMemberModel{}, &relationTb.GroupRequestModel{}); err != nil {
 		return err
 	}
 	redis, err := cache.NewRedis()
@@ -44,7 +44,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupInterface:      controller.NewGroupInterface(mysql, redis.GetClient(), mongo.GetClient()),
+		GroupInterface:      controller.NewGroupInterface(controller.NewGroupDatabase(db, redis.GetClient(), mongo.GetClient())),
 		UserCheck:           check.NewUserCheck(client),
 		ConversationChecker: check.NewConversationChecker(client),
 	})
