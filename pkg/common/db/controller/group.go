@@ -55,8 +55,8 @@ type GroupInterface interface {
 
 var _ GroupInterface = (*GroupController)(nil)
 
-func NewGroupInterface(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupInterface {
-	return &GroupController{database: NewGroupDatabase(db, rdb, mgoClient)}
+func NewGroupInterface(database GroupDataBaseInterface) GroupInterface {
+	return &GroupController{database: database}
 }
 
 type GroupController struct {
@@ -72,7 +72,7 @@ func (g *GroupController) CreateGroup(ctx context.Context, groups []*relationTb.
 }
 
 func (g *GroupController) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
-	return g.TakeGroup(ctx, groupID)
+	return g.database.TakeGroup(ctx, groupID)
 }
 
 func (g *GroupController) FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
@@ -173,6 +173,53 @@ func (g *GroupController) DeleteSuperGroupMember(ctx context.Context, groupID st
 
 func (g *GroupController) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
 	return g.database.CreateSuperGroupMember(ctx, groupID, userIDs)
+}
+
+type Group interface {
+	CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error
+	TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
+	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
+	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error)
+	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
+	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+}
+
+type GroupMember interface {
+	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
+	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
+	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error)
+	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
+	PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
+	SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
+	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error
+	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error)
+	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
+	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error // 转让群
+	UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error
+	UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error
+}
+
+type GroupRequest interface {
+	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
+	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
+	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error)
+}
+
+type SuperGroup interface {
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (*unrelationTb.UserToSuperGroupModel, error)
+	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	DeleteSuperGroup(ctx context.Context, groupID string) error
+	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+}
+
+type GroupDataBase1 interface {
+	Group
+	GroupMember
+	GroupRequest
+	SuperGroup
 }
 
 type GroupDataBaseInterface interface {
@@ -291,7 +338,10 @@ func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 }
 
 func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
-	return g.cache.GetGroupInfo(ctx, groupID)
+	//return g.cache.GetGroupInfo(ctx, groupID)
+	return cache.GetCache(ctx, g.rcClient, g.getGroupInfoKey(groupID), g.expireTime, func(ctx context.Context) (*relationTb.GroupModel, error) {
+		return g.group.Take(ctx, groupID)
+	})
 }
 
 func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {

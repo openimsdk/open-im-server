@@ -41,13 +41,9 @@ type CommonCallbackResp struct {
 	ActionCode int    `json:"actionCode"`
 	ErrCode    int32  `json:"errCode"`
 	ErrMsg     string `json:"errMsg"`
-	//OperationID string `json:"operationID"`
 }
 
-func (c *CommonCallbackResp) Parse() error {
-	if c == nil {
-		return constant.ErrData.Wrap("callback common is nil")
-	}
+func (c CommonCallbackResp) Parse() error {
 	if c.ActionCode != constant.NoError || c.ErrCode != constant.NoError {
 		newErr := constant.ErrCallback
 		newErr.ErrCode = c.ErrCode
