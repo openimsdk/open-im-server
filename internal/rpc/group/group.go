@@ -48,6 +48,7 @@ type groupServer struct {
 	GroupInterface controller.GroupInterface
 	registerCenter discoveryRegistry.SvcDiscoveryRegistry
 	user           *check.UserCheck
+	notification   *notification.Check
 }
 
 //
@@ -281,11 +282,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
 			for _, userID := range userIDs {
-				notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
+				s.notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
 			}
 		}()
 	} else {
-		notification.GroupCreatedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), group.GroupID, userIDs)
+		s.notification.GroupCreatedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), group.GroupID, userIDs)
 	}
 	return resp, nil
 }
@@ -379,7 +380,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 					return nil, err
 				}
 				for _, request := range requests {
-					notification.JoinGroupApplicationNotification(ctx, &pbGroup.JoinGroupReq{
+					s.notification.JoinGroupApplicationNotification(ctx, &pbGroup.JoinGroupReq{
 						GroupID:       request.GroupID,
 						ReqMessage:    request.ReqMsg,
 						JoinSource:    request.JoinSource,
@@ -395,7 +396,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			return nil, err
 		}
 		for _, userID := range req.InvitedUserIDs {
-			notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
+			s.notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
 		}
 	} else {
 		opUserID := tracelog.GetOpUserID(ctx)
@@ -416,7 +417,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		if err := s.GroupInterface.CreateGroup(ctx, nil, groupMembers); err != nil {
 			return nil, err
 		}
-		notification.MemberInvitedNotification(tracelog.GetOperationID(ctx), req.GroupID, tracelog.GetOpUserID(ctx), req.Reason, req.InvitedUserIDs)
+		s.notification.MemberInvitedNotification(tracelog.GetOperationID(ctx), req.GroupID, tracelog.GetOpUserID(ctx), req.Reason, req.InvitedUserIDs)
 	}
 	return resp, nil
 }
@@ -493,7 +494,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		go func() {
 			for _, userID := range req.KickedUserIDs {
-				notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
+				s.notification.SuperGroupNotification(tracelog.GetOperationID(ctx), userID, userID)
 			}
 		}()
 	} else {
@@ -533,7 +534,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		if err := s.GroupInterface.DeleteGroupMember(ctx, group.GroupID, req.KickedUserIDs); err != nil {
 			return nil, err
 		}
-		notification.MemberKickedNotification(req, req.KickedUserIDs)
+		s.notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
 	}
 	return resp, nil
 }
@@ -700,10 +701,10 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	}
 	if !join {
 		if req.HandleResult == constant.GroupResponseAgree {
-			notification.GroupApplicationAcceptedNotification(req)
-			notification.MemberEnterNotification(ctx, req)
+			s.notification.GroupApplicationAcceptedNotification(ctx, req)
+			s.notification.MemberEnterNotification(ctx, req)
 		} else if req.HandleResult == constant.GroupResponseRefuse {
-			notification.GroupApplicationRejectedNotification(req)
+			s.notification.GroupApplicationRejectedNotification(ctx, req)
 		}
 	}
 	return resp, nil
@@ -741,7 +742,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.GroupInterface.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
-		notification.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
+		s.notification.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
@@ -754,7 +755,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if err := s.GroupInterface.CreateGroupRequest(ctx, []*relationTb.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
 	}
-	notification.JoinGroupApplicationNotification(ctx, req)
+	s.notification.JoinGroupApplicationNotification(ctx, req)
 	return resp, nil
 }
 
@@ -768,13 +769,13 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err := s.GroupInterface.DeleteSuperGroupMember(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		notification.SuperGroupNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
+		s.notification.SuperGroupNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
 	} else {
 		_, err := s.GroupInterface.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		notification.MemberQuitNotification(req)
+		s.notification.MemberQuitNotification(ctx, req)
 	}
 	return resp, nil
 }
@@ -808,7 +809,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	notification.GroupInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
+	s.notification.GroupInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
 	if req.GroupInfoForSet.Notification != "" {
 		s.GroupNotification(ctx, group.GroupID)
 	}
@@ -858,7 +859,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	if err := s.GroupInterface.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
 		return nil, err
 	}
-	notification.GroupOwnerTransferredNotification(req)
+	s.notification.GroupOwnerTransferredNotification(ctx, req)
 	return resp, nil
 }
 
@@ -990,7 +991,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			return nil, err
 		}
 	} else {
-		notification.GroupDismissedNotification(req)
+		s.notification.GroupDismissedNotification(ctx, req)
 	}
 	return resp, nil
 }
@@ -1014,7 +1015,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
-	notification.GroupMemberMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID, req.MutedSeconds)
+	s.notification.GroupMemberMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID, req.MutedSeconds)
 	return resp, nil
 }
 
@@ -1037,7 +1038,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
-	notification.GroupMemberCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
+	s.notification.GroupMemberCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
 	return resp, nil
 }
 
@@ -1049,7 +1050,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupStatusMuted)); err != nil {
 		return nil, err
 	}
-	notification.GroupMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
+	s.notification.GroupMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
 	return resp, nil
 }
 
@@ -1061,7 +1062,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupOk)); err != nil {
 		return nil, err
 	}
-	notification.GroupCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
+	s.notification.GroupCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
 	return resp, nil
 }
 
@@ -1138,7 +1139,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		return nil, err
 	}
 	for _, member := range req.Members {
-		notification.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), member.GroupID, member.UserID)
+		s.notification.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), member.GroupID, member.UserID)
 	}
 	return resp, nil
 }
