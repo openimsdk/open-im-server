@@ -3,7 +3,6 @@ package friend
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	chat "Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
@@ -47,7 +46,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 	if err := s.BlackInterface.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
-	chat.BlackDeletedNotification(ctx, req)
+	s.notification.BlackDeletedNotification(ctx, req)
 	return resp, nil
 }
 
@@ -60,6 +59,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := s.BlackInterface.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-	chat.BlackAddedNotification(ctx, req)
+	s.notification.BlackAddedNotification(ctx, req)
 	return resp, nil
 }
