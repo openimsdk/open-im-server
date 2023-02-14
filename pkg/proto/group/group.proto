@@ -279,7 +279,7 @@ message GetUserInGroupMembersReq {
   repeated string groupIDs = 2;
 }
 
-message getUserInGroupMembersResp{
+message GetUserInGroupMembersResp{
   repeated sdkws.GroupMemberFullInfo members = 1;
 }
 
@@ -291,7 +291,14 @@ message GetGroupMemberUserIDResp{
   repeated string userIDs = 1;
 }
 
+message GetGroupMemberRoleLevelReq{
+  string groupID = 1;
+  repeated int32 roleLevels = 2;
+}
 
+message GetGroupMemberRoleLevelResp {
+  repeated sdkws.GroupMemberFullInfo members = 1;
+}
 
 service group{
   //创建群
@@ -350,6 +357,8 @@ service group{
   rpc getUserInGroupMembers(GetUserInGroupMembersReq) returns (GetUserInGroupMembersResp);
   //获取群成员用户ID
   rpc getGroupMemberUserID(GetGroupMemberUserIDReq) returns (GetGroupMemberUserIDResp);
+  //查询群组中对应级别的成员
+  rpc GetGroupMemberRoleLevel(GetGroupMemberRoleLevelReq)returns (GetGroupMemberRoleLevelResp);
 }
 
 
