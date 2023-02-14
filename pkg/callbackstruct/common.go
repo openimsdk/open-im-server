@@ -25,26 +25,36 @@ type CommonCallbackReq struct {
 	Ex               string   `json:"ex"`
 }
 
+func (c *CommonCallbackReq) GetCallbackCommand() string {
+	return c.CallbackCommand
+}
+
+type CallbackReq interface {
+	GetCallbackCommand() string
+}
+
 type CallbackResp interface {
 	Parse() (err error)
 }
 
 type CommonCallbackResp struct {
-	ActionCode  int    `json:"actionCode"`
-	ErrCode     int32  `json:"errCode"`
-	ErrMsg      string `json:"errMsg"`
-	OperationID string `json:"operationID"`
+	ActionCode int    `json:"actionCode"`
+	ErrCode    int32  `json:"errCode"`
+	ErrMsg     string `json:"errMsg"`
+	//OperationID string `json:"operationID"`
 }
 
-func (c *CommonCallbackResp) Parse() (err error) {
+func (c *CommonCallbackResp) Parse() error {
+	if c == nil {
+		return constant.ErrData.Wrap("callback common is nil")
+	}
 	if c.ActionCode != constant.NoError || c.ErrCode != constant.NoError {
 		newErr := constant.ErrCallback
 		newErr.ErrCode = c.ErrCode
 		newErr.DetailErrMsg = fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg)
-		err = newErr
-		return
+		return newErr.Wrap()
 	}
-	return
+	return nil
 }
 
 type UserStatusBaseCallback struct {

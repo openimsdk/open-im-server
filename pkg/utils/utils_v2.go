@@ -425,3 +425,11 @@ func Unwrap(err error) error {
 	}
 	return err
 }
+
+// NotNilReplace 当new_不为空时, 将old设置为new_
+func NotNilReplace[T any](old, new_ *T) {
+	if old == nil || new_ == nil {
+		return
+	}
+	*old = *new_
+}
