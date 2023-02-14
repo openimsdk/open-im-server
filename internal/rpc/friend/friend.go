@@ -217,7 +217,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.G
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends)
+	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(ctx, s.RegisterCenter, friends)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbF
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(friendRequests)
+	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(ctx, s.RegisterCenter, friendRequests)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(friendRequests)
+	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(ctx, s.RegisterCenter, friendRequests)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbFriend.G
 	if err != nil {
 		return nil, err
 	}
-	if resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends); err != nil {
+	if resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(ctx, s.RegisterCenter, friends); err != nil {
 		return nil, err
 	}
 	return resp, nil
