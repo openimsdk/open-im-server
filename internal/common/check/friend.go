@@ -34,3 +34,8 @@ func (f *FriendChecker) GetFriendsInfo(ctx context.Context, ownerUserID, friendU
 func (f *FriendChecker) getConn() (*grpc.ClientConn, error) {
 	return f.zk.GetConn(config.Config.RpcRegisterName.OpenImFriendName)
 }
+
+// possibleFriendUserID是否在userID的好友中
+func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
+
+}

@@ -15,7 +15,7 @@ import (
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
-	if err = callbackBeforeSendGroupMsg(req); err != nil {
+	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -29,7 +29,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 	// callback
-	if err = callbackAfterSendGroupMsg(req); err != nil {
+	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -60,7 +60,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.PromeInc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err = callbackBeforeSendSingleMsg(req); err != nil {
+	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil {
 		return nil, err
 	}
 	_, err = m.messageVerification(ctx, req)
@@ -84,7 +84,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 			return nil, constant.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
-	err = callbackAfterSendSingleMsg(req)
+	err = CallbackAfterSendSingleMsg(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	// callback
 	promePkg.PromeInc(promePkg.GroupChatMsgRecvSuccessCounter)
-	err = callbackBeforeSendGroupMsg(req)
+	err = CallbackBeforeSendGroupMsg(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	wg.Wait()
 
 	// callback
-	err = callbackAfterSendGroupMsg(req)
+	err = CallbackAfterSendGroupMsg(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 		return nil, constant.ErrMessageHasReadDisable.Wrap()
 	}
 	m.encapsulateMsgData(req.MsgData)
-	if err := callbackMsgModify(req); err != nil {
+	if err := CallbackMsgModify(ctx, req); err != nil {
 		return nil, err
 	}
 	switch req.MsgData.SessionType {

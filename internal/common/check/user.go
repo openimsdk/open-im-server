@@ -102,3 +102,7 @@ func (u *UserCheck) GetPublicUserInfoMap(ctx context.Context, userIDs []string, 
 		return e.UserID
 	}), nil
 }
+
+func (u *UserCheck) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
+
+}

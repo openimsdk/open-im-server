@@ -3,6 +3,7 @@ package msg
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/db/controller"
+	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/db/relation"
 	tablerelation "Open_IM/pkg/common/db/table/relation"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
@@ -19,6 +20,9 @@ type msgServer struct {
 	Group          *check.GroupChecker
 	User           *check.UserCheck
 	Conversation   *check.ConversationChecker
+	friend         *check.FriendChecker
+	*localcache.GroupLocalCache
+	black *check.BlackChecker
 }
 
 type deleteMsg struct {
@@ -41,7 +45,10 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		User:         check.NewUserCheck(client),
 		Group:        check.NewGroupChecker(client),
 		//MsgInterface: controller.MsgInterface(),
-		RegisterCenter: client,
+		RegisterCenter:  client,
+		GroupLocalCache: localcache.NewGroupMemberIDsLocalCache(client),
+		black:           check.NewBlackChecker(client),
+		friend:          check.NewFriendChecker(client),
 	}
 	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)

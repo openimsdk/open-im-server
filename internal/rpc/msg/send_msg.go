@@ -1,10 +1,8 @@
 package msg
 
 import (
-	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"
@@ -58,8 +56,8 @@ type MsgCallBackResp struct {
 	}
 }
 
-func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
-	groupMemberInfo, err := check.NewGroupChecker().GetGroupMemberInfo(ctx, groupID, userID)
+func (m *msgServer) userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
+	groupMemberInfo, err := m.Group.GetGroupMemberInfo(ctx, groupID, userID)
 	if err != nil {
 		return false, err
 	}
@@ -70,14 +68,14 @@ func userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (i
 }
 
 // 如果禁言了，再看下是否群管理员
-func groupIsMuted(ctx context.Context, groupID string, userID string) (bool, bool, error) {
-	groupInfo, err := check.NewGroupChecker().GetGroupInfo(ctx, groupID)
+func (m *msgServer) groupIsMuted(ctx context.Context, groupID string, userID string) (bool, bool, error) {
+	groupInfo, err := m.Group.GetGroupInfo(ctx, groupID)
 	if err != nil {
 		return false, false, err
 	}
 
 	if groupInfo.Status == constant.GroupStatusMuted {
-		groupMemberInfo, err := check.NewGroupChecker().GetGroupMemberInfo(ctx, groupID, userID)
+		groupMemberInfo, err := m.Group.GetGroupMemberInfo(ctx, groupID, userID)
 		if err != nil {
 			return false, false, err
 		}
@@ -86,23 +84,9 @@ func groupIsMuted(ctx context.Context, groupID string, userID string) (bool, boo
 	return false, false, nil
 }
 
-func GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-	return localcache.NewGroupMemberIDsLocalCache().GetGroupMemberIDs(ctx, groupID)
+func (m *msgServer) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
+	return m.GroupLocalCache.GetGroupMemberIDs(ctx, groupID)
 }
-
-//func GetGroupInfo(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
-//	return check.NewGroupChecker().GetGroupInfo(ctx, groupID)
-//
-//
-//}
-
-//func GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
-//	check.NewGroupChecker().GetGroupMemberInfo
-//}
-
-//func (m *msgServer)GetSuperGroupMsg(ctx context.Context, groupID string, seq uint32) (*sdkws.MsgData, error) {
-//	return m.MsgInterface.GetSuperGroupMsg(ctx, groupID, seq)
-//}
 
 func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
 	switch data.MsgData.SessionType {
@@ -113,7 +97,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil, nil
 		}
-		black, err := IsBlocked(data.MsgData.SendID, data.MsgData.RecvID)
+		black, err := m.black.IsBlocked(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
 			return nil, err
 		}
@@ -121,7 +105,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, constant.ErrBlockedByPeer.Wrap()
 		}
 		if *config.Config.MessageVerify.FriendVerify {
-			friend, err := IsFriend(data.MsgData.SendID, data.MsgData.RecvID)
+			friend, err := m.friend.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
 				return nil, err
 			}
@@ -135,7 +119,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
 			return nil, nil
 		}
-		userIDList, err := GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+		userIDList, err := m.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +132,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if !utils.IsContain(data.MsgData.SendID, userIDList) {
 			return nil, constant.ErrNotInGroupYet.Wrap()
 		}
-		isMute, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +140,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, constant.ErrMutedInGroup.Wrap()
 		}
 
-		isMute, isAdmin, err := groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			return nil, err
 		}
@@ -169,7 +153,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 		return userIDList, nil
 	case constant.SuperGroupChatType:
-		groupInfo, err := check.NewGroupChecker().GetGroupInfo(ctx, data.MsgData.GroupID)
+		groupInfo, err := m.Group.GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +183,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, nil
 		}
 
-		userIDList, err := GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+		userIDList, err := m.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -213,7 +197,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 				return nil, constant.ErrNotInGroupYet.Wrap()
 			}
 		}
-		isMute, err := userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			return nil, err
 		}
@@ -221,7 +205,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, constant.ErrMutedInGroup.Wrap()
 		}
 
-		isMute, isAdmin, err := groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			return nil, err
 		}
@@ -289,27 +273,8 @@ func GetMsgID(sendID string) string {
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func GetUserGlobalMsgRecvOpt(userID string) (int32, error) {
-
-}
-
-// possibleBlackUserID是否被userID拉黑，也就是是否在userID的黑名单中
-func IsBlocked(possibleBlackUserID, userID string) (bool, error) {
-
-}
-
-// possibleFriendUserID是否在userID的好友中
-func IsFriend(possibleFriendUserID, userID string) (bool, error) {
-
-}
-
-// 没找到不返回错误
-func GetSingleConversationRecvMsgOpt(userID, conversationID string) (int32, error) {
-
-}
-
-func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
-	opt, err := GetUserGlobalMsgRecvOpt(userID)
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
+	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err
 	}
@@ -325,7 +290,7 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 		return true, nil
 	}
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
-	singleOpt, err := GetSingleConversationRecvMsgOpt(userID, conversationID)
+	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
 	if err != nil {
 		return false, err
 	}
@@ -334,7 +299,7 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 		return true, nil
 	case constant.NotReceiveMessage:
 		if utils.IsContainInt(int(pb.MsgData.ContentType), ExcludeContentType) {
-			return true
+			return true, nil
 		}
 		return false, nil
 	case constant.ReceiveNotNotifyMessage:
@@ -378,7 +343,7 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 			options[k] = v
 		}
 		groupPB.MsgData.Options = options
-		isSend, err := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
+		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
 		if err != nil {
 			wg.Done()
 			return err

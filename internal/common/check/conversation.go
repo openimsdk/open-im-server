@@ -29,3 +29,7 @@ func (c *ConversationChecker) ModifyConversationField(ctx context.Context, req *
 func (c *ConversationChecker) getConn() (*grpc.ClientConn, error) {
 	return c.zk.GetConn(config.Config.RpcRegisterName.OpenImConversationName)
 }
+
+func (c *ConversationChecker) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
+
+}
