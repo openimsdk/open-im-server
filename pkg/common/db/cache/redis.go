@@ -95,6 +95,10 @@ type RedisClient struct {
 	rdb redis.UniversalClient
 }
 
+func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
+	return &RedisClient{rdb: rdb}
+}
+
 //func (r *RedisClient) InitRedis() {
 //	var rdb redis.UniversalClient
 //	var err error

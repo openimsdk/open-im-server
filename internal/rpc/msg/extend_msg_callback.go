@@ -1,7 +1,7 @@
 package msg
 
 import (
-	cbApi "Open_IM/pkg/call_back_struct"
+	cb "Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -11,10 +11,10 @@ import (
 	http2 "net/http"
 )
 
-func callbackSetMessageReactionExtensions(setReq *msg.SetMessageReactionExtensionsReq) *cbApi.CallbackBeforeSetMessageReactionExtResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: setReq.OperationID}
+func callbackSetMessageReactionExtensions(setReq *msg.SetMessageReactionExtensionsReq) *cb.CallbackBeforeSetMessageReactionExtResp {
+	callbackResp := cb.CommonCallbackResp{OperationID: setReq.OperationID}
 	log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), setReq.String())
-	req := cbApi.CallbackBeforeSetMessageReactionExtReq{
+	req := cb.CallbackBeforeSetMessageReactionExtReq{
 		OperationID:           setReq.OperationID,
 		CallbackCommand:       constant.CallbackBeforeSetMessageReactionExtensionCommand,
 		SourceID:              setReq.SourceID,
@@ -26,7 +26,7 @@ func callbackSetMessageReactionExtensions(setReq *msg.SetMessageReactionExtensio
 		IsExternalExtensions:  setReq.IsExternalExtensions,
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
-	resp := &cbApi.CallbackBeforeSetMessageReactionExtResp{CommonCallbackResp: &callbackResp}
+	resp := &cb.CallbackBeforeSetMessageReactionExtResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetMessageReactionExtensionCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
@@ -36,8 +36,8 @@ func callbackSetMessageReactionExtensions(setReq *msg.SetMessageReactionExtensio
 
 }
 
-func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReactionExtensionsReq) *cbApi.CallbackDeleteMessageReactionExtResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: setReq.OperationID}
+func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReactionExtensionsReq) *cb.CallbackDeleteMessageReactionExtResp {
+	callbackResp := cb.CommonCallbackResp{OperationID: setReq.OperationID}
 	log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), setReq.String())
 	req := cbApi.CallbackDeleteMessageReactionExtReq{
 		OperationID:           setReq.OperationID,
@@ -58,8 +58,8 @@ func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReacti
 	}
 	return resp
 }
-func callbackGetMessageListReactionExtensions(getReq *msg.GetMessageListReactionExtensionsReq) *cbApi.CallbackGetMessageListReactionExtResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: getReq.OperationID}
+func callbackGetMessageListReactionExtensions(getReq *msg.GetMessageListReactionExtensionsReq) *cb.CallbackGetMessageListReactionExtResp {
+	callbackResp := cb.CommonCallbackResp{OperationID: getReq.OperationID}
 	log.NewDebug(getReq.OperationID, utils.GetSelfFuncName(), getReq.String())
 	req := cbApi.CallbackGetMessageListReactionExtReq{
 		OperationID:     getReq.OperationID,
@@ -78,8 +78,8 @@ func callbackGetMessageListReactionExtensions(getReq *msg.GetMessageListReaction
 	}
 	return resp
 }
-func callbackAddMessageReactionExtensions(setReq *msg.AddMessageReactionExtensionsReq) *cbApi.CallbackAddMessageReactionExtResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: setReq.OperationID}
+func callbackAddMessageReactionExtensions(setReq *msg.AddMessageReactionExtensionsReq) *cb.CallbackAddMessageReactionExtResp {
+	callbackResp := cb.CommonCallbackResp{OperationID: setReq.OperationID}
 	log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), setReq.String())
 	req := cbApi.CallbackAddMessageReactionExtReq{
 		OperationID:           setReq.OperationID,
@@ -93,7 +93,7 @@ func callbackAddMessageReactionExtensions(setReq *msg.AddMessageReactionExtensio
 		IsExternalExtensions:  setReq.IsExternalExtensions,
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
-	resp := &cbApi.CallbackAddMessageReactionExtResp{CommonCallbackResp: &callbackResp}
+	resp := &cb.CallbackAddMessageReactionExtResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp, *resp.CommonCallbackResp, resp.IsReact, resp.MsgFirstModifyTime)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAddMessageListReactionExtensionsCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError

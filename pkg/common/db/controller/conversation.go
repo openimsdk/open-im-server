@@ -142,7 +142,7 @@ func NewConversationDataBase(db relation.Conversation, cache cache.ConversationC
 }
 
 func (c ConversationDataBase) GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error) {
-
+	panic("implement me")
 }
 
 func (c ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context, UserIDList []string, conversationID string, args map[string]interface{}) error {
