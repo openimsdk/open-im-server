@@ -46,27 +46,27 @@ func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) 
 		return nil, err
 	}
 	for _, v := range friends {
-		pbFriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
-		utils.CopyStructFields(pbFriend, users[v.OwnerUserID])
-		utils.CopyStructFields(pbFriend.FriendUser, users[v.FriendUserID])
-		pbFriend.CreateTime = v.CreateTime.Unix()
-		pbFriend.FriendUser.CreateTime = v.CreateTime.Unix()
+		pbfriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
+		utils.CopyStructFields(pbfriend, users[v.OwnerUserID])
+		utils.CopyStructFields(pbfriend.FriendUser, users[v.FriendUserID])
+		pbfriend.CreateTime = v.CreateTime.Unix()
+		pbfriend.FriendUser.CreateTime = v.CreateTime.Unix()
 	}
 	return
 }
 
 func (db *DBFriend) Convert(ctx context.Context) (*sdk.FriendInfo, error) {
-	pbFriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
-	utils.CopyStructFields(pbFriend, db)
+	pbfriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
+	utils.CopyStructFields(pbfriend, db)
 	user, err := db.userCheck.GetUsersInfo(ctx, db.FriendUserID)
 	if err != nil {
 		return nil, err
 	}
-	utils.CopyStructFields(pbFriend.FriendUser, user)
-	pbFriend.CreateTime = db.CreateTime.Unix()
+	utils.CopyStructFields(pbfriend.FriendUser, user)
+	pbfriend.CreateTime = db.CreateTime.Unix()
 
-	pbFriend.FriendUser.CreateTime = db.CreateTime.Unix()
-	return pbFriend, nil
+	pbfriend.FriendUser.CreateTime = db.CreateTime.Unix()
+	return pbfriend, nil
 }
 
 func (pb *PBFriend) Convert() (*relation.FriendModel, error) {

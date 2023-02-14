@@ -11,7 +11,7 @@ type CallbackBeforeSendSingleMsgReq struct {
 }
 
 type CallbackBeforeSendSingleMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackAfterSendSingleMsgReq struct {
@@ -20,7 +20,7 @@ type CallbackAfterSendSingleMsgReq struct {
 }
 
 type CallbackAfterSendSingleMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
@@ -29,7 +29,7 @@ type CallbackBeforeSendGroupMsgReq struct {
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackAfterSendGroupMsgReq struct {
@@ -38,7 +38,7 @@ type CallbackAfterSendGroupMsgReq struct {
 }
 
 type CallbackAfterSendGroupMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackMsgModifyCommandReq struct {
@@ -46,7 +46,7 @@ type CallbackMsgModifyCommandReq struct {
 }
 
 type CallbackMsgModifyCommandResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 	Content          *string                `json:"content"`
 	RecvID           *string                `json:"recvID"`
 	GroupID          *string                `json:"groupID"`
@@ -79,7 +79,7 @@ type CallbackBeforeSetMessageReactionExtReq struct {
 	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
 }
 type CallbackBeforeSetMessageReactionExtResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }
@@ -95,7 +95,7 @@ type CallbackDeleteMessageReactionExtReq struct {
 	MsgFirstModifyTime    int64             `json:"msgFirstModifyTime"`
 }
 type CallbackDeleteMessageReactionExtResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }

@@ -19,7 +19,6 @@ type AuthController struct {
 }
 
 func NewAuthController(rdb redis.UniversalClient, accessSecret string, accessExpire int64) *AuthController {
-	cache.NewRedisClient(rdb)
 	return &AuthController{database: cache.NewTokenRedis(cache.NewRedisClient(rdb), accessSecret, accessExpire)}
 }
 
