@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"
 	utils2 "Open_IM/pkg/utils"
@@ -13,10 +14,21 @@ import (
 )
 
 type Check struct {
-	user   *check.UserCheck
-	group  *check.GroupChecker
-	msg    *check.MsgCheck
-	friend *check.FriendChecker
+	user         *check.UserCheck
+	group        *check.GroupChecker
+	msg          *check.MsgCheck
+	friend       *check.FriendChecker
+	conversation *check.ConversationChecker
+}
+
+func NewCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *Check {
+	return &Check{
+		user:         check.NewUserCheck(zk),
+		group:        check.NewGroupChecker(zk),
+		msg:          check.NewMsgCheck(zk),
+		friend:       check.NewFriendChecker(zk),
+		conversation: check.NewConversationChecker(zk),
+	}
 }
 
 type NotificationMsg struct {
