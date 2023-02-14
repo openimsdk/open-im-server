@@ -1,7 +1,6 @@
 package friend
 
 import (
-	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
@@ -12,7 +11,7 @@ import (
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {
 	resp = &pbFriend.GetPaginationBlacksResp{}
-	if err := check.Access(ctx, req.UserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	blacks, total, err := s.BlackInterface.FindOwnerBlacks(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
@@ -40,7 +39,7 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*
 
 func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
 	resp := &pbFriend.RemoveBlackResp{}
-	if err := check.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.BlackInterface.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {

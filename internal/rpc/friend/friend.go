@@ -150,7 +150,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 // ok
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.RespondFriendApplyReq) (resp *pbFriend.RespondFriendApplyResp, err error) {
 	resp = &pbFriend.RespondFriendApplyResp{}
-	if err := check.Access(ctx, req.ToUserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
 	friendRequest := relationTb.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
@@ -176,7 +176,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 // ok
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (resp *pbFriend.DeleteFriendResp, err error) {
 	resp = &pbFriend.DeleteFriendResp{}
-	if err := check.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -193,7 +193,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 // ok
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (resp *pbFriend.SetFriendRemarkResp, err error) {
 	resp = &pbFriend.SetFriendRemarkResp{}
-	if err := check.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -210,7 +210,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 // ok
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
 	resp = &pbFriend.GetDesignatedFriendsResp{}
-	if err := check.Access(ctx, req.UserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	friends, total, err := s.FriendInterface.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
@@ -228,7 +228,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.G
 // ok 获取接收到的好友申请（即别人主动申请的）
 func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbFriend.GetPaginationFriendsApplyToReq) (resp *pbFriend.GetPaginationFriendsApplyToResp, err error) {
 	resp = &pbFriend.GetPaginationFriendsApplyToResp{}
-	if err := check.Access(ctx, req.UserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	friendRequests, total, err := s.FriendInterface.PageFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
@@ -246,7 +246,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbF
 // ok 获取主动发出去的好友申请列表
 func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *pbFriend.GetPaginationFriendsApplyFromReq) (resp *pbFriend.GetPaginationFriendsApplyFromResp, err error) {
 	resp = &pbFriend.GetPaginationFriendsApplyFromResp{}
-	if err := check.Access(ctx, req.UserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	friendRequests, total, err := s.FriendInterface.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)

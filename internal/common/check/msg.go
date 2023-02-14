@@ -12,6 +12,10 @@ type MsgCheck struct {
 	zk discoveryRegistry.SvcDiscoveryRegistry
 }
 
+func NewMsgCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *MsgCheck {
+	return &MsgCheck{zk: zk}
+}
+
 func (m *MsgCheck) getConn() (*grpc.ClientConn, error) {
 	return m.zk.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 }

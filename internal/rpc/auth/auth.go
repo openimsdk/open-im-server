@@ -65,7 +65,7 @@ func (s *rpcAuth) Run() {
 
 func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
-	if _, err := check.GetUsersInfo(ctx, req.UserID); err != nil {
+	if _, err := s.userCheck.GetUsersInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	token, err := s.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))
@@ -143,4 +143,5 @@ func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID in
 type rpcAuth struct {
 	*rpcserver.RpcServer
 	controller.AuthInterface
+	userCheck *check.UserCheck
 }
