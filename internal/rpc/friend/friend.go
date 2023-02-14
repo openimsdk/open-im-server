@@ -3,7 +3,7 @@ package friend
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	chat "Open_IM/internal/common/notification"
+	"Open_IM/internal/common/notification"
 	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -26,6 +26,8 @@ type friendServer struct {
 	*rpcserver.RpcServer
 	controller.FriendInterface
 	controller.BlackInterface
+	notification *notification.Check
+	userCheck    *check.UserCheck
 }
 
 func NewFriendServer(port int) *friendServer {
@@ -105,7 +107,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbFriend.Apply
 	if req.ToUserID == req.FromUserID {
 		return nil, constant.ErrCanNotAddYourself.Wrap()
 	}
-	if _, err := check.GetUsersInfo(ctx, req.ToUserID, req.FromUserID); err != nil {
+	if _, err := s.userCheck.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}, true); err != nil {
 		return nil, err
 	}
 	in1, in2, err := s.FriendInterface.CheckIn(ctx, req.FromUserID, req.ToUserID)
@@ -118,7 +120,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbFriend.Apply
 	if err = s.FriendInterface.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	chat.FriendApplicationAddNotification(ctx, req)
+	s.notification.FriendApplicationAddNotification(ctx, req)
 	return resp, nil
 }
 
@@ -128,7 +130,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := check.NewUserCheck().GetUsersInfos(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...), true); err != nil {
+	if _, err := s.userCheck.GetUsersInfos(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...), true); err != nil {
 		return nil, err
 	}
 
@@ -157,7 +159,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationAgreedNotification(ctx, req)
+		s.notification.FriendApplicationAgreedNotification(ctx, req)
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {
@@ -165,7 +167,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationRefusedNotification(ctx, req)
+		s.notification.FriendApplicationRefusedNotification(ctx, req)
 		return resp, nil
 	}
 	return nil, constant.ErrArgs.Wrap("req.HandleResult != -1/1")
@@ -184,7 +186,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, []string{req.FriendUserID}); err != nil {
 		return nil, err
 	}
-	chat.FriendDeletedNotification(ctx, req)
+	s.notification.FriendDeletedNotification(ctx, req)
 	return resp, nil
 }
 
@@ -201,7 +203,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	if err := s.FriendInterface.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	chat.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)
+	s.notification.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)
 	return resp, nil
 }
 

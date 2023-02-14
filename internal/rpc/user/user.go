@@ -1,8 +1,9 @@
 package user
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	chat "Open_IM/internal/common/notification"
+	"Open_IM/internal/common/notification"
 	"Open_IM/internal/common/rpcserver"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -25,6 +26,8 @@ import (
 type userServer struct {
 	*rpcserver.RpcServer
 	controller.UserInterface
+	notification *notification.Check
+	userCheck    *check.UserCheck
 }
 
 func NewUserServer(port int) *userServer {
@@ -226,11 +229,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	go func() {
 		for _, v := range friends {
-			chat.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
+			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
 
-	chat.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
+	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
 
 	return resp, nil
 }
@@ -246,7 +249,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	chat.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
+	s.notification.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
 	return resp, nil
 }
 

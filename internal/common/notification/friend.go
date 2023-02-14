@@ -148,12 +148,6 @@ func (c *Check) BlackDeletedNotification(ctx context.Context, req *pbFriend.Remo
 	c.friendNotification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
-// send to myself
-func (c *Check) UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) {
-	selfInfoUpdatedTips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	c.friendNotification(ctx, opUserID, changedUserID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
-}
-
 func (c *Check) FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string, opUserID string) {
 	selfInfoUpdatedTips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
 	c.friendNotification(ctx, opUserID, needNotifiedUserID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
