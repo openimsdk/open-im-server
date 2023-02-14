@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/internal/msg_gateway/gate"
+	"Open_IM/internal/msggateway"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -22,7 +22,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort, *prometheusPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	gate.Init(*rpcPort, *wsPort)
-	gate.Run(*prometheusPort)
+	msggateway.Init(*rpcPort, *wsPort)
+	msggateway.Run(*prometheusPort)
 	wg.Wait()
 }
