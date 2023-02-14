@@ -1208,3 +1208,27 @@ func (s *groupServer) GetGroupMemberUserID(ctx context.Context, req *pbGroup.Get
 	}
 	return resp, nil
 }
+
+func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.GetGroupMemberRoleLevelReq) (*pbGroup.GetGroupMemberRoleLevelResp, error) {
+	resp := &pbGroup.GetGroupMemberRoleLevelResp{}
+	if len(req.RoleLevels) == 0 {
+		return nil, constant.ErrArgs.Wrap("RoleLevels empty")
+	}
+	members, err := s.GroupInterface.FindGroupMember(ctx, []string{req.GroupID}, nil, req.RoleLevels)
+	if err != nil {
+		return nil, err
+	}
+	nameMap, err := s.GetUsernameMap(ctx, utils.Filter(members, func(e *relationTb.GroupMemberModel) (string, bool) {
+		return e.UserID, e.Nickname == ""
+	}), true)
+	if err != nil {
+		return nil, err
+	}
+	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
+		if e.Nickname == "" {
+			e.Nickname = nameMap[e.UserID]
+		}
+		return DbToPbGroupMembersCMSResp(e)
+	})
+	return resp, nil
+}
