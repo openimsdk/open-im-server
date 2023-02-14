@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/db/table/relation"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	sdk "Open_IM/pkg/proto/sdkws"
+	utils2 "Open_IM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"
@@ -38,13 +39,18 @@ func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*relation.FriendM
 	return
 }
 
-func (*DBFriend) DB2PB(ctx context.Context, zk discoveryRegistry.SvcDiscoveryRegistry, friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
+func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
+	userIDs := utils2.Slice(friends, func(e *relation.FriendModel) string { return e.FriendUserID })
+	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
+	if err != nil {
+		return nil, err
+	}
 	for _, v := range friends {
-		u, err := NewDBFriend(v, zk).Convert(ctx)
-		if err != nil {
-			return nil, err
-		}
-		PBFriends = append(PBFriends, u)
+		pbFriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
+		utils.CopyStructFields(pbFriend, users[v.OwnerUserID])
+		utils.CopyStructFields(pbFriend.FriendUser, users[v.FriendUserID])
+		pbFriend.CreateTime = v.CreateTime.Unix()
+		pbFriend.FriendUser.CreateTime = v.CreateTime.Unix()
 	}
 	return
 }
@@ -238,16 +244,16 @@ func (*PBGroup) PB2DB(groups []*sdk.GroupInfo) (DBGroups []*relation.GroupModel,
 	return
 }
 
-func (db *DBGroup) DB2PB(ctx context.Context, zk discoveryRegistry.SvcDiscoveryRegistry, groups []*relation.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
-	for _, v := range groups {
-		u, err := NewDBGroup(v, zk).Convert(ctx)
-		if err != nil {
-			return nil, err
-		}
-		PBGroups = append(PBGroups, u)
-	}
-	return
-}
+//func (db *DBGroup) DB2PB(ctx context.Context, zk discoveryRegistry.SvcDiscoveryRegistry, groups []*relation.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
+//	for _, v := range groups {
+//		u, err := NewDBGroup(v, zk).Convert(ctx)
+//		if err != nil {
+//			return nil, err
+//		}
+//		PBGroups = append(PBGroups, u)
+//	}
+//	return
+//}
 
 func NewDBGroup(groupModel *relation.GroupModel, zk discoveryRegistry.SvcDiscoveryRegistry) *DBGroup {
 	return &DBGroup{GroupModel: groupModel, groupCheck: check.NewGroupChecker(zk)}
@@ -304,16 +310,16 @@ func (*PBGroupMember) PB2DB(groupMembers []*sdk.GroupMemberFullInfo) (DBGroupMem
 	return
 }
 
-func (*DBGroupMember) DB2PB(ctx context.Context, groupMembers []*relation.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
-	for _, v := range groupMembers {
-		u, err := NewDBGroupMember(v).Convert(ctx)
-		if err != nil {
-			return nil, err
-		}
-		PBGroupMembers = append(PBGroupMembers, u)
-	}
-	return
-}
+//func (*DBGroupMember) DB2PB(ctx context.Context, groupMembers []*relation.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
+//	for _, v := range groupMembers {
+//		u, err := NewDBGroupMember(v).Convert(ctx)
+//		if err != nil {
+//			return nil, err
+//		}
+//		PBGroupMembers = append(PBGroupMembers, u)
+//	}
+//	return
+//}
 
 func NewDBGroupMember(groupMember *relation.GroupMemberModel) *DBGroupMember {
 	return &DBGroupMember{GroupMemberModel: groupMember}
@@ -370,16 +376,16 @@ func (*PBGroupRequest) PB2DB(groupRequests []*sdk.GroupRequest) (DBGroupRequests
 	return
 }
 
-func (*DBGroupRequest) DB2PB(groupRequests []*relation.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
-	for _, v := range groupRequests {
-		u, err := NewDBGroupRequest(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		PBGroupRequests = append(PBGroupRequests, u)
-	}
-	return
-}
+//func (*DBGroupRequest) DB2PB(groupRequests []*relation.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
+//	for _, v := range groupRequests {
+//		u, err := NewDBGroupRequest(v).Convert()
+//		if err != nil {
+//			return nil, err
+//		}
+//		PBGroupRequests = append(PBGroupRequests, u)
+//	}
+//	return
+//}
 
 func NewDBGroupRequest(groupRequest *relation.GroupRequestModel) *DBGroupRequest {
 	return &DBGroupRequest{GroupRequestModel: groupRequest}

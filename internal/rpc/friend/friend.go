@@ -217,7 +217,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbFriend.G
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(ctx, s.RegisterCenter, friends)
+	resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbFriend.G
 	if err != nil {
 		return nil, err
 	}
-	if resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(ctx, s.RegisterCenter, friends); err != nil {
+	if resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends); err != nil {
 		return nil, err
 	}
 	return resp, nil
