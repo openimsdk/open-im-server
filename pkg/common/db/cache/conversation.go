@@ -21,7 +21,7 @@ const (
 	conversationExpireTime               = time.Second * 60 * 60 * 12
 )
 
-// args fn will exec when no data in cache
+// arg fn will exec when no data in cache
 type ConversationCache interface {
 	// get user's conversationIDs from cache
 	GetUserConversationIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) ([]string, error)
@@ -96,7 +96,7 @@ func (c *ConversationRedis) GetUserConversationIDs(ctx context.Context, ownerUse
 	//	return nil, utils.Wrap(err, "")
 	//}
 	//return conversationIDs, nil
-	return GetCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, func(ctx context.Context) ([]string, error) {
+	return GetCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), conversationExpireTime, func(ctx context.Context) ([]string, error) {
 		return f(ownerUserID)
 	})
 }
@@ -122,7 +122,7 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 	//	return nil, utils.Wrap(err, "")
 	//}
 	//return conversationIDs, nil
-	return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, fn)
+	return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), conversationExpireTime, fn)
 }
 
 //func GetCache1[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (any, error)) (T, error) {

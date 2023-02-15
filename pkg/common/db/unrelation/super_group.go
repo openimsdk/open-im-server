@@ -127,7 +127,7 @@ type SuperGroupMongoDriver struct {
 //}
 
 func (s *SuperGroupMongoDriver) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string, tx ...any) error {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	_, err := s.superGroupCollection.InsertOne(ctx, &unrelation.SuperGroupModel{
 		GroupID:   groupID,
 		MemberIDs: initMemberIDs,
@@ -147,7 +147,7 @@ func (s *SuperGroupMongoDriver) CreateSuperGroup(ctx context.Context, groupID st
 }
 
 func (s *SuperGroupMongoDriver) TakeSuperGroup(ctx context.Context, groupID string, tx ...any) (group *unrelation.SuperGroupModel, err error) {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	if err := s.superGroupCollection.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&group); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -155,14 +155,15 @@ func (s *SuperGroupMongoDriver) TakeSuperGroup(ctx context.Context, groupID stri
 }
 
 func (s *SuperGroupMongoDriver) FindSuperGroup(ctx context.Context, groupIDs []string, tx ...any) (groups []*unrelation.SuperGroupModel, err error) {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	cursor, err := s.superGroupCollection.Find(ctx, bson.M{"group_id": bson.M{
 		"$in": groupIDs,
 	}})
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return nil, err
 	}
 	defer cursor.Close(ctx)
+
 	if err := cursor.All(ctx, &groups); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -170,7 +171,7 @@ func (s *SuperGroupMongoDriver) FindSuperGroup(ctx context.Context, groupIDs []s
 }
 
 func (s *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...any) error {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return s.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		_, err := s.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDs}}})
@@ -194,7 +195,7 @@ func (s *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID
 }
 
 func (s *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...any) error {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return s.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		_, err := s.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDs}}})
@@ -212,14 +213,14 @@ func (s *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, g
 }
 
 func (s *SuperGroupMongoDriver) GetSuperGroupByUserID(ctx context.Context, userID string, tx ...any) (*unrelation.UserToSuperGroupModel, error) {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	var user unrelation.UserToSuperGroupModel
 	err := s.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
 	return &user, utils.Wrap(err, "")
 }
 
 func (s *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID string, tx ...any) error {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	group, err := s.TakeSuperGroup(ctx, groupID, tx...)
 	if err != nil {
 		return err
@@ -231,7 +232,7 @@ func (s *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID st
 }
 
 //func (s *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID string, tx ...any) error {
-//	ctx = s.getTxCtx(ctx, tx)
+//	ctx = getTxCtx(ctx, tx)
 //	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 //	return s.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 //		superGroup := &unrelation.SuperGroupModel{}
@@ -249,7 +250,7 @@ func (s *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID st
 //}
 
 func (s *SuperGroupMongoDriver) RemoveGroupFromUser(ctx context.Context, groupID string, userIDs []string, tx ...any) error {
-	ctx = s.getTxCtx(ctx, tx)
+	ctx = getTxCtx(ctx, tx)
 	_, err := s.userToSuperGroupCollection.UpdateOne(ctx, bson.M{"user_id": bson.M{"$in": userIDs}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	return utils.Wrap(err, "")
 }

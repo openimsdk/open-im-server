@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
@@ -352,7 +352,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
-	promePkg.PromeGaugeInc(promePkg.OnlineUserGauge)
+	prome.PromeGaugeInc(prome.OnlineUserGauge)
 	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 }
 
@@ -394,7 +394,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
-	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
+	prome.PromeGaugeDec(prome.OnlineUserGauge)
 
 }
 

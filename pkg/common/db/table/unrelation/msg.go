@@ -3,15 +3,19 @@ package unrelation
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/proto/sdkws"
+	"context"
 	"strconv"
+	"strings"
 )
 
 const (
 	singleGocMsgNum = 5000
 	CChat           = "msg"
+	OldestList      = 0
+	NewestList      = -1
 )
 
-type UserMsgDocModel struct {
+type MsgDocModel struct {
 	DocID string         `bson:"uid"`
 	Msg   []MsgInfoModel `bson:"msg"`
 }
@@ -21,53 +25,79 @@ type MsgInfoModel struct {
 	Msg      []byte `bson:"msg"`
 }
 
-func (UserMsgDocModel) TableName() string {
+type MsgDocModelInterface interface {
+	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
+	Create(ctx context.Context, model *MsgDocModel) error
+	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
+	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
+	GetNewestMsg(ctx context.Context, sourceID string) (*MsgInfoModel, error)
+	GetOldestMsg(ctx context.Context, sourceID string) (*MsgInfoModel, error)
+	Delete(ctx context.Context, docIDs []string) error
+	GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*MsgDocModel, error)
+	UpdateOneDoc(ctx context.Context, msg *MsgDocModel) error
+}
+
+func (MsgDocModel) TableName() string {
 	return CChat
 }
 
-func (UserMsgDocModel) GetSingleDocMsgNum() int {
+func (MsgDocModel) GetSingleGocMsgNum() int {
 	return singleGocMsgNum
 }
 
-func (u UserMsgDocModel) getSeqUid(uid string, seq uint32) string {
-	seqSuffix := seq / singleGocMsgNum
-	return u.indexGen(uid, seqSuffix)
-}
-
-func (u UserMsgDocModel) getSeqUserIDList(userID string, maxSeq uint32) []string {
-	seqMaxSuffix := maxSeq / singleGocMsgNum
-	var seqUserIDList []string
-	for i := 0; i <= int(seqMaxSuffix); i++ {
-		seqUserID := u.indexGen(userID, uint32(i))
-		seqUserIDList = append(seqUserIDList, seqUserID)
+func (m *MsgDocModel) IsFull() bool {
+	index, _ := strconv.Atoi(strings.Split(m.DocID, ":")[1])
+	if index == 0 {
+		if len(m.Msg) >= singleGocMsgNum-1 {
+			return true
+		}
 	}
-	return seqUserIDList
+	if len(m.Msg) >= singleGocMsgNum {
+		return true
+	}
+
+	return false
 }
 
-func (UserMsgDocModel) getSeqSuperGroupID(groupID string, seq uint32) string {
+func (m MsgDocModel) GetDocID(sourceID string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
-	return superGroupIndexGen(groupID, seqSuffix)
+	return m.indexGen(sourceID, seqSuffix)
 }
 
-func (u UserMsgDocModel) GetSeqUid(uid string, seq uint32) string {
-	return u.getSeqUid(uid, seq)
+func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq uint32) []string {
+	seqMaxSuffix := maxSeq / singleGocMsgNum
+	var seqUserIDs []string
+	for i := 0; i <= int(seqMaxSuffix); i++ {
+		seqUserID := m.indexGen(userID, uint32(i))
+		seqUserIDs = append(seqUserIDs, seqUserID)
+	}
+	return seqUserIDs
 }
 
-func (u UserMsgDocModel) GetDocIDSeqsMap(uid string, seqs []uint32) map[string][]uint32 {
+func (m MsgDocModel) getSeqSuperGroupID(groupID string, seq uint32) string {
+	seqSuffix := seq / singleGocMsgNum
+	return m.superGroupIndexGen(groupID, seqSuffix)
+}
+
+func (m MsgDocModel) superGroupIndexGen(groupID string, seqSuffix uint32) string {
+	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}
+
+func (m MsgDocModel) GetDocIDSeqsMap(sourceID string, seqs []uint32) map[string][]uint32 {
 	t := make(map[string][]uint32)
 	for i := 0; i < len(seqs); i++ {
-		seqUid := u.getSeqUid(uid, seqs[i])
-		if value, ok := t[seqUid]; !ok {
+		docID := m.GetDocID(sourceID, seqs[i])
+		if value, ok := t[docID]; !ok {
 			var temp []uint32
-			t[seqUid] = append(temp, seqs[i])
+			t[docID] = append(temp, seqs[i])
 		} else {
-			t[seqUid] = append(value, seqs[i])
+			t[docID] = append(value, seqs[i])
 		}
 	}
 	return t
 }
 
-func (UserMsgDocModel) getMsgIndex(seq uint32) int {
+func (m MsgDocModel) getMsgIndex(seq uint32) int {
 	seqSuffix := seq / singleGocMsgNum
 	var index uint32
 	if seqSuffix == 0 {
@@ -78,12 +108,12 @@ func (UserMsgDocModel) getMsgIndex(seq uint32) int {
 	return int(index)
 }
 
-func (UserMsgDocModel) indexGen(uid string, seqSuffix uint32) string {
-	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+func (m MsgDocModel) indexGen(sourceID string, seqSuffix uint32) string {
+	return sourceID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
 
-func (UserMsgDocModel) genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*sdkws.MsgData) {
-	for _, v := range seqList {
+func (MsgDocModel) GenExceptionMessageBySeqs(seqs []uint32) (exceptionMsg []*sdkws.MsgData) {
+	for _, v := range seqs {
 		msg := new(sdkws.MsgData)
 		msg.Seq = v
 		exceptionMsg = append(exceptionMsg, msg)
@@ -91,8 +121,8 @@ func (UserMsgDocModel) genExceptionMessageBySeqList(seqList []uint32) (exception
 	return exceptionMsg
 }
 
-func (UserMsgDocModel) genExceptionSuperGroupMessageBySeqList(seqList []uint32, groupID string) (exceptionMsg []*sdkws.MsgData) {
-	for _, v := range seqList {
+func (MsgDocModel) GenExceptionSuperGroupMessageBySeqs(seqs []uint32, groupID string) (exceptionMsg []*sdkws.MsgData) {
+	for _, v := range seqs {
 		msg := new(sdkws.MsgData)
 		msg.Seq = v
 		msg.GroupID = groupID

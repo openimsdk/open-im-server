@@ -7,7 +7,7 @@
 package http
 
 import (
-	cbApi "Open_IM/pkg/callback_struct"
+	cbApi "Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"bytes"

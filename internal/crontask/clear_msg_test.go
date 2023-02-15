@@ -2,8 +2,7 @@ package cronTask
 
 import (
 	"Open_IM/pkg/common/constant"
-	mongo2 "Open_IM/pkg/common/db/mongo"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"context"
 	"fmt"
 	"strconv"
@@ -59,7 +58,7 @@ func CreateChat(userChat *mongo2.UserChat) error {
 	return err
 }
 
-func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
+func TestDeleteUserMsgsAndSetMinSeq(t *testing.T) {
 	operationID := getCronTaskOperationID()
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:16379",
@@ -81,7 +80,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	userChat := GenUserChat(1, 500, 200, 0, testUID1)
 	err = CreateChat(userChat)
 
-	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID1); err != nil {
+	if err := DeleteUserMsgsAndSetMinSeq(operationID, testUID1); err != nil {
 		t.Error("checkMaxSeqWithMongo failed", testUID1)
 	}
 	if err := checkMaxSeqWithMongo(operationID, testUID1, constant.WriteDiffusion); err != nil {
@@ -94,7 +93,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	// for _, groupID := range testWorkingGroupIDList {
 	// 	operationID = groupID + "-" + operationID
 	// 	log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "userIDList:", testUserIDList)
-	// 	if err := ResetUserGroupMinSeq(operationID, groupID, testUserIDList); err != nil {
+	// 	if err := DeleteUserSuperGroupMsgsAndSetMinSeq(operationID, groupID, testUserIDList); err != nil {
 	// 		t.Error("checkMaxSeqWithMongo failed", groupID)
 	// 	}
 	// 	if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {

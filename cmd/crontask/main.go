@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/internal/cron_task"
+	"Open_IM/internal/crontask"
 	"flag"
 	"fmt"
 	"time"

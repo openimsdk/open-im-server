@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
+	"hash/crc32"
 	"math/rand"
 	"reflect"
 	"runtime"
@@ -225,4 +226,8 @@ func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
 		}
 	}
 	return out
+}
+
+func GetHashCode(s string) uint32 {
+	return crc32.ChecksumIEEE([]byte(s))
 }

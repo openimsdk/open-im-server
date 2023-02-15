@@ -2,83 +2,53 @@ package msgtransfer
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/kafka"
-	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/statistics"
+	"Open_IM/pkg/common/prome"
 	"fmt"
-	"sync"
 )
 
-const OnlineTopicBusy = 1
-const OnlineTopicVacancy = 0
-const Msg = 2
-const ConsumerMsgs = 3
-const AggregationMessages = 4
-const MongoMessages = 5
-const ChannelNum = 100
-
-var (
-	persistentCH          PersistentConsumerHandler
-	historyCH             OnlineHistoryRedisConsumerHandler
-	historyMongoCH        OnlineHistoryMongoConsumerHandler
-	modifyCH              ModifyMsgConsumerHandler
-	producer              *kafka.Producer
-	producerToModify      *kafka.Producer
-	producerToMongo       *kafka.Producer
-	cmdCh                 chan Cmd2Value
-	onlineTopicStatus     int
-	w                     *sync.Mutex
-	singleMsgSuccessCount uint64
-	groupMsgCount         uint64
-	singleMsgFailedCount  uint64
-
-	singleMsgSuccessCountMutex sync.Mutex
-)
-
-func Init() {
-	cmdCh = make(chan Cmd2Value, 10000)
-	w = new(sync.Mutex)
-	if config.Config.Prometheus.Enable {
-		initPrometheus()
-	}
-	persistentCH.Init()   // ws2mschat save mysql
-	historyCH.Init(cmdCh) //
-	historyMongoCH.Init()
-	modifyCH.Init()
-	onlineTopicStatus = OnlineTopicVacancy
-	//offlineHistoryCH.Init(cmdCh)
-	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	statistics.NewStatistics(&groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
-	producerToModify = kafka.NewKafkaProducer(config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.MsgToModify.Topic)
-	producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
+type MsgTransfer struct {
+	persistentCH   PersistentConsumerHandler         // 聊天记录持久化到mysql的消费者 订阅的topic: ws2ms_chat
+	historyCH      OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
+	historyMongoCH OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
+	modifyCH       ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
 }
-func Run(promethuesPort int) {
-	//register mysqlConsumerHandler to
-	if config.Config.ChatPersistenceMysql {
-		go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
-	} else {
-		fmt.Println("not start mysql consumer")
+
+func NewMsgTransfer() *MsgTransfer {
+	msgTransfer := &MsgTransfer{}
+	msgTransfer.persistentCH.Init()
+	msgTransfer.historyCH.Init()
+	msgTransfer.historyMongoCH.Init()
+	msgTransfer.modifyCH.Init()
+	if config.Config.Prometheus.Enable {
+		msgTransfer.initPrometheus()
 	}
-	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
-	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
-	go modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(&modifyCH)
-	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
+	return msgTransfer
+}
+
+func (m *MsgTransfer) initPrometheus() {
+	prome.NewSeqGetSuccessCounter()
+	prome.NewSeqGetFailedCounter()
+	prome.NewSeqSetSuccessCounter()
+	prome.NewSeqSetFailedCounter()
+	prome.NewMsgInsertRedisSuccessCounter()
+	prome.NewMsgInsertRedisFailedCounter()
+	prome.NewMsgInsertMongoSuccessCounter()
+	prome.NewMsgInsertMongoFailedCounter()
+}
+
+func (m *MsgTransfer) Run(promePort int) {
+	if config.Config.ChatPersistenceMysql {
+		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&m.persistentCH)
+	} else {
+		fmt.Println("msg transfer not start mysql consumer")
+	}
+	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&m.historyCH)
+	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&m.historyMongoCH)
+	go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(&m.modifyCH)
 	go func() {
-		err := promePkg.StartPromeSrv(promethuesPort)
+		err := prome.StartPromeSrv(promePort)
 		if err != nil {
 			panic(err)
 		}
 	}()
-}
-func SetOnlineTopicStatus(status int) {
-	w.Lock()
-	defer w.Unlock()
-	onlineTopicStatus = status
-}
-func GetOnlineTopicStatus() int {
-	w.Lock()
-	defer w.Unlock()
-	return onlineTopicStatus
 }

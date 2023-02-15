@@ -15,7 +15,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )
@@ -53,15 +53,15 @@ func init() {
 }
 
 func initPrometheus() {
-	promePkg.NewMsgOfflinePushSuccessCounter()
-	promePkg.NewMsgOfflinePushFailedCounter()
+	prome.NewMsgOfflinePushSuccessCounter()
+	prome.NewMsgOfflinePushFailedCounter()
 }
 
 func Run(promethuesPort int) {
 	go rpcServer.run()
 	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)
 	go func() {
-		err := promePkg.StartPromeSrv(promethuesPort)
+		err := prome.StartPromeSrv(promethuesPort)
 		if err != nil {
 			panic(err)
 		}

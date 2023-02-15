@@ -1,14 +1,19 @@
 package msgtransfer
 
 import (
+	"Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/cache"
+	"Open_IM/pkg/common/db/controller"
+	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/tracelog"
 	pbMsg "Open_IM/pkg/proto/msg"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
+	"context"
 	"encoding/json"
 	"github.com/Shopify/sarama"
 
@@ -16,13 +21,13 @@ import (
 )
 
 type ModifyMsgConsumerHandler struct {
-	msgHandle              map[string]fcb
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
+
+	extendMsgInterface controller.ExtendMsgInterface
+	cache              cache.Cache
 }
 
 func (mmc *ModifyMsgConsumerHandler) Init() {
-	mmc.msgHandle = make(map[string]fcb)
-	mmc.msgHandle[config.Config.Kafka.MsgToModify.Topic] = mmc.ModifyMsg
 	mmc.modifyMsgConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToModify.Topic},
 		config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.ConsumerGroupID.MsgToModify)
@@ -35,7 +40,7 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "ModifyMsgConsumerHandler", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			mmc.msgHandle[msg.Topic](msg, string(msg.Key), sess)
+			mmc.ModifyMsg(msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)
 		}
@@ -58,6 +63,8 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 		if !isReactionFromCache {
 			continue
 		}
+		ctx := context.Background()
+		tracelog.SetOperationID(ctx, msgDataToMQ.OperationID)
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
 			notification := &apistruct.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
@@ -69,21 +76,21 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			}
 			if !notification.IsReact {
 				// first time to modify
-				var reactionExtensionList = make(map[string]mongoDB.KeyValue)
-				extendMsg := mongoDB.ExtendMsg{
+				var reactionExtensionList = make(map[string]unRelationTb.KeyValueModel)
+				extendMsg := unRelationTb.ExtendMsgModel{
 					ReactionExtensionList: reactionExtensionList,
 					ClientMsgID:           notification.ClientMsgID,
 					MsgFirstModifyTime:    notification.MsgFirstModifyTime,
 				}
 				for _, v := range notification.SuccessReactionExtensionList {
-					reactionExtensionList[v.TypeKey] = mongoDB.KeyValue{
+					reactionExtensionList[v.TypeKey] = unRelationTb.KeyValueModel{
 						TypeKey:          v.TypeKey,
 						Value:            v.Value,
 						LatestUpdateTime: v.LatestUpdateTime,
 					}
 				}
 
-				if err := db.DB.InsertExtendMsg(notification.SourceID, notification.SessionType, &extendMsg); err != nil {
+				if err := mmc.extendMsgInterface.InsertExtendMsg(ctx, notification.SourceID, notification.SessionType, &extendMsg); err != nil {
 					log.NewError(msgDataToMQ.OperationID, "MsgFirstModify InsertExtendMsg failed", notification.SourceID, notification.SessionType, extendMsg, err.Error())
 					continue
 				}
@@ -97,7 +104,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 					}
 				}
 				// is already modify
-				if err := db.DB.InsertOrUpdateReactionExtendMsgSet(notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, reactionExtensionList); err != nil {
+				if err := mmc.extendMsgInterface.InsertOrUpdateReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, reactionExtensionList); err != nil {
 					log.NewError(msgDataToMQ.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
 				}
 			}
@@ -106,15 +113,10 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}
-			if err := db.DB.DeleteReactionExtendMsgSet(notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, notification.SuccessReactionExtensionList); err != nil {
+			if err := mmc.extendMsgInterface.DeleteReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, notification.SuccessReactionExtensionList); err != nil {
 				log.NewError(msgDataToMQ.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
 			}
 		}
 	}
 
-}
-
-func UnMarshallSetReactionMsgContent(content []byte) (notification *apistruct.ReactionMessageModifierNotification, err error) {
-
-	return notification, nil
 }

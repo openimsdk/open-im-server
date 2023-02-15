@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	"github.com/OpenIMSDK/getcdv3"
@@ -66,21 +66,21 @@ func (rpc *rpcChat) initPrometheus() {
 	//	Name: "send_msg_failed",
 	//	Help: "The number of send msg failed",
 	//})
-	promePkg.NewMsgPullFromRedisSuccessCounter()
-	promePkg.NewMsgPullFromRedisFailedCounter()
-	promePkg.NewMsgPullFromMongoSuccessCounter()
-	promePkg.NewMsgPullFromMongoFailedCounter()
+	prome.NewMsgPullFromRedisSuccessCounter()
+	prome.NewMsgPullFromRedisFailedCounter()
+	prome.NewMsgPullFromMongoSuccessCounter()
+	prome.NewMsgPullFromMongoFailedCounter()
 
-	promePkg.NewSingleChatMsgRecvSuccessCounter()
-	promePkg.NewGroupChatMsgRecvSuccessCounter()
-	promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
+	prome.NewSingleChatMsgRecvSuccessCounter()
+	prome.NewGroupChatMsgRecvSuccessCounter()
+	prome.NewWorkSuperGroupChatMsgRecvSuccessCounter()
 
-	promePkg.NewSingleChatMsgProcessSuccessCounter()
-	promePkg.NewSingleChatMsgProcessFailedCounter()
-	promePkg.NewGroupChatMsgProcessSuccessCounter()
-	promePkg.NewGroupChatMsgProcessFailedCounter()
-	promePkg.NewWorkSuperGroupChatMsgProcessSuccessCounter()
-	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
+	prome.NewSingleChatMsgProcessSuccessCounter()
+	prome.NewSingleChatMsgProcessFailedCounter()
+	prome.NewGroupChatMsgProcessSuccessCounter()
+	prome.NewGroupChatMsgProcessFailedCounter()
+	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
+	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
 func (rpc *rpcChat) Run() {
@@ -104,11 +104,11 @@ func (rpc *rpcChat) Run() {
 		grpc.MaxSendMsgSize(sendSize),
 	}
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
@@ -146,9 +146,9 @@ func (rpc *rpcChat) runCh() {
 		case msg := <-rpc.delMsgCh:
 			log.NewInfo(msg.OperationID, utils.GetSelfFuncName(), "delmsgch recv new: ", msg)
 			db.DB.DelMsgFromCache(msg.UserID, msg.SeqList, msg.OperationID)
-			unexistSeqList, err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID)
+			unexistSeqList, err := db.DB.DelMsgBySeqs(msg.UserID, msg.SeqList, msg.OperationID)
 			if err != nil {
-				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
+				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqs args: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
 				continue
 			}
 			if len(unexistSeqList) > 0 {

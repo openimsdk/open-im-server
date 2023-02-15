@@ -1,7 +1,7 @@
 package group
 
 import (
-	cbApi "Open_IM/pkg/callback_struct"
+	"Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/table/relation"

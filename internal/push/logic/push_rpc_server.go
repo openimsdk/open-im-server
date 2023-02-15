@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
@@ -47,11 +47,11 @@ func (r *RPCServer) run() {
 	defer listener.Close()
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)

@@ -28,7 +28,7 @@ import (
 	"github.com/gin-gonic/gin"
 	//"syscall"
 	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 )
 
 // @title open-IM-Server API
@@ -50,11 +50,11 @@ func main() {
 	log.Info("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if config.Config.Prometheus.Enable {
-		promePkg.NewApiRequestCounter()
-		promePkg.NewApiRequestFailedCounter()
-		promePkg.NewApiRequestSuccessCounter()
-		r.Use(promePkg.PromeTheusMiddleware)
-		r.GET("/metrics", promePkg.PrometheusHandler())
+		prome.NewApiRequestCounter()
+		prome.NewApiRequestFailedCounter()
+		prome.NewApiRequestSuccessCounter()
+		r.Use(prome.PromeTheusMiddleware)
+		r.GET("/metrics", prome.PrometheusHandler())
 	}
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")

@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/utils"
 	"context"
-	go_redis "github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -34,7 +34,7 @@ func NewTokenRedis(redisClient *RedisClient, accessSecret string, accessExpire i
 func (t *TokenRedis) GetTokensWithoutError(ctx context.Context, userID, platform string) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platform
 	m, err := t.RedisClient.GetClient().HGetAll(context.Background(), key).Result()
-	if err != nil && err == go_redis.Nil {
+	if err != nil && err == redis.Nil {
 		return nil, nil
 	}
 	mm := make(map[string]int)

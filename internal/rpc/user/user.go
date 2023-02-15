@@ -3,6 +3,7 @@ package user
 import (
 	"Open_IM/internal/common/convert"
 	"Open_IM/internal/common/rpc_server"
+	"Open_IM/internal/common/rpcserver"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -65,7 +66,7 @@ func (s *userServer) Run() {
 		prome.NewGrpcRequestFailedCounter()
 		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)

@@ -100,3 +100,10 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32, tx ..
 	err = utils.Wrap(getDBConn(u.DB, tx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
 	return
 }
+
+// 获取所有用户ID
+func (u *UserGorm) GetAllUserID(ctx context.Context) ([]string, error) {
+	var userIDs []string
+	err := u.DB.Pluck("user_id", &userIDs).Error
+	return userIDs, err
+}

@@ -8,7 +8,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	pbAuth "Open_IM/pkg/proto/auth"
@@ -42,13 +42,13 @@ func (s *rpcAuth) Run() {
 	log.NewInfo(operationID, "listen network success ", listener, address)
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
-		promePkg.NewUserRegisterCounter()
-		promePkg.NewUserLoginCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
+		prome.NewUserRegisterCounter()
+		prome.NewUserLoginCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)

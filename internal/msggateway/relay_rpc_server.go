@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 	"Open_IM/pkg/common/tokenverify"
 	pbRelay "Open_IM/pkg/proto/relay"
 	sdkws "Open_IM/pkg/proto/sdkws"
@@ -34,14 +34,14 @@ type RPCServer struct {
 }
 
 func initPrometheus() {
-	promePkg.NewMsgRecvTotalCounter()
-	promePkg.NewGetNewestSeqTotalCounter()
-	promePkg.NewPullMsgBySeqListTotalCounter()
-	promePkg.NewMsgOnlinePushSuccessCounter()
-	promePkg.NewOnlineUserGauges()
-	//promePkg.NewSingleChatMsgRecvSuccessCounter()
-	//promePkg.NewGroupChatMsgRecvSuccessCounter()
-	//promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
+	prome.NewMsgRecvTotalCounter()
+	prome.NewGetNewestSeqTotalCounter()
+	prome.NewPullMsgBySeqListTotalCounter()
+	prome.NewMsgOnlinePushSuccessCounter()
+	prome.NewOnlineUserGauges()
+	//prome.NewSingleChatMsgRecvSuccessCounter()
+	//prome.NewGroupChatMsgRecvSuccessCounter()
+	//prome.NewWorkSuperGroupChatMsgRecvSuccessCounter()
 }
 
 func (r *RPCServer) onInit(rpcPort int) {
@@ -67,11 +67,11 @@ func (r *RPCServer) run() {
 	defer listener.Close()
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
@@ -205,7 +205,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 					resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
 					if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 						tempT.OnlinePush = true
-						promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
+						prome.PromeInc(prome.MsgOnlinePushSuccessCounter)
 						log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
 						temp.ResultCode = resultCode
 						resp = append(resp, temp)

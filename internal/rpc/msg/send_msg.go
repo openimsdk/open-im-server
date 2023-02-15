@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 )
@@ -369,7 +369,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 	}
 	switch pb.MsgData.SessionType {
 	case constant.SingleChatType:
-		promePkg.PromeInc(promePkg.SingleChatMsgRecvSuccessCounter)
+		prome.PromeInc(prome.SingleChatMsgRecvSuccessCounter)
 		// callback
 		t1 = time.Now()
 		callbackResp := callbackBeforeSendSingleMsg(pb)
@@ -382,7 +382,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 				callbackResp.ErrCode = 201
 			}
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-			promePkg.PromeInc(promePkg.SingleChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.SingleChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		t1 = time.Now()
@@ -402,7 +402,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 			log.Info(pb.OperationID, "sendMsgToWriter ", " cost time: ", time.Since(t1))
 			if err1 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err :RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String(), err1.Error())
-				promePkg.PromeInc(promePkg.SingleChatMsgProcessFailedCounter)
+				prome.PromeInc(prome.SingleChatMsgProcessFailedCounter)
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
@@ -412,7 +412,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 			log.Info(pb.OperationID, "sendMsgToWriter ", " cost time: ", time.Since(t1))
 			if err2 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:SendID", msgToMQSingle.MsgData.SendID, msgToMQSingle.String())
-				promePkg.PromeInc(promePkg.SingleChatMsgProcessFailedCounter)
+				prome.PromeInc(prome.SingleChatMsgProcessFailedCounter)
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
@@ -423,11 +423,11 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg resp: ", callbackResp)
 		}
-		promePkg.PromeInc(promePkg.SingleChatMsgProcessSuccessCounter)
+		prome.PromeInc(prome.SingleChatMsgProcessSuccessCounter)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.GroupChatType:
 		// callback
-		promePkg.PromeInc(promePkg.GroupChatMsgRecvSuccessCounter)
+		prome.PromeInc(prome.GroupChatMsgRecvSuccessCounter)
 		callbackResp := callbackBeforeSendGroupMsg(pb)
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg resp:", callbackResp)
@@ -437,12 +437,12 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 				callbackResp.ErrCode = 201
 			}
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-			promePkg.PromeInc(promePkg.GroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.GroupChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		var memberUserIDList []string
 		if flag, errCode, errMsg, memberUserIDList = rpc.messageVerification(ctx, pb); !flag {
-			promePkg.PromeInc(promePkg.GroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.GroupChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 		}
 		log.Debug(pb.OperationID, "GetGroupAllMember userID list", memberUserIDList, "len: ", len(memberUserIDList))
@@ -506,7 +506,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		}
 		if !sendTag {
 			log.NewWarn(pb.OperationID, "send tag is ", sendTag)
-			promePkg.PromeInc(promePkg.GroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.GroupChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		} else {
 			if pb.MsgData.ContentType == constant.AtText {
@@ -571,7 +571,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 				}()
 			}
 			log.Debug(pb.OperationID, "send msg cost time3 ", time.Since(t1), pb.MsgData.ClientMsgID)
-			promePkg.PromeInc(promePkg.GroupChatMsgProcessSuccessCounter)
+			prome.PromeInc(prome.GroupChatMsgProcessSuccessCounter)
 			return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 		}
 	case constant.NotificationChatType:
@@ -595,7 +595,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		log.Debug(pb.OperationID, "send msg cost time ", time.Since(t1), pb.MsgData.ClientMsgID)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.SuperGroupChatType:
-		promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
+		prome.PromeInc(prome.WorkSuperGroupChatMsgRecvSuccessCounter)
 		// callback
 		callbackResp := callbackBeforeSendGroupMsg(pb)
 		if callbackResp.ErrCode != 0 {
@@ -605,12 +605,12 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 			if callbackResp.ErrCode == 0 {
 				callbackResp.ErrCode = 201
 			}
-			promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.WorkSuperGroupChatMsgProcessFailedCounter)
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg result", "end rpc and return", callbackResp)
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		if flag, errCode, errMsg, _ = rpc.messageVerification(ctx, pb); !flag {
-			promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.WorkSuperGroupChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 		}
 		msgToMQSingle.MsgData = pb.MsgData
@@ -618,7 +618,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		err1 := rpc.sendMsgToWriter(ctx, &msgToMQSingle, msgToMQSingle.MsgData.GroupID, constant.OnlineStatus)
 		if err1 != nil {
 			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
-			promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+			prome.PromeInc(prome.WorkSuperGroupChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		}
 		// callback
@@ -626,7 +626,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSuperGroupMsg resp: ", callbackResp)
 		}
-		promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+		prome.PromeInc(prome.WorkSuperGroupChatMsgProcessSuccessCounter)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 
 	default:

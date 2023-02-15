@@ -37,7 +37,3 @@ type SuperGroupModelInterface interface {
 	DeleteSuperGroup(ctx context.Context, groupID string, tx ...any) error
 	RemoveGroupFromUser(ctx context.Context, groupID string, userIDs []string, tx ...any) error
 }
-
-func superGroupIndexGen(groupID string, seqSuffix uint32) string {
-	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
-}

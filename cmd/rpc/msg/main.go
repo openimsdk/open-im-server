@@ -4,7 +4,7 @@ import (
 	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"flag"
 	"fmt"
 )
@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("start msg rpc server, port: ", *rpcPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
 	rpcServer := msg.NewRpcChatServer(*rpcPort)
 	go func() {
-		err := promePkg.StartPromeSrv(*prometheusPort)
+		err := prome.StartPromeSrv(*prometheusPort)
 		if err != nil {
 			panic(err)
 		}

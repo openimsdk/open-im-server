@@ -51,9 +51,6 @@ kafka:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat" #用于mongo和mysql保存消息
-#  ws2mschatoffline:
-#    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-#    topic: "ws2ms_chat_offline" #原为离线用户消息处理，目前暂时弃用
   msgtomongo:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "msg_to_mongo"
@@ -223,8 +220,6 @@ push:
     appSecret:  
     enable: false
 
-
-
 manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
   appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
@@ -238,8 +233,6 @@ multiloginpolicy: 1
 
 #msg log insert to db
 chatpersistencemysql: true
-#可靠性存储
-reliablestorage: false
 #消息缓存时间
 msgCacheTimeout: 86400
 #群聊已读开启

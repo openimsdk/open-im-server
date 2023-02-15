@@ -12,7 +12,7 @@ import (
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
@@ -70,9 +70,7 @@ func NewGroupServer(port int) *groupServer {
 	if err != nil {
 		panic(err.Error())
 	}
-
 	//conns, err := g.registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
-
 	g.GroupInterface = controller.NewGroupInterface(mysql.GormConn(), redis.GetClient(), mongo.GetClient())
 	return &g
 }
@@ -98,11 +96,11 @@ func (s *groupServer) Run() {
 		grpc.UnaryInterceptor(middleware.RpcServerInterceptor),
 	}
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)

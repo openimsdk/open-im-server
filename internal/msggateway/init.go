@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -40,7 +40,7 @@ func Run(promethuesPort int) {
 	go ws.run()
 	go rpcSvr.run()
 	go func() {
-		err := promePkg.StartPromeSrv(promethuesPort)
+		err := prome.StartPromeSrv(promethuesPort)
 		if err != nil {
 			panic(err)
 		}

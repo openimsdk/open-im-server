@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
+	"Open_IM/pkg/common/prome"
 	pbChat "Open_IM/pkg/proto/msg"
 	push "Open_IM/pkg/proto/push"
 	pbRtc "Open_IM/pkg/proto/rtc"
@@ -51,18 +51,18 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	case constant.WSGetNewestSeq:
 		log.NewInfo(m.OperationID, "getSeqReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.getSeqReq(conn, &m)
-		promePkg.PromeInc(promePkg.GetNewestSeqTotalCounter)
+		prome.PromeInc(prome.GetNewestSeqTotalCounter)
 	case constant.WSSendMsg:
 		log.NewInfo(m.OperationID, "sendMsgReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.sendMsgReq(conn, &m)
-		promePkg.PromeInc(promePkg.MsgRecvTotalCounter)
+		prome.PromeInc(prome.MsgRecvTotalCounter)
 	case constant.WSSendSignalMsg:
 		log.NewInfo(m.OperationID, "sendSignalMsgReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.sendSignalMsgReq(conn, &m)
 	case constant.WSPullMsgBySeqList:
 		log.NewInfo(m.OperationID, "pullMsgBySeqListReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.pullMsgBySeqListReq(conn, &m)
-		promePkg.PromeInc(promePkg.PullMsgBySeqListTotalCounter)
+		prome.PromeInc(prome.PullMsgBySeqListTotalCounter)
 	case constant.WsLogoutMsg:
 		log.NewInfo(m.OperationID, "conn.Close()", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.userLogoutReq(conn, &m)

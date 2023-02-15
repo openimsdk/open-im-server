@@ -9,7 +9,7 @@ import (
 	"Open_IM/pkg/common/log"
 	sdkws "Open_IM/pkg/proto/sdkws"
 
-	promePkg "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prometheus"
 )
 
 func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
@@ -53,25 +53,25 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *sdkws.PullMessag
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
 		if err != go_redis.Nil {
-			promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
+			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqList))
 			log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 		} else {
 			log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
 		}
-		msgList, err1 := commonDB.DB.GetMsgBySeqListMongo2(in.UserID, failedSeqList, in.OperationID)
+		msgList, err1 := commonDB.DB.GetMsgBySeqs(in.UserID, failedSeqList, in.OperationID)
 		if err1 != nil {
-			promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
+			prome.PromeAdd(prome.MsgPullFromMongoFailedCounter, len(failedSeqList))
 			log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err1.Error())
 			resp.ErrCode = 201
 			resp.ErrMsg = err1.Error()
 			return resp, nil
 		} else {
-			promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
+			prome.PromeAdd(prome.MsgPullFromMongoSuccessCounter, len(msgList))
 			redisMsgList = append(redisMsgList, msgList...)
 			resp.List = redisMsgList
 		}
 	} else {
-		promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
+		prome.PromeAdd(prome.MsgPullFromRedisSuccessCounter, len(redisMsgList))
 		resp.List = redisMsgList
 	}
 
@@ -80,26 +80,26 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *sdkws.PullMessag
 		redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, in.OperationID)
 		if err != nil {
 			if err != go_redis.Nil {
-				promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
+				prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqList))
 				log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 			} else {
 				log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
 			}
-			msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, in.OperationID)
+			msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqs(k, failedSeqList, in.OperationID)
 			if err1 != nil {
-				promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
+				prome.PromeAdd(prome.MsgPullFromMongoFailedCounter, len(failedSeqList))
 				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err1.Error())
 				resp.ErrCode = 201
 				resp.ErrMsg = err1.Error()
 				return resp, nil
 			} else {
-				promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
+				prome.PromeAdd(prome.MsgPullFromMongoSuccessCounter, len(msgList))
 				redisMsgList = append(redisMsgList, msgList...)
 				x.MsgDataList = redisMsgList
 				m[k] = x
 			}
 		} else {
-			promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
+			prome.PromeAdd(prome.MsgPullFromRedisSuccessCounter, len(redisMsgList))
 			x.MsgDataList = redisMsgList
 			m[k] = x
 		}

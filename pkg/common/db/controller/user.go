@@ -23,6 +23,8 @@ type UserInterface interface {
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
+	//获取所有用户ID
+	GetAllUserID(ctx context.Context) ([]string, error)
 }
 
 type UserController struct {
@@ -55,6 +57,11 @@ func (u *UserController) Page(ctx context.Context, pageNumber, showNumber int32)
 func (u *UserController) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
 	return u.database.IsExist(ctx, userIDs)
 }
+
+func (u *UserController) GetAllUserID(ctx context.Context) ([]string, error) {
+	return u.database.GetAllUserID(ctx)
+}
+
 func NewUserController(db *gorm.DB) *UserController {
 	controller := &UserController{database: newUserDatabase(db)}
 	return controller
@@ -75,6 +82,8 @@ type UserDatabaseInterface interface {
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
+	//获取所有用户ID
+	GetAllUserID(ctx context.Context) ([]string, error)
 }
 
 type UserDatabase struct {
@@ -137,4 +146,8 @@ func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 		return true, nil
 	}
 	return false, nil
+}
+
+func (u *UserDatabase) GetAllUserID(ctx context.Context) ([]string, error) {
+	return u.user.GetAllUserID(ctx)
 }

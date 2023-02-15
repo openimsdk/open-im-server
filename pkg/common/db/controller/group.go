@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/relation"
 	relationTb "Open_IM/pkg/common/db/table/relation"
-	unrelationTb "Open_IM/pkg/common/db/table/unrelation"
+	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/utils"
 	"context"
@@ -47,8 +47,8 @@ type GroupInterface interface {
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
 	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error)
 	// SuperGroup
-	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error)
-	FindJoinSuperGroup(ctx context.Context, userID string) (superGroup *unrelationTb.UserToSuperGroupModel, err error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (superGroup *unRelationTb.UserToSuperGroupModel, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
@@ -153,11 +153,11 @@ func (g *GroupController) PageGroupRequestUser(ctx context.Context, userID strin
 	return g.database.PageGroupRequestUser(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *GroupController) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error) {
+func (g *GroupController) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error) {
 	return g.database.FindSuperGroup(ctx, groupIDs)
 }
 
-func (g *GroupController) FindJoinSuperGroup(ctx context.Context, userID string) (*unrelationTb.UserToSuperGroupModel, error) {
+func (g *GroupController) FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error) {
 	return g.database.FindJoinSuperGroup(ctx, userID)
 }
 
@@ -203,8 +203,8 @@ type GroupDataBaseInterface interface {
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
 	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error)
 	// SuperGroup
-	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error)
-	FindJoinSuperGroup(ctx context.Context, userID string) (*unrelationTb.UserToSuperGroupModel, error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
@@ -467,11 +467,11 @@ func (g *GroupDataBase) PageGroupRequestUser(ctx context.Context, userID string,
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *GroupDataBase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error) {
+func (g *GroupDataBase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*table.SuperGroupModel, error) {
 	return g.mongoDB.FindSuperGroup(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (*unrelationTb.UserToSuperGroupModel, error) {
+func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (*table.UserToSuperGroupModel, error) {
 	return g.mongoDB.GetSuperGroupByUserID(ctx, userID)
 }
 

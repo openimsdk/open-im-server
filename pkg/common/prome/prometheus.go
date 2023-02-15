@@ -1,4 +1,4 @@
-package prometheus
+package prome
 
 import (
 	"Open_IM/pkg/common/config"

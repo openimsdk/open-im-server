@@ -6,14 +6,11 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/db/table"
-	"Open_IM/pkg/common/db/unrelation"
+	relationTb "Open_IM/pkg/common/db/relation"
+	unrealationTb "Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
-	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/getcdv3"
+	"Open_IM/pkg/common/prome"
 	pbConversation "Open_IM/pkg/proto/conversation"
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
@@ -95,11 +92,11 @@ func (c *conversationServer) Run() {
 	//grpc server
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)

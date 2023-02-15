@@ -9,7 +9,7 @@ package msgtransfer
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/mysql_model/im_mysql_msg_model"
+	"Open_IM/pkg/common/db/controller"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/msg"
@@ -17,33 +17,17 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-
-	promePkg "Open_IM/pkg/common/prometheus"
 )
 
 type PersistentConsumerHandler struct {
-	msgHandle               map[string]fcb
 	persistentConsumerGroup *kfk.MConsumerGroup
+	chatLogInterface        controller.ChatLogInterface
 }
 
 func (pc *PersistentConsumerHandler) Init() {
-	pc.msgHandle = make(map[string]fcb)
-	pc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = pc.handleChatWs2Mysql
 	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
-
-}
-
-func initPrometheus() {
-	promePkg.NewSeqGetSuccessCounter()
-	promePkg.NewSeqGetFailedCounter()
-	promePkg.NewSeqSetSuccessCounter()
-	promePkg.NewSeqSetFailedCounter()
-	promePkg.NewMsgInsertRedisSuccessCounter()
-	promePkg.NewMsgInsertRedisFailedCounter()
-	promePkg.NewMsgInsertMongoSuccessCounter()
-	promePkg.NewMsgInsertMongoFailedCounter()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
@@ -75,7 +59,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 		}
 		if tag {
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
-			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
+			if err = pc.chatLogInterface.CreateChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}
@@ -90,7 +74,7 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			pc.msgHandle[msg.Topic](msg, string(msg.Key), sess)
+			pc.handleChatWs2Mysql(msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)
 		}
@@ -98,15 +82,3 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	}
 	return nil
 }
-
-1. 请求1  group Rpc             2. 请求2 发消息 sendMsg rpc
-1 更改数据库
-
-2. 删除哈希缓存
-								检测到哈希变了， 群成员还没来得及删除，有问题
-3. 删除群成员缓存
-
-4. 删除对应群成员加群缓存
-
-5. 删除数量缓存
-

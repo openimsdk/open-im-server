@@ -225,10 +225,6 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
-		//Ws2mschatOffline struct {
-		//	Addr  []string `yaml:"addr"`
-		//	Topic string   `yaml:"topic"`
-		//}
 		MsgToMongo struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
@@ -252,7 +248,6 @@ type config struct {
 	Secret                            string `yaml:"secret"`
 	MultiLoginPolicy                  int    `yaml:"multiloginpolicy"`
 	ChatPersistenceMysql              bool   `yaml:"chatpersistencemysql"`
-	ReliableStorage                   bool   `yaml:"reliablestorage"`
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
 	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`

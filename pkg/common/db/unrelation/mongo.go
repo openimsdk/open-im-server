@@ -62,17 +62,17 @@ func (m *Mongo) GetClient() *mongo.Client {
 }
 
 func (m *Mongo) CreateMsgIndex() {
-	if err := m.createMongoIndex(unrelation, false, "uid"); err != nil {
+	if err := m.createMongoIndex(unrelation.CChat, false, "uid"); err != nil {
 		fmt.Println(err.Error() + " index create failed " + unrelation.CChat + " uid, please create index by yourself in field uid")
 	}
 }
 
 func (m *Mongo) CreateSuperGroupIndex() {
 	if err := m.createMongoIndex(unrelation.CSuperGroup, true, "group_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CTag + " group_id")
+		panic(err.Error() + "index create failed " + unrelation.CSuperGroup + " group_id")
 	}
 	if err := m.createMongoIndex(unrelation.CUserToSuperGroup, true, "user_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CTag + "user_id")
+		panic(err.Error() + "index create failed " + unrelation.CUserToSuperGroup + "user_id")
 	}
 }
 
