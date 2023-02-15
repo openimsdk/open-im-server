@@ -1,7 +1,7 @@
 package callbackstruct
 
 type CallbackBeforeAddFriendReq struct {
-	CallbackCommand string `json:"callbackCommand"`
+	CallbackCommand `json:"callbackCommand"`
 	FromUserID      string `json:"fromUserID" `
 	ToUserID        string `json:"toUserID"`
 	ReqMsg          string `json:"reqMsg"`

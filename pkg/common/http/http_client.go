@@ -59,7 +59,7 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	return result, nil
 }
 
-func CallBackPostReturn(url, callbackCommand string, input interface{}, output cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
+func callBackPostReturn(url, callbackCommand string, input interface{}, output cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
 	v := urlLib.Values{}
 	v.Set("callbackCommand", callbackCommand)
 	url = url + "?" + v.Encode()
@@ -79,6 +79,6 @@ func CallBackPostReturn(url, callbackCommand string, input interface{}, output c
 	return output.Parse()
 }
 
-func CallBackPostReturnV2(url string, req cbapi.CallbackReq, resp cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
-	return CallBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
+func CallBackPostReturn(url string, req cbapi.CallbackReq, resp cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
+	return callBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }

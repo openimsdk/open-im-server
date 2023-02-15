@@ -67,8 +67,8 @@ type CallbackMsgModifyCommandResp struct {
 	Ex               *string                `json:"ex"`
 }
 type CallbackBeforeSetMessageReactionExtReq struct {
-	OperationID           string                     `json:"operationID"`
-	CallbackCommand       string                     `json:"callbackCommand"`
+	OperationID           string `json:"operationID"`
+	CallbackCommand       `json:"callbackCommand"`
 	SourceID              string                     `json:"sourceID"`
 	OpUserID              string                     `json:"opUserID"`
 	SessionType           int32                      `json:"sessionType"`
@@ -84,8 +84,8 @@ type CallbackBeforeSetMessageReactionExtResp struct {
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }
 type CallbackDeleteMessageReactionExtReq struct {
+	CallbackCommand       `json:"callbackCommand"`
 	OperationID           string            `json:"operationID"`
-	CallbackCommand       string            `json:"callbackCommand"`
 	SourceID              string            `json:"sourceID"`
 	OpUserID              string            `json:"opUserID"`
 	SessionType           int32             `json:"sessionType"`

@@ -46,7 +46,7 @@ func CallbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) er
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
-	return http.CallBackPostReturnV2(cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg)
+	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg)
 }
 
 func CallbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -58,7 +58,7 @@ func CallbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
-	return http.CallBackPostReturnV2(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
+	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
 }
 
 func CallbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -70,7 +70,7 @@ func CallbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	return http.CallBackPostReturnV2(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
+	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
 }
 
 func CallbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -82,7 +82,7 @@ func CallbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) erro
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
-	return http.CallBackPostReturnV2(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
 func CallbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -93,7 +93,7 @@ func CallbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
-	if err := http.CallBackPostReturnV2(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
 		return err
 	}
 	if resp.Content != nil {

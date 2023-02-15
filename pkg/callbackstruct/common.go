@@ -56,8 +56,12 @@ func (c CommonCallbackResp) Parse() error {
 type UserStatusBaseCallback struct {
 	CallbackCommand string `json:"callbackCommand"`
 	OperationID     string `json:"operationID"`
-	PlatformID      int32  `json:"platformID"`
+	PlatformID      int    `json:"platformID"`
 	Platform        string `json:"platform"`
+}
+
+func (c UserStatusBaseCallback) GetCallbackCommand() string {
+	return c.CallbackCommand
 }
 
 type UserStatusCallbackReq struct {
