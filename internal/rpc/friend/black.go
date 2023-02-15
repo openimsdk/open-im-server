@@ -1,9 +1,7 @@
 package friend
 
 import (
-	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
@@ -13,14 +11,14 @@ import (
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {
 	resp = &pbFriend.GetPaginationBlacksResp{}
-	if err := check.Access(ctx, req.UserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	blacks, total, err := s.BlackInterface.FindOwnerBlacks(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-	resp.Blacks, err = (*convert.DBBlack)(nil).DB2PB(blacks)
+	resp.Blacks, err = (*convert.NewDBBlack(nil, s.RegisterCenter)).DB2PB(ctx, blacks)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +39,13 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*
 
 func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
 	resp := &pbFriend.RemoveBlackResp{}
-	if err := check.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.BlackInterface.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
-	chat.BlackDeletedNotification(ctx, req)
+	s.notification.BlackDeletedNotification(ctx, req)
 	return resp, nil
 }
 
@@ -60,6 +58,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := s.BlackInterface.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-	chat.BlackAddedNotification(ctx, req)
+	s.notification.BlackAddedNotification(ctx, req)
 	return resp, nil
 }

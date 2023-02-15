@@ -1,186 +1,48 @@
 package user
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
-	"Open_IM/internal/common/rpc_server"
-	"Open_IM/internal/common/rpcserver"
-	chat "Open_IM/internal/rpc/msg"
-	"Open_IM/pkg/common/config"
+	"Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	tablerelation "Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/log"
-	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/sdkws"
 	pbuser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-
+	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 
 type userServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	*rpcserver.RpcServer
 	controller.UserInterface
+	notification        *notification.Check
+	userCheck           *check.UserCheck
+	ConversationChecker *check.ConversationChecker
+	RegisterCenter      discoveryRegistry.SvcDiscoveryRegistry
 }
 
-func NewUserServer(port int) *userServer {
-	r, err := rpcserver.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImUserName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+	mysql, err := relation.NewGormDB()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	//mysql init
-	var mysql relation.Mysql
-	var model relation.UserGorm
-	err = mysql.InitConn().AutoMigrateModel(&model)
-	if err != nil {
-		panic("db init err:" + err.Error())
+	if err := mysql.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+		return err
 	}
-	if mysql.GormConn() != nil {
-		model.DB = mysql.GormConn()
-	} else {
-		panic("db init err:" + "conn is nil")
-	}
-	return &userServer{RpcServer: r, UserInterface: controller.NewUserController(model.DB)}
+	pbuser.RegisterUserServer(server, &userServer{
+		UserInterface:  controller.NewUserController(mysql),
+		notification:   notification.NewCheck(client),
+		userCheck:      check.NewUserCheck(client),
+		RegisterCenter: client,
+	})
+	return nil
 }
-
-func (s *userServer) Run() {
-	operationID := utils.OperationIDGenerator()
-	log.NewInfo(operationID, "rpc user start...")
-	listener, address, err := rpcserver.GetTcpListen(config.Config.ListenIP, s.Port)
-	if err != nil {
-		panic(err)
-	}
-	log.NewInfo(operationID, "listen ok ", address)
-	defer listener.Close()
-	//grpc server
-	var grpcOpts []grpc.ServerOption
-	if config.Config.Prometheus.Enable {
-		prome.NewGrpcRequestCounter()
-		prome.NewGrpcRequestFailedCounter()
-		prome.NewGrpcRequestSuccessCounter()
-		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(grpcOpts...)
-	defer srv.GracefulStop()
-	//Service registers with etcd
-	pbuser.RegisterUserServer(srv, s)
-
-	err = srv.Serve(listener)
-	if err != nil {
-		panic(err)
-	}
-	log.NewInfo(operationID, "rpc  user success")
-}
-
-// ok
-//func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID string, faceURL string, operationID string, opUserID string) {
-//	members, err := s.GetJoinedGroupMembers(ctx, userID)
-//	if err != nil {
-//		return
-//	}
-//	groupIDs := make([]string, 0)
-//	for _, v := range members {
-//		groupIDs = append(groupIDs, v.GroupID)
-//	}
-//	if s.SetGroupMemberInfo(ctx, "", faceURL, "", 0, groupIDs, userID) != nil {
-//		return
-//	}
-//	for _, v := range groupIDs {
-//		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
-//	}
-//}
-
-// ok
-//func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID string, newNickname, oldNickname string, operationID string, opUserID string) {
-//	members, err := s.GetJoinedGroupMembers(ctx, userID)
-//	if err != nil {
-//		return
-//	}
-//	groupIDs := make([]string, 0)
-//	for _, v := range members {
-//		if v.Nickname == oldNickname {
-//			groupIDs = append(groupIDs, v.GroupID)
-//		}
-//	}
-//	s.SetGroupMemberInfo(ctx, newNickname, "", "", 0, groupIDs, userID)
-//	for _, v := range groupIDs {
-//		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
-//	}
-//}
-
-// 设置群头像
-//func (s *userServer) SetGroupMemberInfo(ctx context.Context, nickname, faceURL, ex string, roleLevel int32, groupIDs []string, userID string) (err error) {
-//
-//	req := pbgroup.SetGroupMemberInfo{UserID: userID}
-//	if nickname != "" {
-//		req.Nickname = &wrappers.StringValue{Value: nickname}
-//	}
-//	if faceURL != "" {
-//		req.FaceURL = &wrappers.StringValue{Value: faceURL}
-//	}
-//	if ex != "" {
-//		req.Ex = &wrappers.StringValue{Value: ex}
-//	}
-//	if roleLevel != 0 {
-//		req.RoleLevel = &wrappers.Int32Value{Value: roleLevel}
-//	}
-//
-//	setGroupMemberInfoReq := &pbgroup.SetGroupMemberInfoReq{}
-//	for _, v := range groupIDs {
-//		req.GroupID = v
-//		setGroupMemberInfoReq.Members = append(setGroupMemberInfoReq.Members, &req)
-//	}
-//	conn, err := s.RegisterCenter.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
-//	if err != nil {
-//		return err
-//	}
-//	client := group.NewGroupClient(conn)
-//	_, err = client.SetGroupMemberInfo(ctx, setGroupMemberInfoReq)
-//	return
-//}
-
-// 获取加入的群成员信息
-//func (s *userServer) GetJoinedGroupMembers(ctx context.Context, userID string) (members []*sdkws.GroupMemberFullInfo, err error) {
-//	conn, err := s.RegisterCenter.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	client := group.NewGroupClient(conn)
-//	for {
-//		idx := int32(0)
-//		req := pbgroup.GetJoinedGroupListReq{FromUserID: userID, Pagination: &sdkws.RequestPagination{PageNumber: idx, ShowNumber: constant.ShowNumber}}
-//		resp, err := client.GetJoinedGroupList(ctx, &req)
-//		if err != nil {
-//			return nil, err
-//		}
-//		groupIDs := make([]string, 0)
-//
-//		for _, v := range resp.Groups {
-//			groupIDs = append(groupIDs, v.GroupID)
-//		}
-//
-//		client.GetGroupMembersInfo()
-//
-//		if len(resp.Groups) < constant.ShowNumber {
-//			break
-//		}
-//		idx++
-//	}
-//
-//	return
-//}
 
 // ok
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
@@ -229,11 +91,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	go func() {
 		for _, v := range friends {
-			chat.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
+			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
 
-	chat.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
+	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
 
 	return resp, nil
 }
@@ -249,7 +111,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	chat.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
+	s.notification.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
 	return resp, nil
 }
 

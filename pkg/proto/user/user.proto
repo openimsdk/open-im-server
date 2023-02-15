@@ -128,7 +128,13 @@ message userRegisterResp {
 }
 
 
+message getGlobalRecvMessageOptReq{
+  string userID  = 1;
+}
 
+message getGlobalRecvMessageOptResp{
+  int32 globalRecvMsgOpt = 1;
+}
 
 service user {
   //获取指定的用户信息 全字段
@@ -137,8 +143,10 @@ service user {
   rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
   //设置用户消息接收选项
   rpc setGlobalRecvMessageOpt(setGlobalRecvMessageOptReq) returns(setGlobalRecvMessageOptResp);
+  //获取用户消息接收选项 没找到不返回错误
+  rpc getGlobalRecvMessageOpt(getGlobalRecvMessageOptReq) returns(getGlobalRecvMessageOptResp);
   //检查userID是否存在
-  rpc accountCheck(accountCheckReq)returns(accountCheckResp);
+  rpc accountCheck(accountCheckReq) returns (accountCheckResp);
   //翻页（或指定userID，昵称）拉取用户信息 全字段
   rpc getPaginationUsers(getPaginationUsersReq) returns (getPaginationUsersResp);
   //用户注册

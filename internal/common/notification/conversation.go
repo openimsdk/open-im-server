@@ -1,22 +1,18 @@
-package msg
+package notification
 
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
 	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
-func SetConversationNotification(operationID, sendID, recvID string, contentType int, m proto.Message, tips sdkws.TipsComm) {
-	log.NewInfo(operationID, "args: ", sendID, recvID, contentType, m.String(), tips.String())
+func (c *Check) SetConversationNotification(ctx context.Context, sendID, recvID string, contentType int, m proto.Message, tips sdkws.TipsComm) {
 	var err error
 	tips.Detail, err = proto.Marshal(m)
 	if err != nil {
-		log.NewError(operationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
 	marshaler := jsonpb.Marshaler{
@@ -31,18 +27,16 @@ func SetConversationNotification(operationID, sendID, recvID string, contentType
 	n.ContentType = int32(contentType)
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = operationID
 	n.Content, err = proto.Marshal(&tips)
 	if err != nil {
-		log.Error(operationID, utils.GetSelfFuncName(), "Marshal failed ", err.Error(), tips.String())
 		return
 	}
-	Notification(&n)
+	c.Notification(ctx, &n)
 }
 
 // SetPrivate调用
-func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPrivateChat bool) {
-	log.NewInfo(operationID, utils.GetSelfFuncName())
+func (c *Check) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) {
+
 	conversationSetPrivateTips := &sdkws.ConversationSetPrivateTips{
 		RecvID:    recvID,
 		SendID:    sendID,
@@ -56,23 +50,23 @@ func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPr
 		tipsMsg = config.Config.Notification.ConversationSetPrivate.DefaultTips.CloseTips
 	}
 	tips.DefaultTips = tipsMsg
-	SetConversationNotification(operationID, sendID, recvID, constant.ConversationPrivateChatNotification, conversationSetPrivateTips, tips)
+	c.SetConversationNotification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, conversationSetPrivateTips, tips)
 }
 
 // 会话改变
-func ConversationChangeNotification(ctx context.Context, userID string) {
-	log.NewInfo(operationID, utils.GetSelfFuncName())
+func (c *Check) ConversationChangeNotification(ctx context.Context, userID string) {
+
 	ConversationChangedTips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
 	}
 	var tips sdkws.TipsComm
 	tips.DefaultTips = config.Config.Notification.ConversationOptUpdate.DefaultTips.Tips
-	SetConversationNotification(operationID, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
+	c.SetConversationNotification(ctx, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
 }
 
-//会话未读数同步
-func ConversationUnreadChangeNotification(operationID, userID, conversationID string, updateUnreadCountTime int64) {
-	log.NewInfo(operationID, utils.GetSelfFuncName())
+// 会话未读数同步
+func (c *Check) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, updateUnreadCountTime int64) {
+
 	ConversationChangedTips := &sdkws.ConversationUpdateTips{
 		UserID:                userID,
 		ConversationIDList:    []string{conversationID},
@@ -80,5 +74,5 @@ func ConversationUnreadChangeNotification(operationID, userID, conversationID st
 	}
 	var tips sdkws.TipsComm
 	tips.DefaultTips = config.Config.Notification.ConversationOptUpdate.DefaultTips.Tips
-	SetConversationNotification(operationID, userID, userID, constant.ConversationUnreadNotification, ConversationChangedTips, tips)
+	c.SetConversationNotification(ctx, userID, userID, constant.ConversationUnreadNotification, ConversationChangedTips, tips)
 }

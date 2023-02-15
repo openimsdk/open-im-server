@@ -13,6 +13,47 @@ import (
 	"time"
 )
 
+//func NewMongo() *Mongo {
+//	mgo := &Mongo{}
+//	mgo.InitMongo()
+//	return mgo
+//}
+
+func NewMongo() (*Mongo, error) {
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	if config.Config.Mongo.DBUri != "" {
+		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
+		uri = config.Config.Mongo.DBUri
+	} else {
+		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
+		mongodbHosts := ""
+		for i, v := range config.Config.Mongo.DBAddress {
+			if i == len(config.Config.Mongo.DBAddress)-1 {
+				mongodbHosts += v
+			} else {
+				mongodbHosts += v + ","
+			}
+		}
+		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+				config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, mongodbHosts,
+				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
+		} else {
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+				mongodbHosts, config.Config.Mongo.DBDatabase,
+				config.Config.Mongo.DBMaxPoolSize)
+		}
+	}
+	fmt.Println("mongo:", uri)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+	return &Mongo{db: mongoClient}, nil
+}
+
 type Mongo struct {
 	db *mongo.Client
 }

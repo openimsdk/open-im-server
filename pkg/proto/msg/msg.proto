@@ -30,26 +30,6 @@ message MsgDataToMongoByMQ{
 
 }
 
-//message PullMessageReq {
-//  string UserID = 1;
-//  int64 SeqBegin = 2;
-//  int64 SeqEnd = 3;
-//  string OperationID = 4;
-//}
-//
-//message PullMessageResp {
-//  int32 ErrCode = 1;
-//  string ErrMsg = 2;
-//  int64 MaxSeq = 3;
-//  int64 MinSeq = 4;
-//  repeated GatherFormat SingleUserMsg = 5;
-//  repeated GatherFormat GroupUserMsg = 6;
-//}
-//message PullMessageBySeqListReq{
-//  string UserID = 1;
-//  string OperationID = 2;
-//  repeated int64 seqList =3;
-//}
 message GetMaxAndMinSeqReq {
   string UserID = 1;
   string OperationID = 2;
@@ -62,17 +42,10 @@ message GetMaxAndMinSeqResp {
 }
 
 message SendMsgReq {
-
-string token =1;
-string operationID = 2;
-sdkws.MsgData msgData = 3;
-
-
+  sdkws.MsgData msgData = 3;
 }
 
 message SendMsgResp {
-  int32 errCode = 1;
-  string errMsg = 2;
   string serverMsgID = 4;
   string clientMsgID = 5;
   int64  sendTime = 6;
@@ -80,37 +53,26 @@ message SendMsgResp {
 
 
 message ClearMsgReq{
-      string userID = 1;
-      string opUserID = 2;
-      string operationID = 3;
+  string userID = 1;
 }
 
 
 message ClearMsgResp{
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 
 message SetMsgMinSeqReq{
   string userID = 1;
   string groupID = 2;
   uint32 minSeq = 3;
-  string operationID = 4;
-  string opUserID = 5;
 }
 message SetMsgMinSeqResp{
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 
 message SetSendMsgStatusReq{
-  string operationID = 1;
   int32 status = 2;
 }
 
 message SetSendMsgStatusResp{
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 
 message GetSendMsgStatusReq{
@@ -123,14 +85,10 @@ message GetSendMsgStatusResp{
   int32 status = 3;
 }
 message DelSuperGroupMsgReq{
-  string opUserID = 1;
   string userID = 2;
   string groupID = 3;
-  string operationID = 4;
 }
 message DelSuperGroupMsgResp{
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 message GetSuperGroupMsgReq{
   string operationID = 1;
@@ -267,19 +225,27 @@ message MsgDataToModifyByMQ{
 
 
 service msg {
+  //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxAndMinSeq(sdkws.GetMaxAndMinSeqReq) returns(sdkws.GetMaxAndMinSeqResp);
+  //拉取历史消息（包括用户的，以及指定群组的）
   rpc PullMessageBySeqList(sdkws.PullMessageBySeqListReq) returns(sdkws.PullMessageBySeqListResp);
+  //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
+  //删除某人消息
   rpc DelMsgList(sdkws.DelMsgListReq) returns(sdkws.DelMsgListResp);
+  //删除某个用户某个大群消息
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
+  //清空某人所有消息
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
-  rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
-  rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
-  rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
-  rpc GetSuperGroupMsg(GetSuperGroupMsgReq) returns(GetSuperGroupMsgResp);
-  rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
 
-  // modify msg
+  //设置消息是否发送成功-针对api发送的消息
+  rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
+  //获取消息发送状态
+  rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
+
+
+
+  // 修改消息
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
   rpc GetMessageListReactionExtensions(GetMessageListReactionExtensionsReq) returns(GetMessageListReactionExtensionsResp);
   rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);

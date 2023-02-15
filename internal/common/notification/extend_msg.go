@@ -1,18 +1,16 @@
-package msg
+package notification
 
 import (
-	"Open_IM/pkg/api_struct"
-	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/getcdv3"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/proto/msg"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 )
 
-func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
+func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m apistruct.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
@@ -25,7 +23,6 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 		}
 	}
 	if len(keyMap) == 0 {
-		log.NewWarn(operationID, "all key set failed can not send notification", *req)
 		return
 	}
 	m.SuccessReactionExtensionList = keyMap
@@ -33,9 +30,9 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 	m.IsReact = resp.IsReact
 	m.IsExternalExtensions = req.IsExternalExtensions
 	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
+	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
-func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string, sessionType int32,
+func (c *Check) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
 	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m apistruct.ReactionMessageDeleteNotification
 	m.SourceID = req.SourceID
@@ -48,16 +45,20 @@ func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string
 		}
 	}
 	if len(keyMap) == 0 {
-		log.NewWarn(operationID, "all key set failed can not send notification", *req)
 		return
 	}
 	m.SuccessReactionExtensionList = keyMap
 	m.ClientMsgID = req.ClientMsgID
 	m.MsgFirstModifyTime = req.MsgFirstModifyTime
 
-	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory, isReactionFromCache)
+	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
-func messageReactionSender(operationID, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) {
+func (c *Check) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) {
+	var err error
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sendID", sendID, "sourceID", sourceID, "sessionType", sessionType)
+	}()
+
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
@@ -69,7 +70,6 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
 	}
 	pbData := msg.SendMsgReq{
-		OperationID: operationID,
 		MsgData: &sdkws.MsgData{
 			SendID:      sendID,
 			ClientMsgID: utils.GetMsgID(sendID),
@@ -77,9 +77,8 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 			MsgFrom:     constant.SysMsgType,
 			ContentType: contentType,
 			Content:     []byte(content),
-			//	ForceList:        params.ForceList,
-			CreateTime: utils.GetCurrentTimestampByMill(),
-			Options:    options,
+			CreateTime:  utils.GetCurrentTimestampByMill(),
+			Options:     options,
 		},
 	}
 	switch sessionType {
@@ -88,15 +87,5 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		return
-	}
-	client := msg.NewMsgClient(etcdConn)
-	reply, err := client.SendMsg(context.Background(), &pbData)
-	if err != nil {
-		log.NewError(operationID, "SendMsg rpc failed, ", pbData.String(), err.Error())
-	} else if reply.ErrCode != 0 {
-		log.NewError(operationID, "SendMsg rpc failed, ", pbData.String(), reply.ErrCode, reply.ErrMsg)
-	}
+	_, err = c.msg.SendMsg(ctx, &pbData)
 }

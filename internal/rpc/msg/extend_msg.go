@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
@@ -13,12 +14,12 @@ import (
 	"time"
 )
 
-func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
+func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.SetMessageReactionExtensionsResp
 	rResp.ClientMsgID = req.ClientMsgID
 	rResp.MsgFirstModifyTime = req.MsgFirstModifyTime
-	callbackResp := callbackSetMessageReactionExtensions(req)
+	callbackResp := notification.callbackSetMessageReactionExtensions(req)
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
 		rResp.ErrMsg = callbackResp.ErrMsg
@@ -41,7 +42,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		}
 		rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
 		return &rResp, nil
 	}
 	for _, v := range callbackResp.ResultReactionExtensionList {
@@ -71,7 +72,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 			log.Debug(req.OperationID, "redis handle firstly", req.String())
 			rResp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
 			for k, v := range req.ReactionExtensionList {
-				err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
+				err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 				if err != nil {
 					setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
 					continue
@@ -90,7 +91,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				log.Error(req.OperationID, "SetMessageReactionExpire err:", err.Error(), req.String())
 			}
 		} else {
-			err := rpc.dMessageLocker.LockGlobalMessage(req.ClientMsgID)
+			err := m.dMessageLocker.LockGlobalMessage(req.ClientMsgID)
 			if err != nil {
 				rResp.ErrCode = 100
 				rResp.ErrMsg = err.Error()
@@ -148,7 +149,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 					rResp.Result = append(rResp.Result, temp)
 				}
 			}
-			lockErr := rpc.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
+			lockErr := m.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
 			if lockErr != nil {
 				log.Error(req.OperationID, "UnLockGlobalMessage err:", lockErr.Error())
 			}
@@ -158,7 +159,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		log.Debug(req.OperationID, "redis handle secondly", req.String())
 
 		for k, v := range req.ReactionExtensionList {
-			err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
+			err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 			if err != nil {
 				setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
 				continue
@@ -187,14 +188,14 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	}
 	if !isExists {
 		if !req.IsReact {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
 		} else {
-			ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
 		}
 	} else {
-		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
 	}
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
 	return &rResp, nil
 
 }
@@ -215,8 +216,8 @@ func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errC
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 
-func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
+func (m *msgServer) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
 	for _, messageValue := range req.MessageReactionKeyList {
 		var oneMessage msg.SingleMessageExtensionResult
@@ -266,19 +267,19 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 		}
 		rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
 	}
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
 	return &rResp, nil
 
 }
 
-func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
+func (m *msgServer) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
 	return
 }
 
-func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
+func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.DeleteMessageListReactionExtensionsResp
-	callbackResp := callbackDeleteMessageReactionExtensions(req)
+	callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
 		rResp.ErrMsg = callbackResp.ErrMsg
@@ -294,7 +295,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//if ExternalExtension
 	if req.IsExternalExtensions {
 		rResp.Result = callbackResp.ResultReactionExtensionList
-		ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+		notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
 		return &rResp, nil
 
 	}
@@ -327,7 +328,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	if isExists {
 		log.Debug(req.OperationID, "redis handle this delete", req.String())
 		for _, v := range req.ReactionExtensionList {
-			err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, v.TypeKey)
+			err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, v.TypeKey)
 			if err != nil {
 				setDeleteKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, v.TypeKey, v)
 				continue
@@ -353,7 +354,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 			}
 		}
 	} else {
-		err := rpc.dMessageLocker.LockGlobalMessage(req.ClientMsgID)
+		err := m.dMessageLocker.LockGlobalMessage(req.ClientMsgID)
 		if err != nil {
 			rResp.ErrCode = 100
 			rResp.ErrMsg = err.Error()
@@ -412,13 +413,13 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 				rResp.Result = append(rResp.Result, temp)
 			}
 		}
-		lockErr := rpc.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
+		lockErr := m.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
 		if lockErr != nil {
 			log.Error(req.OperationID, "UnLockGlobalMessage err:", lockErr.Error())
 		}
 
 	}
-	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, isExists)
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
+	notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, isExists)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
 	return &rResp, nil
 }

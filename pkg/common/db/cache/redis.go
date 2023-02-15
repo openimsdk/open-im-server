@@ -88,14 +88,14 @@ type Cache interface {
 
 // native redis operate
 
-type RedisClient struct {
-	rdb redis.UniversalClient
-}
+//func NewRedis() *RedisClient {
+//	o := &RedisClient{}
+//	o.InitRedis()
+//	return o
+//}
 
-func (r *RedisClient) InitRedis() error {
+func NewRedis() (*RedisClient, error) {
 	var rdb redis.UniversalClient
-	var err error
-	ctx := context.Background()
 	if config.Config.Redis.EnableCluster {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    config.Config.Redis.DBAddress,
@@ -103,11 +103,10 @@ func (r *RedisClient) InitRedis() error {
 			Password: config.Config.Redis.DBPassWord, // no password set
 			PoolSize: 50,
 		})
-		_, err = rdb.Ping(ctx).Result()
-		if err != nil {
-			fmt.Println("redis cluster failed address ", config.Config.Redis.DBAddress, config.Config.Redis.DBUserName, config.Config.Redis.DBPassWord)
-			return err
-		}
+		//if err := rdb.Ping(ctx).Err();err != nil {
+		//	return nil, fmt.Errorf("redis ping %w", err)
+		//}
+		//return &RedisClient{rdb: rdb}, nil
 	} else {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     config.Config.Redis.DBAddress[0],
@@ -116,18 +115,22 @@ func (r *RedisClient) InitRedis() error {
 			DB:       0,                              // use default DB
 			PoolSize: 100,                            // 连接池大小
 		})
-		_, err = rdb.Ping(ctx).Result()
-		if err != nil {
-			fmt.Println(" redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
-			return err
-		}
+		//err := rdb.Ping(ctx).Err()
+		//if err != nil {
+		//	panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
+		//}
 	}
-	r.rdb = rdb
-	return nil
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	err := rdb.Ping(ctx).Err()
+	if err != nil {
+		return nil, fmt.Errorf("redis ping %w", err)
+	}
+	return &RedisClient{rdb: rdb}, nil
 }
 
-func (r *RedisClient) GetClient() redis.UniversalClient {
-	return r.rdb
+type RedisClient struct {
+	rdb redis.UniversalClient
 }
 
 func NewRedisClient(rdb redis.UniversalClient) *RedisClient {

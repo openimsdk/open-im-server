@@ -132,7 +132,6 @@ message FriendRequest{
 ///////////////////////////////////base end/////////////////////////////////////
 message PullMessageBySeqListReq{
   string userID = 1;
-  string operationID = 2;
   repeated uint32 seqList = 3;
   map <string, seqList>groupSeqList = 4;
 }
@@ -158,7 +157,6 @@ message PullMessageBySeqListResp {
 message GetMaxAndMinSeqReq {
   repeated string groupIDList = 1;
   string userID = 2;
-  string  operationID = 3;
 }
 message MaxAndMinSeq{
   uint32 maxSeq = 1;
@@ -167,8 +165,6 @@ message MaxAndMinSeq{
 message GetMaxAndMinSeqResp {
   uint32 maxSeq = 1;
   uint32 minSeq = 2;
-  int32 errCode = 3;
-  string errMsg = 4;
   map<string, MaxAndMinSeq> groupMaxAndMinSeq = 5;
 }
 
@@ -606,15 +602,11 @@ message SignalGetTokenByRoomIDReply {
 
 
 message DelMsgListReq{
-  string opUserID = 1;
   string userID = 2;
   repeated uint32 seqList = 3;
-  string operationID = 4;
 }
 
 message DelMsgListResp{
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 
 message SetAppBackgroundStatusReq {

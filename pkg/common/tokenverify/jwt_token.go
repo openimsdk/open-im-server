@@ -87,3 +87,6 @@ func CheckAdmin(ctx context.Context) error {
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
+func IsManagerUserID(opUserID string) bool {
+	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
+}

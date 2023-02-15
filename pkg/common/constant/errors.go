@@ -13,6 +13,8 @@ var (
 
 	ErrUserIDNotFound  = &ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
 	ErrGroupIDNotFound = &ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
+	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
+	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
 
 	ErrRecordNotFound = &ErrInfo{RecordNotFoundError, "RecordNotFoundError", ""}
 
@@ -45,6 +47,13 @@ var (
 
 	ErrDB        = ErrDatabase
 	ErrSendLimit = ErrInternalServer
+
+	ErrBlockedByPeer = &ErrInfo{BlockedByPeer, "BlockedByPeer", ""}
+	//不是对方的好友
+	ErrNotPeersFriend = &ErrInfo{NotPeersFriend, "NotPeersFriend", ""}
+	//
+	ErrMutedInGroup = &ErrInfo{MutedInGroup, "MutedInGroup", ""}
+	ErrMutedGroup   = &ErrInfo{MutedGroup, "MutedGroup", ""}
 )
 
 const (
@@ -92,6 +101,8 @@ const (
 	RelationshipAlreadyError = 92001 //已经是好友关系（或者黑名单）
 	NotRelationshipYetError  = 92002 //不是好友关系（或者黑名单）
 	CanNotAddYourselfError   = 92003 //不能添加自己为好友
+	BlockedByPeer            = 92004 //被对方拉黑
+	NotPeersFriend           = 92005 //不是对方的好友
 )
 
 // 群组错误码
@@ -103,6 +114,9 @@ const (
 	OwnerNotAllowedQuitError = 93004 //群主不能退群
 	GroupTypeNotSupport      = 93005
 	GroupNoOwner             = 93006
+
+	MutedInGroup = 93007 //群成员被禁言
+	MutedGroup   = 93008 //群被禁言
 )
 
 // 用户错误码

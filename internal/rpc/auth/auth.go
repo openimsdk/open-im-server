@@ -2,70 +2,47 @@ package auth
 
 import (
 	"Open_IM/internal/common/check"
-	"Open_IM/internal/common/rpc_server"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
+	"Open_IM/pkg/common/db/relation"
+	relationTb "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
-	prome "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	pbAuth "Open_IM/pkg/proto/auth"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 
-func NewRpcAuthServer(port int) *rpcAuth {
-	r, err := rpcserver.NewRpcServer(config.Config.RpcRegisterIP, port, config.Config.RpcRegisterName.OpenImAuthName, config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+	mysql, err := relation.NewGormDB()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	var redis cache.RedisClient
-	redis.InitRedis()
-	return &rpcAuth{
-		RpcServer:     r,
-		AuthInterface: controller.NewAuthController(redis.GetClient(), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+	if err := mysql.AutoMigrate(&relationTb.FriendModel{}, &relationTb.FriendRequestModel{}, &relationTb.BlackModel{}); err != nil {
+		return err
 	}
+	redis, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	pbAuth.RegisterAuthServer(server, &authServer{
+		userCheck:      check.NewUserCheck(client),
+		RegisterCenter: client,
+		AuthInterface:  controller.NewAuthController(redis.GetClient(), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+	})
+	return nil
 }
 
-func (s *rpcAuth) Run() {
-	operationID := utils.OperationIDGenerator()
-	log.NewInfo(operationID, "rpc auth start...")
-	listener, address, err := rpcserver.GetTcpListen(config.Config.ListenIP, s.Port)
-	if err != nil {
-		panic(err)
-	}
-	log.NewInfo(operationID, "listen network success ", listener, address)
-	var grpcOpts []grpc.ServerOption
-	if config.Config.Prometheus.Enable {
-		prome.NewGrpcRequestCounter()
-		prome.NewGrpcRequestFailedCounter()
-		prome.NewGrpcRequestSuccessCounter()
-		prome.NewUserRegisterCounter()
-		prome.NewUserLoginCounter()
-		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(prome.UnaryServerInterceptorProme),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(grpcOpts...)
-	defer srv.GracefulStop()
-	pbAuth.RegisterAuthServer(srv, s)
-	err = srv.Serve(listener)
-	if err != nil {
-		panic(err)
-	}
-	log.NewInfo(operationID, "rpc auth ok")
-}
-
-func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
+func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
-	if _, err := check.GetUsersInfo(ctx, req.UserID); err != nil {
+	if _, err := s.userCheck.GetUsersInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	token, err := s.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))
@@ -77,7 +54,7 @@ func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbA
 	return &resp, nil
 }
 
-func (s *rpcAuth) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
+func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
 	claims, err = tokenverify.GetClaimFromToken(tokensString)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
@@ -102,7 +79,7 @@ func (s *rpcAuth) parseToken(ctx context.Context, tokensString string) (claims *
 	return nil, constant.ErrTokenNotExist.Wrap()
 }
 
-func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
+func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
 	resp = &pbAuth.ParseTokenResp{}
 	claims, err := s.parseToken(ctx, req.Token)
 	if err != nil {
@@ -114,7 +91,7 @@ func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (re
 	return resp, nil
 }
 
-func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
+func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
 	resp := pbAuth.ForceLogoutResp{}
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
@@ -125,7 +102,7 @@ func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (
 	return &resp, nil
 }
 
-func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
+func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
 	grpcCons, err := s.RegisterCenter.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
 	if err != nil {
 		return err
@@ -140,7 +117,8 @@ func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID in
 	return constant.ErrInternalServer.Wrap()
 }
 
-type rpcAuth struct {
-	*rpcserver.RpcServer
+type authServer struct {
 	controller.AuthInterface
+	userCheck      *check.UserCheck
+	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
 }

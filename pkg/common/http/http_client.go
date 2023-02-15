@@ -7,7 +7,7 @@
 package http
 
 import (
-	cbApi "Open_IM/pkg/callbackstruct"
+	cbapi "Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"bytes"
@@ -59,7 +59,7 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	return result, nil
 }
 
-func CallBackPostReturn(url, callbackCommand string, input interface{}, output cbApi.CallbackResp, callbackConfig config.CallBackConfig) error {
+func callBackPostReturn(url, callbackCommand string, input interface{}, output cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
 	v := urlLib.Values{}
 	v.Set("callbackCommand", callbackCommand)
 	url = url + "?" + v.Encode()
@@ -77,4 +77,8 @@ func CallBackPostReturn(url, callbackCommand string, input interface{}, output c
 		return constant.NewErrData(err)
 	}
 	return output.Parse()
+}
+
+func CallBackPostReturn(url string, req cbapi.CallbackReq, resp cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
+	return callBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }
