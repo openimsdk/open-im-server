@@ -41,7 +41,7 @@ type MsgInterface interface {
 	// 通过seqList获取大群在db里面的消息
 	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []uint32) (seqMsg []*sdkws.MsgData, err error)
 	// 删除用户所有消息/cache/db然后重置seq
-	CleanUpUserMsgFromMongo(ctx context.Context, userID string) error
+	CleanUpUserMsg(ctx context.Context, userID string) error
 	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
 	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID string, remainTime int64) error
 	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
@@ -91,8 +91,8 @@ func (m *MsgController) GetSuperGroupMsgBySeqs(ctx context.Context, groupID stri
 	return m.database.GetSuperGroupMsgBySeqs(ctx, groupID, seqs)
 }
 
-func (m *MsgController) CleanUpUserMsgFromMongo(ctx context.Context, userID string) error {
-	return m.database.CleanUpUserMsgFromMongo(ctx, userID)
+func (m *MsgController) CleanUpUserMsg(ctx context.Context, userID string) error {
+	return m.database.CleanUpUserMsg(ctx, userID)
 }
 
 func (m *MsgController) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID string, remainTime int64) error {
@@ -121,9 +121,9 @@ type MsgDatabaseInterface interface {
 	// 通过seqList获取大群在 mongo里面的消息
 	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []uint32) (seqMsg []*sdkws.MsgData, err error)
 	// 删除用户所有消息/redis/mongo然后重置seq
-	CleanUpUserMsgFromMongo(ctx context.Context, userID string) error
+	CleanUpUserMsg(ctx context.Context, userID string) error
 	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
-	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID string, remainTime int64) error
+	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID []string, remainTime int64) error
 	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
 }
@@ -410,30 +410,53 @@ func (db *MsgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 }
 
 func (db *MsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []uint32) (seqMsg []*sdkws.MsgData, err error) {
-	return db.getMsgBySeqs(ctx, userID, seqs, constant.WriteDiffusion)
+	successMsgs, failedSeqs, err := db.msgCache.GetMessageListBySeq(ctx, userID, seqs)
+	if err != nil {
+		if err != redis.Nil {
+			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
+			log.Error(tracelog.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
+		}
+	}
+	prome.PromeAdd(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
+	if len(failedSeqs) > 0 {
+		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, seqs, constant.WriteDiffusion)
+		if err != nil {
+			prome.PromeAdd(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
+			return nil, err
+		}
+		prome.PromeAdd(prome.MsgPullFromMongoSuccessCounter, len(mongoMsgs))
+		successMsgs = append(successMsgs, mongoMsgs...)
+	}
+	return successMsgs, nil
 }
 
 func (db *MsgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []uint32) (seqMsg []*sdkws.MsgData, err error) {
-	return db.getMsgBySeqs(ctx, groupID, seqs, constant.ReadDiffusion)
+	successMsgs, failedSeqs, err := db.msgCache.GetMessageListBySeq(ctx, groupID, seqs)
+	if err != nil {
+		if err != redis.Nil {
+			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
+			log.Error(tracelog.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
+		}
+	}
+	prome.PromeAdd(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
+	if len(failedSeqs) > 0 {
+		mongoMsgs, err := db.getMsgBySeqs(ctx, groupID, seqs, constant.ReadDiffusion)
+		if err != nil {
+			prome.PromeAdd(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
+			return nil, err
+		}
+		prome.PromeAdd(prome.MsgPullFromMongoSuccessCounter, len(mongoMsgs))
+		successMsgs = append(successMsgs, mongoMsgs...)
+	}
+	return successMsgs, nil
 }
 
-func (db *MsgDatabase) CleanUpUserMsgFromMongo(ctx context.Context, userID string) error {
-	maxSeq, err := db.msgCache.GetUserMaxSeq(ctx, userID)
-	if err == redis.Nil {
-		return nil
-	}
+func (db *MsgDatabase) CleanUpUserMsg(ctx context.Context, userID string) error {
+	err := db.DeleteUserMsgsAndSetMinSeq(ctx, userID, 0)
 	if err != nil {
 		return err
 	}
-	docIDs := db.msg.GetSeqDocIDList(userID, uint32(maxSeq))
-	err = db.msgModel.Delete(ctx, docIDs)
-	if err == mongo.ErrNoDocuments {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	err = db.msgCache.SetUserMinSeq(ctx, userID, maxSeq)
+	err = db.msgCache.CleanUpOneUserAllMsg(ctx, userID)
 	return utils.Wrap(err, "")
 }
 

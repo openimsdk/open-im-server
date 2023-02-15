@@ -56,7 +56,7 @@ type Cache interface {
 	GetMessageListBySeq(ctx context.Context, userID string, seqList []uint32) (seqMsg []*sdkws.MsgData, failedSeqList []uint32, err error)
 	SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error)
 	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error
-	CleanUpOneUserAllMsgFromRedis(ctx context.Context, userID string) error
+	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
 	HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInfoFromCacheByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error)
 	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *pbRtc.SignalInviteReq, err error)
@@ -231,27 +231,28 @@ func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, pl
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
 
-func (r *RedisClient) GetMessageListBySeq(ctx context.Context, userID string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []uint32, errResult error) {
+func (r *RedisClient) GetMessageListBySeq(ctx context.Context, userID string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []uint32, err2 error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
 		result, err := r.rdb.Get(context.Background(), key).Result()
 		if err != nil {
-			errResult = err
+			if err != redis.Nil {
+				err2 = err
+			}
 			failedSeqList = append(failedSeqList, v)
 		} else {
 			msg := sdkws.MsgData{}
 			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
-				errResult = err
+				err2 = err
 				failedSeqList = append(failedSeqList, v)
 			} else {
 				seqMsg = append(seqMsg, &msg)
 			}
-
 		}
 	}
-	return seqMsg, failedSeqList, errResult
+	return seqMsg, failedSeqList, err2
 }
 
 func (r *RedisClient) SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ, uid string) (int, error) {
@@ -285,7 +286,7 @@ func (r *RedisClient) DeleteMessageFromCache(ctx context.Context, userID string,
 	return nil
 }
 
-func (r *RedisClient) CleanUpOneUserAllMsgFromRedis(ctx context.Context, userID string) error {
+func (r *RedisClient) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 	key := messageCache + userID + "_" + "*"
 	vals, err := r.rdb.Keys(ctx, key).Result()
 	if err == redis.Nil {
