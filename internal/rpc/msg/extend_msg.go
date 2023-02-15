@@ -291,11 +291,11 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
 		rResp.ErrMsg = callbackResp.ErrMsg
-		for _, value := range req.ReactionExtensionList {
+		for _, value := range callbackResp.ResultReactionExtensionList {
 			temp := new(msg.KeyValueResp)
-			temp.KeyValue = value
-			temp.ErrMsg = callbackResp.ErrMsg
-			temp.ErrCode = 100
+			temp.KeyValue = value.KeyValue
+			temp.ErrMsg = value.ErrMsg
+			temp.ErrCode = value.ErrCode
 			rResp.Result = append(rResp.Result, temp)
 		}
 		return &rResp, nil
