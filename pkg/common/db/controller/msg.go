@@ -46,6 +46,9 @@ type MsgInterface interface {
 	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID string, remainTime int64) error
 	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
+
+	// SetSendMsgStatus
+	// GetSendMsgStatus
 }
 
 func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {
