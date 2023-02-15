@@ -123,7 +123,7 @@ type MsgDatabaseInterface interface {
 	// 删除用户所有消息/redis/mongo然后重置seq
 	CleanUpUserMsgFromMongo(ctx context.Context, userID string) error
 	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
-	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID string, remainTime int64) error
+	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID []string, remainTime int64) error
 	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
 }
