@@ -223,6 +223,13 @@ message MsgDataToModifyByMQ{
  string triggerID = 3;
 }
 
+message DelMsgListReq{
+  string userID = 2;
+  repeated uint32 seqList = 3;
+}
+
+message DelMsgListResp{
+}
 
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
@@ -232,7 +239,7 @@ service msg {
   //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
   //删除某人消息
-  rpc DelMsgList(sdkws.DelMsgListReq) returns(sdkws.DelMsgListResp);
+  rpc DelMsgList(DelMsgListReq) returns(DelMsgListResp);
   //删除某个用户某个大群消息
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   //清空某人所有消息
