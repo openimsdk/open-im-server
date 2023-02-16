@@ -9,7 +9,7 @@ import (
 
 func (m *msgServer) DelMsgList(ctx context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
 	resp := &common.DelMsgListResp{}
-	if err := m.MsgInterface.DelMsgFromCache(ctx, req.UserID, req.SeqList); err != nil {
+	if _, err := m.MsgInterface.DelMsgBySeqs(ctx, req.UserID, req.SeqList); err != nil {
 		return nil, err
 	}
 	DeleteMessageNotification(ctx, req.UserID, req.SeqList)
@@ -21,11 +21,14 @@ func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroup
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	maxSeq, err := m.MsgInterface.GetGroupMaxSeq(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
-	}
-	if err := m.MsgInterface.SetGroupUserMinSeq(ctx, req.GroupID, maxSeq); err != nil {
+	//maxSeq, err := m.MsgInterface.GetGroupMaxSeq(ctx, req.GroupID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if err := m.MsgInterface.SetGroupUserMinSeq(ctx, req.GroupID, maxSeq); err != nil {
+	//	return nil, err
+	//}
+	if err := m.MsgInterface.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, req.GroupID, req.UserID, 0); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -36,8 +39,11 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.Cl
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	if err := m.MsgInterface.DelUserAllSeq(ctx, req.UserID); err != nil {
+	if err := m.MsgInterface.CleanUpUserMsg(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	//if err := m.MsgInterface.DelUserAllSeq(ctx, req.UserID); err != nil {
+	//	return nil, err
+	//}
 	return resp, nil
 }
