@@ -3,6 +3,7 @@ package controller
 import (
 	relation2 "Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"gorm.io/gorm"
@@ -100,7 +101,7 @@ func (b *BlackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 	inUser2Blacks = true
 	_, err = b.sqlDB.Take(ctx, userID2, userID1)
 	if err != nil {
-		if errors.Unwrap(err) != gorm.ErrRecordNotFound {
+		if utils.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
 		}
 		inUser2Blacks = false

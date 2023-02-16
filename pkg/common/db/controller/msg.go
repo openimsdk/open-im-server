@@ -337,7 +337,7 @@ func (db *MsgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID s
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		if utils.Contain(msgPb.Seq, seqs) {
+		if utils.Contain(msgPb.Seq, seqs...) {
 			indexes = append(indexes, i)
 			seqMsgs = append(seqMsgs, msgPb)
 			hasSeqList = append(hasSeqList, msgPb.Seq)
@@ -348,7 +348,7 @@ func (db *MsgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID s
 		}
 	}
 	for _, i := range seqs {
-		if utils.Contain(i, hasSeqList) {
+		if utils.Contain(i, hasSeqList...) {
 			continue
 		}
 		unExistSeqs = append(unExistSeqs, i)
@@ -398,7 +398,7 @@ func (db *MsgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 				//log.NewError(operationID, "Unmarshal err", seqUid, value, uid, seqList, err.Error())
 				return nil, err
 			}
-			if utils.Contain(msgPb.Seq, value) {
+			if utils.Contain(msgPb.Seq, value...) {
 				seqMsg = append(seqMsg, msgPb)
 				hasSeqs = append(hasSeqs, msgPb.Seq)
 				singleCount++

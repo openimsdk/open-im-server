@@ -93,7 +93,7 @@ func (g *GroupController) DismissGroup(ctx context.Context, groupID string) erro
 }
 
 func (g *GroupController) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
-	return g.database.
+	return g.database.GetGroupIDsByGroupType(ctx, groupType)
 }
 
 func (g *GroupController) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error) {
@@ -213,8 +213,8 @@ type GroupRequest interface {
 }
 
 type SuperGroup interface {
-	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unrelationTb.SuperGroupModel, error)
-	FindJoinSuperGroup(ctx context.Context, userID string) (*unrelationTb.UserToSuperGroupModel, error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
@@ -299,6 +299,10 @@ type GroupDataBase struct {
 	mongoDB *unrelation.SuperGroupMongoDriver
 }
 
+func (g *GroupDataBase) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
+	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
+}
+
 func (g *GroupDataBase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
 	for _, userID := range userIDs {
 		if err := g.cache.DelJoinedGroupID(ctx, userID); err != nil {
@@ -346,10 +350,10 @@ func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 }
 
 func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
-	//return g.cache.GetGroupInfo(ctx, groupID)
-	return cache.GetCache(ctx, g.rcClient, g.getGroupInfoKey(groupID), g.expireTime, func(ctx context.Context) (*relationTb.GroupModel, error) {
-		return g.group.Take(ctx, groupID)
-	})
+	return g.cache.GetGroupInfo(ctx, groupID)
+	//return cache.GetCache(ctx, g.rcClient, g.getGroupInfoKey(groupID), g.expireTime, func(ctx context.Context) (*relationTb.GroupModel, error) {
+	//	return g.group.Take(ctx, groupID)
+	//})
 }
 
 func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
@@ -509,11 +513,11 @@ func (g *GroupDataBase) PageGroupRequestUser(ctx context.Context, userID string,
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *GroupDataBase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*table.SuperGroupModel, error) {
+func (g *GroupDataBase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error) {
 	return g.mongoDB.FindSuperGroup(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (*table.UserToSuperGroupModel, error) {
+func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error) {
 	return g.mongoDB.GetSuperGroupByUserID(ctx, userID)
 }
 
