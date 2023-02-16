@@ -2,7 +2,7 @@ package group
 
 //import (
 //	common "Open_IM/internal/api_to_rpc"
-//	api "Open_IM/pkg/api_struct"
+//	api "Open_IM/pkg/apistruct"
 //	"Open_IM/pkg/common/config"
 //	"Open_IM/pkg/common/constant"
 //	"Open_IM/pkg/common/log"

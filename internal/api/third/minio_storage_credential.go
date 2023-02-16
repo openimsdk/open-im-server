@@ -1,10 +1,9 @@
 package apiThird
 
 import (
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	_ "Open_IM/pkg/common/tokenverify"

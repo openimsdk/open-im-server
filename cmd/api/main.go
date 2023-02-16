@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
@@ -14,7 +13,6 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
 
@@ -28,7 +26,7 @@ import (
 	"github.com/gin-gonic/gin"
 	//"syscall"
 	"Open_IM/pkg/common/constant"
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 )
 
 // @title open-IM-Server API

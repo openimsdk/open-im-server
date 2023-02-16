@@ -132,12 +132,12 @@ message FriendRequest{
 ///////////////////////////////////base end/////////////////////////////////////
 message PullMessageBySeqListReq{
   string userID = 1;
-  repeated uint32 seqList = 3;
+  repeated int64 seqs = 3;
   map <string, seqList>groupSeqList = 4;
 }
 
 message seqList {
-  repeated uint32 seqList = 1;
+  repeated int64 seqs = 1;
 }
 
 
@@ -159,12 +159,12 @@ message GetMaxAndMinSeqReq {
   string userID = 2;
 }
 message MaxAndMinSeq{
-  uint32 maxSeq = 1;
-  uint32 minSeq = 2;
+  int64 maxSeq = 1;
+  int64 minSeq = 2;
 }
 message GetMaxAndMinSeqResp {
-  uint32 maxSeq = 1;
-  uint32 minSeq = 2;
+  int64 maxSeq = 1;
+  int64 minSeq = 2;
   map<string, MaxAndMinSeq> groupMaxAndMinSeq = 5;
 }
 
@@ -187,7 +187,7 @@ message MsgData {
   int32 msgFrom = 10;
   int32 contentType = 11;
   bytes content = 12;
-  uint32 seq = 14;
+  int64 seq = 14;
   int64 sendTime = 15;
   int64 createTime = 16;
   int32 status = 17;
@@ -426,7 +426,7 @@ message ConversationSetPrivateTips{
 message DeleteMessageTips{
   string opUserID = 1;
   string userID = 2;
-  repeated uint32 seqList = 3;
+  repeated int64 seqs = 3;
 }
 ///cms
 message RequestPagination {
@@ -601,13 +601,7 @@ message SignalGetTokenByRoomIDReply {
 }
 
 
-message DelMsgListReq{
-  string userID = 2;
-  repeated uint32 seqList = 3;
-}
 
-message DelMsgListResp{
-}
 
 message SetAppBackgroundStatusReq {
   string userID = 1;
@@ -640,11 +634,5 @@ message KeyValue {
   string typeKey = 1;
   string value = 2;
   int64 latestUpdateTime = 3;
-}
-
-
-message ResponsePagination {
-  int32 CurrentPage = 5;
-  int32 ShowNumber = 6;
 }
 

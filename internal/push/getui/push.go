@@ -3,7 +3,6 @@ package getui
 import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"bytes"

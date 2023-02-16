@@ -67,3 +67,10 @@ func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, show
 	}()
 	return gormSearch[relation.GroupModel](getDBConn(g.DB, tx), []string{"name"}, keyword, pageNumber, showNumber)
 }
+
+func (g *GroupGorm) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
+	if err := g.DB.Model(&relation.GroupModel{}).Where("group_type = ? ", groupType).Pluck("group_id", &groupIDs).Error; err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	return groupIDs, nil
+}

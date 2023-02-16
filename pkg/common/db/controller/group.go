@@ -26,6 +26,7 @@ type GroupInterface interface {
 	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
@@ -89,6 +90,10 @@ func (g *GroupController) UpdateGroup(ctx context.Context, groupID string, data 
 
 func (g *GroupController) DismissGroup(ctx context.Context, groupID string) error {
 	return g.database.DismissGroup(ctx, groupID)
+}
+
+func (g *GroupController) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
+	return g.database.
 }
 
 func (g *GroupController) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error) {
@@ -182,6 +187,7 @@ type Group interface {
 	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 }
 
 type GroupMember interface {
@@ -229,6 +235,8 @@ type GroupDataBaseInterface interface {
 	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
+
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
