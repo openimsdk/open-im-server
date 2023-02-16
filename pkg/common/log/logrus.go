@@ -239,17 +239,6 @@ func NewWarn(OperationID string, args ...interface{}) {
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
 	OperationID := tracelog.GetOperationID(ctx)
-	//if ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo).GinCtx != nil {
-	//	ctxLogger.WithFields(logrus.Fields{
-	//		"OperationID": OperationID,
-	//		"PID":         ctxLogger.Pid,
-	//	}).Infoln("api: ", t.ApiName)
-	//} else {
-	//	ctxLogger.WithFields(logrus.Fields{
-	//		"OperationID": OperationID,
-	//		"PID":         ctxLogger.Pid,
-	//	}).Infoln("rpc: ", t.ApiName)
-	//}
 	for _, v := range *t.Funcs {
 
 		if v.Err != nil {

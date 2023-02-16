@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"

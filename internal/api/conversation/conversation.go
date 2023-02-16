@@ -1,10 +1,9 @@
 package conversation
 
 import (
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"

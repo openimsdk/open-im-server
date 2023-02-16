@@ -1,12 +1,11 @@
 package msg
 
 import (
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/msg"
 	pbCommon "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"

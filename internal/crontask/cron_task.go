@@ -19,11 +19,11 @@ func StartCronTask(userID, workingGroupID string) {
 	fmt.Println("cron task start, config", config.Config.Mongo.ChatRecordsClearTime)
 	if userID != "" {
 		operationID := getCronTaskOperationID()
-		StartClearMsg(operationID, []string{userID})
+		ClearUsersMsg(operationID, []string{userID})
 	}
 	if workingGroupID != "" {
 		operationID := getCronTaskOperationID()
-		StartClearWorkingGroupMsg(operationID, []string{workingGroupID})
+		ClearSuperGroupMsg(operationID, []string{workingGroupID})
 	}
 	if userID != "" || workingGroupID != "" {
 		fmt.Println("clear msg finished")

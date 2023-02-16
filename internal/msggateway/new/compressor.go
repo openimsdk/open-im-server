@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io/ioutil"
-	"open_im_sdk/pkg/utils"
 )
 
 type Compressor interface {

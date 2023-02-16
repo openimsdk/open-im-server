@@ -15,7 +15,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )

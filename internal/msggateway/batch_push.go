@@ -2,7 +2,6 @@ package msggateway
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/msg"
 	sdkws "Open_IM/pkg/proto/sdkws"

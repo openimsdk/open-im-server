@@ -10,6 +10,14 @@ type Req struct {
 	MsgIncr       string `json:"msgIncr" validate:"required"`
 	Data          []byte `json:"data"`
 }
+type Resp struct {
+	ReqIdentifier int32  `json:"reqIdentifier"`
+	MsgIncr       string `json:"msgIncr"`
+	OperationID   string `json:"operationID"`
+	ErrCode       int32  `json:"errCode"`
+	ErrMsg        string `json:"errMsg"`
+	Data          []byte `json:"data"`
+}
 type MessageHandler interface {
 	GetSeq(context context.Context, data Req) ([]byte, error)
 	SendMessage(context context.Context, data Req) ([]byte, error)

@@ -10,9 +10,8 @@ import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/getcdv3"
+
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
@@ -20,7 +19,7 @@ import (
 	"context"
 	"strings"
 
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 
 	"github.com/golang/protobuf/proto"
 )

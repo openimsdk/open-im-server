@@ -32,7 +32,7 @@ func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command strin
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
 		Content:          utils.GetContent(msg.MsgData),
-		Seq:              msg.MsgData.Seq,
+		Seq:              uint32(msg.MsgData.Seq),
 		Ex:               msg.MsgData.Ex,
 	}
 }

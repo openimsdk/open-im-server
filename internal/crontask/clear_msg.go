@@ -3,92 +3,77 @@ package cronTask
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
-	sdkws "Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 	"math"
-	"strconv"
-	"strings"
-
-	"github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
 )
 
-type SeqCheckInterface interface {
-	ClearAll() error
+
+type ClearMsgTool struct {
+	msgInterface   controller.MsgInterface
+	userInterface  controller.UserInterface
+	groupInterface controller.GroupInterface
 }
 
-type ClearMsgCronTask struct {
-	msgModel   controller.MsgInterface
-	userModel  controller.UserInterface
-	groupModel controller.GroupInterface
-	cache      cache.Cache
-}
-
-func (c *ClearMsgCronTask) getCronTaskOperationID() string {
+func (c *ClearMsgTool) getCronTaskOperationID() string {
 	return cronTaskOperationID + utils.OperationIDGenerator()
 }
 
-func (c *ClearMsgCronTask) ClearAll() {
+func (c *ClearMsgTool) ClearAll() {
 	operationID := c.getCronTaskOperationID()
 	ctx := context.Background()
 	tracelog.SetOperationID(ctx, operationID)
-	log.NewInfo(operationID, "========================= start del cron task =========================")
+	log.NewInfo(operationID, "============================ start del cron task ============================")
 	var err error
-	userIDList, err := c.userModel.GetAllUserID(ctx)
+	userIDList, err := c.userInterface.GetAllUserID(ctx)
 	if err == nil {
-		c.StartClearMsg(operationID, userIDList)
+		c.ClearUsersMsg(ctx, userIDList)
 	} else {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
 	// working group msg clear
-	workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
+	workingGroupIDList, err := c.groupInterface.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err == nil {
-		c.StartClearWorkingGroupMsg(operationID, workingGroupIDList)
+		c.ClearSuperGroupMsg(ctx, workingGroupIDList)
 	} else {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
-
-	log.NewInfo(operationID, "========================= start del cron finished =========================")
+	log.NewInfo(operationID, "============================ start del cron finished ============================")
 }
 
-func (c *ClearMsgCronTask) StartClearMsg(operationID string, userIDList []string) {
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
+func (c *ClearMsgTool) ClearUsersMsg(ctx context.Context, userIDList []string) {
 	for _, userID := range userIDList {
-		if err := DeleteUserMsgsAndSetMinSeq(operationID, userID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID)
+		if err := c.msgInterface.DeleteUserMsgsAndSetMinSeq(ctx, userID, int64(config.Config.Mongo.DBRetainChatRecords * 24 *60 *60)); err != nil {
+			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), userID)
 		}
-		if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
-		}
-	}
-}
-
-func (c *ClearMsgCronTask) StartClearWorkingGroupMsg(operationID string, workingGroupIDList []string) {
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "workingGroupIDList: ", workingGroupIDList)
-	for _, groupID := range workingGroupIDList {
-		userIDList, err := rocksCache.GetGroupMemberIDListFromCache(groupID)
+		minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgInterface.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
 		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", userID)
 			continue
 		}
-		log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "workingGroupIDList:", userIDList)
-		if err := DeleteUserSuperGroupMsgsAndSetMinSeq(operationID, groupID, userIDList); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userIDList)
-		}
-		if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
-		}
+		if
 	}
 }
 
-func checkMaxSeqWithMongo(operationID, sourceID string, diffusionType int) error {
+func (c *ClearMsgTool) ClearSuperGroupMsg(ctx context.Context, workingGroupIDList []string) {
+	for _, groupID := range workingGroupIDList {
+		userIDs, err := c.groupInterface.FindGroupMemberUserID(ctx, groupID)
+		if err != nil {
+			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "FindGroupMemberUserID", err.Error(), groupID)
+			continue
+		}
+		if err := c.msgInterface.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, int64(config.Config.Mongo.DBRetainChatRecords * 24 *60 *60)); err != nil {
+			//log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userIDList)
+		}
+		minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgInterface.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
+
+	}
+}
+
+func (c *ClearMsgTool) checkMaxSeqWithMongo(ctx context.Context, sourceID string, diffusionType int) error {
 	var seqRedis uint64
 	var err error
 	if diffusionType == constant.WriteDiffusion {

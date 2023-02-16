@@ -3,7 +3,6 @@ package msg
 import (
 	"Open_IM/internal/common/notification"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"

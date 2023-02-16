@@ -38,22 +38,24 @@ const (
 )
 
 type Cache interface {
-	IncrUserSeq(ctx context.Context, userID string) (uint64, error)
-	GetUserMaxSeq(ctx context.Context, userID string) (uint64, error)
-	SetUserMaxSeq(ctx context.Context, userID string, maxSeq uint64) error
-	SetUserMinSeq(ctx context.Context, userID string, minSeq uint64) (err error)
-	GetUserMinSeq(ctx context.Context, userID string) (uint64, error)
-	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq uint64) (err error)
-	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (uint64, error)
-	GetGroupMaxSeq(ctx context.Context, groupID string) (uint64, error)
-	IncrGroupMaxSeq(ctx context.Context, groupID string) (uint64, error)
-	SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq uint64) error
-	SetGroupMinSeq(ctx context.Context, groupID string, minSeq uint32) error
+	IncrUserSeq(ctx context.Context, userID string) (int64, error)
+	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
+	SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error
+	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
+
+	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
+	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
+	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
+	IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
+	SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
+	SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error
+
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
 	GetTokenMapByUidPid(ctx context.Context, userID, platformID string) (map[string]int, error)
 	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error
-	GetMessageListBySeq(ctx context.Context, userID string, seqList []uint32) (seqMsg []*sdkws.MsgData, failedSeqList []uint32, err error)
+	GetMessageListBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
 	SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error)
 	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error
 	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
@@ -61,7 +63,7 @@ type Cache interface {
 	GetSignalInfoFromCacheByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error)
 	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *pbRtc.SignalInviteReq, err error)
 	DelUserSignalList(ctx context.Context, userID string) error
-	DelMsgFromCache(ctx context.Context, userID string, seqList []uint32) error
+	DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error
 
 	SetGetuiToken(ctx context.Context, token string, expireTime int64) error
 	GetGetuiToken(ctx context.Context) (string, error)
@@ -138,66 +140,66 @@ func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
 }
 
 // Perform seq auto-increment operation of user messages
-func (r *RedisClient) IncrUserSeq(ctx context.Context, uid string) (uint64, error) {
+func (r *RedisClient) IncrUserSeq(ctx context.Context, uid string) (int64, error) {
 	key := userIncrSeq + uid
 	seq, err := r.rdb.Incr(context.Background(), key).Result()
-	return uint64(seq), err
+	return seq, err
 }
 
 // Get the largest Seq
-func (r *RedisClient) GetUserMaxSeq(ctx context.Context, uid string) (uint64, error) {
+func (r *RedisClient) GetUserMaxSeq(ctx context.Context, uid string) (int64, error) {
 	key := userIncrSeq + uid
 	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return uint64(utils.StringToInt(seq)), err
+	return int64(utils.StringToInt(seq)), err
 }
 
 // set the largest Seq
-func (r *RedisClient) SetUserMaxSeq(ctx context.Context, uid string, maxSeq uint64) error {
+func (r *RedisClient) SetUserMaxSeq(ctx context.Context, uid string, maxSeq int64) error {
 	key := userIncrSeq + uid
 	return r.rdb.Set(context.Background(), key, maxSeq, 0).Err()
 }
 
 // Set the user's minimum seq
-func (r *RedisClient) SetUserMinSeq(ctx context.Context, uid string, minSeq uint64) (err error) {
+func (r *RedisClient) SetUserMinSeq(ctx context.Context, uid string, minSeq int64) (err error) {
 	key := userMinSeq + uid
 	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
 }
 
 // Get the smallest Seq
-func (r *RedisClient) GetUserMinSeq(ctx context.Context, uid string) (uint64, error) {
+func (r *RedisClient) GetUserMinSeq(ctx context.Context, uid string) (int64, error) {
 	key := userMinSeq + uid
 	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return uint64(utils.StringToInt(seq)), err
+	return int64(utils.StringToInt(seq)), err
 }
 
-func (r *RedisClient) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq uint64) (err error) {
+func (r *RedisClient) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
 	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
 }
-func (r *RedisClient) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (uint64, error) {
+func (r *RedisClient) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
 	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return uint64(utils.StringToInt(seq)), err
+	return int64(utils.StringToInt(seq)), err
 }
 
-func (r *RedisClient) GetGroupMaxSeq(ctx context.Context, groupID string) (uint64, error) {
+func (r *RedisClient) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
 	key := groupMaxSeq + groupID
 	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return uint64(utils.StringToInt(seq)), err
+	return int64(utils.StringToInt(seq)), err
 }
 
-func (r *RedisClient) IncrGroupMaxSeq(ctx context.Context, groupID string) (uint64, error) {
+func (r *RedisClient) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
 	key := groupMaxSeq + groupID
 	seq, err := r.rdb.Incr(context.Background(), key).Result()
-	return uint64(seq), err
+	return seq, err
 }
 
-func (r *RedisClient) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq uint64) error {
+func (r *RedisClient) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
 	key := groupMaxSeq + groupID
 	return r.rdb.Set(context.Background(), key, maxSeq, 0).Err()
 }
 
-func (r *RedisClient) SetGroupMinSeq(ctx context.Context, groupID string, minSeq uint32) error {
+func (r *RedisClient) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
 	key := groupMinSeq + groupID
 	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
 }
@@ -231,7 +233,7 @@ func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, pl
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
 
-func (r *RedisClient) GetMessageListBySeq(ctx context.Context, userID string, seqList []uint32, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []uint32, err2 error) {
+func (r *RedisClient) GetMessageListBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err2 error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
@@ -398,7 +400,7 @@ func (r *RedisClient) DelUserSignalList(ctx context.Context, userID string) erro
 	return err
 }
 
-func (r *RedisClient) DelMsgFromCache(ctx context.Context, uid string, seqList []uint32, operationID string) {
+func (r *RedisClient) DelMsgFromCache(ctx context.Context, uid string, seqList []int64, operationID string) {
 	for _, seq := range seqList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
 		result, err := r.rdb.Get(context.Background(), key).Result()

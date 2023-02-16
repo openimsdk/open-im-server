@@ -2,7 +2,7 @@ package group
 
 //import (
 //	jsonData "Open_IM/internal/utils"
-//	api "Open_IM/pkg/api_struct"
+//	api "Open_IM/pkg/apistruct"
 //	"Open_IM/pkg/common/config"
 //	"Open_IM/pkg/common/log"
 //	"Open_IM/pkg/common/token_verify"
