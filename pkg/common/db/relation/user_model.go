@@ -1,204 +1,109 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
+	"context"
 	"fmt"
 	"gorm.io/gorm"
-	"time"
 )
 
-func InitManager() {
-	for k, v := range config.Config.Manager.AppManagerUid {
-		_, err := GetUserByUserID(v)
-		if err != nil {
-		} else {
-			continue
-		}
-		var appMgr User
-		appMgr.UserID = v
-		if k == 0 {
-			appMgr.Nickname = config.Config.Manager.AppSysNotificationName
-		} else {
-			appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
-		}
-		appMgr.AppMangerLevel = constant.AppAdmin
-		err = UserRegister(appMgr)
-		if err != nil {
-			fmt.Println("AppManager insert error ", err.Error(), appMgr)
-		} else {
-			fmt.Println("AppManager insert ", appMgr)
-		}
-	}
+type UserGorm struct {
+	DB *gorm.DB
 }
 
-func UserRegister(user User) error {
-	user.CreateTime = time.Now()
-	if user.AppMangerLevel == 0 {
-		user.AppMangerLevel = constant.AppOrdinaryUsers
-	}
-	if user.Birth.Unix() < 0 {
-		user.Birth = utils.UnixSecondToTime(0)
-	}
-	err := UserDB.Table("users").Create(&user).Error
-	if err != nil {
-		return err
-	}
-	return nil
+func NewUserGorm(db *gorm.DB) *UserGorm {
+	var user UserGorm
+	user.DB = db
+	return &user
 }
 
-func GetAllUser() ([]User, error) {
-	var userList []User
-	err := UserDB.Table("users").Find(&userList).Error
-	return userList, err
+// 插入多条
+func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
+	}()
+	return utils.Wrap(getDBConn(u.DB, tx).Create(&users).Error, "")
 }
 
-func TakeUserByUserID(userID string) (*User, error) {
-	var user User
-	err := UserDB.Table("users").Where("user_id=?", userID).Take(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+// 更新用户信息 零值
+func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
+	}()
+	return utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
-func GetUserByUserID(userID string) (*User, error) {
-	var user User
-	err := UserDB.Table("users").Where("user_id=?", userID).Take(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+// 更新多个用户信息 非零值
+func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel, tx ...any) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
+	}()
+	return utils.Wrap(getDBConn(u.DB, tx).Updates(&users).Error, "")
 }
 
-func GetUsersByUserIDList(userIDList []string) ([]*User, error) {
-	var userList []*User
-	err := UserDB.Table("users").Where("user_id in (?)", userIDList).Find(&userList).Error
-	return userList, err
-}
-
-func GetUserNameByUserID(userID string) (string, error) {
-	var user User
-	err := UserDB.Table("users").Select("name").Where("user_id=?", userID).First(&user).Error
-	if err != nil {
-		return "", err
-	}
-	return user.Nickname, nil
-}
-
-func UpdateUserInfo(user User) error {
-	return UserDB.Where("user_id=?", user.UserID).Updates(&user).Error
-}
-
-func UpdateUserInfoByMap(user User, m map[string]interface{}) error {
-	err := UserDB.Where("user_id=?", user.UserID).Updates(m).Error
-	return err
-}
-
-func SelectAllUserID() ([]string, error) {
-	var resultArr []string
-	err := UserDB.Pluck("user_id", &resultArr).Error
-	if err != nil {
-		return nil, err
-	}
-	return resultArr, nil
-}
-
-func SelectSomeUserID(userIDList []string) ([]string, error) {
-	var resultArr []string
-	err := UserDB.Pluck("user_id", &resultArr).Error
-	if err != nil {
-		return nil, err
-	}
-	return resultArr, nil
-}
-
-func GetUsers(showNumber, pageNumber int32) ([]User, error) {
-	var users []User
-	err := UserDB.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
-	if err != nil {
-		return users, err
-	}
+// 获取指定用户信息  不存在，也不返回错误
+func (u *UserGorm) Find(ctx context.Context, userIDs []string, tx ...any) (users []*relation.UserModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
+	}()
+	err = utils.Wrap(getDBConn(u.DB, tx).Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
 }
 
-func AddUser(userID string, phoneNumber string, name string, email string, gender int32, faceURL string, birth string) error {
-	_birth, err := utils.TimeStringToTime(birth)
+// 获取某个用户信息  不存在，则返回错误
+func (u *UserGorm) Take(ctx context.Context, userID string, tx ...any) (user *relation.UserModel, err error) {
+	user = &relation.UserModel{}
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
+	}()
+	err = utils.Wrap(getDBConn(u.DB, tx).Where("user_id = ?", userID).Take(&user).Error, "")
+	return user, err
+}
+
+// 通过名字查找用户 不存在，不返回错误
+func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
+	}()
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
 	if err != nil {
-		return err
+		return
 	}
-	user := User{
-		UserID:      userID,
-		Nickname:    name,
-		FaceURL:     faceURL,
-		Gender:      gender,
-		PhoneNumber: phoneNumber,
-		Birth:       _birth,
-		Email:       email,
-		Ex:          "",
-		CreateTime:  time.Now(),
-	}
-	result := UserDB.Create(&user)
-	return result.Error
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
+	return
 }
 
-func UsersIsBlock(userIDList []string) (inBlockUserIDList []string, err error) {
-	err = BlackListDB.Where("uid in (?) and end_disable_time > now()", userIDList).Pluck("uid", &inBlockUserIDList).Error
-	return inBlockUserIDList, err
+// 通过名字或userID查找用户 不存在，不返回错误
+func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
+	}()
+	db := getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
+	if err = db.Count(&count).Error; err != nil {
+		return
+	}
+	err = utils.Wrap(db.Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
+	return
 }
 
-type BlockUserInfo struct {
-	User             User
-	BeginDisableTime time.Time
-	EndDisableTime   time.Time
+// 获取用户信息 不存在，不返回错误
+func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
+	}()
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Count(&count).Error, "")
+	if err != nil {
+		return
+	}
+	err = utils.Wrap(getDBConn(u.DB, tx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
+	return
 }
 
-func GetUserByName(userName string, showNumber, pageNumber int32) ([]User, error) {
-	var users []User
-	err := UserDB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
-	return users, err
-}
-
-func GetUsersByNameAndID(content string, showNumber, pageNumber int32) ([]User, int64, error) {
-	var users []User
-	var count int64
-	db := UserDB.Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
-	if err := db.Count(&count).Error; err != nil {
-		return nil, 0, err
-	}
-	err := db.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
-	return users, count, err
-}
-
-func GetUserIDsByEmailAndID(phoneNumber, email string) ([]string, error) {
-	if phoneNumber == "" && email == "" {
-		return nil, nil
-	}
-	db := UserDB
-	if phoneNumber != "" {
-		db = db.Where("phone_number = ? ", phoneNumber)
-	}
-	if email != "" {
-		db = db.Where("email = ? ", email)
-	}
-	var userIDList []string
-	err := db.Pluck("user_id", &userIDList).Error
-	return userIDList, err
-}
-
-func GetUsersCount(userName string) (int32, error) {
-	var count int64
-	if err := UserDB.Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return int32(count), nil
-}
-
-func GetBlockUsersNumCount() (int32, error) {
-	var count int64
-	if err := BlackListDB.Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return int32(count), nil
+// 获取所有用户ID
+func (u *UserGorm) GetAllUserID(ctx context.Context) ([]string, error) {
+	var userIDs []string
+	err := u.DB.Pluck("user_id", &userIDs).Error
+	return userIDs, err
 }

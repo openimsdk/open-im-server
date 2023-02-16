@@ -21,7 +21,7 @@ type FriendRequestGorm struct {
 }
 
 // 插入多条记录
-func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...*gorm.DB) (err error) {
+func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendRequests", friendRequests)
 	}()
@@ -29,7 +29,7 @@ func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relati
 }
 
 // 删除记录
-func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (err error) {
+func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID)
 	}()
@@ -37,7 +37,7 @@ func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID str
 }
 
 // 更新零值
-func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
+func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "formUserID", formUserID, "toUserID", toUserID, "args", args)
 	}()
@@ -45,7 +45,7 @@ func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, 
 }
 
 // 更新多条记录 （非零值）
-func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...*gorm.DB) (err error) {
+func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relation.FriendRequestModel, tx ...any) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "friendRequests", friendRequests)
 	}()
@@ -53,7 +53,7 @@ func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relati
 }
 
 // 获取来指定用户的好友申请  未找到 不返回错误
-func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (friendRequest *relation.FriendRequestModel, err error) {
+func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID string, tx ...any) (friendRequest *relation.FriendRequestModel, err error) {
 	friendRequest = &relation.FriendRequestModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID, "friendRequest", *friendRequest)
@@ -62,7 +62,7 @@ func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID strin
 	return
 }
 
-func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID string, tx ...*gorm.DB) (friendRequest *relation.FriendRequestModel, err error) {
+func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID string, tx ...any) (friendRequest *relation.FriendRequestModel, err error) {
 	friendRequest = &relation.FriendRequestModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "toUserID", toUserID, "friendRequest", *friendRequest)
@@ -72,7 +72,7 @@ func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID strin
 }
 
 // 获取toUserID收到的好友申请列表
-func (f *FriendRequestGorm) FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
+func (f *FriendRequestGorm) FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32, tx ...any) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "toUserID", toUserID, "friendRequests", friendRequests)
 	}()
@@ -86,7 +86,7 @@ func (f *FriendRequestGorm) FindToUserID(ctx context.Context, toUserID string, p
 }
 
 // 获取fromUserID发出去的好友申请列表
-func (f *FriendRequestGorm) FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32, tx ...*gorm.DB) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
+func (f *FriendRequestGorm) FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32, tx ...any) (friendRequests []*relation.FriendRequestModel, total int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "fromUserID", fromUserID, "friendRequests", friendRequests)
 	}()

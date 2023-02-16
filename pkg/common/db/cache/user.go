@@ -73,13 +73,13 @@ func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userIn
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error) {
 	var users []*relationTb.UserModel
-	for _, userID := range userIDs {
-		user, err := GetUserInfoFromCache(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, user)
-	}
+	//for _, userID := range userIDs {
+	//	user, err := GetUserInfoFromCache(ctx, userID)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	users = append(users, user)
+	//}
 	return users, nil
 }
 
