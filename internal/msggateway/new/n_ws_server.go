@@ -1,14 +1,22 @@
 package new
 
 import (
+	"bytes"
 	"errors"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"open_im_sdk/pkg/utils"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
+
+var bufferPool = sync.Pool{
+	New: func() interface{} {
+		return make([]byte, 1000)
+	},
+}
 type LongConnServer interface {
 	Run() error
 }
@@ -58,6 +66,41 @@ func newWsServer(opts ...Option) (*WsServer, error) {
 	}, nil
 }
 func (ws *WsServer) Run() error {
+	var client *Client
+	go func() {
+		for {
+			select {
+			case client = <-ws.registerChan:
+				ws.registerClient(client)
+			case client = <-h.unregisterChan:
+				h.unregisterClient(client)
+			case msg = <-h.readChan:
+				h.messageHandler(msg)
+			}
+		}
+	}()
+}
+
+func (ws *WsServer) registerClient(client *Client) {
+	var (
+		ok  bool
+		cli *Client
+	)
+
+	if cli, ok = h.clients.Get(client.key); ok == false {
+		h.clients.Set(client.key, client)
+		atomic.AddInt64(&h.onlineConnections, 1)
+		fmt.Println("R在线用户数量:", h.onlineConnections)
+		return
+	}
+
+	if client.onlineAt > cli.onlineAt {
+		h.clients.Set(client.key, client)
+		h.close(cli)
+		return
+	}
+	h.close(client)
+}
 	http.HandleFunc("/", ws.wsHandler)                              //Get request from client to handle by wsHandler
 	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
 
