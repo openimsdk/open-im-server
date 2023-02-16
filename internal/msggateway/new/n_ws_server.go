@@ -1,8 +1,11 @@
 package new
 
 import (
-	"bytes"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/utils"
 	"errors"
+	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"sync"
@@ -10,12 +13,12 @@ import (
 	"time"
 )
 
-
 var bufferPool = sync.Pool{
 	New: func() interface{} {
 		return make([]byte, 1000)
 	},
 }
+
 type LongConnServer interface {
 	Run() error
 }
@@ -27,17 +30,21 @@ type Server struct {
 	rpcServer      *RpcServer
 }
 type WsServer struct {
-	port              int
-	wsMaxConnNum      int
-	wsUpGrader        *websocket.Upgrader
-	registerChan      chan *Client
-	unregisterChan    chan *Client
-	clients           *UserMap
-	clientPool        sync.Pool
-	onlineUserNum     int64
-	onlineUserConnNum int64
-	compressor        Compressor
-	handler           MessageHandler
+	port                            int
+	wsMaxConnNum                    int64
+	wsUpGrader                      *websocket.Upgrader
+	registerChan                    chan *Client
+	unregisterChan                  chan *Client
+	clients                         *UserMap
+	clientPool                      sync.Pool
+	onlineUserNum                   int64
+	onlineUserConnNum               int64
+	gzipCompressor                  Compressor
+	encoder        Encoder
+	handler                         MessageHandler
+	handshakeTimeout                time.Duration
+	readBufferSize, WriteBufferSize int
+	validate       *validator.Validate
 }
 
 func newWsServer(opts ...Option) (*WsServer, error) {
@@ -50,18 +57,18 @@ func newWsServer(opts ...Option) (*WsServer, error) {
 
 	}
 	return &WsServer{
-		port:         config.port,
-		wsMaxConnNum: config.maxConnNum,
-		wsUpGrader: &websocket.Upgrader{
-			HandshakeTimeout: config.handshakeTimeout,
-			ReadBufferSize:   config.messageMaxMsgLength,
-			CheckOrigin:      func(r *http.Request) bool { return true },
-		},
+		port:             config.port,
+		wsMaxConnNum:     config.maxConnNum,
+		handshakeTimeout: config.handshakeTimeout,
+		readBufferSize:   config.messageMaxMsgLength,
 		clientPool: sync.Pool{
 			New: func() interface{} {
 				return new(Client)
 			},
 		},
+		validate: validator.New(),
+		clients: newUserMap(),
+		handler: NewGrpcHandler(),
 	}, nil
 }
 func (ws *WsServer) Run() error {
@@ -71,53 +78,115 @@ func (ws *WsServer) Run() error {
 			select {
 			case client = <-ws.registerChan:
 				ws.registerClient(client)
-			case client = <-h.unregisterChan:
-				h.unregisterClient(client)
-			case msg = <-h.readChan:
-				h.messageHandler(msg)
+			case client = <-ws.unregisterChan:
+				ws.unregisterClient(client)
 			}
 		}
 	}()
+	http.HandleFunc("/", ws.wsHandler) //Get request from client to handle by wsHandler
+	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
 }
 
 func (ws *WsServer) registerClient(client *Client) {
 	var (
-		ok  bool
+		userOK  bool
+		clientOK bool
 		cli *Client
 	)
-
-	if cli, ok = h.clients.Get(client.key); ok == false {
-		h.clients.Set(client.key, client)
-		atomic.AddInt64(&h.onlineConnections, 1)
-		fmt.Println("R在线用户数量:", h.onlineConnections)
-		return
+	cli, userOK,clientOK = ws.clients.Get(client.userID,client.platformID)
+	if !userOK  {
+        ws.clients.Set(client.userID,client)
+		atomic.AddInt64(&ws.onlineUserNum, 1)
+		atomic.AddInt64(&ws.onlineUserConnNum, 1)
+		fmt.Println("R在线用户数量:", ws.onlineUserNum)
+		fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+	}else{
+		if clientOK  {//已经有同平台的连接存在
+			ws.clients.Set(client.userID,client)
+			ws.multiTerminalLoginChecker(cli)
+		}else{
+			ws.clients.Set(client.userID,client)
+			atomic.AddInt64(&ws.onlineUserConnNum, 1)
+			fmt.Println("R在线用户数量:", ws.onlineUserNum)
+			fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+		}
 	}
 
-	if client.onlineAt > cli.onlineAt {
-		h.clients.Set(client.key, client)
-		h.close(cli)
-		return
-	}
-	h.close(client)
 }
-	http.HandleFunc("/", ws.wsHandler)                              //Get request from client to handle by wsHandler
-	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
+
+func (ws *WsServer) multiTerminalLoginChecker(client *Client) {
+
+}
+func (ws *WsServer) unregisterClient(client *Client) {
+	isDeleteUser:=ws.clients.delete(client.userID,client.platformID)
+	if  isDeleteUser {
+		atomic.AddInt64(&ws.onlineUserNum, -1)
+	}
+	atomic.AddInt64(&ws.onlineUserConnNum, -1)
+	fmt.Println("R在线用户数量:", ws.onlineUserNum)
+	fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+}
+
 
 }
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	context := newContext(w, r)
-	if isPass, compression := ws.headerCheck(w, r, operationID); isPass {
-		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
-		if err != nil {
-			log.Error(operationID, "upgrade http conn err", err.Error(), query)
-			return
-		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], conn.RemoteAddr().String() + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))}
-			userCount++
-			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
-			go ws.readMsg(newConn)
-		}
-	} else {
-		log.Error(operationID, "headerCheck failed ")
+	if ws.onlineUserConnNum >= ws.wsMaxConnNum {
+		httpError(context, constant.ErrConnOverMaxNumLimit)
+		return
 	}
+	var (
+		token      string
+		userID     string
+		platformID string
+		exists     bool
+	 	compression bool
+		compressor Compressor
+
+	)
+
+	token, exists = context.Query(TOKEN)
+	if !exists {
+		httpError(context, constant.ErrConnArgsErr)
+		return
+	}
+	userID, exists = context.Query(USERID)
+	if !exists {
+		httpError(context, constant.ErrConnArgsErr)
+		return
+	}
+	platformID, exists = context.Query(PLATFORM_ID)
+	if !exists {
+		httpError(context, constant.ErrConnArgsErr)
+		return
+	}
+	err := tokenverify.WsVerifyToken(token, userID, platformID)
+	if err != nil {
+		httpError(context, err)
+		return
+	}
+	wsLongConn:=newGWebSocket(constant.WebSocket,ws.handshakeTimeout,ws.readBufferSize)
+	err = wsLongConn.GenerateLongConn(w, r)
+	if err != nil {
+		httpError(context, err)
+		return
+	}
+	compressProtoc, exists := context.Query(COMPRESSION)
+	if exists {
+		if compressProtoc==GZIP_COMPRESSION_PROTOCAL{
+			compression = true
+			compressor = ws.gzipCompressor
+		}
+	}
+	compressProtoc, exists = context.GetHeader(COMPRESSION)
+	if exists {
+		if compressProtoc==GZIP_COMPRESSION_PROTOCAL {
+			compression = true
+			compressor = ws.gzipCompressor
+		}
+	}
+	client:=ws.clientPool.Get().(*Client)
+	client.ResetClient(context,wsLongConn,compression,compressor,ws.encoder,ws.handler,ws.unregisterChan,ws.validate)
+	ws.registerChan <- client
+	go client.readMessage()
 }

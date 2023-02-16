@@ -7,7 +7,7 @@ type configs struct {
 	//长连接监听端口
 	port int
 	//长连接允许最大链接数
-	maxConnNum int
+	maxConnNum int64
 	//连接握手超时时间
 	handshakeTimeout time.Duration
 	//允许消息最大长度
@@ -19,7 +19,7 @@ func WithPort(port int) Option {
 		opt.port = port
 	}
 }
-func WithMaxConnNum(num int) Option {
+func WithMaxConnNum(num int64) Option {
 	return func(opt *configs) {
 		opt.maxConnNum = num
 	}

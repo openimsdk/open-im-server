@@ -54,6 +54,14 @@ var (
 	//
 	ErrMutedInGroup = &ErrInfo{MutedInGroup, "MutedInGroup", ""}
 	ErrMutedGroup   = &ErrInfo{MutedGroup, "MutedGroup", ""}
+
+	ErrConnOverMaxNumLimit = &ErrInfo{ConnOverMaxNumLimit, "ConnOverMaxNumLimit", ""}
+
+	ErrConnOverMaxNumLimit = &ErrInfo{ConnOverMaxNumLimit, "ConnOverMaxNumLimit", ""}
+
+	ErrConnOverMaxNumLimit = &ErrInfo{ConnOverMaxNumLimit, "ConnOverMaxNumLimit", ""}
+	ErrConnArgsErr         = &ErrInfo{ConnArgsErr, "args err, need token, sendID, platformID", ""}
+	ErrConnUpdateErr       = &ErrInfo{ConnArgsErr, "upgrade http conn err", ""}
 )
 
 const (
@@ -140,6 +148,13 @@ const (
 // 消息错误码
 const (
 	MessageHasReadDisable = 96001
+)
+
+// 长连接网关错误码
+const (
+	ConnOverMaxNumLimit = 970001
+	ConnArgsErr         = 970002
+	ConnUpdateErr       = 970003
 )
 
 // temp
