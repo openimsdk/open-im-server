@@ -1,6 +1,9 @@
 package new
 
-import "context"
+import (
+	"Open_IM/internal/common/check"
+	"context"
+)
 
 type Req struct {
 	ReqIdentifier int32  `json:"reqIdentifier" validate:"required"`
@@ -30,6 +33,11 @@ type MessageHandler interface {
 var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
+	msg *check.MsgCheck
+}
+
+func NewGrpcHandler(msg *check.MsgCheck) *GrpcHandler {
+	return &GrpcHandler{msg: msg}
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {

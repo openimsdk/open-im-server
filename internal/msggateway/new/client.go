@@ -3,14 +3,12 @@ package new
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/utils"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"runtime/debug"
 	"sync"
-	"time"
 )
 
 const (
@@ -35,34 +33,51 @@ const (
 type Client struct {
 	w              *sync.Mutex
 	conn           LongConn
-	PlatformID     int32
-	PushedMaxSeq   uint32
-	IsCompress     bool
+	platformID     int
+	isCompress     bool
 	userID         string
-	IsBackground   bool
-	token          string
+	isBackground   bool
 	connID         string
 	onlineAt       int64 // 上线时间戳（毫秒）
 	handler        MessageHandler
 	unregisterChan chan *Client
 	compressor     Compressor
 	encoder        Encoder
-	userContext    UserConnContext
 	validate       *validator.Validate
 	closed         bool
 }
 
-func newClient(conn LongConn, isCompress bool, userID string, isBackground bool, token string,
-	connID string, onlineAt int64, handler MessageHandler, unregisterChan chan *Client) *Client {
+func newClient(ctx *UserConnContext, conn LongConn, isCompress bool, compressor Compressor, encoder Encoder,
+	handler MessageHandler, unregisterChan chan *Client, validate *validator.Validate) *Client {
 	return &Client{
-		conn:       conn,
-		IsCompress: isCompress,
-		userID:     userID, IsBackground: isBackground, token: token,
-		connID:         connID,
-		onlineAt:       onlineAt,
+		w:              new(sync.Mutex),
+		conn:           conn,
+		platformID:     utils.StringToInt(ctx.GetPlatformID()),
+		isCompress:     isCompress,
+		userID:         ctx.GetUserID(),
+		compressor:     compressor,
+		encoder:        encoder,
+		connID:         ctx.GetConnID(),
+		onlineAt:       utils.GetCurrentTimestampByMill(),
 		handler:        handler,
 		unregisterChan: unregisterChan,
+		validate:       validate,
 	}
+}
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, compressor Compressor, encoder Encoder,
+	handler MessageHandler, unregisterChan chan *Client, validate *validator.Validate) {
+	c.w = new(sync.Mutex)
+	c.conn = conn
+	c.platformID = utils.StringToInt(ctx.GetPlatformID())
+	c.isCompress = isCompress
+	c.userID = ctx.GetUserID()
+	c.compressor = compressor
+	c.encoder = encoder
+	c.connID = ctx.GetConnID()
+	c.onlineAt = utils.GetCurrentTimestampByMill()
+	c.handler = handler
+	c.unregisterChan = unregisterChan
+	c.validate = validate
 }
 func (c *Client) readMessage() {
 	defer func() {
@@ -77,7 +92,7 @@ func (c *Client) readMessage() {
 		if returnErr != nil {
 			break
 		}
-		if c.closed == true {
+		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
 			break
 		}
 		switch messageType {
@@ -119,7 +134,8 @@ func (c *Client) handleMessage(message []byte) error {
 		return errors.New("exception conn userID not same to req userID")
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "operationID", binaryReq.OperationID)
+	ctx = context.WithValue(ctx, c.connID, binaryReq.OperationID)
+	ctx = context.WithValue(ctx, OPERATION_ID, binaryReq.OperationID)
 	ctx = context.WithValue(ctx, "userID", binaryReq.SendID)
 	var messageErr error
 	var resp []byte
@@ -173,7 +189,7 @@ func (c *Client) writeMsg(resp Resp) error {
 		return utils.Wrap(err, "")
 	}
 	_ = c.conn.SetWriteTimeout(60)
-	if c.IsCompress {
+	if c.isCompress {
 		var compressErr error
 		resultBuf, compressErr = c.compressor.Compress(encodeBuf)
 		if compressErr != nil {

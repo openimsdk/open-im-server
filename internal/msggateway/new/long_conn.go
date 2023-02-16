@@ -26,19 +26,37 @@ type LongConn interface {
 	SetConnNil()
 	//Check the connection of the current and when it was sent are the same
 	CheckSendConnDiffNow() bool
+	//
+	GenerateLongConn(w http.ResponseWriter, r *http.Request) error
 }
 type GWebSocket struct {
-	protocolType int
-	conn         *websocket.Conn
+	protocolType                    int
+	conn                            *websocket.Conn
+	handshakeTimeout                time.Duration
+	readBufferSize, WriteBufferSize int
 }
 
-func NewDefault(protocolType int) *GWebSocket {
-	return &GWebSocket{protocolType: protocolType}
+func newGWebSocket(protocolType int, handshakeTimeout time.Duration, readBufferSize int) *GWebSocket {
+	return &GWebSocket{protocolType: protocolType, handshakeTimeout: handshakeTimeout, readBufferSize: readBufferSize}
 }
+
 func (d *GWebSocket) Close() error {
 	return d.conn.Close()
 }
+func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) error {
+	upgrader := &websocket.Upgrader{
+		HandshakeTimeout: d.handshakeTimeout,
+		ReadBufferSize:   d.readBufferSize,
+		CheckOrigin:      func(r *http.Request) bool { return true },
+	}
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return err
+	}
+	d.conn = conn
+	return nil
 
+}
 func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
 	d.setSendConn(d.conn)
 	return d.conn.WriteMessage(messageType, message)
