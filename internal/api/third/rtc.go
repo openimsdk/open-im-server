@@ -1,8 +1,7 @@
 package apiThird
 
 import (
-	api "Open_IM/pkg/api_struct"
-	"Open_IM/pkg/common/db"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/utils"

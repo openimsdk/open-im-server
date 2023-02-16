@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -2,7 +2,7 @@ package msg
 
 import (
 	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prometheus"
+	promePkg "Open_IM/pkg/common/prome"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"

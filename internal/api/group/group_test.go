@@ -1,7 +1,7 @@
 package group
 
 import (
-	"Open_IM/pkg/api_struct"
+	"Open_IM/pkg/apistruct"
 	"Open_IM/pkg/proto/group"
 	"context"
 	"errors"

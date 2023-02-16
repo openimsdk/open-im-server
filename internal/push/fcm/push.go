@@ -3,7 +3,6 @@ package fcm
 import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"

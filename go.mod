@@ -56,7 +56,6 @@ require (
 )
 
 require (
-	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

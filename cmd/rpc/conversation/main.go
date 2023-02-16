@@ -4,7 +4,7 @@ import (
 	rpcConversation "Open_IM/internal/rpc/conversation"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 	"flag"
 	"fmt"
 )

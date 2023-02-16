@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
-	promePkg "Open_IM/pkg/common/prometheus"
+	promePkg "Open_IM/pkg/common/prome"
 	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"

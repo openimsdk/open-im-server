@@ -12,15 +12,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
-
-	"github.com/golang/protobuf/proto"
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-
-	"github.com/gorilla/websocket"
-	"google.golang.org/grpc"
 )
 
 type RPCServer struct {

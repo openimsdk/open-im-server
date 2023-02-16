@@ -3,7 +3,6 @@ package new
 import (
 	"bytes"
 	"encoding/gob"
-	"open_im_sdk/pkg/utils"
 )
 
 type Encoder interface {

@@ -9,7 +9,7 @@ import (
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
 
-	promePkg "Open_IM/pkg/common/prometheus"
+	promePkg "Open_IM/pkg/common/prome"
 	"Open_IM/pkg/proto/msg"
 	"google.golang.org/grpc"
 )

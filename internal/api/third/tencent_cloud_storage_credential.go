@@ -1,7 +1,7 @@
 package apiThird
 
 import (
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"

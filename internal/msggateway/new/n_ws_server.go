@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"open_im_sdk/pkg/utils"
 	"sync"
 	"sync/atomic"
 	"time"
