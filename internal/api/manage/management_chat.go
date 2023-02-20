@@ -260,9 +260,13 @@ type FileElem struct {
 	FileSize  int64  `mapstructure:"fileSize"`
 }
 type AtElem struct {
-	Text       string   `mapstructure:"text"`
-	AtUserList []string `mapstructure:"atUserList"`
-	IsAtSelf   bool     `mapstructure:"isAtSelf"`
+	Text        string   `mapstructure:"text"`
+	AtUserList  []string `mapstructure:"atUserList"`
+	AtUsersInfo []struct {
+		AtUserID      string `json:"atUserID,omitempty"`
+		GroupNickname string `json:"groupNickname,omitempty"`
+	} `json:"atUsersInfo,omitempty"`
+	IsAtSelf bool `mapstructure:"isAtSelf"`
 }
 type LocationElem struct {
 	Description string  `mapstructure:"description"`
