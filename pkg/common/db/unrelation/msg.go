@@ -58,7 +58,7 @@ func (m *MsgMongoDriver) FindOneByDocID(ctx context.Context, docID string) (*tab
 
 func (m *MsgMongoDriver) GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*table.MsgDocModel, error) {
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: fmt.Sprintf("^%s", sourceID)}}, findOpts)
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: fmt.Sprintf("^%s:", sourceID)}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -75,7 +75,7 @@ func (m *MsgMongoDriver) GetMsgsByIndex(ctx context.Context, sourceID string, in
 
 func (m *MsgMongoDriver) GetNewestMsg(ctx context.Context, sourceID string) (*table.MsgInfoModel, error) {
 	var msgDocs []table.MsgDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": -1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": -1}))
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -94,7 +94,7 @@ func (m *MsgMongoDriver) GetNewestMsg(ctx context.Context, sourceID string) (*ta
 
 func (m *MsgMongoDriver) GetOldestMsg(ctx context.Context, sourceID string) (*table.MsgInfoModel, error) {
 	var msgDocs []table.MsgDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": 1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": 1}))
 	if err != nil {
 		return nil, err
 	}
