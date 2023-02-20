@@ -157,6 +157,8 @@ func ManagementSendMsg(c *gin.Context) {
 		data = CustomElem{}
 	case constant.CustomOnlineOnly:
 		data = CustomElem{}
+	case constant.AtText:
+		data = AtElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
