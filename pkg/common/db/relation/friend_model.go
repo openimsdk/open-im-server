@@ -133,3 +133,10 @@ func (f *FriendGorm) FindInWhoseFriends(ctx context.Context, friendUserID string
 	err = utils.Wrap(getDBConn(f.DB, tx).Where("friend_user_id = ? ", friendUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friends).Error, "")
 	return
 }
+
+func (f *FriendGorm) FindFriendUserIDs(ctx context.Context, ownerUserID string, tx ...any) (friendUserIDs []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserIDs", friendUserIDs)
+	}()
+	return friendUserIDs, utils.Wrap(getDBConn(f.DB, tx).Model(&relation.FriendModel{}).Where("owner_user_id = ? ", ownerUserID).Pluck("friend_user_id", &friendUserIDs).Error, "")
+}

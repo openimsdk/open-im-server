@@ -1,10 +1,10 @@
 package cache
 
 import (
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"time"
@@ -26,6 +26,7 @@ type BlackCache interface {
 type BlackCacheRedis struct {
 	expireTime time.Duration
 	rcClient   *rockscache.Client
+	black      *relation.BlackGorm
 }
 
 func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB BlackCache, options rockscache.Options) *BlackCacheRedis {
@@ -40,31 +41,14 @@ func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {
-	getBlackIDList := func() (string, error) {
-		blackIDs, err := b.blackDB.GetBlackIDs(ctx, userID)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		bytes, err := json.Marshal(blackIDs)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "blackIDList", blackIDs)
-	}()
-	blackIDListStr, err := b.rcClient.Fetch(blackListCache+userID, b.expireTime, getBlackIDList)
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	err = json.Unmarshal([]byte(blackIDListStr), &blackIDs)
-	return blackIDs, utils.Wrap(err, "")
+	return GetCache(ctx, b.rcClient, b.getBlackIDsKey(userID), b.expireTime, func(ctx context.Context) ([]string, error) {
+		return b.black.FindBlackUserIDs(ctx, userID)
+	})
 }
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()
-	return b.rcClient.TagAsDeleted(blackListCache + userID)
+	return b.rcClient.TagAsDeleted(b.getBlackIDsKey(userID))
 }

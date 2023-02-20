@@ -8,8 +8,8 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func (c *Check) DeleteMessageNotification(ctx context.Context, userID string, seqList []uint32, operationID string) {
-	DeleteMessageTips := sdkws.DeleteMessageTips{UserID: userID, SeqList: seqList}
+func (c *Check) DeleteMessageNotification(ctx context.Context, userID string, seqs []int64, operationID string) {
+	DeleteMessageTips := sdkws.DeleteMessageTips{UserID: userID, Seqs: seqs}
 	c.MessageNotification(ctx, userID, userID, constant.DeleteMessageNotification, &DeleteMessageTips)
 }
 

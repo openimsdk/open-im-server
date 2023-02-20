@@ -139,6 +139,10 @@ func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
 	return &RedisClient{rdb: rdb}
 }
 
+func (r *RedisClient) GetClient() redis.UniversalClient {
+	return r.rdb
+}
+
 // Perform seq auto-increment operation of user messages
 func (r *RedisClient) IncrUserSeq(ctx context.Context, uid string) (int64, error) {
 	key := userIncrSeq + uid
