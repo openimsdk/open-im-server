@@ -1,4 +1,4 @@
-package requestbody
+package body
 
 type PushObj struct {
 	Platform     interface{} `json:"platform"`

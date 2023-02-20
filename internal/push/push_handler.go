@@ -4,7 +4,7 @@
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/5/13 10:33).
  */
-package logic
+package push
 
 import (
 	"Open_IM/pkg/common/config"
@@ -18,21 +18,16 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type fcb func(msg []byte)
-
-type PushConsumerHandler struct {
-	msgHandle         map[string]fcb
+type ConsumerHandler struct {
 	pushConsumerGroup *kfk.MConsumerGroup
 }
 
-func (ms *PushConsumerHandler) Init() {
-	ms.msgHandle = make(map[string]fcb)
-	ms.msgHandle[config.Config.Kafka.Ms2pschat.Topic] = ms.handleMs2PsChat
-	ms.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
+func (c *ConsumerHandler) Init() {
+	c.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ms2pschat.Topic}, config.Config.Kafka.Ms2pschat.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
 }
-func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
+func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
 	log.NewDebug("", "msg come from kafka  And push!!!", "msg", string(msg))
 	msgFromMQ := pbChat.PushMsgDataToMQ{}
 	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
@@ -55,16 +50,14 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 	default:
 		MsgToUser(pbData)
 	}
-	//Call push module to send message to the user
-	//MsgToUser((*pbPush.PushMsgReq)(&msgFromMQ))
 }
-func (PushConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (PushConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (ms *PushConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		ms.msgHandle[msg.Topic](msg.Value)
+		c.handleMs2PsChat(msg.Value)
 		sess.MarkMessage(msg, "")
 	}
 	return nil

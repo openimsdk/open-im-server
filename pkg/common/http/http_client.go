@@ -7,7 +7,7 @@
 package http
 
 import (
-	cbapi "Open_IM/pkg/callbackstruct"
+	"Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"bytes"
@@ -33,19 +33,17 @@ func Get(url string) (response []byte, err error) {
 }
 
 // application/json; charset=utf-8
-func Post(url string, data interface{}, timeOutSecond int) (content []byte, err error) {
+func Post(url string, header map[string]string, data interface{}, timeOutSecond int) (content []byte, err error) {
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
 	}
 	req.Close = true
 	req.Header.Add("content-type", "application/json; charset=utf-8")
-
 	client := &http.Client{Timeout: time.Duration(timeOutSecond) * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -59,11 +57,20 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	return result, nil
 }
 
-func callBackPostReturn(url, callbackCommand string, input interface{}, output cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
+func PostReturn(url string, header map[string]string, input, output interface{}, timeOutSecond int) error {
+	b, err := Post(url, header, input, timeOutSecond)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(b, output)
+	return err
+}
+
+func callBackPostReturn(url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
 	v := urlLib.Values{}
-	v.Set("callbackCommand", callbackCommand)
+	v.Set("callbackCommand", command)
 	url = url + "?" + v.Encode()
-	b, err := Post(url, input, callbackConfig.CallbackTimeOut)
+	b, err := Post(url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			return constant.ErrCallbackContinue
@@ -79,6 +86,6 @@ func callBackPostReturn(url, callbackCommand string, input interface{}, output c
 	return output.Parse()
 }
 
-func CallBackPostReturn(url string, req cbapi.CallbackReq, resp cbapi.CallbackResp, callbackConfig config.CallBackConfig) error {
+func CallBackPostReturn(url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
 	return callBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }

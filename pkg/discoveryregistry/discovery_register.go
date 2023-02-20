@@ -9,6 +9,7 @@ type SvcDiscoveryRegistry interface {
 	UnRegister() error
 	GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
 	GetConn(serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error)
+
 	//RegisterConf(conf []byte) error
 	//LoadConf() ([]byte, error)
 }

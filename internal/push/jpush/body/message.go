@@ -1,4 +1,4 @@
-package requestbody
+package body
 
 type Message struct {
 	MsgContent  string                 `json:"msg_content"`

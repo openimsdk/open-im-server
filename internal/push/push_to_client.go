@@ -4,45 +4,33 @@
 ** author("fg,Gordon@open-im.io").
 ** time(2021/3/5 14:31).
  */
-package logic
+package push
 
 import (
-	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/getcdv3"
+	"Open_IM/pkg/common/prome"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
 	"Open_IM/pkg/utils"
 	"context"
-	"strings"
-
-	prome "Open_IM/pkg/common/prometheus"
-
 	"github.com/golang/protobuf/proto"
+	"strings"
 )
 
-type OpenIMContent struct {
-	SessionType int    `json:"sessionType"`
-	From        string `json:"from"`
-	To          string `json:"to"`
-	Seq         uint32 `json:"seq"`
-}
 type AtContent struct {
 	Text       string   `json:"text"`
 	AtUserList []string `json:"atUserList"`
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
-//var grpcCons []*grpc.ClientConn
-
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
+
 	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
 
 	var UIDList = []string{pushMsg.PushToUserID}
@@ -277,13 +265,13 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	}
 }
 
-func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
-	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin {
+func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts *Opts, err error) {
+	if pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin && pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd {
 		req := &pbRtc.SignalReq{}
 		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
-			return opts, utils.Wrap(err, "")
+			return nil, utils.Wrap(err, "")
 		}
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
+		opts = &Opts{}
 		switch req.Payload.(type) {
 		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
 			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
@@ -291,10 +279,10 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 		}
 	}
 	if pushMsg.MsgData.OfflinePushInfo != nil {
+		opts = &Opts{}
 		opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
 		opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
-		opts.Data = pushMsg.MsgData.OfflinePushInfo.Ex
+		opts.Ex = pushMsg.MsgData.OfflinePushInfo.Ex
 	}
-
 	return opts, nil
 }

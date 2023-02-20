@@ -1,18 +1,16 @@
 package push
 
-import "Open_IM/pkg/common/constant"
-
-var PushTerminal = []int{constant.IOSPlatformID, constant.AndroidPlatformID, constant.WebPlatformID}
+import "context"
 
 type OfflinePusher interface {
-	Push(userIDList []string, title, detailContent, operationID string, opts PushOpts) (resp string, err error)
+	Push(ctx context.Context, userIDs []string, title, content, opts *Opts) error
 }
 
-type PushOpts struct {
-	Signal        Signal
+type Opts struct {
+	Signal        *Signal
 	IOSPushSound  string
 	IOSBadgeCount bool
-	Data          string
+	Ex            string
 }
 
 type Signal struct {

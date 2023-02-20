@@ -2,11 +2,13 @@ package push
 
 import (
 	"Open_IM/internal/push"
+	"Open_IM/internal/push/jpush/body"
 	"Open_IM/internal/push/jpush/common"
-	"Open_IM/internal/push/jpush/requestBody"
 	"Open_IM/pkg/common/config"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -33,26 +35,31 @@ func (j *JPush) SetAlias(cid, alias string) (resp string, err error) {
 	return resp, nil
 }
 
+func (j *JPush) getAuthorization(Appkey string, MasterSecret string) string {
+	str := fmt.Sprintf("%s:%s", Appkey, MasterSecret)
+	buf := []byte(str)
+	Authorization := fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(buf))
+	return Authorization
+}
+
 func (j *JPush) Push(accounts []string, title, detailContent, operationID string, opts push.PushOpts) (string, error) {
-
-	var pf requestbody.Platform
+	var pf body.Platform
 	pf.SetAll()
-	var au requestbody.Audience
+	var au body.Audience
 	au.SetAlias(accounts)
-	var no requestbody.Notification
-
-	var extras requestbody.Extras
+	var no body.Notification
+	var extras body.Extras
 	if opts.Signal.ClientMsgID != "" {
 		extras.ClientMsgID = opts.Signal.ClientMsgID
 	}
 	no.IOSEnableMutableContent()
 	no.SetExtras(extras)
 	no.SetAlert(title)
-	var me requestbody.Message
+	var me body.Message
 	me.SetMsgContent(detailContent)
-	var o requestbody.Options
+	var o body.Options
 	o.SetApnsProduction(config.Config.IOSPush.Production)
-	var po requestbody.PushObj
+	var po body.PushObj
 	po.SetPlatform(&pf)
 	po.SetAudience(&au)
 	po.SetNotification(&no)
@@ -68,8 +75,7 @@ func (j *JPush) Push(accounts []string, title, detailContent, operationID string
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", common.GetAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret))
-
+	req.Header.Set("Authorization", j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret))
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err

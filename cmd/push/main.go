@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/internal/push/logic"
+	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -19,7 +19,7 @@ func main() {
 	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)
 	fmt.Println("start push rpc server, port: ", *rpcPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	logic.Init(*rpcPort)
-	logic.Run(*prometheusPort)
+	push.Init(*rpcPort)
+	push.Run(*prometheusPort)
 	wg.Wait()
 }

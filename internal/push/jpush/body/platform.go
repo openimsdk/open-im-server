@@ -1,4 +1,4 @@
-package requestbody
+package body
 
 import (
 	"Open_IM/pkg/common/constant"

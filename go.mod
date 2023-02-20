@@ -1,6 +1,6 @@
 module Open_IM
 
-go 1.18
+go 1.16
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -49,14 +49,12 @@ require (
 	google.golang.org/api v0.103.0
 	google.golang.org/grpc v1.52.3
 	google.golang.org/protobuf v1.28.1
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.5
 	gorm.io/gorm v1.23.8
 )
 
 require (
-	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

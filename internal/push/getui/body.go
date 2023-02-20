@@ -1,0 +1,142 @@
+package getui
+
+import "Open_IM/pkg/common/config"
+
+type CommonResp struct {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
+type AuthReq struct {
+	Sign      string `json:"sign"`
+	Timestamp string `json:"timestamp"`
+	AppKey    string `json:"appkey"`
+}
+
+type AuthResp struct {
+	ExpireTime string `json:"expire_time"`
+	Token      string `json:"token"`
+}
+
+type TaskResp struct {
+	TaskID string `json:"taskID"`
+}
+
+type Settings struct {
+	TTL *int64 `json:"ttl"`
+}
+
+type Audience struct {
+	Alias []string `json:"alias"`
+}
+
+type PushMessage struct {
+	Notification *Notification `json:"notification,omitempty"`
+	Transmission *string       `json:"transmission,omitempty"`
+}
+
+type PushChannel struct {
+	Ios     *Ios     `json:"ios"`
+	Android *Android `json:"android"`
+}
+
+type PushReq struct {
+	RequestID   *string      `json:"request_id"`
+	Settings    *Settings    `json:"settings"`
+	Audience    *Audience    `json:"audience"`
+	PushMessage *PushMessage `json:"push_message"`
+	PushChannel *PushChannel `json:"push_channel"`
+	IsAsync     *bool        `json:"is_async"`
+	TaskID      *string      `json:"taskid"`
+}
+
+type Ios struct {
+	NotificationType *string `json:"type"`
+	AutoBadge        *string `json:"auto_badge"`
+	Aps              struct {
+		Sound string `json:"sound"`
+		Alert Alert  `json:"alert"`
+	} `json:"aps"`
+}
+
+type Alert struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+type Android struct {
+	Ups struct {
+		Notification Notification `json:"notification"`
+		Options      Options      `json:"options"`
+	} `json:"ups"`
+}
+
+type Notification struct {
+	Title       string `json:"title"`
+	Body        string `json:"body"`
+	ChannelID   string `json:"channelID"`
+	ChannelName string `json:"ChannelName"`
+	ClickType   string `json:"click_type"`
+}
+
+type Options struct {
+	HW struct {
+		DefaultSound bool   `json:"/message/android/notification/default_sound"`
+		ChannelID    string `json:"/message/android/notification/channel_id"`
+		Sound        string `json:"/message/android/notification/sound"`
+		Importance   string `json:"/message/android/notification/importance"`
+	} `json:"HW"`
+	XM struct {
+		ChannelID string `json:"/extra.channel_id"`
+	} `json:"XM"`
+	VV struct {
+		Classification int `json:"/classification"`
+	} `json:"VV"`
+}
+
+func newPushReq(title, content string) PushReq {
+	pushReq := PushReq{PushMessage: &PushMessage{Notification: &Notification{
+		Title:       title,
+		Body:        content,
+		ClickType:   "startapp",
+		ChannelID:   config.Config.Push.Getui.ChannelID,
+		ChannelName: config.Config.Push.Getui.ChannelName,
+	}}}
+	return pushReq
+}
+
+func (pushReq *PushReq) setPushChannel(title string, body string) {
+	pushReq.PushChannel = &PushChannel{}
+	// autoBadge := "+1"
+	pushReq.PushChannel.Ios = &Ios{}
+	notify := "notify"
+	pushReq.PushChannel.Ios.NotificationType = &notify
+	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.Aps.Alert = Alert{
+		Title: title,
+		Body:  body,
+	}
+	pushReq.PushChannel.Android = &Android{}
+	pushReq.PushChannel.Android.Ups.Notification = Notification{
+		Title:     title,
+		Body:      body,
+		ClickType: "startapp",
+	}
+	pushReq.PushChannel.Android.Ups.Options = Options{
+		HW: struct {
+			DefaultSound bool   `json:"/message/android/notification/default_sound"`
+			ChannelID    string `json:"/message/android/notification/channel_id"`
+			Sound        string `json:"/message/android/notification/sound"`
+			Importance   string `json:"/message/android/notification/importance"`
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+		XM: struct {
+			ChannelID string `json:"/extra.channel_id"`
+		}{ChannelID: "high_system"},
+		VV: struct {
+			Classification int "json:\"/classification\""
+		}{
+			Classification: 1,
+		},
+	}
+}

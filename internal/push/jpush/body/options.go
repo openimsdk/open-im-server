@@ -1,4 +1,4 @@
-package requestbody
+package body
 
 type Options struct {
 	ApnsProduction bool `json:"apns_production"`

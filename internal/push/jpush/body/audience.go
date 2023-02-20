@@ -1,4 +1,4 @@
-package requestbody
+package body
 
 const (
 	TAG             = "tag"
@@ -20,7 +20,6 @@ func (a *Audience) set(key string, v []string) {
 		a.audience = make(map[string][]string)
 		a.Object = a.audience
 	}
-
 	//v, ok = this.audience[key]
 	//if ok {
 	//	return

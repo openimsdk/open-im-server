@@ -5,13 +5,13 @@ import common "Open_IM/pkg/proto/sdkws"
 type CallbackBeforePushReq struct {
 	UserStatusBatchCallbackReq
 	*common.OfflinePushInfo
-	ClientMsgID  string   `json:"clientMsgID"`
-	SendID       string   `json:"sendID"`
-	GroupID      string   `json:"groupID"`
-	ContentType  int32    `json:"contentType"`
-	SessionType  int32    `json:"sessionType"`
-	AtUserIDList []string `json:"atUserIDList"`
-	Content      string   `json:"content"`
+	ClientMsgID string   `json:"clientMsgID"`
+	SendID      string   `json:"sendID"`
+	GroupID     string   `json:"groupID"`
+	ContentType int32    `json:"contentType"`
+	SessionType int32    `json:"sessionType"`
+	AtUserIDs   []string `json:"atUserIDList"`
+	Content     string   `json:"content"`
 }
 
 type CallbackBeforePushResp struct {
@@ -21,7 +21,6 @@ type CallbackBeforePushResp struct {
 }
 
 type CallbackBeforeSuperGroupOnlinePushReq struct {
-	//*common.OfflinePushInfo
 	UserStatusBaseCallback
 	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`
@@ -30,7 +29,7 @@ type CallbackBeforeSuperGroupOnlinePushReq struct {
 	SessionType  int32    `json:"sessionType"`
 	AtUserIDList []string `json:"atUserIDList"`
 	Content      string   `json:"content"`
-	Seq          uint32   `json:"seq"`
+	Seq          int64    `json:"seq"`
 }
 
 type CallbackBeforeSuperGroupOnlinePushResp struct {

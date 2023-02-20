@@ -1,4 +1,4 @@
-package logic
+package push
 
 import (
 	tpns "Open_IM/internal/push/sdk/tpns-server-sdk-go/go"

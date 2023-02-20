@@ -1,7 +1,7 @@
-package logic
+package push
 
 import (
-	cbapi "Open_IM/pkg/callbackstruct"
+	"Open_IM/pkg/callbackstruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -15,13 +15,13 @@ func url() string {
 	return config.Config.Callback.CallbackUrl
 }
 
-func CallbackOfflinePush(ctx context.Context, userIDList []string, msg *common.MsgData, offlinePushUserIDList *[]string) error {
+func callbackOfflinePush(ctx context.Context, userIDList []string, msg *common.MsgData, offlinePushUserIDList *[]string) error {
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return nil
 	}
-	req := &cbapi.CallbackBeforePushReq{
-		UserStatusBatchCallbackReq: cbapi.UserStatusBatchCallbackReq{
-			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
+	req := &callbackstruct.CallbackBeforePushReq{
+		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
+			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackOfflinePushCommand,
 				OperationID:     tracelog.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
@@ -35,10 +35,10 @@ func CallbackOfflinePush(ctx context.Context, userIDList []string, msg *common.M
 		GroupID:         msg.GroupID,
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
-		AtUserIDList:    msg.AtUserIDList,
+		AtUserIDs:       msg.AtUserIDList,
 		Content:         utils.GetContent(msg),
 	}
-	resp := &cbapi.CallbackBeforePushResp{}
+	resp := &callbackstruct.CallbackBeforePushResp{}
 	err := http.CallBackPostReturn(url(), req, resp, config.Config.Callback.CallbackOfflinePush)
 	if err != nil {
 		return err
@@ -52,13 +52,13 @@ func CallbackOfflinePush(ctx context.Context, userIDList []string, msg *common.M
 	return nil
 }
 
-func CallbackOnlinePush(operationID string, userIDList []string, msg *common.MsgData) error {
+func callbackOnlinePush(operationID string, userIDList []string, msg *common.MsgData) error {
 	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDList...) {
 		return nil
 	}
-	req := cbapi.CallbackBeforePushReq{
-		UserStatusBatchCallbackReq: cbapi.UserStatusBatchCallbackReq{
-			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
+	req := callbackstruct.CallbackBeforePushReq{
+		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
+			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackOnlinePushCommand,
 				OperationID:     operationID,
 				PlatformID:      int(msg.SenderPlatformID),
@@ -66,24 +66,24 @@ func CallbackOnlinePush(operationID string, userIDList []string, msg *common.Msg
 			},
 			UserIDList: userIDList,
 		},
-		ClientMsgID:  msg.ClientMsgID,
-		SendID:       msg.SendID,
-		GroupID:      msg.GroupID,
-		ContentType:  msg.ContentType,
-		SessionType:  msg.SessionType,
-		AtUserIDList: msg.AtUserIDList,
-		Content:      utils.GetContent(msg),
+		ClientMsgID: msg.ClientMsgID,
+		SendID:      msg.SendID,
+		GroupID:     msg.GroupID,
+		ContentType: msg.ContentType,
+		SessionType: msg.SessionType,
+		AtUserIDs:   msg.AtUserIDList,
+		Content:     utils.GetContent(msg),
 	}
-	resp := &cbapi.CallbackBeforePushResp{}
+	resp := &callbackstruct.CallbackBeforePushResp{}
 	return http.CallBackPostReturn(url(), req, resp, config.Config.Callback.CallbackOnlinePush)
 }
 
-func CallbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *common.MsgData, pushToUserList *[]string) error {
+func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *common.MsgData, pushToUserList *[]string) error {
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		return nil
 	}
-	req := cbapi.CallbackBeforeSuperGroupOnlinePushReq{
-		UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
+	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
+		UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 			CallbackCommand: constant.CallbackSuperGroupOnlinePushCommand,
 			OperationID:     tracelog.GetOperationID(ctx),
 			PlatformID:      int(msg.SenderPlatformID),
@@ -98,7 +98,7 @@ func CallbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg
 		Content:      utils.GetContent(msg),
 		Seq:          msg.Seq,
 	}
-	resp := &cbapi.CallbackBeforeSuperGroupOnlinePushResp{}
+	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		return err
 	}
