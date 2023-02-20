@@ -266,9 +266,10 @@ message MsgData {
   bytes msgDataList = 21;
   string attachedInfo = 22;
   string  ex = 23;
-  bool   isReact = 24;
-  bool isExternalExtensions = 25;
-  int64 msgFirstModifyTime = 26;
+
+  bool   isReact = 40;
+  bool isExternalExtensions = 41;
+  int64 msgFirstModifyTime = 42;
 
 }
 message OfflinePushInfo{
