@@ -273,7 +273,7 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	regex := fmt.Sprintf("^%s", ID)
+	regex := fmt.Sprintf("^%s:", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
 	//primitive.Regex{Pattern: regex}
@@ -330,7 +330,7 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) (replac
 func (d *DataBases) GetNewestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	regex := fmt.Sprintf("^%s", ID)
+	regex := fmt.Sprintf("^%s:", ID)
 	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"uid": -1})
 	var userChats []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
@@ -358,7 +358,7 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *open_im_sdk.MsgData, err error
 func (d *DataBases) GetOldestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	regex := fmt.Sprintf("^%s", ID)
+	regex := fmt.Sprintf("^%s:", ID)
 	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"uid": 1})
 	var userChats []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
