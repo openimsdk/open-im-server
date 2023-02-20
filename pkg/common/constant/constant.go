@@ -315,10 +315,6 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
-const (
-	TokenKicked = 1001
-)
-
 const BigVersion = "v2"
 
 const LogFileName = "OpenIM.log"

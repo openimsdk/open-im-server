@@ -10,7 +10,7 @@ import (
 	tablerelation "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	registry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/sdkws"
 	pbuser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -24,7 +24,8 @@ type userServer struct {
 	notification        *notification.Check
 	userCheck           *check.UserCheck
 	ConversationChecker *check.ConversationChecker
-	RegisterCenter      discoveryRegistry.SvcDiscoveryRegistry
+	RegisterCenter      registry.SvcDiscoveryRegistry
+	friendCheck         *check.FriendChecker
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
@@ -58,11 +59,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
-func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
-
-	return
-}
-
 // ok
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
@@ -78,7 +74,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	friends, err := s.GetAllPageFriends(ctx, req.UserInfo.UserID)
+	friends, err := s.friendCheck.GetAllPageFriends(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,9 +83,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
-
 	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
-
 	return resp, nil
 }
 

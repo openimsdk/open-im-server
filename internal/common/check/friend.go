@@ -2,6 +2,7 @@ package check
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdkws"
@@ -50,11 +51,25 @@ func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, user
 }
 
 func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
-
 	cc, err := f.getConn()
 	if err != nil {
 		return nil, err
 	}
-
-	resp, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx)
+	page := int32(0)
+	req := friend.GetPaginationFriendsReq{UserID: ownerUserID}
+	for {
+		req.Pagination = &sdkws.RequestPagination{PageNumber: page, ShowNumber: constant.ShowNumber}
+		tmp, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx, &req)
+		if err != nil {
+			return nil, err
+		}
+		if len(tmp.FriendsInfo) == 0 {
+			if tmp.Total == int32(len(resp)) {
+				return resp, nil
+			}
+			return nil, constant.ErrData.Wrap("total != resp, but result is nil")
+		}
+		resp = append(resp, tmp.FriendsInfo...)
+		page++
+	}
 }
