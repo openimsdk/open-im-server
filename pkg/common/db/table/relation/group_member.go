@@ -28,16 +28,17 @@ func (GroupMemberModel) TableName() string {
 }
 
 type GroupMemberModelInterface interface {
-	Create(ctx context.Context, groupMemberList []*GroupMemberModel, tx ...any) (err error)
-	Delete(ctx context.Context, groupID string, userIDs []string, tx ...any) (err error)
-	DeleteGroup(ctx context.Context, groupIDs []string, tx ...any) (err error)
-	Update(ctx context.Context, groupID string, userID string, data map[string]any, tx ...any) (err error)
-	UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32, tx ...any) (rowsAffected int64, err error)
-	Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, tx ...any) (groupList []*GroupMemberModel, err error)
-	FindMemberUserID(ctx context.Context, groupID string, tx ...any) (userIDs []string, err error)
-	Take(ctx context.Context, groupID string, userID string, tx ...any) (groupMember *GroupMemberModel, err error)
-	TakeOwner(ctx context.Context, groupID string, tx ...any) (groupMember *GroupMemberModel, err error)
-	SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32, tx ...any) (total uint32, groupList []*GroupMemberModel, err error)
-	MapGroupMemberNum(ctx context.Context, groupIDs []string, tx ...any) (count map[string]uint32, err error)
-	FindJoinUserID(ctx context.Context, groupIDs []string, tx ...any) (groupUsers map[string][]string, err error)
+	NewTx(tx any) GroupMemberModelInterface
+	Create(ctx context.Context, groupMemberList []*GroupMemberModel) (err error)
+	Delete(ctx context.Context, groupID string, userIDs []string) (err error)
+	DeleteGroup(ctx context.Context, groupIDs []string) (err error)
+	Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error)
+	UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) (rowsAffected int64, err error)
+	Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupList []*GroupMemberModel, err error)
+	FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error)
+	Take(ctx context.Context, groupID string, userID string) (groupMember *GroupMemberModel, err error)
+	TakeOwner(ctx context.Context, groupID string) (groupMember *GroupMemberModel, err error)
+	SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, groupList []*GroupMemberModel, err error)
+	MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error)
+	FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
 }

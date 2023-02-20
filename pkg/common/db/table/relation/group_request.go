@@ -28,8 +28,9 @@ func (GroupRequestModel) TableName() string {
 }
 
 type GroupRequestModelInterface interface {
-	Create(ctx context.Context, groupRequests []*GroupRequestModel, tx ...any) (err error)
-	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, tx ...any) (err error)
-	Take(ctx context.Context, groupID string, userID string, tx ...any) (groupRequest *GroupRequestModel, err error)
-	Page(ctx context.Context, userID string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupRequestModel, err error)
+	NewTx(tx any) GroupRequestModelInterface
+	Create(ctx context.Context, groupRequests []*GroupRequestModel) (err error)
+	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32) (err error)
+	Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequestModel, err error)
+	Page(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, groups []*GroupRequestModel, err error)
 }

@@ -69,10 +69,10 @@ func KickGroupMember(c *gin.Context) {
 	// 默认 全部自动
 	NewRpc(NewApiBind[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember).Execute()
 	// 可以自定义编辑请求和响应
-	a := NewRpc(NewApiBind[api_struct.KickGroupMemberReq, api_struct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
-	a.Before(func(apiReq *api_struct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
+	a := NewRpc(NewApiBind[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
+	a.Before(func(apiReq *apistruct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
 		return bind()
-	}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *api_struct.KickGroupMemberResp, bind func() error) error {
+	}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *apistruct.KickGroupMemberResp, bind func() error) error {
 		return bind()
 	}).Execute()
 }

@@ -3,6 +3,7 @@ package group
 import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/notification"
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
@@ -44,7 +45,15 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupInterface:      controller.NewGroupInterface(controller.NewGroupDatabase(db, redis.GetClient(), mongo.GetClient())),
+		GroupInterface: controller.NewGroupController(
+			relation.NewGroupDB(db),
+			relation.NewGroupMemberDB(db),
+			relation.NewGroupRequest(db),
+			tx.NewGorm(db),
+			tx.NewMongo(mongo.GetClient()),
+			unrelation.NewSuperGroupMongoDriver(mongo.GetClient()),
+			redis.GetClient(),
+		),
 		UserCheck:           check.NewUserCheck(client),
 		ConversationChecker: check.NewConversationChecker(client),
 	})
@@ -52,7 +61,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 }
 
 type groupServer struct {
-	GroupInterface      controller.GroupInterface
+	GroupInterface      controller.GroupController
 	UserCheck           *check.UserCheck
 	Notification        *notification.Check
 	ConversationChecker *check.ConversationChecker

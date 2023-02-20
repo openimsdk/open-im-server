@@ -32,11 +32,12 @@ func (GroupModel) TableName() string {
 }
 
 type GroupModelInterface interface {
-	Create(ctx context.Context, groups []*GroupModel, tx ...any) (err error)
-	UpdateMap(ctx context.Context, groupID string, args map[string]interface{}, tx ...any) (err error)
-	UpdateStatus(ctx context.Context, groupID string, status int32, tx ...any) (err error)
-	Find(ctx context.Context, groupIDs []string, tx ...any) (groups []*GroupModel, err error)
-	Take(ctx context.Context, groupID string, tx ...any) (group *GroupModel, err error)
-	Search(ctx context.Context, keyword string, pageNumber, showNumber int32, tx ...any) (total uint32, groups []*GroupModel, err error)
+	NewTx(tx any) GroupModelInterface
+	Create(ctx context.Context, groups []*GroupModel) (err error)
+	UpdateMap(ctx context.Context, groupID string, args map[string]interface{}) (err error)
+	UpdateStatus(ctx context.Context, groupID string, status int32) (err error)
+	Find(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
+	Take(ctx context.Context, groupID string) (group *GroupModel, err error)
+	Search(ctx context.Context, keyword string, pageNumber, showNumber int32) (total uint32, groups []*GroupModel, err error)
 	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 }

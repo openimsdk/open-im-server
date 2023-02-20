@@ -2,7 +2,7 @@ package cache
 
 import (
 	relationTb "Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/db/unrelation"
+	unrelation2 "Open_IM/pkg/common/db/table/unrelation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -51,17 +51,36 @@ type GroupCache interface {
 	DelGroupMemberNum(ctx context.Context, groupID string) (err error)
 }
 
+type GroupCacheRedisInterface interface {
+	GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
+	GetGroupInfo(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
+	BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string) (err error)
+	DelJoinedSuperGroupIDs(ctx context.Context, userID string) (err error)
+	GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error)
+	GetGroupMembersHash(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error)
+	GetGroupMemberHash1(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error)
+	DelGroupMembersHash(ctx context.Context, groupID string) (err error)
+	GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error)
+	DelGroupMemberIDs(ctx context.Context, groupID string) (err error)
+	DelJoinedGroupID(ctx context.Context, userID string) (err error)
+	GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)
+	DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error)
+	DelGroupMemberNum(ctx context.Context, groupID string) (err error)
+	DelGroupInfo(ctx context.Context, groupID string) (err error)
+	DelGroupsInfo(ctx context.Context, groupIDs []string) error
+}
+
 type GroupCacheRedis struct {
 	group        relationTb.GroupModelInterface
 	groupMember  relationTb.GroupMemberModelInterface
 	groupRequest relationTb.GroupRequestModelInterface
-	mongoDB      *unrelation.SuperGroupMongoDriver
+	mongoDB      unrelation2.SuperGroupModelInterface
 	expireTime   time.Duration
 	redisClient  *RedisClient
 	rcClient     *rockscache.Client
 }
 
-func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModelInterface, groupMemberDB relationTb.GroupMemberModelInterface, groupRequestDB relationTb.GroupRequestModelInterface, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCacheRedis {
+func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModelInterface, groupMemberDB relationTb.GroupMemberModelInterface, groupRequestDB relationTb.GroupRequestModelInterface, mongoClient unrelation2.SuperGroupModelInterface, opts rockscache.Options) GroupCacheRedisInterface {
 	return &GroupCacheRedis{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient,

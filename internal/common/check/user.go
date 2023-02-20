@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-//func GetUsersInfo(ctx context.Context, args ...interface{}) ([]*sdkws.UserInfo, error) {
-//	return nil, errors.New("TODO:GetUserInfo")
-//}
-
 func NewUserCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *UserCheck {
 	return &UserCheck{
 		zk: zk,
