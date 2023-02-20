@@ -59,6 +59,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 }
 
 func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
+
 	return
 }
 
@@ -69,14 +70,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	//oldNickname := ""
-	//if req.UserInfo.Nickname != "" {
-	//	u, err := s.FindWithError(ctx, []string{req.UserInfo.UserID})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	oldNickname = u[0].Nickname
-	//}
 	user, err := convert.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
 		return nil, err
@@ -182,5 +175,15 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if err != nil {
 		return nil, err
 	}
+	return resp, nil
+}
+
+func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.GetGlobalRecvMessageOptReq) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
+	resp = &pbuser.GetGlobalRecvMessageOptResp{}
+	user, err := s.FindWithError(ctx, []string{req.UserID})
+	if err != nil {
+		return nil, err
+	}
+	resp.GlobalRecvMsgOpt = user[0].GlobalRecvMsgOpt
 	return resp, nil
 }

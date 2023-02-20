@@ -4,11 +4,15 @@ option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
 message getPaginationFriendsReq{
-  string ownerUserID = 1;
-  repeated string friendUserIDs = 2;
+  sdkws.RequestPagination pagination = 1;
+  string userID = 2;
 }
 message getPaginationFriendsResp{
-  repeated sdkws.FriendInfo friendsInfo = 1;
+  repeated sdkws.FriendInfo FriendsInfo = 1;
+  int32 total = 2;
+
+
+
 }
 
 
@@ -43,12 +47,11 @@ message getPaginationFriendsApplyToResp{
 
 
 message getDesignatedFriendsReq{
-  sdkws.RequestPagination pagination = 1;
-  string userID = 2;
+  string ownerUserID = 1;
+  repeated string friendUserIDs = 2;
 }
 message getDesignatedFriendsResp{
-  repeated sdkws.FriendInfo FriendsInfo = 1;
-  int32 total = 2;
+  repeated sdkws.FriendInfo friendsInfo = 1;
 }
 
 
@@ -160,4 +163,9 @@ service friend{
   rpc getDesignatedFriends(getDesignatedFriendsReq) returns(getDesignatedFriendsResp);
   //获取指定好友信息 有id不存在也返回错误
   rpc getPaginationFriends(getPaginationFriendsReq) returns (getPaginationFriendsResp);
+
+
+
+
+
 }

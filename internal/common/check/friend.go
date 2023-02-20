@@ -37,5 +37,24 @@ func (f *FriendChecker) getConn() (*grpc.ClientConn, error) {
 
 // possibleFriendUserID是否在userID的好友中
 func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
-	return false, nil
+	cc, err := f.getConn()
+	if err != nil {
+		return false, err
+	}
+	resp, err := friend.NewFriendClient(cc).IsFriend(ctx, &friend.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID})
+	if err != nil {
+		return false, err
+	}
+	return resp.InUser1Friends, nil
+
+}
+
+func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
+
+	cc, err := f.getConn()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx)
 }
