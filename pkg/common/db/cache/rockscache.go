@@ -10,38 +10,36 @@ import (
 
 const scanCount = 3000
 
-
-func (rc *RcClient) DelKeys() {
-	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE", groupOwnerIDCache, joinedGroupListCache,
-		groupMemberInfoCache, groupAllMemberInfoCache, "ALL_FRIEND_INFO_CACHE:"} {
-		fName := utils.GetSelfFuncName()
-		var cursor uint64
-		var n int
-		for {
-			var keys []string
-			var err error
-			keys, cursor, err = rc.rdb.Scan(context.Background(), cursor, key+"*", scanCount).Result()
-			if err != nil {
-				panic(err.Error())
-			}
-			n += len(keys)
-			// for each for redis cluster
-			for _, key := range keys {
-				if err = rc.rdb.Del(context.Background(), key).Err(); err != nil {
-					log.NewError("", fName, key, err.Error())
-					err = rc.rdb.Del(context.Background(), key).Err()
-					if err != nil {
-						panic(err.Error())
-					}
-				}
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-	}
-}
-
+//func (rc *RcClient) DelKeys() {
+//	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE", groupOwnerIDCache, joinedGroupListCache,
+//		groupMemberInfoCache, groupAllMemberInfoCache, "ALL_FRIEND_INFO_CACHE:"} {
+//		fName := utils.GetSelfFuncName()
+//		var cursor uint64
+//		var n int
+//		for {
+//			var keys []string
+//			var err error
+//			keys, cursor, err = rc.rdb.Scan(context.Background(), cursor, key+"*", scanCount).Result()
+//			if err != nil {
+//				panic(err.Error())
+//			}
+//			n += len(keys)
+//			// for each for redis cluster
+//			for _, key := range keys {
+//				if err = rc.rdb.Del(context.Background(), key).Err(); err != nil {
+//					log.NewError("", fName, key, err.Error())
+//					err = rc.rdb.Del(context.Background(), key).Err()
+//					if err != nil {
+//						panic(err.Error())
+//					}
+//				}
+//			}
+//			if cursor == 0 {
+//				break
+//			}
+//		}
+//	}
+//}
 
 func GetCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
 	var t T

@@ -19,34 +19,42 @@ type ExtendMsgSetCache struct {
 	rcClient   *rockscache.Client
 }
 
-func (e *ExtendMsgSetCache) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsg, err error) {
-	getExtendMsg := func() (string, error) {
-		extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
-		if err != nil {
-			return "", utils.Wrap(err, "GetExtendMsgList failed")
-		}
-		bytes, err := json.Marshal(extendMsg)
-		if err != nil {
-			return "", utils.Wrap(err, "Marshal failed")
-		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sourceID", sourceID, "sessionType",
-			sessionType, "clientMsgID", clientMsgID, "firstModifyTime", firstModifyTime, "extendMsg", extendMsg)
-	}()
-	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)
-	if err != nil {
-		return nil, utils.Wrap(err, "Fetch failed")
-	}
-	extendMsg = &mongoDB.ExtendMsg{}
-	err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
-	return extendMsg, utils.Wrap(err, "Unmarshal failed")
+func (e *ExtendMsgSetCache) getKey(clientMsgID string) string {
+	return extendMsgCache + clientMsgID
+}
+
+func (e *ExtendMsgSetCache) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error) {
+	//getExtendMsg := func() (string, error) {
+	//	extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
+	//	if err != nil {
+	//		return "", utils.Wrap(err, "GetExtendMsgList failed")
+	//	}
+	//	bytes, err := json.Marshal(extendMsg)
+	//	if err != nil {
+	//		return "", utils.Wrap(err, "Marshal failed")
+	//	}
+	//	return string(bytes), nil
+	//}
+	//defer func() {
+	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sourceID", sourceID, "sessionType",
+	//		sessionType, "clientMsgID", clientMsgID, "firstModifyTime", firstModifyTime, "extendMsg", extendMsg)
+	//}()
+	//extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)
+	//if err != nil {
+	//	return nil, utils.Wrap(err, "Fetch failed")
+	//}
+	//extendMsg = &mongoDB.ExtendMsg{}
+	//err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
+	//return extendMsg, utils.Wrap(err, "Unmarshal failed")
+	return GetCache(ctx, e.rcClient, e.getKey(clientMsgID), e.expireTime, func(ctx context.Context) (*unrelation.ExtendMsgModel, error) {
+		panic("")
+	})
+
 }
 
 func (e *ExtendMsgSetCache) DelExtendMsg(ctx context.Context, clientMsgID string) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "clientMsgID", clientMsgID)
 	}()
-	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgCache+clientMsgID), "DelExtendMsg err")
+	return utils.Wrap(e.rcClient.TagAsDeleted(e.getKey(clientMsgID)), "DelExtendMsg err")
 }
