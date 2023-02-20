@@ -18,6 +18,8 @@ type Conversation interface {
 	FindUserIDAllConversationID(ctx context.Context, userID string, tx ...any) ([]string, error)
 	Take(ctx context.Context, userID, conversationID string, tx ...any) (conversation *relation.ConversationModel, err error)
 	FindConversationID(ctx context.Context, userID string, conversationIDList []string, tx ...any) (existConversationID []string, err error)
+	Transaction(func(tx any) error) error
+	NewTx(tx any) Conversation
 }
 type ConversationGorm struct {
 	DB *gorm.DB
@@ -25,6 +27,15 @@ type ConversationGorm struct {
 
 func NewConversationGorm(DB *gorm.DB) Conversation {
 	return &ConversationGorm{DB: DB}
+}
+func (c *ConversationGorm) Transaction(fn func(tx any) error) error {
+	return c.DB.Transaction(func(tx *gorm.DB) error {
+		return fn(tx)
+	})
+}
+
+func (c *ConversationGorm) NewTx(tx any) Conversation {
+	return &ConversationGorm{DB: tx.(*gorm.DB)}
 }
 
 func (c *ConversationGorm) Create(ctx context.Context, conversations []*relation.ConversationModel, tx ...any) (err error) {

@@ -7,10 +7,10 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
+	tablerelation "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	registry "Open_IM/pkg/discoveryregistry"
 	pbfriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"context"
@@ -23,7 +23,7 @@ type friendServer struct {
 	controller.BlackInterface
 	notification   *notification.Check
 	userCheck      *check.UserCheck
-	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
+	RegisterCenter registry.SvcDiscoveryRegistry
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
@@ -31,7 +31,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&relationTb.FriendModel{}, &relationTb.FriendRequestModel{}, &relationTb.BlackModel{}); err != nil {
+	if err := mysql.AutoMigrate(&tablerelation.FriendModel{}, &tablerelation.FriendRequestModel{}, &tablerelation.BlackModel{}); err != nil {
 		return err
 	}
 	pbfriend.RegisterFriendServer(server, &friendServer{
@@ -102,7 +102,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 	if err := s.userCheck.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := relationTb.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := tablerelation.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
@@ -158,20 +158,21 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 
 // ok
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.GetDesignatedFriendsReq) (resp *pbfriend.GetDesignatedFriendsResp, err error) {
+
 	resp = &pbfriend.GetDesignatedFriendsResp{}
-	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
-		return nil, err
+
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, constant.ErrArgs.Wrap("friend userID repeated")
 	}
-	friends, total, err := s.FriendInterface.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friends, err := s.FriendInterface.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends)
-	if err != nil {
+	if resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends); err != nil {
 		return nil, err
 	}
-	resp.Total = int32(total)
 	return resp, nil
+
 }
 
 // ok 获取接收到的好友申请（即别人主动申请的）
@@ -223,15 +224,17 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) 
 // ok
 func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.GetPaginationFriendsReq) (resp *pbfriend.GetPaginationFriendsResp, err error) {
 	resp = &pbfriend.GetPaginationFriendsResp{}
-	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, constant.ErrArgs.Wrap("friend userID repeated")
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
+		return nil, err
 	}
-	friends, err := s.FriendInterface.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
+	friends, total, err := s.FriendInterface.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-	if resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends); err != nil {
+	resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends)
+	if err != nil {
 		return nil, err
 	}
+	resp.Total = int32(total)
 	return resp, nil
 }

@@ -35,6 +35,8 @@ const (
 	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
+
+	uidPidToken = "UID_PID_TOKEN_STATUS:"
 )
 
 type Cache interface {
@@ -52,7 +54,9 @@ type Cache interface {
 	SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error
 
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
-	GetTokenMapByUidPid(ctx context.Context, userID, platformID string) (map[string]int, error)
+
+	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
+
 	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error
 	GetMessageListBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
@@ -209,11 +213,12 @@ func (r *RedisClient) SetGroupMinSeq(ctx context.Context, groupID string, minSeq
 }
 
 // Store userid and platform class to redis
-func (r *RedisClient) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+func (r *RedisClient) AddTokenFlag(ctx context.Context, userID string, platform string, token string, flag int) error {
+	key := uidPidToken + userID + ":" + platform
 	return r.rdb.HSet(context.Background(), key, token, flag).Err()
 }
 
+//key:userID+platform-> <token, flag>
 func (r *RedisClient) GetTokenMapByUidPid(ctx context.Context, userID, platformID string) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platformID
 	m, err := r.rdb.HGetAll(context.Background(), key).Result()
@@ -223,8 +228,22 @@ func (r *RedisClient) GetTokenMapByUidPid(ctx context.Context, userID, platformI
 	}
 	return mm, err
 }
-func (r *RedisClient) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+
+func (r *RedisClient) GetTokensWithoutError(ctx context.Context, userID, platform string) (map[string]int, error) {
+	key := uidPidToken + userID + ":" + platform
+	m, err := r.rdb.HGetAll(context.Background(), key).Result()
+	if err != nil && err == redis.Nil {
+		return nil, nil
+	}
+	mm := make(map[string]int)
+	for k, v := range m {
+		mm[k] = utils.StringToInt(v)
+	}
+	return mm, utils.Wrap(err, "")
+}
+
+func (r *RedisClient) SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error {
+	key := uidPidToken + userID + ":" + platform
 	mm := make(map[string]interface{})
 	for k, v := range m {
 		mm[k] = v
@@ -232,8 +251,8 @@ func (r *RedisClient) SetTokenMapByUidPid(ctx context.Context, userID string, pl
 	return r.rdb.HSet(context.Background(), key, mm).Err()
 }
 
-func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error {
+	key := uidPidToken + userID + ":" + platform
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
 

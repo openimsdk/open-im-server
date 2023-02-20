@@ -94,17 +94,17 @@ var _ ConversationDataBaseInterface = (*ConversationDataBase)(nil)
 type ConversationDataBase struct {
 	conversationDB relation.Conversation
 	cache          cache.ConversationCache
-	db             *gorm.DB
 }
 
 func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
-	return c.db.Transaction(func(tx *gorm.DB) error {
-		haveUserID, err := c.conversationDB.FindUserID(ctx, userIDList, conversation.ConversationID, tx)
+	fn := func(tx any) error {
+		temp := c.conversationDB.NewTx(tx)
+		haveUserID, err := temp.FindUserID(ctx, userIDList, conversation.ConversationID, tx)
 		if err != nil {
 			return err
 		}
 		if len(haveUserID) > 0 {
-			err = c.conversationDB.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap, tx)
+			err = temp.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap, tx)
 			if err != nil {
 				return err
 			}
@@ -119,7 +119,7 @@ func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, u
 			temp.OwnerUserID = v
 			cList = append(cList, temp)
 		}
-		err = c.conversationDB.Create(ctx, cList)
+		err = temp.Create(ctx, cList)
 		if err != nil {
 			return err
 		}
@@ -134,7 +134,9 @@ func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, u
 			return err
 		}
 		return nil
-	})
+	}
+
+	return c.conversationDB.Transaction(fn)
 }
 
 func NewConversationDataBase(db relation.Conversation, cache cache.ConversationCache) *ConversationDataBase {
