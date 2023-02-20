@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
-	"golang.org/x/tools/go/ssa/testdata/src/strconv"
+	"strconv"
 	"time"
 )
 
@@ -20,6 +20,7 @@ const (
 	superGroupRecvMsgNotNotifyUserIDsKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	conversationExpireTime               = time.Second * 60 * 60 * 12
 )
+
 type FuncDB func() (string, error)
 
 // arg fn will exec when no data in cache
@@ -28,13 +29,13 @@ type ConversationCache interface {
 	GetUserConversationIDs(ctx context.Context, userID string, fn FuncDB) ([]string, error)
 	// del user's conversationIDs from cache, call when a user add or reduce a conversation
 	DelUserConversationIDs(ctx context.Context, userID string) error
-	DelUsersConversationIDs(ctx context.Context,userIDList []string)error
+	DelUsersConversationIDs(ctx context.Context, userIDList []string) error
 	// get one conversation from cache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string, fn FuncDB) (*relationTb.ConversationModel, error)
 	// get one conversation from cache
-	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string, fn FuncDB)([]*relationTb.ConversationModel, error)
+	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string, fn FuncDB) ([]*relationTb.ConversationModel, error)
 	// get one user's all conversations from cache
-	GetUserAllConversations(ctx context.Context, ownerUserID string, fn FuncDB ) ([]*relationTb.ConversationModel, error)
+	GetUserAllConversations(ctx context.Context, ownerUserID string, fn FuncDB) ([]*relationTb.ConversationModel, error)
 	// del one conversation from cache, call when one user's conversation Info changed
 	DelConversation(ctx context.Context, ownerUserID, conversationID string) error
 	DelUserConversations(ctx context.Context, ownerUserID string, conversationIDList []string) error
@@ -55,35 +56,11 @@ type ConversationRedis struct {
 	rcClient *rockscache.Client
 }
 
-func (c *ConversationRedis) GetUserConversationIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) ([]string, error) {
-	panic("implement me")
-}
-
 func (c *ConversationRedis) DelUsersConversationIDs(ctx context.Context, userIDList []string) error {
 	panic("implement me")
 }
 
-func (c *ConversationRedis) GetConversation(ctx context.Context, ownerUserID, conversationID string, fn func(ctx context.Context, ownerUserID string, conversationID string) (*relationTb.ConversationModel, error)) (*relationTb.ConversationModel, error) {
-	panic("implement me")
-}
-
-func (c *ConversationRedis) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string, fn FuncDB) ([]*relationTb.ConversationModel, error) {
-	panic("implement me")
-}
-
-func (c *ConversationRedis) GetUserAllConversations(ctx context.Context, ownerUserID string, fn FuncDB) ([]*relationTb.ConversationModel, error) {
-	panic("implement me")
-}
-
 func (c *ConversationRedis) DelUsersConversation(ctx context.Context, ownerUserIDList []string, conversationID string) error {
-	panic("implement me")
-}
-
-func (c *ConversationRedis) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string, fn func(ctx context.Context, ownerUserID string, conversationID string) (opt int, err error)) (opt int, err error) {
-	panic("implement me")
-}
-
-func (c *ConversationRedis) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (userIDs []string, err error)) (userIDs []string, err error) {
 	panic("implement me")
 }
 
@@ -158,7 +135,11 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 	//	return nil, utils.Wrap(err, "")
 	//}
 	//return conversationIDs, nil
-	return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), conversationExpireTime, fn)
+	//return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), conversationExpireTime, fn)
+
+	return GetCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), conversationExpireTime, func(ctx context.Context) ([]string, error) {
+		panic("")
+	})
 }
 
 //func GetCache1[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (any, error)) (T, error) {

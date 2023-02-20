@@ -104,5 +104,5 @@ func (u *UserCheck) GetPublicUserInfoMap(ctx context.Context, userIDs []string, 
 }
 
 func (u *UserCheck) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-
+	return 0, nil
 }

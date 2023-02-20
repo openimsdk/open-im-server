@@ -37,5 +37,5 @@ func (f *FriendChecker) getConn() (*grpc.ClientConn, error) {
 
 // possibleFriendUserID是否在userID的好友中
 func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
-
+	return false, nil
 }
