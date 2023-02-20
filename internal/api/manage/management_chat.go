@@ -57,6 +57,8 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.CustomOnlineOnly:
 		fallthrough
+	case constant.AtText:
+		fallthrough
 	case constant.AdvancedRevoke:
 		utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 		newContent = utils.StructToJsonString(params.Content)
