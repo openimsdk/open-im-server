@@ -100,5 +100,12 @@ func (u *UserCheck) GetPublicUserInfoMap(ctx context.Context, userIDs []string, 
 }
 
 func (u *UserCheck) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-	return 0, nil
+	cc, err := u.getConn()
+	if err != nil {
+		return 0, err
+	}
+	resp, err := user.NewUserClient(cc).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
+		UserID: userID,
+	})
+	return resp.GlobalRecvMsgOpt, err
 }
