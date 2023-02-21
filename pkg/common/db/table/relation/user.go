@@ -1,6 +1,9 @@
 package relation
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const (
 	UserModelTableName = "users"
@@ -22,8 +25,18 @@ type UserModel struct {
 }
 
 func (UserModel) TableName() string {
-	return GroupRequestModelTableName
+	return UserModelTableName
 }
 
 type UserModelInterface interface {
+	Create(ctx context.Context, users []*UserModel) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	Update(ctx context.Context, users []*UserModel) (err error)
+	// 获取指定用户信息  不存在，也不返回错误
+	Find(ctx context.Context, userIDs []string) (users []*UserModel, err error)
+	// 获取某个用户信息  不存在，则返回错误
+	Take(ctx context.Context, userID string) (user *UserModel, err error)
+	// 获取用户信息 不存在，不返回错误
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*UserModel, count int64, err error)
+	GetAllUserID(ctx context.Context) (userIDs []string, err error)
 }
