@@ -3,6 +3,7 @@ package controller
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/utils"
 	"context"
 )
 
@@ -23,6 +24,8 @@ type UserInterface interface {
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	//获取所有用户ID
 	GetAllUserID(ctx context.Context) ([]string, error)
+	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
+	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 }
 
 type UserController struct {
@@ -60,6 +63,10 @@ func (u *UserController) GetAllUserID(ctx context.Context) ([]string, error) {
 	return u.database.GetAllUserID(ctx)
 }
 
+func (u *UserController) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
+	return u.database.InitOnce(ctx, users)
+}
+
 func NewUserController(database UserDatabaseInterface) UserInterface {
 	return &UserController{database}
 }
@@ -81,6 +88,8 @@ type UserDatabaseInterface interface {
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	//获取所有用户ID
 	GetAllUserID(ctx context.Context) ([]string, error)
+	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
+	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 }
 
 type UserDatabase struct {
@@ -89,6 +98,17 @@ type UserDatabase struct {
 
 func NewUserDatabase(userDB relation.UserModelInterface) *UserDatabase {
 	return &UserDatabase{userDB: userDB}
+}
+
+func (u *UserDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
+	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
+		return e.UserID
+	})
+	result, err := u.userDB.Find(ctx, userIDs)
+	if err != nil {
+		return err
+	}
+
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误

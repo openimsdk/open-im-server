@@ -58,6 +58,8 @@ var (
 
 	ErrConnArgsErr   = &ErrInfo{ConnArgsErr, "args err, need token, sendID, platformID", ""}
 	ErrConnUpdateErr = &ErrInfo{ConnArgsErr, "upgrade http conn err", ""}
+
+	ErrConfig = &ErrInfo{ConfigError, "ConfigError", ""}
 )
 
 const (
@@ -91,6 +93,8 @@ const (
 	DataError         = 90007 //数据错误
 
 	IdentityError = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
+
+	ConfigError = 90009
 )
 
 // 账号错误码

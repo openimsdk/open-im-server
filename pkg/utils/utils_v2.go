@@ -5,6 +5,28 @@ import (
 	"sort"
 )
 
+// SliceSub a中存在,b中不存在 (a-b)
+func SliceSub[E comparable](a, b []E) []E {
+	k := make(map[E]struct{})
+	for i := 0; i < len(b); i++ {
+		k[b[i]] = struct{}{}
+	}
+	t := make(map[E]struct{})
+	rs := make([]E, 0, len(a))
+	for i := 0; i < len(a); i++ {
+		e := a[i]
+		if _, ok := t[e]; ok {
+			continue
+		}
+		if _, ok := k[e]; ok {
+			continue
+		}
+		rs = append(rs, e)
+		t[e] = struct{}{}
+	}
+	return rs
+}
+
 // DistinctAny 去重
 func DistinctAny[E any, K comparable](es []E, fn func(e E) K) []E {
 	v := make([]E, 0, len(es))

@@ -20,7 +20,7 @@ type UserModel struct {
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
 	CreateTime       time.Time `gorm:"column:create_time;index:create_time; autoCreateTime"`
-	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
+	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:18"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }
 

@@ -49,6 +49,8 @@ type MsgInterface interface {
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+
+	MsgToMQ(ctx context.Context, key string, data *pbMsg.MsgDataToMQ) (err error)
 }
 
 func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {
