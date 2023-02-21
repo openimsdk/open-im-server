@@ -8,11 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type FriendUser struct {
-	FriendGorm
-	Nickname string `gorm:"column:name;size:255"`
-}
-
 type FriendGorm struct {
 	DB *gorm.DB
 }

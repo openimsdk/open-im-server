@@ -37,7 +37,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	}
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		FriendInterface: controller.NewFriendController(controller.NewFriendDatabase(relation.NewFriendGorm(db), relation.NewFriendRequestGorm(db), tx.NewGorm(db))),
-		BlackInterface:  controller.NewBlackController(db),
+		BlackInterface:  controller.NewBlackController(controller.NewBlackDatabase(relation.NewBlackGorm(db))),
 		notification:    notification.NewCheck(client),
 		userCheck:       check.NewUserCheck(client),
 		RegisterCenter:  client,
