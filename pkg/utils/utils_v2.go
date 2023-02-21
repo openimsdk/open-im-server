@@ -159,7 +159,7 @@ func Filter[E, T any](es []E, fn func(e E) (T, bool)) []T {
 func Slice[E any, T any](es []E, fn func(e E) T) []T {
 	v := make([]T, len(es))
 	for i := 0; i < len(es); i++ {
-		v = append(v, fn(es[i]))
+		v[i] = fn(es[i])
 	}
 	return v
 }
@@ -356,6 +356,28 @@ func Single[E comparable](a, b []E) []E {
 		}
 	}
 	return v
+}
+
+// SliceSub a中存在,b中不存在 (a-b)
+func SliceSub[E comparable](a, b []E) []E {
+	k := make(map[E]struct{})
+	for i := 0; i < len(b); i++ {
+		k[b[i]] = struct{}{}
+	}
+	t := make(map[E]struct{})
+	rs := make([]E, 0, len(a))
+	for i := 0; i < len(a); i++ {
+		e := a[i]
+		if _, ok := t[e]; ok {
+			continue
+		}
+		if _, ok := k[e]; ok {
+			continue
+		}
+		rs = append(rs, e)
+		t[e] = struct{}{}
+	}
+	return rs
 }
 
 // Order 将ts按es排序
