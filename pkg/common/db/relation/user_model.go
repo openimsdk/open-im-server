@@ -73,11 +73,14 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32) (user
 }
 
 // 获取所有用户ID
-func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
+func (u *UserGorm) PageUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, count int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "userIDs", userIDs, "count", count)
 	}()
-
-	err = u.DB.Pluck("user_id", &userIDs).Error
-	return userIDs, err
+	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Count(&count).Error, "")
+	if err != nil {
+		return
+	}
+	err = u.DB.Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Pluck("user_id", &userIDs).Error
+	return userIDs, count, err
 }

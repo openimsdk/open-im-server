@@ -25,7 +25,7 @@ func (f *FriendChecker) GetFriendsInfo(ctx context.Context, ownerUserID, friendU
 	if err != nil {
 		return nil, err
 	}
-	r, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx, &friend.GetPaginationFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
+	r, err := friend.NewFriendClient(cc).GetDesignatedFriends(ctx, &friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID strin
 			if tmp.Total == int32(len(resp)) {
 				return resp, nil
 			}
-			return nil, constant.ErrData.Wrap("total != resp, but result is nil")
+			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
 		}
 		resp = append(resp, tmp.FriendsInfo...)
 		page++

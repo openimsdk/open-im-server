@@ -126,8 +126,8 @@ func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // 获取，如果没找到，不返回错误
-func (u *UserDatabase) Page(ctx context.Context, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
-	return u.userDB.Page(ctx, showNumber, pageNumber)
+func (u *UserDatabase) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error) {
+	return u.userDB.Page(ctx, pageNumber, showNumber)
 }
 
 // userIDs是否存在 只要有一个存在就为true
@@ -142,6 +142,21 @@ func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 	return false, nil
 }
 
-func (u *UserDatabase) GetAllUserID(ctx context.Context) ([]string, error) {
-	return u.userDB.GetAllUserID(ctx)
+func (u *UserDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
+	pageNumber := int32(0)
+	for {
+		tmp, total, err := u.userDB.PageUserID(ctx, pageNumber, constant.ShowNumber)
+		if err != nil {
+			return nil, err
+		}
+		if len(tmp) == 0 {
+			if total == int64(len(userIDs)) {
+				return userIDs, nil
+			}
+			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
+		}
+		userIDs = append(userIDs, tmp...)
+		pageNumber++
+	}
+	return userIDs, nil
 }
