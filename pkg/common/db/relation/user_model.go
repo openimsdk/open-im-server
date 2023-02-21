@@ -5,18 +5,28 @@ import (
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
 	"gorm.io/gorm"
 )
+
+type User interface {
+	Create(ctx context.Context, users []*relation.UserModel, tx ...any) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}, tx ...any) (err error)
+	Update(ctx context.Context, users []*relation.UserModel, tx ...any) (err error)
+	// 获取指定用户信息  不存在，也不返回错误
+	Find(ctx context.Context, userIDs []string, tx ...any) (users []*relation.UserModel, err error)
+	// 获取某个用户信息  不存在，则返回错误
+	Take(ctx context.Context, userID string, tx ...any) (user *relation.UserModel, err error)
+	// 获取用户信息 不存在，不返回错误
+	Page(ctx context.Context, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error)
+	GetAllUserID(ctx context.Context) (userIDs []string, err error)
+}
 
 type UserGorm struct {
 	DB *gorm.DB
 }
 
-func NewUserGorm(db *gorm.DB) *UserGorm {
-	var user UserGorm
-	user.DB = db
-	return &user
+func NewUserGorm(DB *gorm.DB) *UserGorm {
+	return &UserGorm{DB: DB}
 }
 
 // 插入多条
@@ -62,32 +72,6 @@ func (u *UserGorm) Take(ctx context.Context, userID string, tx ...any) (user *re
 	return user, err
 }
 
-// 通过名字查找用户 不存在，不返回错误
-func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
-	}()
-	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
-	if err != nil {
-		return
-	}
-	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
-	return
-}
-
-// 通过名字或userID查找用户 不存在，不返回错误
-func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
-	}()
-	db := getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
-	if err = db.Count(&count).Error; err != nil {
-		return
-	}
-	err = utils.Wrap(db.Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
-	return
-}
-
 // 获取用户信息 不存在，不返回错误
 func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32, tx ...any) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
@@ -102,8 +86,11 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32, tx ..
 }
 
 // 获取所有用户ID
-func (u *UserGorm) GetAllUserID(ctx context.Context) ([]string, error) {
-	var userIDs []string
-	err := u.DB.Pluck("user_id", &userIDs).Error
+func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs)
+	}()
+
+	err = u.DB.Pluck("user_id", &userIDs).Error
 	return userIDs, err
 }

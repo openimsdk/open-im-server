@@ -29,15 +29,15 @@ type userServer struct {
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
-	mysql, err := relation.NewGormDB()
+	gormDB, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+	if err := gormDB.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
 	pbuser.RegisterUserServer(server, &userServer{
-		UserInterface:  controller.NewUserController(mysql),
+		UserInterface:  controller.NewUserController(controller.NewUserDatabase(relation.NewUserGorm(gormDB))),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,

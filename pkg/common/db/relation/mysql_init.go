@@ -58,6 +58,7 @@ func newMysqlGormDB() (*gorm.DB, error) {
 	return db, nil
 }
 
+// gorm mysql
 func NewGormDB() (*gorm.DB, error) {
 	return newMysqlGormDB()
 }
