@@ -4,6 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	"Open_IM/internal/common/notification"
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
@@ -29,19 +30,28 @@ type userServer struct {
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
-	mysql, err := relation.NewGormDB()
+	gormDB, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+	if err := gormDB.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
-	pbuser.RegisterUserServer(server, &userServer{
-		UserInterface:  controller.NewUserController(mysql),
+	u := &userServer{
+		UserInterface:  controller.NewUserController(controller.NewUserDatabase(relation.NewUserGorm(gormDB))),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,
-	})
+	}
+	pbuser.RegisterUserServer(server, u)
+	users := make([]*tablerelation.UserModel, 0)
+	if len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname) {
+		return constant.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
+	}
+	for k, v := range config.Config.Manager.AppManagerUid {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
+	}
+	u.UserInterface.InitOnce(context.Background(), users)
 	return nil
 }
 

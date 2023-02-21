@@ -58,6 +58,7 @@ func newMysqlGormDB() (*gorm.DB, error) {
 	return db, nil
 }
 
+// gorm mysql
 func NewGormDB() (*gorm.DB, error) {
 	return newMysqlGormDB()
 }
@@ -66,13 +67,4 @@ type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
 	fmt.Printf(format, args...)
-}
-
-func getDBConn(db *gorm.DB, tx []any) *gorm.DB {
-	if len(tx) > 0 {
-		if txDB, ok := tx[0].(*gorm.DB); ok {
-			return txDB
-		}
-	}
-	return db
 }

@@ -12,10 +12,8 @@ type BlackGorm struct {
 	DB *gorm.DB
 }
 
-func NewBlackGorm(db *gorm.DB) *BlackGorm {
-	var black BlackGorm
-	black.DB = db
-	return &black
+func NewBlackGorm(db *gorm.DB) relation.BlackModelInterface {
+	return &BlackGorm{db}
 }
 
 func (b *BlackGorm) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {

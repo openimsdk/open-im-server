@@ -4,6 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	"Open_IM/internal/common/notification"
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
@@ -27,16 +28,16 @@ type friendServer struct {
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
-	mysql, err := relation.NewGormDB()
+	db, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&tablerelation.FriendModel{}, &tablerelation.FriendRequestModel{}, &tablerelation.BlackModel{}); err != nil {
+	if err := db.AutoMigrate(&tablerelation.FriendModel{}, &tablerelation.FriendRequestModel{}, &tablerelation.BlackModel{}); err != nil {
 		return err
 	}
 	pbfriend.RegisterFriendServer(server, &friendServer{
-		FriendInterface: controller.NewFriendController(mysql),
-		BlackInterface:  controller.NewBlackController(mysql),
+		FriendInterface: controller.NewFriendController(controller.NewFriendDatabase(relation.NewFriendGorm(db), relation.NewFriendRequestGorm(db), tx.NewGorm(db))),
+		BlackInterface:  controller.NewBlackController(controller.NewBlackDatabase(relation.NewBlackGorm(db))),
 		notification:    notification.NewCheck(client),
 		userCheck:       check.NewUserCheck(client),
 		RegisterCenter:  client,

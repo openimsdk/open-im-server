@@ -165,14 +165,14 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			}
 
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				resp, err := m.MsgInterface.GetSuperGroupMsg(ctx, data.MsgData.GroupID, revokeMessage.Seq)
+				resp, err := m.MsgInterface.GetSuperGroupMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
 				if err != nil {
 					return nil, err
 				}
-				if resp.ClientMsgID == revokeMessage.ClientMsgID && resp.Seq == revokeMessage.Seq {
-					revokeMessage.SourceMessageSendTime = resp.SendTime
-					revokeMessage.SourceMessageSenderNickname = resp.SenderNickname
-					revokeMessage.SourceMessageSendID = resp.SendID
+				if resp[0].ClientMsgID == revokeMessage.ClientMsgID && resp[0].Seq == int64(revokeMessage.Seq) {
+					revokeMessage.SourceMessageSendTime = resp[0].SendTime
+					revokeMessage.SourceMessageSenderNickname = resp[0].SenderNickname
+					revokeMessage.SourceMessageSendID = resp[0].SendID
 					data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
 				} else {
 					return nil, constant.ErrData.Wrap("MsgData")

@@ -33,7 +33,7 @@ type MsgInterface interface {
 	DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error)
 	//  通过seqList获取db中写扩散消息
 	GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
-	// 通过seqList获取大群在db里面的消息
+	// 通过seqList获取大群在db里面的消息 没找到返回错误
 	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
 	// 删除用户所有消息/cache/db然后重置seq
 	CleanUpUserMsg(ctx context.Context, userID string) error
@@ -49,6 +49,8 @@ type MsgInterface interface {
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+
+	MsgToMQ(ctx context.Context, key string, data *pbMsg.MsgDataToMQ) (err error)
 }
 
 func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {

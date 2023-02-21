@@ -213,9 +213,9 @@ type config struct {
 		}
 	}
 	Manager struct {
-		AppManagerUid          []string `yaml:"appManagerUid"`
-		Secrets                []string `yaml:"secrets"`
-		AppSysNotificationName string   `yaml:"appSysNotificationName"`
+		AppManagerUid []string `yaml:"appManagerUid"`
+		//	AppSysNotificationName string   `yaml:"appSysNotificationName"`
+		Nickname []string `yaml:"nickname"`
 	}
 
 	Kafka struct {

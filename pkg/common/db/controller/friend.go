@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
-	relation1 "Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/utils"
 	"context"
@@ -41,8 +41,8 @@ type FriendController struct {
 	database FriendDatabaseInterface
 }
 
-func NewFriendController(db *gorm.DB) *FriendController {
-	return &FriendController{database: NewFriendDatabase(db)}
+func NewFriendController(database FriendDatabaseInterface) FriendInterface {
+	return &FriendController{database: database}
 }
 
 // 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
@@ -133,12 +133,13 @@ type FriendDatabaseInterface interface {
 }
 
 type FriendDatabase struct {
-	friend        *relation1.FriendGorm
-	friendRequest *relation1.FriendRequestGorm
+	friend        relation.FriendModelInterface
+	friendRequest relation.FriendRequestModelInterface
+	tx            tx.Tx
 }
 
-func NewFriendDatabase(db *gorm.DB) *FriendDatabase {
-	return &FriendDatabase{friend: relation1.NewFriendGorm(db), friendRequest: relation1.NewFriendRequestGorm(db)}
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, tx tx.Tx) *FriendDatabase {
+	return &FriendDatabase{friend: friend, friendRequest: friendRequest, tx: tx}
 }
 
 // ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
@@ -160,8 +161,8 @@ func (f *FriendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 
 // 增加或者更新好友申请 如果之前有记录则更新，没有记录则新增
 func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
-	return f.friendRequest.DB.Transaction(func(tx *gorm.DB) error {
-		_, err := f.friendRequest.Take(ctx, fromUserID, toUserID, tx)
+	return f.tx.Transaction(func(tx any) error {
+		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
 		//有db错误
 		if err != nil && errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
@@ -173,13 +174,13 @@ func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			m["handle_msg"] = ""
 			m["req_msg"] = reqMsg
 			m["ex"] = ex
-			if err := f.friendRequest.UpdateByMap(ctx, fromUserID, toUserID, m, tx); err != nil {
+			if err := f.friendRequest.NewTx(tx).UpdateByMap(ctx, fromUserID, toUserID, m); err != nil {
 				return err
 			}
 			return nil
 		}
 		//gorm.ErrRecordNotFound 错误，则新增
-		if err := f.friendRequest.Create(ctx, []*relation.FriendRequestModel{&relation.FriendRequestModel{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}, tx); err != nil {
+		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{&relation.FriendRequestModel{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}); err != nil {
 			return err
 		}
 		return nil
@@ -188,9 +189,9 @@ func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 
 // (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
 func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error) {
-	return f.friend.DB.Transaction(func(tx *gorm.DB) error {
+	return f.tx.Transaction(func(tx any) error {
 		//先find 找出重复的 去掉重复的
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -201,12 +202,12 @@ func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			return e.FriendUserID
 		})
 
-		err = f.friend.Create(ctx, fs11, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs11)
 		if err != nil {
 			return err
 		}
 
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -216,7 +217,7 @@ func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs22)
 		if err != nil {
 			return err
 		}
@@ -240,14 +241,14 @@ func (f *FriendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 
 // 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 不是好友则建立双向好友关系  （4）修改申请记录 已同意
 func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	return f.friend.DB.Transaction(func(tx *gorm.DB) error {
-		_, err = f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
+	return f.tx.Transaction(func(tx any) error {
+		_, err = f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
 		friendRequest.HandlerUserID = friendRequest.FromUserID
 		friendRequest.HandleResult = constant.FriendResponseAgree
-		err = f.friendRequest.Update(ctx, []*relation.FriendRequestModel{friendRequest}, tx)
+		err = f.friendRequest.NewTx(tx).Update(ctx, []*relation.FriendRequestModel{friendRequest})
 		if err != nil {
 			return err
 		}
@@ -257,7 +258,7 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		addSource := int32(constant.BecomeFriendByApply)
 		OperatorUserID := friendRequest.FromUserID
 		//先find 找出重复的 去掉重复的
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -268,12 +269,12 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 			return e.FriendUserID
 		})
 
-		err = f.friend.Create(ctx, fs11, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs11)
 		if err != nil {
 			return err
 		}
 
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -283,7 +284,7 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs22)
 		if err != nil {
 			return err
 		}

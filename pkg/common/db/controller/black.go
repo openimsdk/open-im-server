@@ -1,7 +1,6 @@
 package controller
 
 import (
-	relation2 "Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/utils"
 	"context"
@@ -24,8 +23,8 @@ type BlackController struct {
 	database BlackDatabaseInterface
 }
 
-func NewBlackController(db *gorm.DB) *BlackController {
-	return &BlackController{database: NewBlackDatabase(db)}
+func NewBlackController(database BlackDatabaseInterface) BlackInterface {
+	return &BlackController{database: database}
 }
 
 // Create 增加黑名单
@@ -60,35 +59,31 @@ type BlackDatabaseInterface interface {
 }
 
 type BlackDatabase struct {
-	sqlDB *relation2.BlackGorm
+	black relation.BlackModelInterface
 }
 
-func NewBlackDatabase(db *gorm.DB) *BlackDatabase {
-	sqlDB := relation2.NewBlackGorm(db)
-	database := &BlackDatabase{
-		sqlDB: sqlDB,
-	}
-	return database
+func NewBlackDatabase(black relation.BlackModelInterface) *BlackDatabase {
+	return &BlackDatabase{black}
 }
 
 // Create 增加黑名单
 func (b *BlackDatabase) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return b.sqlDB.Create(ctx, blacks)
+	return b.black.Create(ctx, blacks)
 }
 
 // Delete 删除黑名单
 func (b *BlackDatabase) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return b.sqlDB.Delete(ctx, blacks)
+	return b.black.Delete(ctx, blacks)
 }
 
 // FindOwnerBlacks 获取黑名单列表
 func (b *BlackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error) {
-	return b.sqlDB.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
+	return b.black.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
 }
 
 // CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 func (b *BlackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error) {
-	_, err = b.sqlDB.Take(ctx, userID1, userID2)
+	_, err = b.black.Take(ctx, userID1, userID2)
 	if err != nil {
 		if errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
@@ -99,7 +94,7 @@ func (b *BlackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 	}
 
 	inUser2Blacks = true
-	_, err = b.sqlDB.Take(ctx, userID2, userID1)
+	_, err = b.black.Take(ctx, userID2, userID1)
 	if err != nil {
 		if utils.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
