@@ -14,14 +14,14 @@ import (
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	resp := &pbGroup.GetJoinedSuperGroupListResp{}
-	joinSuperGroup, err := s.GroupInterface.FindJoinSuperGroup(ctx, req.UserID)
+	joinSuperGroup, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 	if len(joinSuperGroup.GroupIDs) == 0 {
 		return resp, nil
 	}
-	owners, err := s.GroupInterface.FindGroupMember(ctx, joinSuperGroup.GroupIDs, nil, []int32{constant.GroupOwner})
+	owners, err := s.GroupDatabase.FindGroupMember(ctx, joinSuperGroup.GroupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
 		return nil, constant.ErrData.Wrap(fmt.Sprintf("super group %s not owner", strings.Join(ids, ",")))
 	}
-	groups, err := s.GroupInterface.FindGroup(ctx, joinSuperGroup.GroupIDs)
+	groups, err := s.GroupDatabase.FindGroup(ctx, joinSuperGroup.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(groupMap)); len(ids) > 0 {
 		return nil, constant.ErrData.Wrap(fmt.Sprintf("super group info %s not found", strings.Join(ids, ",")))
 	}
-	superGroupMembers, err := s.GroupInterface.FindSuperGroup(ctx, joinSuperGroup.GroupIDs)
+	superGroupMembers, err := s.GroupDatabase.FindSuperGroup(ctx, joinSuperGroup.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -59,18 +59,18 @@ func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSu
 	if len(req.GroupIDs) == 0 {
 		return nil, constant.ErrArgs.Wrap("groupIDs empty")
 	}
-	groups, err := s.GroupInterface.FindGroup(ctx, req.GroupIDs)
+	groups, err := s.GroupDatabase.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	superGroupMembers, err := s.GroupInterface.FindSuperGroup(ctx, req.GroupIDs)
+	superGroupMembers, err := s.GroupDatabase.FindSuperGroup(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
 	superGroupMemberMap := utils.SliceToMapAny(superGroupMembers, func(e *unrelation.SuperGroupModel) (string, []string) {
 		return e.GroupID, e.MemberIDs
 	})
-	owners, err := s.GroupInterface.FindGroupMember(ctx, req.GroupIDs, nil, []int32{constant.GroupOwner})
+	owners, err := s.GroupDatabase.FindGroupMember(ctx, req.GroupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
