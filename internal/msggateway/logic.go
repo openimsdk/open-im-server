@@ -287,7 +287,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg, m.OperationID)
 	if isPass {
 		signalResp := pbRtc.SignalResp{}
-		etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRealTimeCommName, m.OperationID)
+		etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRtcName, m.OperationID)
 		if etcdConn == nil {
 			errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(m.OperationID, errMsg)
@@ -301,7 +301,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
 		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.RpcRegisterName.OpenImRealTimeCommName)
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.RpcRegisterName.OpenImRtcName)
 			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
 			return
 		}

@@ -131,6 +131,7 @@ func DifferenceString(slice1, slice2 []string) []string {
 	}
 	return n
 }
+
 func OperationIDGenerator() string {
 	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }

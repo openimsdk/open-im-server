@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/tracelog"
-	common "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
 )
@@ -15,7 +15,7 @@ func url() string {
 	return config.Config.Callback.CallbackUrl
 }
 
-func callbackOfflinePush(ctx context.Context, userIDList []string, msg *common.MsgData, offlinePushUserIDList *[]string) error {
+func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return nil
 	}
@@ -27,7 +27,7 @@ func callbackOfflinePush(ctx context.Context, userIDList []string, msg *common.M
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 			},
-			UserIDList: userIDList,
+			UserIDList: userIDs,
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
 		ClientMsgID:     msg.ClientMsgID,
@@ -43,8 +43,8 @@ func callbackOfflinePush(ctx context.Context, userIDList []string, msg *common.M
 	if err != nil {
 		return err
 	}
-	if len(resp.UserIDList) != 0 {
-		*offlinePushUserIDList = resp.UserIDList
+	if len(resp.UserIDs) != 0 {
+		*offlinePushUserIDs = resp.UserIDs
 	}
 	if resp.OfflinePushInfo != nil {
 		msg.OfflinePushInfo = resp.OfflinePushInfo
@@ -52,19 +52,19 @@ func callbackOfflinePush(ctx context.Context, userIDList []string, msg *common.M
 	return nil
 }
 
-func callbackOnlinePush(operationID string, userIDList []string, msg *common.MsgData) error {
-	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDList...) {
+func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
+	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.Contain(msg.SendID, userIDs...) {
 		return nil
 	}
 	req := callbackstruct.CallbackBeforePushReq{
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackOnlinePushCommand,
-				OperationID:     operationID,
+				OperationID:     tracelog.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 			},
-			UserIDList: userIDList,
+			UserIDList: userIDs,
 		},
 		ClientMsgID: msg.ClientMsgID,
 		SendID:      msg.SendID,
@@ -78,7 +78,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *common.Msg
 	return http.CallBackPostReturn(url(), req, resp, config.Config.Callback.CallbackOnlinePush)
 }
 
-func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *common.MsgData, pushToUserList *[]string) error {
+func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *sdkws.MsgData, pushToUserIDs *[]string) error {
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		return nil
 	}
@@ -89,21 +89,21 @@ func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg
 			PlatformID:      int(msg.SenderPlatformID),
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
-		ClientMsgID:  msg.ClientMsgID,
-		SendID:       msg.SendID,
-		GroupID:      groupID,
-		ContentType:  msg.ContentType,
-		SessionType:  msg.SessionType,
-		AtUserIDList: msg.AtUserIDList,
-		Content:      utils.GetContent(msg),
-		Seq:          msg.Seq,
+		ClientMsgID: msg.ClientMsgID,
+		SendID:      msg.SendID,
+		GroupID:     groupID,
+		ContentType: msg.ContentType,
+		SessionType: msg.SessionType,
+		AtUserIDs:   msg.AtUserIDList,
+		Content:     utils.GetContent(msg),
+		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		return err
 	}
-	if len(resp.UserIDList) != 0 {
-		*pushToUserList = resp.UserIDList
+	if len(resp.UserIDs) != 0 {
+		*pushToUserIDs = resp.UserIDs
 	}
 	return nil
 }

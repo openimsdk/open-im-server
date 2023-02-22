@@ -3,27 +3,16 @@ package push
 import (
 	"Open_IM/internal/push"
 	"Open_IM/internal/push/jpush/body"
-	"Open_IM/internal/push/jpush/common"
 	"Open_IM/pkg/common/config"
-	"bytes"
+	http2 "Open_IM/pkg/common/http"
+	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
-
-var (
-	JPushClient *JPush
-)
-
-func init() {
-	JPushClient = newJPushClient()
-}
 
 type JPush struct{}
 
-func newJPushClient() *JPush {
+func NewClient() *JPush {
 	return &JPush{}
 }
 
@@ -35,18 +24,18 @@ func (j *JPush) SetAlias(cid, alias string) (resp string, err error) {
 	return resp, nil
 }
 
-func (j *JPush) getAuthorization(Appkey string, MasterSecret string) string {
-	str := fmt.Sprintf("%s:%s", Appkey, MasterSecret)
+func (j *JPush) getAuthorization(appKey string, masterSecret string) string {
+	str := fmt.Sprintf("%s:%s", appKey, masterSecret)
 	buf := []byte(str)
 	Authorization := fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(buf))
 	return Authorization
 }
 
-func (j *JPush) Push(accounts []string, title, detailContent, operationID string, opts push.PushOpts) (string, error) {
+func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *push.Opts) error {
 	var pf body.Platform
 	pf.SetAll()
 	var au body.Audience
-	au.SetAlias(accounts)
+	au.SetAlias(userIDs)
 	var no body.Notification
 	var extras body.Extras
 	if opts.Signal.ClientMsgID != "" {
@@ -55,35 +44,20 @@ func (j *JPush) Push(accounts []string, title, detailContent, operationID string
 	no.IOSEnableMutableContent()
 	no.SetExtras(extras)
 	no.SetAlert(title)
-	var me body.Message
-	me.SetMsgContent(detailContent)
-	var o body.Options
-	o.SetApnsProduction(config.Config.IOSPush.Production)
-	var po body.PushObj
-	po.SetPlatform(&pf)
-	po.SetAudience(&au)
-	po.SetNotification(&no)
-	po.SetMessage(&me)
-	po.SetOptions(&o)
+	var msg body.Message
+	msg.SetMsgContent(content)
+	var opt body.Options
+	opt.SetApnsProduction(config.Config.IOSPush.Production)
+	var pushObj body.PushObj
+	pushObj.SetPlatform(&pf)
+	pushObj.SetAudience(&au)
+	pushObj.SetNotification(&no)
+	pushObj.SetMessage(&msg)
+	pushObj.SetOptions(&opt)
+	var resp interface{}
+	return j.request(pushObj, resp, 5)
+}
 
-	con, err := json.Marshal(po)
-	if err != nil {
-		return "", err
-	}
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", config.Config.Push.Jpns.PushUrl, bytes.NewBuffer(con))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Authorization", j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret))
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(result), nil
+func (j *JPush) request(po body.PushObj, resp interface{}, timeout int) error {
+	return http2.PostReturn(config.Config.Push.Jpns.PushUrl, map[string]string{"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret)}, po, resp, timeout)
 }

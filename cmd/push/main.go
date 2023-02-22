@@ -19,7 +19,8 @@ func main() {
 	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)
 	fmt.Println("start push rpc server, port: ", *rpcPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	push.Init(*rpcPort)
-	push.Run(*prometheusPort)
+	pusher := push.Push{}
+	pusher.Init(*rpcPort)
+	pusher.Run(*prometheusPort)
 	wg.Wait()
 }

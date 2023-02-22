@@ -1,11 +1,30 @@
 package getui
 
-import "Open_IM/pkg/common/config"
+import (
+	"Open_IM/pkg/common/config"
+	"fmt"
+)
 
-type CommonResp struct {
+type Resp struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
+}
+
+func (r *Resp) parseError() (err error) {
+	switch r.Code {
+	case tokenExpireCode:
+		err = TokenExpireError
+	case 0:
+		err = nil
+	default:
+		err = fmt.Errorf("code %d, msg %s", r.Code, r.Msg)
+	}
+	return err
+}
+
+type RespI interface {
+	parseError() error
 }
 
 type AuthReq struct {
@@ -95,6 +114,10 @@ type Options struct {
 	} `json:"VV"`
 }
 
+type Payload struct {
+	IsSignal bool `json:"isSignal"`
+}
+
 func newPushReq(title, content string) PushReq {
 	pushReq := PushReq{PushMessage: &PushMessage{Notification: &Notification{
 		Title:       title,
@@ -104,6 +127,11 @@ func newPushReq(title, content string) PushReq {
 		ChannelName: config.Config.Push.Getui.ChannelName,
 	}}}
 	return pushReq
+}
+
+func newBatchPushReq(userIDs []string, taskID string) PushReq {
+	var IsAsync = true
+	return PushReq{Audience: &Audience{Alias: userIDs}, IsAsync: &IsAsync, TaskID: &taskID}
 }
 
 func (pushReq *PushReq) setPushChannel(title string, body string) {

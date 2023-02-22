@@ -36,11 +36,11 @@ func Init(rpcPort, wsPort int) {
 	initPrometheus()
 }
 
-func Run(promethuesPort int) {
+func Run(prometheusPort int) {
 	go ws.run()
 	go rpcSvr.run()
 	go func() {
-		err := prome.StartPromeSrv(promethuesPort)
+		err := prome.StartPromeSrv(prometheusPort)
 		if err != nil {
 			panic(err)
 		}

@@ -3,7 +3,7 @@ package push
 import "context"
 
 type OfflinePusher interface {
-	Push(ctx context.Context, userIDs []string, title, content, opts *Opts) error
+	Push(ctx context.Context, userIDs []string, title, content string, opts *Opts) error
 }
 
 type Opts struct {

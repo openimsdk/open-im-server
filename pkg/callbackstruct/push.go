@@ -16,24 +16,24 @@ type CallbackBeforePushReq struct {
 
 type CallbackBeforePushResp struct {
 	CommonCallbackResp
-	UserIDList      []string                `json:"userIDList"`
+	UserIDs         []string                `json:"userIDList"`
 	OfflinePushInfo *common.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
 type CallbackBeforeSuperGroupOnlinePushReq struct {
 	UserStatusBaseCallback
-	ClientMsgID  string   `json:"clientMsgID"`
-	SendID       string   `json:"sendID"`
-	GroupID      string   `json:"groupID"`
-	ContentType  int32    `json:"contentType"`
-	SessionType  int32    `json:"sessionType"`
-	AtUserIDList []string `json:"atUserIDList"`
-	Content      string   `json:"content"`
-	Seq          int64    `json:"seq"`
+	ClientMsgID string   `json:"clientMsgID"`
+	SendID      string   `json:"sendID"`
+	GroupID     string   `json:"groupID"`
+	ContentType int32    `json:"contentType"`
+	SessionType int32    `json:"sessionType"`
+	AtUserIDs   []string `json:"atUserIDList"`
+	Content     string   `json:"content"`
+	Seq         int64    `json:"seq"`
 }
 
 type CallbackBeforeSuperGroupOnlinePushResp struct {
 	CommonCallbackResp
-	UserIDList      []string                `json:"userIDList"`
+	UserIDs         []string                `json:"userIDList"`
 	OfflinePushInfo *common.OfflinePushInfo `json:"offlinePushInfo"`
 }

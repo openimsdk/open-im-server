@@ -9,280 +9,258 @@ package push
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
+	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/prome"
-	pbPush "Open_IM/pkg/proto/push"
-	pbRelay "Open_IM/pkg/proto/relay"
+	"Open_IM/pkg/common/tracelog"
+	"Open_IM/pkg/discoveryregistry"
+	msggateway "Open_IM/pkg/proto/msggateway"
 	pbRtc "Open_IM/pkg/proto/rtc"
+	"Open_IM/pkg/proto/sdkws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"github.com/golang/protobuf/proto"
-	"strings"
 )
 
-type AtContent struct {
-	Text       string   `json:"text"`
-	AtUserList []string `json:"atUserList"`
-	IsAtSelf   bool     `json:"isAtSelf"`
+type Pusher struct {
+	cache                  cache.Cache
+	client                 discoveryregistry.SvcDiscoveryRegistry
+	offlinePusher          OfflinePusher
+	groupLocalCache        localcache.GroupLocalCache
+	conversationLocalCache localcache.ConversationLocalCache
+	successCount           int
 }
 
-func MsgToUser(pushMsg *pbPush.PushMsgReq) {
-	var wsResult []*pbRelay.SingelMsgToUserResultList
-	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
-	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
-
-	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
-
-	var UIDList = []string{pushMsg.PushToUserID}
-	callbackResp := callbackOnlinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
-	log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "OnlinePush callback Resp")
-	if callbackResp.ErrCode != 0 {
-		log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOnlinePush result: ", callbackResp)
+func NewPusher(cache cache.Cache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
+	return &Pusher{
+		cache:         cache,
+		client:        client,
+		offlinePusher: offlinePusher,
 	}
-	if callbackResp.ActionCode != constant.ActionAllow {
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "OnlinePush stop")
-		return
-	}
+}
 
-	//Online push message
-	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
-	for _, v := range grpcCons {
-		msgClient := pbRelay.NewRelayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: []string{pushMsg.PushToUserID}})
-		if err != nil {
-			log.NewError("SuperGroupOnlineBatchPushOneMsg push data to client rpc err", pushMsg.OperationID, "err", err)
-			continue
-		}
-		if reply != nil && reply.SinglePushResult != nil {
-			wsResult = append(wsResult, reply.SinglePushResult...)
-		}
+func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgData) error {
+	operationID := tracelog.GetOperationID(ctx)
+	var userIDs = []string{userID}
+	log.Debug(operationID, "Get msg from msg_transfer And push msg", msg.String(), userID)
+	// callback
+	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil {
+		return err
 	}
-	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData, "isOfflinePush", isOfflinePush)
-	successCount++
-	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
+	// push
+	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, userIDs)
+	if err != nil {
+		return err
+	}
+	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
+	log.NewInfo(operationID, "push_result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
+	p.successCount++
+	if isOfflinePush && userID != msg.SendID {
 		// save invitation info for offline push
-		for _, v := range wsResult {
+		for _, v := range wsResults {
 			if v.OnlinePush {
-				return
+				return nil
 			}
 		}
-		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
-			isSend, err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData, pushMsg.PushToUserID)
+		if msg.ContentType == constant.SignalingNotification {
+			isSend, err := p.cache.HandleSignalInfo(ctx, msg, userID)
 			if err != nil {
-				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
-				return
+				return err
 			}
 			if !isSend {
-				return
+				return nil
 			}
 		}
-		var title, detailContent string
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{})
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
-		if callbackResp.ErrCode != 0 {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
-		}
-		if callbackResp.ActionCode != constant.ActionAllow {
-			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
-			return
-		}
-		if pushMsg.MsgData.OfflinePushInfo != nil {
-			title = pushMsg.MsgData.OfflinePushInfo.Title
-			detailContent = pushMsg.MsgData.OfflinePushInfo.Desc
-		}
 
-		if offlinePusher == nil {
-			return
+		if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
+			return err
 		}
-		opts, err := GetOfflinePushOpts(pushMsg)
+		err = p.OfflinePushMsg(ctx, userID, msg, userIDs)
 		if err != nil {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
-		}
-		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, title, detailContent, "opts:", opts)
-		if title == "" {
-			switch pushMsg.MsgData.ContentType {
-			case constant.Text:
-				fallthrough
-			case constant.Picture:
-				fallthrough
-			case constant.Voice:
-				fallthrough
-			case constant.Video:
-				fallthrough
-			case constant.File:
-				title = constant.ContentType2PushContent[int64(pushMsg.MsgData.ContentType)]
-			case constant.AtText:
-				a := AtContent{}
-				_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
-				if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
-					title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
-				} else {
-					title = constant.ContentType2PushContent[constant.GroupMsg]
-				}
-			case constant.SignalingNotification:
-				title = constant.ContentType2PushContent[constant.SignalMsg]
-			default:
-				title = constant.ContentType2PushContent[constant.Common]
-
-			}
-			// detailContent = title
-		}
-		if detailContent == "" {
-			detailContent = title
-		}
-		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
-		if err != nil {
-			prome.PromeInc(prome.MsgOfflinePushFailedCounter)
-			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
-		} else {
-			prome.PromeInc(prome.MsgOfflinePushSuccessCounter)
-			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+			log.NewError(operationID, "OfflinePushMsg failed", userID)
+			return err
 		}
 	}
+	return nil
 }
 
-func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
-	var wsResult []*pbRelay.SingelMsgToUserResultList
-	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
-	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String(), config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable)
-	var pushToUserIDList []string
-	if config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
-		callbackResp := callbackBeforeSuperGroupOnlinePush(pushMsg.OperationID, pushMsg.PushToUserID, pushMsg.MsgData, &pushToUserIDList)
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
-		if callbackResp.ErrCode != 0 {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
-		}
-		if callbackResp.ActionCode != constant.ActionAllow {
-			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "onlinePush stop")
-			return
-		}
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "callback userIDList Resp", pushToUserIDList)
+func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
+	operationID := tracelog.GetOperationID(ctx)
+	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
+	var pushToUserIDs []string
+	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil {
+		return err
 	}
-	if len(pushToUserIDList) == 0 {
-		userIDList, err := utils.GetGroupMemberUserIDList(context.Background(), pushMsg.MsgData.GroupID, pushMsg.OperationID)
+	if len(pushToUserIDs) == 0 {
+		pushToUserIDs, err = p.groupLocalCache.GetGroupMemberIDs(ctx, groupID)
 		if err != nil {
-			log.Error(pushMsg.OperationID, "GetGroupMemberUserIDList failed ", err.Error(), pushMsg.MsgData.GroupID)
-			return
+			return err
 		}
-		pushToUserIDList = userIDList
 	}
+	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)
+	if err != nil {
+		return err
+	}
+	log.Debug(operationID, "push_result", wsResults, "sendData", msg)
+	p.successCount++
+	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
+	if isOfflinePush {
+		var onlineSuccessUserIDs []string
+		var WebAndPcBackgroundUserIDs []string
+		onlineSuccessUserIDs = append(onlineSuccessUserIDs, msg.SendID)
+		for _, v := range wsResults {
+			if v.OnlinePush && v.UserID != msg.SendID {
+				onlineSuccessUserIDs = append(onlineSuccessUserIDs, v.UserID)
+			}
+			if !v.OnlinePush {
+				if len(v.Resp) != 0 {
+					for _, singleResult := range v.Resp {
+						if singleResult.ResultCode == -2 {
+							if constant.PlatformIDToName(int(singleResult.RecvPlatFormID)) == constant.TerminalPC ||
+								singleResult.RecvPlatFormID == constant.WebPlatformID {
+								WebAndPcBackgroundUserIDs = append(WebAndPcBackgroundUserIDs, v.UserID)
+							}
+						}
+					}
+				}
+			}
+		}
+		needOfflinePushUserIDs := utils.DifferenceString(onlineSuccessUserIDs, pushToUserIDs)
+		if msg.ContentType != constant.SignalingNotification {
+			notNotificationUserIDs, err := p.conversationLocalCache.GetRecvMsgNotNotifyUserIDs(ctx, groupID)
+			if err != nil {
+				log.Error(operationID, utils.GetSelfFuncName(), "GetRecvMsgNotNotifyUserIDs failed", groupID)
+				return err
+			}
+			needOfflinePushUserIDs = utils.DifferenceString(notNotificationUserIDs, needOfflinePushUserIDs)
+		}
+		//Use offline push messaging
+		if len(needOfflinePushUserIDs) > 0 {
+			var offlinePushUserIDs []string
+			err = callbackOfflinePush(ctx, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
+			if err != nil {
+				return err
+			}
+			if len(offlinePushUserIDs) > 0 {
+				needOfflinePushUserIDs = offlinePushUserIDs
+			}
+			err = p.OfflinePushMsg(ctx, groupID, msg, offlinePushUserIDs)
+			if err != nil {
+				log.NewError(operationID, "OfflinePushMsg failed", groupID)
+				return err
+			}
+			_, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
+			if err != nil {
+				log.NewError(operationID, "OfflinePushMsg failed", groupID)
+				return err
+			}
+		}
+	}
+	return nil
+}
 
-	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
-
+func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingelMsgToUserResultList, err error) {
+	conns, err := p.client.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	if err != nil {
+		return nil, err
+	}
 	//Online push message
-	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
-	for _, v := range grpcCons {
-		msgClient := pbRelay.NewRelayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: pushToUserIDList})
+	for _, v := range conns {
+		msgClient := msggateway.NewRelayClient(v)
+		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{OperationID: tracelog.GetOperationID(ctx), MsgData: msg, PushToUserIDList: pushToUserIDs})
 		if err != nil {
-			log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+			log.NewError(tracelog.GetOperationID(ctx), msg, len(pushToUserIDs), "err", err)
 			continue
 		}
 		if reply != nil && reply.SinglePushResult != nil {
-			wsResult = append(wsResult, reply.SinglePushResult...)
+			wsResults = append(wsResults, reply.SinglePushResult...)
 		}
 	}
-	log.Debug(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
-	successCount++
-	if isOfflinePush {
-		var onlineSuccessUserIDList []string
-		onlineSuccessUserIDList = append(onlineSuccessUserIDList, pushMsg.MsgData.SendID)
-		for _, v := range wsResult {
-			if v.OnlinePush && v.UserID != pushMsg.MsgData.SendID {
-				onlineSuccessUserIDList = append(onlineSuccessUserIDList, v.UserID)
-			}
-		}
-		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, pushToUserIDList)
-		//Use offline push messaging
-		var title, detailContent string
-		if len(onlineFailedUserIDList) > 0 {
-			var offlinePushUserIDList []string
-			var needOfflinePushUserIDList []string
-			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList)
-			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
-			if callbackResp.ErrCode != 0 {
-				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
-			}
-			if callbackResp.ActionCode != constant.ActionAllow {
-				log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
-				return
-			}
-			if pushMsg.MsgData.OfflinePushInfo != nil {
-				title = pushMsg.MsgData.OfflinePushInfo.Title
-				detailContent = pushMsg.MsgData.OfflinePushInfo.Desc
-			}
-			if len(offlinePushUserIDList) > 0 {
-				needOfflinePushUserIDList = offlinePushUserIDList
-			} else {
-				needOfflinePushUserIDList = onlineFailedUserIDList
-			}
-
-			if offlinePusher == nil {
-				return
-			}
-			opts, err := GetOfflinePushOpts(pushMsg)
-			if err != nil {
-				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
-			}
-			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), needOfflinePushUserIDList, title, detailContent, "opts:", opts)
-			if title == "" {
-				switch pushMsg.MsgData.ContentType {
-				case constant.Text:
-					fallthrough
-				case constant.Picture:
-					fallthrough
-				case constant.Voice:
-					fallthrough
-				case constant.Video:
-					fallthrough
-				case constant.File:
-					title = constant.ContentType2PushContent[int64(pushMsg.MsgData.ContentType)]
-				case constant.AtText:
-					a := AtContent{}
-					_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
-					if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
-						title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
-					} else {
-						title = constant.ContentType2PushContent[constant.GroupMsg]
-					}
-				case constant.SignalingNotification:
-					title = constant.ContentType2PushContent[constant.SignalMsg]
-				default:
-					title = constant.ContentType2PushContent[constant.Common]
-
-				}
-				detailContent = title
-			}
-			pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
-			if err != nil {
-				prome.PromeInc(prome.MsgOfflinePushFailedCounter)
-				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
-			} else {
-				prome.PromeInc(prome.MsgOfflinePushSuccessCounter)
-				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
-			}
-		}
-	}
+	return wsResults, nil
 }
 
-func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts *Opts, err error) {
-	if pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin && pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd {
+func (p *Pusher) OfflinePushMsg(ctx context.Context, sourceID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
+	title, content, opts, err := p.GetOfflinePushInfos(sourceID, msg)
+	if err != nil {
+		return err
+	}
+	err = p.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
+	if err != nil {
+		prome.PromeInc(prome.MsgOfflinePushFailedCounter)
+		return err
+	}
+	prome.PromeInc(prome.MsgOfflinePushSuccessCounter)
+	return nil
+}
+
+func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) {
+	opts = &Opts{}
+	if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
 		req := &pbRtc.SignalReq{}
-		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
+		if err := proto.Unmarshal(msg.Content, req); err != nil {
 			return nil, utils.Wrap(err, "")
 		}
-		opts = &Opts{}
 		switch req.Payload.(type) {
 		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
-			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
-			log.NewDebug(pushMsg.OperationID, opts)
+			opts.Signal = &Signal{ClientMsgID: msg.ClientMsgID}
 		}
 	}
-	if pushMsg.MsgData.OfflinePushInfo != nil {
-		opts = &Opts{}
-		opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
-		opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
-		opts.Ex = pushMsg.MsgData.OfflinePushInfo.Ex
+	if msg.OfflinePushInfo != nil {
+		opts.IOSBadgeCount = msg.OfflinePushInfo.IOSBadgeCount
+		opts.IOSPushSound = msg.OfflinePushInfo.IOSPushSound
+		opts.Ex = msg.OfflinePushInfo.Ex
 	}
 	return opts, nil
+}
+
+func (p *Pusher) GetOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *Opts, err error) {
+	if p.offlinePusher == nil {
+		err = errors.New("no offlinePusher is configured")
+		return
+	}
+	type AtContent struct {
+		Text       string   `json:"text"`
+		AtUserList []string `json:"atUserList"`
+		IsAtSelf   bool     `json:"isAtSelf"`
+	}
+	opts, err = p.GetOfflinePushOpts(msg)
+	if err != nil {
+		return
+	}
+	if msg.OfflinePushInfo != nil {
+		title = msg.OfflinePushInfo.Title
+		content = msg.OfflinePushInfo.Desc
+	}
+	if title == "" {
+		switch msg.ContentType {
+		case constant.Text:
+			fallthrough
+		case constant.Picture:
+			fallthrough
+		case constant.Voice:
+			fallthrough
+		case constant.Video:
+			fallthrough
+		case constant.File:
+			title = constant.ContentType2PushContent[int64(msg.ContentType)]
+		case constant.AtText:
+			a := AtContent{}
+			_ = utils.JsonStringToStruct(string(msg.Content), &a)
+			if utils.IsContain(sourceID, a.AtUserList) {
+				title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+			} else {
+				title = constant.ContentType2PushContent[constant.GroupMsg]
+			}
+		case constant.SignalingNotification:
+			title = constant.ContentType2PushContent[constant.SignalMsg]
+		default:
+			title = constant.ContentType2PushContent[constant.Common]
+		}
+	}
+	if content == "" {
+		content = title
+	}
+	return
 }

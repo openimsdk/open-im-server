@@ -308,17 +308,16 @@ func (r *RedisClient) HandleSignalInfo(ctx context.Context, operationID string, 
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return false, err
 	}
-	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
-	var inviteeUserIDList []string
+	var inviteeUserIDs []string
 	var isInviteSignal bool
 	switch signalInfo := req.Payload.(type) {
 	case *pbRtc.SignalReq_Invite:
-		inviteeUserIDList = signalInfo.Invite.Invitation.InviteeUserIDList
+		inviteeUserIDs = signalInfo.Invite.Invitation.InviteeUserIDList
 		isInviteSignal = true
 	case *pbRtc.SignalReq_InviteInGroup:
-		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
+		inviteeUserIDs = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
 		isInviteSignal = true
-		if !utils.IsContain(pushToUserID, inviteeUserIDList) {
+		if !utils.IsContain(pushToUserID, inviteeUserIDs) {
 			return false, nil
 		}
 	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
@@ -327,7 +326,7 @@ func (r *RedisClient) HandleSignalInfo(ctx context.Context, operationID string, 
 		return false, nil
 	}
 	if isInviteSignal {
-		for _, userID := range inviteeUserIDList {
+		for _, userID := range inviteeUserIDs {
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
 				return false, err

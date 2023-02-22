@@ -1,13 +1,11 @@
 package body
 
 const (
-	TAG             = "tag"
-	TAG_AND         = "tag_and"
-	TAG_NOT         = "tag_not"
-	ALIAS           = "alias"
-	REGISTRATION_ID = "registration_id"
-	SEGMENT         = "segment"
-	ABTEST          = "abtest"
+	TAG            = "tag"
+	TAGAND         = "tag_and"
+	TAGNOT         = "tag_not"
+	ALIAS          = "alias"
+	REGISTRATIONID = "registration_id"
 )
 
 type Audience struct {
@@ -32,11 +30,11 @@ func (a *Audience) SetTag(tags []string) {
 }
 
 func (a *Audience) SetTagAnd(tags []string) {
-	a.set(TAG_AND, tags)
+	a.set(TAGAND, tags)
 }
 
 func (a *Audience) SetTagNot(tags []string) {
-	a.set(TAG_NOT, tags)
+	a.set(TAGNOT, tags)
 }
 
 func (a *Audience) SetAlias(alias []string) {
@@ -44,7 +42,7 @@ func (a *Audience) SetAlias(alias []string) {
 }
 
 func (a *Audience) SetRegistrationId(ids []string) {
-	a.set(REGISTRATION_ID, ids)
+	a.set(REGISTRATIONID, ids)
 }
 
 func (a *Audience) SetAll() {

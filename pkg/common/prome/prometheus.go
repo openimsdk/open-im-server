@@ -11,10 +11,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func StartPromeSrv(promethuesPort int) error {
+func StartPromeSrv(prometheusPort int) error {
 	if config.Config.Prometheus.Enable {
 		http.Handle("/metrics", promhttp.Handler())
-		err := http.ListenAndServe(":"+strconv.Itoa(promethuesPort), nil)
+		err := http.ListenAndServe(":"+strconv.Itoa(prometheusPort), nil)
 		return err
 	}
 	return nil

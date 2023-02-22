@@ -3,7 +3,7 @@ package localcache
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	"Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/group"
 	"context"
 	"sync"
@@ -16,7 +16,7 @@ type GroupLocalCacheInterface interface {
 type GroupLocalCache struct {
 	lock   sync.Mutex
 	cache  map[string]GroupMemberIDsHash
-	client discoveryRegistry.SvcDiscoveryRegistry
+	client discoveryregistry.SvcDiscoveryRegistry
 }
 
 type GroupMemberIDsHash struct {
@@ -24,7 +24,7 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupMemberIDsLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) *GroupLocalCache {
+func NewGroupMemberIDsLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *GroupLocalCache {
 	return &GroupLocalCache{
 		cache:  make(map[string]GroupMemberIDsHash, 0),
 		client: client,
@@ -34,7 +34,7 @@ func NewGroupMemberIDsLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	conn, err := g.client.GetConn(config.Config.RpcRegisterName.OpenImGroupName, nil)
+	conn, err := g.client.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}

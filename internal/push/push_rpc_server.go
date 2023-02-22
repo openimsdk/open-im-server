@@ -3,9 +3,10 @@ package push
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/cache"
+	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
-	prome "Open_IM/pkg/common/prometheus"
+	"Open_IM/pkg/common/prome"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"
@@ -22,14 +23,16 @@ type RPCServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	push            controller.PushInterface
 }
 
-func (r *RPCServer) Init(rpcPort int) {
+func (r *RPCServer) Init(rpcPort int, cache cache.Cache) {
 	r.rpcPort = rpcPort
 	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImPushName
 	r.etcdSchema = config.Config.Etcd.EtcdSchema
 	r.etcdAddr = config.Config.Etcd.EtcdAddr
 }
+
 func (r *RPCServer) run() {
 	listenIP := ""
 	if config.Config.ListenIP == "" {
@@ -77,29 +80,17 @@ func (r *RPCServer) run() {
 		return
 	}
 }
-func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPush.PushMsgResp, error) {
-	//Call push module to send message to the user
+
+func (r *RPCServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (resp *pbPush.PushMsgResp, err error) {
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
 		MsgToSuperGroupUser(pbData)
 	default:
 		MsgToUser(pbData)
 	}
-	return &pbPush.PushMsgResp{
-		ResultCode: 0,
-	}, nil
-
+	return &pbPush.PushMsgResp{}, nil
 }
 
-func (r *RPCServer) DelUserPushToken(c context.Context, req *pbPush.DelUserPushTokenReq) (*pbPush.DelUserPushTokenResp, error) {
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "req", req.String())
-	var resp pbPush.DelUserPushTokenResp
-	err := db.DB.DelFcmToken(req.UserID, int(req.PlatformID))
-	if err != nil {
-		errMsg := req.OperationID + " " + "DelFcmToken failed " + err.Error()
-		log.NewError(req.OperationID, errMsg)
-		resp.ErrCode = 500
-		resp.ErrMsg = errMsg
-	}
-	return &resp, nil
+func (r *RPCServer) DelUserPushToken(ctx context.Context, req *pbPush.DelUserPushTokenReq) (resp *pbPush.DelUserPushTokenResp, err error) {
+	return &pbPush.DelUserPushTokenResp{}, r.push.DelFcmToken(ctx, req.UserID, int(req.PlatformID))
 }

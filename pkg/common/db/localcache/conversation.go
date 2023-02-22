@@ -25,5 +25,5 @@ func NewConversationLocalCache(client discoveryRegistry.SvcDiscoveryRegistry) Co
 
 func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.client.GetConn()
-	return []string{}
+	return []string{}, nil
 }

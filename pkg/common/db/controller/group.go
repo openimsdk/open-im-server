@@ -93,7 +93,7 @@ func (g *GroupController) DismissGroup(ctx context.Context, groupID string) erro
 }
 
 func (g *GroupController) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
-	return g.database.
+	return g.database.GetGroupIDsByGroupType(ctx, groupType)
 }
 
 func (g *GroupController) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error) {

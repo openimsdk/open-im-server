@@ -129,20 +129,19 @@ type config struct {
 		OpenImPushPort           []int `yaml:"openImPushPort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
-		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
+		OpenImRtcPort            []int `yaml:"openImRtcPort"`
 	}
 	RpcRegisterName struct {
-		OpenImUserName   string `yaml:"openImUserName"`
-		OpenImFriendName string `yaml:"openImFriendName"`
-		//	OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
-		OpenImMsgName          string `yaml:"openImMsgName"`
-		OpenImPushName         string `yaml:"openImPushName"`
-		OpenImRelayName        string `yaml:"openImRelayName"`
-		OpenImGroupName        string `yaml:"openImGroupName"`
-		OpenImAuthName         string `yaml:"openImAuthName"`
-		OpenImConversationName string `yaml:"openImConversationName"`
-		OpenImCacheName        string `yaml:"openImCacheName"`
-		OpenImRealTimeCommName string `yaml:"openImRealTimeCommName"`
+		OpenImUserName           string `yaml:"openImUserName"`
+		OpenImFriendName         string `yaml:"openImFriendName"`
+		OpenImMsgName            string `yaml:"openImMsgName"`
+		OpenImPushName           string `yaml:"openImPushName"`
+		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
+		OpenImGroupName          string `yaml:"openImGroupName"`
+		OpenImAuthName           string `yaml:"openImAuthName"`
+		OpenImConversationName   string `yaml:"openImConversationName"`
+		OpenImCacheName          string `yaml:"openImCacheName"`
+		OpenImRtcName            string `yaml:"openImRtcName"`
 	}
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
@@ -481,7 +480,7 @@ type config struct {
 		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
 		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
 		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
-		RealTimeCommPrometheusPort    []int `yaml:"realTimeCommPrometheusPort"`
+		RtcPrometheusPort             []int `yaml:"RtcPrometheusPort"`
 		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
 	} `yaml:"prometheus"`
 }

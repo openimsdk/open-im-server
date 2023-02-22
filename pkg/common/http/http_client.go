@@ -33,7 +33,7 @@ func Get(url string) (response []byte, err error) {
 }
 
 // application/json; charset=utf-8
-func Post(url string, header map[string]string, data interface{}, timeOutSecond int) (content []byte, err error) {
+func Post(url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -42,9 +42,12 @@ func Post(url string, header map[string]string, data interface{}, timeOutSecond 
 	if err != nil {
 		return nil, err
 	}
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
 	req.Close = true
 	req.Header.Add("content-type", "application/json; charset=utf-8")
-	client := &http.Client{Timeout: time.Duration(timeOutSecond) * time.Second}
+	client := &http.Client{Timeout: time.Duration(timeout) * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

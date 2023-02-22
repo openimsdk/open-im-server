@@ -150,7 +150,7 @@ rpcport: #rpc服务端口 默认即可
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
   openImConversationPort: [ 10230 ]
-  openImRealTimeCommPort: [ 11300 ]
+  openImRtcPort: [ 11300 ]
 
 
 rpcregistername: #rpc注册服务名，默认即可
@@ -158,11 +158,11 @@ rpcregistername: #rpc注册服务名，默认即可
   openImFriendName: Friend
   openImMsgName: Msg
   openImPushName: Push
-  openImRelayName: Relay
+  openImMessageGatewayName: MessageGateway
   openImGroupName: Group
   openImAuthName: Auth
   openImConversationName: Conversation
-  openImRealTimeCommName: RealTimeComm
+  openImRtcName: Rtc
 
 log:
   storageLocation: ../logs/
@@ -326,5 +326,5 @@ prometheus:
   authPrometheusPort: [ 20160 ]
   pushPrometheusPort: [ 20170 ]
   conversationPrometheusPort: [ 20230 ]
-  realTimeCommPrometheusPort: [ 21300 ]
+  RtcPrometheusPort: [ 21300 ]
   messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # 端口数量和 script/path_info.cfg  msg_transfer_service_num保持一致

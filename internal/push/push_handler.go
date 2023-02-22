@@ -35,9 +35,8 @@ func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
 		return
 	}
 	pbData := &pbPush.PushMsgReq{
-		OperationID:  msgFromMQ.OperationID,
-		MsgData:      msgFromMQ.MsgData,
-		PushToUserID: msgFromMQ.PushToUserID,
+		MsgData:  msgFromMQ.MsgData,
+		SourceID: msgFromMQ.PushToUserID,
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := utils.GetCurrentTimestampBySecond()

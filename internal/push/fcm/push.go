@@ -22,7 +22,7 @@ type Fcm struct {
 	cache     cache.Cache
 }
 
-func newFcmClient(cache cache.Cache) *Fcm {
+func NewClient(cache cache.Cache) *Fcm {
 	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
@@ -42,7 +42,7 @@ func newFcmClient(cache cache.Cache) *Fcm {
 	return &Fcm{fcmMsgCli: fcmMsgClient}
 }
 
-func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts push.Opts) error {
+func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *push.Opts) error {
 	// accounts->registrationToken
 	allTokens := make(map[string][]string, 0)
 	for _, account := range userIDs {
@@ -105,7 +105,6 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			}
 			messages = append(messages, temp)
 		}
-
 	}
 	messageCount := len(messages)
 	if messageCount > 0 {

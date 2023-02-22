@@ -12,47 +12,46 @@ import (
 	jpush "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/prome"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )
 
-var (
+type Push struct {
 	rpcServer     RPCServer
 	pushCh        ConsumerHandler
 	offlinePusher OfflinePusher
 	successCount  uint64
-)
-
-func Init(rpcPort int) {
-	rpcServer.Init(rpcPort)
-	pushCh.Init()
-
 }
-func init() {
-	statistics.NewStatistics(&successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+
+func (p *Push) Init(rpcPort int) {
+	var cacheInterface cache.Cache
+
+	p.rpcServer.Init(rpcPort, cacheInterface)
+	p.pushCh.Init()
+	statistics.NewStatistics(&p.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	if *config.Config.Push.Getui.Enable {
-		offlinePusher = getui.GetuiClient
+		p.offlinePusher = getui.NewClient(cacheInterface)
 	}
 	if config.Config.Push.Jpns.Enable {
-		offlinePusher = jpush.JPushClient
+		p.offlinePusher = jpush.NewClient()
 	}
-
 	if config.Config.Push.Fcm.Enable {
-		offlinePusher = fcm.NewFcm()
+		p.offlinePusher = fcm.NewClient(cacheInterface)
 	}
 }
 
-func initPrometheus() {
+func (p *Push) initPrometheus() {
 	prome.NewMsgOfflinePushSuccessCounter()
 	prome.NewMsgOfflinePushFailedCounter()
 }
 
-func Run(promethuesPort int) {
-	go rpcServer.run()
-	go pushCh.ConsumerGroup.RegisterHandleAndConsumer(&pushCh)
+func (p *Push) Run(prometheusPort int) {
+	go p.rpcServer.run()
+	go p.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&p.pushCh)
 	go func() {
-		err := prome.StartPromeSrv(promethuesPort)
+		err := prome.StartPromeSrv(prometheusPort)
 		if err != nil {
 			panic(err)
 		}
