@@ -109,6 +109,9 @@ func (u *UserDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 		return err
 	}
 
+	miss := utils.SliceSubAny(users, result, func(e *relation.UserModel) string { return e.UserID })
+
+	u.userDB.Create(ctx, miss)
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
