@@ -25,7 +25,7 @@ type LongConn interface {
 	//Set the connection of the current long connection to nil
 	SetConnNil()
 	//Check the connection of the current and when it was sent are the same
-	CheckSendConnDiffNow() bool
+	//CheckSendConnDiffNow() bool
 	//
 	GenerateLongConn(w http.ResponseWriter, r *http.Request) error
 }
@@ -58,13 +58,13 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 
 }
 func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
-	d.setSendConn(d.conn)
+	//d.setSendConn(d.conn)
 	return d.conn.WriteMessage(messageType, message)
 }
 
-func (d *GWebSocket) setSendConn(sendConn *websocket.Conn) {
-	d.sendConn = sendConn
-}
+//func (d *GWebSocket) setSendConn(sendConn *websocket.Conn) {
+//	d.sendConn = sendConn
+//}
 
 func (d *GWebSocket) ReadMessage() (int, []byte, error) {
 	return d.conn.ReadMessage()
@@ -96,6 +96,7 @@ func (d *GWebSocket) IsNil() bool {
 func (d *GWebSocket) SetConnNil() {
 	d.conn = nil
 }
-func (d *GWebSocket) CheckSendConnDiffNow() bool {
-	return d.conn == d.sendConn
-}
+
+//func (d *GWebSocket) CheckSendConnDiffNow() bool {
+//	return d.conn == d.sendConn
+//}

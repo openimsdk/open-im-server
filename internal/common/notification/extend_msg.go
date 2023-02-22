@@ -87,5 +87,5 @@ func (c *Check) messageReactionSender(ctx context.Context, sendID string, source
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	_, err = c.msg.SendMsg(ctx, &pbData)
+	_, err = c.Msg.SendMsg(ctx, &pbData)
 }

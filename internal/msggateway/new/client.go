@@ -86,7 +86,7 @@ func (c *Client) readMessage() {
 		}
 		//c.close()
 	}()
-	var returnErr error
+	//var returnErr error
 	for {
 		messageType, message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
@@ -115,7 +115,7 @@ func (c *Client) readMessage() {
 
 }
 func (c *Client) handleMessage(message []byte) error {
-	if c.IsCompress {
+	if c.isCompress {
 		var decompressErr error
 		message, decompressErr = c.compressor.DeCompress(message)
 		if decompressErr != nil {
@@ -134,9 +134,10 @@ func (c *Client) handleMessage(message []byte) error {
 		return errors.New("exception conn userID not same to req userID")
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, c.connID, binaryReq.OperationID)
+	ctx = context.WithValue(ctx, CONN_ID, c.connID)
 	ctx = context.WithValue(ctx, OPERATION_ID, binaryReq.OperationID)
-	ctx = context.WithValue(ctx, "userID", binaryReq.SendID)
+	ctx = context.WithValue(ctx, COMMON_USERID, binaryReq.SendID)
+	ctx = context.WithValue(ctx, PLATFORM_ID, c.platformID)
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
@@ -151,12 +152,22 @@ func (c *Client) handleMessage(message []byte) error {
 	case constant.WsLogoutMsg:
 		resp, messageErr = c.handler.UserLogout(ctx, binaryReq)
 	case constant.WsSetBackgroundStatus:
-		resp, messageErr = c.handler.SetUserDeviceBackground(ctx, binaryReq)
+		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
 	default:
 		return errors.New(fmt.Sprintf("ReqIdentifier failed,sendID:%d,msgIncr:%s,reqIdentifier:%s", binaryReq.SendID, binaryReq.MsgIncr, binaryReq.ReqIdentifier))
 	}
-	c.replyMessage(binaryReq, messageErr, resp)
+	c.replyMessage(&binaryReq, messageErr, resp)
 	return nil
+
+}
+func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, error) {
+	resp, isBackground, messageErr := c.handler.SetUserDeviceBackground(ctx, req)
+	if messageErr != nil {
+		return nil, messageErr
+	}
+	c.isBackground = isBackground
+	//todo callback
+	return resp, nil
 
 }
 func (c *Client) close() {
@@ -166,7 +177,7 @@ func (c *Client) close() {
 	c.unregisterChan <- c
 
 }
-func (c *Client) replyMessage(binaryReq Req, err error, resp []byte) {
+func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
 	mReply := Resp{
 		ReqIdentifier: binaryReq.ReqIdentifier,
 		MsgIncr:       binaryReq.MsgIncr,

@@ -16,7 +16,7 @@ import (
 type Check struct {
 	user         *check.UserCheck
 	group        *check.GroupChecker
-	msg          *check.MsgCheck
+	Msg          *check.MsgCheck
 	friend       *check.FriendChecker
 	conversation *check.ConversationChecker
 }
@@ -25,7 +25,7 @@ func NewCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *Check {
 	return &Check{
 		user:         check.NewUserCheck(zk),
 		group:        check.NewGroupChecker(zk),
-		msg:          check.NewMsgCheck(zk),
+		Msg:          check.NewMsgCheck(zk),
 		friend:       check.NewFriendChecker(zk),
 		conversation: check.NewConversationChecker(zk),
 	}
@@ -301,5 +301,5 @@ func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationM
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 
-	_, err = c.msg.SendMsg(ctx, &req)
+	_, err = c.Msg.SendMsg(ctx, &req)
 }

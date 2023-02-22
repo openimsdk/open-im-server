@@ -47,7 +47,7 @@ func (c *UserConnContext) GetConnID() string {
 	return c.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))
 }
 func (c *UserConnContext) GetUserID() string {
-	return c.Req.URL.Query().Get(USERID)
+	return c.Req.URL.Query().Get(WS_USERID)
 }
 func (c *UserConnContext) GetPlatformID() string {
 	return c.Req.URL.Query().Get(PLATFORM_ID)

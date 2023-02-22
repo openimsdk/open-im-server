@@ -1,6 +1,7 @@
 package new
 
 import (
+	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/gob"
 )

@@ -1,8 +1,10 @@
 package new
 
 const (
-	USERID                    = "sendID"
+	WS_USERID                 = "sendID"
+	COMMON_USERID             = "userID"
 	PLATFORM_ID               = "platformID"
+	CONN_ID                   = "connID"
 	TOKEN                     = "token"
 	OPERATION_ID              = "operationID"
 	COMPRESSION               = "compression"
