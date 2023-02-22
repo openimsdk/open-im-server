@@ -13,8 +13,8 @@ import (
 
 type ClearMsgTool struct {
 	msgInterface   controller.MsgInterface
-	userInterface  controller.UserInterface
-	groupInterface controller.GroupInterface
+	userInterface  controller.UserDatabase
+	groupInterface controller.GroupDatabase
 }
 
 func (c *ClearMsgTool) getCronTaskOperationID() string {
