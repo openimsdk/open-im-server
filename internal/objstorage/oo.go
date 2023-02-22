@@ -5,6 +5,7 @@ import "context"
 type Interface interface {
 	Init() error
 	Name() string
+	MinMultipartSize() int64
 	UploadBucket() string
 	PermanentBucket() string
 	ClearBucket() string

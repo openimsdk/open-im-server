@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-//func NewMinio() Interface {
-//	return &minioImpl{}
-//}
+func NewMinio() Interface {
+	return &minioImpl{}
+}
 
 type minioImpl struct {
 	uploadBucket    string // 上传桶
@@ -34,6 +34,10 @@ func (m *minioImpl) Init() error {
 
 func (m *minioImpl) Name() string {
 	return "minio"
+}
+
+func (m *minioImpl) MinMultipartSize() int64 {
+	return 1024 * 1024 * 5 // minio.absMinPartSize
 }
 
 func (m *minioImpl) UploadBucket() string {
