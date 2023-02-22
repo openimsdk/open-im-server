@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/relation"
@@ -8,67 +9,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"gorm.io/gorm"
 )
-
-type ConversationInterface interface {
-	//GetUserIDExistConversation 获取拥有该会话的的用户ID列表
-	GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
-	//UpdateUserConversationFiled 更新用户该会话的属性信息
-	UpdateUsersConversationFiled(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) error
-	//CreateConversation 创建一批新的会话
-	CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error
-	//SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
-	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error
-	//FindConversations 根据会话ID获取某个用户的多个会话
-	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
-	//GetUserAllConversation 获取一个用户在服务器上所有的会话
-	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
-	//SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
-	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
-	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
-	SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
-}
-type ConversationController struct {
-	database ConversationDataBaseInterface
-}
-
-func (c *ConversationController) SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
-	return c.database.SetUsersConversationFiledTx(ctx, userIDList, conversation, filedMap)
-}
-
-func NewConversationController(database ConversationDataBaseInterface) *ConversationController {
-	return &ConversationController{database: database}
-}
-
-func (c *ConversationController) GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error) {
-	return c.database.GetUserIDExistConversation(ctx, userIDList, conversationID)
-}
-
-func (c ConversationController) UpdateUsersConversationFiled(ctx context.Context, UserIDList []string, conversationID string, args map[string]interface{}) error {
-	return c.database.UpdateUsersConversationFiled(ctx, UserIDList, conversationID, args)
-}
-
-func (c ConversationController) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
-	return c.database.CreateConversation(ctx, conversations)
-}
-
-func (c ConversationController) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
-	return c.database.SyncPeerUserPrivateConversationTx(ctx, conversation)
-}
-
-func (c ConversationController) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
-	return c.database.FindConversations(ctx, ownerUserID, conversationIDs)
-}
-
-func (c ConversationController) GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
-	return c.database.GetUserAllConversation(ctx, ownerUserID)
-}
-func (c ConversationController) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error {
-	return c.database.SetUserConversations(ctx, ownerUserID, conversations)
-}
-
-var _ ConversationInterface = (*ConversationController)(nil)
 
 type ConversationDataBaseInterface interface {
 	//GetUserIDExistConversation 获取拥有该会话的的用户ID列表
@@ -89,22 +30,29 @@ type ConversationDataBaseInterface interface {
 	SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 }
 
-var _ ConversationDataBaseInterface = (*ConversationDataBase)(nil)
+func NewConversationDatabase(conversation relation.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDataBaseInterface {
+	return &ConversationDataBase{
+		conversationDB: conversation,
+		cache:          cache,
+		tx:             tx,
+	}
+}
 
 type ConversationDataBase struct {
 	conversationDB relation.Conversation
 	cache          cache.ConversationCache
+	tx             tx.Tx
 }
 
-func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
-	fn := func(tx any) error {
-		temp := c.conversationDB.NewTx(tx)
-		haveUserID, err := temp.FindUserID(ctx, userIDList, conversation.ConversationID, tx)
+func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
+	return c.tx.Transaction(func(tx any) error {
+		conversationTx := c.conversationDB.NewTx(tx)
+		haveUserID, err := conversationTx.FindUserID(ctx, userIDList, conversation.ConversationID)
 		if err != nil {
 			return err
 		}
 		if len(haveUserID) > 0 {
-			err = temp.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap, tx)
+			err = conversationTx.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap)
 			if err != nil {
 				return err
 			}
@@ -119,7 +67,7 @@ func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, u
 			temp.OwnerUserID = v
 			cList = append(cList, temp)
 		}
-		err = temp.Create(ctx, cList)
+		err = conversationTx.Create(ctx, cList)
 		if err != nil {
 			return err
 		}
@@ -134,42 +82,42 @@ func (c ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, u
 			return err
 		}
 		return nil
-	}
-
-	return c.conversationDB.Transaction(fn)
+	})
 }
 
-func NewConversationDataBase(db relation.Conversation, cache cache.ConversationCache) *ConversationDataBase {
-	return &ConversationDataBase{conversationDB: db, cache: cache}
-}
-
-func (c ConversationDataBase) GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error) {
+func (c *ConversationDataBase) GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error) {
 	panic("implement me")
 }
 
-func (c ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context, UserIDList []string, conversationID string, args map[string]interface{}) error {
+func (c *ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context, UserIDList []string, conversationID string, args map[string]interface{}) error {
 	panic("implement me")
 }
 
-func (c ConversationDataBase) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
-	panic("implement me")
+func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
+	return c.tx.Transaction(func(tx any) error {
+		if err := c.conversationDB.NewTx(tx).Create(ctx, conversations); err != nil {
+			return err
+		}
+		// clear cache
+		return nil
+	})
 }
 
-func (c ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
-	return c.db.Transaction(func(tx *gorm.DB) error {
+func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
+	return c.tx.Transaction(func(tx any) error {
 		userIDList := []string{conversation.OwnerUserID, conversation.UserID}
-		haveUserID, err := c.conversationDB.FindUserID(ctx, userIDList, conversation.ConversationID, tx)
+		conversationTx := c.conversationDB.NewTx(tx)
+		haveUserID, err := conversationTx.FindUserID(ctx, userIDList, conversation.ConversationID)
 		if err != nil {
 			return err
 		}
 		filedMap := map[string]interface{}{"is_private_chat": conversation.IsPrivateChat}
 		if len(haveUserID) > 0 {
-			err = c.conversationDB.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap, tx)
+			err = conversationTx.UpdateByMap(ctx, haveUserID, conversation.ConversationID, filedMap)
 			if err != nil {
 				return err
 			}
 		}
-
 		NotUserID := utils.DifferenceString(haveUserID, userIDList)
 		var cList []*relationTb.ConversationModel
 		for _, v := range NotUserID {
@@ -206,7 +154,7 @@ func (c ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Cont
 	})
 }
 
-func (c ConversationDataBase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
+func (c *ConversationDataBase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
 	getConversation := func() (string, error) {
 		conversationList, err := c.conversationDB.Find(ctx, ownerUserID, conversationIDs)
 		if err != nil {
@@ -221,7 +169,7 @@ func (c ConversationDataBase) FindConversations(ctx context.Context, ownerUserID
 	return c.cache.GetConversations(ctx, ownerUserID, conversationIDs, getConversation)
 }
 
-func (c ConversationDataBase) GetConversation(ctx context.Context, ownerUserID string, conversationID string) (*relationTb.ConversationModel, error) {
+func (c *ConversationDataBase) GetConversation(ctx context.Context, ownerUserID string, conversationID string) (*relationTb.ConversationModel, error) {
 	getConversation := func() (string, error) {
 		conversationList, err := c.conversationDB.Take(ctx, ownerUserID, conversationID)
 		if err != nil {
@@ -236,7 +184,7 @@ func (c ConversationDataBase) GetConversation(ctx context.Context, ownerUserID s
 	return c.cache.GetConversation(ctx, ownerUserID, conversationID, getConversation)
 }
 
-func (c ConversationDataBase) GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
+func (c *ConversationDataBase) GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
 	getConversationIDList := func() (string, error) {
 		conversationIDList, err := c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
 		if err != nil {
@@ -254,27 +202,28 @@ func (c ConversationDataBase) GetUserAllConversation(ctx context.Context, ownerU
 	}
 	var conversations []*relationTb.ConversationModel
 	for _, conversationID := range conversationIDList {
-		conversation, tErr := c.GetConversation(ctx, ownerUserID, conversationID)
-		if tErr != nil {
-			return nil, utils.Wrap(tErr, "GetConversation failed")
+		conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
+		if err != nil {
+			return nil, utils.Wrap(err, "GetConversation failed")
 		}
 		conversations = append(conversations, conversation)
 	}
 	return conversations, nil
 }
 
-func (c ConversationDataBase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error {
-	return c.db.Transaction(func(tx *gorm.DB) error {
+func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error {
+	return c.tx.Transaction(func(tx any) error {
 		var conversationIDList []string
 		for _, conversation := range conversations {
 			conversationIDList = append(conversationIDList, conversation.ConversationID)
 		}
-		haveConversations, err := c.conversationDB.Find(ctx, ownerUserID, conversationIDList, tx)
+		conversationTx := c.conversationDB.NewTx(tx)
+		haveConversations, err := conversationTx.Find(ctx, ownerUserID, conversationIDList)
 		if err != nil {
 			return err
 		}
 		if len(haveConversations) > 0 {
-			err = c.conversationDB.Update(ctx, conversations, tx)
+			err = conversationTx.Update(ctx, conversations)
 			if err != nil {
 				return err
 			}

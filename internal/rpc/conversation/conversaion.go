@@ -2,23 +2,24 @@ package conversation
 
 import (
 	"Open_IM/internal/common/check"
+	"Open_IM/internal/common/notification"
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	tableRelation "Open_IM/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/openKeeper"
-
-	"Open_IM/internal/common/notification"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
+	"github.com/dtm-labs/rockscache"
 	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
 	groupChecker *check.GroupChecker
-	controller.ConversationInterface
+	controller.ConversationDataBaseInterface
 	notify *notification.Check
 }
 
@@ -30,18 +31,25 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	if err := db.AutoMigrate(&tableRelation.ConversationModel{}); err != nil {
 		return err
 	}
+	redis, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
 	pbConversation.RegisterConversationServer(server, &conversationServer{
-		groupChecker:          check.NewGroupChecker(client),
-		ConversationInterface: controller.NewConversationController(controller.NewConversationDataBase(controller.NewConversationGorm(db), cache.NewConversationRedis(nil))),
+		groupChecker: check.NewGroupChecker(client),
+		ConversationDataBaseInterface: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(redis.GetClient(), rockscache.Options{
+			RandomExpireAdjustment: 0.2,
+			DisableCacheRead:       false,
+			DisableCacheDelete:     false,
+			StrongConsistency:      true,
+		}), tx.NewGorm(db)),
 	})
-	controller.NewConversationDataBase()
-	controller.NewConversationController()
 	return nil
 }
 
 func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
 	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
+	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +64,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
 	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.GetUserAllConversation(ctx, req.OwnerUserID)
+	conversations, err := c.ConversationDataBaseInterface.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +76,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
 	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +92,7 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
 		return nil, err
 	}
-	err := c.ConversationInterface.SetUserConversations(ctx, req.OwnerUserID, conversations)
+	err := c.ConversationDataBaseInterface.SetUserConversations(ctx, req.OwnerUserID, conversations)
 	if err != nil {
 		return nil, err
 	}
@@ -118,14 +126,14 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		return nil, err
 	}
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.ConversationInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
+		err := c.ConversationDataBaseInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
 		if err != nil {
 			return nil, err
 		}
 		c.notify.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
-	//haveUserID, err := c.ConversationInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
+	//haveUserID, err := c.ConversationDataBaseInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -149,7 +157,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	err = c.ConversationInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
+	err = c.ConversationDataBaseInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}

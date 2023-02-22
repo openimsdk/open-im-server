@@ -79,6 +79,9 @@ func (c *Controller) ApplyPut(ctx context.Context, args *FragmentPutArgs) (*PutA
 	name := args.Name
 	effective := time.Now().Add(args.EffectiveTime)
 	prefix := c.Prefix(&args.PutArgs)
+	if minSize := c.i.MinMultipartSize(); args.FragmentSize > 0 && args.FragmentSize < minSize {
+		args.FragmentSize = minSize
+	}
 	var pack int64
 	if args.FragmentSize <= 0 || args.Size <= args.FragmentSize {
 		pack = 1
