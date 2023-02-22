@@ -7,7 +7,6 @@ import (
 	sdkws "Open_IM/pkg/proto/sdkws"
 	"context"
 
-	"Open_IM/pkg/getcdv3"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

@@ -1,0 +1,37 @@
+syntax = "proto3";
+option go_package = "Open_IM/pkg/proto/file;file";
+package file;
+
+
+message ApplySpaceReq {
+  string name = 1; // 文件名字
+  int64 size = 2; // 大小
+  string hash = 3; // md5
+  uint32 purpose = 4; // 用途
+  string contentType = 5;
+}
+
+message ApplySpaceResp {
+  string url = 1; // 不为空表示已存在
+  int64 size = 2; // 分片大小
+  repeated string put = 3;// put地址
+  string confirmID = 4; // 确认ID
+}
+
+message ConfirmSpaceReq {
+  string confirmID = 1; // 确认ID
+}
+
+message ConfirmSpaceResp {
+  string confirmID = 1;
+}
+
+service file {
+  rpc ApplySpaceReq(ApplySpaceReq) returns(ApplySpaceResp);
+}
+
+
+
+
+
+

@@ -1,17 +1,16 @@
 package user
 
 import (
-	jsonData "Open_IM/internal/utils"
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	cacheRpc "Open_IM/pkg/proto/cache"
 	pbRelay "Open_IM/pkg/proto/relay"
 	sdkws "Open_IM/pkg/proto/sdkws"
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
+	jsonData "Open_IM/pkg/utils"
 	"context"
 	"net/http"
 	"strings"

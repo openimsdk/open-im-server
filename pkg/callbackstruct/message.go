@@ -99,3 +99,38 @@ type CallbackDeleteMessageReactionExtResp struct {
 	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }
+
+type CallbackGetMessageListReactionExtReq struct {
+	OperationID     string `json:"operationID"`
+	CallbackCommand `json:"callbackCommand"`
+	SourceID        string                                                        `json:"sourceID"`
+	OpUserID        string                                                        `json:"opUserID"`
+	SessionType     int32                                                         `json:"sessionType"`
+	TypeKeyList     []string                                                      `json:"typeKeyList"`
+	MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
+}
+
+type CallbackGetMessageListReactionExtResp struct {
+	CommonCallbackResp
+	MessageResultList []*msg.SingleMessageExtensionResult `json:"messageResultList"`
+}
+
+type CallbackAddMessageReactionExtReq struct {
+	OperationID           string `json:"operationID"`
+	CallbackCommand       `json:"callbackCommand"`
+	SourceID              string                     `json:"sourceID"`
+	OpUserID              string                     `json:"opUserID"`
+	SessionType           int32                      `json:"sessionType"`
+	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList"`
+	ClientMsgID           string                     `json:"clientMsgID"`
+	IsReact               bool                       `json:"isReact"`
+	IsExternalExtensions  bool                       `json:"isExternalExtensions"`
+	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
+}
+
+type CallbackAddMessageReactionExtResp struct {
+	CommonCallbackResp
+	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
+	IsReact                     bool                `json:"isReact"`
+	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
+}

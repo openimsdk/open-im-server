@@ -56,27 +56,10 @@ func (f *FriendCacheRedis) getFriendKey(ownerUserID, friendUserID string) string
 	return friendKey + ownerUserID + "-" + friendUserID
 }
 
-func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string, fn func(ctx context.Context, ownerUserID string) (friendIDs []string, err error)) (friendIDs []string, err error) {
-	getFriendIDs := func() (string, error) {
-		friendIDs, err := f.friendDB.GetFriendIDs(ctx, ownerUserID)
-		if err != nil {
-			return "", err
-		}
-		bytes, err := json.Marshal(friendIDs)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendIDs", friendIDs)
-	}()
-	friendIDsStr, err := f.rcClient.Fetch(f.getFriendIDsKey(ownerUserID), f.expireTime, getFriendIDs)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(friendIDsStr), &friendIDs)
-	return friendIDs, utils.Wrap(err, "")
+func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
+	return GetCache(ctx, f.rcClient, f.getFriendIDsKey(ownerUserID), f.expireTime, func(ctx context.Context) ([]string, error) {
+		return f.friendDB.FindFriendUserIDs(ctx, ownerUserID)
+	})
 }
 
 func (f *FriendCacheRedis) DelFriendIDs(ctx context.Context, ownerUserID string) (err error) {

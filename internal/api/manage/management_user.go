@@ -7,12 +7,11 @@
 package manage
 
 import (
-	api "Open_IM/pkg/api_struct"
+	api "Open_IM/pkg/apistruct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"

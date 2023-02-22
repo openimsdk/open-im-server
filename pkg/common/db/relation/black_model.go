@@ -12,10 +12,8 @@ type BlackGorm struct {
 	DB *gorm.DB
 }
 
-func NewBlackGorm(db *gorm.DB) *BlackGorm {
-	var black BlackGorm
-	black.DB = db
-	return &black
+func NewBlackGorm(db *gorm.DB) relation.BlackModelInterface {
+	return &BlackGorm{db}
 }
 
 func (b *BlackGorm) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
@@ -75,4 +73,11 @@ func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pag
 	}
 	err = utils.Wrap(b.DB.Model(&relation.BlackModel{}).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&blacks).Error, "")
 	return
+}
+
+func (b *BlackGorm) FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackUserIDs", blackUserIDs)
+	}()
+	return blackUserIDs, utils.Wrap(b.DB.Model(&relation.BlackModel{}).Where("owner_user_id = ?", blackUserIDs).Pluck("block_user_id", &blackUserIDs).Error, "")
 }

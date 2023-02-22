@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-//func GetUsersInfo(ctx context.Context, args ...interface{}) ([]*sdkws.UserInfo, error) {
-//	return nil, errors.New("TODO:GetUserInfo")
-//}
-
 func NewUserCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *UserCheck {
 	return &UserCheck{
 		zk: zk,
@@ -104,5 +100,12 @@ func (u *UserCheck) GetPublicUserInfoMap(ctx context.Context, userIDs []string, 
 }
 
 func (u *UserCheck) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-
+	cc, err := u.getConn()
+	if err != nil {
+		return 0, err
+	}
+	resp, err := user.NewUserClient(cc).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
+		UserID: userID,
+	})
+	return resp.GlobalRecvMsgOpt, err
 }

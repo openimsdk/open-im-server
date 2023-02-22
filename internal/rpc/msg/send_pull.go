@@ -2,7 +2,7 @@ package msg
 
 import (
 	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prometheus"
+	promePkg "Open_IM/pkg/common/prome"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"
@@ -67,7 +67,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil {
 		return nil, err
 	}
-	isSend, err := modifyMessageByUserMessageReceiveOpt(req.MsgData.RecvID, req.MsgData.SendID, constant.SingleChatType, req)
+	isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, req.MsgData.SendID, constant.SingleChatType, req)
 	if err != nil {
 		return nil, err
 	}

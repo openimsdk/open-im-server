@@ -2,6 +2,7 @@ package check
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	discoveryRegistry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdkws"
@@ -24,7 +25,7 @@ func (f *FriendChecker) GetFriendsInfo(ctx context.Context, ownerUserID, friendU
 	if err != nil {
 		return nil, err
 	}
-	r, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx, &friend.GetPaginationFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
+	r, err := friend.NewFriendClient(cc).GetDesignatedFriends(ctx, &friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +38,38 @@ func (f *FriendChecker) getConn() (*grpc.ClientConn, error) {
 
 // possibleFriendUserID是否在userID的好友中
 func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
+	cc, err := f.getConn()
+	if err != nil {
+		return false, err
+	}
+	resp, err := friend.NewFriendClient(cc).IsFriend(ctx, &friend.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID})
+	if err != nil {
+		return false, err
+	}
+	return resp.InUser1Friends, nil
 
+}
+
+func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
+	cc, err := f.getConn()
+	if err != nil {
+		return nil, err
+	}
+	page := int32(0)
+	req := friend.GetPaginationFriendsReq{UserID: ownerUserID}
+	for {
+		req.Pagination = &sdkws.RequestPagination{PageNumber: page, ShowNumber: constant.ShowNumber}
+		tmp, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx, &req)
+		if err != nil {
+			return nil, err
+		}
+		if len(tmp.FriendsInfo) == 0 {
+			if tmp.Total == int32(len(resp)) {
+				return resp, nil
+			}
+			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
+		}
+		resp = append(resp, tmp.FriendsInfo...)
+		page++
+	}
 }

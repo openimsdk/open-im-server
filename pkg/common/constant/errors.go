@@ -14,7 +14,6 @@ var (
 	ErrUserIDNotFound  = &ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
 	ErrGroupIDNotFound = &ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
 	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
-	ErrGroupIDExisted  = &ErrInfo{GroupIDNotFoundError, "GroupIDExisted", ""} // todo group id 已存在
 
 	ErrRecordNotFound = &ErrInfo{RecordNotFoundError, "RecordNotFoundError", ""}
 
@@ -54,6 +53,13 @@ var (
 	//
 	ErrMutedInGroup = &ErrInfo{MutedInGroup, "MutedInGroup", ""}
 	ErrMutedGroup   = &ErrInfo{MutedGroup, "MutedGroup", ""}
+
+	ErrConnOverMaxNumLimit = &ErrInfo{ConnOverMaxNumLimit, "ConnOverMaxNumLimit", ""}
+
+	ErrConnArgsErr   = &ErrInfo{ConnArgsErr, "args err, need token, sendID, platformID", ""}
+	ErrConnUpdateErr = &ErrInfo{ConnArgsErr, "upgrade http conn err", ""}
+
+	ErrConfig = &ErrInfo{ConfigError, "ConfigError", ""}
 )
 
 const (
@@ -87,6 +93,8 @@ const (
 	DataError         = 90007 //数据错误
 
 	IdentityError = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
+
+	ConfigError = 90009
 )
 
 // 账号错误码
@@ -140,6 +148,13 @@ const (
 // 消息错误码
 const (
 	MessageHasReadDisable = 96001
+)
+
+// 长连接网关错误码
+const (
+	ConnOverMaxNumLimit = 970001
+	ConnArgsErr         = 970002
+	ConnUpdateErr       = 970003
 )
 
 // temp

@@ -158,6 +158,7 @@ message GetMessageListReactionExtensionsReq {
     int64 msgFirstModifyTime = 2;
   }
   repeated MessageReactionKey messageReactionKeyList = 5;
+  repeated string TypeKeyList = 6;
 }
 message GetMessageListReactionExtensionsResp{
   int32 errCode = 1;

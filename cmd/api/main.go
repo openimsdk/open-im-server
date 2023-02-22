@@ -23,9 +23,10 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/prome"
 	"github.com/gin-gonic/gin"
+	//"syscall"
+	"Open_IM/pkg/common/constant"
+	prome "Open_IM/pkg/common/prome"
 )
 
 // @title open-IM-Server API

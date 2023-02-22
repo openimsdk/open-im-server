@@ -1,10 +1,7 @@
 package push
 
 import (
-	tpns "Open_IM/internal/push/sdk/tpns-server-sdk-go/go"
 	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/auth"
-	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/common"
-	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/req"
 	"Open_IM/pkg/common/config"
 )
 

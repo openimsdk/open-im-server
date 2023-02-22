@@ -4,13 +4,14 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	"Open_IM/internal/common/notification"
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	tablerelation "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	registry "Open_IM/pkg/discoveryregistry"
 	"Open_IM/pkg/proto/sdkws"
 	pbuser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -20,27 +21,37 @@ import (
 )
 
 type userServer struct {
-	controller.UserInterface
+	controller.UserDatabase
 	notification        *notification.Check
 	userCheck           *check.UserCheck
 	ConversationChecker *check.ConversationChecker
-	RegisterCenter      discoveryRegistry.SvcDiscoveryRegistry
+	RegisterCenter      registry.SvcDiscoveryRegistry
+	friendCheck         *check.FriendChecker
 }
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
-	mysql, err := relation.NewGormDB()
+	gormDB, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+	if err := gormDB.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
-	pbuser.RegisterUserServer(server, &userServer{
-		UserInterface:  controller.NewUserController(mysql),
+	u := &userServer{
+		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(gormDB)),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,
-	})
+	}
+	pbuser.RegisterUserServer(server, u)
+	users := make([]*tablerelation.UserModel, 0)
+	if len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname) {
+		return constant.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
+	}
+	for k, v := range config.Config.Manager.AppManagerUid {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
+	}
+	u.UserDatabase.InitOnce(context.Background(), users)
 	return nil
 }
 
@@ -58,10 +69,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
-func (s *userServer) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
-	return
-}
-
 // ok
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
@@ -69,14 +76,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	//oldNickname := ""
-	//if req.UserInfo.Nickname != "" {
-	//	u, err := s.FindWithError(ctx, []string{req.UserInfo.UserID})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	oldNickname = u[0].Nickname
-	//}
 	user, err := convert.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
 		return nil, err
@@ -85,7 +84,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	friends, err := s.GetAllPageFriends(ctx, req.UserInfo.UserID)
+	friends, err := s.friendCheck.GetAllPageFriends(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -94,9 +93,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
-
 	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
-
 	return resp, nil
 }
 
@@ -182,5 +179,15 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if err != nil {
 		return nil, err
 	}
+	return resp, nil
+}
+
+func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.GetGlobalRecvMessageOptReq) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
+	resp = &pbuser.GetGlobalRecvMessageOptResp{}
+	user, err := s.FindWithError(ctx, []string{req.UserID})
+	if err != nil {
+		return nil, err
+	}
+	resp.GlobalRecvMsgOpt = user[0].GlobalRecvMsgOpt
 	return resp, nil
 }

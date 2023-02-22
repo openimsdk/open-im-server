@@ -1,7 +1,6 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/db"
 	"time"
 )
 

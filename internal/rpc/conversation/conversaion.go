@@ -2,137 +2,54 @@ package conversation
 
 import (
 	"Open_IM/internal/common/check"
-	chat "Open_IM/internal/rpc/msg"
+	"Open_IM/internal/common/notification"
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	tableRelation "Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
 	pbConversation "Open_IM/pkg/proto/conversation"
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/openKeeper"
 	"github.com/dtm-labs/rockscache"
-	"net"
-	"strconv"
-	"strings"
-
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-
-	"Open_IM/pkg/common/config"
-
 	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
-	groupChecker    *check.GroupChecker
-	controller.ConversationInterface
+	groupChecker *check.GroupChecker
+	controller.ConversationDataBaseInterface
+	notify *notification.Check
 }
 
-func NewConversationServer(port int) *conversationServer {
-	log.NewPrivateLog(constant.LogFileName)
-	c := conversationServer{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImConversationName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
-		groupChecker:    check.NewGroupChecker(),
-	}
-	var cDB relation.Conversation
-	var cCache cache.ConversationCache
-	//mysql init
-	var mysql relation.Mysql
-	err := mysql.InitConn().AutoMigrateModel(&tableRelation.ConversationModel{})
+func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+	db, err := relation.NewGormDB()
 	if err != nil {
-		panic("db init err:" + err.Error())
+		return err
 	}
-	if mysql.GormConn() != nil {
-		//get gorm model
-		cDB = relation.NewConversationGorm(mysql.GormConn())
-	} else {
-		panic("db init err:" + "conn is nil")
+	if err := db.AutoMigrate(&tableRelation.ConversationModel{}); err != nil {
+		return err
 	}
-	//redis init
-	var redis cache.RedisClient
-	redis.InitRedis()
-	rcClient := rockscache.NewClient(redis.GetClient(), rockscache.Options{
-		RandomExpireAdjustment: 0.2,
-		DisableCacheRead:       false,
-		DisableCacheDelete:     false,
-		StrongConsistency:      true,
+	redis, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	pbConversation.RegisterConversationServer(server, &conversationServer{
+		groupChecker: check.NewGroupChecker(client),
+		ConversationDataBaseInterface: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(redis.GetClient(), rockscache.Options{
+			RandomExpireAdjustment: 0.2,
+			DisableCacheRead:       false,
+			DisableCacheDelete:     false,
+			StrongConsistency:      true,
+		}), tx.NewGorm(db)),
 	})
-	cCache = cache.NewConversationRedis(rcClient)
-
-	database := controller.NewConversationDataBase(cDB, cCache)
-	c.ConversationInterface = controller.NewConversationController(database)
-	return &c
-}
-
-func (c *conversationServer) Run() {
-	log.NewInfo("0", "rpc conversation start...")
-
-	listenIP := ""
-	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
-	} else {
-		listenIP = config.Config.ListenIP
-	}
-	address := listenIP + ":" + strconv.Itoa(c.rpcPort)
-
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		panic("listening err:" + err.Error() + c.rpcRegisterName)
-	}
-	log.NewInfo("0", "listen network success, ", address, listener)
-	//grpc server
-	var grpcOpts []grpc.ServerOption
-	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
-		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(grpcOpts...)
-	defer srv.GracefulStop()
-
-	//service registers with etcd
-	pbConversation.RegisterConversationServer(srv, c)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-	err = rpc.RegisterEtcd(c.etcdSchema, strings.Join(c.etcdAddr, ","), rpcRegisterIP, c.rpcPort, c.rpcRegisterName, 10, "")
-	if err != nil {
-		log.NewError("0", "RegisterEtcd failed ", err.Error(),
-			c.etcdSchema, strings.Join(c.etcdAddr, ","), rpcRegisterIP, c.rpcPort, c.rpcRegisterName)
-		panic(utils.Wrap(err, "register conversation module  rpc to etcd err"))
-	}
-	log.NewInfo("0", "RegisterConversationServer ok ", c.etcdSchema, strings.Join(c.etcdAddr, ","), rpcRegisterIP, c.rpcPort, c.rpcRegisterName)
-	err = srv.Serve(listener)
-	if err != nil {
-		log.NewError("0", "Serve failed ", err.Error())
-		return
-	}
-	log.NewInfo("0", "rpc conversation ok")
+	return nil
 }
 
 func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
 	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
+	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +64,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
 	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.GetUserAllConversation(ctx, req.OwnerUserID)
+	conversations, err := c.ConversationDataBaseInterface.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +76,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
 	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationInterface.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -175,11 +92,11 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
 		return nil, err
 	}
-	err := c.ConversationInterface.SetUserConversations(ctx, req.OwnerUserID, conversations)
+	err := c.ConversationDataBaseInterface.SetUserConversations(ctx, req.OwnerUserID, conversations)
 	if err != nil {
 		return nil, err
 	}
-	chat.ConversationChangeNotification(ctx, req.OwnerUserID)
+	c.notify.ConversationChangeNotification(ctx, req.OwnerUserID)
 	return resp, nil
 }
 
@@ -196,7 +113,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	var err error
 	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.groupChecker.GetGroupInfo(req.Conversation.GroupID)
+		groupInfo, err := c.groupChecker.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -209,14 +126,14 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		return nil, err
 	}
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.ConversationInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
+		err := c.ConversationDataBaseInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
 		if err != nil {
 			return nil, err
 		}
-		chat.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
+		c.notify.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
-	//haveUserID, err := c.ConversationInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
+	//haveUserID, err := c.ConversationDataBaseInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -240,18 +157,18 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	err = c.ConversationInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
+	err = c.ConversationDataBaseInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}
 
 	if isSyncConversation {
 		for _, v := range req.UserIDList {
-			chat.ConversationChangeNotification(ctx, v)
+			c.notify.ConversationChangeNotification(ctx, v)
 		}
 	} else {
 		for _, v := range req.UserIDList {
-			chat.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
+			c.notify.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
 		}
 	}
 	return resp, nil

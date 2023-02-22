@@ -5,6 +5,38 @@ import (
 	"sort"
 )
 
+// SliceSub a中存在,b中不存在 (a-b)
+func SliceSub[E comparable](a, b []E) []E {
+	k := make(map[E]struct{})
+	for i := 0; i < len(b); i++ {
+		k[b[i]] = struct{}{}
+	}
+	t := make(map[E]struct{})
+	rs := make([]E, 0, len(a))
+	for i := 0; i < len(a); i++ {
+		e := a[i]
+		if _, ok := t[e]; ok {
+			continue
+		}
+		if _, ok := k[e]; ok {
+			continue
+		}
+		rs = append(rs, e)
+		t[e] = struct{}{}
+	}
+	return rs
+}
+
+// SliceSubAny a中存在,b中不存在 (a-b)
+func SliceSubAny[E comparable, T any](a []E, b []T, fn func(t T) E) []E {
+	return SliceSub(a, Slice(b, fn))
+}
+
+// SliceAnySub a中存在,b中不存在 (a-b) fn 返回的是uuid
+func SliceAnySub[E any, T comparable](a, b []E, fn func(t E) T) []E {
+	panic("todo")
+}
+
 // DistinctAny 去重
 func DistinctAny[E any, K comparable](es []E, fn func(e E) K) []E {
 	v := make([]E, 0, len(es))
@@ -159,7 +191,7 @@ func Filter[E, T any](es []E, fn func(e E) (T, bool)) []T {
 func Slice[E any, T any](es []E, fn func(e E) T) []T {
 	v := make([]T, len(es))
 	for i := 0; i < len(es); i++ {
-		v = append(v, fn(es[i]))
+		v[i] = fn(es[i])
 	}
 	return v
 }

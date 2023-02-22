@@ -202,6 +202,8 @@ const (
 	CallbackBeforeSetGroupMemberInfoCommand              = "CallbackBeforeSetGroupMemberInfoCommand"
 	CallbackBeforeSetMessageReactionExtensionCommand     = "callbackBeforeSetMessageReactionExtensionCommand"
 	CallbackBeforeDeleteMessageReactionExtensionsCommand = "callbackBeforeDeleteMessageReactionExtensionsCommand"
+	CallbackGetMessageListReactionExtensionsCommand      = "callbackGetMessageListReactionExtensionsCommand"
+	CallbackAddMessageListReactionExtensionsCommand      = "callbackAddMessageListReactionExtensionsCommand"
 
 	//callback actionCode
 	ActionAllow     = 0
@@ -315,16 +317,8 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
-const (
-	TokenKicked = 1001
-)
-
 const BigVersion = "v2"
 
 const LogFileName = "OpenIM.log"
-
-const StatisticsTimeInterval = 60
-
-const MaxNotificationNum = 500
 
 const CurrentVersion = "v2.3.4-rc0"

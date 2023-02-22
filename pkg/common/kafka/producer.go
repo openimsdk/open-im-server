@@ -9,7 +9,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 
-	prome "Open_IM/pkg/common/prometheus"
+	prome "Open_IM/pkg/common/prome"
 )
 
 type Producer struct {

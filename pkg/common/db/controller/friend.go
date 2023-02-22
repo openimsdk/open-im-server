@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"Open_IM/internal/tx"
 	"Open_IM/pkg/common/constant"
-	relation1 "Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/utils"
 	"context"
@@ -10,102 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type FriendInterface interface {
-	//  检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
-	CheckIn(ctx context.Context, user1, user2 string) (inUser1Friends bool, inUser2Friends bool, err error)
-	//  增加或者更新好友申请 如果之前有记录则更新，没有记录则新增
-	AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error)
-	//  (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
-	BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error)
-	//  拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝
-	RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error)
-	//  同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 不是好友则建立双向好友关系  （4）修改申请记录 已同意
-	AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error)
-	//  删除好友  外部判断是否好友关系
-	Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error)
-	//  更新好友备注 零值也支持
-	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
-	//  获取ownerUserID的好友列表 无结果不返回错误
-	PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
-	//  friendUserID在哪些人的好友列表中
-	PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error)
-	//  获取我发出去的好友申请  无结果不返回错误
-	PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
-	//  获取我收到的的好友申请 无结果不返回错误
-	PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
-	//  获取某人指定好友的信息 如果有一个不存在也返回错误
-	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
-}
-
-type FriendController struct {
-	database FriendDatabaseInterface
-}
-
-func NewFriendController(db *gorm.DB) *FriendController {
-	return &FriendController{database: NewFriendDatabase(db)}
-}
-
-// 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
-func (f *FriendController) CheckIn(ctx context.Context, user1, user2 string) (inUser1Friends bool, inUser2Friends bool, err error) {
-	return f.database.CheckIn(ctx, user1, user2)
-}
-
-// AddFriendRequest 增加或者更新好友申请
-func (f *FriendController) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
-	return f.database.AddFriendRequest(ctx, fromUserID, toUserID, reqMsg, ex)
-}
-
-// BecomeFriend 先判断是否在好友表，如果在则不插入
-func (f *FriendController) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error) {
-	return f.database.BecomeFriends(ctx, ownerUserID, friendUserIDs, addSource, OperatorUserID)
-}
-
-// RefuseFriendRequest 拒绝好友申请
-func (f *FriendController) RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	return f.database.RefuseFriendRequest(ctx, friendRequest)
-}
-
-// AgreeFriendRequest 同意好友申请
-func (f *FriendController) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	return f.database.AgreeFriendRequest(ctx, friendRequest)
-}
-
-// Delete 删除好友
-func (f *FriendController) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
-	return f.database.Delete(ctx, ownerUserID, friendUserIDs)
-}
-
-// UpdateRemark 更新好友备注
-func (f *FriendController) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
-	return f.database.UpdateRemark(ctx, ownerUserID, friendUserID, remark)
-}
-
-// FindOwnerFriends 获取ownerUserID的好友列表
-func (f *FriendController) PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
-	return f.database.PageOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
-}
-
-// FindInWhoseFriends friendUserID在哪些人的好友列表中
-func (f *FriendController) PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
-	return f.database.PageInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
-}
-
-// FindFriendRequestFromMe 获取我发出去的好友申请
-func (f *FriendController) PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
-	return f.database.PageFriendRequestFromMe(ctx, userID, pageNumber, showNumber)
-}
-
-// FindFriendRequestToMe 获取我收到的的好友申请
-func (f *FriendController) PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
-	return f.database.PageFriendRequestToMe(ctx, userID, pageNumber, showNumber)
-}
-
-// FindFriends 获取某人指定好友的信息
-func (f *FriendController) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
-	return f.database.FindFriendsWithError(ctx, ownerUserID, friendUserIDs)
-}
-
-type FriendDatabaseInterface interface {
+type FriendDatabase interface {
 	// 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
 	CheckIn(ctx context.Context, user1, user2 string) (inUser1Friends bool, inUser2Friends bool, err error)
 	// 增加或者更新好友申请
@@ -132,17 +37,18 @@ type FriendDatabaseInterface interface {
 	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
 }
 
-type FriendDatabase struct {
-	friend        *relation1.FriendGorm
-	friendRequest *relation1.FriendRequestGorm
+type friendDatabase struct {
+	friend        relation.FriendModelInterface
+	friendRequest relation.FriendRequestModelInterface
+	tx            tx.Tx
 }
 
-func NewFriendDatabase(db *gorm.DB) *FriendDatabase {
-	return &FriendDatabase{friend: relation1.NewFriendGorm(db), friendRequest: relation1.NewFriendRequestGorm(db)}
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, tx tx.Tx) FriendDatabase {
+	return &friendDatabase{friend: friend, friendRequest: friendRequest, tx: tx}
 }
 
 // ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
-func (f *FriendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Friends bool, inUser2Friends bool, err error) {
+func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Friends bool, inUser2Friends bool, err error) {
 	friends, err := f.friend.FindUserState(ctx, userID1, userID2)
 	if err != nil {
 		return false, false, err
@@ -159,9 +65,9 @@ func (f *FriendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 }
 
 // 增加或者更新好友申请 如果之前有记录则更新，没有记录则新增
-func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
-	return f.friendRequest.DB.Transaction(func(tx *gorm.DB) error {
-		_, err := f.friendRequest.Take(ctx, fromUserID, toUserID, tx)
+func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
+	return f.tx.Transaction(func(tx any) error {
+		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
 		//有db错误
 		if err != nil && errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
@@ -173,13 +79,13 @@ func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			m["handle_msg"] = ""
 			m["req_msg"] = reqMsg
 			m["ex"] = ex
-			if err := f.friendRequest.UpdateByMap(ctx, fromUserID, toUserID, m, tx); err != nil {
+			if err := f.friendRequest.NewTx(tx).UpdateByMap(ctx, fromUserID, toUserID, m); err != nil {
 				return err
 			}
 			return nil
 		}
 		//gorm.ErrRecordNotFound 错误，则新增
-		if err := f.friendRequest.Create(ctx, []*relation.FriendRequestModel{&relation.FriendRequestModel{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}, tx); err != nil {
+		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{&relation.FriendRequestModel{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}); err != nil {
 			return err
 		}
 		return nil
@@ -187,10 +93,10 @@ func (f *FriendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 }
 
 // (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
-func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error) {
-	return f.friend.DB.Transaction(func(tx *gorm.DB) error {
+func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error) {
+	return f.tx.Transaction(func(tx any) error {
 		//先find 找出重复的 去掉重复的
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -201,12 +107,12 @@ func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			return e.FriendUserID
 		})
 
-		err = f.friend.Create(ctx, fs11, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs11)
 		if err != nil {
 			return err
 		}
 
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -216,7 +122,7 @@ func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs22)
 		if err != nil {
 			return err
 		}
@@ -225,7 +131,7 @@ func (f *FriendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 }
 
 // 拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝
-func (f *FriendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
+func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	_, err = f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 	if err != nil {
 		return err
@@ -239,15 +145,15 @@ func (f *FriendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 }
 
 // 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 不是好友则建立双向好友关系  （4）修改申请记录 已同意
-func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	return f.friend.DB.Transaction(func(tx *gorm.DB) error {
-		_, err = f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
+func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
+	return f.tx.Transaction(func(tx any) error {
+		_, err = f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
 		friendRequest.HandlerUserID = friendRequest.FromUserID
 		friendRequest.HandleResult = constant.FriendResponseAgree
-		err = f.friendRequest.Update(ctx, []*relation.FriendRequestModel{friendRequest}, tx)
+		err = f.friendRequest.NewTx(tx).Update(ctx, []*relation.FriendRequestModel{friendRequest})
 		if err != nil {
 			return err
 		}
@@ -257,7 +163,7 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		addSource := int32(constant.BecomeFriendByApply)
 		OperatorUserID := friendRequest.FromUserID
 		//先find 找出重复的 去掉重复的
-		fs1, err := f.friend.FindFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -268,12 +174,12 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 			return e.FriendUserID
 		})
 
-		err = f.friend.Create(ctx, fs11, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs11)
 		if err != nil {
 			return err
 		}
 
-		fs2, err := f.friend.FindReversalFriends(ctx, ownerUserID, friendUserIDs, tx)
+		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
@@ -283,7 +189,7 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
-		err = f.friend.Create(ctx, fs22, tx)
+		err = f.friend.NewTx(tx).Create(ctx, fs22)
 		if err != nil {
 			return err
 		}
@@ -292,37 +198,37 @@ func (f *FriendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 }
 
 // 删除好友  外部判断是否好友关系
-func (f *FriendDatabase) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
+func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
 	return f.friend.Delete(ctx, ownerUserID, friendUserIDs)
 }
 
 // 更新好友备注 零值也支持
-func (f *FriendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
+func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
 	return f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark)
 }
 
 // 获取ownerUserID的好友列表 无结果不返回错误
-func (f *FriendDatabase) PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+func (f *friendDatabase) PageOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
 	return f.friend.FindOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
 }
 
 // friendUserID在哪些人的好友列表中
-func (f *FriendDatabase) PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
+func (f *friendDatabase) PageInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.FriendModel, total int64, err error) {
 	return f.friend.FindInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
 }
 
 // 获取我发出去的好友申请  无结果不返回错误
-func (f *FriendDatabase) PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+func (f *friendDatabase) PageFriendRequestFromMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
 	return f.friendRequest.FindFromUserID(ctx, userID, pageNumber, showNumber)
 }
 
 // 获取我收到的的好友申请 无结果不返回错误
-func (f *FriendDatabase) PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
+func (f *friendDatabase) PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error) {
 	return f.friendRequest.FindToUserID(ctx, userID, pageNumber, showNumber)
 }
 
 // 获取某人指定好友的信息 如果有好友不存在，也返回错误
-func (f *FriendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
+func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error) {
 	friends, err = f.friend.FindFriends(ctx, ownerUserID, friendUserIDs)
 	if err != nil {
 		return

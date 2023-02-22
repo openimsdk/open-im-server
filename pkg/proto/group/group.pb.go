@@ -39,7 +39,7 @@ func (m *CreateGroupReq) Reset()         { *m = CreateGroupReq{} }
 func (m *CreateGroupReq) String() string { return proto.CompactTextString(m) }
 func (*CreateGroupReq) ProtoMessage()    {}
 func (*CreateGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{0}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{0}
 }
 func (m *CreateGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateGroupReq.Unmarshal(m, b)
@@ -98,7 +98,7 @@ func (m *CreateGroupResp) Reset()         { *m = CreateGroupResp{} }
 func (m *CreateGroupResp) String() string { return proto.CompactTextString(m) }
 func (*CreateGroupResp) ProtoMessage()    {}
 func (*CreateGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{1}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{1}
 }
 func (m *CreateGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateGroupResp.Unmarshal(m, b)
@@ -136,7 +136,7 @@ func (m *GetGroupsInfoReq) Reset()         { *m = GetGroupsInfoReq{} }
 func (m *GetGroupsInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsInfoReq) ProtoMessage()    {}
 func (*GetGroupsInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{2}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{2}
 }
 func (m *GetGroupsInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsInfoReq.Unmarshal(m, b)
@@ -174,7 +174,7 @@ func (m *GetGroupsInfoResp) Reset()         { *m = GetGroupsInfoResp{} }
 func (m *GetGroupsInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsInfoResp) ProtoMessage()    {}
 func (*GetGroupsInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{3}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{3}
 }
 func (m *GetGroupsInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsInfoResp.Unmarshal(m, b)
@@ -212,7 +212,7 @@ func (m *SetGroupInfoReq) Reset()         { *m = SetGroupInfoReq{} }
 func (m *SetGroupInfoReq) String() string { return proto.CompactTextString(m) }
 func (*SetGroupInfoReq) ProtoMessage()    {}
 func (*SetGroupInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{4}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{4}
 }
 func (m *SetGroupInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupInfoReq.Unmarshal(m, b)
@@ -249,7 +249,7 @@ func (m *SetGroupInfoResp) Reset()         { *m = SetGroupInfoResp{} }
 func (m *SetGroupInfoResp) String() string { return proto.CompactTextString(m) }
 func (*SetGroupInfoResp) ProtoMessage()    {}
 func (*SetGroupInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{5}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{5}
 }
 func (m *SetGroupInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupInfoResp.Unmarshal(m, b)
@@ -281,7 +281,7 @@ func (m *GetGroupApplicationListReq) Reset()         { *m = GetGroupApplicationL
 func (m *GetGroupApplicationListReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationListReq) ProtoMessage()    {}
 func (*GetGroupApplicationListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{6}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{6}
 }
 func (m *GetGroupApplicationListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationListReq.Unmarshal(m, b)
@@ -327,7 +327,7 @@ func (m *GetGroupApplicationListResp) Reset()         { *m = GetGroupApplication
 func (m *GetGroupApplicationListResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationListResp) ProtoMessage()    {}
 func (*GetGroupApplicationListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{7}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{7}
 }
 func (m *GetGroupApplicationListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationListResp.Unmarshal(m, b)
@@ -373,7 +373,7 @@ func (m *GetUserReqApplicationListReq) Reset()         { *m = GetUserReqApplicat
 func (m *GetUserReqApplicationListReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserReqApplicationListReq) ProtoMessage()    {}
 func (*GetUserReqApplicationListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{8}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{8}
 }
 func (m *GetUserReqApplicationListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserReqApplicationListReq.Unmarshal(m, b)
@@ -419,7 +419,7 @@ func (m *GetUserReqApplicationListResp) Reset()         { *m = GetUserReqApplica
 func (m *GetUserReqApplicationListResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserReqApplicationListResp) ProtoMessage()    {}
 func (*GetUserReqApplicationListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{9}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{9}
 }
 func (m *GetUserReqApplicationListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserReqApplicationListResp.Unmarshal(m, b)
@@ -466,7 +466,7 @@ func (m *TransferGroupOwnerReq) Reset()         { *m = TransferGroupOwnerReq{} }
 func (m *TransferGroupOwnerReq) String() string { return proto.CompactTextString(m) }
 func (*TransferGroupOwnerReq) ProtoMessage()    {}
 func (*TransferGroupOwnerReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{10}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{10}
 }
 func (m *TransferGroupOwnerReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TransferGroupOwnerReq.Unmarshal(m, b)
@@ -517,7 +517,7 @@ func (m *TransferGroupOwnerResp) Reset()         { *m = TransferGroupOwnerResp{}
 func (m *TransferGroupOwnerResp) String() string { return proto.CompactTextString(m) }
 func (*TransferGroupOwnerResp) ProtoMessage()    {}
 func (*TransferGroupOwnerResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{11}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{11}
 }
 func (m *TransferGroupOwnerResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TransferGroupOwnerResp.Unmarshal(m, b)
@@ -551,7 +551,7 @@ func (m *JoinGroupReq) Reset()         { *m = JoinGroupReq{} }
 func (m *JoinGroupReq) String() string { return proto.CompactTextString(m) }
 func (*JoinGroupReq) ProtoMessage()    {}
 func (*JoinGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{12}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{12}
 }
 func (m *JoinGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinGroupReq.Unmarshal(m, b)
@@ -609,7 +609,7 @@ func (m *JoinGroupResp) Reset()         { *m = JoinGroupResp{} }
 func (m *JoinGroupResp) String() string { return proto.CompactTextString(m) }
 func (*JoinGroupResp) ProtoMessage()    {}
 func (*JoinGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{13}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{13}
 }
 func (m *JoinGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinGroupResp.Unmarshal(m, b)
@@ -643,7 +643,7 @@ func (m *GroupApplicationResponseReq) Reset()         { *m = GroupApplicationRes
 func (m *GroupApplicationResponseReq) String() string { return proto.CompactTextString(m) }
 func (*GroupApplicationResponseReq) ProtoMessage()    {}
 func (*GroupApplicationResponseReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{14}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{14}
 }
 func (m *GroupApplicationResponseReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GroupApplicationResponseReq.Unmarshal(m, b)
@@ -701,7 +701,7 @@ func (m *GroupApplicationResponseResp) Reset()         { *m = GroupApplicationRe
 func (m *GroupApplicationResponseResp) String() string { return proto.CompactTextString(m) }
 func (*GroupApplicationResponseResp) ProtoMessage()    {}
 func (*GroupApplicationResponseResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{15}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{15}
 }
 func (m *GroupApplicationResponseResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GroupApplicationResponseResp.Unmarshal(m, b)
@@ -732,7 +732,7 @@ func (m *QuitGroupReq) Reset()         { *m = QuitGroupReq{} }
 func (m *QuitGroupReq) String() string { return proto.CompactTextString(m) }
 func (*QuitGroupReq) ProtoMessage()    {}
 func (*QuitGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{16}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{16}
 }
 func (m *QuitGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuitGroupReq.Unmarshal(m, b)
@@ -769,7 +769,7 @@ func (m *QuitGroupResp) Reset()         { *m = QuitGroupResp{} }
 func (m *QuitGroupResp) String() string { return proto.CompactTextString(m) }
 func (*QuitGroupResp) ProtoMessage()    {}
 func (*QuitGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{17}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{17}
 }
 func (m *QuitGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuitGroupResp.Unmarshal(m, b)
@@ -802,7 +802,7 @@ func (m *GetGroupMemberListReq) Reset()         { *m = GetGroupMemberListReq{} }
 func (m *GetGroupMemberListReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberListReq) ProtoMessage()    {}
 func (*GetGroupMemberListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{18}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{18}
 }
 func (m *GetGroupMemberListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberListReq.Unmarshal(m, b)
@@ -855,7 +855,7 @@ func (m *GetGroupMemberListResp) Reset()         { *m = GetGroupMemberListResp{}
 func (m *GetGroupMemberListResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberListResp) ProtoMessage()    {}
 func (*GetGroupMemberListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{19}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{19}
 }
 func (m *GetGroupMemberListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberListResp.Unmarshal(m, b)
@@ -901,7 +901,7 @@ func (m *GetGroupMembersInfoReq) Reset()         { *m = GetGroupMembersInfoReq{}
 func (m *GetGroupMembersInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersInfoReq) ProtoMessage()    {}
 func (*GetGroupMembersInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{20}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{20}
 }
 func (m *GetGroupMembersInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersInfoReq.Unmarshal(m, b)
@@ -946,7 +946,7 @@ func (m *GetGroupMembersInfoResp) Reset()         { *m = GetGroupMembersInfoResp
 func (m *GetGroupMembersInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersInfoResp) ProtoMessage()    {}
 func (*GetGroupMembersInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{21}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{21}
 }
 func (m *GetGroupMembersInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersInfoResp.Unmarshal(m, b)
@@ -986,7 +986,7 @@ func (m *KickGroupMemberReq) Reset()         { *m = KickGroupMemberReq{} }
 func (m *KickGroupMemberReq) String() string { return proto.CompactTextString(m) }
 func (*KickGroupMemberReq) ProtoMessage()    {}
 func (*KickGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{22}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{22}
 }
 func (m *KickGroupMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickGroupMemberReq.Unmarshal(m, b)
@@ -1037,7 +1037,7 @@ func (m *KickGroupMemberResp) Reset()         { *m = KickGroupMemberResp{} }
 func (m *KickGroupMemberResp) String() string { return proto.CompactTextString(m) }
 func (*KickGroupMemberResp) ProtoMessage()    {}
 func (*KickGroupMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{23}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{23}
 }
 func (m *KickGroupMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickGroupMemberResp.Unmarshal(m, b)
@@ -1069,7 +1069,7 @@ func (m *GetJoinedGroupListReq) Reset()         { *m = GetJoinedGroupListReq{} }
 func (m *GetJoinedGroupListReq) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedGroupListReq) ProtoMessage()    {}
 func (*GetJoinedGroupListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{24}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{24}
 }
 func (m *GetJoinedGroupListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedGroupListReq.Unmarshal(m, b)
@@ -1115,7 +1115,7 @@ func (m *GetJoinedGroupListResp) Reset()         { *m = GetJoinedGroupListResp{}
 func (m *GetJoinedGroupListResp) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedGroupListResp) ProtoMessage()    {}
 func (*GetJoinedGroupListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{25}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{25}
 }
 func (m *GetJoinedGroupListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedGroupListResp.Unmarshal(m, b)
@@ -1162,7 +1162,7 @@ func (m *InviteUserToGroupReq) Reset()         { *m = InviteUserToGroupReq{} }
 func (m *InviteUserToGroupReq) String() string { return proto.CompactTextString(m) }
 func (*InviteUserToGroupReq) ProtoMessage()    {}
 func (*InviteUserToGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{26}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{26}
 }
 func (m *InviteUserToGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteUserToGroupReq.Unmarshal(m, b)
@@ -1213,7 +1213,7 @@ func (m *InviteUserToGroupResp) Reset()         { *m = InviteUserToGroupResp{} }
 func (m *InviteUserToGroupResp) String() string { return proto.CompactTextString(m) }
 func (*InviteUserToGroupResp) ProtoMessage()    {}
 func (*InviteUserToGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{27}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{27}
 }
 func (m *InviteUserToGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteUserToGroupResp.Unmarshal(m, b)
@@ -1245,7 +1245,7 @@ func (m *GetGroupAllMemberReq) Reset()         { *m = GetGroupAllMemberReq{} }
 func (m *GetGroupAllMemberReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAllMemberReq) ProtoMessage()    {}
 func (*GetGroupAllMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{28}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{28}
 }
 func (m *GetGroupAllMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAllMemberReq.Unmarshal(m, b)
@@ -1290,7 +1290,7 @@ func (m *GetGroupAllMemberResp) Reset()         { *m = GetGroupAllMemberResp{} }
 func (m *GetGroupAllMemberResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAllMemberResp) ProtoMessage()    {}
 func (*GetGroupAllMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{29}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{29}
 }
 func (m *GetGroupAllMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAllMemberResp.Unmarshal(m, b)
@@ -1330,7 +1330,7 @@ func (m *CMSGroup) Reset()         { *m = CMSGroup{} }
 func (m *CMSGroup) String() string { return proto.CompactTextString(m) }
 func (*CMSGroup) ProtoMessage()    {}
 func (*CMSGroup) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{30}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{30}
 }
 func (m *CMSGroup) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CMSGroup.Unmarshal(m, b)
@@ -1384,7 +1384,7 @@ func (m *GetGroupsReq) Reset()         { *m = GetGroupsReq{} }
 func (m *GetGroupsReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsReq) ProtoMessage()    {}
 func (*GetGroupsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{31}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{31}
 }
 func (m *GetGroupsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsReq.Unmarshal(m, b)
@@ -1437,7 +1437,7 @@ func (m *GetGroupsResp) Reset()         { *m = GetGroupsResp{} }
 func (m *GetGroupsResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsResp) ProtoMessage()    {}
 func (*GetGroupsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{32}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{32}
 }
 func (m *GetGroupsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsResp.Unmarshal(m, b)
@@ -1482,7 +1482,7 @@ func (m *GetGroupMemberReq) Reset()         { *m = GetGroupMemberReq{} }
 func (m *GetGroupMemberReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberReq) ProtoMessage()    {}
 func (*GetGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{33}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{33}
 }
 func (m *GetGroupMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberReq.Unmarshal(m, b)
@@ -1522,7 +1522,7 @@ func (m *GetGroupMembersCMSReq) Reset()         { *m = GetGroupMembersCMSReq{} }
 func (m *GetGroupMembersCMSReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersCMSReq) ProtoMessage()    {}
 func (*GetGroupMembersCMSReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{34}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{34}
 }
 func (m *GetGroupMembersCMSReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersCMSReq.Unmarshal(m, b)
@@ -1575,7 +1575,7 @@ func (m *GetGroupMembersCMSResp) Reset()         { *m = GetGroupMembersCMSResp{}
 func (m *GetGroupMembersCMSResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersCMSResp) ProtoMessage()    {}
 func (*GetGroupMembersCMSResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{35}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{35}
 }
 func (m *GetGroupMembersCMSResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersCMSResp.Unmarshal(m, b)
@@ -1620,7 +1620,7 @@ func (m *DismissGroupReq) Reset()         { *m = DismissGroupReq{} }
 func (m *DismissGroupReq) String() string { return proto.CompactTextString(m) }
 func (*DismissGroupReq) ProtoMessage()    {}
 func (*DismissGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{36}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{36}
 }
 func (m *DismissGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DismissGroupReq.Unmarshal(m, b)
@@ -1657,7 +1657,7 @@ func (m *DismissGroupResp) Reset()         { *m = DismissGroupResp{} }
 func (m *DismissGroupResp) String() string { return proto.CompactTextString(m) }
 func (*DismissGroupResp) ProtoMessage()    {}
 func (*DismissGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{37}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{37}
 }
 func (m *DismissGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DismissGroupResp.Unmarshal(m, b)
@@ -1690,7 +1690,7 @@ func (m *MuteGroupMemberReq) Reset()         { *m = MuteGroupMemberReq{} }
 func (m *MuteGroupMemberReq) String() string { return proto.CompactTextString(m) }
 func (*MuteGroupMemberReq) ProtoMessage()    {}
 func (*MuteGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{38}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{38}
 }
 func (m *MuteGroupMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MuteGroupMemberReq.Unmarshal(m, b)
@@ -1741,7 +1741,7 @@ func (m *MuteGroupMemberResp) Reset()         { *m = MuteGroupMemberResp{} }
 func (m *MuteGroupMemberResp) String() string { return proto.CompactTextString(m) }
 func (*MuteGroupMemberResp) ProtoMessage()    {}
 func (*MuteGroupMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{39}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{39}
 }
 func (m *MuteGroupMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MuteGroupMemberResp.Unmarshal(m, b)
@@ -1773,7 +1773,7 @@ func (m *CancelMuteGroupMemberReq) Reset()         { *m = CancelMuteGroupMemberR
 func (m *CancelMuteGroupMemberReq) String() string { return proto.CompactTextString(m) }
 func (*CancelMuteGroupMemberReq) ProtoMessage()    {}
 func (*CancelMuteGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{40}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{40}
 }
 func (m *CancelMuteGroupMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMuteGroupMemberReq.Unmarshal(m, b)
@@ -1817,7 +1817,7 @@ func (m *CancelMuteGroupMemberResp) Reset()         { *m = CancelMuteGroupMember
 func (m *CancelMuteGroupMemberResp) String() string { return proto.CompactTextString(m) }
 func (*CancelMuteGroupMemberResp) ProtoMessage()    {}
 func (*CancelMuteGroupMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{41}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{41}
 }
 func (m *CancelMuteGroupMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMuteGroupMemberResp.Unmarshal(m, b)
@@ -1848,7 +1848,7 @@ func (m *MuteGroupReq) Reset()         { *m = MuteGroupReq{} }
 func (m *MuteGroupReq) String() string { return proto.CompactTextString(m) }
 func (*MuteGroupReq) ProtoMessage()    {}
 func (*MuteGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{42}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{42}
 }
 func (m *MuteGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MuteGroupReq.Unmarshal(m, b)
@@ -1885,7 +1885,7 @@ func (m *MuteGroupResp) Reset()         { *m = MuteGroupResp{} }
 func (m *MuteGroupResp) String() string { return proto.CompactTextString(m) }
 func (*MuteGroupResp) ProtoMessage()    {}
 func (*MuteGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{43}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{43}
 }
 func (m *MuteGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MuteGroupResp.Unmarshal(m, b)
@@ -1916,7 +1916,7 @@ func (m *CancelMuteGroupReq) Reset()         { *m = CancelMuteGroupReq{} }
 func (m *CancelMuteGroupReq) String() string { return proto.CompactTextString(m) }
 func (*CancelMuteGroupReq) ProtoMessage()    {}
 func (*CancelMuteGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{44}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{44}
 }
 func (m *CancelMuteGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMuteGroupReq.Unmarshal(m, b)
@@ -1953,7 +1953,7 @@ func (m *CancelMuteGroupResp) Reset()         { *m = CancelMuteGroupResp{} }
 func (m *CancelMuteGroupResp) String() string { return proto.CompactTextString(m) }
 func (*CancelMuteGroupResp) ProtoMessage()    {}
 func (*CancelMuteGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{45}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{45}
 }
 func (m *CancelMuteGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMuteGroupResp.Unmarshal(m, b)
@@ -1984,7 +1984,7 @@ func (m *GetJoinedSuperGroupListReq) Reset()         { *m = GetJoinedSuperGroupL
 func (m *GetJoinedSuperGroupListReq) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedSuperGroupListReq) ProtoMessage()    {}
 func (*GetJoinedSuperGroupListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{46}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{46}
 }
 func (m *GetJoinedSuperGroupListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedSuperGroupListReq.Unmarshal(m, b)
@@ -2022,7 +2022,7 @@ func (m *GetJoinedSuperGroupListResp) Reset()         { *m = GetJoinedSuperGroup
 func (m *GetJoinedSuperGroupListResp) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedSuperGroupListResp) ProtoMessage()    {}
 func (*GetJoinedSuperGroupListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{47}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{47}
 }
 func (m *GetJoinedSuperGroupListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedSuperGroupListResp.Unmarshal(m, b)
@@ -2060,7 +2060,7 @@ func (m *GetSuperGroupsInfoReq) Reset()         { *m = GetSuperGroupsInfoReq{} }
 func (m *GetSuperGroupsInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupsInfoReq) ProtoMessage()    {}
 func (*GetSuperGroupsInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{48}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{48}
 }
 func (m *GetSuperGroupsInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupsInfoReq.Unmarshal(m, b)
@@ -2098,7 +2098,7 @@ func (m *GetSuperGroupsInfoResp) Reset()         { *m = GetSuperGroupsInfoResp{}
 func (m *GetSuperGroupsInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupsInfoResp) ProtoMessage()    {}
 func (*GetSuperGroupsInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{49}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{49}
 }
 func (m *GetSuperGroupsInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupsInfoResp.Unmarshal(m, b)
@@ -2141,7 +2141,7 @@ func (m *SetGroupMemberInfo) Reset()         { *m = SetGroupMemberInfo{} }
 func (m *SetGroupMemberInfo) String() string { return proto.CompactTextString(m) }
 func (*SetGroupMemberInfo) ProtoMessage()    {}
 func (*SetGroupMemberInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{50}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{50}
 }
 func (m *SetGroupMemberInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupMemberInfo.Unmarshal(m, b)
@@ -2214,7 +2214,7 @@ func (m *SetGroupMemberInfoReq) Reset()         { *m = SetGroupMemberInfoReq{} }
 func (m *SetGroupMemberInfoReq) String() string { return proto.CompactTextString(m) }
 func (*SetGroupMemberInfoReq) ProtoMessage()    {}
 func (*SetGroupMemberInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{51}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{51}
 }
 func (m *SetGroupMemberInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupMemberInfoReq.Unmarshal(m, b)
@@ -2251,7 +2251,7 @@ func (m *SetGroupMemberInfoResp) Reset()         { *m = SetGroupMemberInfoResp{}
 func (m *SetGroupMemberInfoResp) String() string { return proto.CompactTextString(m) }
 func (*SetGroupMemberInfoResp) ProtoMessage()    {}
 func (*SetGroupMemberInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{52}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{52}
 }
 func (m *SetGroupMemberInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupMemberInfoResp.Unmarshal(m, b)
@@ -2282,7 +2282,7 @@ func (m *GetGroupAbstractInfoReq) Reset()         { *m = GetGroupAbstractInfoReq
 func (m *GetGroupAbstractInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAbstractInfoReq) ProtoMessage()    {}
 func (*GetGroupAbstractInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{53}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{53}
 }
 func (m *GetGroupAbstractInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAbstractInfoReq.Unmarshal(m, b)
@@ -2322,7 +2322,7 @@ func (m *GroupAbstractInfo) Reset()         { *m = GroupAbstractInfo{} }
 func (m *GroupAbstractInfo) String() string { return proto.CompactTextString(m) }
 func (*GroupAbstractInfo) ProtoMessage()    {}
 func (*GroupAbstractInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{54}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{54}
 }
 func (m *GroupAbstractInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GroupAbstractInfo.Unmarshal(m, b)
@@ -2374,7 +2374,7 @@ func (m *GetGroupAbstractInfoResp) Reset()         { *m = GetGroupAbstractInfoRe
 func (m *GetGroupAbstractInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAbstractInfoResp) ProtoMessage()    {}
 func (*GetGroupAbstractInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{55}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{55}
 }
 func (m *GetGroupAbstractInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAbstractInfoResp.Unmarshal(m, b)
@@ -2413,7 +2413,7 @@ func (m *GetUserInGroupMembersReq) Reset()         { *m = GetUserInGroupMembersR
 func (m *GetUserInGroupMembersReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserInGroupMembersReq) ProtoMessage()    {}
 func (*GetUserInGroupMembersReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{56}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{56}
 }
 func (m *GetUserInGroupMembersReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInGroupMembersReq.Unmarshal(m, b)
@@ -2458,7 +2458,7 @@ func (m *GetUserInGroupMembersResp) Reset()         { *m = GetUserInGroupMembers
 func (m *GetUserInGroupMembersResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserInGroupMembersResp) ProtoMessage()    {}
 func (*GetUserInGroupMembersResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{57}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{57}
 }
 func (m *GetUserInGroupMembersResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInGroupMembersResp.Unmarshal(m, b)
@@ -2496,7 +2496,7 @@ func (m *GetGroupMemberUserIDReq) Reset()         { *m = GetGroupMemberUserIDReq
 func (m *GetGroupMemberUserIDReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberUserIDReq) ProtoMessage()    {}
 func (*GetGroupMemberUserIDReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{58}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{58}
 }
 func (m *GetGroupMemberUserIDReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberUserIDReq.Unmarshal(m, b)
@@ -2534,7 +2534,7 @@ func (m *GetGroupMemberUserIDResp) Reset()         { *m = GetGroupMemberUserIDRe
 func (m *GetGroupMemberUserIDResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberUserIDResp) ProtoMessage()    {}
 func (*GetGroupMemberUserIDResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{59}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{59}
 }
 func (m *GetGroupMemberUserIDResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberUserIDResp.Unmarshal(m, b)
@@ -2573,7 +2573,7 @@ func (m *GetGroupMemberRoleLevelReq) Reset()         { *m = GetGroupMemberRoleLe
 func (m *GetGroupMemberRoleLevelReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberRoleLevelReq) ProtoMessage()    {}
 func (*GetGroupMemberRoleLevelReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{60}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{60}
 }
 func (m *GetGroupMemberRoleLevelReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberRoleLevelReq.Unmarshal(m, b)
@@ -2618,7 +2618,7 @@ func (m *GetGroupMemberRoleLevelResp) Reset()         { *m = GetGroupMemberRoleL
 func (m *GetGroupMemberRoleLevelResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberRoleLevelResp) ProtoMessage()    {}
 func (*GetGroupMemberRoleLevelResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_4a94cf46004e5ca3, []int{61}
+	return fileDescriptor_group_a9155eb4f624bfe9, []int{61}
 }
 func (m *GetGroupMemberRoleLevelResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberRoleLevelResp.Unmarshal(m, b)
@@ -3727,9 +3727,9 @@ var _Group_serviceDesc = grpc.ServiceDesc{
 	Metadata: "group/group.proto",
 }
 
-func init() { proto.RegisterFile("group/group.proto", fileDescriptor_group_4a94cf46004e5ca3) }
+func init() { proto.RegisterFile("group/group.proto", fileDescriptor_group_a9155eb4f624bfe9) }
 
-var fileDescriptor_group_4a94cf46004e5ca3 = []byte{
+var fileDescriptor_group_a9155eb4f624bfe9 = []byte{
 	// 1833 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0x51, 0x53, 0xe4, 0xc6,
 	0x11, 0xae, 0xdd, 0x33, 0xdc, 0xd1, 0xc7, 0x1a, 0x18, 0xd8, 0x45, 0x27, 0xb8, 0x83, 0x8c, 0xaf,

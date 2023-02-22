@@ -1,123 +1,95 @@
 package relation
 
 import (
+	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/common/tracelog"
+	"Open_IM/pkg/utils"
+	"context"
 	"gorm.io/gorm"
 )
 
-var ConversationDB *gorm.DB
-
-//type Conversation struct {
-//	OwnerUserID           string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
-//	ConversationID        string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
-//	ConversationType      int32  `gorm:"column:conversation_type" json:"conversationType"`
-//	UserID                string `gorm:"column:user_id;type:char(64)" json:"userID"`
-//	GroupID               string `gorm:"column:group_id;type:char(128)" json:"groupID"`
-//	RecvMsgOpt            int32  `gorm:"column:recv_msg_opt" json:"recvMsgOpt"`
-//	UnreadCount           int32  `gorm:"column:unread_count" json:"unreadCount"`
-//	DraftTextTime         int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
-//	IsPinned              bool   `gorm:"column:is_pinned" json:"isPinned"`
-//	IsPrivateChat         bool   `gorm:"column:is_private_chat" json:"isPrivateChat"`
-//	BurnDuration          int32  `gorm:"column:burn_duration;default:30" json:"burnDuration"`
-//	GroupAtType           int32  `gorm:"column:group_at_type" json:"groupAtType"`
-//	IsNotInGroup          bool   `gorm:"column:is_not_in_group" json:"isNotInGroup"`
-//	UpdateUnreadCountTime int64  `gorm:"column:update_unread_count_time" json:"updateUnreadCountTime"`
-//	AttachedInfo          string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
-//	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
-//}
-
-func (Conversation) TableName() string {
-	return "conversations"
+type Conversation interface {
+	Create(ctx context.Context, conversations []*relation.ConversationModel) (err error)
+	Delete(ctx context.Context, groupIDs []string) (err error)
+	UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error)
+	Update(ctx context.Context, conversations []*relation.ConversationModel) (err error)
+	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error)
+	FindUserID(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
+	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
+	Take(ctx context.Context, userID, conversationID string) (conversation *relation.ConversationModel, err error)
+	FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error)
+	NewTx(tx any) Conversation
+}
+type ConversationGorm struct {
+	DB *gorm.DB
 }
 
-func SetConversation(conversation Conversation) (bool, error) {
-	var isUpdate bool
-	newConversation := conversation
-	if ConversationDB.Model(&Conversation{}).Find(&newConversation).RowsAffected == 0 {
-		return isUpdate, ConversationDB.Model(&Conversation{}).Create(&conversation).Error
-		// if exist, then update record
-	} else {
-		//force update
-		isUpdate = true
-		return isUpdate, ConversationDB.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
-			Updates(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt, "is_pinned": conversation.IsPinned, "is_private_chat": conversation.IsPrivateChat,
-				"group_at_type": conversation.GroupAtType, "is_not_in_group": conversation.IsNotInGroup}).Error
-	}
-}
-func SetOneConversation(conversation Conversation) error {
-	return ConversationDB.Model(&Conversation{}).Create(&conversation).Error
-
+func NewConversationGorm(DB *gorm.DB) Conversation {
+	return &ConversationGorm{DB: DB}
 }
 
-func PeerUserSetConversation(conversation Conversation) error {
-	newConversation := conversation
-	if ConversationDB.Model(&Conversation{}).Find(&newConversation).RowsAffected == 0 {
-		return ConversationDB.Model(&Conversation{}).Create(&conversation).Error
-		// if exist, then update record
-	}
-	//force update
-	return ConversationDB.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
-		Updates(map[string]interface{}{"is_private_chat": conversation.IsPrivateChat}).Error
-
+func (c *ConversationGorm) NewTx(tx any) Conversation {
+	return &ConversationGorm{DB: tx.(*gorm.DB)}
 }
 
-func SetRecvMsgOpt(conversation Conversation) (bool, error) {
-	var isUpdate bool
-	newConversation := conversation
-	if ConversationDB.Model(&Conversation{}).Find(&newConversation).RowsAffected == 0 {
-		return isUpdate, ConversationDB.Model(&Conversation{}).Create(&conversation).Error
-		// if exist, then update record
-	} else {
-		//force update
-		isUpdate = true
-		return isUpdate, ConversationDB.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
-			Updates(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt}).Error
-	}
+func (c *ConversationGorm) Create(ctx context.Context, conversations []*relation.ConversationModel) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "conversations", conversations)
+	}()
+	return utils.Wrap(c.DB.Create(&conversations).Error, "")
 }
 
-func GetUserAllConversations(ownerUserID string) ([]Conversation, error) {
-	var conversations []Conversation
-	err := ConversationDB.Where("owner_user_id=?", ownerUserID).Find(&conversations).Error
-	return conversations, err
-}
-func GetMultipleUserConversationByConversationID(ownerUserIDList []string, conversationID string) ([]Conversation, error) {
-	var conversations []Conversation
-	err := ConversationDB.Where("owner_user_id IN ? and  conversation_id=?", ownerUserIDList, conversationID).Find(&conversations).Error
-	return conversations, err
-}
-func GetExistConversationUserIDList(ownerUserIDList []string, conversationID string) ([]string, error) {
-	var resultArr []string
-	err := ConversationDB.Table("conversations").Where(" owner_user_id IN (?) and conversation_id=?", ownerUserIDList, conversationID).Pluck("owner_user_id", &resultArr).Error
-	if err != nil {
-		return nil, err
-	}
-	return resultArr, nil
+func (c *ConversationGorm) Delete(ctx context.Context, groupIDs []string) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs)
+	}()
+	return utils.Wrap(c.DB.Where("group_id in (?)", groupIDs).Delete(&relation.ConversationModel{}).Error, "")
 }
 
-func GetConversation(OwnerUserID, conversationID string) (Conversation, error) {
-	var conversation Conversation
-	err := ConversationDB.Table("conversations").Where("owner_user_id=? and conversation_id=?", OwnerUserID, conversationID).Take(&conversation).Error
-	return conversation, err
+func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDList", userIDList, "conversationID", conversationID)
+	}()
+	return utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args).Error, "")
 }
 
-func GetConversations(OwnerUserID string, conversationIDs []string) ([]Conversation, error) {
-	var conversations []Conversation
-	err := ConversationDB.Model(&Conversation{}).Where("conversation_id IN (?) and  owner_user_id=?", conversationIDs, OwnerUserID).Find(&conversations).Error
+func (c *ConversationGorm) Update(ctx context.Context, conversations []*relation.ConversationModel) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "conversations", conversations)
+	}()
+	return utils.Wrap(c.DB.Updates(&conversations).Error, "")
+}
+
+func (c *ConversationGorm) Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "groups", conversations)
+	}()
+	err = utils.Wrap(c.DB.Where("owner_user_id=? and conversation_id IN (?)", ownerUserID, conversationIDs).Find(&conversations).Error, "")
 	return conversations, err
 }
 
-func GetConversationsByConversationIDMultipleOwner(OwnerUserIDList []string, conversationID string) ([]Conversation, error) {
-	var conversations []Conversation
-	err := ConversationDB.Model(&Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", OwnerUserIDList, conversationID).Find(&conversations).Error
-	return conversations, err
+func (c *ConversationGorm) Take(ctx context.Context, userID, conversationID string) (conversation *relation.ConversationModel, err error) {
+	cc := &relation.ConversationModel{}
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "conversation", *conversation)
+	}()
+	return cc, utils.Wrap(c.DB.Where("conversation_id = ? And owner_user_id = ?", conversationID, userID).Take(cc).Error, "")
 }
-
-func UpdateColumnsConversations(ownerUserIDList []string, conversationID string, args map[string]interface{}) error {
-	return ConversationDB.Model(&Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
-
+func (c *ConversationGorm) FindUserID(ctx context.Context, userIDList []string, conversationID string) (existUserID []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userIDList, "existUserID", existUserID)
+	}()
+	return existUserID, utils.Wrap(c.DB.Where(" owner_user_id IN (?) and conversation_id=?", userIDList, conversationID).Pluck("owner_user_id", &existUserID).Error, "")
 }
-
-func GetConversationIDListByUserID(userID string) ([]string, error) {
-	var IDList []string
-	err := ConversationDB.Model(&Conversation{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &IDList).Error
-	return IDList, err
+func (c *ConversationGorm) FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "existConversationIDList", existConversationID)
+	}()
+	return existConversationID, utils.Wrap(c.DB.Where(" conversation_id IN (?) and owner_user_id=?", conversationIDList, userID).Pluck("conversation_id", &existConversationID).Error, "")
+}
+func (c *ConversationGorm) FindUserIDAllConversationID(ctx context.Context, userID string) (conversationIDList []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "conversationIDList", conversationIDList)
+	}()
+	return conversationIDList, utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &conversationIDList).Error, "")
 }

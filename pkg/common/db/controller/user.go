@@ -2,105 +2,60 @@ package controller
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/common/db/table/relation"
+	"Open_IM/pkg/utils"
 	"context"
-	"gorm.io/gorm"
 )
 
-type UserInterface interface {
+type UserDatabase interface {
 	//获取指定用户的信息 如有userID未找到 也返回错误
-	FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
+	FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	//获取指定用户的信息 如有userID未找到 不返回错误
-	Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
+	Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error)
 	//插入多条 外部保证userID 不重复 且在db中不存在
-	Create(ctx context.Context, users []*relationTb.UserModel) (err error)
+	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	//更新（非零值） 外部保证userID存在
-	Update(ctx context.Context, users []*relationTb.UserModel) (err error)
+	Update(ctx context.Context, users []*relation.UserModel) (err error)
 	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	//如果没找到，不返回错误
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
+	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error)
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	//获取所有用户ID
 	GetAllUserID(ctx context.Context) ([]string, error)
+	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
+	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 }
 
-type UserController struct {
-	database UserDatabaseInterface
+type userDatabase struct {
+	userDB relation.UserModelInterface
 }
 
-// 获取指定用户的信息 如有userID未找到 也返回错误
-func (u *UserController) FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
-	return u.database.FindWithError(ctx, userIDs)
+func NewUserDatabase(userDB relation.UserModelInterface) UserDatabase {
+	return &userDatabase{userDB: userDB}
 }
 
-func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
-	return u.database.Find(ctx, userIDs)
-}
-func (u *UserController) Create(ctx context.Context, users []*relationTb.UserModel) error {
-	return u.database.Create(ctx, users)
-}
-
-func (u *UserController) Update(ctx context.Context, users []*relationTb.UserModel) (err error) {
-	return u.database.Update(ctx, users)
-}
-func (u *UserController) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return u.database.UpdateByMap(ctx, userID, args)
-}
-
-func (u *UserController) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error) {
-	return u.database.Page(ctx, pageNumber, showNumber)
-}
-
-func (u *UserController) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
-	return u.database.IsExist(ctx, userIDs)
-}
-
-func (u *UserController) GetAllUserID(ctx context.Context) ([]string, error) {
-	return u.database.GetAllUserID(ctx)
-}
-
-func NewUserController(db *gorm.DB) *UserController {
-	controller := &UserController{database: newUserDatabase(db)}
-	return controller
-}
-
-type UserDatabaseInterface interface {
-	//获取指定用户的信息 如有userID未找到 也返回错误
-	FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
-	//获取指定用户的信息 如有userID未找到 不返回错误
-	Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)
-	//插入多条 外部保证userID 不重复 且在db中不存在
-	Create(ctx context.Context, users []*relationTb.UserModel) (err error)
-	//更新（非零值） 外部保证userID存在
-	Update(ctx context.Context, users []*relationTb.UserModel) (err error)
-	//更新（零值） 外部保证userID存在
-	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	//如果没找到，不返回错误
-	Page(ctx context.Context, pageNumber, showNumber int32) (users []*relationTb.UserModel, count int64, err error)
-	//只要有一个存在就为true
-	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
-	//获取所有用户ID
-	GetAllUserID(ctx context.Context) ([]string, error)
-}
-
-type UserDatabase struct {
-	user *relation.UserGorm
-}
-
-func newUserDatabase(db *gorm.DB) *UserDatabase {
-	sqlDB := relation.NewUserGorm(db)
-	database := &UserDatabase{
-		user: sqlDB,
+func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
+	userIDs := utils.Slice(users, func(e *relation.UserModel) string {
+		return e.UserID
+	})
+	result, err := u.userDB.Find(ctx, userIDs)
+	if err != nil {
+		return err
 	}
-	return database
+	miss := utils.SliceAnySub(users, result, func(e *relation.UserModel) string { return e.UserID })
+	if len(miss) > 0 {
+		u.userDB.Create(ctx, miss)
+	}
+
+	return nil
 }
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
-func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
-	users, err = u.user.Find(ctx, userIDs)
+func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
+
+	users, err = u.userDB.Find(ctx, userIDs)
 	if err != nil {
 		return
 	}
@@ -111,34 +66,34 @@ func (u *UserDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 }
 
 // 获取指定用户的信息 如有userID未找到 不返回错误
-func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error) {
-	users, err = u.user.Find(ctx, userIDs)
+func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
+	users, err = u.userDB.Find(ctx, userIDs)
 	return
 }
 
 // 插入多条 外部保证userID 不重复 且在db中不存在
-func (u *UserDatabase) Create(ctx context.Context, users []*relationTb.UserModel) (err error) {
-	return u.user.Create(ctx, users)
+func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
+	return u.userDB.Create(ctx, users)
 }
 
 // 更新（非零值） 外部保证userID存在
-func (u *UserDatabase) Update(ctx context.Context, users []*relationTb.UserModel) (err error) {
-	return u.user.Update(ctx, users)
+func (u *userDatabase) Update(ctx context.Context, users []*relation.UserModel) (err error) {
+	return u.userDB.Update(ctx, users)
 }
 
 // 更新（零值） 外部保证userID存在
-func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return u.user.UpdateByMap(ctx, userID, args)
+func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+	return u.userDB.UpdateByMap(ctx, userID, args)
 }
 
 // 获取，如果没找到，不返回错误
-func (u *UserDatabase) Page(ctx context.Context, showNumber, pageNumber int32) (users []*relationTb.UserModel, count int64, err error) {
-	return u.user.Page(ctx, showNumber, pageNumber)
+func (u *userDatabase) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error) {
+	return u.userDB.Page(ctx, pageNumber, showNumber)
 }
 
 // userIDs是否存在 只要有一个存在就为true
-func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
-	users, err := u.user.Find(ctx, userIDs)
+func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
+	users, err := u.userDB.Find(ctx, userIDs)
 	if err != nil {
 		return false, err
 	}
@@ -148,6 +103,21 @@ func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 	return false, nil
 }
 
-func (u *UserDatabase) GetAllUserID(ctx context.Context) ([]string, error) {
-	return u.user.GetAllUserID(ctx)
+func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
+	pageNumber := int32(0)
+	for {
+		tmp, total, err := u.userDB.PageUserID(ctx, pageNumber, constant.ShowNumber)
+		if err != nil {
+			return nil, err
+		}
+		if len(tmp) == 0 {
+			if total == int64(len(userIDs)) {
+				return userIDs, nil
+			}
+			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
+		}
+		userIDs = append(userIDs, tmp...)
+		pageNumber++
+	}
+	return userIDs, nil
 }

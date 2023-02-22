@@ -2,7 +2,6 @@ package unrelation
 
 import (
 	"context"
-	"strconv"
 )
 
 const (
@@ -29,11 +28,12 @@ func (UserToSuperGroupModel) TableName() string {
 }
 
 type SuperGroupModelInterface interface {
-	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string, tx ...any) error
-	FindSuperGroup(ctx context.Context, groupIDs []string, tx ...any) (groups []*SuperGroupModel, err error)
-	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...any) error
-	RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string, tx ...any) error
-	GetSuperGroupByUserID(ctx context.Context, userID string, tx ...any) (*UserToSuperGroupModel, error)
-	DeleteSuperGroup(ctx context.Context, groupID string, tx ...any) error
-	RemoveGroupFromUser(ctx context.Context, groupID string, userIDs []string, tx ...any) error
+	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error
+	TakeSuperGroup(ctx context.Context, groupID string) (group *SuperGroupModel, err error)
+	FindSuperGroup(ctx context.Context, groupIDs []string) (groups []*SuperGroupModel, err error)
+	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
+	RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string) error
+	GetSuperGroupByUserID(ctx context.Context, userID string) (*UserToSuperGroupModel, error)
+	DeleteSuperGroup(ctx context.Context, groupID string) error
+	RemoveGroupFromUser(ctx context.Context, groupID string, userIDs []string) error
 }
