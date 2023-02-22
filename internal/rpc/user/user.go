@@ -21,7 +21,7 @@ import (
 )
 
 type userServer struct {
-	controller.UserInterface
+	controller.UserDatabase
 	notification        *notification.Check
 	userCheck           *check.UserCheck
 	ConversationChecker *check.ConversationChecker
@@ -38,7 +38,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	u := &userServer{
-		UserInterface:  controller.NewUserController(controller.NewUserDatabase(relation.NewUserGorm(gormDB))),
+		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(gormDB)),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,
@@ -51,7 +51,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.AppManagerUid {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
 	}
-	u.UserInterface.InitOnce(context.Background(), users)
+	u.UserDatabase.InitOnce(context.Background(), users)
 	return nil
 }
 
