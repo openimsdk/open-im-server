@@ -26,7 +26,7 @@ type Push struct {
 }
 
 func (p *Push) Init(rpcPort int) {
-	var cacheInterface cache.Cache
+	var cacheInterface cache.MsgCache
 
 	p.rpcServer.Init(rpcPort, cacheInterface)
 	p.pushCh.Init()

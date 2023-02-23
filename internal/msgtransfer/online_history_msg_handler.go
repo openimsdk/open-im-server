@@ -57,7 +57,7 @@ type OnlineHistoryRedisConsumerHandler struct {
 	producerToMongo  *kafka.Producer
 
 	msgInterface controller.MsgInterface
-	cache        cache.Cache
+	cache        cache.MsgCache
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) Init() {

@@ -3,11 +3,11 @@ package msg
 import (
 	"Open_IM/pkg/common/tokenverify"
 	"Open_IM/pkg/proto/msg"
-	common "Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/proto/sdkws"
 	"context"
 )
 
-func (m *msgServer) DelMsgList(ctx context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
+func (m *msgServer) DelMsgList(ctx context.Context, req *sdkws.DelMsgListReq) (*sdkws.DelMsgListResp, error) {
 	resp := &common.DelMsgListResp{}
 	if _, err := m.MsgInterface.DelMsgBySeqs(ctx, req.UserID, req.SeqList); err != nil {
 		return nil, err

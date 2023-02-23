@@ -21,6 +21,27 @@ func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error
 	return copier.Copy(a, b)
 }
 
+func Wrap1(err error) error {
+	if err != nil {
+		return Wrap(err, "")
+	}
+	return nil
+}
+
+func Wrap2[T any](a T, err error) (T, error) {
+	if err != nil {
+		return a, Wrap(err, "")
+	}
+	return a, nil
+}
+
+func Wrap3[T any, V any](a T, b V, err error) (T, V, error) {
+	if err != nil {
+		return a, b, Wrap(err, "")
+	}
+	return a, b, nil
+}
+
 func Wrap(err error, message string) error {
 	return errors.Wrap(err, "==> "+printCallerNameAndLine()+message)
 }

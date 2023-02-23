@@ -19,7 +19,7 @@ import (
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kfk.MConsumerGroup
 	msgInterface         controller.MsgInterface
-	cache                cache.Cache
+	cache                cache.MsgCache
 }
 
 func (mc *OnlineHistoryMongoConsumerHandler) Init() {
