@@ -102,5 +102,5 @@ service conversation {
   rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
   rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
-  rpc GetRecvMsgNotNotifyUserIDs(GetSuperGroupOpenNotDisturbUserIDReq) returns (GetSuperGroupOpenNotDisturbUserIDResp);
+  rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
 }

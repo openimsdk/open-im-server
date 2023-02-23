@@ -22,6 +22,8 @@ type ConversationDataBaseInterface interface {
 	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error
 	//FindConversations 根据会话ID获取某个用户的多个会话
 	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
+	//FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
+	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	//GetUserAllConversation 获取一个用户在服务器上所有的会话
 	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
 	//SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
@@ -256,4 +258,8 @@ func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUs
 		}
 		return nil
 	})
+}
+
+func (c *ConversationDataBase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
+	return c.conversationDB.FindRecvMsgNotNotifyUserIDs(ctx, groupID)
 }

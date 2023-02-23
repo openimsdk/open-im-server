@@ -175,8 +175,12 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 }
 
 // 获取超级大群开启免打扰的用户ID
-func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetSuperGroupOpenNotDisturbUserIDReq) (*pbConversation.GetSuperGroupOpenNotDisturbUserIDResp, error) {
-	//resp := &pbConversation.GetSuperGroupOpenNotDisturbUserIDResp{}
-
-	panic("implement me")
+func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
+	resp := &pbConversation.GetRecvMsgNotNotifyUserIDsResp{}
+	userIDs, err := c.ConversationDataBaseInterface.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	resp.UserIDs = userIDs
+	return resp, nil
 }

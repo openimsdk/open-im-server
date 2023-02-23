@@ -1,6 +1,7 @@
 package relation
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
@@ -18,6 +19,7 @@ type Conversation interface {
 	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
 	Take(ctx context.Context, userID, conversationID string) (conversation *relation.ConversationModel, err error)
 	FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error)
+	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	NewTx(tx any) Conversation
 }
 type ConversationGorm struct {
@@ -92,4 +94,11 @@ func (c *ConversationGorm) FindUserIDAllConversationID(ctx context.Context, user
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "conversationIDList", conversationIDList)
 	}()
 	return conversationIDList, utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &conversationIDList).Error, "")
+}
+
+func (c *ConversationGorm) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userIDs", userIDs)
+	}()
+	return userIDs, utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("group_id = ? and recv_msg_opt", groupID, constant.ReceiveNotNotifyMessage).Pluck("user_id", &userIDs).Error, "")
 }
