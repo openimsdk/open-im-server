@@ -32,7 +32,3 @@ func main() {
 		panic("api start failed " + err.Error())
 	}
 }
-
-func T() {
-
-}
