@@ -256,7 +256,7 @@ func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, pl
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
 
-func (r *RedisClient) GetMessagesBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err2 error) {
+func (r *RedisClient) GetMessagesBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err2 error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
@@ -265,25 +265,25 @@ func (r *RedisClient) GetMessagesBySeq(ctx context.Context, userID string, seqLi
 			if err != redis.Nil {
 				err2 = err
 			}
-			failedSeqList = append(failedSeqList, v)
+			failedSeqs = append(failedSeqs, v)
 		} else {
 			msg := sdkws.MsgData{}
 			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
 				err2 = err
-				failedSeqList = append(failedSeqList, v)
+				failedSeqs = append(failedSeqs, v)
 			} else {
-				seqMsg = append(seqMsg, &msg)
+				seqMsgs = append(seqMsgs, &msg)
 			}
 		}
 	}
-	return seqMsg, failedSeqList, err2
+	return seqMsgs, failedSeqs, err2
 }
 
-func (r *RedisClient) SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ, uid string) (int, error) {
+func (r *RedisClient) SetMessageToCache(ctx context.Context, userID string, msgs []*pbChat.MsgDataToMQ, uid string) (int, error) {
 	pipe := r.rdb.Pipeline()
-	var failedList []pbChat.MsgDataToMQ
-	for _, msg := range msgList {
+	var failedMsgs []pbChat.MsgDataToMQ
+	for _, msg := range msgs {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		s, err := utils.Pb2String(msg.MsgData)
 		if err != nil {
@@ -292,17 +292,17 @@ func (r *RedisClient) SetMessageToCache(ctx context.Context, userID string, msgL
 		err = pipe.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
 		//err = r.rdb.HMSet(context.Background(), "12", map[string]interface{}{"1": 2, "343": false}).Err()
 		if err != nil {
-			failedList = append(failedList, *msg)
+			failedMsgs = append(failedMsgs, *msg)
 		}
 	}
-	if len(failedList) != 0 {
-		return len(failedList), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList))
+	if len(failedMsgs) != 0 {
+		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList))
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err
 }
-func (r *RedisClient) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error {
-	for _, msg := range msgList {
+func (r *RedisClient) DeleteMessageFromCache(ctx context.Context, userID string, msgs []*pbChat.MsgDataToMQ) error {
+	for _, msg := range msgs {
 		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		err := r.rdb.Del(ctx, key).Err()
 		if err != nil {

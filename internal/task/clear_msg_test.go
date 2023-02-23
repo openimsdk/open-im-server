@@ -1,4 +1,4 @@
-package cronTask
+package task
 
 import (
 	"Open_IM/pkg/common/constant"
