@@ -43,7 +43,7 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 		prome.NewGrpcRequestFailedCounter()
 		prome.NewGrpcRequestSuccessCounter()
 		options = append(options, []grpc.ServerOption{
-			grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
+			//grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
