@@ -6,7 +6,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
-	promePkg "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/prome"
 	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
@@ -39,11 +39,11 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 	}
 	options = append(options, grpc.UnaryInterceptor(middleware.RpcServerInterceptor)) // ctx 中间件
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		options = append(options, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
@@ -55,7 +55,7 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 		return err
 	}
 	if config.Config.Prometheus.Enable {
-		err := promePkg.StartPromeSrv(*flagPrometheusPort)
+		err := prome.StartPromeSrv(*flagPrometheusPort)
 		if err != nil {
 			return err
 		}
