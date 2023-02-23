@@ -14,7 +14,9 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.MessageTransferPrometheusPort[0], "MessageTransferPrometheusPort default listen port")
+	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
+	config.InitConfig(*configPath)
 	log.NewPrivateLog(constant.LogFileName)
 	msgTransfer := msgtransfer.NewMsgTransfer()
 	fmt.Println("start msg_transfer server ", ", OpenIM version: ", constant.CurrentVersion, "\n")

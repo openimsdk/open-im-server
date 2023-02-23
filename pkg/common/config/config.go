@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -537,10 +536,8 @@ func initConfig(config interface{}, configName, configPath string) {
 	unmarshalConfig(config, configPath)
 }
 
-func InitConfig() {
-	configPath := flag.String("config_path", "../config/", "config folder")
-	flag.Parse()
-	initConfig(&Config, "config.yaml", *configPath)
-	initConfig(&NotificationConfig, "notification.yaml", *configPath)
+func InitConfig(configPath string) {
+	initConfig(&Config, "config.yaml", configPath)
+	initConfig(&NotificationConfig, "notification.yaml", configPath)
 	Config.Notification = NotificationConfig.Notification
 }

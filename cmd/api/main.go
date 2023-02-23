@@ -18,8 +18,9 @@ func main() {
 	router := api.NewGinRouter()
 	go third.MinioInit()
 	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
+	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig()
+	config.InitConfig(*configPath)
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
@@ -30,4 +31,8 @@ func main() {
 		log.Error("", "api run failed ", address, err.Error())
 		panic("api start failed " + err.Error())
 	}
+}
+
+func T() {
+
 }

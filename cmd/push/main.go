@@ -14,7 +14,9 @@ func main() {
 	defaultPorts := config.Config.RpcPort.OpenImPushPort
 	rpcPort := flag.Int("port", defaultPorts[0], "rpc listening port")
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.MessageTransferPrometheusPort[0], "PushrometheusPort default listen port")
+	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
+	config.InitConfig(*configPath)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)
