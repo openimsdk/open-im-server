@@ -166,21 +166,21 @@ func (m *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID i
 
 func (m *msgCache) GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platformID
-	m, err := m.rdb.HGetAll(ctx, key).Result()
+	r, err := m.rdb.HGetAll(ctx, key).Result()
 	if err != nil {
 		return nil, utils.Wrap1(err)
 	}
 	mm := make(map[string]int)
-	for k, v := range m {
+	for k, v := range r {
 		mm[k] = utils.StringToInt(v)
 	}
 	return mm, nil
 }
 
-func (m *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
+func (m *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, r map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	mm := make(map[string]interface{})
-	for k, v := range m {
+	for k, v := range r {
 		mm[k] = v
 	}
 	return utils.Wrap1(m.rdb.HSet(ctx, key, mm).Err())

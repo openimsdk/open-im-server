@@ -292,7 +292,7 @@ func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 		return nil, err
 	}
 	resp.List = msgs
-	for userID, list := range req.GroupSeqList {
+	for userID := range req.GroupSeqList {
 		msgs, err := m.MsgInterface.GetMessageListBySeq(ctx, userID, req.Seqs)
 		if err != nil {
 			return nil, err

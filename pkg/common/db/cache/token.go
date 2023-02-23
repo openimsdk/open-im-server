@@ -55,5 +55,5 @@ func (t *TokenRedis) CreateToken(ctx context.Context, userID string, platform st
 	if err != nil {
 		return "", utils.Wrap(err, "")
 	}
-	return tokenString, t.redisClient.AddTokenFlag(ctx, userID, platform, tokenString, constant.NormalToken)
+	return tokenString, t.redisClient.AddTokenFlag(ctx, userID, constant.PlatformNameToID(platform), tokenString, constant.NormalToken)
 }
