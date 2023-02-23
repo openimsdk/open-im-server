@@ -4,7 +4,6 @@ import (
 	"OpenIM/pkg/apistruct"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	kfk "OpenIM/pkg/common/kafka"
@@ -24,7 +23,6 @@ type ModifyMsgConsumerHandler struct {
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
 
 	extendMsgInterface controller.ExtendMsgInterface
-	cache              cache.MsgCache
 }
 
 func (mmc *ModifyMsgConsumerHandler) Init() {
