@@ -85,11 +85,11 @@ message BatchSetConversationsResp{
   repeated string Failed = 2;
 }
 
-message GetSuperGroupOpenNotDisturbUserIDReq {
+message GetRecvMsgNotNotifyUserIDsReq {
   string groupID = 1;
 }
 
-message GetSuperGroupOpenNotDisturbUserIDResp {
+message GetRecvMsgNotNotifyUserIDsResp {
   repeated string userIDs = 1;
 }
 
@@ -102,5 +102,5 @@ service conversation {
   rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
   rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
-  rpc GetSuperGroupOpenNotDisturbUserID(GetSuperGroupOpenNotDisturbUserIDReq) returns (GetSuperGroupOpenNotDisturbUserIDResp);
+  rpc GetRecvMsgNotNotifyUserIDs(GetSuperGroupOpenNotDisturbUserIDReq) returns (GetSuperGroupOpenNotDisturbUserIDResp);
 }

@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db/cache"
 	http2 "Open_IM/pkg/common/http"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
@@ -63,8 +64,12 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 		maxNum := 999
 		if len(userIDs) > maxNum {
 			s := splitter.NewSplitter(maxNum, userIDs)
-			for _, v := range s.GetSplitResult() {
-				err = g.batchPush(ctx, token, v.Item, pushReq)
+			for i, v := range s.GetSplitResult() {
+				go func(index int, userIDs []string) {
+					if err = g.batchPush(ctx, token, userIDs, pushReq); err != nil {
+						log.NewError(tracelog.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
+					}
+				}(i, v.Item)
 			}
 		} else {
 			err = g.batchPush(ctx, token, userIDs, pushReq)
