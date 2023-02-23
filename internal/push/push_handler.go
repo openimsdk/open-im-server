@@ -11,15 +11,18 @@ import (
 	"Open_IM/pkg/common/constant"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/tracelog"
 	pbChat "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
+	"context"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
 
 type ConsumerHandler struct {
 	pushConsumerGroup *kfk.MConsumerGroup
+	pusher            Pusher
 }
 
 func (c *ConsumerHandler) Init() {
@@ -27,6 +30,7 @@ func (c *ConsumerHandler) Init() {
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ms2pschat.Topic}, config.Config.Kafka.Ms2pschat.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
 }
+
 func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
 	log.NewDebug("", "msg come from kafka  And push!!!", "msg", string(msg))
 	msgFromMQ := pbChat.PushMsgDataToMQ{}
@@ -43,11 +47,17 @@ func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
 	if nowSec-sec > 10 {
 		return
 	}
+	ctx := context.Background()
+	tracelog.SetOperationID(ctx, "")
+	var err error
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		MsgToSuperGroupUser(pbData)
+		err = c.pusher.MsgToSuperGroupUser(ctx, pbData.SourceID, pbData.MsgData)
 	default:
-		MsgToUser(pbData)
+		err = c.pusher.MsgToUser(ctx, pbData.SourceID, pbData.MsgData)
+	}
+	if err != nil {
+		log.NewError("", "push failed", *pbData)
 	}
 }
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }

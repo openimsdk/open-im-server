@@ -79,7 +79,6 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 		}
 		err = p.OfflinePushMsg(ctx, userID, msg, userIDs)
 		if err != nil {
-			log.NewError(operationID, "OfflinePushMsg failed", userID)
 			return err
 		}
 	}

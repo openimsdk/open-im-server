@@ -21,16 +21,13 @@ import (
 type RPCServer struct {
 	rpcPort         int
 	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
-	push            controller.PushInterface
+	pushInterface   controller.PushInterface
+	pusher          Pusher
 }
 
 func (r *RPCServer) Init(rpcPort int, cache cache.MsgCache) {
 	r.rpcPort = rpcPort
 	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImPushName
-	r.etcdSchema = config.Config.Etcd.EtcdSchema
-	r.etcdAddr = config.Config.Etcd.EtcdAddr
 }
 
 func (r *RPCServer) run() {
@@ -84,13 +81,13 @@ func (r *RPCServer) run() {
 func (r *RPCServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (resp *pbPush.PushMsgResp, err error) {
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		MsgToSuperGroupUser(pbData)
+		err = r.pusher.MsgToSuperGroupUser(ctx, pbData.SourceID, pbData.MsgData)
 	default:
-		MsgToUser(pbData)
+		err = r.pusher.MsgToUser(ctx, pbData.SourceID, pbData.MsgData)
 	}
-	return &pbPush.PushMsgResp{}, nil
+	return &pbPush.PushMsgResp{}, err
 }
 
 func (r *RPCServer) DelUserPushToken(ctx context.Context, req *pbPush.DelUserPushTokenReq) (resp *pbPush.DelUserPushTokenResp, err error) {
-	return &pbPush.DelUserPushTokenResp{}, r.push.DelFcmToken(ctx, req.UserID, int(req.PlatformID))
+	return &pbPush.DelUserPushTokenResp{}, r.pushInterface.DelFcmToken(ctx, req.UserID, int(req.PlatformID))
 }

@@ -51,7 +51,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeAddFriend(ctx, req); err != nil {
+	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {

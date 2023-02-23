@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/peer"
 )
 
-func UnaryServerInterceptorProme(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func UnaryServerInterceptorPrometheus(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	remote, _ := peer.FromContext(ctx)
 	remoteAddr := remote.Addr.String()
 

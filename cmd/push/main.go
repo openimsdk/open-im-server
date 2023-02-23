@@ -20,7 +20,9 @@ func main() {
 	log.NewPrivateLog(constant.LogFileName)
 	fmt.Println("start push rpc server, port: ", *rpcPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
 	pusher := push.Push{}
-	pusher.Init(*rpcPort)
+	if err := pusher.Init(*rpcPort); err != nil {
+		panic(err.Error())
+	}
 	pusher.Run(*prometheusPort)
 	wg.Wait()
 }

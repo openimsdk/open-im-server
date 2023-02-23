@@ -16,7 +16,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 	resp = &msg.SendMsgResp{}
 	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
-	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil {
+	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.PromeInc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil {
+	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 	_, err = m.messageVerification(ctx, req)
@@ -86,7 +86,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 		}
 	}
 	err = CallbackAfterSendSingleMsg(ctx, req)
-	if err != nil {
+	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 	promePkg.PromeInc(promePkg.SingleChatMsgProcessSuccessCounter)
@@ -100,7 +100,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	// callback
 	promePkg.PromeInc(promePkg.GroupChatMsgRecvSuccessCounter)
 	err = CallbackBeforeSendGroupMsg(ctx, req)
-	if err != nil {
+	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -235,7 +235,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 		return nil, constant.ErrMessageHasReadDisable.Wrap()
 	}
 	m.encapsulateMsgData(req.MsgData)
-	if err := CallbackMsgModify(ctx, req); err != nil {
+	if err := CallbackMsgModify(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 	switch req.MsgData.SessionType {
