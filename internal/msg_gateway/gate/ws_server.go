@@ -195,6 +195,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 	defer rwLock.Unlock()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
@@ -250,6 +251,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
