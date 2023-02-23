@@ -25,7 +25,7 @@ type RPCServer struct {
 	pusher          Pusher
 }
 
-func (r *RPCServer) Init(rpcPort int, cache cache.Cache) {
+func (r *RPCServer) Init(rpcPort int, cache cache.MsgCache) {
 	r.rpcPort = rpcPort
 	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImPushName
 }

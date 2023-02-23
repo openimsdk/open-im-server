@@ -24,7 +24,7 @@ type ModifyMsgConsumerHandler struct {
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
 
 	extendMsgInterface controller.ExtendMsgInterface
-	cache              cache.Cache
+	cache              cache.MsgCache
 }
 
 func (mmc *ModifyMsgConsumerHandler) Init() {

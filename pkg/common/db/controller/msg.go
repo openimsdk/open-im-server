@@ -1,20 +1,21 @@
 package controller
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/db/unrelation"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/common/tracelog"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
+	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
+	"Open_IM/pkg/common/db/unrelation"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/prome"
+	"Open_IM/pkg/common/tracelog"
+	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
 	"sync"
 	"time"
 
-	pbMsg "OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
+	pbMsg "Open_IM/pkg/proto/msg"
+	"Open_IM/pkg/proto/sdkws"
+	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"github.com/go-redis/redis/v8"
@@ -23,98 +24,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-//type MsgInterface interface {
-//	// 批量插入消息到db
-//	BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error
-//	// 刪除redis中消息缓存
-//	DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error
-//	// incrSeq然后批量插入缓存
-//	BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)
-//	// 删除消息 返回不存在的seqList
-//	DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error)
-//	//  通过seqList获取db中写扩散消息
-//	GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
-//	// 通过seqList获取大群在db里面的消息 没找到返回错误
-//	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
-//	// 删除用户所有消息/cache/db然后重置seq
-//	CleanUpUserMsg(ctx context.Context, userID string) error
-//	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
-//	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID []string, remainTime int64) error
-//	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
-//	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
-//	// 获取用户 seq mongo和redis
-//	GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
-//	// 获取群 seq mongo和redis
-//	GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error)
-//	// 设置群用户最小seq 直接调用cache
-//	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
-//	// 设置用户最小seq 直接调用cache
-//	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
-//
-//	MsgToMQ(ctx context.Context, key string, data *pbMsg.MsgDataToMQ) (err error)
-//}
-//
-//func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {
-//	return &MsgController{}
-//}
-//
-//type MsgController struct {
-//	database MsgDatabase
-//}
-//
-//func (m *MsgController) BatchInsertChat2DB(ctx context.Context, ID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
-//	return m.database.BatchInsertChat2DB(ctx, ID, msgList, currentMaxSeq)
-//}
-//
-//func (m *MsgController) DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error {
-//	return m.database.DeleteMessageFromCache(ctx, sourceID, msgList)
-//}
-//
-//func (m *MsgController) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
-//	return m.database.BatchInsertChat2Cache(ctx, sourceID, msgList)
-//}
-//
-//func (m *MsgController) DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
-//	return m.database.DelMsgBySeqs(ctx, userID, seqs)
-//}
-//
-//func (m *MsgController) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-//	return m.database.GetMsgBySeqs(ctx, userID, seqs)
-//}
-//
-//func (m *MsgController) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-//	return m.database.GetSuperGroupMsgBySeqs(ctx, groupID, seqs)
-//}
-//
-//func (m *MsgController) CleanUpUserMsg(ctx context.Context, userID string) error {
-//	return m.database.CleanUpUserMsg(ctx, userID)
-//}
-//
-//func (m *MsgController) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userIDs []string, remainTime int64) error {
-//	return m.database.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, remainTime)
-//}
-//
-//func (m *MsgController) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error {
-//	return m.database.DeleteUserMsgsAndSetMinSeq(ctx, userID, remainTime)
-//}
-//
-//func (m *MsgController) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
-//	return m.database.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
-//}
-//
-//func (m *MsgController) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error) {
-//	return m.database.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
-//}
-//
-//func (m *MsgController) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
-//	return m.database.SetGroupUserMinSeq(ctx, groupID, userID, minSeq)
-//}
-//
-//func (m *MsgController) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
-//	return m.database.SetUserMinSeq(ctx, userID, minSeq)
-//}
-
-type MsgDatabase interface {
+type MsgDatabaseInterface interface {
 	// 批量插入消息
 	BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error
 	// 刪除redis中消息缓存
@@ -140,12 +50,11 @@ type MsgDatabase interface {
 	GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error)
 	// 设置群用户最小seq 直接调用cache
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
-	//
-	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
 
 	JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
+
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 
 	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
@@ -155,105 +64,135 @@ type MsgDatabase interface {
 	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
 	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
 	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
-	SetSendMsgStatus(ctx context.Context, userID string, status int32) error
-	GetSendMsgStatus(ctx context.Context, userID string) (int32, error)
+	SetSendMsgStatus(ctx context.Context, id string, status int32) error
+	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error
 	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
-}
-type msgDatabase struct {
-	mgo   unRelationTb.MsgDocModelInterface
-	cache cache.Cache
-	msg   unRelationTb.MsgDocModel
+	GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error)
 }
 
-func (db *msgDatabase) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabaseInterface {
+	return &MsgDatabase{}
+}
+
+type MsgDatabase struct {
+	mgo       unRelationTb.MsgDocModelInterface
+	cache     cache.MsgCache
+	msg       unRelationTb.MsgDocModel
+	ExtendMsg unRelationTb.ExtendMsgSetModelInterface
+	rdb       redis.Client
+}
+
+func (db *MsgDatabase) reactionExtensionList(reactionExtensionList map[string]*sdkws.KeyValue) map[string]unRelationTb.KeyValueModel {
+	r := make(map[string]unRelationTb.KeyValueModel)
+	for key, value := range reactionExtensionList {
+		r[key] = unRelationTb.KeyValueModel{
+			TypeKey:          value.TypeKey,
+			Value:            value.Value,
+			LatestUpdateTime: value.LatestUpdateTime,
+		}
+	}
+	return r
+}
+
+func (db *MsgDatabase) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+	return db.cache.JudgeMessageReactionEXISTS(ctx, clientMsgID, sessionType)
+}
+
+func (db *MsgDatabase) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
+	return db.cache.SetMessageTypeKeyValue(ctx, clientMsgID, sessionType, typeKey, value)
+}
+
+func (db *MsgDatabase) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+	return db.cache.SetMessageReactionExpire(ctx, clientMsgID, sessionType, expiration)
+}
+
+func (db *MsgDatabase) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
+	return db.cache.GetMessageTypeKeyValue(ctx, clientMsgID, sessionType, typeKey)
+}
+
+func (db *MsgDatabase) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
+	return db.cache.GetOneMessageAllReactionList(ctx, clientMsgID, sessionType)
+}
+
+func (db *MsgDatabase) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
+	return db.cache.DeleteOneMessageKey(ctx, clientMsgID, sessionType, subKey)
+}
+
+func (db *MsgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+	return db.ExtendMsg.InsertOrUpdateReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensionList))
+}
+
+func (db *MsgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error) {
+	extendMsgSet, err := db.ExtendMsg.GetExtendMsgSet(ctx, sourceID, sessionType, maxMsgUpdateTime)
+	if err != nil {
+		return nil, err
+	}
+	extendMsg, ok := extendMsgSet.ExtendMsgs[clientMsgID]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("cant find client msg id: %s", clientMsgID))
+	}
+	reactionExtensionList := make(map[string]*pbMsg.KeyValueResp)
+	for key, model := range extendMsg.ReactionExtensionList {
+		reactionExtensionList[key] = &pbMsg.KeyValueResp{
+			KeyValue: &sdkws.KeyValue{
+				TypeKey:          model.TypeKey,
+				Value:            model.Value,
+				LatestUpdateTime: model.LatestUpdateTime,
+			},
+		}
+	}
+	return &pbMsg.ExtendMsg{
+		ReactionExtensionList: reactionExtensionList,
+		ClientMsgID:           extendMsg.ClientMsgID,
+		MsgFirstModifyTime:    extendMsg.MsgFirstModifyTime,
+		AttachedInfo:          extendMsg.AttachedInfo,
+		Ex:                    extendMsg.Ex,
+	}, nil
+}
+
+func (db *MsgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+	return db.ExtendMsg.DeleteReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensionList))
+}
+
+func (db *MsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
+	return db.cache.SetSendMsgStatus(ctx, id, status)
+}
+
+func (db *MsgDatabase) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
+	return db.cache.GetSendMsgStatus(ctx, id)
+}
+
+func (db *MsgDatabase) MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (db *msgDatabase) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
-	//TODO implement me
-	panic("implement me")
+func (db *MsgDatabase) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
+	return db.cache.GetUserMaxSeq(ctx, userID)
 }
 
-func (db *msgDatabase) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+func (db *MsgDatabase) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
+	return db.cache.GetUserMinSeq(ctx, userID)
 }
 
-func (db *msgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error) {
-	//TODO implement me
-	panic("implement me")
+func (db *MsgDatabase) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+	return db.cache.GetGroupMaxSeq(ctx, groupID)
 }
 
-func (db *msgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
-	//TODO implement me
-	panic("implement me")
+func (db *MsgDatabase) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
+	return db.cache.GetGroupMinSeq(ctx, groupID)
 }
 
-func (db *msgDatabase) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+func (db *MsgDatabase) GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error) {
+	seqMsg, _, err := db.cache.GetMessageListBySeq(ctx, userID, seqs)
+	return seqMsg, err
 }
 
-func (db *msgDatabase) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) SetSendMsgStatus(ctx context.Context, userID string, status int32) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) GetSendMsgStatus(ctx context.Context, userID string) (int32, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *msgDatabase) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabase {
-	return &msgDatabase{}
-}
-
-func (db *msgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
+func (db *MsgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
 	//newTime := utils.GetCurrentTimestampByMill()
 	if int64(len(msgList)) > db.msg.GetSingleGocMsgNum() {
 		return errors.New("too large")
@@ -337,11 +276,11 @@ func (db *msgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, 
 	return nil
 }
 
-func (db *msgDatabase) DeleteMessageFromCache(ctx context.Context, userID string, msgs []*pbMsg.MsgDataToMQ) error {
+func (db *MsgDatabase) DeleteMessageFromCache(ctx context.Context, userID string, msgs []*pbMsg.MsgDataToMQ) error {
 	return db.cache.DeleteMessageFromCache(ctx, userID, msgs)
 }
 
-func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
+func (db *MsgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
 	//newTime := utils.GetCurrentTimestampByMill()
 	lenList := len(msgList)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
@@ -393,7 +332,7 @@ func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID strin
 	return lastMaxSeq, utils.Wrap(err, "")
 }
 
-func (db *msgDatabase) DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
+func (db *MsgDatabase) DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
 	sortkeys.Int64s(seqs)
 	docIDSeqsMap := db.msg.GetDocIDSeqsMap(userID, seqs)
 	lock := sync.Mutex{}
@@ -414,7 +353,7 @@ func (db *msgDatabase) DelMsgBySeqs(ctx context.Context, userID string, seqs []i
 	return totalUnExistSeqs, nil
 }
 
-func (db *msgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (unExistSeqs []int64, err error) {
+func (db *MsgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (unExistSeqs []int64, err error) {
 	seqMsgs, indexes, unExistSeqs, err := db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
 	if err != nil {
 		return nil, err
@@ -427,7 +366,7 @@ func (db *msgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, s
 	return unExistSeqs, nil
 }
 
-func (db *msgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error) {
+func (db *MsgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error) {
 	doc, err := db.mgo.FindOneByDocID(ctx, docID)
 	if err != nil {
 		return nil, nil, nil, err
@@ -458,7 +397,7 @@ func (db *msgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID s
 	return seqMsgs, indexes, unExistSeqs, nil
 }
 
-func (db *msgDatabase) GetNewestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
+func (db *MsgDatabase) GetNewestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
 	msgInfo, err := db.mgo.GetNewestMsg(ctx, sourceID)
 	if err != nil {
 		return nil, err
@@ -466,7 +405,7 @@ func (db *msgDatabase) GetNewestMsg(ctx context.Context, sourceID string) (msgPb
 	return db.unmarshalMsg(msgInfo)
 }
 
-func (db *msgDatabase) GetOldestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
+func (db *MsgDatabase) GetOldestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
 	msgInfo, err := db.mgo.GetOldestMsg(ctx, sourceID)
 	if err != nil {
 		return nil, err
@@ -474,7 +413,7 @@ func (db *msgDatabase) GetOldestMsg(ctx context.Context, sourceID string) (msgPb
 	return db.unmarshalMsg(msgInfo)
 }
 
-func (db *msgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *sdkws.MsgData, err error) {
+func (db *MsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *sdkws.MsgData, err error) {
 	msgPb = &sdkws.MsgData{}
 	err = proto.Unmarshal(msgInfo.Msg, msgPb)
 	if err != nil {
@@ -483,7 +422,7 @@ func (db *msgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *
 	return msgPb, nil
 }
 
-func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs []int64, diffusionType int) (seqMsg []*sdkws.MsgData, err error) {
+func (db *MsgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs []int64, diffusionType int) (seqMsg []*sdkws.MsgData, err error) {
 	var hasSeqs []int64
 	singleCount := 0
 	m := db.msg.GetDocIDSeqsMap(sourceID, seqs)
@@ -524,8 +463,8 @@ func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 	return seqMsg, nil
 }
 
-func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, userID, seqs)
+func (db *MsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+	successMsgs, failedSeqs, err := db.cache.GetMessageListBySeq(ctx, userID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
@@ -545,8 +484,8 @@ func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []i
 	return successMsgs, nil
 }
 
-func (db *msgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, groupID, seqs)
+func (db *MsgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+	successMsgs, failedSeqs, err := db.cache.GetMessageListBySeq(ctx, groupID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
@@ -566,7 +505,7 @@ func (db *msgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID strin
 	return successMsgs, nil
 }
 
-func (db *msgDatabase) CleanUpUserMsg(ctx context.Context, userID string) error {
+func (db *MsgDatabase) CleanUpUserMsg(ctx context.Context, userID string) error {
 	err := db.DeleteUserMsgsAndSetMinSeq(ctx, userID, 0)
 	if err != nil {
 		return err
@@ -575,7 +514,7 @@ func (db *msgDatabase) CleanUpUserMsg(ctx context.Context, userID string) error 
 	return utils.Wrap(err, "")
 }
 
-func (db *msgDatabase) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userIDs []string, remainTime int64) error {
+func (db *MsgDatabase) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userIDs []string, remainTime int64) error {
 	var delStruct delMsgRecursionStruct
 	minSeq, err := db.deleteMsgRecursion(ctx, groupID, unRelationTb.OldestList, &delStruct, remainTime)
 	if err != nil {
@@ -603,7 +542,7 @@ func (db *msgDatabase) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context,
 	return nil
 }
 
-func (db *msgDatabase) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error {
+func (db *MsgDatabase) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error {
 	var delStruct delMsgRecursionStruct
 	minSeq, err := db.deleteMsgRecursion(ctx, userID, unRelationTb.OldestList, &delStruct, remainTime)
 	if err != nil {
@@ -629,7 +568,7 @@ func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
 // seq 70
 // set minSeq 21
 // recursion 删除list并且返回设置的最小seq
-func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
+func (db *MsgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
 	// find from oldest list
 	msgs, err := db.mgo.GetMsgsByIndex(ctx, sourceID, index)
 	if err != nil || msgs.DocID == "" {
@@ -691,10 +630,10 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	//log.NewDebug(operationID, sourceID, "continue to", delStruct)
 	//  继续递归 index+1
 	seq, err := db.deleteMsgRecursion(ctx, sourceID, index+1, delStruct, remainTime)
-	return seq, err
+	return seq, utils.Wrap(err, "deleteMsg failed")
 }
 
-func (db *msgDatabase) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
+func (db *MsgDatabase) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
 	minSeqMongo, maxSeqMongo, err = db.GetMinMaxSeqMongo(ctx, userID)
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -711,7 +650,7 @@ func (db *msgDatabase) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, user
 	return
 }
 
-func (db *msgDatabase) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error) {
+func (db *MsgDatabase) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error) {
 	minSeqMongo, maxSeqMongo, err = db.GetMinMaxSeqMongo(ctx, groupID)
 	if err != nil {
 		return 0, 0, 0, err
@@ -723,7 +662,7 @@ func (db *msgDatabase) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context
 	return
 }
 
-func (db *msgDatabase) GetMinMaxSeqMongo(ctx context.Context, sourceID string) (minSeqMongo, maxSeqMongo int64, err error) {
+func (db *MsgDatabase) GetMinMaxSeqMongo(ctx context.Context, sourceID string) (minSeqMongo, maxSeqMongo int64, err error) {
 	oldestMsgMongo, err := db.mgo.GetOldestMsg(ctx, sourceID)
 	if err != nil {
 		return 0, 0, err
@@ -745,10 +684,10 @@ func (db *msgDatabase) GetMinMaxSeqMongo(ctx context.Context, sourceID string) (
 	return
 }
 
-func (db *msgDatabase) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
+func (db *MsgDatabase) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
 	return db.cache.SetGroupUserMinSeq(ctx, groupID, userID, minSeq)
 }
 
-func (db *msgDatabase) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
+func (db *MsgDatabase) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
 	return db.cache.SetUserMinSeq(ctx, userID, minSeq)
 }

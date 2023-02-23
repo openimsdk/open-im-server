@@ -10,7 +10,7 @@ type PushInterface interface {
 }
 
 type PushDataBase struct {
-	cache cache.Cache
+	cache cache.MsgCache
 }
 
 func (p *PushDataBase) DelFcmToken(ctx context.Context, userID string, platformID int) error {
