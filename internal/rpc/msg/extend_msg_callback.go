@@ -27,7 +27,11 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
 	resp := &cbapi.CallbackBeforeSetMessageReactionExtResp{}
-	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	if err := http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+		return err
+	}
+	setReq.MsgFirstModifyTime = resp.MsgFirstModifyTime
+	return nil
 }
 
 func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReactionExtensionsReq) error {

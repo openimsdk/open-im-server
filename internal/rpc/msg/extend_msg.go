@@ -14,107 +14,50 @@ import (
 )
 
 func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
-	var rResp msg.SetMessageReactionExtensionsResp
-	rResp.ClientMsgID = req.ClientMsgID
-	rResp.MsgFirstModifyTime = req.MsgFirstModifyTime
-	callbackResp := notification.callbackSetMessageReactionExtensions(req)
-	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
-		rResp.ErrCode = int32(callbackResp.ErrCode)
-		rResp.ErrMsg = callbackResp.ErrMsg
-		for _, value := range req.ReactionExtensionList {
-			temp := new(msg.KeyValueResp)
-			temp.KeyValue = value
-			temp.ErrMsg = callbackResp.ErrMsg
-			temp.ErrCode = 100
-			rResp.Result = append(rResp.Result, temp)
-		}
-		return &rResp, nil
+	resp = &msg.SetMessageReactionExtensionsResp{}
+	//resp.ClientMsgID = req.ClientMsgID
+	//resp.MsgFirstModifyTime = req.MsgFirstModifyTime
+
+	if err := CallbackSetMessageReactionExtensions(ctx, req); err != nil {
+		return nil, err
 	}
 	//if ExternalExtension
 	if req.IsExternalExtensions {
-		var isHistory bool
-		if req.IsReact {
-			isHistory = false
-		} else {
-			isHistory = true
-		}
-		rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
-		rResp.Result = callbackResp.ResultReactionExtensionList
-		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
-		return &rResp, nil
+		resp.MsgFirstModifyTime = req.MsgFirstModifyTime
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, !req.IsReact, false)
+		return resp, nil
 	}
-	for _, v := range callbackResp.ResultReactionExtensionList {
-		if v.ErrCode == 0 {
-			req.ReactionExtensionList[v.KeyValue.TypeKey] = v.KeyValue
-		} else {
-			delete(req.ReactionExtensionList, v.KeyValue.TypeKey)
-			rResp.Result = append(rResp.Result, v)
-		}
-	}
-	isExists, err := db.DB.JudgeMessageReactionEXISTS(req.ClientMsgID, req.SessionType)
+	isExists, err := m.MsgInterface.JudgeMessageReactionEXISTS(ctx, req.ClientMsgID, req.SessionType)
 	if err != nil {
-		rResp.ErrCode = 100
-		rResp.ErrMsg = err.Error()
-		for _, value := range req.ReactionExtensionList {
-			temp := new(msg.KeyValueResp)
-			temp.KeyValue = value
-			temp.ErrMsg = err.Error()
-			temp.ErrCode = 100
-			rResp.Result = append(rResp.Result, temp)
-		}
-		return &rResp, nil
+		return nil, err
 	}
 
 	if !isExists {
 		if !req.IsReact {
-			log.Debug(req.OperationID, "redis handle firstly", req.String())
-			rResp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
+			resp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
 			for k, v := range req.ReactionExtensionList {
-				err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
+				err := m.MessageLocker.LockMessageTypeKey(ctx, req.ClientMsgID, k)
 				if err != nil {
-					setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
-					continue
+					return nil, err
 				}
 				v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-				newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
-				if newerr != nil {
-					setKeyResultInfo(&rResp, 201, newerr.Error(), req.ClientMsgID, k, v)
-					continue
+				if err := m.MsgInterface.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
+					return nil, err
 				}
-				setKeyResultInfo(&rResp, 0, "", req.ClientMsgID, k, v)
 			}
-			rResp.IsReact = true
-			_, err := db.DB.SetMessageReactionExpire(req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
+			resp.IsReact = true
+			_, err := m.MsgInterface.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
 			if err != nil {
-				log.Error(req.OperationID, "SetMessageReactionExpire err:", err.Error(), req.String())
+				return nil, err
 			}
 		} else {
-			err := m.dMessageLocker.LockGlobalMessage(req.ClientMsgID)
+			err := m.MessageLocker.LockGlobalMessage(ctx, req.ClientMsgID)
 			if err != nil {
-				rResp.ErrCode = 100
-				rResp.ErrMsg = err.Error()
-				for _, value := range req.ReactionExtensionList {
-					temp := new(msg.KeyValueResp)
-					temp.KeyValue = value
-					temp.ErrMsg = err.Error()
-					temp.ErrCode = 100
-					rResp.Result = append(rResp.Result, temp)
-				}
-				return &rResp, nil
+				return nil, err
 			}
-			mongoValue, err := db.DB.GetExtendMsg(req.SourceID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
+			mongoValue, err := m.MsgInterface.GetExtendMsg(ctx, req.SourceID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
 			if err != nil {
-				rResp.ErrCode = 200
-				rResp.ErrMsg = err.Error()
-				for _, value := range req.ReactionExtensionList {
-					temp := new(msg.KeyValueResp)
-					temp.KeyValue = value
-					temp.ErrMsg = err.Error()
-					temp.ErrCode = 100
-					rResp.Result = append(rResp.Result, temp)
-				}
-				return &rResp, nil
+				return nil, err
 			}
 			setValue := make(map[string]*sdkws.KeyValue)
 			for k, v := range req.ReactionExtensionList {
@@ -123,7 +66,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				if vv, ok := mongoValue.ReactionExtensionList[k]; ok {
 					utils.CopyStructFields(temp, &vv)
 					if v.LatestUpdateTime != vv.LatestUpdateTime {
-						setKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, k, temp)
+						setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
 						continue
 					}
 				}
@@ -139,13 +82,13 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 					temp.KeyValue = value
 					temp.ErrMsg = err.Error()
 					temp.ErrCode = 100
-					rResp.Result = append(rResp.Result, temp)
+					resp.Result = append(resp.Result, temp)
 				}
 			} else {
 				for _, value := range setValue {
 					temp := new(msg.KeyValueResp)
 					temp.KeyValue = value
-					rResp.Result = append(rResp.Result, temp)
+					resp.Result = append(resp.Result, temp)
 				}
 			}
 			lockErr := m.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
@@ -160,42 +103,42 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		for k, v := range req.ReactionExtensionList {
 			err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 			if err != nil {
-				setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
+				setKeyResultInfo(&resp, 100, err.Error(), req.ClientMsgID, k, v)
 				continue
 			}
 			redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k)
 			if err != nil && err != go_redis.Nil {
-				setKeyResultInfo(&rResp, 200, err.Error(), req.ClientMsgID, k, v)
+				setKeyResultInfo(&resp, 200, err.Error(), req.ClientMsgID, k, v)
 				continue
 			}
 			temp := new(sdkws.KeyValue)
 			utils.JsonStringToStruct(redisValue, temp)
 			if v.LatestUpdateTime != temp.LatestUpdateTime {
-				setKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, k, temp)
+				setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
 				continue
 			} else {
 				v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
 				newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
 				if newerr != nil {
-					setKeyResultInfo(&rResp, 201, newerr.Error(), req.ClientMsgID, k, temp)
+					setKeyResultInfo(&resp, 201, newerr.Error(), req.ClientMsgID, k, temp)
 					continue
 				}
-				setKeyResultInfo(&rResp, 0, "", req.ClientMsgID, k, v)
+				setKeyResultInfo(&resp, 0, "", req.ClientMsgID, k, v)
 			}
 
 		}
 	}
 	if !isExists {
 		if !req.IsReact {
-			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true, true)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, true, true)
 		} else {
-			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+			notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, false, false)
 		}
 	} else {
-		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, true)
+		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, false, true)
 	}
-	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
-	return &rResp, nil
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", resp.String())
+	return &resp, nil
 
 }
 func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *sdkws.KeyValue) {

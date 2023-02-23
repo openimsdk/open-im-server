@@ -1,16 +1,17 @@
 package msg
 
 import (
+	"context"
 	"time"
 )
 
 const GlOBLLOCK = "GLOBAL_LOCK"
 
 type MessageLocker interface {
-	LockMessageTypeKey(clientMsgID, typeKey string) (err error)
-	UnLockMessageTypeKey(clientMsgID string, typeKey string) error
-	LockGlobalMessage(clientMsgID string) (err error)
-	UnLockGlobalMessage(clientMsgID string) (err error)
+	LockMessageTypeKey(ctx context.Context, clientMsgID, typeKey string) (err error)
+	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, typeKey string) error
+	LockGlobalMessage(ctx context.Context, clientMsgID string) (err error)
+	UnLockGlobalMessage(ctx context.Context, clientMsgID string) (err error)
 }
 type LockerMessage struct{}
 

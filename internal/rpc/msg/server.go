@@ -16,13 +16,14 @@ import (
 
 type msgServer struct {
 	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
-	MsgInterface   controller.MsgInterface
+	MsgInterface   controller.MsgDatabaseInterface
 	Group          *check.GroupChecker
 	User           *check.UserCheck
 	Conversation   *check.ConversationChecker
 	friend         *check.FriendChecker
 	*localcache.GroupLocalCache
-	black *check.BlackChecker
+	black         *check.BlackChecker
+	MessageLocker MessageLocker
 }
 
 type deleteMsg struct {

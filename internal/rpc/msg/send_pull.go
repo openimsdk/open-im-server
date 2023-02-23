@@ -13,6 +13,7 @@ import (
 )
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
+	resp = &msg.SendMsgResp{}
 	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
 	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil {

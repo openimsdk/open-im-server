@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/tracelog"
 	"github.com/gogo/protobuf/sortkeys"
 	"sync"
+	"time"
 
 	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdkws"
@@ -22,96 +23,96 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type MsgInterface interface {
-	// 批量插入消息到db
-	BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error
-	// 刪除redis中消息缓存
-	DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error
-	// incrSeq然后批量插入缓存
-	BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)
-	// 删除消息 返回不存在的seqList
-	DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error)
-	//  通过seqList获取db中写扩散消息
-	GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
-	// 通过seqList获取大群在db里面的消息 没找到返回错误
-	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
-	// 删除用户所有消息/cache/db然后重置seq
-	CleanUpUserMsg(ctx context.Context, userID string) error
-	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
-	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID []string, remainTime int64) error
-	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
-	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
-	// 获取用户 seq mongo和redis
-	GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
-	// 获取群 seq mongo和redis
-	GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error)
-	// 设置群用户最小seq 直接调用cache
-	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
-	// 设置用户最小seq 直接调用cache
-	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
-
-	MsgToMQ(ctx context.Context, key string, data *pbMsg.MsgDataToMQ) (err error)
-}
-
-func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {
-	return &MsgController{}
-}
-
-type MsgController struct {
-	database MsgDatabase
-}
-
-func (m *MsgController) BatchInsertChat2DB(ctx context.Context, ID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
-	return m.database.BatchInsertChat2DB(ctx, ID, msgList, currentMaxSeq)
-}
-
-func (m *MsgController) DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error {
-	return m.database.DeleteMessageFromCache(ctx, sourceID, msgList)
-}
-
-func (m *MsgController) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
-	return m.database.BatchInsertChat2Cache(ctx, sourceID, msgList)
-}
-
-func (m *MsgController) DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
-	return m.database.DelMsgBySeqs(ctx, userID, seqs)
-}
-
-func (m *MsgController) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	return m.database.GetMsgBySeqs(ctx, userID, seqs)
-}
-
-func (m *MsgController) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	return m.database.GetSuperGroupMsgBySeqs(ctx, groupID, seqs)
-}
-
-func (m *MsgController) CleanUpUserMsg(ctx context.Context, userID string) error {
-	return m.database.CleanUpUserMsg(ctx, userID)
-}
-
-func (m *MsgController) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userIDs []string, remainTime int64) error {
-	return m.database.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, remainTime)
-}
-
-func (m *MsgController) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error {
-	return m.database.DeleteUserMsgsAndSetMinSeq(ctx, userID, remainTime)
-}
-
-func (m *MsgController) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
-	return m.database.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
-}
-
-func (m *MsgController) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error) {
-	return m.database.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
-}
-
-func (m *MsgController) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
-	return m.database.SetGroupUserMinSeq(ctx, groupID, userID, minSeq)
-}
-
-func (m *MsgController) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
-	return m.database.SetUserMinSeq(ctx, userID, minSeq)
-}
+//type MsgInterface interface {
+//	// 批量插入消息到db
+//	BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error
+//	// 刪除redis中消息缓存
+//	DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error
+//	// incrSeq然后批量插入缓存
+//	BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)
+//	// 删除消息 返回不存在的seqList
+//	DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error)
+//	//  通过seqList获取db中写扩散消息
+//	GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
+//	// 通过seqList获取大群在db里面的消息 没找到返回错误
+//	GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
+//	// 删除用户所有消息/cache/db然后重置seq
+//	CleanUpUserMsg(ctx context.Context, userID string) error
+//	// 删除大群消息重置群成员最小群seq, remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除 redis cache)
+//	DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userID []string, remainTime int64) error
+//	// 删除用户消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
+//	DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error
+//	// 获取用户 seq mongo和redis
+//	GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
+//	// 获取群 seq mongo和redis
+//	GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error)
+//	// 设置群用户最小seq 直接调用cache
+//	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
+//	// 设置用户最小seq 直接调用cache
+//	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+//
+//	MsgToMQ(ctx context.Context, key string, data *pbMsg.MsgDataToMQ) (err error)
+//}
+//
+//func NewMsgController(mgo *mongo.Client, rdb redis.UniversalClient) MsgInterface {
+//	return &MsgController{}
+//}
+//
+//type MsgController struct {
+//	database MsgDatabase
+//}
+//
+//func (m *MsgController) BatchInsertChat2DB(ctx context.Context, ID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
+//	return m.database.BatchInsertChat2DB(ctx, ID, msgList, currentMaxSeq)
+//}
+//
+//func (m *MsgController) DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error {
+//	return m.database.DeleteMessageFromCache(ctx, sourceID, msgList)
+//}
+//
+//func (m *MsgController) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
+//	return m.database.BatchInsertChat2Cache(ctx, sourceID, msgList)
+//}
+//
+//func (m *MsgController) DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
+//	return m.database.DelMsgBySeqs(ctx, userID, seqs)
+//}
+//
+//func (m *MsgController) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+//	return m.database.GetMsgBySeqs(ctx, userID, seqs)
+//}
+//
+//func (m *MsgController) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+//	return m.database.GetSuperGroupMsgBySeqs(ctx, groupID, seqs)
+//}
+//
+//func (m *MsgController) CleanUpUserMsg(ctx context.Context, userID string) error {
+//	return m.database.CleanUpUserMsg(ctx, userID)
+//}
+//
+//func (m *MsgController) DeleteUserSuperGroupMsgsAndSetMinSeq(ctx context.Context, groupID string, userIDs []string, remainTime int64) error {
+//	return m.database.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, remainTime)
+//}
+//
+//func (m *MsgController) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID string, remainTime int64) error {
+//	return m.database.DeleteUserMsgsAndSetMinSeq(ctx, userID, remainTime)
+//}
+//
+//func (m *MsgController) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
+//	return m.database.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
+//}
+//
+//func (m *MsgController) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error) {
+//	return m.database.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
+//}
+//
+//func (m *MsgController) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
+//	return m.database.SetGroupUserMinSeq(ctx, groupID, userID, minSeq)
+//}
+//
+//func (m *MsgController) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
+//	return m.database.SetUserMinSeq(ctx, userID, minSeq)
+//}
 
 type MsgDatabaseInterface interface {
 	// 批量插入消息
@@ -141,8 +142,14 @@ type MsgDatabaseInterface interface {
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
-}
 
+	JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
+
+	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
+
+	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
+	GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error)
+}
 type MsgDatabase struct {
 	mgo   unRelationTb.MsgDocModelInterface
 	cache cache.Cache
