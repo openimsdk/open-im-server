@@ -149,11 +149,109 @@ type MsgDatabaseInterface interface {
 
 	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
 	GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error)
+	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
+	GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error)
+	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
+	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
+	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
+	SetSendMsgStatus(ctx context.Context, userID string, status int32) error
+	GetSendMsgStatus(ctx context.Context, userID string) (int32, error)
+	MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error
+	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
+	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
+	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
+	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
+	GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error)
 }
 type MsgDatabase struct {
 	mgo   unRelationTb.MsgDocModelInterface
 	cache cache.Cache
 	msg   unRelationTb.MsgDocModel
+}
+
+func (db *MsgDatabase) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) SetSendMsgStatus(ctx context.Context, userID string, status int32) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetSendMsgStatus(ctx context.Context, userID string) (int32, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (db *MsgDatabase) GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabaseInterface {
