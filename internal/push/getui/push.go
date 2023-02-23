@@ -9,6 +9,7 @@ import (
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
+	"sync"
 
 	"Open_IM/pkg/utils"
 	"context"
@@ -64,13 +65,17 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 		maxNum := 999
 		if len(userIDs) > maxNum {
 			s := splitter.NewSplitter(maxNum, userIDs)
+			wg := sync.WaitGroup{}
+			wg.Add(len(s.GetSplitResult()))
 			for i, v := range s.GetSplitResult() {
 				go func(index int, userIDs []string) {
+					defer wg.Done()
 					if err = g.batchPush(ctx, token, userIDs, pushReq); err != nil {
 						log.NewError(tracelog.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
 					}
 				}(i, v.Item)
 			}
+			wg.Wait()
 		} else {
 			err = g.batchPush(ctx, token, userIDs, pushReq)
 		}

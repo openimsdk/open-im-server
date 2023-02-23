@@ -56,8 +56,8 @@ type OnlineHistoryRedisConsumerHandler struct {
 	producerToModify *kafka.Producer
 	producerToMongo  *kafka.Producer
 
-	msgInterface controller.MsgInterface
-	cache        cache.Cache
+	msgDatabase controller.MsgDatabase
+	cache       cache.Cache
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) Init() {
@@ -113,7 +113,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				}
 				log.Debug(triggerID, "msg storage length", len(storageMsgList), "push length", len(notStoragePushMsgList))
 				if len(storageMsgList) > 0 {
-					lastSeq, err := och.msgInterface.BatchInsertChat2Cache(ctx, msgChannelValue.aggregationID, storageMsgList)
+					lastSeq, err := och.msgDatabase.BatchInsertChat2Cache(ctx, msgChannelValue.aggregationID, storageMsgList)
 					if err != nil {
 						och.singleMsgFailedCountMutex.Lock()
 						och.singleMsgFailedCount += uint64(len(storageMsgList))

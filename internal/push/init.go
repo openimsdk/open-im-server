@@ -25,9 +25,12 @@ type Push struct {
 	successCount  uint64
 }
 
-func (p *Push) Init(rpcPort int) {
-	var cacheInterface cache.Cache
-
+func (p *Push) Init(rpcPort int) error {
+	redisClient, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	var cacheInterface cache.Cache = redisClient
 	p.rpcServer.Init(rpcPort, cacheInterface)
 	p.pushCh.Init()
 	statistics.NewStatistics(&p.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
@@ -40,6 +43,7 @@ func (p *Push) Init(rpcPort int) {
 	if config.Config.Push.Fcm.Enable {
 		p.offlinePusher = fcm.NewClient(cacheInterface)
 	}
+	return nil
 }
 
 func (p *Push) initPrometheus() {

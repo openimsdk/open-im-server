@@ -142,7 +142,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeCreateGroup(ctx, req); err != nil {
+	if err := CallbackBeforeCreateGroup(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 	var groupMembers []*relationTb.GroupMemberModel
@@ -158,7 +158,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != constant.ErrCallbackContinue {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -318,7 +318,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			member.OperatorUserID = opUserID
 			member.InviterUserID = opUserID
 			member.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != constant.ErrCallbackContinue {
 				return nil, err
 			}
 			groupMembers = append(groupMembers, member)
@@ -601,7 +601,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			OperatorUserID: tracelog.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
+		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != constant.ErrCallbackContinue {
 			return nil, err
 		}
 	}
@@ -645,7 +645,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != constant.ErrCallbackContinue {
 			return nil, err
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {

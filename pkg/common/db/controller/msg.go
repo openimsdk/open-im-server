@@ -161,7 +161,6 @@ type MsgDatabaseInterface interface {
 	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
-	GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error)
 }
 type MsgDatabase struct {
 	mgo   unRelationTb.MsgDocModelInterface
@@ -245,11 +244,6 @@ func (db *MsgDatabase) GetGroupMaxSeq(ctx context.Context, groupID string) (int6
 }
 
 func (db *MsgDatabase) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (db *MsgDatabase) GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -530,7 +524,7 @@ func (db *MsgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 }
 
 func (db *MsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	successMsgs, failedSeqs, err := db.cache.GetMessageListBySeq(ctx, userID, seqs)
+	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, userID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
@@ -551,7 +545,7 @@ func (db *MsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []i
 }
 
 func (db *MsgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
-	successMsgs, failedSeqs, err := db.cache.GetMessageListBySeq(ctx, groupID, seqs)
+	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, groupID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.PromeAdd(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))

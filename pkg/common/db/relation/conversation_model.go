@@ -100,5 +100,5 @@ func (c *ConversationGorm) FindRecvMsgNotNotifyUserIDs(ctx context.Context, grou
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userIDs", userIDs)
 	}()
-	return userIDs, utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("group_id = ? and recv_msg_opt", groupID, constant.ReceiveNotNotifyMessage).Pluck("user_id", &userIDs).Error, "")
+	return userIDs, utils.Wrap(c.DB.Model(&relation.ConversationModel{}).Where("group_id = ? and recv_msg_opt = ?", groupID, constant.ReceiveNotNotifyMessage).Pluck("user_id", &userIDs).Error, "")
 }

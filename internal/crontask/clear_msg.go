@@ -12,7 +12,7 @@ import (
 )
 
 type ClearMsgTool struct {
-	msgInterface   controller.MsgInterface
+	msgInterface   controller.MsgDatabase
 	userInterface  controller.UserDatabase
 	groupInterface controller.GroupDatabase
 }
@@ -73,7 +73,11 @@ func (c *ClearMsgTool) ClearSuperGroupMsg(ctx context.Context, workingGroupIDLis
 			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", groupID)
 			continue
 		}
-		c.FixGroupUserSeq(ctx, userIDs, groupID)
+		//for _, userID := range userIDs {
+		//	c.msgInterface.getgroup
+		//	c.FixGroupUserSeq(ctx, userID, groupID, )
+		//
+		//}
 		c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
 	}
 }

@@ -59,7 +59,7 @@ type Cache interface {
 
 	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error
-	GetMessageListBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
+	GetMessagesBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
 	SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error)
 	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error
 	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
@@ -213,13 +213,13 @@ func (r *RedisClient) SetGroupMinSeq(ctx context.Context, groupID string, minSeq
 }
 
 // Store userid and platform class to redis
-func (r *RedisClient) AddTokenFlag(ctx context.Context, userID string, platform string, token string, flag int) error {
-	key := uidPidToken + userID + ":" + platform
+func (r *RedisClient) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	return r.rdb.HSet(context.Background(), key, token, flag).Err()
 }
 
 //key:userID+platform-> <token, flag>
-func (r *RedisClient) GetTokenMapByUidPid(ctx context.Context, userID, platformID string) (map[string]int, error) {
+func (r *RedisClient) GetTokenMapByUidPid(ctx context.Context, userID, platformID int) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platformID
 	m, err := r.rdb.HGetAll(context.Background(), key).Result()
 	mm := make(map[string]int)
@@ -256,7 +256,7 @@ func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, pl
 	return r.rdb.HDel(context.Background(), key, fields...).Err()
 }
 
-func (r *RedisClient) GetMessageListBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err2 error) {
+func (r *RedisClient) GetMessagesBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err2 error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
