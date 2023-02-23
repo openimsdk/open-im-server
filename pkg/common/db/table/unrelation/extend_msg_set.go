@@ -1,7 +1,7 @@
 package unrelation
 
 import (
-	"Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"strconv"
 	"strings"

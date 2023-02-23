@@ -1,8 +1,8 @@
 package group
 
 import (
-	"Open_IM/pkg/apistruct"
-	"Open_IM/pkg/proto/group"
+	"OpenIM/pkg/apistruct"
+	"OpenIM/pkg/proto/group"
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"

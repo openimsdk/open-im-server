@@ -7,7 +7,7 @@
 package log
 
 import (
-	"Open_IM/pkg/common/config"
+	"OpenIM/pkg/common/config"
 	"context"
 	"fmt"
 	elasticV7 "github.com/olivere/elastic/v7"

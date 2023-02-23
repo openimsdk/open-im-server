@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"

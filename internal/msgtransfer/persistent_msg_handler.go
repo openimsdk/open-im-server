@@ -7,13 +7,13 @@
 package msgtransfer
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/controller"
-	kfk "Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/controller"
+	kfk "OpenIM/pkg/common/kafka"
+	"OpenIM/pkg/common/log"
+	pbMsg "OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/utils"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

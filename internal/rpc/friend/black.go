@@ -1,11 +1,11 @@
 package friend
 
 import (
-	"Open_IM/internal/common/convert"
-	"Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/common/tracelog"
-	pbFriend "Open_IM/pkg/proto/friend"
+	"OpenIM/internal/common/convert"
+	"OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/common/tracelog"
+	pbFriend "OpenIM/pkg/proto/friend"
 	"context"
 )
 

@@ -1,10 +1,10 @@
 package notification
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	pbFriend "Open_IM/pkg/proto/friend"
-	"Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	pbFriend "OpenIM/pkg/proto/friend"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

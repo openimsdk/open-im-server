@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"Open_IM/internal/tx"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/utils"
+	"OpenIM/internal/tx"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
 )

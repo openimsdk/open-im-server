@@ -1,7 +1,7 @@
 package tracelog
 
 import (
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/sirupsen/logrus"
 	"runtime"

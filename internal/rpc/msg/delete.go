@@ -1,14 +1,14 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/proto/msg"
-	common "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 )
 
-func (m *msgServer) DelMsgList(ctx context.Context, req *common.DelMsgListReq) (*common.DelMsgListResp, error) {
-	resp := &common.DelMsgListResp{}
+func (m *msgServer) DelMsgList(ctx context.Context, req *sdkws.DelMsgListReq) (*sdkws.DelMsgListResp, error) {
+	resp := &sdkws.DelMsgListResp{}
 	if _, err := m.MsgInterface.DelMsgBySeqs(ctx, req.UserID, req.SeqList); err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroup
 	//if err := m.MsgInterface.SetGroupUserMinSeq(ctx, req.GroupID, maxSeq); err != nil {
 	//	return nil, err
 	//}
-	if err := m.MsgInterface.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, req.GroupID, req.UserID, 0); err != nil {
+	if err := m.MsgInterface.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, req.GroupID, []string{req.UserID}, 0); err != nil {
 		return nil, err
 	}
 	return resp, nil

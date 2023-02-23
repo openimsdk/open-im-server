@@ -1,12 +1,12 @@
 package startrpc
 
 import (
-	"Open_IM/internal/common/network"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/middleware"
-	promePkg "Open_IM/pkg/common/prome"
+	"OpenIM/internal/common/network"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/middleware"
+	promePkg "OpenIM/pkg/common/prome"
 	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"

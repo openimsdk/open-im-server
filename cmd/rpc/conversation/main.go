@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Open_IM/internal/rpc/conversation"
-	"Open_IM/internal/startrpc"
-	"Open_IM/pkg/common/config"
+	"OpenIM/internal/rpc/conversation"
+	"OpenIM/internal/startrpc"
+	"OpenIM/pkg/common/config"
 )
 
 func main() {

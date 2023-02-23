@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"math/rand"
 	"strconv"

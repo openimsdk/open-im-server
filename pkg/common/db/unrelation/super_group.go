@@ -1,9 +1,9 @@
 package unrelation
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -1,13 +1,13 @@
 package msggateway
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	prome "Open_IM/pkg/common/prome"
-	"Open_IM/pkg/common/tokenverify"
-	pbRelay "Open_IM/pkg/proto/relay"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	prome "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/tokenverify"
+	pbRelay "OpenIM/pkg/proto/relay"
+	"OpenIM/pkg/utils"
 	"bytes"
 	"compress/gzip"
 	"context"

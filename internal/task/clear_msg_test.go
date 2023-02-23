@@ -1,8 +1,8 @@
 package task
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"fmt"
 	"strconv"

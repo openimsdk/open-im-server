@@ -1,20 +1,20 @@
 package controller
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/common/db/unrelation"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
-	"Open_IM/pkg/common/tracelog"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/common/db/unrelation"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/tracelog"
 	"github.com/gogo/protobuf/sortkeys"
 	"sync"
 	"time"
 
-	pbMsg "Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	pbMsg "OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"github.com/go-redis/redis/v8"
@@ -146,7 +146,6 @@ type MsgDatabase interface {
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
 
 	JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
-
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 
 	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)

@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prome"
-	pbConversation "Open_IM/pkg/proto/conversation"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	promePkg "OpenIM/pkg/common/prome"
+	pbConversation "OpenIM/pkg/proto/conversation"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/proto"
 	"sync"

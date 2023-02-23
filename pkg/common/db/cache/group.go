@@ -1,10 +1,10 @@
 package cache
 
 import (
-	relationTb "Open_IM/pkg/common/db/table/relation"
-	unrelation2 "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	unrelation2 "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"

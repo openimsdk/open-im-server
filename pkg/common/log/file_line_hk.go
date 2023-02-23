@@ -7,7 +7,7 @@
 package log
 
 import (
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"runtime"
 	"strings"

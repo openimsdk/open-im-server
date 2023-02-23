@@ -1,14 +1,14 @@
 package msggateway
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
 
-	"Open_IM/pkg/statistics"
+	"OpenIM/pkg/statistics"
 	"fmt"
 	"sync"
 
-	prome "Open_IM/pkg/common/prome"
+	prome "OpenIM/pkg/common/prome"
 
 	"github.com/go-playground/validator/v10"
 )

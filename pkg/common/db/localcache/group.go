@@ -1,10 +1,10 @@
 package localcache
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/discoveryregistry"
-	"Open_IM/pkg/proto/group"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/group"
 	"context"
 	"sync"
 )

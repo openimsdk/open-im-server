@@ -1,16 +1,16 @@
 package group
 
 //import (
-//	common "Open_IM/internal/api_to_rpc"
-//	api "Open_IM/pkg/apistruct"
-//	"Open_IM/pkg/common/config"
-//	"Open_IM/pkg/common/constant"
-//	"Open_IM/pkg/common/log"
-//	"Open_IM/pkg/common/token_verify"
-//	"Open_IM/pkg/common/tracelog"
-//	"Open_IM/pkg/getcdv3"
-//	rpc "Open_IM/pkg/proto/group"
-//	"Open_IM/pkg/utils"
+//	common "OpenIM/internal/api_to_rpc"
+//	api "OpenIM/pkg/apistruct"
+//	"OpenIM/pkg/common/config"
+//	"OpenIM/pkg/common/constant"
+//	"OpenIM/pkg/common/log"
+//	"OpenIM/pkg/common/token_verify"
+//	"OpenIM/pkg/common/tracelog"
+//	"OpenIM/pkg/getcdv3"
+//	rpc "OpenIM/pkg/proto/group"
+//	"OpenIM/pkg/utils"
 //	"context"
 //	"github.com/golang/protobuf/ptypes/wrappers"
 //	"google.golang.org/grpc"
@@ -20,7 +20,7 @@ package group
 //	"net/http"
 //	"strings"
 //
-//	jsonData "Open_IM/internal/utils"
+//	jsonData "OpenIM/internal/utils"
 //)
 
 // @Summary 把用户踢出群组

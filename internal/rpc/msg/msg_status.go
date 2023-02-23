@@ -1,9 +1,9 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	pbMsg "Open_IM/pkg/proto/msg"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	pbMsg "OpenIM/pkg/proto/msg"
 	"context"
 )
 

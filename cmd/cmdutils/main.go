@@ -1,17 +1,17 @@
 package main
 
 import (
-	"Open_IM/internal/task"
+	"OpenIM/internal/task"
 	"flag"
 	"fmt"
 	"time"
 )
 
 func main() {
-	var userID = flag.String("userID", "", "userID to clear msg and reset seq")
-	var workingGroupID = flag.String("workingGroupID", "", "workingGroupID to clear msg and reset seq")
-	var fixAllSeq = flag.Bool("fixAllSeq", false, "fix seq")
+	var userID = flag.String("user_id", "", "userID to clear msg and reset seq")
+	var superGroupID = flag.String("super_group_id", "", "superGroupID to clear msg and reset seq")
+	var fixAllSeq = flag.Bool("fix_all_seq", false, "fix seq")
 	flag.Parse()
-	fmt.Println(time.Now(), "start cronTask", *userID, *workingGroupID)
-	task.FixSeq(*userID, *workingGroupID, *fixAllSeq)
+	fmt.Println(time.Now(), "start cronTask", *userID, *superGroupID)
+	task.FixSeq(*userID, *superGroupID, *fixAllSeq)
 }

@@ -1,8 +1,8 @@
 package log
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/tracelog"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/tracelog"
 	"bufio"
 	"context"
 	//"bufio"

@@ -11,8 +11,8 @@ zookeeper:
 
 mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
-  dbMysqlUserName:  #mysql用户名，建议修改
-  dbMysqlPassword:  # mysql密码，建议修改
+  dbMysqlUserName: root #mysql用户名，建议修改
+  dbMysqlPassword: openIM123 # mysql密码，建议修改
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
@@ -30,8 +30,8 @@ mongo:
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName:  #mongo用户名，建议先不设置
-  dbPassword:   #mongo密码，建议先不设置
+  dbUserName: root #mongo用户名，建议先不设置
+  dbPassword: openIM123  #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
   chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
@@ -42,7 +42,7 @@ redis:
   dbMaxActive: 0
   dbIdleTimeout: 120
   dbUserName:     #only redis version 6.0+ need username
-  dbPassWord:  #redis密码 建议修改
+  dbPassWord: openIM123 #redis密码 建议修改
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
@@ -113,11 +113,11 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
     location: us-east-1
-    endpoint:  #minio外网ip 这个ip是给客户端访问的
+    endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
     endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
-    accessKeyID:
-    secretAccessKey:
+    accessKeyID: root
+    secretAccessKey: openIM123
     storageTime: 50 #文件在minio中保存的时间
     isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
@@ -203,11 +203,11 @@ push:
     pushIntent:  
     enable: false # true or false (bool)
   getui:  #个推推送
-    pushUrl: 
+    pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
-    enable: # true or false (bool)
+    enable: false # true or false (bool)
     channelID: ""
     channelName: ""
   fcm:  #firebase cloud message 消息推送
@@ -220,7 +220,7 @@ manager:
   secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
   appSysNotificationName: "系统通知"
 
-secret:
+secret: tuoyun
 # 多端互踢策略
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
@@ -236,11 +236,11 @@ singleMessageHasReadReceiptEnable: true
 
 #token config
 tokenpolicy:
-  accessSecret:  #token生成相关，默认即可
+  accessSecret: "OpenIM_server" #token生成相关，默认即可
   # Token effective time day as a unit
-  accessExpire:  #token过期时间（天） 默认即可
+  accessExpire: 90  #token过期时间（天） 默认即可
 messageverify:
-  friendVerify:
+  friendVerify: false
 
 #ios系统推送声音以及标记计数
 iospush:

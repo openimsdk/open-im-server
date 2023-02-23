@@ -1,11 +1,11 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table/relation"
-	pbMsg "Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/table/relation"
+	pbMsg "OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

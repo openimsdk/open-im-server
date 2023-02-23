@@ -1,14 +1,14 @@
 package push
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
-	pbPush "Open_IM/pkg/proto/push"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/prome"
+	pbPush "OpenIM/pkg/proto/push"
+	"OpenIM/pkg/utils"
 	"context"
 	"net"
 	"strconv"

@@ -1,7 +1,7 @@
 package check
 
 import (
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	"context"
 )
 

@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/config"
+	"OpenIM/pkg/common/config"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"time"

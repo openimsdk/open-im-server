@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Open_IM/pkg/common/constant"
+	"OpenIM/pkg/common/constant"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

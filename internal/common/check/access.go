@@ -1,7 +1,7 @@
 package check
 
 import (
-	"Open_IM/pkg/common/tokenverify"
+	"OpenIM/pkg/common/tokenverify"
 	"context"
 )
 

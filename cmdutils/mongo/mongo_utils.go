@@ -1,8 +1,8 @@
 package mongo
 
 import (
-	"Open_IM/pkg/common/config"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/config"
+	sdkws "OpenIM/pkg/proto/sdkws"
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/proto"

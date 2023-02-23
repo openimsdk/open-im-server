@@ -1,14 +1,14 @@
 package notification
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/common/tracelog"
-	pbGroup "Open_IM/pkg/proto/group"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/common/tracelog"
+	pbGroup "OpenIM/pkg/proto/group"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

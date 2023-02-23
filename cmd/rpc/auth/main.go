@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Open_IM/internal/rpc/auth"
-	"Open_IM/internal/startrpc"
-	"Open_IM/pkg/common/config"
+	"OpenIM/internal/rpc/auth"
+	"OpenIM/internal/startrpc"
+	"OpenIM/pkg/common/config"
 )
 
 func main() {

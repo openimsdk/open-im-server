@@ -1,8 +1,8 @@
 package new
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"

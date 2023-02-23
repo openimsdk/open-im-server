@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/internal/common/notification"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/internal/common/notification"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 

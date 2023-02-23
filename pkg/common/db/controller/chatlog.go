@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
-	pbMsg "Open_IM/pkg/proto/msg"
+	"OpenIM/pkg/common/db/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	pbMsg "OpenIM/pkg/proto/msg"
 	"gorm.io/gorm"
 )
 

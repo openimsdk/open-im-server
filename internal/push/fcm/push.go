@@ -1,10 +1,10 @@
 package fcm
 
 import (
-	"Open_IM/internal/push"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
+	"OpenIM/internal/push"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"

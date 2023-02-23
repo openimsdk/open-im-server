@@ -1,7 +1,7 @@
 package statistics
 
 import (
-	"Open_IM/pkg/common/log"
+	"OpenIM/pkg/common/log"
 	"time"
 )
 

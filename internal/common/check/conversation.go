@@ -1,10 +1,10 @@
 package check
 
 import (
-	"Open_IM/pkg/common/config"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
-	"Open_IM/pkg/proto/conversation"
-	pbConversation "Open_IM/pkg/proto/conversation"
+	"OpenIM/pkg/common/config"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/conversation"
+	pbConversation "OpenIM/pkg/proto/conversation"
 	"context"
 	"google.golang.org/grpc"
 )

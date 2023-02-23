@@ -1,11 +1,11 @@
-package apiThird
+package third
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
 	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	sts20150401 "github.com/alibabacloud-go/sts-20150401/client"

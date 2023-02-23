@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"fmt"
 	"github.com/pkg/errors"
 	"strings"

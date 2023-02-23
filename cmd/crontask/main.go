@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/internal/task"
+	"OpenIM/internal/task"
 	"fmt"
 	"time"
 )

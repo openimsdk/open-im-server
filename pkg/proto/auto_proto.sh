@@ -11,7 +11,7 @@ echo "proto file generate success"
 
 
 j=0
-for file in $(find ./Open_IM -name   "*.go"); do # Not recommended, will break on whitespace
+for file in $(find ./OpenIM -name   "*.go"); do # Not recommended, will break on whitespace
     filelist[j]=$file
     j=`expr $j + 1`
 done
@@ -19,10 +19,10 @@ done
 
 for ((i = 0; i < ${#filelist[*]}; i++)); do
   proto=${filelist[$i]}
-  cp $proto  ${proto#*./Open_IM/pkg/proto/}
+  cp $proto  ${proto#*./OpenIM/pkg/proto/}
 done
-rm Open_IM -rf
-#find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdkws\"/\"Open_IM\/pkg\/proto\/sdkws\"/g'
+rm OpenIM -rf
+#find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdkws\"/\"OpenIM\/pkg\/proto\/sdkws\"/g'
 
 
 

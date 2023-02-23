@@ -1,8 +1,8 @@
 package fcm
 
 import (
-	"Open_IM/internal/push"
-	"Open_IM/pkg/common/db/cache"
+	"OpenIM/internal/push"
+	"OpenIM/pkg/common/db/cache"
 	"context"
 	"github.com/stretchr/testify/assert"
 	"testing"

@@ -1,10 +1,10 @@
 package new
 
 import (
-	"Open_IM/internal/common/notification"
-	"Open_IM/pkg/proto/msg"
-	pbRtc "Open_IM/pkg/proto/rtc"
-	"Open_IM/pkg/proto/sdkws"
+	"OpenIM/internal/common/notification"
+	"OpenIM/pkg/proto/msg"
+	pbRtc "OpenIM/pkg/proto/rtc"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"

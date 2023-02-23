@@ -1,10 +1,10 @@
 package tokenverify
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
 	"time"

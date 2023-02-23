@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"Open_IM/pkg/common/db/relation"
-	relationTb "Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/db/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"

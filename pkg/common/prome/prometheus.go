@@ -1,7 +1,7 @@
 package prome
 
 import (
-	"Open_IM/pkg/common/config"
+	"OpenIM/pkg/common/config"
 	"bytes"
 	"net/http"
 	"strconv"

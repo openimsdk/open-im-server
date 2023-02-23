@@ -1,11 +1,11 @@
-package apiThird
+package third
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
 	"github.com/fatih/structs"
 
 	//"github.com/fatih/structs"

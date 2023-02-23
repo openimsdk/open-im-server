@@ -1,7 +1,7 @@
 package new
 
 import (
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"bytes"
 	"compress/gzip"
 	"io/ioutil"

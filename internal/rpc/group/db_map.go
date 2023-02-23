@@ -1,8 +1,8 @@
 package group
 
 import (
-	pbGroup "Open_IM/pkg/proto/group"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	pbGroup "OpenIM/pkg/proto/group"
+	sdkws "OpenIM/pkg/proto/sdkws"
 	"time"
 )
 

@@ -1,10 +1,10 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
-	pbChat "Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	pbChat "OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
 	"context"
 
 	"github.com/gin-gonic/gin"

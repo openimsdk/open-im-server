@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"Open_IM/internal/tx"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	relationTb "Open_IM/pkg/common/db/table/relation"
-	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/utils"
+	"OpenIM/internal/tx"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/dtm-labs/rockscache"

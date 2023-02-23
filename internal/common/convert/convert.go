@@ -1,11 +1,11 @@
 package convert
 
 import (
-	"Open_IM/internal/common/check"
-	"Open_IM/pkg/common/db/table/relation"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
-	sdk "Open_IM/pkg/proto/sdkws"
-	utils2 "Open_IM/pkg/utils"
+	"OpenIM/internal/common/check"
+	"OpenIM/pkg/common/db/table/relation"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	sdk "OpenIM/pkg/proto/sdkws"
+	utils2 "OpenIM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"

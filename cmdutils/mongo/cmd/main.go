@@ -1,8 +1,8 @@
 package main
 
 import (
-	mongoUtils "Open_IM/cmdutils/mongo"
-	"Open_IM/pkg/common/config"
+	mongoUtils "OpenIM/cmdutils/mongo"
+	"OpenIM/pkg/common/config"
 	"context"
 	"flag"
 	"fmt"

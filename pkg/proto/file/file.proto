@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "Open_IM/pkg/proto/file;file";
+option go_package = "OpenIM/pkg/proto/file;file";
 package file;
 
 

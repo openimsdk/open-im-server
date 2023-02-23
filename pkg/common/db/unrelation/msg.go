@@ -1,9 +1,9 @@
 package unrelation
 
 import (
-	table "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	table "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"

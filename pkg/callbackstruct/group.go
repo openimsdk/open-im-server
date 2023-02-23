@@ -1,8 +1,8 @@
 package callbackstruct
 
 import (
-	"Open_IM/pkg/apistruct"
-	common "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/apistruct"
+	common "OpenIM/pkg/proto/sdkws"
 )
 
 type CallbackCommand string

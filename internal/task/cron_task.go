@@ -1,10 +1,10 @@
 package task
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"time"
@@ -36,7 +36,7 @@ func StartCronTask() error {
 	}
 }
 
-func FixSeq(userID, workingGroupID string, fixAllSeq bool) {
+func FixSeq(userID, superGroupID string, fixAllSeq bool) {
 	log.NewPrivateLog(moduleName)
 	log.NewInfo(utils.OperationIDGenerator(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
 	clearCronTask := msgTool{}
@@ -46,8 +46,8 @@ func FixSeq(userID, workingGroupID string, fixAllSeq bool) {
 	if userID != "" {
 		clearCronTask.ClearUsersMsg(ctx, []string{userID})
 	}
-	if workingGroupID != "" {
-		clearCronTask.ClearSuperGroupMsg(ctx, []string{workingGroupID})
+	if superGroupID != "" {
+		clearCronTask.ClearSuperGroupMsg(ctx, []string{superGroupID})
 	}
 	if fixAllSeq {
 		clearCronTask.FixAllSeq(ctx)

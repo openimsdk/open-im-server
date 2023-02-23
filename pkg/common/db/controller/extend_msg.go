@@ -1,8 +1,8 @@
 package controller
 
 import (
-	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/proto/sdkws"
+	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"

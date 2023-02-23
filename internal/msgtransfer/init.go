@@ -1,8 +1,8 @@
 package msgtransfer
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/prome"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/prome"
 	"fmt"
 )
 

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"Open_IM/internal/push"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
+	"OpenIM/internal/push"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
 	"flag"
 	"fmt"
 	"sync"
