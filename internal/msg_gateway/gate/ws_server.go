@@ -106,6 +106,12 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			ws.delUserConn(conn)
 			return
 		}
+		if messageType == websocket.CloseMessage {
+			log.NewWarn("", "WS receive error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", string(msg))
+			userCount--
+			ws.delUserConn(conn)
+			return
+		}
 		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
 		if conn.IsCompress {
 			buff := bytes.NewBuffer(msg)
