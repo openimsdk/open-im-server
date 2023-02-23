@@ -1,13 +1,13 @@
 package cache
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	pbChat "Open_IM/pkg/proto/msg"
-	pbRtc "Open_IM/pkg/proto/rtc"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	pbChat "OpenIM/pkg/proto/msg"
+	pbRtc "OpenIM/pkg/proto/rtc"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"

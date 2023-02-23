@@ -1,21 +1,21 @@
 package controller
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/common/db/unrelation"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
-	"Open_IM/pkg/common/tracelog"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/common/db/unrelation"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/tracelog"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
 	"sync"
 	"time"
 
-	pbMsg "Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	pbMsg "OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"github.com/go-redis/redis/v8"
@@ -71,7 +71,6 @@ type MsgDatabaseInterface interface {
 	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
-	GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error)
 }
 
 func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabaseInterface {
@@ -185,11 +184,6 @@ func (db *MsgDatabase) GetGroupMaxSeq(ctx context.Context, groupID string) (int6
 
 func (db *MsgDatabase) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
 	return db.cache.GetGroupMinSeq(ctx, groupID)
-}
-
-func (db *MsgDatabase) GetMessageListBySeq(ctx context.Context, userID string, seqs []int64) ([]*sdkws.MsgData, error) {
-	seqMsg, _, err := db.cache.GetMessageListBySeq(ctx, userID, seqs)
-	return seqMsg, err
 }
 
 func (db *MsgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) error {
