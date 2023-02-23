@@ -14,7 +14,9 @@ func main() {
 	var fixAllSeq = flag.Bool("fix_all_seq", false, "fix seq")
 	var configPath = flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig(*configPath)
+	if err := config.InitConfig(*configPath); err != nil {
+		panic(err.Error())
+	}
 	fmt.Println(time.Now(), "start cronTask", *userID, *superGroupID)
 	task.FixSeq(*userID, *superGroupID, *fixAllSeq)
 }

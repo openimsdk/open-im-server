@@ -16,7 +16,9 @@ func main() {
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.MessageTransferPrometheusPort[0], "PushrometheusPort default listen port")
 	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig(*configPath)
+	if err := config.InitConfig(*configPath); err != nil {
+		panic(err.Error())
+	}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)

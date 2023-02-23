@@ -20,7 +20,9 @@ func main() {
 	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
 	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig(*configPath)
+	if err := config.InitConfig(*configPath); err != nil {
+		panic(err.Error())
+	}
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)

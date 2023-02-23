@@ -12,7 +12,9 @@ func main() {
 	fmt.Println(time.Now(), "start cronTask")
 	var configPath = flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig(*configPath)
+	if err := config.InitConfig(*configPath); err != nil {
+		panic(err.Error())
+	}
 	if err := task.StartCronTask(); err != nil {
 		panic(err.Error())
 	}

@@ -502,17 +502,17 @@ type Notification struct {
 	} `yaml:"signal"`
 }
 
-func unmarshalConfig(config interface{}, configPath string) {
+func unmarshalConfig(config interface{}, configPath string) error {
 	bytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		panic(err.Error() + configPath)
+		return err
 	}
 	if err = yaml.Unmarshal(bytes, config); err != nil {
-		panic(err.Error())
+		return err
 	}
 }
 
-func initConfig(config interface{}, configName, configPath string) {
+func initConfig(config interface{}, configName, configPath string) error {
 	if configPath == "" {
 		var env = "CONFIG_NAME"
 		if configName == "config.yaml" {
@@ -533,11 +533,18 @@ func initConfig(config interface{}, configName, configPath string) {
 			configPath = fmt.Sprintf("../config/%s", configName)
 		}
 	}
-	unmarshalConfig(config, configPath)
+	return unmarshalConfig(config, configPath)
 }
 
-func InitConfig(configPath string) {
-	initConfig(&Config, "config.yaml", configPath)
-	initConfig(&NotificationConfig, "notification.yaml", configPath)
+func InitConfig(configPath string) error {
+	err := initConfig(&Config, "config.yaml", configPath)
+	if err != nil {
+		return err
+	}
+	err = initConfig(&NotificationConfig, "notification.yaml", configPath)
+	if err != nil {
+		return err
+	}
 	Config.Notification = NotificationConfig.Notification
+	return nil
 }

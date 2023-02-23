@@ -20,7 +20,9 @@ func main() {
 	prometheusPort := flag.Int("prometheus_port", defaultPromePorts[0], "PushrometheusPort default listen port")
 	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
-	config.InitConfig(*configPath)
+	if err := config.InitConfig(*configPath); err != nil {
+		panic(err.Error())
+	}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort, *prometheusPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
