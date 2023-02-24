@@ -287,7 +287,7 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 
 func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
 	resp := &sdkws.PullMessageBySeqListResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgInterface.GetMessagesBySeq(ctx, req.UserID, req.Seqs)
+	msgs, err := m.MsgInterface.GetMessagesBySeqs(ctx, req.UserID, req.Seqs)
 	if err != nil {
 		return nil, err
 	}
