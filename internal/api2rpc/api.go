@@ -23,7 +23,7 @@ import (
 //		return
 //	}
 //	tracelog.SetCtxInfo(ctx, logFuncName, nil, "apiReq", apiReq)
-//	etcdConn, err := rpc.GetConn(ctx, rpcName)
+//	etcdConn, err := rpcFn.GetConn(ctx, rpcName)
 //	if err != nil {
 //		WriteErrorResponse(ctx, "GetConn", err)
 //		return

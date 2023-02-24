@@ -1,7 +1,6 @@
 package apistruct
 
 import (
-	pbRelay "OpenIM/pkg/proto/relay"
 	sdkws "OpenIM/pkg/proto/sdkws"
 )
 
@@ -26,7 +25,7 @@ type GetUsersOnlineStatusReq struct {
 }
 type GetUsersOnlineStatusResp struct {
 	CommResp
-	SuccessResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
+	//SuccessResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
 }
 type AccountCheckReq struct {
 	OperationID     string   `json:"operationID" binding:"required"`

@@ -510,6 +510,7 @@ func unmarshalConfig(config interface{}, configPath string) error {
 	if err = yaml.Unmarshal(bytes, config); err != nil {
 		return err
 	}
+	return nil
 }
 
 func initConfig(config interface{}, configName, configPath string) error {
