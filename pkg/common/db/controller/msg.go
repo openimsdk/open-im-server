@@ -418,7 +418,7 @@ func (db *msgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *
 	return msgPb, nil
 }
 
-func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs []int64, diffusionType int) (seqMsg []*sdkws.MsgData, err error) {
+func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs []int64, diffusionType int) (seqMsgs []*sdkws.MsgData, err error) {
 	var hasSeqs []int64
 	singleCount := 0
 	m := db.msg.GetDocIDSeqsMap(sourceID, seqs)
@@ -436,7 +436,7 @@ func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 				return nil, err
 			}
 			if utils.Contain(msgPb.Seq, value...) {
-				seqMsg = append(seqMsg, msgPb)
+				seqMsgs = append(seqMsgs, msgPb)
 				hasSeqs = append(hasSeqs, msgPb.Seq)
 				singleCount++
 				if singleCount == len(value) {
@@ -454,12 +454,12 @@ func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 		} else if diffusionType == constant.ReadDiffusion {
 			exceptionMsg = db.msg.GenExceptionSuperGroupMessageBySeqs(diff, sourceID)
 		}
-		seqMsg = append(seqMsg, exceptionMsg...)
+		seqMsgs = append(seqMsgs, exceptionMsg...)
 	}
-	return seqMsg, nil
+	return seqMsgs, nil
 }
 
-func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []int64) (successMsgs []*sdkws.MsgData, err error) {
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, userID, seqs)
 	if err != nil {
 		if err != redis.Nil {
@@ -480,7 +480,7 @@ func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []i
 	return successMsgs, nil
 }
 
-func (db *msgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error) {
+func (db *msgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID string, seqs []int64) (successMsgs []*sdkws.MsgData, err error) {
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, groupID, seqs)
 	if err != nil {
 		if err != redis.Nil {
