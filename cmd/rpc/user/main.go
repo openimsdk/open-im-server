@@ -8,6 +8,6 @@ import (
 
 func main() {
 
-	startrpc.Start(config.Config.RpcPort.OpenImUserPort[0], config.Config.RpcRegisterName.OpenImUserName, config.Config.Prometheus.UserPrometheusPort[0], user.Start)
+	startrpc.Start(config.Config.RpcPort.OpenImUserPort, config.Config.RpcRegisterName.OpenImUserName, config.Config.Prometheus.UserPrometheusPort[0], user.Start)
 
 }

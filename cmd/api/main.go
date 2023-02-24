@@ -17,12 +17,14 @@ func main() {
 	log.NewPrivateLog(constant.LogFileName)
 	router := api.NewGinRouter()
 	go third.MinioInit()
-	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
 	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
 	if err := config.InitConfig(*configPath); err != nil {
 		panic(err.Error())
 	}
+
+	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
+	flag.Parse()
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
