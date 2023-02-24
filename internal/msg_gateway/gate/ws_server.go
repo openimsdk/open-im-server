@@ -106,6 +106,12 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			ws.delUserConn(conn)
 			return
 		}
+		if messageType == websocket.CloseMessage {
+			log.NewWarn("", "WS receive error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", string(msg))
+			userCount--
+			ws.delUserConn(conn)
+			return
+		}
 		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
 		if conn.IsCompress {
 			buff := bytes.NewBuffer(msg)
@@ -189,6 +195,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 	defer rwLock.Unlock()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
@@ -244,6 +251,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
