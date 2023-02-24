@@ -311,6 +311,7 @@ func (s *adminCMSServer) GetActiveGroup(_ context.Context, req *pbAdminCMS.GetAc
 		return resp, nil
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
+	toTime.AddDate(0, 0, 1)
 	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveGroups failed", err.Error())
@@ -340,6 +341,7 @@ func (s *adminCMSServer) GetActiveUser(_ context.Context, req *pbAdminCMS.GetAct
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
+	toTime.AddDate(0, 0, 1)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeUsers, err := imdb.GetActiveUsers(fromTime, toTime, 12)
 	if err != nil {
