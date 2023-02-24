@@ -1,9 +1,9 @@
-package apiThird
+package third
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/minio/minio-go/v7"

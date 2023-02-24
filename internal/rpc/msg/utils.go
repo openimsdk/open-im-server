@@ -1,10 +1,10 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )

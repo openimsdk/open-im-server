@@ -1,16 +1,16 @@
 /*
 ** description("").
-** copyright('Open_IM,www.Open_IM.io').
+** copyright('OpenIM,www.OpenIM.io').
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/5/21 15:29).
  */
 package msggateway
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	pbRtc "Open_IM/pkg/proto/rtc"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	pbRtc "OpenIM/pkg/proto/rtc"
+	sdkws "OpenIM/pkg/proto/sdkws"
 	"github.com/golang/protobuf/proto"
 )
 

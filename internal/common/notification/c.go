@@ -1,14 +1,14 @@
 package notification
 
 import (
-	"Open_IM/internal/common/check"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	utils2 "Open_IM/pkg/utils"
+	"OpenIM/internal/common/check"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	utils2 "OpenIM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 )
@@ -300,6 +300,5 @@ func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationM
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-
 	_, err = c.Msg.SendMsg(ctx, &req)
 }

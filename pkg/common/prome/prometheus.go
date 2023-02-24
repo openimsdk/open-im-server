@@ -1,7 +1,7 @@
 package prome
 
 import (
-	"Open_IM/pkg/common/config"
+	"OpenIM/pkg/common/config"
 	"bytes"
 	"net/http"
 	"strconv"
@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func StartPromeSrv(prometheusPort int) error {
+func StartPrometheusSrv(prometheusPort int) error {
 	if config.Config.Prometheus.Enable {
 		http.Handle("/metrics", promhttp.Handler())
 		err := http.ListenAndServe(":"+strconv.Itoa(prometheusPort), nil)
@@ -37,19 +37,19 @@ func (r responseBodyWriter) Write(b []byte) (int, error) {
 	return r.ResponseWriter.Write(b)
 }
 
-func PromeTheusMiddleware(c *gin.Context) {
-	PromeInc(ApiRequestCounter)
+func PrometheusMiddleware(c *gin.Context) {
+	Inc(ApiRequestCounter)
 	w := &responseBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
 	c.Writer = w
 	c.Next()
 	if c.Writer.Status() == http.StatusOK {
-		PromeInc(ApiRequestSuccessCounter)
+		Inc(ApiRequestSuccessCounter)
 	} else {
-		PromeInc(ApiRequestFailedCounter)
+		Inc(ApiRequestFailedCounter)
 	}
 }
 
-func PromeInc(counter prometheus.Counter) {
+func Inc(counter prometheus.Counter) {
 	if config.Config.Prometheus.Enable {
 		if counter != nil {
 			counter.Inc()
@@ -57,7 +57,7 @@ func PromeInc(counter prometheus.Counter) {
 	}
 }
 
-func PromeAdd(counter prometheus.Counter, add int) {
+func Add(counter prometheus.Counter, add int) {
 	if config.Config.Prometheus.Enable {
 		if counter != nil {
 			counter.Add(float64(add))
@@ -65,7 +65,7 @@ func PromeAdd(counter prometheus.Counter, add int) {
 	}
 }
 
-func PromeGaugeInc(gauges prometheus.Gauge) {
+func GaugeInc(gauges prometheus.Gauge) {
 	if config.Config.Prometheus.Enable {
 		if gauges != nil {
 			gauges.Inc()
@@ -73,7 +73,7 @@ func PromeGaugeInc(gauges prometheus.Gauge) {
 	}
 }
 
-func PromeGaugeDec(gauges prometheus.Gauge) {
+func GaugeDec(gauges prometheus.Gauge) {
 	if config.Config.Prometheus.Enable {
 		if gauges != nil {
 			gauges.Dec()

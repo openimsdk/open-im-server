@@ -1,14 +1,14 @@
 package apiAuth
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	rpc "Open_IM/pkg/proto/auth"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	rpc "OpenIM/pkg/proto/auth"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"net/http"
 	"strings"

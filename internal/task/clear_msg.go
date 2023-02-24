@@ -1,12 +1,12 @@
 package task
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -36,9 +36,9 @@ func (c *msgTool) ClearAll() {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
 	// working group msg clear
-	workingGroupIDList, err := c.groupInterface.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
+	superGroupIDList, err := c.groupInterface.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err == nil {
-		c.ClearSuperGroupMsg(ctx, workingGroupIDList)
+		c.ClearSuperGroupMsg(ctx, superGroupIDList)
 	} else {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
@@ -60,8 +60,8 @@ func (c *msgTool) ClearUsersMsg(ctx context.Context, userIDList []string) {
 	}
 }
 
-func (c *msgTool) ClearSuperGroupMsg(ctx context.Context, workingGroupIDList []string) {
-	for _, groupID := range workingGroupIDList {
+func (c *msgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDList []string) {
+	for _, groupID := range superGroupIDList {
 		userIDs, err := c.groupInterface.FindGroupMemberUserID(ctx, groupID)
 		if err != nil {
 			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "FindGroupMemberUserID", err.Error(), groupID)

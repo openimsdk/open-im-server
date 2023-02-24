@@ -1,4 +1,4 @@
-module Open_IM
+module OpenIM
 
 go 1.18
 

@@ -1,15 +1,15 @@
 package msggateway
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
-	pbChat "Open_IM/pkg/proto/msg"
-	push "Open_IM/pkg/proto/push"
-	pbRtc "Open_IM/pkg/proto/rtc"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/prome"
+	pbChat "OpenIM/pkg/proto/msg"
+	push "OpenIM/pkg/proto/push"
+	pbRtc "OpenIM/pkg/proto/rtc"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"bytes"
 	"context"
 	"encoding/gob"
@@ -50,18 +50,18 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	case constant.WSGetNewestSeq:
 		log.NewInfo(m.OperationID, "getSeqReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.getSeqReq(conn, &m)
-		prome.PromeInc(prome.GetNewestSeqTotalCounter)
+		prome.Inc(prome.GetNewestSeqTotalCounter)
 	case constant.WSSendMsg:
 		log.NewInfo(m.OperationID, "sendMsgReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.sendMsgReq(conn, &m)
-		prome.PromeInc(prome.MsgRecvTotalCounter)
+		prome.Inc(prome.MsgRecvTotalCounter)
 	case constant.WSSendSignalMsg:
 		log.NewInfo(m.OperationID, "sendSignalMsgReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.sendSignalMsgReq(conn, &m)
 	case constant.WSPullMsgBySeqList:
 		log.NewInfo(m.OperationID, "pullMsgBySeqListReq ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.pullMsgBySeqListReq(conn, &m)
-		prome.PromeInc(prome.PullMsgBySeqListTotalCounter)
+		prome.Inc(prome.PullMsgBySeqListTotalCounter)
 	case constant.WsLogoutMsg:
 		log.NewInfo(m.OperationID, "conn.Close()", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.userLogoutReq(conn, &m)

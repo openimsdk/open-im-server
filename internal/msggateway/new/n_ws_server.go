@@ -1,9 +1,9 @@
 package new
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/utils"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"

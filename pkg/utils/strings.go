@@ -7,7 +7,7 @@
 package utils
 
 import (
-	"Open_IM/pkg/common/constant"
+	"OpenIM/pkg/common/constant"
 	"encoding/json"
 	"math/rand"
 	"strconv"

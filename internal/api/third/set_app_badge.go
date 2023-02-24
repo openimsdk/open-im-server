@@ -1,10 +1,10 @@
-package apiThird
+package third
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/utils"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

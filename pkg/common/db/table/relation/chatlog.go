@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 	"time"
 
-	pbMsg "Open_IM/pkg/proto/msg"
+	pbMsg "OpenIM/pkg/proto/msg"
 )
 
 const (

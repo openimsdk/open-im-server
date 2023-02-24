@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"Open_IM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/cache"
 	"context"
 	"github.com/go-redis/redis/v8"
 )

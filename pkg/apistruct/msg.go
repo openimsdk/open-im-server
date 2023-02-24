@@ -1,8 +1,8 @@
 package apistruct
 
 import (
-	"Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
 )
 
 type DelMsgReq struct {

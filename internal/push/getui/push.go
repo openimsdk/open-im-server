@@ -1,17 +1,17 @@
 package getui
 
 import (
-	"Open_IM/internal/push"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db/cache"
-	http2 "Open_IM/pkg/common/http"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/utils/splitter"
+	"OpenIM/internal/push"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/db/cache"
+	http2 "OpenIM/pkg/common/http"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
 	"sync"
 
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/utils"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -38,12 +38,12 @@ const (
 )
 
 type Client struct {
-	cache           cache.MsgCache
+	cache           cache.Cache
 	tokenExpireTime int64
 	taskIDTTL       int64
 }
 
-func NewClient(cache cache.MsgCache) *Client {
+func NewClient(cache cache.Cache) *Client {
 	return &Client{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
 }
 
@@ -70,8 +70,9 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 			for i, v := range s.GetSplitResult() {
 				go func(index int, userIDs []string) {
 					defer wg.Done()
-					if err = g.batchPush(ctx, token, userIDs, pushReq); err != nil {
+					if err2 := g.batchPush(ctx, token, userIDs, pushReq); err2 != nil {
 						log.NewError(tracelog.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
+						err = err2
 					}
 				}(i, v.Item)
 			}

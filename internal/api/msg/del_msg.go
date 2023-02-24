@@ -1,14 +1,14 @@
 package msg
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	rpc "Open_IM/pkg/proto/msg"
-	pbCommon "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	rpc "OpenIM/pkg/proto/msg"
+	pbCommon "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"

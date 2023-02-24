@@ -1,18 +1,17 @@
 package msgtransfer
 
 import (
-	"Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/controller"
-	unRelationTb "Open_IM/pkg/common/db/table/unrelation"
-	kfk "Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	pbMsg "Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/controller"
+	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	kfk "OpenIM/pkg/common/kafka"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	pbMsg "OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
 	"github.com/Shopify/sarama"
@@ -24,7 +23,6 @@ type ModifyMsgConsumerHandler struct {
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
 
 	extendMsgInterface controller.ExtendMsgInterface
-	cache              cache.MsgCache
 }
 
 func (mmc *ModifyMsgConsumerHandler) Init() {

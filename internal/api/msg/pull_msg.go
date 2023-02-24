@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

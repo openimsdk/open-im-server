@@ -1,22 +1,22 @@
 package msg
 
 import (
-	"Open_IM/internal/common/check"
-	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/db/localcache"
-	"Open_IM/pkg/common/db/relation"
-	tablerelation "Open_IM/pkg/common/db/table/relation"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
+	"OpenIM/internal/common/check"
+	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/db/localcache"
+	"OpenIM/pkg/common/db/relation"
+	tablerelation "OpenIM/pkg/common/db/table/relation"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
 
-	promePkg "Open_IM/pkg/common/prome"
-	"Open_IM/pkg/proto/msg"
+	promePkg "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/proto/msg"
 	"google.golang.org/grpc"
 )
 
 type msgServer struct {
 	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
-	MsgInterface   controller.MsgDatabaseInterface
+	MsgDatabase    controller.MsgDatabase
 	Group          *check.GroupChecker
 	User           *check.UserCheck
 	Conversation   *check.ConversationChecker
@@ -45,7 +45,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		Conversation: check.NewConversationChecker(client),
 		User:         check.NewUserCheck(client),
 		Group:        check.NewGroupChecker(client),
-		//MsgInterface: controller.MsgInterface(),
+		//MsgDatabase: controller.MsgDatabase(),
 		RegisterCenter:  client,
 		GroupLocalCache: localcache.NewGroupMemberIDsLocalCache(client),
 		black:           check.NewBlackChecker(client),

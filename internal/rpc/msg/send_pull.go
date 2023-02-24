@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/constant"
-	promePkg "Open_IM/pkg/common/prome"
-	pbConversation "Open_IM/pkg/proto/conversation"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	promePkg "OpenIM/pkg/common/prome"
+	pbConversation "OpenIM/pkg/proto/conversation"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/proto"
 	"sync"
@@ -14,18 +14,18 @@ import (
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	resp = &msg.SendMsgResp{}
-	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
 	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
 	if _, err = m.messageVerification(ctx, req); err != nil {
-		promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.GroupID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.GroupID, &msgToMQSingle)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 
-	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
@@ -42,12 +42,12 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 }
 func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.RecvID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.RecvID, &msgToMQSingle)
 	if err != nil {
 		return nil, err
 	}
 	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.SendID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.SendID, &msgToMQSingle)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +60,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
-	promePkg.PromeInc(promePkg.SingleChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
 	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
@@ -74,13 +74,13 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	}
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
 	if isSend {
-		err = m.MsgInterface.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
 		if err != nil {
 			return nil, constant.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
 	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgInterface.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
 		if err != nil {
 			return nil, constant.ErrInternalServer.Wrap("insert to mq")
 		}
@@ -89,7 +89,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
-	promePkg.PromeInc(promePkg.SingleChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
@@ -98,7 +98,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	// callback
-	promePkg.PromeInc(promePkg.GroupChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.GroupChatMsgRecvSuccessCounter)
 	err = CallbackBeforeSendGroupMsg(ctx, req)
 	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
@@ -106,7 +106,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 
 	var memberUserIDList []string
 	if memberUserIDList, err = m.messageVerification(ctx, req); err != nil {
-		promePkg.PromeInc(promePkg.GroupChatMsgProcessFailedCounter)
+		promePkg.Inc(promePkg.GroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
 
@@ -221,7 +221,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	}
 	//
 
-	promePkg.PromeInc(promePkg.GroupChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.GroupChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
@@ -255,11 +255,11 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
 	resp := new(sdkws.GetMaxAndMinSeqResp)
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
-	maxSeq, err := m.MsgInterface.GetUserMaxSeq(ctx, req.UserID)
+	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	minSeq, err := m.MsgInterface.GetUserMinSeq(ctx, req.UserID)
+	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -268,11 +268,11 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	if len(req.GroupIDList) > 0 {
 		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
 		for _, groupID := range req.GroupIDList {
-			maxSeq, err := m.MsgInterface.GetGroupMaxSeq(ctx, groupID)
+			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
-			minSeq, err := m.MsgInterface.GetGroupMinSeq(ctx, groupID)
+			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
@@ -287,13 +287,13 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 
 func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
 	resp := &sdkws.PullMessageBySeqListResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgInterface.GetMessageListBySeq(ctx, req.UserID, req.Seqs)
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
 	if err != nil {
 		return nil, err
 	}
 	resp.List = msgs
-	for userID := range req.GroupSeqList {
-		msgs, err := m.MsgInterface.GetMessageListBySeq(ctx, userID, req.Seqs)
+	for userID, list := range req.GroupSeqList {
+		msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, userID, req.Seqs)
 		if err != nil {
 			return nil, err
 		}

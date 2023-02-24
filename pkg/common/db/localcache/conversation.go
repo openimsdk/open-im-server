@@ -1,9 +1,9 @@
 package localcache
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/discoveryregistry"
-	"Open_IM/pkg/proto/conversation"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/conversation"
 	"context"
 	"sync"
 )

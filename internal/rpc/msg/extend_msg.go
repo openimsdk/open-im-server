@@ -1,12 +1,12 @@
 package msg
 
 import (
-	"Open_IM/internal/common/notification"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/internal/common/notification"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 
@@ -27,7 +27,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, !req.IsReact, false)
 		return resp, nil
 	}
-	isExists, err := m.MsgInterface.JudgeMessageReactionEXISTS(ctx, req.ClientMsgID, req.SessionType)
+	isExists, err := m.MsgDatabase.JudgeMessageReactionEXISTS(ctx, req.ClientMsgID, req.SessionType)
 	if err != nil {
 		return nil, err
 	}
@@ -41,12 +41,12 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 					return nil, err
 				}
 				v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-				if err := m.MsgInterface.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
+				if err := m.MsgDatabase.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
 					return nil, err
 				}
 			}
 			resp.IsReact = true
-			_, err := m.MsgInterface.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
+			_, err := m.MsgDatabase.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
 			if err != nil {
 				return nil, err
 			}
@@ -55,7 +55,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 			if err != nil {
 				return nil, err
 			}
-			mongoValue, err := m.MsgInterface.GetExtendMsg(ctx, req.SourceID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
+			mongoValue, err := m.MsgDatabase.GetExtendMsg(ctx, req.SourceID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
 			if err != nil {
 				return nil, err
 			}

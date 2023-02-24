@@ -7,14 +7,14 @@
 package push
 
 import (
-	fcm "Open_IM/internal/push/fcm"
-	"Open_IM/internal/push/getui"
-	jpush "Open_IM/internal/push/jpush"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/prome"
-	"Open_IM/pkg/statistics"
+	fcm "OpenIM/internal/push/fcm"
+	"OpenIM/internal/push/getui"
+	jpush "OpenIM/internal/push/jpush"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/statistics"
 	"fmt"
 )
 
@@ -55,7 +55,7 @@ func (p *Push) Run(prometheusPort int) {
 	go p.rpcServer.run()
 	go p.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&p.pushCh)
 	go func() {
-		err := prome.StartPromeSrv(prometheusPort)
+		err := prome.StartPrometheusSrv(prometheusPort)
 		if err != nil {
 			panic(err)
 		}

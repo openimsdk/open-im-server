@@ -1,9 +1,9 @@
 package unrelation
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db/table/unrelation"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -57,7 +57,6 @@ func (s *SuperGroupMongoDriver) FindSuperGroup(ctx context.Context, groupIDs []s
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-
 	if err := cursor.All(ctx, &groups); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -65,43 +64,32 @@ func (s *SuperGroupMongoDriver) FindSuperGroup(ctx context.Context, groupIDs []s
 }
 
 func (s *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
-	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
-	return s.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
-		_, err := s.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDs}}})
+	_, err := s.superGroupCollection.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDs}}})
+	if err != nil {
+		return err
+	}
+	upsert := true
+	opts := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	for _, userID := range userIDs {
+		_, err = s.userToSuperGroupCollection.UpdateOne(ctx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
-			_ = sCtx.AbortTransaction(ctx)
-			return err
+			return utils.Wrap(err, "transaction failed")
 		}
-		upsert := true
-		opts := &options.UpdateOptions{
-			Upsert: &upsert,
-		}
-		for _, userID := range userIDs {
-			_, err = s.userToSuperGroupCollection.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
-			if err != nil {
-				_ = sCtx.AbortTransaction(ctx)
-				return utils.Wrap(err, "transaction failed")
-			}
-		}
-		return sCtx.CommitTransaction(ctx)
-	})
+	}
 }
 
 func (s *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
-	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
-	return s.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
-		_, err := s.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDs}}})
-		if err != nil {
-			_ = sCtx.AbortTransaction(ctx)
-			return err
-		}
-		err = s.RemoveGroupFromUser(sCtx, groupID, userIDs)
-		if err != nil {
-			_ = sCtx.AbortTransaction(ctx)
-			return err
-		}
-		return sCtx.CommitTransaction(ctx)
-	})
+	_, err := s.superGroupCollection.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDs}}})
+	if err != nil {
+		return err
+	}
+	err = s.RemoveGroupFromUser(ctx, groupID, userIDs)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *SuperGroupMongoDriver) GetSuperGroupByUserID(ctx context.Context, userID string) (*unrelation.UserToSuperGroupModel, error) {

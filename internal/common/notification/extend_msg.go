@@ -1,12 +1,12 @@
 package notification
 
 import (
-	"Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/proto/msg"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/proto/msg"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 )
 

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"Open_IM/pkg/common/log"
+	"OpenIM/pkg/common/log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"

@@ -1,14 +1,14 @@
 package group
 
 //import (
-//	jsonData "Open_IM/internal/utils"
-//	api "Open_IM/pkg/apistruct"
-//	"Open_IM/pkg/common/config"
-//	"Open_IM/pkg/common/log"
-//	"Open_IM/pkg/common/token_verify"
-//	"Open_IM/pkg/getcdv3"
-//	rpc "Open_IM/pkg/proto/group"
-//	"Open_IM/pkg/utils"
+//	jsonData "OpenIM/internal/utils"
+//	api "OpenIM/pkg/apistruct"
+//	"OpenIM/pkg/common/config"
+//	"OpenIM/pkg/common/log"
+//	"OpenIM/pkg/common/token_verify"
+//	"OpenIM/pkg/getcdv3"
+//	rpc "OpenIM/pkg/proto/group"
+//	"OpenIM/pkg/utils"
 //	"context"
 //	"github.com/gin-gonic/gin"
 //	"net/http"

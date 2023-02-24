@@ -1,13 +1,13 @@
 package msg
 
 import (
-	cbapi "Open_IM/pkg/callbackstruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/http"
-	"Open_IM/pkg/common/tracelog"
-	pbChat "Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/utils"
+	cbapi "OpenIM/pkg/callbackstruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/http"
+	"OpenIM/pkg/common/tracelog"
+	pbChat "OpenIM/pkg/proto/msg"
+	"OpenIM/pkg/utils"
 	"context"
 )
 

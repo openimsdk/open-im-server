@@ -1,10 +1,10 @@
 package common
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	utils2 "Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	utils2 "OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"

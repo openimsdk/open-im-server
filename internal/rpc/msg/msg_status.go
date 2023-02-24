@@ -1,15 +1,15 @@
 package msg
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/tracelog"
-	pbMsg "Open_IM/pkg/proto/msg"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
+	pbMsg "OpenIM/pkg/proto/msg"
 	"context"
 )
 
 func (m *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgStatusReq) (*pbMsg.SetSendMsgStatusResp, error) {
 	resp := &pbMsg.SetSendMsgStatusResp{}
-	if err := m.MsgInterface.SetSendMsgStatus(ctx, tracelog.GetOperationID(ctx), req.Status); err != nil {
+	if err := m.MsgDatabase.SetSendMsgStatus(ctx, tracelog.GetOperationID(ctx), req.Status); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -17,7 +17,7 @@ func (m *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgS
 
 func (m *msgServer) GetSendMsgStatus(ctx context.Context, req *pbMsg.GetSendMsgStatusReq) (*pbMsg.GetSendMsgStatusResp, error) {
 	resp := &pbMsg.GetSendMsgStatusResp{}
-	status, err := m.MsgInterface.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
+	status, err := m.MsgDatabase.GetSendMsgStatus(ctx, tracelog.GetOperationID(ctx))
 	if IsNotFound(err) {
 		resp.Status = constant.MsgStatusNotExist
 		return resp, nil

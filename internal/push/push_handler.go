@@ -1,20 +1,20 @@
 /*
 ** description("").
-** copyright('Open_IM,www.Open_IM.io').
+** copyright('OpenIM,www.OpenIM.io').
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/5/13 10:33).
  */
 package push
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	kfk "Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tracelog"
-	pbChat "Open_IM/pkg/proto/msg"
-	pbPush "Open_IM/pkg/proto/push"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	kfk "OpenIM/pkg/common/kafka"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
+	pbChat "OpenIM/pkg/proto/msg"
+	pbPush "OpenIM/pkg/proto/push"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

@@ -1,8 +1,8 @@
 package msgtransfer
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/prome"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/prome"
 	"fmt"
 )
 
@@ -46,7 +46,7 @@ func (m *MsgTransfer) Run(promePort int) {
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&m.historyMongoCH)
 	go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(&m.modifyCH)
 	go func() {
-		err := prome.StartPromeSrv(promePort)
+		err := prome.StartPrometheusSrv(promePort)
 		if err != nil {
 			panic(err)
 		}

@@ -1,13 +1,13 @@
-package apiThird
+package third
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tokenverify"
-	_ "Open_IM/pkg/common/tokenverify"
-	"Open_IM/pkg/utils"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tokenverify"
+	_ "OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"

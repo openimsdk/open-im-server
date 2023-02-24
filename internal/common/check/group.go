@@ -1,12 +1,12 @@
 package check
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	discoveryRegistry "Open_IM/pkg/discoveryregistry"
-	"Open_IM/pkg/proto/group"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/group"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
 	"strings"

@@ -1,6 +1,7 @@
 package unrelation
 
 import (
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"strconv"
 	"strings"
@@ -40,8 +41,8 @@ type ExtendMsgSetModelInterface interface {
 	GetAllExtendMsgSet(ctx context.Context, sourceID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSetModel, err error)
 	GetExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, maxMsgUpdateTime int64) (*ExtendMsgSetModel, error)
 	InsertExtendMsg(ctx context.Context, sourceID string, sessionType int32, msg *ExtendMsgModel) error
-	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]KeyValueModel) error
-	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]KeyValueModel) error
+	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
+	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
 	TakeExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *ExtendMsgModel, err error)
 }
 

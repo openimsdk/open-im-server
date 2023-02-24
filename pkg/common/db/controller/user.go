@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/utils"
 	"context"
 )
 

@@ -1,8 +1,8 @@
 package apistruct
 
 import (
-	pbRelay "Open_IM/pkg/proto/relay"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	pbRelay "OpenIM/pkg/proto/relay"
+	sdkws "OpenIM/pkg/proto/sdkws"
 )
 
 type DeleteUsersReq struct {

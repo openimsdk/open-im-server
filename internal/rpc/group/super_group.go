@@ -1,12 +1,12 @@
 package group
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table/relation"
-	"Open_IM/pkg/common/db/table/unrelation"
-	pbGroup "Open_IM/pkg/proto/group"
-	sdkws "Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/db/table/unrelation"
+	pbGroup "OpenIM/pkg/proto/group"
+	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"strings"

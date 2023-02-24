@@ -1,10 +1,10 @@
 package push
 
 import (
-	"Open_IM/internal/push"
-	"Open_IM/internal/push/jpush/body"
-	"Open_IM/pkg/common/config"
-	http2 "Open_IM/pkg/common/http"
+	"OpenIM/internal/push"
+	"OpenIM/internal/push/jpush/body"
+	"OpenIM/pkg/common/config"
+	http2 "OpenIM/pkg/common/http"
 	"context"
 	"encoding/base64"
 	"fmt"

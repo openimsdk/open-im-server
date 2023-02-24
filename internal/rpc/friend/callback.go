@@ -1,12 +1,12 @@
 package friend
 
 import (
-	cbapi "Open_IM/pkg/callbackstruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/http"
-	"Open_IM/pkg/common/tracelog"
-	pbfriend "Open_IM/pkg/proto/friend"
+	cbapi "OpenIM/pkg/callbackstruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/http"
+	"OpenIM/pkg/common/tracelog"
+	pbfriend "OpenIM/pkg/proto/friend"
 	"context"
 )
 

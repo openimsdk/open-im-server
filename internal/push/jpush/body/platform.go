@@ -1,7 +1,7 @@
 package body
 
 import (
-	"Open_IM/pkg/common/constant"
+	"OpenIM/pkg/common/constant"
 	"errors"
 )
 

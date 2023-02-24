@@ -1,12 +1,12 @@
 package conversation
 
 import (
-	api "Open_IM/pkg/apistruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
-	pbConversation "Open_IM/pkg/proto/conversation"
-	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/pkg/utils"
+	api "OpenIM/pkg/apistruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	pbConversation "OpenIM/pkg/proto/conversation"
+	pbUser "OpenIM/pkg/proto/user"
+	"OpenIM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

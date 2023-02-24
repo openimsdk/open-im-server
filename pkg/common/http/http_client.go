@@ -7,9 +7,9 @@
 package http
 
 import (
-	"Open_IM/pkg/callbackstruct"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
+	"OpenIM/pkg/callbackstruct"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"

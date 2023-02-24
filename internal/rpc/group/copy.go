@@ -1,9 +1,9 @@
 package group
 
 import (
-	"Open_IM/pkg/common/db/table/relation"
-	pbGroup "Open_IM/pkg/proto/group"
-	sdkws "Open_IM/pkg/proto/sdkws"
+	"OpenIM/pkg/common/db/table/relation"
+	pbGroup "OpenIM/pkg/proto/group"
+	sdkws "OpenIM/pkg/proto/sdkws"
 	"time"
 )
 

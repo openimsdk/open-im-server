@@ -1,12 +1,12 @@
 package startrpc
 
 import (
-	"Open_IM/internal/common/network"
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/middleware"
-	promePkg "Open_IM/pkg/common/prome"
+	"OpenIM/internal/common/network"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/middleware"
+	"OpenIM/pkg/common/prome"
 	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
@@ -18,7 +18,11 @@ import (
 func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options []grpc.ServerOption) error {
 	flagRpcPort := flag.Int("port", rpcPorts[0], "get RpcGroupPort from cmd,default 16000 as port")
 	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts[0], "groupPrometheusPort default listen port")
+	configPath := flag.String("config_path", "../config/", "config folder")
 	flag.Parse()
+	if err := config.InitConfig(*configPath); err != nil {
+		return err
+	}
 	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", constant.CurrentVersion)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, *flagRpcPort))
@@ -37,11 +41,11 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 	}
 	options = append(options, grpc.UnaryInterceptor(middleware.RpcServerInterceptor)) // ctx 中间件
 	if config.Config.Prometheus.Enable {
-		promePkg.NewGrpcRequestCounter()
-		promePkg.NewGrpcRequestFailedCounter()
-		promePkg.NewGrpcRequestSuccessCounter()
+		prome.NewGrpcRequestCounter()
+		prome.NewGrpcRequestFailedCounter()
+		prome.NewGrpcRequestSuccessCounter()
 		options = append(options, []grpc.ServerOption{
-			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			//grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
@@ -53,7 +57,7 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 		return err
 	}
 	if config.Config.Prometheus.Enable {
-		err := promePkg.StartPromeSrv(*flagPrometheusPort)
+		err := prome.StartPrometheusSrv(*flagPrometheusPort)
 		if err != nil {
 			return err
 		}

@@ -7,25 +7,25 @@
 package push
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/localcache"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/prome"
-	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/discoveryregistry"
-	msggateway "Open_IM/pkg/proto/msggateway"
-	pbRtc "Open_IM/pkg/proto/rtc"
-	"Open_IM/pkg/proto/sdkws"
-	"Open_IM/pkg/utils"
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/localcache"
+	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/discoveryregistry"
+	msggateway "OpenIM/pkg/proto/msggateway"
+	pbRtc "OpenIM/pkg/proto/rtc"
+	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"github.com/golang/protobuf/proto"
 )
 
 type Pusher struct {
-	cache                  cache.MsgCache
+	cache                  cache.Cache
 	client                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          OfflinePusher
 	groupLocalCache        localcache.GroupLocalCache
@@ -33,7 +33,7 @@ type Pusher struct {
 	successCount           int
 }
 
-func NewPusher(cache cache.MsgCache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
+func NewPusher(cache cache.Cache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
 	return &Pusher{
 		cache:         cache,
 		client:        client,
@@ -187,10 +187,10 @@ func (p *Pusher) OfflinePushMsg(ctx context.Context, sourceID string, msg *sdkws
 	}
 	err = p.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
 	if err != nil {
-		prome.PromeInc(prome.MsgOfflinePushFailedCounter)
+		prome.Inc(prome.MsgOfflinePushFailedCounter)
 		return err
 	}
-	prome.PromeInc(prome.MsgOfflinePushSuccessCounter)
+	prome.Inc(prome.MsgOfflinePushSuccessCounter)
 	return nil
 }
 
