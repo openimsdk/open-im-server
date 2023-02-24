@@ -14,21 +14,18 @@ import (
 )
 
 func main() {
-	log.NewPrivateLog(constant.LogFileName)
-	router := api.NewGinRouter()
-	go third.MinioInit()
-	configPath := flag.String("config_path", "../config/", "config folder")
-	flag.Parse()
-	if err := config.InitConfig(*configPath); err != nil {
+	if err := config.InitConfig(); err != nil {
 		panic(err.Error())
 	}
-
+	log.NewPrivateLog(constant.LogFileName)
+	router := api.NewGinRouter()
 	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
 	flag.Parse()
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
+	go third.MinioInit()
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
 	err := router.Run(address)
 	if err != nil {

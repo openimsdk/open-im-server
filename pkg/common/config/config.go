@@ -1,7 +1,8 @@
 package config
 
 import (
-	"fmt"
+	"OpenIM/pkg/discoveryregistry"
+	"flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,8 +17,14 @@ var (
 	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
+const (
+	FileName             = "config.yaml"
+	NotificationFileName = "notification.yaml"
+	ENV                  = "CONFIG_NAME"
+	DefaultPath          = "../config/"
+)
+
 var Config config
-var NotificationConfig notificationConfig
 
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
@@ -315,10 +322,6 @@ type config struct {
 	} `yaml:"prometheus"`
 }
 
-type notificationConfig struct {
-	Notification Notification `yaml:"notification"`
-}
-
 type Notification struct {
 	GroupCreated struct {
 		Conversation PConversation `yaml:"conversation"`
@@ -495,14 +498,9 @@ type Notification struct {
 			CloseTips string `yaml:"closeTips"`
 		} `yaml:"defaultTips"`
 	} `yaml:"conversationSetPrivate"`
-	Signal struct {
-		OfflinePush struct {
-			Title string `yaml:"title"`
-		} `yaml:"offlinePush"`
-	} `yaml:"signal"`
 }
 
-func unmarshalConfig(config interface{}, configPath string) error {
+func (c *config) unmarshalConfig(config interface{}, configPath string) error {
 	bytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return err
@@ -513,39 +511,34 @@ func unmarshalConfig(config interface{}, configPath string) error {
 	return nil
 }
 
-func initConfig(config interface{}, configName, configPath string) error {
+func (c *config) initConfig(config interface{}, configName, configPath string) error {
 	if configPath == "" {
-		var env = "CONFIG_NAME"
-		if configName == "config.yaml" {
-			env = "CONFIG_NAME"
-		} else if configName == "usualConfig.yaml" {
-			env = "USUAL_CONFIG_NAME"
-		}
-		cfgName := os.Getenv(env)
-		if len(cfgName) != 0 {
-			configPath = filepath.Join(cfgName, "config", configName)
-			_, err := os.Stat(configPath)
-			if os.IsNotExist(err) {
-				configPath = filepath.Join(Root, "config", configName)
-			} else {
-				Root = cfgName
-			}
-		} else {
-			configPath = fmt.Sprintf("../config/%s", configName)
+		if configPath == "" {
+			configPath = DefaultPath
 		}
 	}
-	return unmarshalConfig(config, configPath)
+	_, err := os.Stat(configPath)
+	if os.IsNotExist(err) {
+		configPath = filepath.Join(Root, "config", configName)
+	}
+	Root = filepath.Dir(configPath)
+	return c.unmarshalConfig(config, configPath)
 }
 
-func InitConfig(configPath string) error {
-	err := initConfig(&Config, "config.yaml", configPath)
+func (c *config) Register(registry discoveryregistry.SvcDiscoveryRegistry) error {
+	registry
+}
+
+func InitConfig() error {
+	configPath := flag.String("config_path", os.Getenv(ENV), "folder for config")
+	flag.Parse()
+	err := Config.initConfig(&Config, FileName, *configPath)
 	if err != nil {
 		return err
 	}
-	err = initConfig(&NotificationConfig, "notification.yaml", configPath)
+	err = Config.initConfig(&Config.Notification, NotificationFileName, *configPath)
 	if err != nil {
 		return err
 	}
-	Config.Notification = NotificationConfig.Notification
 	return nil
 }
