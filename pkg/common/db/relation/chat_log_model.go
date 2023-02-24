@@ -17,7 +17,7 @@ type ChatLogGorm struct {
 	DB *gorm.DB
 }
 
-func NewChatLog(db *gorm.DB) *ChatLogGorm {
+func NewChatLogGorm(db *gorm.DB) *ChatLogGorm {
 	return &ChatLogGorm{DB: db}
 }
 

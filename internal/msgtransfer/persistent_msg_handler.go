@@ -21,7 +21,7 @@ import (
 
 type PersistentConsumerHandler struct {
 	persistentConsumerGroup *kfk.MConsumerGroup
-	chatLogInterface        controller.ChatLogInterface
+	chatLogInterface        controller.ChatLogDatabase
 }
 
 func (pc *PersistentConsumerHandler) Init() {
