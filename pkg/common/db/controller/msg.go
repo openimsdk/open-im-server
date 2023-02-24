@@ -629,7 +629,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	return seq, utils.Wrap(err, "deleteMsg failed")
 }
 
-func (db *MsgDatabase) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
+func (db *msgDatabase) GetUserMinMaxSeqInMongoAndCache(ctx context.Context, userID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
 	minSeqMongo, maxSeqMongo, err = db.GetMinMaxSeqMongo(ctx, userID)
 	if err != nil {
 		return 0, 0, 0, 0, err
