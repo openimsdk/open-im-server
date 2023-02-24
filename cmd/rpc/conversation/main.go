@@ -7,5 +7,10 @@ import (
 )
 
 func main() {
-	startrpc.Start(config.Config.RpcPort.OpenImConversationPort, config.Config.RpcRegisterName.OpenImConversationName, config.Config.Prometheus.ConversationPrometheusPort, conversation.Start)
+	if err := config.InitConfig(); err != nil {
+		panic(err.Error())
+	}
+	if err := startrpc.Start(config.Config.RpcPort.OpenImConversationPort[0], config.Config.RpcRegisterName.OpenImConversationName, config.Config.Prometheus.ConversationPrometheusPort[0], conversation.Start); err != nil {
+		panic(err.Error())
+	}
 }

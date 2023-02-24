@@ -15,14 +15,10 @@ import (
 	"net"
 )
 
-func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options []grpc.ServerOption) error {
-	flagRpcPort := flag.Int("port", rpcPorts[0], "get RpcGroupPort from cmd,default 16000 as port")
-	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts[0], "groupPrometheusPort default listen port")
-	configPath := flag.String("config_path", "../config/", "config folder")
+func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options []grpc.ServerOption) error {
+	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
+	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts, "groupPrometheusPort default listen port")
 	flag.Parse()
-	if err := config.InitConfig(*configPath); err != nil {
-		return err
-	}
 	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", constant.CurrentVersion)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, *flagRpcPort))
@@ -65,7 +61,6 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 	return rpcFn(zkClient, srv)
 }
 
-func Start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options ...grpc.ServerOption) {
-	err := start(rpcPorts, rpcRegisterName, prometheusPorts, rpcFn, options)
-	fmt.Println("end", err)
+func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options ...grpc.ServerOption) error {
+	return start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
 }
