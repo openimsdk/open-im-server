@@ -3,12 +3,12 @@ package group
 import (
 	"OpenIM/internal/common/check"
 	"OpenIM/internal/common/notification"
-	"OpenIM/internal/tx"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/db/tx"
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"

@@ -3,6 +3,7 @@ package cache
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
 	pbChat "OpenIM/pkg/proto/msg"
 	pbRtc "OpenIM/pkg/proto/rtc"
 	"OpenIM/pkg/proto/sdkws"
@@ -10,12 +11,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -37,6 +38,10 @@ const (
 	exTypeKeyLocker         = "EX_LOCK:"
 
 	uidPidToken = "UID_PID_TOKEN_STATUS:"
+
+	SignalListCache = "SIGNAL_LIST_CACHE:"
+
+	SignalCache = "SIGNAL_CACHE:"
 )
 
 type Cache interface {
@@ -49,6 +54,7 @@ type Cache interface {
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
 	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
+	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
 	IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
 	SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
 	SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error
@@ -74,8 +80,8 @@ type Cache interface {
 	SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error
 	GetGetuiTaskID(ctx context.Context) (string, error)
 
-	SetSendMsgStatus(ctx context.Context, status int32) error
-	GetSendMsgStatus(ctx context.Context) (int, error)
+	SetSendMsgStatus(ctx context.Context, id string, status int32) error
+	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error)
 	GetFcmToken(ctx context.Context, account string, platformID int) (string, error)
 	DelFcmToken(ctx context.Context, account string, platformID int) error
@@ -92,298 +98,227 @@ type Cache interface {
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 }
 
-// native redis operate
-
-//func NewRedis() *RedisClient {
-//	o := &RedisClient{}
-//	o.InitRedis()
-//	return o
-//}
-
-func NewRedis() (*RedisClient, error) {
-	var rdb redis.UniversalClient
-	if config.Config.Redis.EnableCluster {
-		rdb = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    config.Config.Redis.DBAddress,
-			Username: config.Config.Redis.DBUserName,
-			Password: config.Config.Redis.DBPassWord, // no password set
-			PoolSize: 50,
-		})
-		//if err := rdb.Ping(ctx).Err();err != nil {
-		//	return nil, fmt.Errorf("redis ping %w", err)
-		//}
-		//return &RedisClient{rdb: rdb}, nil
-	} else {
-		rdb = redis.NewClient(&redis.Options{
-			Addr:     config.Config.Redis.DBAddress[0],
-			Username: config.Config.Redis.DBUserName,
-			Password: config.Config.Redis.DBPassWord, // no password set
-			DB:       0,                              // use default DB
-			PoolSize: 100,                            // 连接池大小
-		})
-		//err := rdb.Ping(ctx).Err()
-		//if err != nil {
-		//	panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
-		//}
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	err := rdb.Ping(ctx).Err()
-	if err != nil {
-		return nil, fmt.Errorf("redis ping %w", err)
-	}
-	return &RedisClient{rdb: rdb}, nil
+func NewMsgCache(client redis.UniversalClient) Cache {
+	return &msgCache{rdb: client}
 }
 
-type RedisClient struct {
+type msgCache struct {
 	rdb redis.UniversalClient
 }
 
-func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
-	return &RedisClient{rdb: rdb}
+func (m *msgCache) IncrUserSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, userIncrSeq+userID).Int64())
 }
 
-func (r *RedisClient) GetClient() redis.UniversalClient {
-	return r.rdb
+func (m *msgCache) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, userIncrSeq+userID).Int64())
 }
 
-// Perform seq auto-increment operation of user messages
-func (r *RedisClient) IncrUserSeq(ctx context.Context, uid string) (int64, error) {
-	key := userIncrSeq + uid
-	seq, err := r.rdb.Incr(context.Background(), key).Result()
-	return seq, err
+func (m *msgCache) SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error {
+	return utils.Wrap1(m.rdb.Set(ctx, userIncrSeq+userID, maxSeq, 0).Err())
 }
 
-// Get the largest Seq
-func (r *RedisClient) GetUserMaxSeq(ctx context.Context, uid string) (int64, error) {
-	key := userIncrSeq + uid
-	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return int64(utils.StringToInt(seq)), err
+func (m *msgCache) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
+	return utils.Wrap1(m.rdb.Set(ctx, userMinSeq+userID, minSeq, 0).Err())
 }
 
-// set the largest Seq
-func (r *RedisClient) SetUserMaxSeq(ctx context.Context, uid string, maxSeq int64) error {
-	key := userIncrSeq + uid
-	return r.rdb.Set(context.Background(), key, maxSeq, 0).Err()
+func (m *msgCache) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, userMinSeq+userID).Int64())
 }
 
-// Set the user's minimum seq
-func (r *RedisClient) SetUserMinSeq(ctx context.Context, uid string, minSeq int64) (err error) {
-	key := userMinSeq + uid
-	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
-}
-
-// Get the smallest Seq
-func (r *RedisClient) GetUserMinSeq(ctx context.Context, uid string) (int64, error) {
-	key := userMinSeq + uid
-	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return int64(utils.StringToInt(seq)), err
-}
-
-func (r *RedisClient) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
+func (m *msgCache) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
-}
-func (r *RedisClient) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
-	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return int64(utils.StringToInt(seq)), err
+	return utils.Wrap1(m.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
-func (r *RedisClient) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+func (m *msgCache) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, groupMinSeq+groupID).Int64())
+}
+
+func (m *msgCache) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, groupMaxSeq+groupID).Int64())
+}
+
+func (m *msgCache) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, groupMinSeq+groupID).Int64())
+}
+
+func (m *msgCache) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
 	key := groupMaxSeq + groupID
-	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return int64(utils.StringToInt(seq)), err
+	seq, err := m.rdb.Incr(ctx, key).Uint64()
+	return int64(seq), utils.Wrap1(err)
 }
 
-func (r *RedisClient) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+func (m *msgCache) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
 	key := groupMaxSeq + groupID
-	seq, err := r.rdb.Incr(context.Background(), key).Result()
-	return seq, err
+	return utils.Wrap1(m.rdb.Set(ctx, key, maxSeq, 0).Err())
 }
 
-func (r *RedisClient) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
-	key := groupMaxSeq + groupID
-	return r.rdb.Set(context.Background(), key, maxSeq, 0).Err()
-}
-
-func (r *RedisClient) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
+func (m *msgCache) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
 	key := groupMinSeq + groupID
-	return r.rdb.Set(context.Background(), key, minSeq, 0).Err()
+	return utils.Wrap1(m.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
-// Store userid and platform class to redis
-func (r *RedisClient) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
+func (m *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	return r.rdb.HSet(context.Background(), key, token, flag).Err()
+	return utils.Wrap1(m.rdb.HSet(ctx, key, token, flag).Err())
 }
 
-//key:userID+platform-> <token, flag>
-func (r *RedisClient) GetTokenMapByUidPid(ctx context.Context, userID, platformID int) (map[string]int, error) {
+func (m *msgCache) GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platformID
-	m, err := r.rdb.HGetAll(context.Background(), key).Result()
-	mm := make(map[string]int)
-	for k, v := range m {
-		mm[k] = utils.StringToInt(v)
-	}
-	return mm, err
-}
-
-func (r *RedisClient) GetTokensWithoutError(ctx context.Context, userID, platform string) (map[string]int, error) {
-	key := uidPidToken + userID + ":" + platform
-	m, err := r.rdb.HGetAll(context.Background(), key).Result()
-	if err != nil && err == redis.Nil {
-		return nil, nil
+	m, err := m.rdb.HGetAll(ctx, key).Result()
+	if err != nil {
+		return nil, utils.Wrap1(err)
 	}
 	mm := make(map[string]int)
 	for k, v := range m {
 		mm[k] = utils.StringToInt(v)
 	}
-	return mm, utils.Wrap(err, "")
+	return mm, nil
 }
 
-func (r *RedisClient) SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error {
-	key := uidPidToken + userID + ":" + platform
+func (m *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	mm := make(map[string]interface{})
 	for k, v := range m {
 		mm[k] = v
 	}
-	return r.rdb.HSet(context.Background(), key, mm).Err()
+	return utils.Wrap1(m.rdb.HSet(ctx, key, mm).Err())
 }
 
-func (r *RedisClient) DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error {
-	key := uidPidToken + userID + ":" + platform
-	return r.rdb.HDel(context.Background(), key, fields...).Err()
+func (m *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	return utils.Wrap1(m.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (r *RedisClient) GetMessagesBySeq(ctx context.Context, userID string, seqList []int64, operationID string) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err2 error) {
+func (m *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error) {
+	var errResult error
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
-		result, err := r.rdb.Get(context.Background(), key).Result()
+		result, err := m.rdb.Get(ctx, key).Result()
 		if err != nil {
-			if err != redis.Nil {
-				err2 = err
-			}
-			failedSeqs = append(failedSeqs, v)
+			errResult = err
+			failedSeqList = append(failedSeqList, v)
 		} else {
 			msg := sdkws.MsgData{}
 			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
-				err2 = err
-				failedSeqs = append(failedSeqs, v)
+				errResult = err
+				failedSeqList = append(failedSeqList, v)
 			} else {
-				seqMsgs = append(seqMsgs, &msg)
+				seqMsg = append(seqMsg, &msg)
 			}
+
 		}
 	}
-	return seqMsgs, failedSeqs, err2
+	return seqMsg, failedSeqList, errResult
 }
 
-func (r *RedisClient) SetMessageToCache(ctx context.Context, userID string, msgs []*pbChat.MsgDataToMQ, uid string) (int, error) {
-	pipe := r.rdb.Pipeline()
-	var failedMsgs []pbChat.MsgDataToMQ
-	for _, msg := range msgs {
-		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+func (m *msgCache) SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error) {
+	pipe := m.rdb.Pipeline()
+	var failedList []pbChat.MsgDataToMQ
+	for _, msg := range msgList {
+		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		s, err := utils.Pb2String(msg.MsgData)
 		if err != nil {
-			continue
+			return 0, utils.Wrap1(err)
 		}
 		err = pipe.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
-		//err = r.rdb.HMSet(context.Background(), "12", map[string]interface{}{"1": 2, "343": false}).Err()
 		if err != nil {
-			failedMsgs = append(failedMsgs, *msg)
+			return 0, utils.Wrap1(err)
 		}
 	}
-	if len(failedMsgs) != 0 {
-		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList))
+	if len(failedList) != 0 {
+		return len(failedList), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, tracelog.GetOperationID(ctx)))
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err
 }
-func (r *RedisClient) DeleteMessageFromCache(ctx context.Context, userID string, msgs []*pbChat.MsgDataToMQ) error {
-	for _, msg := range msgs {
-		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
-		err := r.rdb.Del(ctx, key).Err()
-		if err != nil {
+
+func (m *msgCache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error {
+	for _, msg := range msgList {
+		if err := m.rdb.Del(ctx, messageCache+userID+"_"+strconv.Itoa(int(msg.MsgData.Seq))).Err(); err != nil {
+			return utils.Wrap1(err)
 		}
 	}
 	return nil
 }
 
-func (r *RedisClient) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
+func (m *msgCache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 	key := messageCache + userID + "_" + "*"
-	vals, err := r.rdb.Keys(ctx, key).Result()
+	vals, err := m.rdb.Keys(ctx, key).Result()
 	if err == redis.Nil {
 		return nil
 	}
 	if err != nil {
-		return utils.Wrap(err, "")
+		return utils.Wrap1(err)
 	}
 	for _, v := range vals {
-		err = r.rdb.Del(ctx, v).Err()
+		if err := m.rdb.Del(ctx, v).Err(); err != nil {
+			return utils.Wrap1(err)
+		}
 	}
 	return nil
 }
 
-func (r *RedisClient) HandleSignalInfo(ctx context.Context, operationID string, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
+func (m *msgCache) HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
 	req := &pbRtc.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
-		return false, err
+		return false, utils.Wrap1(err)
 	}
-	var inviteeUserIDs []string
+	var inviteeUserIDList []string
 	var isInviteSignal bool
 	switch signalInfo := req.Payload.(type) {
 	case *pbRtc.SignalReq_Invite:
-		inviteeUserIDs = signalInfo.Invite.Invitation.InviteeUserIDList
+		inviteeUserIDList = signalInfo.Invite.Invitation.InviteeUserIDList
 		isInviteSignal = true
 	case *pbRtc.SignalReq_InviteInGroup:
-		inviteeUserIDs = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
+		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
 		isInviteSignal = true
-		if !utils.IsContain(pushToUserID, inviteeUserIDs) {
+		if !utils.Contain(pushToUserID, inviteeUserIDList...) {
 			return false, nil
 		}
 	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
-		return false, nil
+		return false, utils.Wrap1(errors.New("signalInfo do not need offlinePush"))
 	default:
 		return false, nil
 	}
 	if isInviteSignal {
-		for _, userID := range inviteeUserIDs {
+		for _, userID := range inviteeUserIDList {
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
-				return false, err
+				return false, utils.Wrap1(err)
 			}
-			keyList := signalListCache + userID
-			err = r.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
+			keyList := SignalListCache + userID
+			err = m.rdb.LPush(ctx, keyList, msg.ClientMsgID).Err()
 			if err != nil {
-				return false, err
+				return false, utils.Wrap1(err)
 			}
-			err = r.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
+			err = m.rdb.Expire(ctx, keyList, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return false, err
+				return false, utils.Wrap1(err)
 			}
-			key := signalCache + msg.ClientMsgID
-			err = r.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
+			key := SignalCache + msg.ClientMsgID
+			err = m.rdb.Set(ctx, key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return false, err
+				return false, utils.Wrap1(err)
 			}
 		}
 	}
 	return true, nil
 }
 
-func (r *RedisClient) GetSignalInfoFromCacheByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
-	key := signalCache + clientMsgID
-	invitationInfo = &pbRtc.SignalInviteReq{}
-	bytes, err := r.rdb.Get(context.Background(), key).Bytes()
+func (m *msgCache) GetSignalInfoFromCacheByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+	bytes, err := m.rdb.Get(ctx, SignalCache+clientMsgID).Bytes()
 	if err != nil {
-		return nil, err
+		return nil, utils.Wrap1(err)
 	}
 	req := &pbRtc.SignalReq{}
 	if err = proto.Unmarshal(bytes, req); err != nil {
-		return nil, err
+		return nil, utils.Wrap1(err)
 	}
+	invitationInfo = &pbRtc.SignalInviteReq{}
 	switch req2 := req.Payload.(type) {
 	case *pbRtc.SignalReq_Invite:
 		invitationInfo.Invitation = req2.Invite.Invitation
@@ -392,162 +327,112 @@ func (r *RedisClient) GetSignalInfoFromCacheByClientMsgID(ctx context.Context, c
 		invitationInfo.Invitation = req2.InviteInGroup.Invitation
 		invitationInfo.OpUserID = req2.InviteInGroup.OpUserID
 	}
-	return invitationInfo, err
-}
-
-func (r *RedisClient) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
-	keyList := signalListCache + userID
-	result := r.rdb.LPop(context.Background(), keyList)
-	if err = result.Err(); err != nil {
-		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
-	}
-	key, err := result.Result()
-	if err != nil {
-		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
-	}
-	invitationInfo, err = r.GetSignalInfoFromCacheByClientMsgID(ctx, key)
-	if err != nil {
-		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
-	}
-	err = r.DelUserSignalList(ctx, userID)
-	if err != nil {
-		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
-	}
 	return invitationInfo, nil
 }
 
-func (r *RedisClient) DelUserSignalList(ctx context.Context, userID string) error {
-	keyList := signalListCache + userID
-	err := r.rdb.Del(context.Background(), keyList).Err()
-	return err
+func (m *msgCache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+	key, err := m.rdb.LPop(ctx, SignalListCache+userID).Result()
+	if err != nil {
+		return nil, utils.Wrap1(err)
+	}
+	invitationInfo, err = m.GetSignalInfoFromCacheByClientMsgID(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return invitationInfo, m.DelUserSignalList(ctx, userID)
 }
 
-func (r *RedisClient) DelMsgFromCache(ctx context.Context, uid string, seqList []int64, operationID string) {
+func (m *msgCache) DelUserSignalList(ctx context.Context, userID string) error {
+	return utils.Wrap1(m.rdb.Del(ctx, SignalListCache+userID).Err())
+}
+
+func (m *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error {
 	for _, seq := range seqList {
-		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
-		result, err := r.rdb.Get(context.Background(), key).Result()
+		key := messageCache + userID + "_" + strconv.Itoa(int(seq))
+		result, err := m.rdb.Get(ctx, key).Result()
 		if err != nil {
 			if err == redis.Nil {
-			} else {
+				continue
 			}
-			continue
+			return utils.Wrap1(err)
 		}
 		var msg sdkws.MsgData
-		if err := utils.String2Pb(result, &msg); err != nil {
-			continue
+		if err := jsonpb.UnmarshalString(result, &msg); err != nil {
+			return err
 		}
 		msg.Status = constant.MsgDeleted
 		s, err := utils.Pb2String(&msg)
 		if err != nil {
-			continue
+			return utils.Wrap1(err)
 		}
-		if err := r.rdb.Set(context.Background(), key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
+		if err := m.rdb.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
+			return utils.Wrap1(err)
 		}
 	}
+	return nil
 }
 
-func (r *RedisClient) SetGetuiToken(ctx context.Context, token string, expireTime int64) error {
-	return r.rdb.Set(context.Background(), getuiToken, token, time.Duration(expireTime)*time.Second).Err()
+func (m *msgCache) SetGetuiToken(ctx context.Context, token string, expireTime int64) error {
+	return utils.Wrap1(m.rdb.Set(ctx, getuiToken, token, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (r *RedisClient) GetGetuiToken(ctx context.Context) (string, error) {
-	result, err := r.rdb.Get(context.Background(), getuiToken).Result()
-	return result, err
+func (m *msgCache) GetGetuiToken(ctx context.Context) (string, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, getuiToken).Result())
 }
 
-func (r *RedisClient) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
-	return r.rdb.Set(context.Background(), getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err()
+func (m *msgCache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
+	return utils.Wrap1(m.rdb.Set(ctx, getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (r *RedisClient) GetGetuiTaskID(ctx context.Context) (string, error) {
-	result, err := r.rdb.Get(context.Background(), getuiTaskID).Result()
-	return result, err
+func (m *msgCache) GetGetuiTaskID(ctx context.Context) (string, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, getuiTaskID).Result())
 }
 
-func (r *RedisClient) SetSendMsgStatus(ctx context.Context, status int32, operationID string) error {
-	return r.rdb.Set(context.Background(), sendMsgFailedFlag+operationID, status, time.Hour*24).Err()
+func (m *msgCache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
+	return utils.Wrap1(m.rdb.Set(ctx, sendMsgFailedFlag+id, status, time.Hour*24).Err())
 }
 
-func (r *RedisClient) GetSendMsgStatus(ctx context.Context, operationID string) (int, error) {
-	result, err := r.rdb.Get(context.Background(), sendMsgFailedFlag+operationID).Result()
-	if err != nil {
-		return 0, err
-	}
-	status, err := strconv.Atoi(result)
-	return status, err
+func (m *msgCache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
+	result, err := m.rdb.Get(ctx, sendMsgFailedFlag+id).Int()
+	return int32(result), utils.Wrap1(err)
 }
 
-func (r *RedisClient) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	key := FcmToken + account + ":" + strconv.Itoa(platformID)
-	return r.rdb.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
+func (m *msgCache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
+	return utils.Wrap1(m.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (r *RedisClient) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	key := FcmToken + account + ":" + strconv.Itoa(platformID)
-	return r.rdb.Get(context.Background(), key).Result()
-}
-func (r *RedisClient) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	key := FcmToken + account + ":" + strconv.Itoa(platformID)
-	return r.rdb.Del(context.Background(), key).Err()
-}
-func (r *RedisClient) IncrUserBadgeUnreadCountSum(ctx context.Context, uid string) (int, error) {
-	key := userBadgeUnreadCountSum + uid
-	seq, err := r.rdb.Incr(context.Background(), key).Result()
-	return int(seq), err
-}
-func (r *RedisClient) SetUserBadgeUnreadCountSum(ctx context.Context, uid string, value int) error {
-	key := userBadgeUnreadCountSum + uid
-	return r.rdb.Set(context.Background(), key, value, 0).Err()
-}
-func (r *RedisClient) GetUserBadgeUnreadCountSum(ctx context.Context, uid string) (int, error) {
-	key := userBadgeUnreadCountSum + uid
-	seq, err := r.rdb.Get(context.Background(), key).Result()
-	return utils.StringToInt(seq), err
-}
-func (r *RedisClient) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	n, err := r.rdb.Exists(context.Background(), key).Result()
-	return n > 0, err
+func (m *msgCache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Result())
 }
 
-func (r *RedisClient) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	return r.rdb.HGetAll(context.Background(), key).Result()
-
-}
-func (r *RedisClient) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	return r.rdb.HDel(context.Background(), key, subKey).Err()
-
-}
-func (r *RedisClient) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	return r.rdb.Expire(context.Background(), key, expiration).Result()
+func (m *msgCache) DelFcmToken(ctx context.Context, account string, platformID int) error {
+	return utils.Wrap1(m.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
 }
 
-func (r *RedisClient) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	result, err := r.rdb.HGet(context.Background(), key, typeKey).Result()
-	return result, err
+func (m *msgCache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
+	seq, err := m.rdb.Incr(ctx, userBadgeUnreadCountSum+userID).Result()
+	return int(seq), utils.Wrap1(err)
 }
 
-func (r *RedisClient) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
-	key := r.getMessageReactionExPrefix(clientMsgID, sessionType)
-	return r.rdb.HSet(context.Background(), key, typeKey, value).Err()
-
+func (m *msgCache) SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error {
+	return utils.Wrap1(m.rdb.Set(ctx, userBadgeUnreadCountSum+userID, value, 0).Err())
 }
 
-func (r *RedisClient) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
+func (m *msgCache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
+	return utils.Wrap2(m.rdb.Get(ctx, userBadgeUnreadCountSum+userID).Int())
+}
+
+func (m *msgCache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
-	return r.rdb.SetNX(context.Background(), key, 1, time.Minute).Err()
+	return utils.Wrap1(m.rdb.SetNX(ctx, key, 1, time.Minute).Err())
 }
-func (r *RedisClient) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
+
+func (m *msgCache) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
-	return r.rdb.Del(context.Background(), key).Err()
-
+	return utils.Wrap1(m.rdb.Del(ctx, key).Err())
 }
 
-func (r *RedisClient) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
+func (m *msgCache) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
 	switch sessionType {
 	case constant.SingleChatType:
 		return "EX_SINGLE_" + clientMsgID
@@ -559,4 +444,32 @@ func (r *RedisClient) getMessageReactionExPrefix(clientMsgID string, sessionType
 		return "EX_NOTIFICATION" + clientMsgID
 	}
 	return ""
+}
+
+func (m *msgCache) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+	n, err := m.rdb.Exists(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType)).Result()
+	if err != nil {
+		return false, utils.Wrap(err, "")
+	}
+	return n > 0, nil
+}
+
+func (m *msgCache) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
+	return utils.Wrap1(m.rdb.HSet(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
+}
+
+func (m *msgCache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+	return utils.Wrap2(m.rdb.Expire(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType), expiration).Result())
+}
+
+func (m *msgCache) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
+	return utils.Wrap2(m.rdb.HGet(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey).Result())
+}
+
+func (m *msgCache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
+	return utils.Wrap2(m.rdb.HGetAll(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType)).Result())
+}
+
+func (m *msgCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
+	return utils.Wrap1(m.rdb.HDel(ctx, m.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
 }

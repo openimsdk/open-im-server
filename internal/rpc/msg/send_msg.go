@@ -165,7 +165,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			}
 
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				resp, err := m.MsgInterface.GetSuperGroupMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
+				resp, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
 				if err != nil {
 					return nil, err
 				}
@@ -352,7 +352,7 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 			if v == "" || groupPB.MsgData.SendID == "" {
 				return constant.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
 			}
-			err := m.MsgInterface.MsgToMQ(ctx, v, &msgToMQGroup)
+			err := m.MsgDatabase.MsgToMQ(ctx, v, &msgToMQGroup)
 			if err != nil {
 				wg.Done()
 				return err

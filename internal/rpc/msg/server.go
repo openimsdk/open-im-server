@@ -16,7 +16,7 @@ import (
 
 type msgServer struct {
 	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
-	MsgInterface   controller.MsgDatabase
+	MsgDatabase    controller.MsgDatabase
 	Group          *check.GroupChecker
 	User           *check.UserCheck
 	Conversation   *check.ConversationChecker
@@ -45,7 +45,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		Conversation: check.NewConversationChecker(client),
 		User:         check.NewUserCheck(client),
 		Group:        check.NewGroupChecker(client),
-		//MsgInterface: controller.MsgInterface(),
+		//MsgDatabase: controller.MsgDatabase(),
 		RegisterCenter:  client,
 		GroupLocalCache: localcache.NewGroupMemberIDsLocalCache(client),
 		black:           check.NewBlackChecker(client),

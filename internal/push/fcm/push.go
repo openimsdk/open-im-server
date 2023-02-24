@@ -19,10 +19,10 @@ var Terminal = []int{constant.IOSPlatformID, constant.AndroidPlatformID, constan
 
 type Fcm struct {
 	fcmMsgCli *messaging.Client
-	cache     cache.MsgCache
+	cache     cache.Cache
 }
 
-func NewClient(cache cache.MsgCache) *Fcm {
+func NewClient(cache cache.Cache) *Fcm {
 	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {

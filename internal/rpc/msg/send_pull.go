@@ -25,7 +25,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.GroupID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.GroupID, &msgToMQSingle)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +42,12 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 }
 func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.RecvID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.RecvID, &msgToMQSingle)
 	if err != nil {
 		return nil, err
 	}
 	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgInterface.MsgToMQ(ctx, msgToMQSingle.MsgData.SendID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.SendID, &msgToMQSingle)
 		if err != nil {
 			return nil, err
 		}
@@ -74,13 +74,13 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	}
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
 	if isSend {
-		err = m.MsgInterface.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
 		if err != nil {
 			return nil, constant.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
 	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgInterface.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
 		if err != nil {
 			return nil, constant.ErrInternalServer.Wrap("insert to mq")
 		}
@@ -255,11 +255,11 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
 	resp := new(sdkws.GetMaxAndMinSeqResp)
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
-	maxSeq, err := m.MsgInterface.GetUserMaxSeq(ctx, req.UserID)
+	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	minSeq, err := m.MsgInterface.GetUserMinSeq(ctx, req.UserID)
+	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -268,11 +268,11 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	if len(req.GroupIDList) > 0 {
 		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
 		for _, groupID := range req.GroupIDList {
-			maxSeq, err := m.MsgInterface.GetGroupMaxSeq(ctx, groupID)
+			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
-			minSeq, err := m.MsgInterface.GetGroupMinSeq(ctx, groupID)
+			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
 			}
@@ -287,13 +287,13 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 
 func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
 	resp := &sdkws.PullMessageBySeqListResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgInterface.GetMessagesBySeqs(ctx, req.UserID, req.Seqs)
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
 	if err != nil {
 		return nil, err
 	}
 	resp.List = msgs
 	for userID, list := range req.GroupSeqList {
-		msgs, err := m.MsgInterface.GetMessagesBySeq(ctx, userID, req.Seqs)
+		msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, userID, req.Seqs)
 		if err != nil {
 			return nil, err
 		}

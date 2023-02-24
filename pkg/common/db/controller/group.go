@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"OpenIM/internal/tx"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/common/db/tx"
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"

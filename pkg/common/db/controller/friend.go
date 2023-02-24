@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"OpenIM/internal/tx"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/db/tx"
 	"OpenIM/pkg/utils"
 	"context"
 	"errors"

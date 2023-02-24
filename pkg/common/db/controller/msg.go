@@ -50,6 +50,8 @@ type MsgDatabase interface {
 	GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context, groupID string) (minSeqMongo, maxSeqMongo, maxSeqCache int64, err error)
 	// 设置群用户最小seq 直接调用cache
 	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
+	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
+
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
 
@@ -79,7 +81,7 @@ func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabase {
 
 type msgDatabase struct {
 	mgo       unRelationTb.MsgDocModelInterface
-	cache     cache.MsgCache
+	cache     cache.Cache
 	msg       unRelationTb.MsgDocModel
 	ExtendMsg unRelationTb.ExtendMsgSetModelInterface
 	rdb       redis.Client
@@ -684,4 +686,8 @@ func (db *msgDatabase) SetGroupUserMinSeq(ctx context.Context, groupID, userID s
 
 func (db *msgDatabase) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
 	return db.cache.SetUserMinSeq(ctx, userID, minSeq)
+}
+
+func (db *msgDatabase) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
+	return db.cache.GetGroupUserMinSeq(ctx, groupID, userID)
 }

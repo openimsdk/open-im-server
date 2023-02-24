@@ -25,7 +25,7 @@ import (
 )
 
 type Pusher struct {
-	cache                  cache.MsgCache
+	cache                  cache.Cache
 	client                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          OfflinePusher
 	groupLocalCache        localcache.GroupLocalCache
@@ -33,7 +33,7 @@ type Pusher struct {
 	successCount           int
 }
 
-func NewPusher(cache cache.MsgCache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
+func NewPusher(cache cache.Cache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
 	return &Pusher{
 		cache:         cache,
 		client:        client,

@@ -3,12 +3,12 @@ package conversation
 import (
 	"OpenIM/internal/common/check"
 	"OpenIM/internal/common/notification"
-	"OpenIM/internal/tx"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/relation"
 	tableRelation "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/db/tx"
 	pbConversation "OpenIM/pkg/proto/conversation"
 	"OpenIM/pkg/utils"
 	"context"

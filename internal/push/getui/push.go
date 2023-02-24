@@ -38,12 +38,12 @@ const (
 )
 
 type Client struct {
-	cache           cache.MsgCache
+	cache           cache.Cache
 	tokenExpireTime int64
 	taskIDTTL       int64
 }
 
-func NewClient(cache cache.MsgCache) *Client {
+func NewClient(cache cache.Cache) *Client {
 	return &Client{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
 }
 
