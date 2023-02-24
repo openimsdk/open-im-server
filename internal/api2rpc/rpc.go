@@ -1,83 +1,9 @@
-package group
+package api2rpc
 
 import (
-	common "OpenIM/internal/api2rpc"
-	"OpenIM/pkg/apistruct"
-	"OpenIM/pkg/proto/group"
 	"context"
-	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
-
-type ApiBind[A, B any] interface {
-	OperationID() string
-	OpUserID() (string, error)
-	Bind(*A) error
-	Context() context.Context
-	Resp(resp *B, err error)
-}
-
-func NewGin[A, B any](c *gin.Context) ApiBind[A, B] {
-	return &ginApiBind[A, B]{
-		c: c,
-	}
-}
-
-type ginApiBind[A, B any] struct {
-	c *gin.Context
-}
-
-func (g *ginApiBind[A, B]) OperationID() string {
-	return g.c.GetHeader("operationID")
-}
-
-func (g *ginApiBind[A, B]) OpUserID() (string, error) {
-	return "", nil
-}
-
-func (g *ginApiBind[A, B]) Bind(a *A) error {
-	return g.c.BindJSON(a)
-}
-
-func (g *ginApiBind[A, B]) Resp(resp *B, err error) {
-	if err == nil {
-		g.Write(resp)
-	} else {
-		g.Error(err)
-	}
-}
-
-func (g *ginApiBind[A, B]) Error(err error) {
-	//TODO implement me
-}
-
-func (g *ginApiBind[A, B]) Write(b *B) {
-	//TODO implement me
-}
-
-func (g *ginApiBind[A, B]) Context() context.Context {
-	return g.c
-}
-
-//func TestName(t *testing.T) {
-//	//var bind ApiBind[int, int]
-//	//NewRpc(bind, "", group.NewGroupClient, temp)
-//
-//	var c *gin.Context
-//	NewRpc(NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), "", group.NewGroupClient, group.GroupClient.KickGroupMember)
-//}
-
-func KickGroupMember(c *gin.Context) {
-	// 默认 全部自动
-	NewRpc(NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), group.NewGroupClient, group.GroupClient.KickGroupMember).Call()
-	// 可以自定义编辑请求和响应
-	a := NewRpc(NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), group.NewGroupClient, group.GroupClient.KickGroupMember)
-	a.Before(func(apiReq *apistruct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
-		return bind()
-	}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *apistruct.KickGroupMemberResp, bind func() error) error {
-		return bind()
-	}).Call()
-}
 
 // NewRpc A: apiReq B: apiResp  C: rpcReq  D: rpcResp  Z: rpcClient (group.GroupClient)
 func NewRpc[A, B any, C, D any, Z any](bind ApiBind[A, B], client func(conn *grpc.ClientConn) Z, rpc func(client Z, ctx context.Context, req *C, options ...grpc.CallOption) (*D, error)) *Rpc[A, B, C, D, Z] {
@@ -113,12 +39,12 @@ func (a *Rpc[A, B, C, D, Z]) After(fn func(rpcResp *D, apiResp *B, bind func() e
 }
 
 func (a *Rpc[A, B, C, D, Z]) defaultCopyReq(apiReq *A, rpcReq *C) error {
-	common.CopyAny(apiReq, rpcReq)
+	CopyAny(apiReq, rpcReq)
 	return nil
 }
 
 func (a *Rpc[A, B, C, D, Z]) defaultCopyResp(rpcResp *D, apiResp *B) error {
-	common.CopyAny(rpcResp, apiResp)
+	CopyAny(rpcResp, apiResp)
 	return nil
 }
 

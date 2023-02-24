@@ -1,58 +1,55 @@
-package common
+package api2rpc
 
 import (
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
-	utils2 "OpenIM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/status"
 	"net/http"
-	"reflect"
 	"strings"
 )
 
-func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
-	if rpcName == "" {
-		rpcName = utils2.GetFuncName(1)
-	}
-	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
-	ctx := tracelog.NewCtx(c, rpcFuncName)
-	defer log.ShowLog(ctx)
-	if err := c.BindJSON(apiReq); err != nil {
-		WriteErrorResponse(ctx, "BindJSON", err)
-		return
-	}
-	tracelog.SetCtxInfo(ctx, logFuncName, nil, "apiReq", apiReq)
-	etcdConn, err := rpc.GetConn(ctx, rpcName)
-	if err != nil {
-		WriteErrorResponse(ctx, "GetConn", err)
-		return
-	}
-	rpcClient := reflect.ValueOf(rpcClientFunc).Call([]reflect.Value{
-		reflect.ValueOf(etcdConn),
-	})[0].MethodByName(rpcFuncName) // rpcClient func
-	rpcReqPtr := reflect.New(rpcClient.Type().In(1).Elem()) // *req
-	CopyAny(apiReq, rpcReqPtr.Interface())
-	tracelog.SetCtxInfo(ctx, logFuncName, nil, "opUserID", c.GetString("opUserID"), "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
-	respArr := rpcClient.Call([]reflect.Value{
-		reflect.ValueOf(context.Context(c)), // context.Context (ctx operationID. opUserID)
-		rpcReqPtr,                           // rpcClient apiReq
-	}) // respArr => (apiResp, error)
-	if !respArr[1].IsNil() { // rpcClient err != nil
-		err := respArr[1].Interface().(error)
-		WriteErrorResponse(ctx, rpcFuncName, err, "callRpcResp", "error")
-		return
-	}
-	rpcResp := respArr[0].Elem()
-	tracelog.SetCtxInfo(ctx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
-	if apiResp != nil {
-		CopyAny(rpcResp.Interface(), apiResp)
-	}
-	SetSuccess(ctx, rpcFuncName, apiResp)
-}
+//func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
+//	if rpcName == "" {
+//		rpcName = utils2.GetFuncName(1)
+//	}
+//	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
+//	ctx := tracelog.NewCtx(c, rpcFuncName)
+//	defer log.ShowLog(ctx)
+//	if err := c.BindJSON(apiReq); err != nil {
+//		WriteErrorResponse(ctx, "BindJSON", err)
+//		return
+//	}
+//	tracelog.SetCtxInfo(ctx, logFuncName, nil, "apiReq", apiReq)
+//	etcdConn, err := rpc.GetConn(ctx, rpcName)
+//	if err != nil {
+//		WriteErrorResponse(ctx, "GetConn", err)
+//		return
+//	}
+//	rpcClient := reflect.ValueOf(rpcClientFunc).Call([]reflect.Value{
+//		reflect.ValueOf(etcdConn),
+//	})[0].MethodByName(rpcFuncName) // rpcClient func
+//	rpcReqPtr := reflect.New(rpcClient.Type().In(1).Elem()) // *req
+//	CopyAny(apiReq, rpcReqPtr.Interface())
+//	tracelog.SetCtxInfo(ctx, logFuncName, nil, "opUserID", c.GetString("opUserID"), "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
+//	respArr := rpcClient.Call([]reflect.Value{
+//		reflect.ValueOf(context.Context(c)), // context.Context (ctx operationID. opUserID)
+//		rpcReqPtr,                           // rpcClient apiReq
+//	}) // respArr => (apiResp, error)
+//	if !respArr[1].IsNil() { // rpcClient err != nil
+//		err := respArr[1].Interface().(error)
+//		WriteErrorResponse(ctx, rpcFuncName, err, "callRpcResp", "error")
+//		return
+//	}
+//	rpcResp := respArr[0].Elem()
+//	tracelog.SetCtxInfo(ctx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
+//	if apiResp != nil {
+//		CopyAny(rpcResp.Interface(), apiResp)
+//	}
+//	SetSuccess(ctx, rpcFuncName, apiResp)
+//}
 
 func rpcString(v interface{}) string {
 	if s, ok := v.(interface{ String() string }); ok {

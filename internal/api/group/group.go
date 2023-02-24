@@ -1,5 +1,12 @@
 package group
 
+import (
+	"OpenIM/internal/api2rpc"
+	"OpenIM/pkg/apistruct"
+	"OpenIM/pkg/proto/group"
+	"github.com/gin-gonic/gin"
+)
+
 //import (
 //	common "OpenIM/internal/api_to_rpc"
 //	api "OpenIM/pkg/apistruct"
@@ -23,73 +30,24 @@ package group
 //	jsonData "OpenIM/internal/utils"
 //)
 
-// @Summary 把用户踢出群组
-// @Description 把用户踢出群组
-// @Tags 群组相关
-// @ID KickGroupMember
-// @Accept json
-// @Param token header string true "im token"
-// @Param req body api.KickGroupMemberReq true "GroupID为要操作的群ID <br> kickedUserIDList为要踢出的群用户ID <br> reason为原因"
-// @Produce json
-// @Success 0 {object} api.KickGroupMemberResp "result为结果码, -1为失败, 0为成功"
-// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
-// @Router /group/kick_group [post]
 //func KickGroupMember(c *gin.Context) {
-//	params := api.KickGroupMemberReq{}
-//	if err := c.BindJSON(&params); err != nil {
-//		log.NewError("0", "BindJSON failed ", err.Error())
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-//		return
-//	}
-//	if len(params.KickedUserIDList) > constant.MaxNotificationNum {
-//		errMsg := params.OperationID + " too many members " + utils.Int32ToString(int32(len(params.KickedUserIDList)))
-//		log.Error(params.OperationID, errMsg)
-//		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errMsg})
-//		return
-//	}
-//	req := &rpc.KickGroupMemberReq{}
-//	utils.CopyStructFields(req, &params)
-//	var ok bool
-//	var errInfo string
-//	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-//	if !ok {
-//		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-//		log.NewError(req.OperationID, errMsg)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
-//		return
-//	}
-//
-//	log.NewInfo(req.OperationID, "KickGroupMember args ", req.String())
-//
-//	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
-//	if etcdConn == nil {
-//		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-//		log.NewError(req.OperationID, errMsg)
-//		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-//		return
-//	}
-//	client := rpc.NewGroupClient(etcdConn)
-//	RpcResp, err := client.KickGroupMember(context.Background(), req)
-//	if err != nil {
-//		log.NewError(req.OperationID, "FindGroupMemberAll failed ", err.Error(), req.String())
-//		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
-//		return
-//	}
-//
-//	var memberListResp api.KickGroupMemberResp
-//	memberListResp.ErrMsg = RpcResp.CommonResp.ErrMsg
-//	memberListResp.ErrCode = RpcResp.CommonResp.ErrCode
-//	for _, v := range RpcResp.Id2ResultList {
-//		memberListResp.UserIDResultList = append(memberListResp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
-//	}
-//	if len(memberListResp.UserIDResultList) == 0 {
-//		memberListResp.UserIDResultList = []*api.UserIDResult{}
-//	}
-//
-//	log.NewInfo(req.OperationID, "KickGroupMember api return ", memberListResp)
-//	c.JSON(http.StatusOK, memberListResp)
+//	api2rpc.NewRpc(api2rpc.NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), group.NewGroupClient, group.GroupClient.KickGroupMember).Name("group").Call()
 //}
+
+func KickGroupMember(c *gin.Context) {
+	// 默认 全部自动
+	api := api2rpc.NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c)
+	api2rpc.NewRpc(api, group.NewGroupClient, group.GroupClient.KickGroupMember).Name("group").Call()
+
+	//// 可以自定义编辑请求和响应
+	//a := NewRpc(NewGin[apistruct.KickGroupMemberReq, apistruct.KickGroupMemberResp](c), group.NewGroupClient, group.GroupClient.KickGroupMember)
+	//a.Before(func(apiReq *apistruct.KickGroupMemberReq, rpcReq *group.KickGroupMemberReq, bind func() error) error {
+	//	return bind()
+	//}).After(func(rpcResp *group.KickGroupMemberResp, apiResp *apistruct.KickGroupMemberResp, bind func() error) error {
+	//	return bind()
+	//}).Name("group").Call()
+}
+
 //
 //// @Summary 获取群成员信息
 //// @Description 获取群成员信息

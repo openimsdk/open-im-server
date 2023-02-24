@@ -1,4 +1,4 @@
-package common
+package api2rpc
 
 import (
 	"fmt"
