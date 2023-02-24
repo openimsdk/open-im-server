@@ -187,10 +187,10 @@ func (p *Pusher) OfflinePushMsg(ctx context.Context, sourceID string, msg *sdkws
 	}
 	err = p.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
 	if err != nil {
-		prome.PromeInc(prome.MsgOfflinePushFailedCounter)
+		prome.Inc(prome.MsgOfflinePushFailedCounter)
 		return err
 	}
-	prome.PromeInc(prome.MsgOfflinePushSuccessCounter)
+	prome.Inc(prome.MsgOfflinePushSuccessCounter)
 	return nil
 }
 

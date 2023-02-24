@@ -66,7 +66,7 @@ func (p *Producer) SendMessage(m proto.Message, key string, operationID string) 
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	log.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg.Key.Length(), kMsg.Value.Length(), p.producer)
 	if err == nil {
-		prome.PromeInc(prome.SendMsgCounter)
+		prome.Inc(prome.SendMsgCounter)
 	}
 	return partition, offset, utils.Wrap(err, "")
 }

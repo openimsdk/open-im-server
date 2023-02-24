@@ -55,7 +55,7 @@ func (p *Push) Run(prometheusPort int) {
 	go p.rpcServer.run()
 	go p.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&p.pushCh)
 	go func() {
-		err := prome.StartPromeSrv(prometheusPort)
+		err := prome.StartPrometheusSrv(prometheusPort)
 		if err != nil {
 			panic(err)
 		}

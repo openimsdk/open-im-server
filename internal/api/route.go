@@ -32,7 +32,7 @@ func NewGinRouter() *gin.Engine {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
 		prome.NewApiRequestSuccessCounter()
-		r.Use(prome.PromeTheusMiddleware)
+		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
 	userRouterGroup := r.Group("/user")

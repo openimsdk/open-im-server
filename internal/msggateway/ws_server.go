@@ -351,7 +351,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
-	prome.PromeGaugeInc(prome.OnlineUserGauge)
+	prome.GaugeInc(prome.OnlineUserGauge)
 	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 }
 
@@ -393,7 +393,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
-	prome.PromeGaugeDec(prome.OnlineUserGauge)
+	prome.GaugeDec(prome.OnlineUserGauge)
 
 }
 

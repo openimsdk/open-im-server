@@ -14,14 +14,14 @@ import (
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	resp = &msg.SendMsgResp{}
-	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
 	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
 	if _, err = m.messageVerification(ctx, req); err != nil {
-		promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
 	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
@@ -34,7 +34,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 
-	promePkg.PromeInc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
@@ -60,7 +60,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
-	promePkg.PromeInc(promePkg.SingleChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
 	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
-	promePkg.PromeInc(promePkg.SingleChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
@@ -98,7 +98,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	// callback
-	promePkg.PromeInc(promePkg.GroupChatMsgRecvSuccessCounter)
+	promePkg.Inc(promePkg.GroupChatMsgRecvSuccessCounter)
 	err = CallbackBeforeSendGroupMsg(ctx, req)
 	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
@@ -106,7 +106,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 
 	var memberUserIDList []string
 	if memberUserIDList, err = m.messageVerification(ctx, req); err != nil {
-		promePkg.PromeInc(promePkg.GroupChatMsgProcessFailedCounter)
+		promePkg.Inc(promePkg.GroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
 
@@ -221,7 +221,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	}
 	//
 
-	promePkg.PromeInc(promePkg.GroupChatMsgProcessSuccessCounter)
+	promePkg.Inc(promePkg.GroupChatMsgProcessSuccessCounter)
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID

@@ -57,7 +57,7 @@ func start(rpcPorts []int, rpcRegisterName string, prometheusPorts []int, rpcFn 
 		return err
 	}
 	if config.Config.Prometheus.Enable {
-		err := prome.StartPromeSrv(*flagPrometheusPort)
+		err := prome.StartPrometheusSrv(*flagPrometheusPort)
 		if err != nil {
 			return err
 		}

@@ -40,7 +40,7 @@ func Run(prometheusPort int) {
 	go ws.run()
 	go rpcSvr.run()
 	go func() {
-		err := prome.StartPromeSrv(prometheusPort)
+		err := prome.StartPrometheusSrv(prometheusPort)
 		if err != nil {
 			panic(err)
 		}
