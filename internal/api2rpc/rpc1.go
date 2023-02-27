@@ -43,7 +43,7 @@ func (r *rpcCall[A, B, C, D, E]) Call(c *gin.Context, client func() (E, error)) 
 	} else {
 		cerr, ok := err.(errs.Coderr)
 		if ok {
-			resp.ErrCode = cerr.Code()
+			resp.ErrCode = int32(cerr.Code())
 			resp.ErrMsg = cerr.Msg()
 			resp.ErrDtl = cerr.Detail()
 		} else {

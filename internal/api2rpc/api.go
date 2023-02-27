@@ -59,7 +59,7 @@ func rpcString(v interface{}) string {
 }
 
 type baseResp struct {
-	ErrCode int         `json:"errCode"`
+	ErrCode int32       `json:"errCode"`
 	ErrMsg  string      `json:"errMsg"`
 	ErrDtl  string      `json:"errDtl"`
 	Data    interface{} `json:"data"`
