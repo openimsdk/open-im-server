@@ -22,14 +22,10 @@ func (g *Group) getGroupClient() (group.GroupClient, error) {
 }
 
 func (g *Group) KickGroupMember(c *gin.Context) {
-	api2rpc.Rpc(
-		&apistruct.KickGroupMemberReq{},
-		&apistruct.KickGroupMemberResp{},
-		group.GroupClient.KickGroupMember,
-	).Must(c, g.getGroupClient).Call()
+	var fn = group.GroupClient.KickGroupMember
+	api2rpc.New(&apistruct.KickGroupMemberReq{}, &apistruct.KickGroupMemberResp{}, fn).Call(c, g.getGroupClient)
 }
 
-//func (g *Group) KickGroupMember1(c *gin.Context) {
-//	var fn func(client group.GroupClient, ctx context.Context, in *group.KickGroupMemberReq, opts ...grpc.CallOption) (*group.KickGroupMemberResp, error) = group.GroupClient.KickGroupMember
-//	api2rpc.Rpc(&apistruct.KickGroupMemberReq{}, &apistruct.KickGroupMemberResp{}, fn).Must(c, g.getGroupClient).Call()
-//}
+func (g *Group) GetGroupMembersInfo(c *gin.Context) {
+	api2rpc.New(&apistruct.GetGroupMembersInfoReq{}, &apistruct.GetGroupMembersInfoResp{}, group.GroupClient.GetGroupMembersInfo).Call(c, g.getGroupClient)
+}
