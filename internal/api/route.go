@@ -81,8 +81,8 @@ func NewGinRouter() *gin.Engine {
 		c.Set("opUserID", userID)
 		c.Next()
 	})
+	g := group.NewGroup(nil)
 	{
-		g := group.NewGroup(nil)
 		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
 		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
@@ -93,25 +93,23 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
 		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo) //1
 		groupRouterGroup.POST("/kick_group", g.KickGroupMember)    //1
-		//	groupRouterGroup.POST("/get_group_member_list", g.FindGroupMemberAll)        //no use
-		groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
-		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)      //1
-		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)          //1
+		//groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
+		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo) //1
+		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)     //1
 		groupRouterGroup.POST("/get_joined_group_list", g.GetJoinedGroupList)
 		groupRouterGroup.POST("/dismiss_group", g.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", g.MuteGroupMember)
 		groupRouterGroup.POST("/cancel_mute_group_member", g.CancelMuteGroupMember) //MuteGroup
 		groupRouterGroup.POST("/mute_group", g.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", g.CancelMuteGroup)
-		groupRouterGroup.POST("/set_group_member_nickname", g.SetGroupMemberNickname)
+		//groupRouterGroup.POST("/set_group_member_nickname", g.SetGroupMemberNickname)
 		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
-		//groupRouterGroup.POST("/get_group_all_member_list_by_split", g.GetGroupAllMemberListBySplit)
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
-		superGroupRouterGroup.POST("/get_joined_group_list", group.GetJoinedSuperGroupList)
-		superGroupRouterGroup.POST("/get_groups_info", group.GetSuperGroupsInfo)
+		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
+		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
 	////certificate
 	authRouterGroup := r.Group("/auth")
