@@ -526,7 +526,8 @@ func (c *config) initConfig(config interface{}, configName, configPath string) e
 }
 
 func (c *config) Register(registry discoveryregistry.SvcDiscoveryRegistry) error {
-	registry
+	//registry
+	return nil
 }
 
 func InitConfig() error {

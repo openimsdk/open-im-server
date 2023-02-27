@@ -9,7 +9,7 @@ import (
 
 type rpcFunc[E, C, D any] func(client E, ctx context.Context, req *C, options ...grpc.CallOption) (*D, error)
 
-func New[A, B, C, D any, E any](apiReq *A, apiResp *B, rpc func(client E, ctx context.Context, req *C, options ...grpc.CallOption) (*D, error)) RpcCall[A, B, C, D, E] {
+func New[A, B, C, D, E any](apiReq *A, apiResp *B, rpc func(client E, ctx context.Context, req *C, options ...grpc.CallOption) (*D, error)) RpcCall[A, B, C, D, E] {
 	return &rpcCall[A, B, C, D, E]{
 		apiReq:  apiReq,
 		apiResp: apiResp,

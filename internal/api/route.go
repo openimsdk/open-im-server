@@ -82,6 +82,7 @@ func NewGinRouter() *gin.Engine {
 		c.Next()
 	})
 	{
+
 		groupRouterGroup.POST("/create_group", group.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", group.NewSetGroupInfo)                             //1
 		groupRouterGroup.POST("/join_group", group.JoinGroup)                                       //1
