@@ -85,7 +85,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 			} else {
 				log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
 			}
-			msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, in.OperationID)
+			msgList, _, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, in.OperationID)
 			if err1 != nil {
 				promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
 				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err1.Error())

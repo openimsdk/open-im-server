@@ -137,7 +137,7 @@ func (d *DataBases) DelMsgBySeqListInOneDoc(suffixUserID string, seqList []uint3
 		return nil, utils.Wrap(err, "")
 	}
 	for i, v := range seqMsgList {
-		if err := d.ReplaceMsgByIndex(suffixUserID, v, operationID, indexList[i]); err != nil {
+		if err := d.DelMsgByIndex(suffixUserID, v, operationID, indexList[i]); err != nil {
 			return nil, utils.Wrap(err, "")
 		}
 	}
@@ -161,7 +161,7 @@ func (d *DataBases) DelMsgLogic(uid string, seqList []uint32, operationID string
 	return nil
 }
 
-func (d *DataBases) ReplaceMsgByIndex(suffixUserID string, msg *open_im_sdk.MsgData, operationID string, seqIndex int) error {
+func (d *DataBases) DelMsgByIndex(suffixUserID string, msg *open_im_sdk.MsgData, operationID string, seqIndex int) error {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), suffixUserID, *msg)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -195,13 +195,54 @@ func (d *DataBases) ReplaceMsgBySeq(uid string, msg *open_im_sdk.MsgData, operat
 		log.NewError(operationID, utils.GetSelfFuncName(), "proto marshal", err.Error())
 		return utils.Wrap(err, "")
 	}
-
 	updateResult, err := c.UpdateOne(
 		ctx, bson.M{"uid": uid},
 		bson.M{"$set": bson.M{s: bytes}})
 	log.NewInfo(operationID, utils.GetSelfFuncName(), updateResult)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "UpdateOne", err.Error())
+		return utils.Wrap(err, "")
+	}
+	return nil
+}
+
+func (d *DataBases) GetMsgBySeqIndex(uid string, seq uint32, operationID string) (*open_im_sdk.MsgData, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	uid = getSeqUid(uid, seq)
+	seqIndex := getMsgIndex(seq)
+	result, err := c.Find(ctx, bson.M{"msg": bson.M{"$slice": []int{seqIndex, 1}}})
+	if err != nil {
+		return nil, err
+	}
+	var msgInfos []MsgInfo
+	if err := result.Decode(&msgInfos); err != nil {
+		return nil, err
+	}
+	if len(msgInfos) < 1 {
+		return nil, ErrMsgListNotExist
+	}
+	var msg open_im_sdk.MsgData
+	if err := proto.Unmarshal(msgInfos[0].Msg, &msg); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+func (d *DataBases) ReplaceMsgByIndex(uid string, msg *open_im_sdk.MsgData, index int) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	uid = getSeqUid(uid, msg.Seq)
+	seqIndex := getMsgIndex(msg.Seq)
+	s := fmt.Sprintf("msg.%d.msg", seqIndex)
+	bytes, err := proto.Marshal(msg)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	_, err = c.UpdateOne(
+		ctx, bson.M{"uid": uid},
+		bson.M{"$set": bson.M{s: bytes}})
+	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	return nil
@@ -441,8 +482,9 @@ func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operatio
 	}
 	return seqMsg, nil
 }
-func (d *DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+func (d *DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, indexes map[uint32]int, err error) {
 	var hasSeqList []uint32
+	indexes = make(map[uint32]int)
 	singleCount := 0
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -471,10 +513,11 @@ func (d *DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uin
 			msg := new(open_im_sdk.MsgData)
 			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 				log.NewError(operationID, "Unmarshal err", seqUid, value, groupID, seqList, err.Error())
-				return nil, err
+				return nil, nil, err
 			}
 			if isContainInt32(msg.Seq, value) {
 				seqMsg = append(seqMsg, msg)
+				indexes[msg.Seq] = i
 				hasSeqList = append(hasSeqList, msg.Seq)
 				singleCount++
 				if singleCount == len(value) {
@@ -488,9 +531,8 @@ func (d *DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uin
 		diff = utils.Difference(hasSeqList, seqList)
 		exceptionMSg := genExceptionSuperGroupMessageBySeqList(diff, groupID)
 		seqMsg = append(seqMsg, exceptionMSg...)
-
 	}
-	return seqMsg, nil
+	return seqMsg, nil, nil
 }
 
 func (d *DataBases) GetMsgAndIndexBySeqListInOneMongo2(suffixUserID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, indexList []int, unexistSeqList []uint32, err error) {
