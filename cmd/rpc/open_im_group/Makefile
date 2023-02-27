@@ -11,6 +11,11 @@ ifeq ($(OS),windows)
 
 BINARY_NAME=${NAME}.exe
 
+else
+
+BINARY_NAME=${NAME}
+
+
 endif
 
 build:
