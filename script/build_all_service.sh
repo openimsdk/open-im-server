@@ -25,7 +25,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   cd $begin_path
   service_path=${service_source_root[$i]}
   cd $service_path
-  make install
+  make install os=${goos} arch=${goarch}
   if [ $? -ne 0 ]; then
         echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
         exit -1
