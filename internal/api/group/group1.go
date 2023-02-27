@@ -2,7 +2,6 @@ package group
 
 import (
 	"OpenIM/internal/a2r"
-	"OpenIM/pkg/apistruct"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/proto/group"
 	"context"
@@ -10,8 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func _() {
-	context.Background()
+var _ context.Context = nil // 解决goland编辑器bug
+
+func NewGroup(zk *openKeeper.ZkClient) *Group {
+	return &Group{zk: zk}
 }
 
 type Group struct {
@@ -27,9 +28,9 @@ func (g *Group) getGroupClient() (group.GroupClient, error) {
 }
 
 func (g *Group) KickGroupMember(c *gin.Context) {
-	a2r.Call(&apistruct.KickGroupMemberReq{}, &apistruct.KickGroupMemberResp{}, group.GroupClient.KickGroupMember, g.getGroupClient, c, nil, nil)
+	a2r.Call(group.GroupClient.KickGroupMember, g.getGroupClient, c)
 }
 
 func (g *Group) GetGroupMembersInfo(c *gin.Context) {
-	a2r.Call1(group.GroupClient.GetGroupMembersInfo, g.getGroupClient, c)
+	a2r.Call(group.GroupClient.GetGroupMembersInfo, g.getGroupClient, c)
 }

@@ -82,31 +82,31 @@ func NewGinRouter() *gin.Engine {
 		c.Next()
 	})
 	{
-
-		groupRouterGroup.POST("/create_group", group.NewCreateGroup)                                //1
-		groupRouterGroup.POST("/set_group_info", group.NewSetGroupInfo)                             //1
-		groupRouterGroup.POST("/join_group", group.JoinGroup)                                       //1
-		groupRouterGroup.POST("/quit_group", group.QuitGroup)                                       //1
-		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)        //1
-		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
-		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
-		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo) //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)    //1
-		//	groupRouterGroup.POST("/get_group_member_list", group.FindGroupMemberAll)        //no use
-		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
-		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
-		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
-		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
-		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
-		groupRouterGroup.POST("/mute_group", group.MuteGroup)
-		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
-		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
-		groupRouterGroup.POST("/set_group_member_info", group.SetGroupMemberInfo)
-		groupRouterGroup.POST("/get_group_abstract_info", group.GetGroupAbstractInfo)
-		//groupRouterGroup.POST("/get_group_all_member_list_by_split", group.GetGroupAllMemberListBySplit)
+		g := group.NewGroup(nil)
+		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
+		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
+		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
+		groupRouterGroup.POST("/quit_group", g.QuitGroup)                                       //1
+		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)        //1
+		groupRouterGroup.POST("/transfer_group", g.TransferGroupOwner)                          //1
+		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList) //1
+		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
+		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo) //1
+		groupRouterGroup.POST("/kick_group", g.KickGroupMember)    //1
+		//	groupRouterGroup.POST("/get_group_member_list", g.FindGroupMemberAll)        //no use
+		groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
+		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)      //1
+		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)          //1
+		groupRouterGroup.POST("/get_joined_group_list", g.GetJoinedGroupList)
+		groupRouterGroup.POST("/dismiss_group", g.DismissGroup) //
+		groupRouterGroup.POST("/mute_group_member", g.MuteGroupMember)
+		groupRouterGroup.POST("/cancel_mute_group_member", g.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/mute_group", g.MuteGroup)
+		groupRouterGroup.POST("/cancel_mute_group", g.CancelMuteGroup)
+		groupRouterGroup.POST("/set_group_member_nickname", g.SetGroupMemberNickname)
+		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
+		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
+		//groupRouterGroup.POST("/get_group_all_member_list_by_split", g.GetGroupAllMemberListBySplit)
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
