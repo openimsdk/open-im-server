@@ -41,6 +41,14 @@ type CallbackAfterSendGroupMsgResp struct {
 	*CommonCallbackResp
 }
 
+type CallbackAfterConsumeGroupMsgReq struct {
+	CommonCallbackReq
+	GroupID string `json:"groupID"`
+}
+
+type CallbackAfterConsumeGroupMsgResp struct {
+	*CommonCallbackResp
+}
 type CallbackMsgModifyCommandReq struct {
 	CommonCallbackReq
 }
