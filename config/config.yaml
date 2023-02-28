@@ -6,13 +6,13 @@ serverversion: 2.3.1
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
-  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+  etcdAddr: [ 172.16.0.47:237 ] #单机部署时，默认即可
   userName:
   password:
   secret:
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
+  dbMysqlAddress: [ rm-2zetkh468264c9i92.mysql.rds.aliyuncs.com:3306 ] #mysql地址 目前仅支持单机，默认即可
   dbMysqlUserName:  #mysql用户名，建议修改
   dbMysqlPassword:  # mysql密码，建议修改
   dbMysqlDatabaseName: openIM_v2 #默认即可
@@ -27,7 +27,7 @@ mysql:
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
   #dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
-  dbAddress: [ 127.0.0.1:37017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbAddress: [ 172.16.0.47:27017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
@@ -39,7 +39,7 @@ mongo:
   chatRecordsClearTime: "0 3 * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
 
 redis:
-  dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
+  dbAddress: [ 172.16.0.46:6379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -51,19 +51,19 @@ kafka:
   SASLUserName: 
   SASLPassword:
   ws2mschat:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    addr: [ 172.16.0.47:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat" #用于mongo和mysql保存消息
 #  ws2mschatoffline:
 #    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
 #    topic: "ws2ms_chat_offline" #原为离线用户消息处理，目前暂时弃用
   msgtomongo:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    addr: [ 172.16.0.47:9092 ] #kafka配置，默认即可
     topic: "msg_to_mongo"
   ms2pschat:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    addr: [ 172.16.0.47:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat" #消息push
   msgtomodify:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    addr: [ 172.16.0.47:9092 ] #kafka配置，默认即可
     topic: "msg_to_modify"
   consumergroupid:
     msgToTransfer: mongo
@@ -109,8 +109,8 @@ cmsapi:
 sdk:
   openImSdkWsPort: [ 10003 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
   dataDir: [ ../db/sdk/ ]
-  openImWsAddress: ws://127.0.0.1:10001
-  openImApiAddress: http://127.0.0.1:10002
+  openImWsAddress: ws://47.94.239.29:10001
+  openImApiAddress: http://47.94.239.29:10002
 
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
@@ -125,7 +125,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     appBucket: app # 存储app的桶
     location: us-east-1
     endpoint:  #minio外网ip 这个ip是给客户端访问的
-    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
+    endpointInner: http://172.16.0.47:9000 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID:
     secretAccessKey:
@@ -768,18 +768,18 @@ demo:
   #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 10004 ]
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
-    accessKeyId:
-    accessKeySecret:
-    signName:
-    verificationCodeTemplateCode:
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_226810164
     enable: false
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
-    appID:
-    region:
-    secretID:
-    secretKey:
+    appID: 2400000648
+    region: "ap-singapore"
+    secretID: IKIDra4JPGsFMDwQedMq42lESQBgwwgBQQAe
+    secretKey: HI6fz4uUotjJdiX6QUIrAE2buxlKdgU2
     signName:
-    verificationCodeTemplateCode:
+    verificationCodeTemplateCode: 2902877
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   needInvitationCode: false
@@ -787,7 +787,7 @@ demo:
   codeTTL: 60
   useSuperCode: true
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
-    title:
+    title: "openIM"
     senderMail:
     senderAuthorizationCode:
     smtpAddr:
