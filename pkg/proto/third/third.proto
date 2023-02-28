@@ -32,13 +32,41 @@ message GetRTCInvitationInfoReq {
 }
 
 message GetRTCInvitationInfoResp {
-   sdkws.InvitationInfo invitationInfo = 1;
-   sdkws.OfflinePushInfo offlinePushInfo = 2;
+ sdkws.InvitationInfo invitationInfo = 1;
+ sdkws.OfflinePushInfo offlinePushInfo = 2;
+}
+
+message GetRTCInvitationInfoStartAppReq {
+  string userID = 1;
+}
+
+message GetRTCInvitationInfoStartAppResp {
+ sdkws.InvitationInfo invitationInfo = 1;
+ sdkws.OfflinePushInfo offlinePushInfo = 2;
+}
+
+message FcmUpdateTokenReq {
+ int32 Platform = 1;
+ string FcmToken = string = 2;
+}
+
+message FcmUpdateTokenResp {
+}
+
+message SetAppBadgeReq {
+  string FromUserID = 1;
+  int32 AppUnreadCount = 2;
+}
+
+message SetAppBadgeResp {
 }
 
 service third {
   rpc ApplySpace(ApplySpaceReq) returns(ApplySpaceResp);
-  rpc GetRTCInvitationInfo()
+  rpc GetRTCInvitationInfo(GetRTCInvitationInfoReq) returns(GetRTCInvitationInfoResp);
+  rpc GetRTCInvitationInfoStartApp(GetRTCInvitationInfoStartAppReq) returns(GetRTCInvitationInfoStartAppResp);
+  rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);
+  rpc SetAppBadge(SetAppBadgeReq) returns(SetAppBadgeResp);
 }
 
 
