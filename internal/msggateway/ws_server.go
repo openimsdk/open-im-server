@@ -6,7 +6,7 @@ import (
 	"OpenIM/pkg/common/log"
 	prome "OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tokenverify"
-	pbRelay "OpenIM/pkg/proto/relay"
+	msggateway "OpenIM/pkg/proto/relay"
 	"OpenIM/pkg/utils"
 	"bytes"
 	"compress/gzip"
@@ -166,8 +166,8 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 			continue
 		}
 		log.Debug(operationID, "call this node ", v.Target(), rpcSvr.target)
-		client := pbRelay.NewRelayClient(v)
-		req := &pbRelay.MultiTerminalLoginCheckReq{OperationID: operationID, PlatformID: platformID, UserID: userID, Token: token}
+		client := msggateway.NewRelayClient(v)
+		req := &msggateway.MultiTerminalLoginCheckReq{OperationID: operationID, PlatformID: platformID, UserID: userID, Token: token}
 		log.NewInfo(operationID, "MultiTerminalLoginCheckReq ", client, req.String())
 		resp, err := client.MultiTerminalLoginCheck(context.Background(), req)
 		if err != nil {

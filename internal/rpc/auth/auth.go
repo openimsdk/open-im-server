@@ -13,7 +13,7 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	pbAuth "OpenIM/pkg/proto/auth"
-	pbRelay "OpenIM/pkg/proto/relay"
+	msggateway "OpenIM/pkg/proto/relay"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/OpenIMSDK/openKeeper"
@@ -108,8 +108,8 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		return err
 	}
 	for _, v := range grpcCons {
-		client := pbRelay.NewRelayClient(v)
-		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
+		client := msggateway.NewRelayClient(v)
+		kickReq := &msggateway.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
 		log.NewInfo(operationID, "KickUserOffline ", client, kickReq.String())
 		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")

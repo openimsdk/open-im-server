@@ -12,7 +12,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tokenverify"
-	pbRelay "OpenIM/pkg/proto/relay"
+	msggateway "OpenIM/pkg/proto/relay"
 	rpc "OpenIM/pkg/proto/user"
 	"OpenIM/pkg/utils"
 	"context"
@@ -138,7 +138,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbRelay.GetUsersOnlineStatusReq{}
+	req := &msggateway.GetUsersOnlineStatusReq{}
 	utils.CopyStructFields(req, &params)
 
 	var ok bool
@@ -152,12 +152,12 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	}
 
 	log.NewInfo(params.OperationID, "GetUsersOnlineStatus args ", req.String())
-	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
-	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
+	var wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
+	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
 	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), params.OperationID)
 	for _, v := range grpcCons {
-		client := pbRelay.NewRelayClient(v)
+		client := msggateway.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
 		if err != nil {
 			log.NewError(params.OperationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())
@@ -172,7 +172,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	//Online data merge of each node
 	for _, v1 := range params.UserIDList {
 		flag = false
-		temp := new(pbRelay.GetUsersOnlineStatusResp_SuccessResult)
+		temp := new(msggateway.GetUsersOnlineStatusResp_SuccessResult)
 		for _, v2 := range wsResult {
 			if v2.UserID == v1 {
 				flag = true
@@ -190,7 +190,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	}
 	resp := api.GetUsersOnlineStatusResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, SuccessResult: respResult}
 	if len(respResult) == 0 {
-		resp.SuccessResult = []*pbRelay.GetUsersOnlineStatusResp_SuccessResult{}
+		resp.SuccessResult = []*msggateway.GetUsersOnlineStatusResp_SuccessResult{}
 	}
 	log.NewInfo(req.OperationID, "GetUsersOnlineStatus api return", resp)
 	c.JSON(http.StatusOK, resp)

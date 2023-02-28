@@ -8,7 +8,7 @@ import (
 	pbChat "OpenIM/pkg/proto/msg"
 	push "OpenIM/pkg/proto/push"
 	pbRtc "OpenIM/pkg/proto/rtc"
-	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"bytes"
 	"context"

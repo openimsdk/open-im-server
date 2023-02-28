@@ -1,6 +1,6 @@
 syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
-option go_package = "OpenIM/pkg/proto/msggateway;pbMsggateway";
+option go_package = "OpenIM/pkg/proto/msggateway;msggateway";
 package msggateway;
 
 message OnlinePushMsgReq {
