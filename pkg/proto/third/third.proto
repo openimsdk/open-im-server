@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 option go_package = "OpenIM/pkg/proto/third;third";
 package third;
 
@@ -26,8 +27,18 @@ message ConfirmSpaceResp {
   string confirmID = 1;
 }
 
+message GetRTCInvitationInfoReq {
+  string ClientMsgID = 1;
+}
+
+message GetRTCInvitationInfoResp {
+   sdkws.InvitationInfo invitationInfo = 1;
+   sdkws.OfflinePushInfo offlinePushInfo = 2;
+}
+
 service third {
-  rpc ApplySpaceReq(ApplySpaceReq) returns(ApplySpaceResp);
+  rpc ApplySpace(ApplySpaceReq) returns(ApplySpaceResp);
+  rpc GetRTCInvitationInfo()
 }
 
 
