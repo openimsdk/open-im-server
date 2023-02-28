@@ -47,7 +47,7 @@ message GetRTCInvitationInfoStartAppResp {
 
 message FcmUpdateTokenReq {
  int32 Platform = 1;
- string FcmToken = string = 2;
+ string FcmToken = 2;
 }
 
 message FcmUpdateTokenResp {
