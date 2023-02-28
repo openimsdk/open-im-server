@@ -15,15 +15,12 @@ spec:
     spec:
       containers:
         - name: conversation
-          image: openim/conversation:v2.3.4
+          image: openim/conversation:v2.3.8
           # imagePullPolicy: Always
           ports:
             - containerPort: 10230
           volumeMounts:
             - name: config
-              mountPath: /Open-IM-Server/config
-              readOnly: true
-            - name: usualconfig
               mountPath: /Open-IM-Server/config
               readOnly: true
           env:
@@ -34,11 +31,12 @@ spec:
           
       volumes:
         - name: config
-          configMap:
-            name: config
-        - name: usualconfig
-            configMap:
-              name: usualconfig
+          projected:
+            sources:
+            - configMap:
+                name: openim-config
+            - configMap:
+                name: openim-usualconfig
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 
