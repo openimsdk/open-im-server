@@ -111,6 +111,10 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						singleMsgSuccessCountMutex.Lock()
 						singleMsgSuccessCount += uint64(len(storageMsgList))
 						singleMsgSuccessCountMutex.Unlock()
+						callbackResp := callbackAfterConsumeGroupMsg(storageMsgList, triggerID)
+						if callbackResp.ErrCode != 0 {
+							log.NewError(triggerID, utils.GetSelfFuncName(), "callbackAfterConsumeGroupMsg resp: ", callbackResp)
+						}
 						och.SendMessageToMongoCH(msgChannelValue.aggregationID, triggerID, storageMsgList, lastSeq)
 
 						for _, v := range storageMsgList {

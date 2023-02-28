@@ -210,6 +210,7 @@ const (
 	CallbackAfterSendSingleMsgCommand                    = "callbackAfterSendSingleMsgCommand"
 	CallbackBeforeSendGroupMsgCommand                    = "callbackBeforeSendGroupMsgCommand"
 	CallbackAfterSendGroupMsgCommand                     = "callbackAfterSendGroupMsgCommand"
+	CallbackAfterConsumeGroupMsgCommand                  = "callbackAfterConsumeGroupMsgCommand"
 	CallbackMsgModifyCommand                             = "callbackMsgModifyCommand"
 	CallbackUserOnlineCommand                            = "callbackUserOnlineCommand"
 	CallbackUserOfflineCommand                           = "callbackUserOfflineCommand"

@@ -202,6 +202,7 @@ message AddMessageReactionExtensionsReq {
   bool isReact = 10;
   bool isExternalExtensions = 11;
   int64 msgFirstModifyTime = 12;
+  uint32 seq = 13;
 }
 message AddMessageReactionExtensionsResp {
   int32 errCode = 1;

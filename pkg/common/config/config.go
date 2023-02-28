@@ -287,6 +287,7 @@ type config struct {
 		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackAfterConsumeGroupMsg       callBackConfig `yaml:"callbackAfterConsumeGroupMsg"`
 		CallbackMsgModify                  callBackConfig `yaml:"callbackMsgModify"`
 		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
 		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`

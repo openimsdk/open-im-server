@@ -311,6 +311,9 @@ callback:
   callbackAfterSendGroupMsg:
     enable: false
     callbackTimeOut: 2
+  callbackAfterConsumeGroupMsg:
+    enable: false
+    callbackTimeOut: 2
   callbackMsgModify:
     enable: false
     callbackTimeOut: 2

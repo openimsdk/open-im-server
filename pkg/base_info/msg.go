@@ -64,6 +64,7 @@ type ModifyMessageReactionExtensionsReq struct {
 	IsReact               bool                        `json:"isReact"`
 	IsExternalExtensions  bool                        `json:"isExternalExtensions"`
 	MsgFirstModifyTime    int64                       `json:"msgFirstModifyTime"`
+	Seq                   uint32                      `json:"seq"`
 }
 
 type ModifyMessageReactionExtensionsResp struct {

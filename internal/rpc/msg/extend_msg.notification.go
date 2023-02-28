@@ -58,6 +58,7 @@ func ExtendMessageAddedNotification(operationID, sendID string, sourceID string,
 	m.ClientMsgID = req.ClientMsgID
 	m.IsReact = resp.IsReact
 	m.IsExternalExtensions = req.IsExternalExtensions
+	m.Seq = req.Seq
 	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
 	messageReactionSender(operationID, sendID, sourceID, senderPlatformID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
