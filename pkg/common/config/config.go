@@ -22,6 +22,7 @@ const (
 	NotificationFileName = "notification.yaml"
 	ENV                  = "CONFIG_NAME"
 	DefaultPath          = "../config/"
+	ConfKey              = "conf"
 )
 
 var Config config
@@ -525,8 +526,16 @@ func (c *config) initConfig(config interface{}, configName, configPath string) e
 	return c.unmarshalConfig(config, configPath)
 }
 
-func (c *config) Register(registry discoveryregistry.SvcDiscoveryRegistry) error {
-	registry
+func (c *config) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
+	bytes, err := yaml.Marshal(Config)
+	if err != nil {
+		return err
+	}
+	return registry.RegisterConf2Registry(ConfKey, bytes)
+}
+
+func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
+	return registry.GetConfFromRegistry(ConfKey)
 }
 
 func InitConfig() error {
