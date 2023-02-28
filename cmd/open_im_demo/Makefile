@@ -16,10 +16,6 @@ else
 
 BINARY_NAME=${NAME}
 
-else
-
-BINARY_NAME=${NAME}
-
 endif
 
 build:
