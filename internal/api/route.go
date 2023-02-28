@@ -1,19 +1,14 @@
 package api
 
 import (
-	"OpenIM/internal/api/auth"
 	"OpenIM/internal/api/conversation"
-	"OpenIM/internal/api/friend"
-	"OpenIM/internal/api/group"
 	"OpenIM/internal/api/manage"
 	"OpenIM/internal/api/msg"
 	"OpenIM/internal/api/third"
-	"OpenIM/internal/api/user"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
 	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/common/tokenverify"
 	"github.com/gin-gonic/gin"
 	"io"
 	"os"
@@ -35,90 +30,79 @@ func NewGinRouter() *gin.Engine {
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
+
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
-		userRouterGroup.POST("/set_global_msg_recv_opt", user.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", user.GetUsersPublicInfo)            //1
-		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
-		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
-		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
-		userRouterGroup.POST("/get_user_friend_from_cache", user.GetFriendIDListFromCache)
-		userRouterGroup.POST("/get_black_list_from_cache", user.GetBlackIDListFromCache)
-		userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) //1
-		userRouterGroup.POST("/account_check", manage.AccountCheck)       //1
-		//	userRouterGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
-		userRouterGroup.POST("/get_users", user.GetUsers)
+		u := NewUser(nil)
+		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
+		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
+		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)            //1
+		userRouterGroup.POST("/get_self_user_info", u.GetSelfUserInfo)           //1
+		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus) //1
+		userRouterGroup.POST("/get_users_info_from_cache", u.GetUsersInfoFromCache)
+		userRouterGroup.POST("/get_user_friend_from_cache", u.GetFriendIDListFromCache)
+		userRouterGroup.POST("/get_black_list_from_cache", u.GetBlackIDListFromCache)
+		//userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) // todo
+		//userRouterGroup.POST("/account_check", manage.AccountCheck)       // todo
+		userRouterGroup.POST("/get_users", u.GetUsers)
 	}
 	////friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
-		friendRouterGroup.POST("/add_friend", friend.AddFriend)                        //1
-		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)                  //1
-		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)    //1
-		friendRouterGroup.POST("/get_self_friend_apply_list", friend.GetSelfApplyList) //1
-		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)               //1
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)       //1
-		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)           //1
+		f := NewFriend(nil)
+		friendRouterGroup.POST("/add_friend", f.AddFriend)                        //1
+		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
+		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
+		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList) //1
+		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)               //1
+		friendRouterGroup.POST("/add_friend_response", f.AddFriendResponse)       //1
+		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)           //1
+		friendRouterGroup.POST("/add_black", f.AddBlack)                          //1
+		friendRouterGroup.POST("/get_black_list", f.GetBlacklist)                 //1
+		friendRouterGroup.POST("/remove_black", f.RemoveBlacklist)                //1
+		friendRouterGroup.POST("/import_friend", f.ImportFriend)                  //1
+		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
 
-		friendRouterGroup.POST("/add_black", friend.AddBlack)           //1
-		friendRouterGroup.POST("/get_black_list", friend.GetBlacklist)  //1
-		friendRouterGroup.POST("/remove_black", friend.RemoveBlacklist) //1
-
-		friendRouterGroup.POST("/import_friend", friend.ImportFriend) //1
-		friendRouterGroup.POST("/is_friend", friend.IsFriend)         //1
 	}
-	//group related routing group
 	groupRouterGroup := r.Group("/group")
-	groupRouterGroup.Use(func(c *gin.Context) {
-		userID, err := tokenverify.ParseUserIDFromToken(c.GetHeader("token"), c.GetString("operationID"))
-		if err != nil {
-			c.String(400, err.Error())
-			c.Abort()
-			return
-		}
-		c.Set("opUserID", userID)
-		c.Next()
-	})
+	g := NewGroup(nil)
 	{
-		groupRouterGroup.POST("/create_group", group.NewCreateGroup)                                //1
-		groupRouterGroup.POST("/set_group_info", group.NewSetGroupInfo)                             //1
-		groupRouterGroup.POST("/join_group", group.JoinGroup)                                       //1
-		groupRouterGroup.POST("/quit_group", group.QuitGroup)                                       //1
-		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)        //1
-		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
-		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
-		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo) //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)    //1
-		//	groupRouterGroup.POST("/get_group_member_list", group.FindGroupMemberAll)        //no use
-		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
-		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
-		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
-		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
-		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
-		groupRouterGroup.POST("/mute_group", group.MuteGroup)
-		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
-		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
-		groupRouterGroup.POST("/set_group_member_info", group.SetGroupMemberInfo)
-		groupRouterGroup.POST("/get_group_abstract_info", group.GetGroupAbstractInfo)
-		//groupRouterGroup.POST("/get_group_all_member_list_by_split", group.GetGroupAllMemberListBySplit)
+		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
+		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
+		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
+		groupRouterGroup.POST("/quit_group", g.QuitGroup)                                       //1
+		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)        //1
+		groupRouterGroup.POST("/transfer_group", g.TransferGroupOwner)                          //1
+		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList) //1
+		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
+		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo) //1
+		groupRouterGroup.POST("/kick_group", g.KickGroupMember)    //1
+		//groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
+		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo) //1
+		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)     //1
+		groupRouterGroup.POST("/get_joined_group_list", g.GetJoinedGroupList)
+		groupRouterGroup.POST("/dismiss_group", g.DismissGroup) //
+		groupRouterGroup.POST("/mute_group_member", g.MuteGroupMember)
+		groupRouterGroup.POST("/cancel_mute_group_member", g.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/mute_group", g.MuteGroup)
+		groupRouterGroup.POST("/cancel_mute_group", g.CancelMuteGroup)
+		//groupRouterGroup.POST("/set_group_member_nickname", g.SetGroupMemberNickname)
+		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
+		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
-		superGroupRouterGroup.POST("/get_joined_group_list", group.GetJoinedSuperGroupList)
-		superGroupRouterGroup.POST("/get_groups_info", group.GetSuperGroupsInfo)
+		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
+		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
 	////certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		authRouterGroup.POST("/user_register", apiAuth.UserRegister) //1
-		authRouterGroup.POST("/user_token", apiAuth.UserToken)       //1
-		authRouterGroup.POST("/parse_token", apiAuth.ParseToken)     //1
-		authRouterGroup.POST("/force_logout", apiAuth.ForceLogout)   //1
+		a := NewAuth(nil)
+		authRouterGroup.POST("/user_register", a.UserRegister) //1
+		authRouterGroup.POST("/user_token", a.UserToken)       //1
+		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
+		authRouterGroup.POST("/force_logout", a.ForceLogout)   //1
 	}
 	////Third service
 	thirdGroup := r.Group("/third")
