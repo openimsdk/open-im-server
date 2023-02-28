@@ -92,6 +92,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 						msg = msgs[0]
 						index = indexes[msg.Seq]
 					}
+					msg.IsReact = true
 					if err := db.DB.ReplaceMsgByIndex(notification.SourceID, msg, index); err != nil {
 						log.NewError(msgDataToMQ.OperationID, "ReplaceMsgByIndex failed", notification.SourceID, *msg)
 					}

@@ -23,7 +23,7 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
-          - name: usualConfig
+          - name: usualconfig
             mountPath: /Open-IM-Server/config
             readOnly: true
         env:
@@ -35,7 +35,7 @@ spec:
         - name: config
           configMap:
             name: openim-config
-        - name: usualConfig
+        - name: usualconfig
             configMap:
               name: openim-usualConfig
   strategy: #更新策略
