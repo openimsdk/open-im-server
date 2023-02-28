@@ -1,6 +1,6 @@
 syntax = "proto3";
-option go_package = "OpenIM/pkg/proto/file;file";
-package file;
+option go_package = "OpenIM/pkg/proto/third;third";
+package third;
 
 
 message ApplySpaceReq {
@@ -26,7 +26,7 @@ message ConfirmSpaceResp {
   string confirmID = 1;
 }
 
-service file {
+service third {
   rpc ApplySpaceReq(ApplySpaceReq) returns(ApplySpaceResp);
 }
 

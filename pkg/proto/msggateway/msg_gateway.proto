@@ -1,17 +1,19 @@
 syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
-option go_package = "OpenIM/pkg/proto/relay;pbRelay";
-package relay;
+option go_package = "OpenIM/pkg/proto/msggateway;pbMsggateway";
+package msggateway;
 
 message OnlinePushMsgReq {
   string OperationID = 1;
   sdkws.MsgData msgData = 2;
   string pushToUserID = 3;
 }
+
 message OnlinePushMsgResp{
-repeated SingleMsgToUserPlatform resp = 1;
+    repeated SingleMsgToUserPlatform resp = 1;
 }
-message SingelMsgToUserResultList{
+
+message SingleMsgToUserResultList{
   string userID =1;
   repeated SingleMsgToUserPlatform resp = 2;
   bool onlinePush = 3;
@@ -22,8 +24,9 @@ message OnlineBatchPushOneMsgReq{
   sdkws.MsgData msgData = 2;
   repeated string pushToUserIDList = 3;
 }
+
 message OnlineBatchPushOneMsgResp{
-  repeated SingelMsgToUserResultList singlePushResult= 1;
+  repeated SingleMsgToUserResultList singlePushResult= 1;
 }
 //message SendMsgByWSReq{
 //  string SendID = 1;
@@ -47,6 +50,7 @@ message GetUsersOnlineStatusReq{
   string  operationID = 2;
   string opUserID = 3;
 }
+
 message GetUsersOnlineStatusResp{
   int32  errCode = 1;
   string errMsg = 2;
@@ -67,16 +71,16 @@ message GetUsersOnlineStatusResp{
     string userID = 1;
     string status = 2;
     repeated SuccessDetail detailPlatformStatus = 3;
-
   }
 }
+
 message KickUserOfflineReq{
   string operationID = 1;
     int32  platformID = 2;
   repeated string kickUserIDList = 3;
 }
-message KickUserOfflineResp{
 
+message KickUserOfflineResp{
 }
 
 
