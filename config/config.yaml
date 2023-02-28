@@ -6,7 +6,7 @@ serverversion: 2.3.1
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
-  etcdAddr: [ 172.16.0.47:237 ] #单机部署时，默认即可
+  etcdAddr: [ 172.16.0.47:2379 ] #单机部署时，默认即可
   userName:
   password:
   secret:
