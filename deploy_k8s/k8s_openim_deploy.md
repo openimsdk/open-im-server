@@ -20,7 +20,7 @@
 2. 在项目根目录通过config/config.yaml  
  ```  
     kubectl -n openim create configmap config --from-file=config/config.yaml
-    kubectl -n openim create configmap usualConfig --from-file=config/usualConfig.yaml
+    kubectl -n openim create configmap usualconfig --from-file=config/usualConfig.yaml
  ```
     查看configmap
  ```
