@@ -1,7 +1,7 @@
-package apiAuth
+package api
 
 import (
-	"OpenIM/internal/a2r"
+	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
 	auth "OpenIM/pkg/proto/auth"
 	"context"

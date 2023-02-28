@@ -1,7 +1,7 @@
-package user
+package api
 
 import (
-	"OpenIM/internal/a2r"
+	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/proto/user"
 	"context"

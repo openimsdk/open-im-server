@@ -1,14 +1,10 @@
 package api
 
 import (
-	"OpenIM/internal/api/auth"
 	"OpenIM/internal/api/conversation"
-	"OpenIM/internal/api/friend"
-	"OpenIM/internal/api/group"
 	"OpenIM/internal/api/manage"
 	"OpenIM/internal/api/msg"
 	"OpenIM/internal/api/third"
-	"OpenIM/internal/api/user"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
@@ -37,7 +33,7 @@ func NewGinRouter() *gin.Engine {
 
 	userRouterGroup := r.Group("/user")
 	{
-		u := user.NewUser(nil)
+		u := NewUser(nil)
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)            //1
@@ -53,7 +49,7 @@ func NewGinRouter() *gin.Engine {
 	////friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		f := friend.NewFriend(nil)
+		f := NewFriend(nil)
 		friendRouterGroup.POST("/add_friend", f.AddFriend)                        //1
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
@@ -69,7 +65,7 @@ func NewGinRouter() *gin.Engine {
 
 	}
 	groupRouterGroup := r.Group("/group")
-	g := group.NewGroup(nil)
+	g := NewGroup(nil)
 	{
 		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
@@ -102,7 +98,7 @@ func NewGinRouter() *gin.Engine {
 	////certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := apiAuth.NewAuth(nil)
+		a := NewAuth(nil)
 		authRouterGroup.POST("/user_register", a.UserRegister) //1
 		authRouterGroup.POST("/user_token", a.UserToken)       //1
 		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
