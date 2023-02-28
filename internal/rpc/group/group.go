@@ -564,6 +564,35 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	return &resp, nil
 }
 
+func (s *groupServer) InviteUserToGroups(ctx context.Context, req *pbGroup.InviteUserToGroupsReq) (*pbGroup.InviteUserToGroupsResp, error) {
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "no permission InviteUserToGroup ", req.String())
+		return &pbGroup.InviteUserToGroupsResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+	}
+	for _, v := range req.GroupIDList {
+		groupInfo, err := imdb.GetGroupInfoByGroupID(v)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", v, err)
+			return &pbGroup.InviteUserToGroupsResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error() + v}, nil
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			errMsg := " group status is dismissed " + v
+			return &pbGroup.InviteUserToGroupsResp{ErrCode: constant.ErrStatus.ErrCode, ErrMsg: errMsg}, nil
+		}
+	}
+	if err := db.DB.AddUserToSuperGroups(req.GroupIDList, req.InvitedUserID); err != nil {
+		log.NewError(req.OperationID, "AddUserToSuperGroups failed ", err.Error())
+		return &pbGroup.InviteUserToGroupsResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}, nil
+	}
+	if err := rocksCache.DelJoinedSuperGroupIDListFromCache(req.InvitedUserID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+	}
+	chat.SuperGroupNotification(req.OperationID, req.InvitedUserID, req.InvitedUserID)
+
+	log.NewInfo(req.OperationID, "InviteUserToGroups rpc return ")
+	return nil, nil
+}
+
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
 	log.NewInfo(req.OperationID, "GetGroupAllMember, args ", req.String())
 	var resp pbGroup.GetGroupAllMemberResp

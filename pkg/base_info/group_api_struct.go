@@ -47,7 +47,15 @@ type InviteUserToGroupResp struct {
 	CommResp
 	UserIDResultList []*UserIDResult `json:"data"`
 }
-
+type InviteUserToGroupsReq struct {
+	GroupIDList   string `json:"groupIDList" binding:"required"`
+	InvitedUserID string `json:"invitedUserID" binding:"required"`
+	Reason        string `json:"reason"`
+	OperationID   string `json:"operationID" binding:"required"`
+}
+type InviteUserToGroupsResp struct {
+	CommResp
+}
 type GetJoinedGroupListReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	FromUserID  string `json:"fromUserID" binding:"required"`
