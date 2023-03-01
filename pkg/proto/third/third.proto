@@ -27,35 +27,37 @@ message ConfirmSpaceResp {
   string confirmID = 1;
 }
 
-message GetRTCInvitationInfoReq {
+message GetSignalInvitationInfoReq {
   string ClientMsgID = 1;
 }
 
-message GetRTCInvitationInfoResp {
+message GetSignalInvitationInfoResp {
  sdkws.InvitationInfo invitationInfo = 1;
  sdkws.OfflinePushInfo offlinePushInfo = 2;
 }
 
-message GetRTCInvitationInfoStartAppReq {
+message GetSignalInvitationInfoStartAppReq {
   string userID = 1;
 }
 
-message GetRTCInvitationInfoStartAppResp {
+message GetSignalInvitationInfoStartAppResp {
  sdkws.InvitationInfo invitationInfo = 1;
  sdkws.OfflinePushInfo offlinePushInfo = 2;
 }
 
 message FcmUpdateTokenReq {
- int32 Platform = 1;
+ int32 PlatformID = 1;
  string FcmToken = 2;
+ string account = 3;
+ int64 expireTime = 4;
 }
 
 message FcmUpdateTokenResp {
 }
 
 message SetAppBadgeReq {
-  string FromUserID = 1;
-  int32 AppUnreadCount = 2;
+  string userID = 1;
+  int AppUnreadCount = 2;
 }
 
 message SetAppBadgeResp {
@@ -63,8 +65,8 @@ message SetAppBadgeResp {
 
 service third {
   rpc ApplySpace(ApplySpaceReq) returns(ApplySpaceResp);
-  rpc GetRTCInvitationInfo(GetRTCInvitationInfoReq) returns(GetRTCInvitationInfoResp);
-  rpc GetRTCInvitationInfoStartApp(GetRTCInvitationInfoStartAppReq) returns(GetRTCInvitationInfoStartAppResp);
+  rpc GetSignalInvitationInfo(GetSignalInvitationInfoReq) returns(GetSignalInvitationInfoResp);
+  rpc GetSignalInvitationInfoStartApp(GetSignalInvitationInfoStartAppReq) returns(GetSignalInvitationInfoStartAppResp);
   rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);
   rpc SetAppBadge(SetAppBadgeReq) returns(SetAppBadgeResp);
 }

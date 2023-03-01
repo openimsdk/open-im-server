@@ -5,11 +5,11 @@ import (
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/localcache"
 	"OpenIM/pkg/common/db/relation"
-	tablerelation "OpenIM/pkg/common/db/table/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
 
-	promePkg "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/proto/msg"
 	"google.golang.org/grpc"
 )
@@ -26,19 +26,12 @@ type msgServer struct {
 	MessageLocker MessageLocker
 }
 
-type deleteMsg struct {
-	UserID      string
-	OpUserID    string
-	SeqList     []uint32
-	OperationID string
-}
-
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	mysql, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := mysql.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+	if err := mysql.AutoMigrate(&relationTb.UserModel{}); err != nil {
 		return err
 	}
 	s := &msgServer{
@@ -57,17 +50,17 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 }
 
 func (m *msgServer) initPrometheus() {
-	promePkg.NewMsgPullFromRedisSuccessCounter()
-	promePkg.NewMsgPullFromRedisFailedCounter()
-	promePkg.NewMsgPullFromMongoSuccessCounter()
-	promePkg.NewMsgPullFromMongoFailedCounter()
-	promePkg.NewSingleChatMsgRecvSuccessCounter()
-	promePkg.NewGroupChatMsgRecvSuccessCounter()
-	promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
-	promePkg.NewSingleChatMsgProcessSuccessCounter()
-	promePkg.NewSingleChatMsgProcessFailedCounter()
-	promePkg.NewGroupChatMsgProcessSuccessCounter()
-	promePkg.NewGroupChatMsgProcessFailedCounter()
-	promePkg.NewWorkSuperGroupChatMsgProcessSuccessCounter()
-	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
+	prome.NewMsgPullFromRedisSuccessCounter()
+	prome.NewMsgPullFromRedisFailedCounter()
+	prome.NewMsgPullFromMongoSuccessCounter()
+	prome.NewMsgPullFromMongoFailedCounter()
+	prome.NewSingleChatMsgRecvSuccessCounter()
+	prome.NewGroupChatMsgRecvSuccessCounter()
+	prome.NewWorkSuperGroupChatMsgRecvSuccessCounter()
+	prome.NewSingleChatMsgProcessSuccessCounter()
+	prome.NewSingleChatMsgProcessFailedCounter()
+	prome.NewGroupChatMsgProcessSuccessCounter()
+	prome.NewGroupChatMsgProcessFailedCounter()
+	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
+	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }

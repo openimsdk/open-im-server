@@ -42,7 +42,7 @@ type NotificationMsg struct {
 	SenderFaceURL  string
 }
 
-func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationMsg) {
+func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationMsg) error {
 	var err error
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils2.GetFuncName(1), err, "notificationMsg", notificationMsg)
@@ -301,4 +301,5 @@ func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationM
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = c.Msg.SendMsg(ctx, &req)
+	return err
 }

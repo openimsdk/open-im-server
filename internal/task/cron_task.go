@@ -24,7 +24,7 @@ func StartCronTask() error {
 	operationID := clearCronTask.getCronTaskOperationID()
 	tracelog.SetOperationID(ctx, operationID)
 	c := cron.New()
-	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, clearCronTask.ClearAll)
+	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, clearCronTask.ClearMsgAndFixSeq)
 	if err != nil {
 		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
 		return err

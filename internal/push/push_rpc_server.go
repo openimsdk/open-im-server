@@ -21,7 +21,7 @@ import (
 type RPCServer struct {
 	rpcPort         int
 	rpcRegisterName string
-	pushInterface   controller.PushInterface
+	PushDatabase    controller.PushDatabase
 	pusher          Pusher
 }
 
@@ -89,5 +89,5 @@ func (r *RPCServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (res
 }
 
 func (r *RPCServer) DelUserPushToken(ctx context.Context, req *pbPush.DelUserPushTokenReq) (resp *pbPush.DelUserPushTokenResp, err error) {
-	return &pbPush.DelUserPushTokenResp{}, r.pushInterface.DelFcmToken(ctx, req.UserID, int(req.PlatformID))
+	return &pbPush.DelUserPushTokenResp{}, r.PushDatabase.DelFcmToken(ctx, req.UserID, int(req.PlatformID))
 }

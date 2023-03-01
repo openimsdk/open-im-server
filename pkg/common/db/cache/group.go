@@ -25,33 +25,6 @@ const (
 )
 
 type GroupCache interface {
-	GetGroupsInfo(ctx context.Context, groupIDs []string, fn func(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)) (groups []*relationTb.GroupModel, err error)
-	DelGroupsInfo(ctx context.Context, groupID string) (err error)
-	GetGroupInfo(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)) (group *relationTb.GroupModel, err error)
-	DelGroupInfo(ctx context.Context, groupID string) (err error)
-
-	BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string, fn func(ctx context.Context, userIDs []string) error) (err error)
-
-	GetJoinedSuperGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error)) (joinedSuperGroupIDs []string, err error)
-	DelJoinedSuperGroupIDs(ctx context.Context, userID string) (err error)
-
-	GetGroupMembersHash(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (hashCodeUint64 uint64, err error)) (hashCodeUint64 uint64, err error)
-	DelGroupMembersHash(ctx context.Context, groupID string) (err error)
-
-	GetGroupMemberIDs(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (groupMemberIDs []string, err error)) (groupMemberIDs []string, err error)
-	DelGroupMemberIDs(ctx context.Context, groupID string) error
-
-	GetJoinedGroupIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) (joinedGroupIDs []string, err error)) (joinedGroupIDs []string, err error)
-	DelJoinedGroupIDs(ctx context.Context, userID string) (err error)
-
-	GetGroupMemberInfo(ctx context.Context, groupID, userID string, fn func(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)) (groupMember *relationTb.GroupMemberModel, err error)
-	DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error)
-
-	GetGroupMemberNum(ctx context.Context, groupID string, fn func(ctx context.Context, groupID string) (num int, err error)) (num int, err error)
-	DelGroupMemberNum(ctx context.Context, groupID string) (err error)
-}
-
-type GroupCacheRedisInterface interface {
 	GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
 	GetGroupInfo(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
 	BatchDelJoinedSuperGroupIDs(ctx context.Context, userIDs []string) (err error)
@@ -76,19 +49,14 @@ type GroupCacheRedis struct {
 	groupRequest relationTb.GroupRequestModelInterface
 	mongoDB      unrelation2.SuperGroupModelInterface
 	expireTime   time.Duration
-	redisClient  *RedisClient
 	rcClient     *rockscache.Client
 }
 
 func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModelInterface, groupMemberDB relationTb.GroupMemberModelInterface, groupRequestDB relationTb.GroupRequestModelInterface, mongoClient unrelation2.SuperGroupModelInterface, opts rockscache.Options) GroupCacheRedisInterface {
 	return &GroupCacheRedis{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
-		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
+		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB,
 		mongoDB: mongoClient,
 	}
-}
-
-func (g *GroupCacheRedis) getRedisClient() *RedisClient {
-	return g.redisClient
 }
 
 func (g *GroupCacheRedis) getGroupInfoKey(groupID string) string {

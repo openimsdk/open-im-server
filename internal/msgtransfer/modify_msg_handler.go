@@ -22,7 +22,7 @@ import (
 type ModifyMsgConsumerHandler struct {
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
 
-	extendMsgInterface controller.ExtendMsgInterface
+	extendMsgDatabase controller.ExtendMsgDatabase
 }
 
 func (mmc *ModifyMsgConsumerHandler) Init() {
@@ -88,7 +88,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 					}
 				}
 
-				if err := mmc.extendMsgInterface.InsertExtendMsg(ctx, notification.SourceID, notification.SessionType, &extendMsg); err != nil {
+				if err := mmc.extendMsgDatabase.InsertExtendMsg(ctx, notification.SourceID, notification.SessionType, &extendMsg); err != nil {
 					log.NewError(msgDataToMQ.OperationID, "MsgFirstModify InsertExtendMsg failed", notification.SourceID, notification.SessionType, extendMsg, err.Error())
 					continue
 				}
@@ -102,7 +102,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 					}
 				}
 				// is already modify
-				if err := mmc.extendMsgInterface.InsertOrUpdateReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, reactionExtensionList); err != nil {
+				if err := mmc.extendMsgDatabase.InsertOrUpdateReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, reactionExtensionList); err != nil {
 					log.NewError(msgDataToMQ.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
 				}
 			}
@@ -111,7 +111,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}
-			if err := mmc.extendMsgInterface.DeleteReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, notification.SuccessReactionExtensionList); err != nil {
+			if err := mmc.extendMsgDatabase.DeleteReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, notification.SuccessReactionExtensionList); err != nil {
 				log.NewError(msgDataToMQ.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
 			}
 		}

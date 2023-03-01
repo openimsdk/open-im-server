@@ -13,11 +13,9 @@ import (
 	"time"
 )
 
-//func NewMongo() *Mongo {
-//	mgo := &Mongo{}
-//	mgo.InitMongo()
-//	return mgo
-//}
+type Mongo struct {
+	db *mongo.Client
+}
 
 func NewMongo() (*Mongo, error) {
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
@@ -52,50 +50,6 @@ func NewMongo() (*Mongo, error) {
 		return nil, err
 	}
 	return &Mongo{db: mongoClient}, nil
-}
-
-type Mongo struct {
-	db *mongo.Client
-}
-
-func (m *Mongo) InitMongo() {
-	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	if config.Config.Mongo.DBUri != "" {
-		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
-		uri = config.Config.Mongo.DBUri
-	} else {
-		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
-		mongodbHosts := ""
-		for i, v := range config.Config.Mongo.DBAddress {
-			if i == len(config.Config.Mongo.DBAddress)-1 {
-				mongodbHosts += v
-			} else {
-				mongodbHosts += v + ","
-			}
-		}
-		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			// clientOpts := options.Client().ApplyURI("mongodb://localhost:27017,localhost:27018/?replicaSet=replset")
-			//mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]
-			//uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin&replicaSet=replset",
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
-				config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, mongodbHosts,
-				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
-		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
-				mongodbHosts, config.Config.Mongo.DBDatabase,
-				config.Config.Mongo.DBMaxPoolSize)
-		}
-	}
-	fmt.Println(utils.GetFuncName(1), "start to init mongoDB:", uri)
-	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil {
-		time.Sleep(time.Duration(30) * time.Second)
-		mongoClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-		if err != nil {
-			panic(err.Error() + " mongo.Connect failed " + uri)
-		}
-	}
-	m.db = mongoClient
 }
 
 func (m *Mongo) GetClient() *mongo.Client {

@@ -19,7 +19,7 @@ import (
 
 type conversationServer struct {
 	groupChecker *check.GroupChecker
-	controller.ConversationDataBaseInterface
+	controller.ConversationDatabase
 	notify *notification.Check
 }
 
@@ -37,7 +37,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	}
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		groupChecker: check.NewGroupChecker(client),
-		ConversationDataBaseInterface: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(redis.GetClient(), rockscache.Options{
+		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(redis.GetClient(), rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
@@ -49,7 +49,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 
 func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
 	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
-	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
+	conversations, err := c.ConversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
 	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationDataBaseInterface.GetUserAllConversation(ctx, req.OwnerUserID)
+	conversations, err := c.ConversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
 	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationDataBaseInterface.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	conversations, err := c.ConversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
 		return nil, err
 	}
-	err := c.ConversationDataBaseInterface.SetUserConversations(ctx, req.OwnerUserID, conversations)
+	err := c.ConversationDatabase.SetUserConversations(ctx, req.OwnerUserID, conversations)
 	if err != nil {
 		return nil, err
 	}
@@ -126,14 +126,14 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		return nil, err
 	}
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.ConversationDataBaseInterface.SyncPeerUserPrivateConversationTx(ctx, &conversation)
+		err := c.ConversationDatabase.SyncPeerUserPrivateConversationTx(ctx, &conversation)
 		if err != nil {
 			return nil, err
 		}
 		c.notify.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
-	//haveUserID, err := c.ConversationDataBaseInterface.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
+	//haveUserID, err := c.ConversationDatabase.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -157,7 +157,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	err = c.ConversationDataBaseInterface.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
+	err = c.ConversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 // 获取超级大群开启免打扰的用户ID
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
 	resp := &pbConversation.GetRecvMsgNotNotifyUserIDsResp{}
-	userIDs, err := c.ConversationDataBaseInterface.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	userIDs, err := c.ConversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}

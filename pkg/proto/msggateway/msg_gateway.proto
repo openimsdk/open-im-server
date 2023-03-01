@@ -95,7 +95,7 @@ message MultiTerminalLoginCheckResp{
     string  errMsg = 2;
 }
 
-service relay {
+service msgGateway {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
   rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq) returns(GetUsersOnlineStatusResp);
   rpc OnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);

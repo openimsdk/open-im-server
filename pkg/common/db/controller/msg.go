@@ -552,8 +552,8 @@ func (db *msgDatabase) DeleteUserMsgsAndSetMinSeq(ctx context.Context, userID st
 
 // this is struct for recursion
 type delMsgRecursionStruct struct {
-	minSeq       int64
-	delDocIDList []string
+	minSeq    int64
+	delDocIDs []string
 }
 
 func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
@@ -576,7 +576,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 			}
 		}
 		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList)
-		err = db.mgo.Delete(ctx, delStruct.delDocIDList)
+		err = db.mgo.Delete(ctx, delStruct.delDocIDs)
 		if err != nil {
 			return 0, err
 		}
@@ -587,7 +587,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 		log.NewWarn(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "msgs too large:", len(msgs.Msg), "docID:", msgs.DocID)
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgs.IsFull() {
-		delStruct.delDocIDList = append(delStruct.delDocIDList, msgs.DocID)
+		delStruct.delDocIDs = append(delStruct.delDocIDs, msgs.DocID)
 		lastMsgPb := &sdkws.MsgData{}
 		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
 		if err != nil {
@@ -611,7 +611,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 				msg.SendTime = 0
 				hasMarkDelFlag = true
 			} else {
-				if err := db.mgo.Delete(ctx, delStruct.delDocIDList); err != nil {
+				if err := db.mgo.Delete(ctx, delStruct.delDocIDs); err != nil {
 					return 0, err
 				}
 				if hasMarkDelFlag {

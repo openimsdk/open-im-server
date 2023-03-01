@@ -5,14 +5,18 @@ import (
 	"context"
 )
 
-type PushInterface interface {
+type PushDatabase interface {
 	DelFcmToken(ctx context.Context, userID string, platformID int) error
 }
 
-type PushDataBase struct {
+type pushDataBase struct {
 	cache cache.Cache
 }
 
-func (p *PushDataBase) DelFcmToken(ctx context.Context, userID string, platformID int) error {
+func NewPushDatabase(cache cache.Cache) PushDatabase {
+	return &pushDataBase{cache: cache}
+}
+
+func (p *pushDataBase) DelFcmToken(ctx context.Context, userID string, platformID int) error {
 	return p.cache.DelFcmToken(ctx, userID, platformID)
 }

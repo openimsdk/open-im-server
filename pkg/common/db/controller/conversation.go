@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 )
 
-type ConversationDataBaseInterface interface {
+type ConversationDatabase interface {
 	//GetUserIDExistConversation 获取拥有该会话的的用户ID列表
 	GetUserIDExistConversation(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
 	//UpdateUserConversationFiled 更新用户该会话的属性信息
@@ -32,7 +32,7 @@ type ConversationDataBaseInterface interface {
 	SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 }
 
-func NewConversationDatabase(conversation relation.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDataBaseInterface {
+func NewConversationDatabase(conversation relation.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
 	return &ConversationDataBase{
 		conversationDB: conversation,
 		cache:          cache,

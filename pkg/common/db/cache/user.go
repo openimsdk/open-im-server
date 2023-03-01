@@ -25,17 +25,16 @@ type UserCache interface {
 type UserCacheRedis struct {
 	userDB *relation.UserGorm
 
-	expireTime  time.Duration
-	redisClient *RedisClient
-	rcClient    *rockscache.Client
+	expireTime time.Duration
+
+	rcClient *rockscache.Client
 }
 
 func NewUserCacheRedis(rdb redis.UniversalClient, userDB *relation.UserGorm, options rockscache.Options) *UserCacheRedis {
 	return &UserCacheRedis{
-		userDB:      userDB,
-		expireTime:  userExpireTime,
-		redisClient: NewRedisClient(rdb),
-		rcClient:    rockscache.NewClient(rdb, options),
+		userDB:     userDB,
+		expireTime: userExpireTime,
+		rcClient:   rockscache.NewClient(rdb, options),
 	}
 }
 

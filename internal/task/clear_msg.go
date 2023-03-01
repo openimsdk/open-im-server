@@ -14,16 +14,16 @@ import (
 )
 
 type msgTool struct {
-	msgInterface   controller.MsgDatabase
-	userInterface  controller.UserDatabase
-	groupInterface controller.GroupDatabase
+	msgInterface  controller.MsgDatabase
+	userInterface controller.UserDatabase
+	groupDatabase controller.GroupDatabase
 }
 
 func (c *msgTool) getCronTaskOperationID() string {
 	return cronTaskOperationID + utils.OperationIDGenerator()
 }
 
-func (c *msgTool) ClearAll() {
+func (c *msgTool) ClearMsgAndFixSeq() {
 	operationID := c.getCronTaskOperationID()
 	ctx := context.Background()
 	tracelog.SetOperationID(ctx, operationID)
@@ -36,7 +36,7 @@ func (c *msgTool) ClearAll() {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
 	// working group msg clear
-	superGroupIDList, err := c.groupInterface.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
+	superGroupIDList, err := c.groupDatabase.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err == nil {
 		c.ClearSuperGroupMsg(ctx, superGroupIDList)
 	} else {
@@ -45,8 +45,8 @@ func (c *msgTool) ClearAll() {
 	log.NewInfo(operationID, "============================ start del cron finished ============================")
 }
 
-func (c *msgTool) ClearUsersMsg(ctx context.Context, userIDList []string) {
-	for _, userID := range userIDList {
+func (c *msgTool) ClearUsersMsg(ctx context.Context, userIDs []string) {
+	for _, userID := range userIDs {
 		if err := c.msgInterface.DeleteUserMsgsAndSetMinSeq(ctx, userID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
 			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), userID)
 		}
@@ -60,9 +60,9 @@ func (c *msgTool) ClearUsersMsg(ctx context.Context, userIDList []string) {
 	}
 }
 
-func (c *msgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDList []string) {
-	for _, groupID := range superGroupIDList {
-		userIDs, err := c.groupInterface.FindGroupMemberUserID(ctx, groupID)
+func (c *msgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDs []string) {
+	for _, groupID := range superGroupIDs {
+		userIDs, err := c.groupDatabase.FindGroupMemberUserID(ctx, groupID)
 		if err != nil {
 			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "FindGroupMemberUserID", err.Error(), groupID)
 			continue
@@ -114,6 +114,14 @@ func (c *msgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, max
 	}
 }
 
+func (c *msgTool) ShowUserSeqs(ctx context.Context, userID string) {
+
+}
+
+func (c *msgTool) ShowSuperGroupSeqs(ctx context.Context, groupID string) {
+
+}
+
 func (c *msgTool) FixAllSeq(ctx context.Context) {
 	userIDs, err := c.userInterface.GetAllUserID(ctx)
 	if err != nil {
@@ -137,7 +145,7 @@ func (c *msgTool) FixAllSeq(ctx context.Context) {
 	}
 	fmt.Println("fix users seq success")
 
-	groupIDs, err := c.groupInterface.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
+	groupIDs, err := c.groupDatabase.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -147,7 +155,7 @@ func (c *msgTool) FixAllSeq(ctx context.Context) {
 			fmt.Println("GetGroupMaxSeq failed", groupID)
 			continue
 		}
-		userIDs, err := c.groupInterface.FindGroupMemberUserID(ctx, groupID)
+		userIDs, err := c.groupDatabase.FindGroupMemberUserID(ctx, groupID)
 		if err != nil {
 			fmt.Println("get groupID", groupID, "failed, try again later")
 			continue

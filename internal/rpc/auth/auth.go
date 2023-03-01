@@ -13,12 +13,18 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	pbAuth "OpenIM/pkg/proto/auth"
-	msggateway "OpenIM/pkg/proto/relay"
+	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
+
+type authServer struct {
+	controller.AuthDatabase
+	userCheck      *check.UserCheck
+	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
+}
 
 func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	mysql, err := relation.NewGormDB()
@@ -28,14 +34,14 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	if err := mysql.AutoMigrate(&relationTb.FriendModel{}, &relationTb.FriendRequestModel{}, &relationTb.BlackModel{}); err != nil {
 		return err
 	}
-	redis, err := cache.NewRedis()
+	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
 	pbAuth.RegisterAuthServer(server, &authServer{
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,
-		AuthInterface:  controller.NewAuthController(redis.GetClient(), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+		AuthDatabase:   controller.NewAuthDatabase(cache.NewCache(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
 	})
 	return nil
 }
@@ -103,22 +109,16 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	grpcCons, err := s.RegisterCenter.GetConns(config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons, err := s.RegisterCenter.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return err
 	}
 	for _, v := range grpcCons {
-		client := msggateway.NewRelayClient(v)
+		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
 		log.NewInfo(operationID, "KickUserOffline ", client, kickReq.String())
 		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")
 	}
 	return constant.ErrInternalServer.Wrap()
-}
-
-type authServer struct {
-	controller.AuthInterface
-	userCheck      *check.UserCheck
-	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
 }

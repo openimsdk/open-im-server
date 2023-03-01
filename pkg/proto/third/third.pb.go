@@ -39,7 +39,7 @@ func (m *ApplySpaceReq) Reset()         { *m = ApplySpaceReq{} }
 func (m *ApplySpaceReq) String() string { return proto.CompactTextString(m) }
 func (*ApplySpaceReq) ProtoMessage()    {}
 func (*ApplySpaceReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{0}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{0}
 }
 func (m *ApplySpaceReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplySpaceReq.Unmarshal(m, b)
@@ -108,7 +108,7 @@ func (m *ApplySpaceResp) Reset()         { *m = ApplySpaceResp{} }
 func (m *ApplySpaceResp) String() string { return proto.CompactTextString(m) }
 func (*ApplySpaceResp) ProtoMessage()    {}
 func (*ApplySpaceResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{1}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{1}
 }
 func (m *ApplySpaceResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplySpaceResp.Unmarshal(m, b)
@@ -167,7 +167,7 @@ func (m *ConfirmSpaceReq) Reset()         { *m = ConfirmSpaceReq{} }
 func (m *ConfirmSpaceReq) String() string { return proto.CompactTextString(m) }
 func (*ConfirmSpaceReq) ProtoMessage()    {}
 func (*ConfirmSpaceReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{2}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{2}
 }
 func (m *ConfirmSpaceReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfirmSpaceReq.Unmarshal(m, b)
@@ -205,7 +205,7 @@ func (m *ConfirmSpaceResp) Reset()         { *m = ConfirmSpaceResp{} }
 func (m *ConfirmSpaceResp) String() string { return proto.CompactTextString(m) }
 func (*ConfirmSpaceResp) ProtoMessage()    {}
 func (*ConfirmSpaceResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{3}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{3}
 }
 func (m *ConfirmSpaceResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfirmSpaceResp.Unmarshal(m, b)
@@ -232,45 +232,45 @@ func (m *ConfirmSpaceResp) GetConfirmID() string {
 	return ""
 }
 
-type GetRTCInvitationInfoReq struct {
+type GetSignalInvitationInfoReq struct {
 	ClientMsgID          string   `protobuf:"bytes,1,opt,name=ClientMsgID" json:"ClientMsgID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetRTCInvitationInfoReq) Reset()         { *m = GetRTCInvitationInfoReq{} }
-func (m *GetRTCInvitationInfoReq) String() string { return proto.CompactTextString(m) }
-func (*GetRTCInvitationInfoReq) ProtoMessage()    {}
-func (*GetRTCInvitationInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{4}
+func (m *GetSignalInvitationInfoReq) Reset()         { *m = GetSignalInvitationInfoReq{} }
+func (m *GetSignalInvitationInfoReq) String() string { return proto.CompactTextString(m) }
+func (*GetSignalInvitationInfoReq) ProtoMessage()    {}
+func (*GetSignalInvitationInfoReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_third_3f9746cdadff77e4, []int{4}
 }
-func (m *GetRTCInvitationInfoReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetRTCInvitationInfoReq.Unmarshal(m, b)
+func (m *GetSignalInvitationInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSignalInvitationInfoReq.Unmarshal(m, b)
 }
-func (m *GetRTCInvitationInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetRTCInvitationInfoReq.Marshal(b, m, deterministic)
+func (m *GetSignalInvitationInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSignalInvitationInfoReq.Marshal(b, m, deterministic)
 }
-func (dst *GetRTCInvitationInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRTCInvitationInfoReq.Merge(dst, src)
+func (dst *GetSignalInvitationInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSignalInvitationInfoReq.Merge(dst, src)
 }
-func (m *GetRTCInvitationInfoReq) XXX_Size() int {
-	return xxx_messageInfo_GetRTCInvitationInfoReq.Size(m)
+func (m *GetSignalInvitationInfoReq) XXX_Size() int {
+	return xxx_messageInfo_GetSignalInvitationInfoReq.Size(m)
 }
-func (m *GetRTCInvitationInfoReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRTCInvitationInfoReq.DiscardUnknown(m)
+func (m *GetSignalInvitationInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSignalInvitationInfoReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRTCInvitationInfoReq proto.InternalMessageInfo
+var xxx_messageInfo_GetSignalInvitationInfoReq proto.InternalMessageInfo
 
-func (m *GetRTCInvitationInfoReq) GetClientMsgID() string {
+func (m *GetSignalInvitationInfoReq) GetClientMsgID() string {
 	if m != nil {
 		return m.ClientMsgID
 	}
 	return ""
 }
 
-type GetRTCInvitationInfoResp struct {
+type GetSignalInvitationInfoResp struct {
 	InvitationInfo       *sdkws.InvitationInfo  `protobuf:"bytes,1,opt,name=invitationInfo" json:"invitationInfo,omitempty"`
 	OfflinePushInfo      *sdkws.OfflinePushInfo `protobuf:"bytes,2,opt,name=offlinePushInfo" json:"offlinePushInfo,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
@@ -278,83 +278,83 @@ type GetRTCInvitationInfoResp struct {
 	XXX_sizecache        int32                  `json:"-"`
 }
 
-func (m *GetRTCInvitationInfoResp) Reset()         { *m = GetRTCInvitationInfoResp{} }
-func (m *GetRTCInvitationInfoResp) String() string { return proto.CompactTextString(m) }
-func (*GetRTCInvitationInfoResp) ProtoMessage()    {}
-func (*GetRTCInvitationInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{5}
+func (m *GetSignalInvitationInfoResp) Reset()         { *m = GetSignalInvitationInfoResp{} }
+func (m *GetSignalInvitationInfoResp) String() string { return proto.CompactTextString(m) }
+func (*GetSignalInvitationInfoResp) ProtoMessage()    {}
+func (*GetSignalInvitationInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_third_3f9746cdadff77e4, []int{5}
 }
-func (m *GetRTCInvitationInfoResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetRTCInvitationInfoResp.Unmarshal(m, b)
+func (m *GetSignalInvitationInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSignalInvitationInfoResp.Unmarshal(m, b)
 }
-func (m *GetRTCInvitationInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetRTCInvitationInfoResp.Marshal(b, m, deterministic)
+func (m *GetSignalInvitationInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSignalInvitationInfoResp.Marshal(b, m, deterministic)
 }
-func (dst *GetRTCInvitationInfoResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRTCInvitationInfoResp.Merge(dst, src)
+func (dst *GetSignalInvitationInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSignalInvitationInfoResp.Merge(dst, src)
 }
-func (m *GetRTCInvitationInfoResp) XXX_Size() int {
-	return xxx_messageInfo_GetRTCInvitationInfoResp.Size(m)
+func (m *GetSignalInvitationInfoResp) XXX_Size() int {
+	return xxx_messageInfo_GetSignalInvitationInfoResp.Size(m)
 }
-func (m *GetRTCInvitationInfoResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRTCInvitationInfoResp.DiscardUnknown(m)
+func (m *GetSignalInvitationInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSignalInvitationInfoResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRTCInvitationInfoResp proto.InternalMessageInfo
+var xxx_messageInfo_GetSignalInvitationInfoResp proto.InternalMessageInfo
 
-func (m *GetRTCInvitationInfoResp) GetInvitationInfo() *sdkws.InvitationInfo {
+func (m *GetSignalInvitationInfoResp) GetInvitationInfo() *sdkws.InvitationInfo {
 	if m != nil {
 		return m.InvitationInfo
 	}
 	return nil
 }
 
-func (m *GetRTCInvitationInfoResp) GetOfflinePushInfo() *sdkws.OfflinePushInfo {
+func (m *GetSignalInvitationInfoResp) GetOfflinePushInfo() *sdkws.OfflinePushInfo {
 	if m != nil {
 		return m.OfflinePushInfo
 	}
 	return nil
 }
 
-type GetRTCInvitationInfoStartAppReq struct {
+type GetSignalInvitationInfoStartAppReq struct {
 	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetRTCInvitationInfoStartAppReq) Reset()         { *m = GetRTCInvitationInfoStartAppReq{} }
-func (m *GetRTCInvitationInfoStartAppReq) String() string { return proto.CompactTextString(m) }
-func (*GetRTCInvitationInfoStartAppReq) ProtoMessage()    {}
-func (*GetRTCInvitationInfoStartAppReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{6}
+func (m *GetSignalInvitationInfoStartAppReq) Reset()         { *m = GetSignalInvitationInfoStartAppReq{} }
+func (m *GetSignalInvitationInfoStartAppReq) String() string { return proto.CompactTextString(m) }
+func (*GetSignalInvitationInfoStartAppReq) ProtoMessage()    {}
+func (*GetSignalInvitationInfoStartAppReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_third_3f9746cdadff77e4, []int{6}
 }
-func (m *GetRTCInvitationInfoStartAppReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppReq.Unmarshal(m, b)
+func (m *GetSignalInvitationInfoStartAppReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppReq.Unmarshal(m, b)
 }
-func (m *GetRTCInvitationInfoStartAppReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppReq.Marshal(b, m, deterministic)
+func (m *GetSignalInvitationInfoStartAppReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppReq.Marshal(b, m, deterministic)
 }
-func (dst *GetRTCInvitationInfoStartAppReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRTCInvitationInfoStartAppReq.Merge(dst, src)
+func (dst *GetSignalInvitationInfoStartAppReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSignalInvitationInfoStartAppReq.Merge(dst, src)
 }
-func (m *GetRTCInvitationInfoStartAppReq) XXX_Size() int {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppReq.Size(m)
+func (m *GetSignalInvitationInfoStartAppReq) XXX_Size() int {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppReq.Size(m)
 }
-func (m *GetRTCInvitationInfoStartAppReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRTCInvitationInfoStartAppReq.DiscardUnknown(m)
+func (m *GetSignalInvitationInfoStartAppReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSignalInvitationInfoStartAppReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRTCInvitationInfoStartAppReq proto.InternalMessageInfo
+var xxx_messageInfo_GetSignalInvitationInfoStartAppReq proto.InternalMessageInfo
 
-func (m *GetRTCInvitationInfoStartAppReq) GetUserID() string {
+func (m *GetSignalInvitationInfoStartAppReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
 	}
 	return ""
 }
 
-type GetRTCInvitationInfoStartAppResp struct {
+type GetSignalInvitationInfoStartAppResp struct {
 	InvitationInfo       *sdkws.InvitationInfo  `protobuf:"bytes,1,opt,name=invitationInfo" json:"invitationInfo,omitempty"`
 	OfflinePushInfo      *sdkws.OfflinePushInfo `protobuf:"bytes,2,opt,name=offlinePushInfo" json:"offlinePushInfo,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
@@ -362,38 +362,38 @@ type GetRTCInvitationInfoStartAppResp struct {
 	XXX_sizecache        int32                  `json:"-"`
 }
 
-func (m *GetRTCInvitationInfoStartAppResp) Reset()         { *m = GetRTCInvitationInfoStartAppResp{} }
-func (m *GetRTCInvitationInfoStartAppResp) String() string { return proto.CompactTextString(m) }
-func (*GetRTCInvitationInfoStartAppResp) ProtoMessage()    {}
-func (*GetRTCInvitationInfoStartAppResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{7}
+func (m *GetSignalInvitationInfoStartAppResp) Reset()         { *m = GetSignalInvitationInfoStartAppResp{} }
+func (m *GetSignalInvitationInfoStartAppResp) String() string { return proto.CompactTextString(m) }
+func (*GetSignalInvitationInfoStartAppResp) ProtoMessage()    {}
+func (*GetSignalInvitationInfoStartAppResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_third_3f9746cdadff77e4, []int{7}
 }
-func (m *GetRTCInvitationInfoStartAppResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppResp.Unmarshal(m, b)
+func (m *GetSignalInvitationInfoStartAppResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppResp.Unmarshal(m, b)
 }
-func (m *GetRTCInvitationInfoStartAppResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppResp.Marshal(b, m, deterministic)
+func (m *GetSignalInvitationInfoStartAppResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppResp.Marshal(b, m, deterministic)
 }
-func (dst *GetRTCInvitationInfoStartAppResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRTCInvitationInfoStartAppResp.Merge(dst, src)
+func (dst *GetSignalInvitationInfoStartAppResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSignalInvitationInfoStartAppResp.Merge(dst, src)
 }
-func (m *GetRTCInvitationInfoStartAppResp) XXX_Size() int {
-	return xxx_messageInfo_GetRTCInvitationInfoStartAppResp.Size(m)
+func (m *GetSignalInvitationInfoStartAppResp) XXX_Size() int {
+	return xxx_messageInfo_GetSignalInvitationInfoStartAppResp.Size(m)
 }
-func (m *GetRTCInvitationInfoStartAppResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRTCInvitationInfoStartAppResp.DiscardUnknown(m)
+func (m *GetSignalInvitationInfoStartAppResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSignalInvitationInfoStartAppResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRTCInvitationInfoStartAppResp proto.InternalMessageInfo
+var xxx_messageInfo_GetSignalInvitationInfoStartAppResp proto.InternalMessageInfo
 
-func (m *GetRTCInvitationInfoStartAppResp) GetInvitationInfo() *sdkws.InvitationInfo {
+func (m *GetSignalInvitationInfoStartAppResp) GetInvitationInfo() *sdkws.InvitationInfo {
 	if m != nil {
 		return m.InvitationInfo
 	}
 	return nil
 }
 
-func (m *GetRTCInvitationInfoStartAppResp) GetOfflinePushInfo() *sdkws.OfflinePushInfo {
+func (m *GetSignalInvitationInfoStartAppResp) GetOfflinePushInfo() *sdkws.OfflinePushInfo {
 	if m != nil {
 		return m.OfflinePushInfo
 	}
@@ -412,7 +412,7 @@ func (m *FcmUpdateTokenReq) Reset()         { *m = FcmUpdateTokenReq{} }
 func (m *FcmUpdateTokenReq) String() string { return proto.CompactTextString(m) }
 func (*FcmUpdateTokenReq) ProtoMessage()    {}
 func (*FcmUpdateTokenReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{8}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{8}
 }
 func (m *FcmUpdateTokenReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_FcmUpdateTokenReq.Unmarshal(m, b)
@@ -456,7 +456,7 @@ func (m *FcmUpdateTokenResp) Reset()         { *m = FcmUpdateTokenResp{} }
 func (m *FcmUpdateTokenResp) String() string { return proto.CompactTextString(m) }
 func (*FcmUpdateTokenResp) ProtoMessage()    {}
 func (*FcmUpdateTokenResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{9}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{9}
 }
 func (m *FcmUpdateTokenResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_FcmUpdateTokenResp.Unmarshal(m, b)
@@ -488,7 +488,7 @@ func (m *SetAppBadgeReq) Reset()         { *m = SetAppBadgeReq{} }
 func (m *SetAppBadgeReq) String() string { return proto.CompactTextString(m) }
 func (*SetAppBadgeReq) ProtoMessage()    {}
 func (*SetAppBadgeReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{10}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{10}
 }
 func (m *SetAppBadgeReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetAppBadgeReq.Unmarshal(m, b)
@@ -532,7 +532,7 @@ func (m *SetAppBadgeResp) Reset()         { *m = SetAppBadgeResp{} }
 func (m *SetAppBadgeResp) String() string { return proto.CompactTextString(m) }
 func (*SetAppBadgeResp) ProtoMessage()    {}
 func (*SetAppBadgeResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_7f0ad743baded49b, []int{11}
+	return fileDescriptor_third_3f9746cdadff77e4, []int{11}
 }
 func (m *SetAppBadgeResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetAppBadgeResp.Unmarshal(m, b)
@@ -557,10 +557,10 @@ func init() {
 	proto.RegisterType((*ApplySpaceResp)(nil), "third.ApplySpaceResp")
 	proto.RegisterType((*ConfirmSpaceReq)(nil), "third.ConfirmSpaceReq")
 	proto.RegisterType((*ConfirmSpaceResp)(nil), "third.ConfirmSpaceResp")
-	proto.RegisterType((*GetRTCInvitationInfoReq)(nil), "third.GetRTCInvitationInfoReq")
-	proto.RegisterType((*GetRTCInvitationInfoResp)(nil), "third.GetRTCInvitationInfoResp")
-	proto.RegisterType((*GetRTCInvitationInfoStartAppReq)(nil), "third.GetRTCInvitationInfoStartAppReq")
-	proto.RegisterType((*GetRTCInvitationInfoStartAppResp)(nil), "third.GetRTCInvitationInfoStartAppResp")
+	proto.RegisterType((*GetSignalInvitationInfoReq)(nil), "third.GetSignalInvitationInfoReq")
+	proto.RegisterType((*GetSignalInvitationInfoResp)(nil), "third.GetSignalInvitationInfoResp")
+	proto.RegisterType((*GetSignalInvitationInfoStartAppReq)(nil), "third.GetSignalInvitationInfoStartAppReq")
+	proto.RegisterType((*GetSignalInvitationInfoStartAppResp)(nil), "third.GetSignalInvitationInfoStartAppResp")
 	proto.RegisterType((*FcmUpdateTokenReq)(nil), "third.FcmUpdateTokenReq")
 	proto.RegisterType((*FcmUpdateTokenResp)(nil), "third.FcmUpdateTokenResp")
 	proto.RegisterType((*SetAppBadgeReq)(nil), "third.SetAppBadgeReq")
@@ -579,8 +579,8 @@ const _ = grpc.SupportPackageIsVersion4
 
 type ThirdClient interface {
 	ApplySpace(ctx context.Context, in *ApplySpaceReq, opts ...grpc.CallOption) (*ApplySpaceResp, error)
-	GetRTCInvitationInfo(ctx context.Context, in *GetRTCInvitationInfoReq, opts ...grpc.CallOption) (*GetRTCInvitationInfoResp, error)
-	GetRTCInvitationInfoStartApp(ctx context.Context, in *GetRTCInvitationInfoStartAppReq, opts ...grpc.CallOption) (*GetRTCInvitationInfoStartAppResp, error)
+	GetSignalInvitationInfo(ctx context.Context, in *GetSignalInvitationInfoReq, opts ...grpc.CallOption) (*GetSignalInvitationInfoResp, error)
+	GetSignalInvitationInfoStartApp(ctx context.Context, in *GetSignalInvitationInfoStartAppReq, opts ...grpc.CallOption) (*GetSignalInvitationInfoStartAppResp, error)
 	FcmUpdateToken(ctx context.Context, in *FcmUpdateTokenReq, opts ...grpc.CallOption) (*FcmUpdateTokenResp, error)
 	SetAppBadge(ctx context.Context, in *SetAppBadgeReq, opts ...grpc.CallOption) (*SetAppBadgeResp, error)
 }
@@ -602,18 +602,18 @@ func (c *thirdClient) ApplySpace(ctx context.Context, in *ApplySpaceReq, opts ..
 	return out, nil
 }
 
-func (c *thirdClient) GetRTCInvitationInfo(ctx context.Context, in *GetRTCInvitationInfoReq, opts ...grpc.CallOption) (*GetRTCInvitationInfoResp, error) {
-	out := new(GetRTCInvitationInfoResp)
-	err := grpc.Invoke(ctx, "/third.third/GetRTCInvitationInfo", in, out, c.cc, opts...)
+func (c *thirdClient) GetSignalInvitationInfo(ctx context.Context, in *GetSignalInvitationInfoReq, opts ...grpc.CallOption) (*GetSignalInvitationInfoResp, error) {
+	out := new(GetSignalInvitationInfoResp)
+	err := grpc.Invoke(ctx, "/third.third/GetSignalInvitationInfo", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *thirdClient) GetRTCInvitationInfoStartApp(ctx context.Context, in *GetRTCInvitationInfoStartAppReq, opts ...grpc.CallOption) (*GetRTCInvitationInfoStartAppResp, error) {
-	out := new(GetRTCInvitationInfoStartAppResp)
-	err := grpc.Invoke(ctx, "/third.third/GetRTCInvitationInfoStartApp", in, out, c.cc, opts...)
+func (c *thirdClient) GetSignalInvitationInfoStartApp(ctx context.Context, in *GetSignalInvitationInfoStartAppReq, opts ...grpc.CallOption) (*GetSignalInvitationInfoStartAppResp, error) {
+	out := new(GetSignalInvitationInfoStartAppResp)
+	err := grpc.Invoke(ctx, "/third.third/GetSignalInvitationInfoStartApp", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -642,8 +642,8 @@ func (c *thirdClient) SetAppBadge(ctx context.Context, in *SetAppBadgeReq, opts 
 
 type ThirdServer interface {
 	ApplySpace(context.Context, *ApplySpaceReq) (*ApplySpaceResp, error)
-	GetRTCInvitationInfo(context.Context, *GetRTCInvitationInfoReq) (*GetRTCInvitationInfoResp, error)
-	GetRTCInvitationInfoStartApp(context.Context, *GetRTCInvitationInfoStartAppReq) (*GetRTCInvitationInfoStartAppResp, error)
+	GetSignalInvitationInfo(context.Context, *GetSignalInvitationInfoReq) (*GetSignalInvitationInfoResp, error)
+	GetSignalInvitationInfoStartApp(context.Context, *GetSignalInvitationInfoStartAppReq) (*GetSignalInvitationInfoStartAppResp, error)
 	FcmUpdateToken(context.Context, *FcmUpdateTokenReq) (*FcmUpdateTokenResp, error)
 	SetAppBadge(context.Context, *SetAppBadgeReq) (*SetAppBadgeResp, error)
 }
@@ -670,38 +670,38 @@ func _Third_ApplySpace_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_GetRTCInvitationInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRTCInvitationInfoReq)
+func _Third_GetSignalInvitationInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSignalInvitationInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).GetRTCInvitationInfo(ctx, in)
+		return srv.(ThirdServer).GetSignalInvitationInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/third.third/GetRTCInvitationInfo",
+		FullMethod: "/third.third/GetSignalInvitationInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).GetRTCInvitationInfo(ctx, req.(*GetRTCInvitationInfoReq))
+		return srv.(ThirdServer).GetSignalInvitationInfo(ctx, req.(*GetSignalInvitationInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_GetRTCInvitationInfoStartApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRTCInvitationInfoStartAppReq)
+func _Third_GetSignalInvitationInfoStartApp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSignalInvitationInfoStartAppReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).GetRTCInvitationInfoStartApp(ctx, in)
+		return srv.(ThirdServer).GetSignalInvitationInfoStartApp(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/third.third/GetRTCInvitationInfoStartApp",
+		FullMethod: "/third.third/GetSignalInvitationInfoStartApp",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).GetRTCInvitationInfoStartApp(ctx, req.(*GetRTCInvitationInfoStartAppReq))
+		return srv.(ThirdServer).GetSignalInvitationInfoStartApp(ctx, req.(*GetSignalInvitationInfoStartAppReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -751,12 +751,12 @@ var _Third_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Third_ApplySpace_Handler,
 		},
 		{
-			MethodName: "GetRTCInvitationInfo",
-			Handler:    _Third_GetRTCInvitationInfo_Handler,
+			MethodName: "GetSignalInvitationInfo",
+			Handler:    _Third_GetSignalInvitationInfo_Handler,
 		},
 		{
-			MethodName: "GetRTCInvitationInfoStartApp",
-			Handler:    _Third_GetRTCInvitationInfoStartApp_Handler,
+			MethodName: "GetSignalInvitationInfoStartApp",
+			Handler:    _Third_GetSignalInvitationInfoStartApp_Handler,
 		},
 		{
 			MethodName: "FcmUpdateToken",
@@ -771,45 +771,46 @@ var _Third_serviceDesc = grpc.ServiceDesc{
 	Metadata: "third/third.proto",
 }
 
-func init() { proto.RegisterFile("third/third.proto", fileDescriptor_third_7f0ad743baded49b) }
+func init() { proto.RegisterFile("third/third.proto", fileDescriptor_third_3f9746cdadff77e4) }
 
-var fileDescriptor_third_7f0ad743baded49b = []byte{
-	// 588 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0x41, 0x4f, 0xdb, 0x30,
-	0x14, 0x56, 0x08, 0x65, 0xeb, 0xab, 0x28, 0x60, 0x01, 0xcb, 0x22, 0x04, 0x51, 0x0e, 0xc0, 0x85,
-	0x66, 0x62, 0x27, 0xc4, 0x26, 0x0d, 0xba, 0x75, 0xaa, 0xa6, 0x0a, 0x94, 0xb6, 0xda, 0xb4, 0x5b,
-	0xd6, 0x3a, 0x6d, 0xd4, 0xc6, 0x7e, 0xb3, 0x1d, 0x10, 0xfb, 0x03, 0x3b, 0xef, 0xbc, 0xe3, 0xfe,
-	0xe8, 0x14, 0xb7, 0x94, 0x24, 0x0b, 0xdd, 0x8e, 0xbb, 0x58, 0x7e, 0x9f, 0xbf, 0xef, 0xf9, 0x3d,
-	0xbf, 0xe7, 0x07, 0x5b, 0x6a, 0x1c, 0x89, 0xa1, 0xa7, 0xd7, 0x06, 0x0a, 0xae, 0x38, 0xa9, 0x68,
-	0xc3, 0x3e, 0xba, 0x42, 0xca, 0x4e, 0xda, 0x9d, 0x93, 0x2e, 0x15, 0x37, 0x54, 0x78, 0x38, 0x19,
-	0x79, 0x9a, 0xe0, 0xc9, 0xe1, 0xe4, 0x56, 0x7a, 0xb7, 0x72, 0xc6, 0x77, 0xbf, 0x1b, 0xb0, 0x7e,
-	0x81, 0x38, 0xbd, 0xeb, 0x62, 0x30, 0xa0, 0x3e, 0xfd, 0x4a, 0x08, 0xac, 0xb2, 0x20, 0xa6, 0x96,
-	0xe1, 0x18, 0xc7, 0x55, 0x5f, 0xef, 0x53, 0x4c, 0x46, 0xdf, 0xa8, 0xb5, 0xe2, 0x18, 0xc7, 0xa6,
-	0xaf, 0xf7, 0x29, 0x36, 0x0e, 0xe4, 0xd8, 0x32, 0x67, 0xbc, 0x74, 0x4f, 0x2c, 0x78, 0x82, 0x89,
-	0x40, 0x2e, 0xa9, 0xb5, 0xea, 0x18, 0xc7, 0xeb, 0xfe, 0xbd, 0x49, 0x1c, 0xa8, 0x0d, 0x38, 0x53,
-	0x94, 0xa9, 0xde, 0x1d, 0x52, 0xab, 0xa2, 0x45, 0x59, 0xc8, 0x0d, 0xa1, 0x9e, 0x0d, 0x44, 0x22,
-	0xd9, 0x04, 0x33, 0x11, 0xd3, 0x79, 0x20, 0xe9, 0xb6, 0x34, 0x8e, 0x4d, 0x30, 0x31, 0x51, 0x96,
-	0xe9, 0x98, 0x29, 0x0b, 0x13, 0x45, 0xf6, 0xa0, 0x3a, 0xe0, 0x2c, 0x8c, 0x44, 0xdc, 0x7e, 0xab,
-	0xe3, 0xa8, 0xfa, 0x0f, 0x80, 0xeb, 0xc1, 0x46, 0x73, 0x66, 0x2c, 0x52, 0xce, 0x09, 0x8c, 0xa2,
-	0xe0, 0x05, 0x6c, 0xe6, 0x05, 0x12, 0xff, 0xa2, 0x38, 0x87, 0x67, 0xef, 0xa9, 0xf2, 0x7b, 0xcd,
-	0x36, 0xbb, 0x89, 0x54, 0xa0, 0x22, 0xce, 0xda, 0x2c, 0xe4, 0xe9, 0x55, 0x0e, 0xd4, 0x9a, 0xd3,
-	0x88, 0x32, 0xd5, 0x91, 0xa3, 0x85, 0x34, 0x0b, 0xb9, 0x3f, 0x0d, 0xb0, 0xca, 0xd5, 0x12, 0xc9,
-	0x6b, 0xa8, 0x47, 0x39, 0x54, 0x7b, 0xa8, 0x9d, 0xee, 0x34, 0x74, 0x5d, 0x1b, 0x05, 0x49, 0x81,
-	0x4c, 0xde, 0xc0, 0x06, 0x0f, 0xc3, 0x69, 0xc4, 0xe8, 0x75, 0x22, 0xc7, 0x5a, 0xbf, 0xa2, 0xf5,
-	0xbb, 0x73, 0xfd, 0x55, 0xfe, 0xd4, 0x2f, 0xd2, 0xdd, 0x33, 0x38, 0x28, 0x0b, 0xae, 0xab, 0x02,
-	0xa1, 0x2e, 0x10, 0xd3, 0x14, 0x77, 0x61, 0x2d, 0x91, 0x54, 0x2c, 0xb2, 0x9b, 0x5b, 0xee, 0x2f,
-	0x03, 0x9c, 0xe5, 0xda, 0xff, 0x21, 0xc1, 0x0f, 0xb0, 0xd5, 0x1a, 0xc4, 0x7d, 0x1c, 0x06, 0x8a,
-	0xf6, 0xf8, 0x84, 0xb2, 0x34, 0x25, 0x1b, 0x9e, 0x5e, 0x4f, 0x03, 0x15, 0x72, 0x11, 0xeb, 0x78,
-	0x2a, 0xfe, 0xc2, 0x4e, 0xcf, 0x5a, 0x83, 0x58, 0x53, 0xf5, 0x5d, 0x55, 0x7f, 0x61, 0xbb, 0xdb,
-	0x40, 0x8a, 0xce, 0x24, 0xba, 0x9f, 0xa0, 0xde, 0xa5, 0x69, 0xc6, 0x97, 0xc1, 0x70, 0xa4, 0x1b,
-	0x70, 0x1f, 0xa0, 0x25, 0x78, 0xdc, 0xcf, 0x3e, 0x5b, 0x06, 0x21, 0x87, 0xfa, 0x6f, 0xf4, 0x99,
-	0xa0, 0xc1, 0xb0, 0xc9, 0x13, 0xa6, 0xf4, 0x4d, 0x15, 0xbf, 0x80, 0xba, 0x5b, 0xb0, 0x91, 0xf3,
-	0x2c, 0xf1, 0xf4, 0x87, 0x09, 0xb3, 0x99, 0x40, 0xce, 0x00, 0x1e, 0x3e, 0x18, 0xd9, 0x6e, 0xcc,
-	0xc6, 0x46, 0xee, 0xf3, 0xdb, 0x3b, 0x25, 0xa8, 0x44, 0xf2, 0x11, 0xb6, 0xcb, 0x2a, 0x47, 0xf6,
-	0xe7, 0xf4, 0x47, 0xba, 0xdd, 0x3e, 0x58, 0x7a, 0x2e, 0x91, 0x70, 0xd8, 0x5b, 0xd6, 0x12, 0xe4,
-	0x70, 0x89, 0x83, 0x4c, 0xcf, 0xd9, 0x47, 0xff, 0xc4, 0x93, 0x48, 0xde, 0x41, 0x3d, 0x5f, 0x11,
-	0x62, 0xcd, 0xa5, 0x7f, 0x54, 0xdd, 0x7e, 0xfe, 0xc8, 0x89, 0x44, 0xf2, 0x0a, 0x6a, 0x99, 0x87,
-	0x26, 0xf7, 0xcf, 0x96, 0x2f, 0xab, 0xbd, 0x5b, 0x06, 0x4b, 0xbc, 0xdc, 0xff, 0xbc, 0x97, 0xce,
-	0xe7, 0x76, 0x27, 0x33, 0x97, 0x35, 0xf3, 0x5c, 0xaf, 0x5f, 0xd6, 0x34, 0xf4, 0xf2, 0x77, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x85, 0xa6, 0x11, 0xd8, 0xe0, 0x05, 0x00, 0x00,
+var fileDescriptor_third_3f9746cdadff77e4 = []byte{
+	// 594 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0xc1, 0x6e, 0xd3, 0x4c,
+	0x10, 0x96, 0xeb, 0xa6, 0xff, 0x9f, 0x89, 0x9a, 0xb6, 0xab, 0xb6, 0x18, 0x53, 0x15, 0x63, 0x24,
+	0x28, 0x48, 0x8d, 0x51, 0x39, 0x21, 0x0a, 0xa2, 0x2d, 0x04, 0x45, 0x28, 0x6a, 0xe5, 0x34, 0x12,
+	0xe2, 0x84, 0x49, 0xd6, 0x89, 0x15, 0x7b, 0x77, 0xd8, 0x5d, 0xb7, 0x94, 0x17, 0xe0, 0x2d, 0xb8,
+	0x20, 0xf1, 0x9c, 0xc8, 0x9b, 0x34, 0xb5, 0x4d, 0x42, 0x38, 0x72, 0xb1, 0x66, 0xbe, 0xfd, 0xbe,
+	0xd9, 0x99, 0x9d, 0xf1, 0xc0, 0x86, 0x1a, 0x46, 0xa2, 0xef, 0xe9, 0x6f, 0x03, 0x05, 0x57, 0x9c,
+	0x54, 0xb4, 0x63, 0x3f, 0x3c, 0x45, 0xca, 0xf6, 0x5b, 0xed, 0xfd, 0x0e, 0x15, 0x17, 0x54, 0x78,
+	0x38, 0x1a, 0x78, 0x9a, 0xe0, 0xc9, 0xfe, 0xe8, 0x52, 0x7a, 0x97, 0x72, 0xcc, 0x77, 0xbf, 0x19,
+	0xb0, 0x7a, 0x84, 0x18, 0x5f, 0x75, 0x30, 0xe8, 0x51, 0x9f, 0x7e, 0x26, 0x04, 0x96, 0x59, 0x90,
+	0x50, 0xcb, 0x70, 0x8c, 0xbd, 0xaa, 0xaf, 0xed, 0x0c, 0x93, 0xd1, 0x57, 0x6a, 0x2d, 0x39, 0xc6,
+	0x9e, 0xe9, 0x6b, 0x3b, 0xc3, 0x86, 0x81, 0x1c, 0x5a, 0xe6, 0x98, 0x97, 0xd9, 0xc4, 0x82, 0xff,
+	0x30, 0x15, 0xc8, 0x25, 0xb5, 0x96, 0x1d, 0x63, 0x6f, 0xd5, 0xbf, 0x76, 0x89, 0x03, 0xb5, 0x1e,
+	0x67, 0x8a, 0x32, 0x75, 0x7e, 0x85, 0xd4, 0xaa, 0x68, 0x51, 0x1e, 0x72, 0x43, 0xa8, 0xe7, 0x13,
+	0x91, 0x48, 0xd6, 0xc1, 0x4c, 0x45, 0x3c, 0x49, 0x24, 0x33, 0x67, 0xe6, 0xb1, 0x0e, 0x26, 0xa6,
+	0xca, 0x32, 0x1d, 0x33, 0x63, 0x61, 0xaa, 0xc8, 0x0e, 0x54, 0x7b, 0x9c, 0x85, 0x91, 0x48, 0x5a,
+	0xaf, 0x75, 0x1e, 0x55, 0xff, 0x06, 0x70, 0x3d, 0x58, 0x3b, 0x19, 0x3b, 0xd3, 0x92, 0x0b, 0x02,
+	0xa3, 0x2c, 0x78, 0x02, 0xeb, 0x45, 0x81, 0xc4, 0x05, 0x8a, 0x97, 0x60, 0xbf, 0xa5, 0xaa, 0x13,
+	0x0d, 0x58, 0x10, 0xb7, 0xd8, 0x45, 0xa4, 0x02, 0x15, 0x71, 0xd6, 0x62, 0x21, 0xcf, 0x6e, 0x73,
+	0xa0, 0x76, 0x12, 0x47, 0x94, 0xa9, 0xb6, 0x1c, 0x4c, 0xd5, 0x79, 0xc8, 0xfd, 0x6e, 0xc0, 0x9d,
+	0xb9, 0x01, 0x24, 0x92, 0x17, 0x50, 0x8f, 0x0a, 0xa8, 0x0e, 0x52, 0x3b, 0xd8, 0x6a, 0xe8, 0xee,
+	0x36, 0x4a, 0x92, 0x12, 0x99, 0xbc, 0x82, 0x35, 0x1e, 0x86, 0x71, 0xc4, 0xe8, 0x59, 0x2a, 0x87,
+	0x5a, 0xbf, 0xa4, 0xf5, 0xdb, 0x13, 0xfd, 0x69, 0xf1, 0xd4, 0x2f, 0xd3, 0xdd, 0x43, 0x70, 0xe7,
+	0xe4, 0xd7, 0x51, 0x81, 0x50, 0x47, 0x88, 0x59, 0xa1, 0xdb, 0xb0, 0x92, 0x4a, 0x2a, 0xa6, 0x35,
+	0x4e, 0x3c, 0xf7, 0xa7, 0x01, 0xf7, 0x17, 0xca, 0xff, 0x85, 0x32, 0xdf, 0xc1, 0x46, 0xb3, 0x97,
+	0x74, 0xb1, 0x1f, 0x28, 0x7a, 0xce, 0x47, 0x94, 0x65, 0x55, 0xd9, 0xf0, 0xff, 0x59, 0x1c, 0xa8,
+	0x90, 0x8b, 0x44, 0xe7, 0x53, 0xf1, 0xa7, 0x7e, 0x76, 0xd6, 0xec, 0x25, 0x9a, 0xaa, 0xef, 0xaa,
+	0xfa, 0x53, 0xdf, 0xdd, 0x04, 0x52, 0x0e, 0x26, 0xd1, 0x7d, 0x0f, 0xf5, 0x0e, 0xcd, 0x2a, 0x3e,
+	0x0e, 0xfa, 0x03, 0x3d, 0x8c, 0xbb, 0x00, 0x4d, 0xc1, 0x93, 0x6e, 0xfe, 0xe5, 0x72, 0x08, 0x79,
+	0xa0, 0xff, 0x93, 0x2e, 0x13, 0x34, 0xe8, 0x9f, 0xf0, 0x94, 0x29, 0x7d, 0x53, 0xc5, 0x2f, 0xa1,
+	0xee, 0x06, 0xac, 0x15, 0x22, 0x4b, 0x3c, 0xf8, 0x61, 0xc2, 0x78, 0x3f, 0x90, 0x67, 0x00, 0x37,
+	0x3f, 0x1b, 0xd9, 0x6c, 0x8c, 0x57, 0x48, 0x61, 0x11, 0xd8, 0x5b, 0x33, 0x50, 0x89, 0xe4, 0x23,
+	0xdc, 0x9a, 0xd3, 0x3c, 0x72, 0x6f, 0xa2, 0x98, 0x3f, 0xfc, 0xb6, 0xbb, 0x88, 0x22, 0x91, 0x7c,
+	0x81, 0xbb, 0x0b, 0xc6, 0x83, 0x3c, 0xfa, 0x73, 0x98, 0xdc, 0x14, 0xda, 0x8f, 0xff, 0x96, 0x2a,
+	0x91, 0xbc, 0x81, 0x7a, 0xb1, 0x47, 0xc4, 0x9a, 0xa8, 0x7f, 0x9b, 0x03, 0xfb, 0xf6, 0x9c, 0x13,
+	0x89, 0xe4, 0x10, 0x6a, 0xb9, 0xa7, 0x27, 0xd7, 0x0f, 0x59, 0x6c, 0xb4, 0xbd, 0x3d, 0x0b, 0x96,
+	0x78, 0xbc, 0xfb, 0x61, 0x27, 0xdb, 0xde, 0xad, 0x76, 0x6e, 0x6b, 0x6b, 0xe6, 0x73, 0xfd, 0xfd,
+	0xb4, 0xa2, 0xa1, 0xa7, 0xbf, 0x02, 0x00, 0x00, 0xff, 0xff, 0xbd, 0xf0, 0xfa, 0xf7, 0xfe, 0x05,
+	0x00, 0x00,
 }

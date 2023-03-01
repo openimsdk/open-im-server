@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
+	"github.com/dtm-labs/rockscache"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"math/big"
@@ -36,11 +37,11 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	if err := db.AutoMigrate(&relationTb.GroupModel{}, &relationTb.GroupMemberModel{}, &relationTb.GroupRequestModel{}); err != nil {
 		return err
 	}
-	redis, err := cache.NewRedis()
+	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
-	mongo, err := unrelation.NewMongo()
+	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,9 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 			tx.NewGorm(db),
 			tx.NewMongo(mongo.GetClient()),
 			unrelation.NewSuperGroupMongoDriver(mongo.GetClient()),
-			redis.GetClient(),
+			cache.NewGroupCacheRedis(rdb, relation.NewGroupDB(db), relation.NewGroupMemberDB(db), relation.NewGroupRequest(db), unrelation.NewSuperGroupMongoDriver(mongo.GetClient()), rockscache.Options{
+				StrongConsistency: true,
+			}),
 		),
 		UserCheck:           check.NewUserCheck(client),
 		ConversationChecker: check.NewConversationChecker(client),

@@ -9,9 +9,7 @@ import (
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
-	"github.com/dtm-labs/rockscache"
 	_ "github.com/dtm-labs/rockscache"
-	"github.com/go-redis/redis/v8"
 )
 
 type GroupDatabase interface {
@@ -56,8 +54,8 @@ func NewGroupDatabase(
 	request relationTb.GroupRequestModelInterface,
 	tx tx.Tx,
 	ctxTx tx.CtxTx,
-	super unRelationTb.SuperGroupModelInterface,
-	client redis.UniversalClient,
+	superGroup unRelationTb.SuperGroupModelInterface,
+	cache cache.GroupCache,
 ) GroupDatabase {
 	database := &groupDatabase{
 		groupDB:        group,
@@ -65,13 +63,8 @@ func NewGroupDatabase(
 		groupRequestDB: request,
 		tx:             tx,
 		ctxTx:          ctxTx,
-		cache: cache.NewGroupCacheRedis(client, group, member, request, super, rockscache.Options{
-			RandomExpireAdjustment: 0.2,
-			DisableCacheRead:       false,
-			DisableCacheDelete:     false,
-			StrongConsistency:      true,
-		}),
-		mongoDB: super,
+		cache:          cache,
+		mongoDB:        superGroup,
 	}
 	return database
 }
@@ -82,7 +75,7 @@ type groupDatabase struct {
 	groupRequestDB relationTb.GroupRequestModelInterface
 	tx             tx.Tx
 	ctxTx          tx.CtxTx
-	cache          cache.GroupCacheRedisInterface
+	cache          cache.GroupCache
 	mongoDB        unRelationTb.SuperGroupModelInterface
 }
 

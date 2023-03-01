@@ -30,7 +30,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 	// callback
-	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil {
+	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -165,7 +165,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 
 	// callback
 	err = CallbackAfterSendGroupMsg(ctx, req)
-	if err != nil {
+	if err != nil && err != constant.ErrCallbackContinue {
 		return nil, err
 	}
 
