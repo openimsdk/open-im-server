@@ -592,15 +592,12 @@ message SignalGetTokenByRoomIDReq {
   string roomID = 1;
   string opUserID = 2;
   ParticipantMetaData participant = 3;
-  string operationID = 4;
 }
 
 message SignalGetTokenByRoomIDReply {
   string token = 1;
   string liveURL = 2;
 }
-
-
 
 
 message SetAppBackgroundStatusReq {

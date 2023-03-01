@@ -57,7 +57,7 @@ message FcmUpdateTokenResp {
 
 message SetAppBadgeReq {
   string userID = 1;
-  int AppUnreadCount = 2;
+  int32 AppUnreadCount = 2;
 }
 
 message SetAppBadgeResp {

@@ -10,17 +10,16 @@ message SignalMessageAssembleReq {
 
 message SignalMessageAssembleResp {
  bool isPass = 1;
- SignalResp signalResp = 2;
- MsgData msgData = 3;
+ sdkws.SignalResp signalResp = 2;
+ sdkws.MsgData msgData = 3;
 }
 
 message SignalGetRoomsReq {
- string operationID = 1;
- string roomID = 2;
+ string roomID = 1;
 }
 
 message SignalGetRoomsResp {
-  repeated SignalGetRoomByGroupIDReply rooms = 1;
+  repeated sdkws.SignalGetRoomByGroupIDReply rooms = 1;
 }
 
 service RtcService {
