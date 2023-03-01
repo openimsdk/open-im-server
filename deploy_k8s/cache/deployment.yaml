@@ -15,15 +15,12 @@ spec:
     spec:
       containers:
       - name: cache
-        image: openim/cache:v2.3.4
+        image: openim/cache:v2.3.8
         # imagePullPolicy: Always
         ports:
         - containerPort: 10240
         volumeMounts:
           - name: config
-            mountPath: /Open-IM-Server/config
-            readOnly: true
-          - name: usualconfig
             mountPath: /Open-IM-Server/config
             readOnly: true
         env:
@@ -33,10 +30,11 @@ spec:
             value: "/Open-IM-Server"
       volumes:
         - name: config
-          configMap:
-            name: openim-config
-        - name: usualconfig
-            configMap:
-              name: openim-usualConfig
+          projected:
+            sources:
+            - configMap:
+                name: openim-config
+            - configMap:
+                name: openim-usualconfig
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
