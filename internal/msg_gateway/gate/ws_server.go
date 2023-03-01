@@ -220,8 +220,12 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			platform = k
 			uid = v
 		}
-		if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
-			delete(oldConnMap, platform)
+		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // only recycle self conn
+			if oldconn, okMap := oldConnMap[platform]; okMap {
+				if oldconn == conn {
+					delete(oldConnMap, platform)
+				}
+			}
 			ws.wsUserToConn[uid] = oldConnMap
 			if len(oldConnMap) == 0 {
 				delete(ws.wsUserToConn, uid)
