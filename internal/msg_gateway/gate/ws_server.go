@@ -344,7 +344,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 			conns = append(conns, conn)
 			oldConnMap[platformID] = conns
 		} else {
-			conns := make([]*UserConn, 2)
+			var conns []*UserConn
 			conns = append(conns, conn)
 			oldConnMap[platformID] = conns
 		}
@@ -352,7 +352,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 		log.Debug(operationID, "user not first come in, add conn ", uid, platformID, conn, oldConnMap)
 	} else {
 		i := make(map[int][]*UserConn)
-		conns := make([]*UserConn, 1)
+		var conns []*UserConn
 		conns = append(conns, conn)
 		i[platformID] = conns
 		ws.wsUserToConn[uid] = i
@@ -374,15 +374,16 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 
 	if oldConnMap, ok := ws.wsUserToConn[conn.userID]; ok { // only recycle self conn
 		if oldconns, okMap := oldConnMap[platform]; okMap {
-			var flag bool
-			a := make([]*UserConn, 2)
+
+			var a []*UserConn
+
 			for _, client := range oldconns {
 				if client != conn {
 					a = append(a, client)
-					flag = true
+
 				}
 			}
-			if flag {
+			if len(a) != 0 {
 				oldConnMap[platform] = a
 			} else {
 				delete(oldConnMap, platform)
