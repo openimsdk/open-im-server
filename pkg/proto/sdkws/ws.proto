@@ -133,7 +133,7 @@ message FriendRequest{
 message PullMessageBySeqsReq{
   string userID = 1;
   repeated int64 seqs = 3;
-  map <string, seqList>groupSeqs = 4;
+  map <string, seqs>groupSeqs = 4;
 }
 
 message seqs {
