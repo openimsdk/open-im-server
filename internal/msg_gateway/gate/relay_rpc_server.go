@@ -199,6 +199,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 		userConnMap := ws.getUserAllCons(v)
 		for platform, userConns := range userConnMap {
 			if len(userConns) != 0 {
+				log.NewWarn(req.OperationID, "conns is ", len(userConns), platform, userConns)
 				for _, userConn := range userConns {
 					temp := &pbRelay.SingleMsgToUserPlatform{
 						RecvID:         v,
