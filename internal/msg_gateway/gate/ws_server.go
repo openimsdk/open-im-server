@@ -352,7 +352,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 		log.Debug(operationID, "user not first come in, add conn ", uid, platformID, conn, oldConnMap)
 	} else {
 		i := make(map[int][]*UserConn)
-		conns := make([]*UserConn, 2)
+		conns := make([]*UserConn, 1)
 		conns = append(conns, conn)
 		i[platformID] = conns
 		ws.wsUserToConn[uid] = i
