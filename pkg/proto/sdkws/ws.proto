@@ -130,13 +130,13 @@ message FriendRequest{
 
 
 ///////////////////////////////////base end/////////////////////////////////////
-message PullMessageBySeqListReq{
+message PullMessageBySeqsReq{
   string userID = 1;
   repeated int64 seqs = 3;
-  map <string, seqList>groupSeqList = 4;
+  map <string, seqList>groupSeqs = 4;
 }
 
-message seqList {
+message seqs {
   repeated int64 seqs = 1;
 }
 
@@ -145,7 +145,7 @@ message MsgDataList {
   repeated MsgData msgDataList = 1;
 }
 
-message PullMessageBySeqListResp {
+message PullMessageBySeqsResp {
   int32 errCode = 1;
   string errMsg = 2;
   repeated MsgData list = 3;
@@ -155,7 +155,7 @@ message PullMessageBySeqListResp {
 
 
 message GetMaxAndMinSeqReq {
-  repeated string groupIDList = 1;
+  repeated string groupIDs = 1;
   string userID = 2;
 }
 message MaxAndMinSeq{
