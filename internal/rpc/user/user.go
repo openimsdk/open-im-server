@@ -29,13 +29,20 @@ type userServer struct {
 	friendCheck         *check.FriendChecker
 }
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	gormDB, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
 	if err := gormDB.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
+	}
+	users := make([]*tablerelation.UserModel, 0)
+	if len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname) {
+		return constant.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
+	}
+	for k, v := range config.Config.Manager.AppManagerUid {
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
 	}
 	u := &userServer{
 		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(gormDB)),
@@ -44,13 +51,6 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		RegisterCenter: client,
 	}
 	pbuser.RegisterUserServer(server, u)
-	users := make([]*tablerelation.UserModel, 0)
-	if len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname) {
-		return constant.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
-	}
-	for k, v := range config.Config.Manager.AppManagerUid {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
-	}
 	u.UserDatabase.InitOnce(context.Background(), users)
 	return nil
 }

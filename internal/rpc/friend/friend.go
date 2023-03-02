@@ -27,7 +27,7 @@ type friendServer struct {
 	RegisterCenter registry.SvcDiscoveryRegistry
 }
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	db, err := relation.NewGormDB()
 	if err != nil {
 		return err

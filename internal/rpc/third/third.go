@@ -57,7 +57,7 @@ func (t *thirdServer) GetSignalInvitationInfoStartApp(ctx context.Context, req *
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
-	err = t.thirdDatabase.FcmUpdateToken(ctx)
+	err = t.thirdDatabase.FcmUpdateToken(ctx, req.Account, int(req.PlatformID), req.FcmToken, req.ExpireTime)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTo
 }
 
 func (t *thirdServer) SetAppBadge(ctx context.Context, req *third.SetAppBadgeReq) (resp *third.SetAppBadgeResp, err error) {
-	err = t.thirdDatabase.SetAppBadge(ctx, req.UserID, req.AppUnreadCount)
+	err = t.thirdDatabase.SetAppBadge(ctx, req.UserID, int(req.AppUnreadCount))
 	if err != nil {
 		return nil, err
 	}

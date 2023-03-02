@@ -7,6 +7,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
 	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/discoveryregistry"
 	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
@@ -15,7 +16,7 @@ import (
 	"net"
 )
 
-func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options []grpc.ServerOption) error {
+func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
 	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
 	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts, "groupPrometheusPort default listen port")
 	flag.Parse()
@@ -61,6 +62,6 @@ func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(
 	return rpcFn(zkClient, srv)
 }
 
-func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client *openKeeper.ZkClient, server *grpc.Server) error, options ...grpc.ServerOption) error {
+func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 	return start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
 }

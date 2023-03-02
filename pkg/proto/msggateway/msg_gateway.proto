@@ -4,29 +4,27 @@ option go_package = "OpenIM/pkg/proto/msggateway;msggateway";
 package msggateway;
 
 message OnlinePushMsgReq {
-  string OperationID = 1;
-  sdkws.MsgData msgData = 2;
-  string pushToUserID = 3;
+  sdkws.MsgData msgData = 1;
+  string pushToUserID = 2;
 }
 
 message OnlinePushMsgResp{
     repeated SingleMsgToUserPlatform resp = 1;
 }
 
-message SingleMsgToUserResultList{
+message SingleMsgToUserResults {
   string userID =1;
   repeated SingleMsgToUserPlatform resp = 2;
   bool onlinePush = 3;
 
 }
 message OnlineBatchPushOneMsgReq{
-  string OperationID = 1;
-  sdkws.MsgData msgData = 2;
-  repeated string pushToUserIDList = 3;
+  sdkws.MsgData msgData = 1;
+  repeated string pushToUserIDs = 2;
 }
 
 message OnlineBatchPushOneMsgResp{
-  repeated SingleMsgToUserResultList singlePushResult= 1;
+  repeated SingleMsgToUserResults singlePushResult= 1;
 }
 //message SendMsgByWSReq{
 //  string SendID = 1;
@@ -45,17 +43,14 @@ message SingleMsgToUserPlatform{
   string  RecvID = 2;
   int32   RecvPlatFormID = 3;
 }
+
 message GetUsersOnlineStatusReq{
-  repeated string  userIDList = 1;
-  string  operationID = 2;
-  string opUserID = 3;
+  repeated string  userIDs = 1;
 }
 
 message GetUsersOnlineStatusResp{
-  int32  errCode = 1;
-  string errMsg = 2;
-  repeated SuccessResult successResult = 3;
-  repeated FailedDetail failedResult = 4;
+  repeated SuccessResult successResult = 1;
+  repeated FailedDetail failedResult = 2;
   message SuccessDetail{
     string platform = 1;
     string status = 2;
@@ -63,9 +58,7 @@ message GetUsersOnlineStatusResp{
     bool isBackground = 4;
   }
   message FailedDetail{
-    string userID = 3;
-    int32  errCode = 1;
-    string errMsg = 2;
+    string userID = 1;
   }
   message SuccessResult{
     string userID = 1;
@@ -75,9 +68,8 @@ message GetUsersOnlineStatusResp{
 }
 
 message KickUserOfflineReq{
-  string operationID = 1;
-    int32  platformID = 2;
-  repeated string kickUserIDList = 3;
+  int32  platformID = 1;
+  repeated string kickUserIDList = 2;
 }
 
 message KickUserOfflineResp{
@@ -91,8 +83,6 @@ message MultiTerminalLoginCheckReq{
     string operationID = 4;
 }
 message MultiTerminalLoginCheckResp{
-    int32   errCode = 1;
-    string  errMsg = 2;
 }
 
 service msgGateway {

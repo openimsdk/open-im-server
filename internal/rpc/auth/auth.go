@@ -16,7 +16,6 @@ import (
 	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 
@@ -26,7 +25,7 @@ type authServer struct {
 	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
 }
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client discoveryRegistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mysql, err := relation.NewGormDB()
 	if err != nil {
 		return err

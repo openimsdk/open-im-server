@@ -4,8 +4,7 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tracelog"
-	pbChat "OpenIM/pkg/proto/msg"
-	pbRtc "OpenIM/pkg/proto/rtc"
+	pbMsg "OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
@@ -20,10 +19,9 @@ import (
 )
 
 const (
-	userIncrSeq      = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken = "DEVICE_TOKEN"
-	userMinSeq       = "REDIS_USER_MIN_SEQ:"
-
+	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken        = "DEVICE_TOKEN"
+	userMinSeq              = "REDIS_USER_MIN_SEQ:"
 	getuiToken              = "GETUI_TOKEN"
 	getuiTaskID             = "GETUI_TASK_ID"
 	messageCache            = "MESSAGE_CACHE:"
@@ -36,12 +34,7 @@ const (
 	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
-
-	uidPidToken = "UID_PID_TOKEN_STATUS:"
-
-	SignalListCache = "SIGNAL_LIST_CACHE:"
-
-	SignalCache = "SIGNAL_CACHE:"
+	uidPidToken             = "UID_PID_TOKEN_STATUS:"
 )
 
 type Cache interface {
@@ -62,10 +55,10 @@ type Cache interface {
 	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error
 	GetMessagesBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error)
-	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error
+	SetMessageToCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) (int, error)
+	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) error
 	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
-	HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
+	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
 	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error)
 	DelUserSignalList(ctx context.Context, userID string) error
@@ -210,9 +203,9 @@ func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqList []i
 	return seqMsg, failedSeqList, errResult
 }
 
-func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) (int, error) {
+func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) (int, error) {
 	pipe := c.rdb.Pipeline()
-	var failedList []pbChat.MsgDataToMQ
+	var failedList []pbMsg.MsgDataToMQ
 	for _, msg := range msgList {
 		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		s, err := utils.Pb2String(msg.MsgData)
@@ -231,9 +224,9 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 	return 0, err
 }
 
-func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbChat.MsgDataToMQ) error {
-	for _, msg := range msgList {
-		if err := c.rdb.Del(ctx, messageCache+userID+"_"+strconv.Itoa(int(msg.MsgData.Seq))).Err(); err != nil {
+func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) error {
+	for _, v := range msgList {
+		if err := c.rdb.Del(ctx, messageCache+userID+"_"+strconv.Itoa(int(v.MsgData.Seq))).Err(); err != nil {
 			return utils.Wrap1(err)
 		}
 	}
@@ -257,35 +250,35 @@ func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 	return nil
 }
 
-func (c *cache) HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
-	req := &pbRtc.SignalReq{}
+func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
+	req := &sdkws.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return false, utils.Wrap1(err)
 	}
-	var inviteeUserIDList []string
+	var inviteeUserIDs []string
 	var isInviteSignal bool
 	switch signalInfo := req.Payload.(type) {
-	case *pbRtc.SignalReq_Invite:
-		inviteeUserIDList = signalInfo.Invite.Invitation.InviteeUserIDList
+	case *sdkws.SignalReq_Invite:
+		inviteeUserIDs = signalInfo.Invite.Invitation.InviteeUserIDList
 		isInviteSignal = true
-	case *pbRtc.SignalReq_InviteInGroup:
-		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
+	case *sdkws.SignalReq_InviteInGroup:
+		inviteeUserIDs = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
 		isInviteSignal = true
-		if !utils.Contain(pushToUserID, inviteeUserIDList...) {
+		if !utils.Contain(pushToUserID, inviteeUserIDs...) {
 			return false, nil
 		}
-	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
+	case *sdkws.SignalReq_HungUp, *sdkws.SignalReq_Cancel, *sdkws.SignalReq_Reject, *sdkws.SignalReq_Accept:
 		return false, utils.Wrap1(errors.New("signalInfo do not need offlinePush"))
 	default:
 		return false, nil
 	}
 	if isInviteSignal {
-		for _, userID := range inviteeUserIDList {
+		for _, userID := range inviteeUserIDs {
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
 				return false, utils.Wrap1(err)
 			}
-			keyList := SignalListCache + userID
+			keyList := signalListCache + userID
 			err = c.rdb.LPush(ctx, keyList, msg.ClientMsgID).Err()
 			if err != nil {
 				return false, utils.Wrap1(err)
@@ -294,7 +287,7 @@ func (c *cache) HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushTo
 			if err != nil {
 				return false, utils.Wrap1(err)
 			}
-			key := SignalCache + msg.ClientMsgID
+			key := signalCache + msg.ClientMsgID
 			err = c.rdb.Set(ctx, key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
 				return false, utils.Wrap1(err)
@@ -304,29 +297,29 @@ func (c *cache) HandleSignalInfo(ctx context.Context, msg *sdkws.MsgData, pushTo
 	return true, nil
 }
 
-func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
-	bytes, err := c.rdb.Get(ctx, SignalCache+clientMsgID).Bytes()
+func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (signalInviteReq *sdkws.SignalInviteReq, err error) {
+	bytes, err := c.rdb.Get(ctx, signalCache+clientMsgID).Bytes()
 	if err != nil {
 		return nil, utils.Wrap1(err)
 	}
-	req := &sdkws.SignalReq{}
-	if err = proto.Unmarshal(bytes, req); err != nil {
+	signalReq := &sdkws.SignalReq{}
+	if err = proto.Unmarshal(bytes, signalReq); err != nil {
 		return nil, utils.Wrap1(err)
 	}
-	invitationInfo = &sdkws.SignalInviteReq{}
-	switch req2 := req.Payload.(type) {
-	case *pbRtc.SignalReq_Invite:
-		invitationInfo.Invitation = req2.Invite.Invitation
-		invitationInfo.OpUserID = req2.Invite.OpUserID
-	case *pbRtc.SignalReq_InviteInGroup:
-		invitationInfo.Invitation = req2.InviteInGroup.Invitation
-		invitationInfo.OpUserID = req2.InviteInGroup.OpUserID
+	signalInviteReq = &sdkws.SignalInviteReq{}
+	switch req := signalReq.Payload.(type) {
+	case *sdkws.SignalReq_Invite:
+		signalInviteReq.Invitation = req.Invite.Invitation
+		signalInviteReq.OpUserID = req.Invite.OpUserID
+	case *sdkws.SignalReq_InviteInGroup:
+		signalInviteReq.Invitation = req.InviteInGroup.Invitation
+		signalInviteReq.OpUserID = req.InviteInGroup.OpUserID
 	}
-	return invitationInfo, nil
+	return signalInviteReq, nil
 }
 
 func (c *cache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
-	key, err := c.rdb.LPop(ctx, SignalListCache+userID).Result()
+	key, err := c.rdb.LPop(ctx, signalListCache+userID).Result()
 	if err != nil {
 		return nil, utils.Wrap1(err)
 	}
@@ -338,7 +331,7 @@ func (c *cache) GetAvailableSignalInvitationInfo(ctx context.Context, userID str
 }
 
 func (c *cache) DelUserSignalList(ctx context.Context, userID string) error {
-	return utils.Wrap1(c.rdb.Del(ctx, SignalListCache+userID).Err())
+	return utils.Wrap1(c.rdb.Del(ctx, signalListCache+userID).Err())
 }
 
 func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error {

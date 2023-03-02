@@ -9,14 +9,13 @@ package push
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/localcache"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/discoveryregistry"
-	msggateway "OpenIM/pkg/proto/msggateway"
-	pbRtc "OpenIM/pkg/proto/rtc"
+	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
@@ -25,7 +24,7 @@ import (
 )
 
 type Pusher struct {
-	cache                  cache.Cache
+	database               controller.PushDatabase
 	client                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          OfflinePusher
 	groupLocalCache        localcache.GroupLocalCache
@@ -33,11 +32,14 @@ type Pusher struct {
 	successCount           int
 }
 
-func NewPusher(cache cache.Cache, client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher) *Pusher {
+func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher, database controller.PushDatabase,
+	groupLocalCache localcache.GroupLocalCache, conversationLocalCache localcache.ConversationLocalCache) *Pusher {
 	return &Pusher{
-		cache:         cache,
-		client:        client,
-		offlinePusher: offlinePusher,
+		database:               database,
+		client:                 client,
+		offlinePusher:          offlinePusher,
+		groupLocalCache:        groupLocalCache,
+		conversationLocalCache: conversationLocalCache,
 	}
 }
 
@@ -46,7 +48,7 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 	var userIDs = []string{userID}
 	log.Debug(operationID, "Get msg from msg_transfer And push msg", msg.String(), userID)
 	// callback
-	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil {
+	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != constant.ErrCallbackContinue {
 		return err
 	}
 	// push
@@ -65,7 +67,7 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 			}
 		}
 		if msg.ContentType == constant.SignalingNotification {
-			isSend, err := p.cache.HandleSignalInfo(ctx, msg, userID)
+			isSend, err := p.database.HandleSignalInvite(ctx, msg, userID)
 			if err != nil {
 				return err
 			}
@@ -77,7 +79,7 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 		if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
 			return err
 		}
-		err = p.OfflinePushMsg(ctx, userID, msg, userIDs)
+		err = p.offlinePushMsg(ctx, userID, msg, userIDs)
 		if err != nil {
 			return err
 		}
@@ -89,7 +91,7 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 	operationID := tracelog.GetOperationID(ctx)
 	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
 	var pushToUserIDs []string
-	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil {
+	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil && err != constant.ErrCallbackContinue {
 		return err
 	}
 	if len(pushToUserIDs) == 0 {
@@ -145,14 +147,14 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			err = p.OfflinePushMsg(ctx, groupID, msg, offlinePushUserIDs)
+			err = p.offlinePushMsg(ctx, groupID, msg, offlinePushUserIDs)
 			if err != nil {
-				log.NewError(operationID, "OfflinePushMsg failed", groupID)
+				log.NewError(operationID, "offlinePushMsg failed", groupID)
 				return err
 			}
 			_, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
 			if err != nil {
-				log.NewError(operationID, "OfflinePushMsg failed", groupID)
+				log.NewError(operationID, "offlinePushMsg failed", groupID)
 				return err
 			}
 		}
@@ -160,14 +162,14 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 	return nil
 }
 
-func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingelMsgToUserResultList, err error) {
+func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResultList, err error) {
 	conns, err := p.client.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return nil, err
 	}
 	//Online push message
 	for _, v := range conns {
-		msgClient := msggateway.NewRelayClient(v)
+		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{OperationID: tracelog.GetOperationID(ctx), MsgData: msg, PushToUserIDList: pushToUserIDs})
 		if err != nil {
 			log.NewError(tracelog.GetOperationID(ctx), msg, len(pushToUserIDs), "err", err)
@@ -180,8 +182,8 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	return wsResults, nil
 }
 
-func (p *Pusher) OfflinePushMsg(ctx context.Context, sourceID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
-	title, content, opts, err := p.GetOfflinePushInfos(sourceID, msg)
+func (p *Pusher) offlinePushMsg(ctx context.Context, sourceID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
+	title, content, opts, err := p.getOfflinePushInfos(sourceID, msg)
 	if err != nil {
 		return err
 	}
@@ -197,12 +199,12 @@ func (p *Pusher) OfflinePushMsg(ctx context.Context, sourceID string, msg *sdkws
 func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) {
 	opts = &Opts{}
 	if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
-		req := &pbRtc.SignalReq{}
+		req := &sdkws.SignalReq{}
 		if err := proto.Unmarshal(msg.Content, req); err != nil {
 			return nil, utils.Wrap(err, "")
 		}
 		switch req.Payload.(type) {
-		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
+		case *sdkws.SignalReq_Invite, *sdkws.SignalReq_InviteInGroup:
 			opts.Signal = &Signal{ClientMsgID: msg.ClientMsgID}
 		}
 	}
@@ -214,7 +216,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) 
 	return opts, nil
 }
 
-func (p *Pusher) GetOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *Opts, err error) {
+func (p *Pusher) getOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *Opts, err error) {
 	if p.offlinePusher == nil {
 		err = errors.New("no offlinePusher is configured")
 		return

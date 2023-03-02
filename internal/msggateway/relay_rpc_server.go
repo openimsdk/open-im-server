@@ -173,7 +173,7 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *msggateway.GetU
 
 func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
-	var singleUserResult []*msggateway.SingelMsgToUserResultList
+	var singleUserResult []*msggateway.SingleMsgToUserResultList
 	//r.GetBatchMsgForPush(req.OperationID,req.MsgData,req.PushToUserIDList,)
 	msgBytes, _ := proto.Marshal(req.MsgData)
 	mReply := Resp{
@@ -189,7 +189,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *msgg
 	}
 	for _, v := range req.PushToUserIDList {
 		var resp []*msggateway.SingleMsgToUserPlatform
-		tempT := &msggateway.SingelMsgToUserResultList{
+		tempT := &msggateway.SingleMsgToUserResultList{
 			UserID: v,
 		}
 		userConnMap := ws.getUserAllCons(v)
@@ -224,11 +224,11 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *msgg
 }
 func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
-	var singleUserResult []*msggateway.SingelMsgToUserResultList
+	var singleUserResult []*msggateway.SingleMsgToUserResultList
 
 	for _, v := range req.PushToUserIDList {
 		var resp []*msggateway.SingleMsgToUserPlatform
-		tempT := &msggateway.SingelMsgToUserResultList{
+		tempT := &msggateway.SingleMsgToUserResultList{
 			UserID: v,
 		}
 		userConnMap := ws.getUserAllCons(v)

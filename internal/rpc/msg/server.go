@@ -6,16 +6,14 @@ import (
 	"OpenIM/pkg/common/db/localcache"
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
-	discoveryRegistry "OpenIM/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/openKeeper"
-
 	"OpenIM/pkg/common/prome"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/msg"
 	"google.golang.org/grpc"
 )
 
 type msgServer struct {
-	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
+	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase    controller.MsgDatabase
 	Group          *check.GroupChecker
 	User           *check.UserCheck
@@ -26,7 +24,7 @@ type msgServer struct {
 	MessageLocker MessageLocker
 }
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	mysql, err := relation.NewGormDB()
 	if err != nil {
 		return err

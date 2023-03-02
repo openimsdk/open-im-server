@@ -19,18 +19,18 @@ import (
 )
 
 type Push struct {
-	rpcServer     RPCServer
+	rpcServer     PushServer
 	pushCh        ConsumerHandler
 	offlinePusher OfflinePusher
 	successCount  uint64
 }
 
 func (p *Push) Init(rpcPort int) error {
-	redisClient, err := cache.NewRedis()
+	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
-	var cacheInterface cache.Cache = redisClient
+	var cacheInterface cache.Cache
 	p.rpcServer.Init(rpcPort, cacheInterface)
 	p.pushCh.Init()
 	statistics.NewStatistics(&p.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)

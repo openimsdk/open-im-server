@@ -5,40 +5,33 @@ option go_package = "OpenIM/pkg/proto/msg;msg";
 package msg;
 
 message MsgDataToMQ{
-  string token =1;
-  string operationID = 2;
-  sdkws.MsgData msgData = 3;
+  string token = 1;
+  sdkws.MsgData msgData = 2;
 }
 
 
 message MsgDataToDB {
   sdkws.MsgData msgData = 1;
-  string operationID = 2;
-
 }
+
 message PushMsgDataToMQ{
-  string OperationID = 1;
-  sdkws.MsgData msgData = 2;
-  string pushToUserID = 3;
+  sdkws.MsgData msgData = 1;
+  string sourceID = 2;
 }
+
 message MsgDataToMongoByMQ{
- uint64 lastSeq =1;
+ int64 lastSeq = 1;
  string aggregationID = 2;
- repeated MsgDataToMQ messageList = 3;
+ repeated MsgDataToMQ messages = 3;
  string triggerID = 4;
-
-
 }
 
 message GetMaxAndMinSeqReq {
   string UserID = 1;
-  string OperationID = 2;
 }
 message GetMaxAndMinSeqResp {
-  int32 ErrCode = 1;
-  string ErrMsg = 2;
-  uint32 MaxSeq = 3;
-  uint32 MinSeq = 4;
+  int64 MaxSeq = 1;
+  int64 MinSeq = 2;
 }
 
 message SendMsgReq {
@@ -46,9 +39,9 @@ message SendMsgReq {
 }
 
 message SendMsgResp {
-  string serverMsgID = 4;
-  string clientMsgID = 5;
-  int64  sendTime = 6;
+  string serverMsgID = 1;
+  string clientMsgID = 2;
+  int64  sendTime = 3;
 }
 
 
@@ -69,119 +62,98 @@ message SetMsgMinSeqResp{
 }
 
 message SetSendMsgStatusReq{
-  int32 status = 2;
+  int32 status = 1;
 }
 
 message SetSendMsgStatusResp{
 }
 
 message GetSendMsgStatusReq{
-  string operationID = 1;
 }
 
 message GetSendMsgStatusResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  int32 status = 3;
+  int32 status = 1;
 }
+
 message DelSuperGroupMsgReq{
-  string userID = 2;
-  string groupID = 3;
+  string userID = 1;
+  string groupID = 2;
 }
+
 message DelSuperGroupMsgResp{
 }
-message GetSuperGroupMsgReq{
-  string operationID = 1;
-  uint32 Seq = 2;
-  string groupID = 3;
 
+message GetSuperGroupMsgReq{
+  int64 Seq = 1;
+  string groupID = 2;
 }
 message GetSuperGroupMsgResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  sdkws.MsgData msgData = 3;
+  sdkws.MsgData msgData = 1;
 }
-message GetWriteDiffMsgReq{
-    string operationID = 1;
-    uint32 Seq = 2;
 
-  }
+message GetWriteDiffMsgReq{
+  int64 Seq = 1;
+}
 message GetWriteDiffMsgResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  sdkws.MsgData msgData = 3;
+  sdkws.MsgData msgData = 2;
 }
 
 message ModifyMessageReactionExtensionsReq {
-  string operationID = 1;
-  string sourceID = 2;
-  string opUserID = 3;
-  int32 sessionType = 4;
-  map <string, sdkws.KeyValue>reactionExtensionList = 5;
-  string clientMsgID = 6;
-  google.protobuf.StringValue ex = 7;
-  google.protobuf.StringValue attachedInfo = 8;
-  bool isReact = 9;
-  bool isExternalExtensions = 10;
-  int64 msgFirstModifyTime = 11;
+  string sourceID = 1;
+  int32 sessionType = 2;
+  map <string, sdkws.KeyValue>reactionExtensions = 3;
+  string clientMsgID = 4;
+  google.protobuf.StringValue ex = 5;
+  google.protobuf.StringValue attachedInfo = 6;
+  bool isReact = 7;
+  bool isExternalExtensions = 8;
+  int64 msgFirstModifyTime = 9;
 }
 message SetMessageReactionExtensionsReq {
-  string operationID = 1;
-  string sourceID = 2;
-  string opUserID = 3;
-  int32 sessionType = 4;
-  map <string, sdkws.KeyValue>reactionExtensionList = 5;
-  string clientMsgID = 6;
-  google.protobuf.StringValue ex = 7;
-  google.protobuf.StringValue attachedInfo = 8;
-  bool isReact = 9;
-  bool isExternalExtensions = 10;
-  int64 msgFirstModifyTime = 11;
+  string sourceID = 1;
+  int32 sessionType = 2;
+  map <string, sdkws.KeyValue>reactionExtensions = 3;
+  string clientMsgID = 4;
+  google.protobuf.StringValue ex = 5;
+  google.protobuf.StringValue attachedInfo = 6;
+  bool isReact = 7;
+  bool isExternalExtensions = 8;
+  int64 msgFirstModifyTime = 9;
 }
 message SetMessageReactionExtensionsResp {
-  int32 errCode = 1;
-  string errMsg = 2;
-  string clientMsgID = 3;
-  int64 msgFirstModifyTime = 4;
-  bool isReact = 5;
-  repeated KeyValueResp result = 6;
+  string clientMsgID = 1;
+  int64 msgFirstModifyTime = 2;
+  bool isReact = 3;
+  repeated KeyValueResp result = 4;
 }
 
 
-message GetMessageListReactionExtensionsReq {
-  string operationID = 1;
-  string opUserID = 2;
-  string sourceID = 3;
-  int32 sessionType = 4;
+message GetMessagesReactionExtensionsReq {
+  string sourceID = 1;
+  int32 sessionType = 2;
   message MessageReactionKey {
     string clientMsgID = 1;
     int64 msgFirstModifyTime = 2;
   }
-  repeated MessageReactionKey messageReactionKeyList = 5;
-  repeated string TypeKeyList = 6;
+  repeated MessageReactionKey messageReactionKeys = 3;
+  repeated string TypeKeys = 4;
 }
-message GetMessageListReactionExtensionsResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  repeated SingleMessageExtensionResult  singleMessageResult =3;
+message GetMessagesReactionExtensionsResp{
+  repeated SingleMessageExtensionResult singleMessageResult = 1;
 
 }
 message SingleMessageExtensionResult {
-  int32 errCode = 1;
-  string errMsg = 2;
-  map <string,  sdkws.KeyValue>reactionExtensionList = 3;
-  string clientMsgID = 4;
+  map <string,  sdkws.KeyValue>reactionExtensions = 1;
+  string clientMsgID = 2;
 }
 
 
 message ModifyMessageReactionExtensionsResp {
-  int32 errCode = 1;
-  string errMsg = 2;
-  repeated ExtendMsgResp successList = 3;
-  repeated ExtendMsgResp failedList = 4;
+  repeated ExtendMsgResp successList = 1;
+  repeated ExtendMsgResp failedList = 2;
 }
 
-message DeleteMessageListReactionExtensionsReq {
+message DeleteMessagesReactionExtensionsReq {
   string operationID = 1;
   string opUserID = 2;
   string sourceID = 3;
@@ -189,23 +161,19 @@ message DeleteMessageListReactionExtensionsReq {
   string clientMsgID = 5;
   bool isExternalExtensions = 6;
   int64 msgFirstModifyTime = 7;
-  repeated sdkws.KeyValue reactionExtensionList = 8;
+  repeated sdkws.KeyValue reactionExtensions = 8;
 }
 
-message DeleteMessageListReactionExtensionsResp {
-  int32 errCode = 1;
-  string errMsg = 2;
-  repeated KeyValueResp result = 6;
+message DeleteMessagesReactionExtensionsResp {
+  repeated KeyValueResp result = 1;
 }
 
 message ExtendMsgResp {
   ExtendMsg extendMsg = 1;
-  int32 errCode = 2;
-  string errMsg = 3;
 }
 
 message ExtendMsg {
-  map <string, KeyValueResp>reactionExtensionList = 1;
+  map <string, KeyValueResp>reactionExtensions = 1;
   string clientMsgID = 2;
   int64 msgFirstModifyTime = 3;
   string attachedInfo = 4;
@@ -214,33 +182,30 @@ message ExtendMsg {
 
 message KeyValueResp {
   sdkws.KeyValue keyValue = 1;
-  int32 errCode = 2;
-  string errMsg = 3;
 }
 
 message MsgDataToModifyByMQ{
- string aggregationID = 1;
- repeated MsgDataToMQ messageList = 2;
- string triggerID = 3;
+ repeated MsgDataToMQ messages = 1;
+ string triggerID = 2;
 }
 
-message DelMsgListReq{
+message DelMsgsReq{
   string userID = 2;
-  repeated uint32 seqList = 3;
+  repeated int64 seqs = 3;
 }
 
-message DelMsgListResp{
+message DelMsgsResp{
 }
 
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxAndMinSeq(sdkws.GetMaxAndMinSeqReq) returns(sdkws.GetMaxAndMinSeqResp);
   //拉取历史消息（包括用户的，以及指定群组的）
-  rpc PullMessageBySeqList(sdkws.PullMessageBySeqListReq) returns(sdkws.PullMessageBySeqListResp);
+  rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
   //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
   //删除某人消息
-  rpc DelMsgList(DelMsgListReq) returns(DelMsgListResp);
+  rpc DelMsgs(DelMsgsReq) returns(DelMsgsResp);
   //删除某个用户某个大群消息
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   //清空某人所有消息
@@ -255,7 +220,7 @@ service msg {
 
   // 修改消息
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
-  rpc GetMessageListReactionExtensions(GetMessageListReactionExtensionsReq) returns(GetMessageListReactionExtensionsResp);
+  rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
   rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
-  rpc DeleteMessageReactionExtensions(DeleteMessageListReactionExtensionsReq) returns(DeleteMessageListReactionExtensionsResp);
+  rpc DeleteMessageReactionExtensions(DeleteMessagesReactionExtensionsReq) returns(DeleteMessagesReactionExtensionsResp);
 }

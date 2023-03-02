@@ -36,5 +36,5 @@ func (ChatLogModel) TableName() string {
 
 type ChatLogModelInterface interface {
 	Create(msg pbMsg.MsgDataToMQ) error
-	GetChatLog(chatLog *ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []ChatLogModel, error)
+	GetChatLog(chatLog *ChatLogModel, pageNumber, showNumber int32, contentTypes []int32) (int64, []ChatLogModel, error)
 }
