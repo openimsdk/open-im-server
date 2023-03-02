@@ -146,10 +146,8 @@ message MsgDataList {
 }
 
 message PullMessageBySeqsResp {
-  int32 errCode = 1;
-  string errMsg = 2;
-  repeated MsgData list = 3;
-  map<string, MsgDataList> groupMsgDataList = 4;
+  repeated MsgData list = 1;
+  map<string, MsgDataList> groupMsgDataList = 2;
 }
 
 
@@ -606,8 +604,6 @@ message SetAppBackgroundStatusReq {
 }
 
 message SetAppBackgroundStatusResp {
-  int32 errCode = 1;
-  string errMsg = 2;
 }
 
 message ExtendMsgSet {
