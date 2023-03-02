@@ -1,7 +1,6 @@
 package api
 
 import (
-	"OpenIM/internal/api/conversation"
 	"OpenIM/internal/api/manage"
 	"OpenIM/internal/api/msg"
 	"OpenIM/internal/api/third"
@@ -9,6 +8,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
 	"OpenIM/pkg/common/prome"
+	"github.com/OpenIMSDK/openKeeper"
 	"github.com/gin-gonic/gin"
 	"io"
 	"os"
@@ -31,9 +31,11 @@ func NewGinRouter() *gin.Engine {
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
 
+	var zk *openKeeper.ZkClient
+
 	userRouterGroup := r.Group("/user")
 	{
-		u := NewUser(nil)
+		u := NewUser(zk)
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)            //1
@@ -49,23 +51,23 @@ func NewGinRouter() *gin.Engine {
 	////friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		f := NewFriend(nil)
-		friendRouterGroup.POST("/add_friend", f.AddFriend)                        //1
+		f := NewFriend(zk)
+		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)                 //1
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList) //1
 		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)               //1
-		friendRouterGroup.POST("/add_friend_response", f.AddFriendResponse)       //1
+		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)      //1
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)           //1
 		friendRouterGroup.POST("/add_black", f.AddBlack)                          //1
-		friendRouterGroup.POST("/get_black_list", f.GetBlacklist)                 //1
-		friendRouterGroup.POST("/remove_black", f.RemoveBlacklist)                //1
-		friendRouterGroup.POST("/import_friend", f.ImportFriend)                  //1
+		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)          //1
+		friendRouterGroup.POST("/remove_black", f.RemoveBlack)                    //1
+		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
 		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
 
 	}
 	groupRouterGroup := r.Group("/group")
-	g := NewGroup(nil)
+	g := NewGroup(zk)
 	{
 		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
@@ -98,7 +100,7 @@ func NewGinRouter() *gin.Engine {
 	////certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := NewAuth(nil)
+		a := NewAuth(zk)
 		authRouterGroup.POST("/user_register", a.UserRegister) //1
 		authRouterGroup.POST("/user_token", a.UserToken)       //1
 		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
@@ -141,13 +143,36 @@ func NewGinRouter() *gin.Engine {
 	////Conversation
 	conversationGroup := r.Group("/conversation")
 	{ //1
-		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
-		conversationGroup.POST("/get_conversation", conversation.GetConversation)
-		conversationGroup.POST("/get_conversations", conversation.GetConversations)
-		conversationGroup.POST("/set_conversation", conversation.SetConversation)
-		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
-		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
-		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
+		c := NewConversation(zk)
+		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
+		conversationGroup.POST("/get_conversation", c.GetConversation)
+		conversationGroup.POST("/get_conversations", c.GetConversations)
+		conversationGroup.POST("/set_conversation", c.SetConversation)
+		conversationGroup.POST("/batch_set_conversation", c.BatchSetConversations)
+		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
+		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 	}
 	return r
 }
+
+/*
+
+	{
+		GetSeq
+		SendMsg
+		PullMsgBySeqList
+		DelMsg
+		DelSuperGroupMsg
+		ClearMsg
+		SetMsgMinSeq
+		SetMessageReactionExtensions
+		GetMessageListReactionExtensions
+		AddMessageReactionExtensions
+		DeleteMessageReactionExtensions
+		ManagementSendMsg
+		ManagementBatchSendMsg
+		CheckMsgIsSendSuccess
+	}
+
+
+*/

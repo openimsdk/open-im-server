@@ -19,26 +19,26 @@ type Auth struct {
 	zk *openKeeper.ZkClient
 }
 
-func (a *Auth) getGroupClient() (auth.AuthClient, error) {
-	conn, err := a.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+func (o *Auth) client() (auth.AuthClient, error) {
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}
 	return auth.NewAuthClient(conn), nil
 }
 
-func (a *Auth) UserRegister(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserRegister, a.getGroupClient, c)
+func (o *Auth) UserRegister(c *gin.Context) {
+	a2r.Call(auth.AuthClient.UserRegister, o.client, c)
 }
 
-func (a *Auth) UserToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserToken, a.getGroupClient, c)
+func (o *Auth) UserToken(c *gin.Context) {
+	a2r.Call(auth.AuthClient.UserToken, o.client, c)
 }
 
-func (a *Auth) ParseToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ParseToken, a.getGroupClient, c)
+func (o *Auth) ParseToken(c *gin.Context) {
+	a2r.Call(auth.AuthClient.ParseToken, o.client, c)
 }
 
-func (a *Auth) ForceLogout(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ForceLogout, a.getGroupClient, c)
+func (o *Auth) ForceLogout(c *gin.Context) {
+	a2r.Call(auth.AuthClient.ForceLogout, o.client, c)
 }

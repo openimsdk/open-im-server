@@ -19,58 +19,58 @@ type Friend struct {
 	zk *openKeeper.ZkClient
 }
 
-func (f *Friend) getGroupClient() (friend.FriendClient, error) {
-	conn, err := f.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+func (o *Friend) client() (friend.FriendClient, error) {
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}
 	return friend.NewFriendClient(conn), nil
 }
 
-func (f *Friend) AddFriend(c *gin.Context) {
-	a2r.Call(friend.FriendClient.AddFriend, f.getGroupClient, c)
+func (o *Friend) ApplyToAddFriend(c *gin.Context) {
+	a2r.Call(friend.FriendClient.ApplyToAddFriend, o.client, c)
 }
 
-func (f *Friend) DeleteFriend(c *gin.Context) {
-	a2r.Call(friend.FriendClient.DeleteFriend, f.getGroupClient, c)
+func (o *Friend) DeleteFriend(c *gin.Context) {
+	a2r.Call(friend.FriendClient.DeleteFriend, o.client, c)
 }
 
-func (f *Friend) GetFriendApplyList(c *gin.Context) {
-	a2r.Call(friend.FriendClient.GetFriendApplyList, f.getGroupClient, c)
+func (o *Friend) GetFriendApplyList(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyFrom, o.client, c)
 }
 
-func (f *Friend) GetSelfApplyList(c *gin.Context) {
-	a2r.Call(friend.FriendClient.GetSelfApplyList, f.getGroupClient, c)
+func (o *Friend) GetSelfApplyList(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyFrom, o.client, c)
 }
 
-func (f *Friend) GetFriendList(c *gin.Context) {
-	a2r.Call(friend.FriendClient.GetFriendList, f.getGroupClient, c)
+func (o *Friend) GetFriendList(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetDesignatedFriends, o.client, c)
 }
 
-func (f *Friend) AddFriendResponse(c *gin.Context) {
-	a2r.Call(friend.FriendClient.AddFriendResponse, f.getGroupClient, c)
+func (o *Friend) RespondFriendApply(c *gin.Context) {
+	a2r.Call(friend.FriendClient.RespondFriendApply, o.client, c)
 }
 
-func (f *Friend) SetFriendRemark(c *gin.Context) {
-	a2r.Call(friend.FriendClient.SetFriendRemark, f.getGroupClient, c)
+func (o *Friend) SetFriendRemark(c *gin.Context) {
+	a2r.Call(friend.FriendClient.SetFriendRemark, o.client, c)
 }
 
-func (f *Friend) AddBlack(c *gin.Context) {
-	a2r.Call(friend.FriendClient.AddBlack, f.getGroupClient, c)
+func (o *Friend) AddBlack(c *gin.Context) {
+	a2r.Call(friend.FriendClient.AddBlack, o.client, c)
 }
 
-func (f *Friend) GetBlacklist(c *gin.Context) {
-	a2r.Call(friend.FriendClient.GetBlacklist, f.getGroupClient, c)
+func (o *Friend) GetPaginationBlacks(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetPaginationBlacks, o.client, c)
 }
 
-func (f *Friend) RemoveBlacklist(c *gin.Context) {
-	a2r.Call(friend.FriendClient.RemoveBlacklist, f.getGroupClient, c)
+func (o *Friend) RemoveBlack(c *gin.Context) {
+	a2r.Call(friend.FriendClient.RemoveBlack, o.client, c)
 }
 
-func (f *Friend) ImportFriend(c *gin.Context) {
-	a2r.Call(friend.FriendClient.ImportFriend, f.getGroupClient, c)
+func (o *Friend) ImportFriends(c *gin.Context) {
+	a2r.Call(friend.FriendClient.ImportFriends, o.client, c)
 }
 
-func (f *Friend) IsFriend(c *gin.Context) {
-	a2r.Call(friend.FriendClient.IsFriend, f.getGroupClient, c)
+func (o *Friend) IsFriend(c *gin.Context) {
+	a2r.Call(friend.FriendClient.IsFriend, o.client, c)
 }
