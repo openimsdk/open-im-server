@@ -6,7 +6,7 @@ import (
 )
 
 func (u *UserCheck) Access(ctx context.Context, ownerUserID string) (err error) {
-	_, err = u.GetUsersInfo(ctx, ownerUserID)
+	_, err = u.GetUserInfo(ctx, ownerUserID)
 	if err != nil {
 		return err
 	}

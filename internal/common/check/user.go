@@ -47,7 +47,7 @@ func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complet
 	return resp.UsersInfo, nil
 }
 
-func (u *UserCheck) GetUsersInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
+func (u *UserCheck) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err

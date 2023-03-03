@@ -129,10 +129,10 @@ func NewGinRouter() *gin.Engine {
 		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
 		chatGroup.POST("/set_msg_min_seq", msg.SetMsgMinSeq)
 
-		chatGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
-		chatGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
-		chatGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
-		chatGroup.POST("/delete_message_reaction_extensions", msg.DeleteMessageReactionExtensions)
+		//chatGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
+		//chatGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
+		//chatGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
+		//chatGroup.POST("/delete_message_reaction_extensions", msg.DeleteMessageReactionExtensions)
 	}
 	////Conversation
 	conversationGroup := r.Group("/conversation")

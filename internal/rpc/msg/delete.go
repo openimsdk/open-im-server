@@ -11,7 +11,7 @@ func (m *msgServer) DelMsgs(ctx context.Context, req *msg.DelMsgsReq) (*msg.DelM
 	if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.Seqs); err != nil {
 		return nil, err
 	}
-	DeleteMessageNotification(ctx, req.UserID, req.Seqs)
+	//DeleteMessageNotification(ctx, req.UserID, req.Seqs)
 	return resp, nil
 }
 
