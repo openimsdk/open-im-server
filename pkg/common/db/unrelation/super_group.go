@@ -11,14 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
 )
 
-func NewSuperGroupMongoDriver(mgoClient *mongo.Client) unrelation.SuperGroupModelInterface {
-	mgoDB := mgoClient.Database(config.Config.Mongo.DBDatabase)
-	return &SuperGroupMongoDriver{MgoDB: mgoDB, MgoClient: mgoClient, superGroupCollection: mgoDB.Collection(unrelation.CSuperGroup), userToSuperGroupCollection: mgoDB.Collection(unrelation.CUserToSuperGroup)}
+func NewSuperGroupMongoDriver(database *mongo.Database) unrelation.SuperGroupModelInterface {
+	return &SuperGroupMongoDriver{superGroupCollection: database.Collection(unrelation.CSuperGroup), userToSuperGroupCollection: database.Collection(unrelation.CUserToSuperGroup)}
 }
 
 type SuperGroupMongoDriver struct {
-	MgoClient                  *mongo.Client
-	MgoDB                      *mongo.Database
 	superGroupCollection       *mongo.Collection
 	userToSuperGroupCollection *mongo.Collection
 }

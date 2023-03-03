@@ -9,10 +9,10 @@ import (
 	"OpenIM/pkg/common/db/relation"
 	tableRelation "OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/tx"
+	"OpenIM/pkg/discoveryregistry"
 	pbConversation "OpenIM/pkg/proto/conversation"
 	"OpenIM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"github.com/dtm-labs/rockscache"
 	"google.golang.org/grpc"
 )
@@ -23,7 +23,7 @@ type conversationServer struct {
 	notify *notification.Check
 }
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	db, err := relation.NewGormDB()
 	if err != nil {
 		return err
@@ -31,13 +31,14 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 	if err := db.AutoMigrate(&tableRelation.ConversationModel{}); err != nil {
 		return err
 	}
-	redis, err := cache.NewRedis()
+	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
+
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		groupChecker: check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(redis.GetClient(), rockscache.Options{
+		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
@@ -176,11 +177,11 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 
 // 获取超级大群开启免打扰的用户ID
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	resp := &pbConversation.GetRecvMsgNotNotifyUserIDsResp{}
 	userIDs, err := c.ConversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbConversation.GetRecvMsgNotNotifyUserIDsResp{}
 	resp.UserIDs = userIDs
 	return resp, nil
 }

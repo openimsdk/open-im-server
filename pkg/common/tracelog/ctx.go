@@ -1,6 +1,7 @@
 package tracelog
 
 import (
+	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/sirupsen/logrus"
@@ -15,7 +16,7 @@ import (
 const TraceLogKey = "tracelog"
 
 func NewCtx(c *gin.Context, api string) context.Context {
-	req := &ApiInfo{ApiName: api, GinCtx: c, OperationID: c.GetHeader("operationID"), Funcs: &[]FuncInfo{}}
+	req := &ApiInfo{ApiName: api, GinCtx: c, OperationID: c.GetHeader(constant.OperationID), Funcs: &[]FuncInfo{}}
 	return context.WithValue(c, TraceLogKey, req)
 }
 

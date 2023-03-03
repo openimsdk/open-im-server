@@ -27,13 +27,13 @@ type Pusher struct {
 	database               controller.PushDatabase
 	client                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          OfflinePusher
-	groupLocalCache        localcache.GroupLocalCache
-	conversationLocalCache localcache.ConversationLocalCache
+	groupLocalCache        *localcache.GroupLocalCache
+	conversationLocalCache *localcache.ConversationLocalCache
 	successCount           int
 }
 
 func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher, database controller.PushDatabase,
-	groupLocalCache localcache.GroupLocalCache, conversationLocalCache localcache.ConversationLocalCache) *Pusher {
+	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
 	return &Pusher{
 		database:               database,
 		client:                 client,
@@ -162,7 +162,7 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 	return nil
 }
 
-func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResultList, err error) {
+func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	conns, err := p.client.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	//Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{OperationID: tracelog.GetOperationID(ctx), MsgData: msg, PushToUserIDList: pushToUserIDs})
+		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
 		if err != nil {
 			log.NewError(tracelog.GetOperationID(ctx), msg, len(pushToUserIDs), "err", err)
 			continue

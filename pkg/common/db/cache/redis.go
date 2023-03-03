@@ -37,7 +37,7 @@ const (
 	uidPidToken             = "UID_PID_TOKEN_STATUS:"
 )
 
-type Cache interface {
+type Model interface {
 	IncrUserSeq(ctx context.Context, userID string) (int64, error)
 	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 	SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error
@@ -75,7 +75,7 @@ type Cache interface {
 	IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error)
 	SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error
 	GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error)
-	JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
+	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
 	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
 	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
 	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
@@ -85,7 +85,7 @@ type Cache interface {
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 }
 
-func NewCache(client redis.UniversalClient) Cache {
+func NewCacheModel(client redis.UniversalClient) Model {
 	return &cache{rdb: client}
 }
 
@@ -205,7 +205,7 @@ func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqList []i
 
 func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) (int, error) {
 	pipe := c.rdb.Pipeline()
-	var failedList []pbMsg.MsgDataToMQ
+	var failedMsgs []pbMsg.MsgDataToMQ
 	for _, msg := range msgList {
 		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		s, err := utils.Pb2String(msg.MsgData)
@@ -217,8 +217,8 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 			return 0, utils.Wrap1(err)
 		}
 	}
-	if len(failedList) != 0 {
-		return len(failedList), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, tracelog.GetOperationID(ctx)))
+	if len(failedMsgs) != 0 {
+		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, tracelog.GetOperationID(ctx)))
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err
@@ -434,7 +434,7 @@ func (c *cache) getMessageReactionExPrefix(clientMsgID string, sessionType int32
 	return ""
 }
 
-func (c *cache) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+func (c *cache) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
 	n, err := c.rdb.Exists(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result()
 	if err != nil {
 		return false, utils.Wrap(err, "")

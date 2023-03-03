@@ -14,7 +14,7 @@ func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID str
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m apistruct.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
-	m.OpUserID = req.OpUserID
+	m.OpUserID = tracelog.GetOpUserID(ctx)
 	m.SessionType = req.SessionType
 	keyMap := make(map[string]*sdkws.KeyValue)
 	for _, valueResp := range resp.Result {
@@ -33,7 +33,7 @@ func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID str
 	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
 func (c *Check) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
-	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m apistruct.ReactionMessageDeleteNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID

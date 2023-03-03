@@ -18,8 +18,8 @@ type ConversationLocalCache struct {
 	client                            discoveryregistry.SvcDiscoveryRegistry
 }
 
-func NewConversationLocalCache(client discoveryregistry.SvcDiscoveryRegistry) ConversationLocalCache {
-	return ConversationLocalCache{
+func NewConversationLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *ConversationLocalCache {
+	return &ConversationLocalCache{
 		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string][]string, 0),
 		client:                            client,
 	}

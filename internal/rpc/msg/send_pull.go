@@ -52,10 +52,11 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 			return nil, err
 		}
 	}
-
-	resp.SendTime = msgToMQSingle.MsgData.SendTime
-	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
-	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
+	resp = &msg.SendMsgResp{
+		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
+		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
+		SendTime:    msgToMQSingle.MsgData.SendTime,
+	}
 	return resp, nil
 }
 
@@ -90,9 +91,11 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 		return nil, err
 	}
 	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
-	resp.SendTime = msgToMQSingle.MsgData.SendTime
-	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
-	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
+	resp = &msg.SendMsgResp{
+		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
+		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
+		SendTime:    msgToMQSingle.MsgData.SendTime,
+	}
 	return resp, nil
 }
 
@@ -265,9 +268,9 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	}
 	resp.MaxSeq = maxSeq
 	resp.MinSeq = minSeq
-	if len(req.GroupIDList) > 0 {
+	if len(req.GroupIDs) > 0 {
 		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
-		for _, groupID := range req.GroupIDList {
+		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
@@ -285,19 +288,19 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	return resp, nil
 }
 
-func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
-	resp := &sdkws.PullMessageBySeqListResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
+func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+	resp := &sdkws.PullMessageBySeqsResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
 	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
 	if err != nil {
 		return nil, err
 	}
 	resp.List = msgs
-	for userID, list := range req.GroupSeqList {
-		msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, userID, req.Seqs)
+	for groupID, list := range req.GroupSeqs {
+		msgs, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, groupID, list.Seqs)
 		if err != nil {
 			return nil, err
 		}
-		resp.GroupMsgDataList[userID] = &sdkws.MsgDataList{
+		resp.GroupMsgDataList[groupID] = &sdkws.MsgDataList{
 			MsgDataList: msgs,
 		}
 	}

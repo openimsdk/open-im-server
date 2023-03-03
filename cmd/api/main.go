@@ -2,7 +2,6 @@ package main
 
 import (
 	"OpenIM/internal/api"
-	"OpenIM/internal/api/third"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"flag"
@@ -25,7 +24,6 @@ func main() {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
-	go third.MinioInit()
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
 	err := router.Run(address)
 	if err != nil {

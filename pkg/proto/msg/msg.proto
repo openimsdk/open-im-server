@@ -182,11 +182,14 @@ message ExtendMsg {
 
 message KeyValueResp {
   sdkws.KeyValue keyValue = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
 }
 
 message MsgDataToModifyByMQ{
  repeated MsgDataToMQ messages = 1;
  string triggerID = 2;
+ string aggregationID = 3;
 }
 
 message DelMsgsReq{

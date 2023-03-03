@@ -2,7 +2,6 @@ package unrelation
 
 import (
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
 	"errors"
@@ -18,7 +17,7 @@ type ExtendMsgSetMongoDriver struct {
 	ExtendMsgSetCollection *mongo.Collection
 }
 
-func NewExtendMsgSetMongoDriver(mgoDB *mongo.Database) *ExtendMsgSetMongoDriver {
+func NewExtendMsgSetMongoDriver(mgoDB *mongo.Database) unRelationTb.ExtendMsgSetModelInterface {
 	return &ExtendMsgSetMongoDriver{mgoDB: mgoDB, ExtendMsgSetCollection: mgoDB.Collection(unRelationTb.CExtendMsgSet)}
 }
 
@@ -95,7 +94,7 @@ func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(ctx context.Context, sourceID 
 }
 
 // insert or update
-func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
 	var updateBson = bson.M{}
 	for _, v := range reactionExtensionList {
 		updateBson[fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, v.TypeKey)] = v
@@ -116,7 +115,7 @@ func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context
 }
 
 // delete TypeKey
-func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
+func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
 	var updateBson = bson.M{}
 	for _, v := range reactionExtensionList {
 		updateBson[fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, v.TypeKey)] = ""
@@ -132,7 +131,7 @@ func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context
 	return err
 }
 
-func (e *ExtendMsgSetMongoDriver) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *unRelationTb.ExtendMsgModel, err error) {
+func (e *ExtendMsgSetMongoDriver) TakeExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *unRelationTb.ExtendMsgModel, err error) {
 	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{fmt.Sprintf("extend_msgs.%s", clientMsgID): 1})
 	regex := fmt.Sprintf("^%s", sourceID)
 	result, err := e.ExtendMsgSetCollection.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "max_msg_update_time": bson.M{"$lte": maxMsgUpdateTime}}, findOpts)

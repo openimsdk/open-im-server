@@ -4,10 +4,10 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
-	prome "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/proto/msggateway"
-	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"bytes"
 	"context"
@@ -44,12 +44,11 @@ func initPrometheus() {
 
 func (r *RPCServer) onInit(rpcPort int) {
 	r.rpcPort = rpcPort
-	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImRelayName
-	r.etcdSchema = config.Config.Etcd.EtcdSchema
-	r.etcdAddr = config.Config.Etcd.EtcdAddr
+	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImMessageGatewayName
 	r.platformList = genPlatformArray()
 	r.pushTerminal = []int{constant.IOSPlatformID, constant.AndroidPlatformID}
 }
+
 func (r *RPCServer) run() {
 	listenIP := ""
 	if config.Config.ListenIP == "" {
@@ -76,7 +75,7 @@ func (r *RPCServer) run() {
 	}
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
-	msggateway.RegisterRelayServer(srv, r)
+	msggateway.RegisterMsgGatewayServer(srv, r)
 
 	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
@@ -97,7 +96,7 @@ func (r *RPCServer) run() {
 		return
 	}
 }
-func (r *RPCServer) OnlinePushMsg(_ context.Context, in *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
+func (r *RPCServer) OnlinePushMsg(ctx context.Context, in *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
 	log.NewInfo(in.OperationID, "PushMsgToUser is arriving", in.String())
 	var resp []*msggateway.SingleMsgToUserPlatform
 	msgBytes, _ := proto.Marshal(in.MsgData)

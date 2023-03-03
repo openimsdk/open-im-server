@@ -3,16 +3,15 @@ package msg
 import (
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
 )
 
-func (m *msgServer) DelMsgList(ctx context.Context, req *sdkws.DelMsgListReq) (*sdkws.DelMsgListResp, error) {
-	resp := &sdkws.DelMsgListResp{}
-	if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.SeqList); err != nil {
+func (m *msgServer) DelMsgs(ctx context.Context, req *msg.DelMsgsReq) (*msg.DelMsgsResp, error) {
+	resp := &msg.DelMsgsResp{}
+	if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.Seqs); err != nil {
 		return nil, err
 	}
-	DeleteMessageNotification(ctx, req.UserID, req.SeqList)
+	DeleteMessageNotification(ctx, req.UserID, req.Seqs)
 	return resp, nil
 }
 
@@ -21,13 +20,6 @@ func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroup
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	//maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, req.GroupID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if err := m.MsgDatabase.SetGroupUserMinSeq(ctx, req.GroupID, maxSeq); err != nil {
-	//	return nil, err
-	//}
 	if err := m.MsgDatabase.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, req.GroupID, []string{req.UserID}, 0); err != nil {
 		return nil, err
 	}
@@ -42,8 +34,5 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.Cl
 	if err := m.MsgDatabase.CleanUpUserMsg(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	//if err := m.MsgDatabase.DelUserAllSeq(ctx, req.UserID); err != nil {
-	//	return nil, err
-	//}
 	return resp, nil
 }

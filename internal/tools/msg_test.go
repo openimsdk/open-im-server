@@ -1,4 +1,4 @@
-package task
+package tools
 
 import (
 	"OpenIM/pkg/common/constant"
@@ -16,12 +16,7 @@ import (
 	"time"
 )
 
-var (
-	redisClient *redis.Client
-	mongoClient *mongo.Collection
-)
-
-func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *mongo2.UserChat {
+func GenUserChat(startSeq, stopSeq, delSeq, index int64, userID string) *mongo2.UserChat {
 	chat := &mongo2.UserChat{UID: userID + strconv.Itoa(int(index))}
 	for i := startSeq; i <= stopSeq; i++ {
 		msg := sdkws.MsgData{
@@ -36,8 +31,8 @@ func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *mongo2
 			SessionType:      1,
 			MsgFrom:          100,
 			ContentType:      101,
-			Content:          []byte("testFaceURL"),
-			Seq:              uint32(i),
+			Content:          []byte("testFaceURL.com"),
+			Seq:              i,
 			SendTime:         time.Now().Unix(),
 			CreateTime:       time.Now().Unix(),
 			Status:           1,
@@ -89,15 +84,4 @@ func TestDeleteUserMsgsAndSetMinSeq(t *testing.T) {
 	if err != nil {
 		t.Error("err is not nil", testUID1, err.Error())
 	}
-	// testWorkingGroupIDList := []string{"test_del_id1", "test_del_id2", "test_del_id3", "test_del_id4", "test_del_id5"}
-	// for _, groupID := range testWorkingGroupIDList {
-	// 	operationID = groupID + "-" + operationID
-	// 	log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "userIDList:", testUserIDList)
-	// 	if err := DeleteUserSuperGroupMsgsAndSetMinSeq(operationID, groupID, testUserIDList); err != nil {
-	// 		t.Error("checkMaxSeqWithMongo failed", groupID)
-	// 	}
-	// 	if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
-	// 		t.Error("checkMaxSeqWithMongo failed", groupID)
-	// 	}
-	// }
 }

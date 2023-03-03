@@ -7,6 +7,8 @@
 package kafka
 
 import (
+	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/tracelog"
 	"context"
 	"github.com/Shopify/sarama"
 )
@@ -39,6 +41,19 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 		topics,
 	}
 }
+
+func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) context.Context {
+	ctx := context.Background()
+	var operationID string
+	for _, v := range cMsg.Headers {
+		if string(v.Key) == constant.OperationID {
+			operationID = string(v.Value)
+		}
+	}
+	tracelog.SetOperationID(ctx, operationID)
+	return ctx
+}
+
 func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {
 	ctx := context.Background()
 	for {

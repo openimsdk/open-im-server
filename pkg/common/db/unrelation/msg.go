@@ -18,13 +18,12 @@ var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
 var ErrMsgNotFound = errors.New("msg not found")
 
 type MsgMongoDriver struct {
-	mgoDB         *mongo.Database
 	MsgCollection *mongo.Collection
 	msg           table.MsgDocModel
 }
 
-func NewMsgMongoDriver(mgoDB *mongo.Database) *MsgMongoDriver {
-	return &MsgMongoDriver{mgoDB: mgoDB, MsgCollection: mgoDB.Collection(table.MsgDocModel{}.TableName())}
+func NewMsgMongoDriver(database *mongo.Database) table.MsgDocModelInterface {
+	return &MsgMongoDriver{MsgCollection: database.Collection(table.MsgDocModel{}.TableName())}
 }
 
 func (m *MsgMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []table.MsgInfoModel) error {

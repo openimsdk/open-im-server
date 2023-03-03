@@ -3,7 +3,6 @@ package msg
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -33,27 +32,6 @@ type MessageRevoked struct {
 	SourceMessageSenderNickname string `json:"sourceMessageSenderNickname"`
 	SessionType                 int32  `json:"sessionType"`
 	Seq                         uint32 `json:"seq"`
-}
-type MsgCallBackReq struct {
-	SendID       string `json:"sendID"`
-	RecvID       string `json:"recvID"`
-	Content      string `json:"content"`
-	SendTime     int64  `json:"sendTime"`
-	MsgFrom      int32  `json:"msgFrom"`
-	ContentType  int32  `json:"contentType"`
-	SessionType  int32  `json:"sessionType"`
-	PlatformID   int32  `json:"senderPlatformID"`
-	MsgID        string `json:"msgID"`
-	IsOnlineOnly bool   `json:"isOnlineOnly"`
-}
-type MsgCallBackResp struct {
-	ErrCode         int32  `json:"errCode"`
-	ErrMsg          string `json:"errMsg"`
-	ResponseErrCode int32  `json:"responseErrCode"`
-	ResponseResult  struct {
-		ModifiedMsg string `json:"modifiedMsg"`
-		Ext         string `json:"ext"`
-	}
 }
 
 func (m *msgServer) userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
@@ -331,7 +309,7 @@ func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
 }
 
 func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, wg *sync.WaitGroup) error {
-	msgToMQGroup := msg.MsgDataToMQ{OperationID: tracelog.GetOperationID(ctx), MsgData: groupPB.MsgData}
+	msgToMQGroup := msg.MsgDataToMQ{MsgData: groupPB.MsgData}
 	tempOptions := make(map[string]bool, 1)
 	for k, v := range groupPB.MsgData.Options {
 		tempOptions[k] = v

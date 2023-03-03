@@ -22,16 +22,19 @@ import (
 
 type ConsumerHandler struct {
 	pushConsumerGroup *kfk.MConsumerGroup
-	pusher            Pusher
+	pusher            *Pusher
 }
 
-func (c *ConsumerHandler) Init() {
-	c.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
+func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
+	var consumerHandler ConsumerHandler
+	consumerHandler.pusher = pusher
+	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ms2pschat.Topic}, config.Config.Kafka.Ms2pschat.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
+	return &consumerHandler
 }
 
-func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
+func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	log.NewDebug("", "msg come from kafka  And push!!!", "msg", string(msg))
 	msgFromMQ := pbChat.PushMsgDataToMQ{}
 	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
@@ -40,14 +43,13 @@ func (c *ConsumerHandler) handleMs2PsChat(msg []byte) {
 	}
 	pbData := &pbPush.PushMsgReq{
 		MsgData:  msgFromMQ.MsgData,
-		SourceID: msgFromMQ.PushToUserID,
+		SourceID: msgFromMQ.SourceID,
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := utils.GetCurrentTimestampBySecond()
 	if nowSec-sec > 10 {
 		return
 	}
-	ctx := context.Background()
 	tracelog.SetOperationID(ctx, "")
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
@@ -66,7 +68,8 @@ func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		c.handleMs2PsChat(msg.Value)
+		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
+		c.handleMs2PsChat(ctx, msg.Value)
 		sess.MarkMessage(msg, "")
 	}
 	return nil

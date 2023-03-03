@@ -70,8 +70,8 @@ func (ws *WServer) run() {
 func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	operationID := ""
-	if len(query["operationID"]) != 0 {
-		operationID = query["operationID"][0]
+	if len(query[constant.OperationID]) != 0 {
+		operationID = query[constant.OperationID][0]
 	} else {
 		operationID = utils.OperationIDGenerator()
 	}

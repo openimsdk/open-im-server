@@ -27,7 +27,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &resp, !req.IsReact, false)
 		return resp, nil
 	}
-	isExists, err := m.MsgDatabase.JudgeMessageReactionEXISTS(ctx, req.ClientMsgID, req.SessionType)
+	isExists, err := m.MsgDatabase.JudgeMessageReactionExist(ctx, req.ClientMsgID, req.SessionType)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	if !isExists {
 		if !req.IsReact {
 			resp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
-			for k, v := range req.ReactionExtensionList {
+			for k, v := range req.ReactionExtensions {
 				err := m.MessageLocker.LockMessageTypeKey(ctx, req.ClientMsgID, k)
 				if err != nil {
 					return nil, err
@@ -60,10 +60,10 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				return nil, err
 			}
 			setValue := make(map[string]*sdkws.KeyValue)
-			for k, v := range req.ReactionExtensionList {
+			for k, v := range req.ReactionExtensions {
 
 				temp := new(sdkws.KeyValue)
-				if vv, ok := mongoValue.ReactionExtensionList[k]; ok {
+				if vv, ok := mongoValue.ReactionExtensions[k]; ok {
 					utils.CopyStructFields(temp, &vv)
 					if v.LatestUpdateTime != vv.LatestUpdateTime {
 						setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
@@ -158,14 +158,14 @@ func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errC
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 
-func (m *msgServer) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.GetMessagesReactionExtensionsReq) (resp *msg.GetMessagesReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
 	for _, messageValue := range req.MessageReactionKeyList {
 		var oneMessage msg.SingleMessageExtensionResult
 		oneMessage.ClientMsgID = messageValue.ClientMsgID
 
-		isExists, err := db.DB.JudgeMessageReactionEXISTS(messageValue.ClientMsgID, req.SessionType)
+		isExists, err := db.DB.JudgeMessageReactionExist(messageValue.ClientMsgID, req.SessionType)
 		if err != nil {
 			rResp.ErrCode = 100
 			rResp.ErrMsg = err.Error()
@@ -218,9 +218,9 @@ func (m *msgServer) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 	return
 }
 
-func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
+func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessagesReactionExtensionsReq) (resp *msg.DeleteMessagesReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
-	var rResp msg.DeleteMessageListReactionExtensionsResp
+	var rResp msg.DeleteMessagesReactionExtensionsResp
 	callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
 	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 		rResp.ErrCode = int32(callbackResp.ErrCode)
@@ -241,7 +241,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 		return &rResp, nil
 
 	}
-	for _, v := range callbackResp.ResultReactionExtensionList {
+	for _, v := range callbackResp.ResultReactionExtensions {
 		if v.ErrCode != 0 {
 			func(req *[]*sdkws.KeyValue, typeKey string) {
 				for i := 0; i < len(*req); i++ {
@@ -253,7 +253,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 			rResp.Result = append(rResp.Result, v)
 		}
 	}
-	isExists, err := db.DB.JudgeMessageReactionEXISTS(req.ClientMsgID, req.SessionType)
+	isExists, err := db.DB.JudgeMessageReactionExist(req.ClientMsgID, req.SessionType)
 	if err != nil {
 		rResp.ErrCode = 100
 		rResp.ErrMsg = err.Error()

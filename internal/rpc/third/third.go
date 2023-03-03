@@ -7,13 +7,13 @@ import (
 	"OpenIM/pkg/common/db/obj"
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/third"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	third.RegisterThirdServer(server, &thirdServer{
-		thirdDatabase: controller.NewThirdDatabase(cache.NewCache(rdb)),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewCacheModel(rdb)),
 		userCheck:     check.NewUserCheck(client),
 		s3dataBase:    controller.NewS3Database(o, relation.NewObjectHash(db), relation.NewObjectInfo(db), relation.NewObjectPut(db)),
 	})
@@ -41,28 +41,6 @@ type thirdServer struct {
 	thirdDatabase controller.ThirdDatabase
 	s3dataBase    controller.S3Database
 	userCheck     *check.UserCheck
-}
-
-func (t *thirdServer) GetSignalInvitationInfo(ctx context.Context, req *third.GetSignalInvitationInfoReq) (resp *third.GetSignalInvitationInfoResp, err error) {
-	signalReq, err := t.thirdDatabase.GetSignalInvitationInfoByClientMsgID(ctx, req.ClientMsgID)
-	if err != nil {
-		return nil, err
-	}
-	resp = &third.GetSignalInvitationInfoResp{}
-	resp.InvitationInfo = signalReq.Invitation
-	resp.OfflinePushInfo = signalReq.OfflinePushInfo
-	return resp, nil
-}
-
-func (t *thirdServer) GetSignalInvitationInfoStartApp(ctx context.Context, req *third.GetSignalInvitationInfoStartAppReq) (resp *third.GetSignalInvitationInfoStartAppResp, err error) {
-	signalReq, err := t.thirdDatabase.GetAvailableSignalInvitationInfo(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	resp = &third.GetSignalInvitationInfoStartAppResp{}
-	resp.InvitationInfo = signalReq.Invitation
-	resp.OfflinePushInfo = signalReq.OfflinePushInfo
-	return resp, nil
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

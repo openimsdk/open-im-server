@@ -2,6 +2,7 @@ package main
 
 import (
 	"OpenIM/internal/task"
+	"OpenIM/internal/tools"
 	"OpenIM/pkg/common/config"
 	"fmt"
 	"time"
@@ -12,7 +13,7 @@ func main() {
 	if err := config.InitConfig(); err != nil {
 		panic(err.Error())
 	}
-	if err := task.StartCronTask(); err != nil {
+	if err := tools.StartCronTask(); err != nil {
 		panic(err.Error())
 	}
 }

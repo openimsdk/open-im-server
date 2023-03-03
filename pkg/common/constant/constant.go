@@ -280,6 +280,9 @@ const (
 	Female = 2
 )
 
+const OperationID = "operationID"
+const OpUserID = "opUserID"
+
 const (
 	UnreliableNotification    = 1
 	ReliableNotificationNoMsg = 2

@@ -3,6 +3,8 @@ package controller
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/log"
@@ -10,6 +12,7 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
+	"gorm.io/gorm"
 	"sync"
 	"time"
 
@@ -55,7 +58,7 @@ type MsgDatabase interface {
 	// 设置用户最小seq 直接调用cache
 	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
 
-	JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
+	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
 
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 
@@ -75,22 +78,31 @@ type MsgDatabase interface {
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
 }
 
-func NewMsgDatabase(mgo *mongo.Client, rdb redis.UniversalClient) MsgDatabase {
-	return &msgDatabase{}
+func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.Model) MsgDatabase {
+	return &msgDatabase{
+		msgDocModel: msgDocModel,
+		cache:       cacheModel,
+	}
+}
+
+func InitMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) MsgDatabase {
+	cacheModel := cache.NewCacheModel(rdb)
+	msgDocModel := unrelation.NewMsgMongoDriver(database)
+	msgDatabase := NewMsgDatabase(msgDocModel, cacheModel)
+	return msgDatabase
 }
 
 type msgDatabase struct {
-	mgo       unRelationTb.MsgDocModelInterface
-	cache     cache.Cache
-	msg       unRelationTb.MsgDocModel
-	ExtendMsg unRelationTb.ExtendMsgSetModelInterface
-	rdb       redis.Client
+	msgDocModel    unRelationTb.MsgDocModelInterface
+	cache          cache.Model
+	msg            unRelationTb.MsgDocModel
+	extendMsgModel unRelationTb.ExtendMsgSetModelInterface
 }
 
-func (db *msgDatabase) reactionExtensionList(reactionExtensionList map[string]*sdkws.KeyValue) map[string]unRelationTb.KeyValueModel {
-	r := make(map[string]unRelationTb.KeyValueModel)
+func (db *msgDatabase) reactionExtensionList(reactionExtensionList map[string]*sdkws.KeyValue) map[string]*unRelationTb.KeyValueModel {
+	r := make(map[string]*unRelationTb.KeyValueModel)
 	for key, value := range reactionExtensionList {
-		r[key] = unRelationTb.KeyValueModel{
+		r[key] = &unRelationTb.KeyValueModel{
 			TypeKey:          value.TypeKey,
 			Value:            value.Value,
 			LatestUpdateTime: value.LatestUpdateTime,
@@ -99,8 +111,8 @@ func (db *msgDatabase) reactionExtensionList(reactionExtensionList map[string]*s
 	return r
 }
 
-func (db *msgDatabase) JudgeMessageReactionEXISTS(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
-	return db.cache.JudgeMessageReactionEXISTS(ctx, clientMsgID, sessionType)
+func (db *msgDatabase) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+	return db.cache.JudgeMessageReactionExist(ctx, clientMsgID, sessionType)
 }
 
 func (db *msgDatabase) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
@@ -123,12 +135,12 @@ func (db *msgDatabase) DeleteOneMessageKey(ctx context.Context, clientMsgID stri
 	return db.cache.DeleteOneMessageKey(ctx, clientMsgID, sessionType, subKey)
 }
 
-func (db *msgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
-	return db.ExtendMsg.InsertOrUpdateReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensionList))
+func (db *msgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensions map[string]*sdkws.KeyValue) error {
+	return db.extendMsgModel.InsertOrUpdateReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensions))
 }
 
 func (db *msgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error) {
-	extendMsgSet, err := db.ExtendMsg.GetExtendMsgSet(ctx, sourceID, sessionType, maxMsgUpdateTime)
+	extendMsgSet, err := db.extendMsgModel.GetExtendMsgSet(ctx, sourceID, sessionType, maxMsgUpdateTime)
 	if err != nil {
 		return nil, err
 	}
@@ -147,16 +159,16 @@ func (db *msgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessio
 		}
 	}
 	return &pbMsg.ExtendMsg{
-		ReactionExtensionList: reactionExtensionList,
-		ClientMsgID:           extendMsg.ClientMsgID,
-		MsgFirstModifyTime:    extendMsg.MsgFirstModifyTime,
-		AttachedInfo:          extendMsg.AttachedInfo,
-		Ex:                    extendMsg.Ex,
+		ReactionExtensions: reactionExtensionList,
+		ClientMsgID:        extendMsg.ClientMsgID,
+		MsgFirstModifyTime: extendMsg.MsgFirstModifyTime,
+		AttachedInfo:       extendMsg.AttachedInfo,
+		Ex:                 extendMsg.Ex,
 	}, nil
 }
 
-func (db *msgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error {
-	return db.ExtendMsg.DeleteReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensionList))
+func (db *msgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensions map[string]*sdkws.KeyValue) error {
+	return db.extendMsgModel.DeleteReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, db.reactionExtensionList(reactionExtensions))
 }
 
 func (db *msgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
@@ -235,13 +247,13 @@ func (db *msgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, 
 		//filter := bson.M{"uid": seqUid}
 		//log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo, "userID: ", userID)
 		//err := c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgsToMongo}}}).Err()
-		err = db.mgo.PushMsgsToDoc(ctx, docID, msgsToMongo)
+		err = db.msgDocModel.PushMsgsToDoc(ctx, docID, msgsToMongo)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				doc := &unRelationTb.MsgDocModel{}
 				doc.DocID = docID
 				doc.Msg = msgsToMongo
-				if err = db.mgo.Create(ctx, doc); err != nil {
+				if err = db.msgDocModel.Create(ctx, doc); err != nil {
 					prome.Inc(prome.MsgInsertMongoFailedCounter)
 					//log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 					return utils.Wrap(err, "")
@@ -261,7 +273,7 @@ func (db *msgDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, 
 		nextDoc.DocID = docIDNext
 		nextDoc.Msg = msgsToMongoNext
 		//log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext, "userID: ", userID)
-		if err = db.mgo.Create(ctx, nextDoc); err != nil {
+		if err = db.msgDocModel.Create(ctx, nextDoc); err != nil {
 			prome.Inc(prome.MsgInsertMongoFailedCounter)
 			//log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 			return utils.Wrap(err, "")
@@ -355,7 +367,7 @@ func (db *msgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, s
 		return nil, err
 	}
 	for i, v := range seqMsgs {
-		if err = db.mgo.UpdateMsgStatusByIndexInOneDoc(ctx, docID, v, indexes[i], constant.MsgDeleted); err != nil {
+		if err = db.msgDocModel.UpdateMsgStatusByIndexInOneDoc(ctx, docID, v, indexes[i], constant.MsgDeleted); err != nil {
 			return nil, err
 		}
 	}
@@ -363,7 +375,7 @@ func (db *msgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, s
 }
 
 func (db *msgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error) {
-	doc, err := db.mgo.FindOneByDocID(ctx, docID)
+	doc, err := db.msgDocModel.FindOneByDocID(ctx, docID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -394,7 +406,7 @@ func (db *msgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID s
 }
 
 func (db *msgDatabase) GetNewestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
-	msgInfo, err := db.mgo.GetNewestMsg(ctx, sourceID)
+	msgInfo, err := db.msgDocModel.GetNewestMsg(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +414,7 @@ func (db *msgDatabase) GetNewestMsg(ctx context.Context, sourceID string) (msgPb
 }
 
 func (db *msgDatabase) GetOldestMsg(ctx context.Context, sourceID string) (msgPb *sdkws.MsgData, err error) {
-	msgInfo, err := db.mgo.GetOldestMsg(ctx, sourceID)
+	msgInfo, err := db.msgDocModel.GetOldestMsg(ctx, sourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +435,7 @@ func (db *msgDatabase) getMsgBySeqs(ctx context.Context, sourceID string, seqs [
 	singleCount := 0
 	m := db.msg.GetDocIDSeqsMap(sourceID, seqs)
 	for docID, value := range m {
-		doc, err := db.mgo.FindOneByDocID(ctx, docID)
+		doc, err := db.msgDocModel.FindOneByDocID(ctx, docID)
 		if err != nil {
 			//log.NewError(operationID, "not find seqUid", seqUid, value, uid, seqList, err.Error())
 			continue
@@ -566,7 +578,7 @@ func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
 // recursion 删除list并且返回设置的最小seq
 func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
 	// find from oldest list
-	msgs, err := db.mgo.GetMsgsByIndex(ctx, sourceID, index)
+	msgs, err := db.msgDocModel.GetMsgsByIndex(ctx, sourceID, index)
 	if err != nil || msgs.DocID == "" {
 		if err != nil {
 			if err == unrelation.ErrMsgListNotExist {
@@ -576,7 +588,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 			}
 		}
 		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList)
-		err = db.mgo.Delete(ctx, delStruct.delDocIDs)
+		err = db.msgDocModel.Delete(ctx, delStruct.delDocIDs)
 		if err != nil {
 			return 0, err
 		}
@@ -611,11 +623,11 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 				msg.SendTime = 0
 				hasMarkDelFlag = true
 			} else {
-				if err := db.mgo.Delete(ctx, delStruct.delDocIDs); err != nil {
+				if err := db.msgDocModel.Delete(ctx, delStruct.delDocIDs); err != nil {
 					return 0, err
 				}
 				if hasMarkDelFlag {
-					if err := db.mgo.UpdateOneDoc(ctx, msgs); err != nil {
+					if err := db.msgDocModel.UpdateOneDoc(ctx, msgs); err != nil {
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
 				}
@@ -659,7 +671,7 @@ func (db *msgDatabase) GetSuperGroupMinMaxSeqInMongoAndCache(ctx context.Context
 }
 
 func (db *msgDatabase) GetMinMaxSeqMongo(ctx context.Context, sourceID string) (minSeqMongo, maxSeqMongo int64, err error) {
-	oldestMsgMongo, err := db.mgo.GetOldestMsg(ctx, sourceID)
+	oldestMsgMongo, err := db.msgDocModel.GetOldestMsg(ctx, sourceID)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -668,7 +680,7 @@ func (db *msgDatabase) GetMinMaxSeqMongo(ctx context.Context, sourceID string) (
 		return 0, 0, err
 	}
 	minSeqMongo = msgPb.Seq
-	newestMsgMongo, err := db.mgo.GetNewestMsg(ctx, sourceID)
+	newestMsgMongo, err := db.msgDocModel.GetNewestMsg(ctx, sourceID)
 	if err != nil {
 		return 0, 0, err
 	}

@@ -6,7 +6,6 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
 	"flag"
-	"fmt"
 	"sync"
 )
 
@@ -18,8 +17,8 @@ func main() {
 	wg.Add(1)
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.MessageTransferPrometheusPort[0], "MessageTransferPrometheusPort default listen port")
 	log.NewPrivateLog(constant.LogFileName)
-	msgTransfer := msgtransfer.NewMsgTransfer()
-	fmt.Println("start msg_transfer server ", ", OpenIM version: ", constant.CurrentVersion, "\n")
-	msgTransfer.Run(*prometheusPort)
+	if err := msgtransfer.StartTransfer(*prometheusPort); err != nil {
+		panic(err)
+	}
 	wg.Wait()
 }

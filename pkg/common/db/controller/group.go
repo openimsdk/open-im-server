@@ -3,13 +3,19 @@ package controller
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	"OpenIM/pkg/common/db/tx"
+	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
+	"github.com/dtm-labs/rockscache"
 	_ "github.com/dtm-labs/rockscache"
+	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 type GroupDatabase interface {
@@ -67,6 +73,21 @@ func NewGroupDatabase(
 		mongoDB:        superGroup,
 	}
 	return database
+}
+
+func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.Database) GroupDatabase {
+	return NewGroupDatabase(
+		relation.NewGroupDB(db),
+		relation.NewGroupMemberDB(db),
+		relation.NewGroupRequest(db),
+		tx.NewGorm(db),
+		tx.NewMongo(database.Client()),
+		unrelation.NewSuperGroupMongoDriver(database),
+		cache.NewGroupCacheRedis(rdb, relation.NewGroupDB(db), relation.NewGroupMemberDB(db), relation.NewGroupRequest(db), unrelation.NewSuperGroupMongoDriver(database), rockscache.Options{
+			StrongConsistency:      true,
+			RandomExpireAdjustment: 2.0,
+		}),
+	)
 }
 
 type groupDatabase struct {

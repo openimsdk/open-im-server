@@ -3,8 +3,8 @@ package check
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	discoveryRegistry "OpenIM/pkg/discoveryregistry"
-	sdkws "OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/proto/user"
 	"OpenIM/pkg/utils"
 	"context"
@@ -12,18 +12,18 @@ import (
 	"strings"
 )
 
-func NewUserCheck(zk discoveryRegistry.SvcDiscoveryRegistry) *UserCheck {
+func NewUserCheck(client discoveryregistry.SvcDiscoveryRegistry) *UserCheck {
 	return &UserCheck{
-		zk: zk,
+		client: client,
 	}
 }
 
 type UserCheck struct {
-	zk discoveryRegistry.SvcDiscoveryRegistry
+	client discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (u *UserCheck) getConn() (*grpc.ClientConn, error) {
-	return u.zk.GetConn(config.Config.RpcRegisterName.OpenImUserName)
+	return u.client.GetConn(config.Config.RpcRegisterName.OpenImUserName)
 }
 
 func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error) {
@@ -107,5 +107,8 @@ func (u *UserCheck) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) 
 	resp, err := user.NewUserClient(cc).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
 	})
+	if err != nil {
+		return 0, err
+	}
 	return resp.GlobalRecvMsgOpt, err
 }
