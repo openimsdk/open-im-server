@@ -7,12 +7,12 @@ type ApiResponse struct {
 	Data    any    `json:"data"`
 }
 
-func Success(data any) *ApiResponse {
+func apiSuccess(data any) *ApiResponse {
 	return &ApiResponse{
 		Data: data,
 	}
 }
 
-func Error(err error) *ApiResponse {
+func apiError(err error) *ApiResponse {
 	return &ApiResponse{ErrCode: 10000, ErrMsg: err.Error()}
 }
