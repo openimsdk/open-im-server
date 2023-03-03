@@ -628,7 +628,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if group.GroupType == constant.SuperGroup {
 			return nil, constant.ErrGroupTypeNotSupport.Wrap()
 		}
-		user, err := s.UserCheck.GetUsersInfo(ctx, tracelog.GetOpUserID(ctx))
+		user, err := s.UserCheck.GetUserInfo(ctx, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}

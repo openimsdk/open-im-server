@@ -213,7 +213,6 @@ service msg {
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   //清空某人所有消息
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
-
   //设置消息是否发送成功-针对api发送的消息
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   //获取消息发送状态

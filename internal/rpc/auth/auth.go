@@ -38,7 +38,7 @@ func Start(client discoveryRegistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
-	if _, err := s.userCheck.GetUsersInfo(ctx, req.UserID); err != nil {
+	if _, err := s.userCheck.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))

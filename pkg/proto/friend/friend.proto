@@ -139,7 +139,7 @@ message getFriendIDsReq {
 }
 
 message getFriendIDsResp {
-  repeated string = 1;
+  repeated string friendIDs = 1;
 }
 
 service friend{

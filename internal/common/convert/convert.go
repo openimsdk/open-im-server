@@ -58,7 +58,7 @@ func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) 
 func (db *DBFriend) Convert(ctx context.Context) (*sdk.FriendInfo, error) {
 	pbfriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
 	utils.CopyStructFields(pbfriend, db)
-	user, err := db.userCheck.GetUsersInfo(ctx, db.FriendUserID)
+	user, err := db.userCheck.GetUserInfo(ctx, db.FriendUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,14 +139,14 @@ func (pb *PBFriendRequest) Convert() (*relation.FriendRequestModel, error) {
 func (db *DBFriendRequest) Convert(ctx context.Context) (*sdk.FriendRequest, error) {
 	pbFriendRequest := &sdk.FriendRequest{}
 	utils.CopyStructFields(pbFriendRequest, db)
-	user, err := db.userCheck.GetUsersInfo(ctx, db.FromUserID)
+	user, err := db.userCheck.GetUserInfo(ctx, db.FromUserID)
 	if err != nil {
 		return nil, err
 	}
 	pbFriendRequest.FromNickname = user.Nickname
 	pbFriendRequest.FromFaceURL = user.FaceURL
 	pbFriendRequest.FromGender = user.Gender
-	user, err = db.userCheck.GetUsersInfo(ctx, db.ToUserID)
+	user, err = db.userCheck.GetUserInfo(ctx, db.ToUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (db *DBBlack) Convert(ctx context.Context) (*sdk.BlackInfo, error) {
 	pbBlack := &sdk.BlackInfo{}
 	utils.CopyStructFields(pbBlack, db)
 	pbBlack.CreateTime = db.CreateTime.Unix()
-	user, err := db.userCheck.GetUsersInfo(ctx, db.BlockUserID)
+	user, err := db.userCheck.GetUserInfo(ctx, db.BlockUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +344,7 @@ func (db *DBGroupMember) Convert(ctx context.Context) (*sdk.GroupMemberFullInfo,
 	dst := &sdk.GroupMemberFullInfo{}
 	utils.CopyStructFields(dst, db)
 
-	user, err := db.userCheck.GetUsersInfo(ctx, db.UserID)
+	user, err := db.userCheck.GetUserInfo(ctx, db.UserID)
 	if err != nil {
 		return nil, err
 	}
