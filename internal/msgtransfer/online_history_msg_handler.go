@@ -3,13 +3,11 @@ package msgtransfer
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/kafka"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
 	pbMsg "OpenIM/pkg/proto/msg"
-	pbPush "OpenIM/pkg/proto/push"
 	"OpenIM/pkg/statistics"
 	"OpenIM/pkg/utils"
 	"context"
@@ -57,10 +55,11 @@ type OnlineHistoryRedisConsumerHandler struct {
 	producerToMongo  *kafka.Producer
 
 	msgDatabase controller.MsgDatabase
-	cache       cache.Cache
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) Init() {
+func NewOnlineHistoryRedisConsumerHandler(database controller.MsgDatabase) *OnlineHistoryRedisConsumerHandler {
+	var och OnlineHistoryRedisConsumerHandler
+	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel
 	go och.MessagesDistributionHandle()
 	for i := 0; i < ChannelNum; i++ {
@@ -73,8 +72,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Init() {
 	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
-
 	statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	return &och
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
@@ -242,17 +241,17 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) sendMessageToPushMQ(ctx context.Context, message *pbMsg.MsgDataToMQ, pushToUserID string) {
-	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
-	pid, offset, err := och.producerToPush.SendMessage(ctx, &mqPushMsg, mqPushMsg.PushToUserID)
+	mqPushMsg := pbMsg.PushMsgDataToMQ{MsgData: message.MsgData, SourceID: pushToUserID}
+	pid, offset, err := och.producerToPush.SendMessage(ctx, &mqPushMsg, mqPushMsg.SourceID)
 	if err != nil {
-		log.Error(mqPushMsg.OperationID, "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+		log.Error(tracelog.GetOperationID(ctx), "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 	}
 	return
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) sendMessageToModifyMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ) {
 	if len(messages) > 0 {
-		pid, offset, err := och.producerToModify.SendMessage(ctx, &pbMsg.MsgDataToModifyByMQ{AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID)
+		pid, offset, err := och.producerToModify.SendMessage(ctx, &pbMsg.MsgDataToModifyByMQ{AggregationID: aggregationID, Messages: messages, TriggerID: triggerID}, aggregationID)
 		if err != nil {
 			log.Error(triggerID, "kafka send failed", "send data", len(messages), "pid", pid, "offset", offset, "err", err.Error(), "key", aggregationID)
 		}
@@ -261,7 +260,7 @@ func (och *OnlineHistoryRedisConsumerHandler) sendMessageToModifyMQ(ctx context.
 
 func (och *OnlineHistoryRedisConsumerHandler) SendMessageToMongoCH(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) {
 	if len(messages) > 0 {
-		pid, offset, err := och.producerToMongo.SendMessage(ctx, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID)
+		pid, offset, err := och.producerToMongo.SendMessage(ctx, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, Messages: messages, TriggerID: triggerID}, aggregationID)
 		if err != nil {
 			log.Error(triggerID, "kafka send failed", "send data", len(messages), "pid", pid, "offset", offset, "err", err.Error(), "key", aggregationID)
 		}

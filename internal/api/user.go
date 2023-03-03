@@ -27,6 +27,10 @@ func (u *User) getGroupClient() (user.UserClient, error) {
 	return user.NewUserClient(conn), nil
 }
 
+func (u *User) UserRegister(c *gin.Context) {
+	a2r.Call(user.UserClient.UserRegister, u.getGroupClient, c)
+}
+
 func (u *User) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, u.getGroupClient, c)
 }

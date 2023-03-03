@@ -16,7 +16,6 @@ import (
 	pbuser "OpenIM/pkg/proto/user"
 	"OpenIM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 
@@ -30,11 +29,11 @@ type userServer struct {
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	gormDB, err := relation.NewGormDB()
+	db, err := relation.NewGormDB()
 	if err != nil {
 		return err
 	}
-	if err := gormDB.AutoMigrate(&tablerelation.UserModel{}); err != nil {
+	if err := db.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
 	users := make([]*tablerelation.UserModel, 0)
@@ -45,14 +44,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
 	}
 	u := &userServer{
-		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(gormDB)),
+		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(db)),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,
 	}
 	pbuser.RegisterUserServer(server, u)
-	u.UserDatabase.InitOnce(context.Background(), users)
-	return nil
+	return u.UserDatabase.InitOnce(context.Background(), users)
 }
 
 // ok

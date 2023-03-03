@@ -34,6 +34,7 @@ func NewGinRouter() *gin.Engine {
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(nil)
+		userRouterGroup.POST("/user_register", u.UserRegister)
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)            //1
@@ -99,7 +100,8 @@ func NewGinRouter() *gin.Engine {
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuth(nil)
-		authRouterGroup.POST("/user_register", a.UserRegister) //1
+		u := NewUser(nil)
+		authRouterGroup.POST("/user_register", u.UserRegister) //1
 		authRouterGroup.POST("/user_token", a.UserToken)       //1
 		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
 		authRouterGroup.POST("/force_logout", a.ForceLogout)   //1

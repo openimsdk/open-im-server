@@ -12,8 +12,10 @@ import (
 	"OpenIM/pkg/common/db/controller"
 	kfk "OpenIM/pkg/common/kafka"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/tracelog"
 	pbMsg "OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/utils"
+	"context"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
@@ -21,26 +23,30 @@ import (
 
 type PersistentConsumerHandler struct {
 	persistentConsumerGroup *kfk.MConsumerGroup
-	chatLogInterface        controller.ChatLogDatabase
+	chatLogDatabase         controller.ChatLogDatabase
 }
 
-func (pc *PersistentConsumerHandler) Init() {
-	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
-		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
+func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *PersistentConsumerHandler {
+	return &PersistentConsumerHandler{
+		persistentConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
+			config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql),
+		chatLogDatabase: database,
+	}
 }
 
-func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
+func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
+	operationID := tracelog.GetOperationID(ctx)
 	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg), msgKey)
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.NewError(msgFromMQ.OperationID, "msg_transfer Unmarshal msg err", "msg", string(msg), "err", err.Error())
+		log.NewError(operationID, "msg_transfer Unmarshal msg err", "msg", string(msg), "err", err.Error())
 		return
 	}
-	log.Debug(msgFromMQ.OperationID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
+	log.Debug(operationID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
 	//Only process receiver data
@@ -58,23 +64,22 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			tag = true
 		}
 		if tag {
-			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
+			log.NewInfo(operationID, "msg_transfer msg persisting", string(msg))
 			if err = pc.chatLogInterface.CreateChatLog(msgFromMQ); err != nil {
-				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
+				log.NewError(operationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}
 		}
-
 	}
 }
 func (PersistentConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim) error {
+func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			pc.handleChatWs2Mysql(msg, string(msg.Key), sess)
+			ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg)
+			pc.handleChatWs2Mysql(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)
 		}

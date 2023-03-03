@@ -12,13 +12,13 @@ import (
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/discoveryregistry"
 	pbConversation "OpenIM/pkg/proto/conversation"
 	pbGroup "OpenIM/pkg/proto/group"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/openKeeper"
 	"github.com/dtm-labs/rockscache"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	db, err := relation.NewGormDB()
 	if err != nil {
 		return err
@@ -46,17 +46,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupDatabase: controller.NewGroupDatabase(
-			relation.NewGroupDB(db),
-			relation.NewGroupMemberDB(db),
-			relation.NewGroupRequest(db),
-			tx.NewGorm(db),
-			tx.NewMongo(mongo.GetClient()),
-			unrelation.NewSuperGroupMongoDriver(mongo.GetClient()),
-			cache.NewGroupCacheRedis(rdb, relation.NewGroupDB(db), relation.NewGroupMemberDB(db), relation.NewGroupRequest(db), unrelation.NewSuperGroupMongoDriver(mongo.GetClient()), rockscache.Options{
-				StrongConsistency: true,
-			}),
-		),
+		GroupDatabase:       controller.InitGroupDatabase(db, rdb, mongo.GetDatabase()),
 		UserCheck:           check.NewUserCheck(client),
 		ConversationChecker: check.NewConversationChecker(client),
 	})

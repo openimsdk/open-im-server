@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"OpenIM/pkg/common/constant"
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func CorsHandler() gin.HandlerFunc {
 
 func GinParseOperationID(c *gin.Context) {
 	if c.Request.Method == http.MethodPost {
-		operationID := c.Request.Header.Get("operationID")
+		operationID := c.Request.Header.Get(constant.OperationID)
 		if operationID == "" {
 			body, err := ioutil.ReadAll(c.Request.Body)
 			if err != nil {
@@ -50,9 +51,9 @@ func GinParseOperationID(c *gin.Context) {
 			}
 			c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
 			operationID = req.OperationID
-			c.Request.Header.Set("operationID", operationID)
+			c.Request.Header.Set(constant.OperationID, operationID)
 		}
-		c.Set("operationID", operationID)
+		c.Set(constant.OperationID, operationID)
 		c.Next()
 		return
 	}

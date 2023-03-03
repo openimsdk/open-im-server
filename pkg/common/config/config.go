@@ -194,17 +194,6 @@ type config struct {
 	}
 
 	Push struct {
-		Tpns struct {
-			Ios struct {
-				AccessID  string `yaml:"accessID"`
-				SecretKey string `yaml:"secretKey"`
-			}
-			Android struct {
-				AccessID  string `yaml:"accessID"`
-				SecretKey string `yaml:"secretKey"`
-			}
-			Enable bool `yaml:"enable"`
-		}
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
@@ -215,7 +204,7 @@ type config struct {
 		Getui struct {
 			PushUrl      string `yaml:"pushUrl"`
 			AppKey       string `yaml:"appKey"`
-			Enable       *bool  `yaml:"enable"`
+			Enable       bool   `yaml:"enable"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
 			ChannelID    string `yaml:"channelID"`
@@ -224,13 +213,6 @@ type config struct {
 		Fcm struct {
 			ServiceAccount string `yaml:"serviceAccount"`
 			Enable         bool   `yaml:"enable"`
-		}
-		Mob struct {
-			AppKey    string `yaml:"appKey"`
-			PushUrl   string `yaml:"pushUrl"`
-			Scheme    string `yaml:"scheme"`
-			AppSecret string `yaml:"appSecret"`
-			Enable    bool   `yaml:"enable"`
 		}
 	}
 	Manager struct {

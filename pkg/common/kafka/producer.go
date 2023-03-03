@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
 	log "OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
@@ -67,6 +68,7 @@ func (p *Producer) SendMessage(ctx context.Context, m proto.Message, key string)
 		return -1, -1, errors.New("key or value == 0")
 	}
 	kMsg.Metadata = ctx
+	kMsg.Headers = []sarama.RecordHeader{{Key: []byte(constant.OperationID), Value: []byte(operationID)}}
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	log.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg.Key.Length(), kMsg.Value.Length(), p.producer)
 	if err == nil {

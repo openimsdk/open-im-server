@@ -2,27 +2,54 @@ package msgtransfer
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/db/relation"
+	relationTb "OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/prome"
 	"fmt"
 )
 
 type MsgTransfer struct {
-	persistentCH   PersistentConsumerHandler         // 聊天记录持久化到mysql的消费者 订阅的topic: ws2ms_chat
-	historyCH      OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
-	historyMongoCH OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
-	modifyCH       ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
+	persistentCH   *PersistentConsumerHandler         // 聊天记录持久化到mysql的消费者 订阅的topic: ws2ms_chat
+	historyCH      *OnlineHistoryRedisConsumerHandler // 这个消费者聚合消息, 订阅的topic：ws2ms_chat, 修改通知发往msg_to_modify topic, 消息存入redis后Incr Redis, 再发消息到ms2pschat topic推送， 发消息到msg_to_mongo topic持久化
+	historyMongoCH *OnlineHistoryMongoConsumerHandler // mongoDB批量插入, 成功后删除redis中消息，以及处理删除通知消息删除的 订阅的topic: msg_to_mongo
+	modifyCH       *ModifyMsgConsumerHandler          // 负责消费修改消息通知的consumer, 订阅的topic: msg_to_modify
 }
 
-func NewMsgTransfer() *MsgTransfer {
-	msgTransfer := &MsgTransfer{}
-	msgTransfer.persistentCH.Init()
-	msgTransfer.historyCH.Init()
-	msgTransfer.historyMongoCH.Init()
-	msgTransfer.modifyCH.Init()
-	if config.Config.Prometheus.Enable {
-		msgTransfer.initPrometheus()
+func StartTransfer(prometheusPort int) error {
+	db, err := relation.NewGormDB()
+	if err != nil {
+		return err
 	}
-	return msgTransfer
+	if err := db.AutoMigrate(&relationTb.ChatLogModel{}); err != nil {
+		return err
+	}
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
+	cacheModel := cache.NewCacheModel(rdb)
+	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
+	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
+
+	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
+	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel)
+	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
+
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase)
+	msgTransfer.initPrometheus()
+	return msgTransfer.Start(prometheusPort)
+}
+
+func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase, extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase) *MsgTransfer {
+	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase),
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 }
 
 func (m *MsgTransfer) initPrometheus() {
@@ -36,19 +63,18 @@ func (m *MsgTransfer) initPrometheus() {
 	prome.NewMsgInsertMongoFailedCounter()
 }
 
-func (m *MsgTransfer) Run(promePort int) {
+func (m *MsgTransfer) Start(prometheusPort int) error {
 	if config.Config.ChatPersistenceMysql {
-		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&m.persistentCH)
+		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
 	} else {
 		fmt.Println("msg transfer not start mysql consumer")
 	}
-	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&m.historyCH)
-	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&m.historyMongoCH)
-	go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(&m.modifyCH)
-	go func() {
-		err := prome.StartPrometheusSrv(promePort)
-		if err != nil {
-			panic(err)
-		}
-	}()
+	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
+	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
+	go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(m.modifyCH)
+	err := prome.StartPrometheusSrv(prometheusPort)
+	if err != nil {
+		return err
+	}
+	return nil
 }

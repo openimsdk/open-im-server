@@ -19,7 +19,7 @@ func Start(client *openKeeper.ZkClient, server *grpc.Server) error {
 		return err
 	}
 	third.RegisterThirdServer(server, &thirdServer{
-		thirdDatabase: controller.NewThirdDatabase(cache.NewCache(rdb)),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewCacheModel(rdb)),
 		userCheck:     check.NewUserCheck(client),
 	})
 	return nil
@@ -32,28 +32,6 @@ type thirdServer struct {
 
 func (t *thirdServer) ApplySpace(ctx context.Context, req *third.ApplySpaceReq) (resp *third.ApplySpaceResp, err error) {
 	return
-}
-
-func (t *thirdServer) GetSignalInvitationInfo(ctx context.Context, req *third.GetSignalInvitationInfoReq) (resp *third.GetSignalInvitationInfoResp, err error) {
-	signalReq, err := t.thirdDatabase.GetSignalInvitationInfoByClientMsgID(ctx, req.ClientMsgID)
-	if err != nil {
-		return nil, err
-	}
-	resp = &third.GetSignalInvitationInfoResp{}
-	resp.InvitationInfo = signalReq.Invitation
-	resp.OfflinePushInfo = signalReq.OfflinePushInfo
-	return resp, nil
-}
-
-func (t *thirdServer) GetSignalInvitationInfoStartApp(ctx context.Context, req *third.GetSignalInvitationInfoStartAppReq) (resp *third.GetSignalInvitationInfoStartAppResp, err error) {
-	signalReq, err := t.thirdDatabase.GetAvailableSignalInvitationInfo(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	resp = &third.GetSignalInvitationInfoStartAppResp{}
-	resp.InvitationInfo = signalReq.Invitation
-	resp.OfflinePushInfo = signalReq.OfflinePushInfo
-	return resp, nil
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {

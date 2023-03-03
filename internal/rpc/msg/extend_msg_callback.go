@@ -18,9 +18,9 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 		OperationID:           tracelog.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackBeforeSetMessageReactionExtensionCommand,
 		SourceID:              setReq.SourceID,
-		OpUserID:              setReq.OpUserID,
+		OpUserID:              tracelog.GetOpUserID(ctx),
 		SessionType:           setReq.SessionType,
-		ReactionExtensionList: setReq.ReactionExtensionList,
+		ReactionExtensionList: setReq.ReactionExtensions,
 		ClientMsgID:           setReq.ClientMsgID,
 		IsReact:               setReq.IsReact,
 		IsExternalExtensions:  setReq.IsExternalExtensions,
@@ -34,7 +34,7 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 	return nil
 }
 
-func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReactionExtensionsReq) error {
+func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -44,7 +44,7 @@ func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReacti
 		SourceID:              setReq.SourceID,
 		OpUserID:              setReq.OpUserID,
 		SessionType:           setReq.SessionType,
-		ReactionExtensionList: setReq.ReactionExtensionList,
+		ReactionExtensionList: setReq.ReactionExtensions,
 		ClientMsgID:           setReq.ClientMsgID,
 		IsExternalExtensions:  setReq.IsExternalExtensions,
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
@@ -53,31 +53,31 @@ func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReacti
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
-func CallbackGetMessageListReactionExtensions(getReq *msg.GetMessageListReactionExtensionsReq) error {
+func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.GetMessagesReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
 	req := &cbapi.CallbackGetMessageListReactionExtReq{
-		OperationID:     getReq.OperationID,
+		OperationID:     tracelog.GetOperationID(ctx),
 		CallbackCommand: constant.CallbackGetMessageListReactionExtensionsCommand,
 		SourceID:        getReq.SourceID,
-		OpUserID:        getReq.OpUserID,
+		OpUserID:        tracelog.GetOperationID(ctx),
 		SessionType:     getReq.SessionType,
-		TypeKeyList:     getReq.TypeKeyList,
-		MessageKeyList:  getReq.MessageReactionKeyList,
+		TypeKeyList:     getReq.TypeKeys,
+		MessageKeyList:  getReq.MessageReactionKeys,
 	}
 	resp := &cbapi.CallbackGetMessageListReactionExtResp{}
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
-func CallbackAddMessageReactionExtensions(setReq *msg.ModifyMessageReactionExtensionsReq) error {
+func CallbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.ModifyMessageReactionExtensionsReq) error {
 	req := &cbapi.CallbackAddMessageReactionExtReq{
-		OperationID:           setReq.OperationID,
+		OperationID:           tracelog.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackAddMessageListReactionExtensionsCommand,
 		SourceID:              setReq.SourceID,
-		OpUserID:              setReq.OpUserID,
+		OpUserID:              tracelog.GetOperationID(ctx),
 		SessionType:           setReq.SessionType,
-		ReactionExtensionList: setReq.ReactionExtensionList,
+		ReactionExtensionList: setReq.ReactionExtensions,
 		ClientMsgID:           setReq.ClientMsgID,
 		IsReact:               setReq.IsReact,
 		IsExternalExtensions:  setReq.IsExternalExtensions,

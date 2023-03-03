@@ -27,10 +27,6 @@ func (a *Auth) getGroupClient() (auth.AuthClient, error) {
 	return auth.NewAuthClient(conn), nil
 }
 
-func (a *Auth) UserRegister(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserRegister, a.getGroupClient, c)
-}
-
 func (a *Auth) UserToken(c *gin.Context) {
 	a2r.Call(auth.AuthClient.UserToken, a.getGroupClient, c)
 }

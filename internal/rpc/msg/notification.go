@@ -2,6 +2,6 @@ package msg
 
 import "context"
 
-func DeleteMessageNotification(ctx context.Context, userID string, seqs []uint32) {
+func DeleteMessageNotification(ctx context.Context, userID string, seqs []int64) {
 	panic("todo")
 }

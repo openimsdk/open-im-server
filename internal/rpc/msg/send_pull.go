@@ -285,19 +285,19 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	return resp, nil
 }
 
-func (m *msgServer) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
-	resp := &sdkws.PullMessageBySeqListResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
+func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+	resp := &sdkws.PullMessageBySeqsResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
 	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
 	if err != nil {
 		return nil, err
 	}
 	resp.List = msgs
-	for userID, list := range req.GroupSeqList {
-		msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, userID, req.Seqs)
+	for groupID, list := range req.GroupSeqs {
+		msgs, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, groupID, list.Seqs)
 		if err != nil {
 			return nil, err
 		}
-		resp.GroupMsgDataList[userID] = &sdkws.MsgDataList{
+		resp.GroupMsgDataList[groupID] = &sdkws.MsgDataList{
 			MsgDataList: msgs,
 		}
 	}

@@ -12,10 +12,10 @@ type PushDatabase interface {
 }
 
 type pushDataBase struct {
-	cache cache.Cache
+	cache cache.Model
 }
 
-func NewPushDatabase(cache cache.Cache) PushDatabase {
+func NewPushDatabase(cache cache.Model) PushDatabase {
 	return &pushDataBase{cache: cache}
 }
 

@@ -56,25 +56,26 @@ func (m *Mongo) GetClient() *mongo.Client {
 	return m.db
 }
 
-func (m *Mongo) CreateMsgIndex() {
-	if err := m.createMongoIndex(unrelation.CChat, false, "uid"); err != nil {
-		fmt.Println(err.Error() + " index create failed " + unrelation.CChat + " uid, please create index by yourself in field uid")
-	}
+func (m *Mongo) GetDatabase() *mongo.Database {
+	return m.db.Database(config.Config.Mongo.DBDatabase)
 }
 
-func (m *Mongo) CreateSuperGroupIndex() {
+func (m *Mongo) CreateMsgIndex() error {
+	return m.createMongoIndex(unrelation.CChat, false, "uid")
+}
+
+func (m *Mongo) CreateSuperGroupIndex() error {
 	if err := m.createMongoIndex(unrelation.CSuperGroup, true, "group_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CSuperGroup + " group_id")
+		return err
 	}
 	if err := m.createMongoIndex(unrelation.CUserToSuperGroup, true, "user_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CUserToSuperGroup + "user_id")
+		return err
 	}
+	return nil
 }
 
-func (m *Mongo) CreateExtendMsgSetIndex() {
-	if err := m.createMongoIndex(unrelation.CExtendMsgSet, true, "-create_time", "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + unrelation.CExtendMsgSet + " -create_time, work_moment_id")
-	}
+func (m *Mongo) CreateExtendMsgSetIndex() error {
+	return m.createMongoIndex(unrelation.CExtendMsgSet, true, "-create_time", "work_moment_id")
 }
 
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
@@ -106,27 +107,4 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 		return utils.Wrap(err, result)
 	}
 	return nil
-}
-
-func MongoTransaction(ctx context.Context, mgo *mongo.Client, fn func(ctx mongo.SessionContext) error) error {
-	sess, err := mgo.StartSession()
-	if err != nil {
-		return err
-	}
-	sCtx := mongo.NewSessionContext(ctx, sess)
-	defer sess.EndSession(sCtx)
-	if err := fn(sCtx); err != nil {
-		_ = sess.AbortTransaction(sCtx)
-		return err
-	}
-	return utils.Wrap(sess.CommitTransaction(sCtx), "")
-}
-
-func getTxCtx(ctx context.Context, tx []any) context.Context {
-	if len(tx) > 0 {
-		if ctx, ok := tx[0].(mongo.SessionContext); ok {
-			return ctx
-		}
-	}
-	return ctx
 }

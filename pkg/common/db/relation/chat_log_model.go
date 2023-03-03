@@ -17,7 +17,7 @@ type ChatLogGorm struct {
 	DB *gorm.DB
 }
 
-func NewChatLogGorm(db *gorm.DB) *ChatLogGorm {
+func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
 	return &ChatLogGorm{DB: db}
 }
 

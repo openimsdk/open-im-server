@@ -28,7 +28,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
 	}
-	if opts := md.Get("operationID"); len(opts) != 1 || opts[0] == "" {
+	if opts := md.Get(constant.OperationID); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "operationID error").Err()
 	} else {
 		operationID = opts[0]
@@ -71,7 +71,7 @@ func RpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	//if cc == nil {
 	//	return utils.Wrap(constant.ErrRpcConn, "")
 	//}
-	operationID, ok := ctx.Value("operationID").(string)
+	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
 		return utils.Wrap(constant.ErrArgs, "ctx missing operationID")
 	}
@@ -79,6 +79,6 @@ func RpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if !ok {
 		return utils.Wrap(constant.ErrArgs, "ctx missing opUserID")
 	}
-	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
+	md := metadata.Pairs(constant.OperationID, operationID, "opUserID", opUserID)
 	return invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 }
