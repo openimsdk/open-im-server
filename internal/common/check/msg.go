@@ -39,12 +39,12 @@ func (m *MsgCheck) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinS
 	return resp, err
 }
 
-func (m *MsgCheck) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqListReq) (*sdkws.PullMessageBySeqListResp, error) {
+func (m *MsgCheck) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	cc, err := m.getConn()
 	if err != nil {
 		return nil, err
 	}
-	resp, err := msg.NewMsgClient(cc).PullMessageBySeqList(ctx, req)
+	resp, err := msg.NewMsgClient(cc).PullMessageBySeqs(ctx, req)
 	return resp, err
 }
 

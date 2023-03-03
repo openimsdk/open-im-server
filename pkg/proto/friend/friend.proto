@@ -134,6 +134,14 @@ message getPaginationFriendsApplyFromResp{
   int32 total = 2;
 }
 
+message getFriendIDsReq {
+  string userID = 1;
+}
+
+message getFriendIDsResp {
+  repeated string = 1;
+}
+
 service friend{
   //申请加好友
   rpc applyToAddFriend(applyToAddFriendReq) returns(applyToAddFriendResp);
@@ -163,9 +171,6 @@ service friend{
   rpc getDesignatedFriends(getDesignatedFriendsReq) returns(getDesignatedFriendsResp);
   //获取指定好友信息 有id不存在也返回错误
   rpc getPaginationFriends(getPaginationFriendsReq) returns (getPaginationFriendsResp);
-
-
-
-
-
+  // 获取好友ID列表
+  rpc getFriendIDs(getFriendIDsReq) returns (getFriendIDsResp);
 }
