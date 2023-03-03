@@ -15,7 +15,6 @@ import (
 	pbfriend "OpenIM/pkg/proto/friend"
 	"OpenIM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 )
 

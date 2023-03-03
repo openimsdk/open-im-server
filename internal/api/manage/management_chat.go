@@ -7,6 +7,7 @@
 package manage
 
 import (
+	"OpenIM/internal/apiresp"
 	api "OpenIM/pkg/apistruct"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
@@ -16,6 +17,7 @@ import (
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -122,6 +124,10 @@ func init() {
 // @Failure 400 {object} api.ManagementSendMsgResp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/manage_send_msg [post]
 func ManagementSendMsg(c *gin.Context) {
+
+	apiresp.GinError(c, errors.New("todo"))
+	apiresp.GinSuccess(c, nil)
+
 	var data interface{}
 	params := api.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {

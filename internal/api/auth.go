@@ -28,7 +28,7 @@ func (o *Auth) client() (auth.AuthClient, error) {
 }
 
 func (o *Auth) UserRegister(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserRegister, o.client, c)
+	//a2r.Call(auth.AuthClient.UserRegister, o.client, c) // todo
 }
 
 func (o *Auth) UserToken(c *gin.Context) {

@@ -19,7 +19,7 @@ func NewMinioInterface() (Interface, error) {
 	//	Creds:  credentials.NewStaticV4("minioadmin", "minioadmin", ""),
 	//	Secure: false,
 	//})
-
+	// todo 初始化连接和桶
 	return &minioImpl{}, nil
 }
 

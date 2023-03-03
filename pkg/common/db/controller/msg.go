@@ -3,8 +3,6 @@ package controller
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/log"
@@ -12,7 +10,6 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
-	"gorm.io/gorm"
 	"sync"
 	"time"
 
