@@ -43,13 +43,14 @@ func (o *User) GetUsersPublicInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
 }
 
-//func (u *User) GetAllUsersUid(c *gin.Context) {
-//	a2r.Call(user.UserClient.GetAllUsersUid, u.client, c)
-//}
+func (o *User) GetAllUsersID(c *gin.Context) {
+	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
+}
+
 //
-//func (u *User) AccountCheck(c *gin.Context) {
-//	a2r.Call(user.UserClient.AccountCheck, u.client, c)
-//}
+func (u *User) AccountCheck(c *gin.Context) {
+	a2r.Call(user.UserClient.AccountCheck, u.client, c)
+}
 
 func (o *User) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, o.client, c)

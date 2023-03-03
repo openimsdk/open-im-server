@@ -59,7 +59,6 @@ type ManagementSendMsgReq struct {
 }
 
 type ManagementSendMsgResp struct {
-	CommResp
 	ResultList sdkws.UserSendMsgResp `json:"data"`
 }
 

@@ -39,7 +39,7 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo) //1
-		//userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) // todo
+		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
 		//userRouterGroup.POST("/account_check", manage.AccountCheck)       // todo
 		userRouterGroup.POST("/get_users", u.GetUsers)
 	}
@@ -118,17 +118,19 @@ func NewGinRouter() *gin.Engine {
 	////Message
 	chatGroup := r.Group("/msg")
 	{
-		chatGroup.POST("/newest_seq", msg.GetSeq)
-		chatGroup.POST("/send_msg", msg.SendMsg)
-		chatGroup.POST("/pull_msg_by_seq", msg.PullMsgBySeqList)
-		chatGroup.POST("/del_msg", msg.DelMsg)
-		chatGroup.POST("/del_super_group_msg", msg.DelSuperGroupMsg)
-		chatGroup.POST("/clear_msg", msg.ClearMsg)
-		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
-		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
-		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
-		chatGroup.POST("/set_msg_min_seq", msg.SetMsgMinSeq)
+		m := NewMsg(zk)
+		chatGroup.POST("/newest_seq", m.GetSeq)
+		chatGroup.POST("/send_msg", m.SendMsg)
+		chatGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
+		chatGroup.POST("/del_msg", m.DelMsg)
+		chatGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)
+		chatGroup.POST("/clear_msg", m.ClearMsg)
 
+		chatGroup.POST("/manage_send_msg", m.ManagementSendMsg)
+		chatGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
+		chatGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
+		chatGroup.POST("/get_users_online_status", m.GetUsersOnlineStatus)
+		chatGroup.POST("/account_check", m.AccountCheck)
 		//chatGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
 		//chatGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
 		//chatGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
