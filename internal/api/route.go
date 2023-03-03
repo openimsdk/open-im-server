@@ -1,8 +1,6 @@
 package api
 
 import (
-	"OpenIM/internal/api/manage"
-	"OpenIM/internal/api/msg"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
