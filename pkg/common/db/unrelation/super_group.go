@@ -1,14 +1,12 @@
 package unrelation
 
 import (
-	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/table/unrelation"
 	"OpenIM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
 )
 
 func NewSuperGroupMongoDriver(database *mongo.Database) unrelation.SuperGroupModelInterface {
@@ -75,6 +73,7 @@ func (s *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID
 			return utils.Wrap(err, "transaction failed")
 		}
 	}
+	return nil
 }
 
 func (s *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDs []string) error {

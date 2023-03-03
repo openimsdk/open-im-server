@@ -75,12 +75,12 @@ type ModifyMessageReactionExtensionsResp struct {
 	} `json:"data"`
 }
 
-type OperateMessageListReactionExtensionsReq struct {
-	OperationID            string                                                        `json:"operationID" binding:"required"`
-	SourceID               string                                                        `json:"sourceID"  binding:"required"`
-	SessionType            string                                                        `json:"sessionType" binding:"required"`
-	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
-}
+//type OperateMessageListReactionExtensionsReq struct {
+//	OperationID            string                                                        `json:"operationID" binding:"required"`
+//	SourceID               string                                                        `json:"sourceID"  binding:"required"`
+//	SessionType            string                                                        `json:"sessionType" binding:"required"`
+//	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
+//}
 
 type OperateMessageListReactionExtensionsResp struct {
 	CommResp
@@ -94,7 +94,7 @@ type SetMessageReactionExtensionsCallbackReq ModifyMessageReactionExtensionsReq
 
 type SetMessageReactionExtensionsCallbackResp ModifyMessageReactionExtensionsResp
 
-type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
+//type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
 
 type GetMessageListReactionExtensionsResp struct {
 	CommResp
