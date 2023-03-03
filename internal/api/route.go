@@ -40,7 +40,7 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo) //1
 		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
-		//userRouterGroup.POST("/account_check", manage.AccountCheck)       // todo
+		userRouterGroup.POST("/account_check", u.AccountCheck)        // todo
 		userRouterGroup.POST("/get_users", u.GetUsers)
 	}
 	////friend routing group
