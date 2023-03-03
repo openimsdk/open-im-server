@@ -103,11 +103,11 @@ type CallbackDeleteMessageReactionExtResp struct {
 type CallbackGetMessageListReactionExtReq struct {
 	OperationID     string `json:"operationID"`
 	CallbackCommand `json:"callbackCommand"`
-	SourceID        string                                                        `json:"sourceID"`
-	OpUserID        string                                                        `json:"opUserID"`
-	SessionType     int32                                                         `json:"sessionType"`
-	TypeKeyList     []string                                                      `json:"typeKeyList"`
-	MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
+	SourceID        string   `json:"sourceID"`
+	OpUserID        string   `json:"opUserID"`
+	SessionType     int32    `json:"sessionType"`
+	TypeKeyList     []string `json:"typeKeyList"`
+	//MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
 }
 
 type CallbackGetMessageListReactionExtResp struct {
