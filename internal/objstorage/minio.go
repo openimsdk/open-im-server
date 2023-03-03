@@ -95,7 +95,7 @@ func (m *minioImpl) GetObjectInfo(ctx context.Context, args *BucketFile) (*Objec
 	}, nil
 }
 
-func (m *minioImpl) CopyObjetInfo(ctx context.Context, src *BucketFile, dst *BucketFile) error {
+func (m *minioImpl) CopyObjectInfo(ctx context.Context, src *BucketFile, dst *BucketFile) error {
 	destination, err := minio.NewDestinationInfo(dst.Bucket, dst.Name, nil, nil)
 	if err != nil {
 		return err
@@ -103,15 +103,15 @@ func (m *minioImpl) CopyObjetInfo(ctx context.Context, src *BucketFile, dst *Buc
 	return m.client.CopyObject(destination, minio.NewSourceInfo(src.Bucket, src.Name, nil))
 }
 
-func (m *minioImpl) DeleteObjetInfo(ctx context.Context, info *BucketFile) error {
+func (m *minioImpl) DeleteObjectInfo(ctx context.Context, info *BucketFile) error {
 	return m.client.RemoveObject(info.Bucket, info.Name)
 }
 
-func (m *minioImpl) MoveObjetInfo(ctx context.Context, src *BucketFile, dst *BucketFile) error {
-	if err := m.CopyObjetInfo(ctx, src, dst); err != nil {
+func (m *minioImpl) MoveObjectInfo(ctx context.Context, src *BucketFile, dst *BucketFile) error {
+	if err := m.CopyObjectInfo(ctx, src, dst); err != nil {
 		return err
 	}
-	return m.DeleteObjetInfo(ctx, src)
+	return m.DeleteObjectInfo(ctx, src)
 }
 
 func (m *minioImpl) MergeObjectInfo(ctx context.Context, src []BucketFile, dst *BucketFile) error {
@@ -119,7 +119,7 @@ func (m *minioImpl) MergeObjectInfo(ctx context.Context, src []BucketFile, dst *
 	case 0:
 		return errors.New("src empty")
 	case 1:
-		return m.CopyObjetInfo(ctx, &src[0], dst)
+		return m.CopyObjectInfo(ctx, &src[0], dst)
 	}
 	destination, err := minio.NewDestinationInfo(dst.Bucket, dst.Name, nil, nil)
 	if err != nil {

@@ -38,12 +38,7 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/user_register", u.UserRegister)
 		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)            //1
-		userRouterGroup.POST("/get_self_user_info", u.GetSelfUserInfo)           //1
-		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus) //1
-		userRouterGroup.POST("/get_users_info_from_cache", u.GetUsersInfoFromCache)
-		userRouterGroup.POST("/get_user_friend_from_cache", u.GetFriendIDListFromCache)
-		userRouterGroup.POST("/get_black_list_from_cache", u.GetBlackIDListFromCache)
+		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo) //1
 		//userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) // todo
 		//userRouterGroup.POST("/account_check", manage.AccountCheck)       // todo
 		userRouterGroup.POST("/get_users", u.GetUsers)
@@ -111,7 +106,6 @@ func NewGinRouter() *gin.Engine {
 	thirdGroup := r.Group("/third")
 	{
 		t := NewThird(zk)
-
 		thirdGroup.POST("/get_rtc_invitation_info", t.GetSignalInvitationInfo)
 		thirdGroup.POST("/get_rtc_invitation_start_app", t.GetSignalInvitationInfoStartApp)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)

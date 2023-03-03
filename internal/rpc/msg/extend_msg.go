@@ -158,7 +158,7 @@ func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errC
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 
-func (m *msgServer) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.GetMessagesReactionExtensionsReq) (resp *msg.GetMessagesReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
 	for _, messageValue := range req.MessageReactionKeyList {
@@ -218,7 +218,7 @@ func (m *msgServer) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 	return
 }
 
-func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
+func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessagesReactionExtensionsReq) (resp *msg.DeleteMessagesReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	var rResp msg.DeleteMessagesReactionExtensionsResp
 	callbackResp := notification.callbackDeleteMessageReactionExtensions(req)

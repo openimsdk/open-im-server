@@ -5,8 +5,6 @@ import (
 	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/localcache"
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
@@ -54,6 +52,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		GroupLocalCache:   localcache.NewGroupLocalCache(client),
 		black:             check.NewBlackChecker(client),
 		friend:            check.NewFriendChecker(client),
+		MessageLocker:     NewLockerMessage(cacheModel),
 	}
 	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)

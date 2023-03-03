@@ -7,17 +7,9 @@ require (
 	github.com/OpenIMSDK/openKeeper v0.0.1
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
-	github.com/alibabacloud-go/darabonba-openapi v0.1.11
-	github.com/alibabacloud-go/sts-20150401 v1.1.0
-	github.com/alibabacloud-go/tea v1.1.17
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/aws/aws-sdk-go-v2 v1.16.7
-	github.com/aws/aws-sdk-go-v2/config v1.15.14
-	github.com/aws/aws-sdk-go-v2/credentials v1.12.9
-	github.com/aws/aws-sdk-go-v2/service/sts v1.16.9
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dtm-labs/rockscache v0.0.11
-	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-redis/redis/v8 v8.11.5
@@ -56,6 +48,7 @@ require (
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect

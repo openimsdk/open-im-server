@@ -27,6 +27,10 @@ func (o *User) client() (user.UserClient, error) {
 	return user.NewUserClient(conn), nil
 }
 
+func (o *User) UserRegister(c *gin.Context) {
+	a2r.Call(user.UserClient.UserRegister, o.client, c)
+}
+
 func (o *User) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, o.client, c)
 }
@@ -37,26 +41,6 @@ func (o *User) SetGlobalRecvMessageOpt(c *gin.Context) {
 
 func (o *User) GetUsersPublicInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
-}
-
-func (o *User) GetSelfUserInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.GetSelfUserInfo, o.client, c)
-}
-
-func (o *User) GetUsersOnlineStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.GetUsersOnlineStatus, o.client, c)
-}
-
-func (o *User) GetUsersInfoFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetUsersInfoFromCache, o.client, c)
-}
-
-func (o *User) GetFriendIDListFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetFriendIDListFromCache, o.client, c)
-}
-
-func (o *User) GetBlackIDListFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetBlackIDListFromCache, o.client, c)
 }
 
 //func (u *User) GetAllUsersUid(c *gin.Context) {

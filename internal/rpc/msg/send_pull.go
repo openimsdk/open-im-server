@@ -52,10 +52,11 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 			return nil, err
 		}
 	}
-
-	resp.SendTime = msgToMQSingle.MsgData.SendTime
-	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
-	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
+	resp = &msg.SendMsgResp{
+		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
+		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
+		SendTime:    msgToMQSingle.MsgData.SendTime,
+	}
 	return resp, nil
 }
 
@@ -90,9 +91,11 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 		return nil, err
 	}
 	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
-	resp.SendTime = msgToMQSingle.MsgData.SendTime
-	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
-	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
+	resp = &msg.SendMsgResp{
+		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
+		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
+		SendTime:    msgToMQSingle.MsgData.SendTime,
+	}
 	return resp, nil
 }
 
@@ -265,9 +268,9 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	}
 	resp.MaxSeq = maxSeq
 	resp.MinSeq = minSeq
-	if len(req.GroupIDList) > 0 {
+	if len(req.GroupIDs) > 0 {
 		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
-		for _, groupID := range req.GroupIDList {
+		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil {
 				return nil, err
