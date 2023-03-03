@@ -14,5 +14,5 @@ func Success(data any) *ApiResponse {
 }
 
 func Error(err error) *ApiResponse {
-	return &ApiResponse{}
+	return &ApiResponse{ErrCode: 10000, ErrMsg: err.Error()}
 }
