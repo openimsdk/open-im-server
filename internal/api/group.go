@@ -19,106 +19,106 @@ type Group struct {
 	zk *openKeeper.ZkClient
 }
 
-func (g *Group) getGroupClient() (group.GroupClient, error) {
-	conn, err := g.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+func (o *Group) client() (group.GroupClient, error) {
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}
 	return group.NewGroupClient(conn), nil
 }
 
-func (g *Group) NewCreateGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.CreateGroup, g.getGroupClient, c)
+func (o *Group) NewCreateGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.CreateGroup, o.client, c)
 }
 
-func (g *Group) NewSetGroupInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.SetGroupInfo, g.getGroupClient, c)
+func (o *Group) NewSetGroupInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.SetGroupInfo, o.client, c)
 }
 
-func (g *Group) JoinGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.JoinGroup, g.getGroupClient, c)
+func (o *Group) JoinGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.JoinGroup, o.client, c)
 }
 
-func (g *Group) QuitGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.QuitGroup, g.getGroupClient, c)
+func (o *Group) QuitGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.QuitGroup, o.client, c)
 }
 
-func (g *Group) ApplicationGroupResponse(c *gin.Context) {
-	a2r.Call(group.GroupClient.GroupApplicationResponse, g.getGroupClient, c)
+func (o *Group) ApplicationGroupResponse(c *gin.Context) {
+	a2r.Call(group.GroupClient.GroupApplicationResponse, o.client, c)
 }
 
-func (g *Group) TransferGroupOwner(c *gin.Context) {
-	a2r.Call(group.GroupClient.TransferGroupOwner, g.getGroupClient, c)
+func (o *Group) TransferGroupOwner(c *gin.Context) {
+	a2r.Call(group.GroupClient.TransferGroupOwner, o.client, c)
 }
 
-func (g *Group) GetRecvGroupApplicationList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetGroupApplicationList, g.getGroupClient, c)
+func (o *Group) GetRecvGroupApplicationList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupApplicationList, o.client, c)
 }
 
-func (g *Group) GetUserReqGroupApplicationList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetUserReqApplicationList, g.getGroupClient, c)
+func (o *Group) GetUserReqGroupApplicationList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetUserReqApplicationList, o.client, c)
 }
 
-func (g *Group) GetGroupsInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetGroupsInfo, g.getGroupClient, c)
+func (o *Group) GetGroupsInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupsInfo, o.client, c)
 }
 
-func (g *Group) KickGroupMember(c *gin.Context) {
-	a2r.Call(group.GroupClient.KickGroupMember, g.getGroupClient, c)
+func (o *Group) KickGroupMember(c *gin.Context) {
+	a2r.Call(group.GroupClient.KickGroupMember, o.client, c)
 }
 
-func (g *Group) GetGroupMembersInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetGroupMembersInfo, g.getGroupClient, c)
+func (o *Group) GetGroupMembersInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.client, c)
 }
 
-func (g *Group) InviteUserToGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.InviteUserToGroup, g.getGroupClient, c)
+func (o *Group) InviteUserToGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.InviteUserToGroup, o.client, c)
 }
 
-func (g *Group) GetJoinedGroupList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetJoinedGroupList, g.getGroupClient, c)
+func (o *Group) GetJoinedGroupList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetJoinedGroupList, o.client, c)
 }
 
-func (g *Group) DismissGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.DismissGroup, g.getGroupClient, c)
+func (o *Group) DismissGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.DismissGroup, o.client, c)
 }
 
-func (g *Group) MuteGroupMember(c *gin.Context) {
-	a2r.Call(group.GroupClient.MuteGroupMember, g.getGroupClient, c)
+func (o *Group) MuteGroupMember(c *gin.Context) {
+	a2r.Call(group.GroupClient.MuteGroupMember, o.client, c)
 }
 
-func (g *Group) CancelMuteGroupMember(c *gin.Context) {
-	a2r.Call(group.GroupClient.CancelMuteGroupMember, g.getGroupClient, c)
+func (o *Group) CancelMuteGroupMember(c *gin.Context) {
+	a2r.Call(group.GroupClient.CancelMuteGroupMember, o.client, c)
 }
 
-func (g *Group) MuteGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.MuteGroup, g.getGroupClient, c)
+func (o *Group) MuteGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.MuteGroup, o.client, c)
 }
 
-func (g *Group) CancelMuteGroup(c *gin.Context) {
-	a2r.Call(group.GroupClient.CancelMuteGroup, g.getGroupClient, c)
+func (o *Group) CancelMuteGroup(c *gin.Context) {
+	a2r.Call(group.GroupClient.CancelMuteGroup, o.client, c)
 }
 
-func (g *Group) SetGroupMemberInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.SetGroupMemberInfo, g.getGroupClient, c)
+func (o *Group) SetGroupMemberInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.SetGroupMemberInfo, o.client, c)
 }
 
-func (g *Group) GetGroupAbstractInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetGroupAbstractInfo, g.getGroupClient, c)
+func (o *Group) GetGroupAbstractInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupAbstractInfo, o.client, c)
 }
 
 //func (g *Group) SetGroupMemberNickname(c *gin.Context) {
-//	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.getGroupClient, c)
+//	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.client, c)
 //}
 //
 //func (g *Group) GetGroupAllMemberList(c *gin.Context) {
-//	a2r.Call(group.GroupClient.GetGroupAllMember, g.getGroupClient, c)
+//	a2r.Call(group.GroupClient.GetGroupAllMember, g.client, c)
 //}
 
-func (g *Group) GetJoinedSuperGroupList(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetJoinedSuperGroupList, g.getGroupClient, c)
+func (o *Group) GetJoinedSuperGroupList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetJoinedSuperGroupList, o.client, c)
 }
 
-func (g *Group) GetSuperGroupsInfo(c *gin.Context) {
-	a2r.Call(group.GroupClient.GetSuperGroupsInfo, g.getGroupClient, c)
+func (o *Group) GetSuperGroupsInfo(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetSuperGroupsInfo, o.client, c)
 }

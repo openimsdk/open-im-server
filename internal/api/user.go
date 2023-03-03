@@ -19,58 +19,54 @@ type User struct {
 	zk *openKeeper.ZkClient
 }
 
-func (u *User) getGroupClient() (user.UserClient, error) {
-	conn, err := u.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+func (o *User) client() (user.UserClient, error) {
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}
 	return user.NewUserClient(conn), nil
 }
 
-func (u *User) UserRegister(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegister, u.getGroupClient, c)
+func (o *User) UpdateUserInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.UpdateUserInfo, o.client, c)
 }
 
-func (u *User) UpdateUserInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.UpdateUserInfo, u.getGroupClient, c)
+func (o *User) SetGlobalRecvMessageOpt(c *gin.Context) {
+	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, o.client, c)
 }
 
-func (u *User) SetGlobalRecvMessageOpt(c *gin.Context) {
-	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.getGroupClient, c)
+func (o *User) GetUsersPublicInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
 }
 
-func (u *User) GetUsersPublicInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, u.getGroupClient, c)
+func (o *User) GetSelfUserInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.GetSelfUserInfo, o.client, c)
 }
 
-func (u *User) GetSelfUserInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.GetSelfUserInfo, u.getGroupClient, c)
+func (o *User) GetUsersOnlineStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetUsersOnlineStatus, o.client, c)
 }
 
-func (u *User) GetUsersOnlineStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.GetUsersOnlineStatus, u.getGroupClient, c)
+func (o *User) GetUsersInfoFromCache(c *gin.Context) {
+	a2r.Call(user.UserClient.GetUsersInfoFromCache, o.client, c)
 }
 
-func (u *User) GetUsersInfoFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetUsersInfoFromCache, u.getGroupClient, c)
+func (o *User) GetFriendIDListFromCache(c *gin.Context) {
+	a2r.Call(user.UserClient.GetFriendIDListFromCache, o.client, c)
 }
 
-func (u *User) GetFriendIDListFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetFriendIDListFromCache, u.getGroupClient, c)
-}
-
-func (u *User) GetBlackIDListFromCache(c *gin.Context) {
-	a2r.Call(user.UserClient.GetBlackIDListFromCache, u.getGroupClient, c)
+func (o *User) GetBlackIDListFromCache(c *gin.Context) {
+	a2r.Call(user.UserClient.GetBlackIDListFromCache, o.client, c)
 }
 
 //func (u *User) GetAllUsersUid(c *gin.Context) {
-//	a2r.Call(user.UserClient.GetAllUsersUid, u.getGroupClient, c)
+//	a2r.Call(user.UserClient.GetAllUsersUid, u.client, c)
 //}
 //
 //func (u *User) AccountCheck(c *gin.Context) {
-//	a2r.Call(user.UserClient.AccountCheck, u.getGroupClient, c)
+//	a2r.Call(user.UserClient.AccountCheck, u.client, c)
 //}
 
-func (u *User) GetUsers(c *gin.Context) {
-	a2r.Call(user.UserClient.GetPaginationUsers, u.getGroupClient, c)
+func (o *User) GetUsers(c *gin.Context) {
+	a2r.Call(user.UserClient.GetPaginationUsers, o.client, c)
 }
