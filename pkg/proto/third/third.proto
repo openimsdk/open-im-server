@@ -3,28 +3,46 @@ import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 option go_package = "OpenIM/pkg/proto/third;third";
 package third;
 
-
-message ApplySpaceReq {
-  string name = 1; // 文件名字
-  int64 size = 2; // 大小
-  string hash = 3; // md5
-  uint32 purpose = 4; // 用途
-  string contentType = 5;
+message ApplyPutReq {
+  string name = 1;
+  int64 size = 2;
+  string hash = 3;
+  int64 fragmentSize = 4;
+  int64 cleanTime = 5;
 }
 
-message ApplySpaceResp {
-  string url = 1; // 不为空表示已存在
-  int64 size = 2; // 分片大小
-  repeated string put = 3;// put地址
-  string confirmID = 4; // 确认ID
+message ApplyPutResp {
+  string url = 1;
+  string putID = 2;
+  int64 fragmentSize = 3;
+//  int64 expirationTime = 4;
+  repeated string PutURLs = 5;
 }
 
-message ConfirmSpaceReq {
-  string confirmID = 1; // 确认ID
+message ConfirmPutReq {
+  string putID = 1;
 }
 
-message ConfirmSpaceResp {
-  string confirmID = 1;
+message ConfirmPutResp {
+  string url = 1;
+}
+
+message GetPutReq {
+  string putID = 1;
+}
+
+message GetPutFragment{
+  int64 size = 1;
+  string hash = 2;
+}
+
+message GetPutResp {
+  string name = 1;
+  int64 size = 2;
+  string hash = 3;
+  int64 fragmentSize = 4;
+  int64 cleanTime = 5;
+  repeated GetPutFragment fragments = 6;
 }
 
 message GetSignalInvitationInfoReq {
@@ -32,8 +50,8 @@ message GetSignalInvitationInfoReq {
 }
 
 message GetSignalInvitationInfoResp {
- sdkws.InvitationInfo invitationInfo = 1;
- sdkws.OfflinePushInfo offlinePushInfo = 2;
+  sdkws.InvitationInfo invitationInfo = 1;
+  sdkws.OfflinePushInfo offlinePushInfo = 2;
 }
 
 message GetSignalInvitationInfoStartAppReq {
@@ -41,15 +59,15 @@ message GetSignalInvitationInfoStartAppReq {
 }
 
 message GetSignalInvitationInfoStartAppResp {
- sdkws.InvitationInfo invitationInfo = 1;
- sdkws.OfflinePushInfo offlinePushInfo = 2;
+  sdkws.InvitationInfo invitationInfo = 1;
+  sdkws.OfflinePushInfo offlinePushInfo = 2;
 }
 
 message FcmUpdateTokenReq {
- int32 PlatformID = 1;
- string FcmToken = 2;
- string account = 3;
- int64 expireTime = 4;
+  int32 PlatformID = 1;
+  string FcmToken = 2;
+  string account = 3;
+  int64 expireTime = 4;
 }
 
 message FcmUpdateTokenResp {
@@ -64,7 +82,10 @@ message SetAppBadgeResp {
 }
 
 service third {
-  rpc ApplySpace(ApplySpaceReq) returns(ApplySpaceResp);
+  rpc ApplyPut(ApplyPutReq) returns(ApplyPutResp);
+  rpc GetPut(GetPutReq) returns(GetPutResp);
+  rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
+
   rpc GetSignalInvitationInfo(GetSignalInvitationInfoReq) returns(GetSignalInvitationInfoResp);
   rpc GetSignalInvitationInfoStartApp(GetSignalInvitationInfoStartAppReq) returns(GetSignalInvitationInfoStartAppResp);
   rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);

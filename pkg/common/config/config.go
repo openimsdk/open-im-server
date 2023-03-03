@@ -164,6 +164,7 @@ type config struct {
 		OpenImConversationName   string `yaml:"openImConversationName"`
 		OpenImCacheName          string `yaml:"openImCacheName"`
 		OpenImRtcName            string `yaml:"openImRtcName"`
+		OpenImThirdName          string `yaml:"openImThirdName"`
 	}
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`

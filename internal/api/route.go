@@ -3,7 +3,6 @@ package api
 import (
 	"OpenIM/internal/api/manage"
 	"OpenIM/internal/api/msg"
-	"OpenIM/internal/api/third"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/middleware"
@@ -106,20 +105,24 @@ func NewGinRouter() *gin.Engine {
 		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
 		authRouterGroup.POST("/force_logout", a.ForceLogout)   //1
 	}
+
+	/*
+
+	 */
+
 	////Third service
 	thirdGroup := r.Group("/third")
 	{
-		thirdGroup.POST("/tencent_cloud_storage_credential", third.TencentCloudStorageCredential)
-		thirdGroup.POST("/ali_oss_credential", third.AliOSSCredential)
-		thirdGroup.POST("/minio_storage_credential", third.MinioStorageCredential)
-		thirdGroup.POST("/minio_upload", third.MinioUploadFile)
-		thirdGroup.POST("/upload_update_app", third.UploadUpdateApp)
-		thirdGroup.POST("/get_download_url", third.GetDownloadURL)
-		thirdGroup.POST("/get_rtc_invitation_info", third.GetRTCInvitationInfo)
-		thirdGroup.POST("/get_rtc_invitation_start_app", third.GetRTCInvitationInfoStartApp)
-		thirdGroup.POST("/fcm_update_token", third.FcmUpdateToken)
-		thirdGroup.POST("/aws_storage_credential", third.AwsStorageCredential)
-		thirdGroup.POST("/set_app_badge", third.SetAppBadge)
+		t := NewThird(zk)
+
+		thirdGroup.POST("/get_rtc_invitation_info", t.GetSignalInvitationInfo)
+		thirdGroup.POST("/get_rtc_invitation_start_app", t.GetSignalInvitationInfoStartApp)
+		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
+		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
+
+		thirdGroup.POST("/apply_put", t.ApplyPut)
+		thirdGroup.POST("/get_put", t.GetPut)
+		thirdGroup.POST("/confirm_put", t.ConfirmPut)
 	}
 	////Message
 	chatGroup := r.Group("/msg")
