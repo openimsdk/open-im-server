@@ -7,8 +7,13 @@
 package push
 
 import (
+	"OpenIM/internal/push/offlinepush"
+	"OpenIM/internal/push/offlinepush/fcm"
+	"OpenIM/internal/push/offlinepush/getui"
+	"OpenIM/internal/push/offlinepush/jpush"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
 	"OpenIM/pkg/common/db/localcache"
 	"OpenIM/pkg/common/log"
@@ -26,13 +31,13 @@ import (
 type Pusher struct {
 	database               controller.PushDatabase
 	client                 discoveryregistry.SvcDiscoveryRegistry
-	offlinePusher          OfflinePusher
+	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
 	successCount           int
 }
 
-func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher OfflinePusher, database controller.PushDatabase,
+func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
 	return &Pusher{
 		database:               database,
@@ -41,6 +46,20 @@ func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher Offl
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
 	}
+}
+
+func NewOfflinePusher(cache cache.Model) offlinepush.OfflinePusher {
+	var offlinePusher offlinepush.OfflinePusher
+	if config.Config.Push.Getui.Enable {
+		offlinePusher = getui.NewClient(cache)
+	}
+	if config.Config.Push.Fcm.Enable {
+		offlinePusher = fcm.NewClient(cache)
+	}
+	if config.Config.Push.Jpns.Enable {
+		offlinePusher = jpush.NewClient()
+	}
+	return offlinePusher
 }
 
 func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgData) error {
@@ -196,8 +215,8 @@ func (p *Pusher) offlinePushMsg(ctx context.Context, sourceID string, msg *sdkws
 	return nil
 }
 
-func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) {
-	opts = &Opts{}
+func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts, err error) {
+	opts = &offlinepush.Opts{}
 	if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
 		req := &sdkws.SignalReq{}
 		if err := proto.Unmarshal(msg.Content, req); err != nil {
@@ -205,7 +224,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) 
 		}
 		switch req.Payload.(type) {
 		case *sdkws.SignalReq_Invite, *sdkws.SignalReq_InviteInGroup:
-			opts.Signal = &Signal{ClientMsgID: msg.ClientMsgID}
+			opts.Signal = &offlinepush.Signal{ClientMsgID: msg.ClientMsgID}
 		}
 	}
 	if msg.OfflinePushInfo != nil {
@@ -216,7 +235,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *Opts, err error) 
 	return opts, nil
 }
 
-func (p *Pusher) getOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *Opts, err error) {
+func (p *Pusher) getOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
 	if p.offlinePusher == nil {
 		err = errors.New("no offlinePusher is configured")
 		return

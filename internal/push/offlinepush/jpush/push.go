@@ -1,8 +1,8 @@
 package jpush
 
 import (
-	"OpenIM/internal/push"
-	"OpenIM/internal/push/jpush/body"
+	"OpenIM/internal/push/offlinepush"
+	"OpenIM/internal/push/offlinepush/jpush/body"
 	"OpenIM/pkg/common/config"
 	http2 "OpenIM/pkg/common/http"
 	"context"
@@ -31,7 +31,7 @@ func (j *JPush) getAuthorization(appKey string, masterSecret string) string {
 	return Authorization
 }
 
-func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *push.Opts) error {
+func (j *JPush) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	var pf body.Platform
 	pf.SetAll()
 	var au body.Audience

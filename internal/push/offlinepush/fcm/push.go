@@ -1,7 +1,7 @@
 package fcm
 
 import (
-	"OpenIM/internal/push"
+	"OpenIM/internal/push/offlinepush"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
@@ -42,7 +42,7 @@ func NewClient(cache cache.Model) *Fcm {
 	return &Fcm{fcmMsgCli: fcmMsgClient}
 }
 
-func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *push.Opts) error {
+func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	// accounts->registrationToken
 	allTokens := make(map[string][]string, 0)
 	for _, account := range userIDs {

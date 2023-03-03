@@ -1,7 +1,7 @@
 package getui
 
 import (
-	"OpenIM/internal/push"
+	"OpenIM/internal/push/offlinepush"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/cache"
 	http2 "OpenIM/pkg/common/http"
@@ -47,7 +47,7 @@ func NewClient(cache cache.Model) *Client {
 	return &Client{cache: cache, tokenExpireTime: tokenExpireTime, taskIDTTL: taskIDTTL}
 }
 
-func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *push.Opts) error {
+func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if err == redis.Nil {
@@ -150,7 +150,7 @@ func (g *Client) postReturn(url string, header map[string]string, input interfac
 	if err != nil {
 		return err
 	}
-	return output.parseError()
+	return parseError()
 }
 
 func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err error) {
