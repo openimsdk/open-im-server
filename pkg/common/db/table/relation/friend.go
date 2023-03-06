@@ -48,6 +48,6 @@ type FriendModelInterface interface {
 	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
 	// 获取好友UserID列表
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
-
+	GetFriendIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	NewTx(tx any) FriendModelInterface
 }

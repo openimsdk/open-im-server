@@ -223,7 +223,6 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) 
 
 // ok
 func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.GetPaginationFriendsReq) (resp *pbfriend.GetPaginationFriendsResp, err error) {
-	resp = &pbfriend.GetPaginationFriendsResp{}
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -231,10 +230,23 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.G
 	if err != nil {
 		return nil, err
 	}
+	resp = &pbfriend.GetPaginationFriendsResp{}
 	resp.FriendsInfo, err = (*convert.NewDBFriend(nil, s.RegisterCenter)).DB2PB(ctx, friends)
 	if err != nil {
 		return nil, err
 	}
 	resp.Total = int32(total)
+	return resp, nil
+}
+
+func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriendIDsReq) (resp *pbfriend.GetFriendIDsResp, err error) {
+	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	resp = &pbfriend.GetFriendIDsResp{}
+	resp.FriendIDs, err = s.FriendDatabase.GetFriendIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
