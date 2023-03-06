@@ -22,7 +22,7 @@ import (
 var _ context.Context // 解决goland编辑器bug
 
 func NewMsg(zk *openKeeper.ZkClient) *Msg {
-	return &Msg{zk: zk}
+	return &Msg{zk: zk, validate: validator.New()}
 }
 
 type Msg struct {
@@ -30,7 +30,7 @@ type Msg struct {
 	validate *validator.Validate
 }
 
-func () SetOptions(options map[string]bool, value bool) {
+func SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
@@ -103,9 +103,6 @@ func newUserSendMsgReq(params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 		}
 	}
 	return &pbData
-}
-func init() {
-	validate = validator.New()
 }
 
 func (o *Msg) client() (msg.MsgClient, error) {
@@ -197,7 +194,7 @@ func (o *Msg) ManagementSendMsg(c *gin.Context) {
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
 		apiresp.GinError(c, constant.ErrData)
 		return
-	} else if err := validate.Struct(data); err != nil {
+	} else if err := o.validate.Struct(data); err != nil {
 		apiresp.GinError(c, constant.ErrData)
 		return
 	}
