@@ -31,4 +31,6 @@ type ObjectPutModelInterface interface {
 	Create(ctx context.Context, m []*ObjectPutModel) error
 	Take(ctx context.Context, putID string) (*ObjectPutModel, error)
 	SetCompleted(ctx context.Context, putID string) error
+	FindExpirationPut(ctx context.Context, expirationTime time.Time, num int) ([]*ObjectPutModel, error)
+	DelPut(ctx context.Context, ids []string) error
 }

@@ -24,4 +24,5 @@ type ObjectInfoModelInterface interface {
 	NewTx(tx any) ObjectInfoModelInterface
 	SetObject(ctx context.Context, obj *ObjectInfoModel) error
 	Take(ctx context.Context, name string) (*ObjectInfoModel, error)
+	DeleteExpiration(ctx context.Context, expiration time.Time) error
 }

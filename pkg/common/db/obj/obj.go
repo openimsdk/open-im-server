@@ -47,7 +47,7 @@ type Interface interface {
 	GetObjectInfo(ctx context.Context, args *BucketObject) (*ObjectInfo, error)
 	// CopyObjet 复制对象
 	CopyObjet(ctx context.Context, src *BucketObject, dst *BucketObject) error
-	// DeleteObjet 删除对象
+	// DeleteObjet 删除对象(不存在返回nil)
 	DeleteObjet(ctx context.Context, info *BucketObject) error
 	// ComposeObject 合并对象
 	ComposeObject(ctx context.Context, src []BucketObject, dst *BucketObject) error

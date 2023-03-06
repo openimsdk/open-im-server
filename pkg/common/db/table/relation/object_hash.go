@@ -26,4 +26,5 @@ type ObjectHashModelInterface interface {
 	NewTx(tx any) ObjectHashModelInterface
 	Take(ctx context.Context, hash string, engine string) (*ObjectHashModel, error)
 	Create(ctx context.Context, h []*ObjectHashModel) error
+	DeleteNoCitation(ctx context.Context, engine string, num int) (list []*ObjectHashModel, err error)
 }
