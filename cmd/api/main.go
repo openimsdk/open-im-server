@@ -17,9 +17,9 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the server",
 	Run: func(cmd *cobra.Command, args []string) {
-		port, _ := cmd.Flags().GetInt("port")
-		configFolderPath, _ := cmd.Flags().GetString("config_folder_path")
-		fmt.Printf("Starting server on port %s with config file at %s\n", port, configFolderPath)
+		port, _ := cmd.Flags().GetInt(constant.FlagPort)
+		configFolderPath, _ := cmd.Flags().GetString(constant.FlagConf)
+		fmt.Printf("Starting server on port %d with config file at %s\n", port, configFolderPath)
 		if err := run(configFolderPath, port); err != nil {
 			panic(err.Error())
 		}
@@ -27,8 +27,8 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().IntP("port", "p", 10002, "Port to listen on")
-	startCmd.Flags().StringP("config_path", "c", "", "Path to config file folder")
+	startCmd.Flags().IntP(constant.FlagPort, "p", 10002, "Port to listen on")
+	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
 
 func run(configFolderPath string, port int) error {

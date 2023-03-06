@@ -327,3 +327,9 @@ const LogFileName = "OpenIM.log"
 const CurrentVersion = "v2.3.4-rc0"
 
 const LocalHost = "0.0.0.0"
+
+// flag parse
+const (
+	FlagPort = "port"
+	FlagConf = "config_folder_path"
+)
