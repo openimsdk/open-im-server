@@ -93,7 +93,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//} else {
 	//	log.Debug(req.OperationID, "redis handle secondly", req.String())
 	//
-	//	for k, v := range req.ReactionExtensionList {
+	//	for k, v := range req.Pb2Model {
 	//		err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 	//		if err != nil {
 	//			setKeyResultInfo(&resp, 100, err.Error(), req.ClientMsgID, k, v)
@@ -179,7 +179,7 @@ func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.
 	//			utils.JsonStringToStruct(v, temp)
 	//			keyMap[k] = temp
 	//		}
-	//		oneMessage.ReactionExtensionList = keyMap
+	//		oneMessage.Pb2Model = keyMap
 	//
 	//	} else {
 	//		mongoValue, err := db.DB.GetExtendMsg(req.SourceID, req.SessionType, messageValue.ClientMsgID, messageValue.MsgFirstModifyTime)
@@ -191,14 +191,14 @@ func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.
 	//		}
 	//		keyMap := make(map[string]*sdkws.KeyValue)
 	//
-	//		for k, v := range mongoValue.ReactionExtensionList {
+	//		for k, v := range mongoValue.Pb2Model {
 	//			temp := new(sdkws.KeyValue)
 	//			temp.TypeKey = v.TypeKey
 	//			temp.Value = v.Value
 	//			temp.LatestUpdateTime = v.LatestUpdateTime
 	//			keyMap[k] = temp
 	//		}
-	//		oneMessage.ReactionExtensionList = keyMap
+	//		oneMessage.Pb2Model = keyMap
 	//	}
 	//	rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
 	//}
@@ -218,7 +218,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
 	//	rResp.ErrCode = int32(callbackResp.ErrCode)
 	//	rResp.ErrMsg = callbackResp.ErrMsg
-	//	for _, value := range req.ReactionExtensionList {
+	//	for _, value := range req.Pb2Model {
 	//		temp := new(msg.KeyValueResp)
 	//		temp.KeyValue = value
 	//		temp.ErrMsg = callbackResp.ErrMsg
@@ -242,7 +242,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//					*req = append((*req)[:i], (*req)[i+1:]...)
 	//				}
 	//			}
-	//		}(&req.ReactionExtensionList, v.KeyValue.TypeKey)
+	//		}(&req.Pb2Model, v.KeyValue.TypeKey)
 	//		rResp.Result = append(rResp.Result, v)
 	//	}
 	//}
@@ -250,7 +250,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//if err != nil {
 	//	rResp.ErrCode = 100
 	//	rResp.ErrMsg = err.Error()
-	//	for _, value := range req.ReactionExtensionList {
+	//	for _, value := range req.Pb2Model {
 	//		temp := new(msg.KeyValueResp)
 	//		temp.KeyValue = value
 	//		temp.ErrMsg = err.Error()
@@ -262,7 +262,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//
 	//if isExists {
 	//	log.Debug(req.OperationID, "redis handle this delete", req.String())
-	//	for _, v := range req.ReactionExtensionList {
+	//	for _, v := range req.Pb2Model {
 	//		err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, v.TypeKey)
 	//		if err != nil {
 	//			setDeleteKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, v.TypeKey, v)
@@ -293,7 +293,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//	if err != nil {
 	//		rResp.ErrCode = 100
 	//		rResp.ErrMsg = err.Error()
-	//		for _, value := range req.ReactionExtensionList {
+	//		for _, value := range req.Pb2Model {
 	//			temp := new(msg.KeyValueResp)
 	//			temp.KeyValue = value
 	//			temp.ErrMsg = err.Error()
@@ -306,7 +306,7 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//	if err != nil {
 	//		rResp.ErrCode = 200
 	//		rResp.ErrMsg = err.Error()
-	//		for _, value := range req.ReactionExtensionList {
+	//		for _, value := range req.Pb2Model {
 	//			temp := new(msg.KeyValueResp)
 	//			temp.KeyValue = value
 	//			temp.ErrMsg = err.Error()
@@ -316,10 +316,10 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//		return &rResp, nil
 	//	}
 	//	setValue := make(map[string]*sdkws.KeyValue)
-	//	for _, v := range req.ReactionExtensionList {
+	//	for _, v := range req.Pb2Model {
 	//
 	//		temp := new(sdkws.KeyValue)
-	//		if vv, ok := mongoValue.ReactionExtensionList[v.TypeKey]; ok {
+	//		if vv, ok := mongoValue.Pb2Model[v.TypeKey]; ok {
 	//			utils.CopyStructFields(temp, &vv)
 	//			if v.LatestUpdateTime != vv.LatestUpdateTime {
 	//				setDeleteKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, v.TypeKey, temp)

@@ -25,7 +25,7 @@ func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID str
 	if len(keyMap) == 0 {
 		return
 	}
-	m.SuccessReactionExtensionList = keyMap
+	m.SuccessReactionExtensions = keyMap
 	m.ClientMsgID = req.ClientMsgID
 	m.IsReact = resp.IsReact
 	m.IsExternalExtensions = req.IsExternalExtensions
@@ -47,7 +47,7 @@ func (c *Check) ExtendMessageDeleteNotification(ctx context.Context, sendID stri
 	if len(keyMap) == 0 {
 		return
 	}
-	m.SuccessReactionExtensionList = keyMap
+	m.SuccessReactionExtensions = keyMap
 	m.ClientMsgID = req.ClientMsgID
 	m.MsgFirstModifyTime = req.MsgFirstModifyTime
 

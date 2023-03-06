@@ -65,7 +65,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMs
 		}
 		if tag {
 			log.NewInfo(operationID, "msg_transfer msg persisting", string(msg))
-			if err = pc.chatLogInterface.CreateChatLog(msgFromMQ); err != nil {
+			if err = pc.chatLogDatabase.CreateChatLog(msgFromMQ); err != nil {
 				log.NewError(operationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}

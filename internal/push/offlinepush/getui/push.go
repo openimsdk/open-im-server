@@ -150,7 +150,7 @@ func (g *Client) postReturn(url string, header map[string]string, input interfac
 	if err != nil {
 		return err
 	}
-	return parseError()
+	return output.parseError()
 }
 
 func (g *Client) getTokenAndSave2Redis(ctx context.Context) (token string, err error) {

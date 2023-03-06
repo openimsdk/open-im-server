@@ -64,7 +64,6 @@ func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 		OpUserID:        tracelog.GetOperationID(ctx),
 		SessionType:     getReq.SessionType,
 		TypeKeyList:     getReq.TypeKeys,
-		MessageKeyList:  getReq.MessageReactionKeys,
 	}
 	resp := &cbapi.CallbackGetMessageListReactionExtResp{}
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)

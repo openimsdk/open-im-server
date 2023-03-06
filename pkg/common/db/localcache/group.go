@@ -52,7 +52,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {
 		return localHashInfo.userIDs, nil
 	}
-	groupMembersResp, err := client.GetGroupMemberUserID(ctx, &group.GetGroupMemberUserIDReq{
+	groupMembersResp, err := client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
 		GroupID: groupID,
 	})
 	if err != nil {
