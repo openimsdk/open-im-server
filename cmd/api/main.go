@@ -29,7 +29,6 @@ var startCmd = &cobra.Command{
 func init() {
 	startCmd.Flags().IntP("port", "port", 10002, "Port to listen on")
 	startCmd.Flags().StringP("config_path", "config_path", "", "Path to config file folder")
-	// 在此处添加其他命令行参数，如果需要
 }
 
 func run(port int) error {
