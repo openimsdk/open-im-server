@@ -1,7 +1,7 @@
 .PHONY: all build run gotool install clean help
 
 NAME=open_im_third
-BIN_DIR=../../bin/
+BIN_DIR=../../../bin/
 
 OS:= $(or $(os),linux)
 ARCH:=$(or $(arch),amd64)
