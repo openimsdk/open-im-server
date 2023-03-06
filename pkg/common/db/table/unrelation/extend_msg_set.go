@@ -1,6 +1,7 @@
 package unrelation
 
 import (
+	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"strconv"
 	"strings"
@@ -65,4 +66,16 @@ func (e *ExtendMsgSetModel) SplitSourceIDAndGetIndex() int32 {
 
 type GetAllExtendMsgSetOpts struct {
 	ExcludeExtendMsgs bool
+}
+
+func (ExtendMsgSetModel) Pb2Model(reactionExtensionList map[string]*sdkws.KeyValue) map[string]*KeyValueModel {
+	r := make(map[string]*KeyValueModel)
+	for key, value := range reactionExtensionList {
+		r[key] = &KeyValueModel{
+			TypeKey:          value.TypeKey,
+			Value:            value.Value,
+			LatestUpdateTime: value.LatestUpdateTime,
+		}
+	}
+	return r
 }
