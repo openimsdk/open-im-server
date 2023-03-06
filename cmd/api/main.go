@@ -18,9 +18,9 @@ var startCmd = &cobra.Command{
 	Short: "Start the server",
 	Run: func(cmd *cobra.Command, args []string) {
 		port, _ := cmd.Flags().GetInt("port")
-		configPath, _ := cmd.Flags().GetString("config_path")
-		fmt.Printf("Starting server on port %s with config file at %s\n", port, configPath)
-		if err := run(port); err != nil {
+		configFolderPath, _ := cmd.Flags().GetString("config_folder_path")
+		fmt.Printf("Starting server on port %s with config file at %s\n", port, configFolderPath)
+		if err := run(configFolderPath, port); err != nil {
 			panic(err.Error())
 		}
 	},
@@ -31,8 +31,8 @@ func init() {
 	startCmd.Flags().StringP("config_path", "c", "", "Path to config file folder")
 }
 
-func run(port int) error {
-	if err := config.InitConfig(); err != nil {
+func run(configFolderPath string, port int) error {
+	if err := config.InitConfig(configFolderPath); err != nil {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
