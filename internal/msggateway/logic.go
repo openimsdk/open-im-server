@@ -13,12 +13,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"runtime"
-	"strings"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
+	"runtime"
 )
 
 func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
@@ -81,33 +79,18 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	log.Info(m.OperationID, "argsValidate ", isPass, errCode, errMsg)
 	if isPass {
 		rpcReq := sdkws.GetMaxAndMinSeqReq{}
-		rpcReq.GroupIDList = data.(sdkws.GetMaxAndMinSeqReq).GroupIDList
+		rpcReq.GroupIDs = data.(sdkws.GetMaxAndMinSeqReq).GroupIDs
 		rpcReq.UserID = m.SendID
-		rpcReq.OperationID = m.OperationID
-		log.Debug(m.OperationID, "Ws call success to getMaxAndMinSeq", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdkws.GetMaxAndMinSeqReq).GroupIDList)
-		grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
-		if grpcConn == nil {
-			errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
-			nReply.ErrCode = 500
-			nReply.ErrMsg = errMsg
-			log.NewError(rpcReq.OperationID, errMsg)
-			ws.getSeqResp(conn, m, nReply)
-			return
-		}
+		log.Debug(m.OperationID, "Ws call success to getMaxAndMinSeq", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdkws.GetMaxAndMinSeqReq).GroupIDs)
+		var grpcConn *grpc.ClientConn
 		msgClient := pbChat.NewMsgClient(grpcConn)
 		rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 		if err != nil {
-			nReply.ErrCode = 500
-			nReply.ErrMsg = err.Error()
-			log.Error(rpcReq.OperationID, "rpc call failed to GetMaxAndMinSeq ", nReply.String())
 			ws.getSeqResp(conn, m, nReply)
 		} else {
-			log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
 			ws.getSeqResp(conn, m, rpcReply)
 		}
 	} else {
-		nReply.ErrCode = errCode
-		nReply.ErrMsg = errMsg
 		log.Error(m.OperationID, "argsValidate failed send resp: ", nReply.String())
 		ws.getSeqResp(conn, m, nReply)
 	}
@@ -119,8 +102,6 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdkws.GetMaxAndMinSeqR
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
-		ErrCode:       pb.GetErrCode(),
-		ErrMsg:        pb.GetErrMsg(),
 		OperationID:   m.OperationID,
 		Data:          b,
 	}
@@ -131,52 +112,44 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdkws.GetMaxAndMinSeqR
 
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, string(m.Data))
-	nReply := new(sdkws.PullMessageBySeqListResp)
-	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList, m.OperationID)
+	nReply := new(sdkws.PullMessageBySeqsResp)
+	isPass, _, _, data := ws.argsValidate(m, constant.WSPullMsgBySeqList, m.OperationID)
 	if isPass {
-		rpcReq := sdkws.PullMessageBySeqListReq{}
-		rpcReq.SeqList = data.(sdkws.PullMessageBySeqListReq).SeqList
+		rpcReq := sdkws.PullMessageBySeqsReq{}
+		rpcReq.Seqs = data.(sdkws.PullMessageBySeqsReq).Seqs
 		rpcReq.UserID = m.SendID
-		rpcReq.OperationID = m.OperationID
-		rpcReq.GroupSeqList = data.(sdkws.PullMessageBySeqListReq).GroupSeqList
-		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdkws.PullMessageBySeqListReq).SeqList)
-		grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+		rpcReq.GroupSeqs = data.(sdkws.PullMessageBySeqsReq).GroupSeqs
+		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdkws.PullMessageBySeqsReq).Seqs)
+		var grpcConn *grpc.ClientConn
+
+		//grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 		if grpcConn == nil {
-			errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
-			nReply.ErrCode = 500
-			nReply.ErrMsg = errMsg
-			log.NewError(rpcReq.OperationID, errMsg)
 			ws.pullMsgBySeqListResp(conn, m, nReply)
 			return
 		}
 		msgClient := pbChat.NewMsgClient(grpcConn)
 		maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * 20)
-		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq, maxSizeOption)
+		reply, err := msgClient.PullMessageBySeqs(context.Background(), &rpcReq, maxSizeOption)
 		if err != nil {
-			log.NewError(rpcReq.OperationID, "pullMsgBySeqListReq err", err.Error())
-			nReply.ErrCode = 200
-			nReply.ErrMsg = err.Error()
 			ws.pullMsgBySeqListResp(conn, m, nReply)
 		} else {
-			log.NewInfo(rpcReq.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), len(reply.List))
+			//log.NewInfo(rpcReq.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), len(reply.List))
 			ws.pullMsgBySeqListResp(conn, m, reply)
 		}
 	} else {
-		nReply.ErrCode = errCode
-		nReply.ErrMsg = errMsg
 		ws.pullMsgBySeqListResp(conn, m, nReply)
 	}
 }
-func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdkws.PullMessageBySeqListResp) {
+func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdkws.PullMessageBySeqsResp) {
 	log.NewInfo(m.OperationID, "pullMsgBySeqListResp come  here ", pb.String())
 	c, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
-		ErrCode:       pb.GetErrCode(),
-		ErrMsg:        pb.GetErrMsg(),
-		OperationID:   m.OperationID,
-		Data:          c,
+		//ErrCode:       pb.GetErrCode(),
+		//ErrMsg:        pb.GetErrMsg(),
+		OperationID: m.OperationID,
+		Data:        c,
 	}
 	log.NewInfo(m.OperationID, "pullMsgBySeqListResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
 		len(mReply.Data))
@@ -188,22 +161,24 @@ func (ws *WServer) userLogoutReq(conn *UserConn, m *Req) {
 	rpcReq := push.DelUserPushTokenReq{}
 	rpcReq.UserID = m.SendID
 	rpcReq.PlatformID = conn.PlatformID
-	rpcReq.OperationID = m.OperationID
-	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, m.OperationID)
+	//rpcReq.OperationID = m.OperationID
+	var grpcConn *grpc.ClientConn
+
+	//grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, m.OperationID)
 	if grpcConn == nil {
-		errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(rpcReq.OperationID, errMsg)
+		//errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
+		//log.NewError(rpcReq.OperationID, errMsg)
 		ws.userLogoutResp(conn, m)
 		return
 	}
 	msgClient := push.NewPushMsgServiceClient(grpcConn)
-	reply, err := msgClient.DelUserPushToken(context.Background(), &rpcReq)
+	_, err := msgClient.DelUserPushToken(context.Background(), &rpcReq)
 	if err != nil {
-		log.NewError(rpcReq.OperationID, "DelUserPushToken err", err.Error())
+		//log.NewError(rpcReq.OperationID, "DelUserPushToken err", err.Error())
 
 		ws.userLogoutResp(conn, m)
 	} else {
-		log.NewInfo(rpcReq.OperationID, "rpc call success to DelUserPushToken", reply.String())
+		//log.NewInfo(rpcReq.OperationID, "rpc call success to DelUserPushToken", reply.String())
 		ws.userLogoutResp(conn, m)
 	}
 	ws.userLogoutResp(conn, m)
@@ -225,39 +200,41 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
 
 	nReply := new(pbChat.SendMsgResp)
-	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg, m.OperationID)
+	isPass, _, _, pData := ws.argsValidate(m, constant.WSSendMsg, m.OperationID)
 	if isPass {
 		data := pData.(sdkws.MsgData)
 		pbData := pbChat.SendMsgReq{
-			Token:       m.Token,
-			OperationID: m.OperationID,
-			MsgData:     &data,
+			//Token:       m.Token,
+			//OperationID: m.OperationID,
+			MsgData: &data,
 		}
 		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data.String())
-		etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
-		if etcdConn == nil {
+		var grpcConn *grpc.ClientConn
+
+		//etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+		if grpcConn == nil {
 			errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
-			nReply.ErrCode = 500
-			nReply.ErrMsg = errMsg
+			//nReply.ErrCode = 500
+			//nReply.ErrMsg = errMsg
 			log.NewError(m.OperationID, errMsg)
 			ws.sendMsgResp(conn, m, nReply)
 			return
 		}
-		client := pbChat.NewMsgClient(etcdConn)
+		client := pbChat.NewMsgClient(grpcConn)
 		reply, err := client.SendMsg(context.Background(), &pbData)
 		if err != nil {
-			log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
-			nReply.ErrCode = 200
-			nReply.ErrMsg = err.Error()
+			//log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
+			//nReply.ErrCode = 200
+			//nReply.ErrMsg = err.Error()
 			ws.sendMsgResp(conn, m, nReply)
 		} else {
-			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
+			//log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
 			ws.sendMsgResp(conn, m, reply)
 		}
 
 	} else {
-		nReply.ErrCode = errCode
-		nReply.ErrMsg = errMsg
+		//nReply.ErrCode = errCode
+		//nReply.ErrMsg = errMsg
 		ws.sendMsgResp(conn, m, nReply)
 	}
 
@@ -271,8 +248,6 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
-		ErrCode:       pb.GetErrCode(),
-		ErrMsg:        pb.GetErrMsg(),
 		OperationID:   m.OperationID,
 		Data:          b,
 	}
@@ -282,20 +257,21 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, string(m.Data))
-	nReply := new(pbChat.SendMsgResp)
+	//nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg, m.OperationID)
 	if isPass {
-		signalResp := pbRtc.SignalResp{}
-		etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRtcName, m.OperationID)
-		if etcdConn == nil {
+		signalResp := sdkws.SignalResp{}
+		var grpcConn *grpc.ClientConn
+		//etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRtcName, m.OperationID)
+		if grpcConn == nil {
 			errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(m.OperationID, errMsg)
 			ws.sendSignalMsgResp(conn, 204, errMsg, m, &signalResp)
 			return
 		}
-		rtcClient := pbRtc.NewRtcServiceClient(etcdConn)
+		rtcClient := pbRtc.NewRtcServiceClient(grpcConn)
 		req := &pbRtc.SignalMessageAssembleReq{
-			SignalReq:   pData.(*pbRtc.SignalReq),
+			SignalReq:   pData.(*sdkws.SignalReq),
 			OperationID: m.OperationID,
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
@@ -310,40 +286,41 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 		log.NewInfo(m.OperationID, utils.GetSelfFuncName(), respPb.String())
 		if respPb.IsPass {
 			pbData := pbChat.SendMsgReq{
-				Token:       m.Token,
-				OperationID: m.OperationID,
-				MsgData:     &msgData,
+				//Token:       m.Token,
+				//OperationID: m.OperationID,
+				MsgData: &msgData,
 			}
 			log.NewInfo(m.OperationID, utils.GetSelfFuncName(), "pbData: ", pbData)
 			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
-			etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
-			if etcdConn == nil {
+			var grpcConn *grpc.ClientConn
+			//etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+			if grpcConn == nil {
 				errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(m.OperationID, errMsg)
 				ws.sendSignalMsgResp(conn, 200, errMsg, m, &signalResp)
 				return
 			}
-			client := pbChat.NewMsgClient(etcdConn)
-			reply, err := client.SendMsg(context.Background(), &pbData)
+			client := pbChat.NewMsgClient(grpcConn)
+			_, err := client.SendMsg(context.Background(), &pbData)
 			if err != nil {
-				log.NewError(pbData.OperationID, utils.GetSelfFuncName(), "rpc sendMsg err", err.Error())
-				nReply.ErrCode = 200
-				nReply.ErrMsg = err.Error()
+				//log.NewError(pbData.OperationID, utils.GetSelfFuncName(), "rpc sendMsg err", err.Error())
+				//nReply.ErrCode = 200
+				//nReply.ErrMsg = err.Error()
 				ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 			} else {
-				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String(), signalResp.String(), m)
+				//log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String(), signalResp.String(), m)
 				ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
 			}
 		} else {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), respPb.IsPass, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg)
-			ws.sendSignalMsgResp(conn, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg, m, &signalResp)
+			//log.NewError(m.OperationID, utils.GetSelfFuncName(), respPb.IsPass, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg)
+			//ws.sendSignalMsgResp(conn, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg, m, &signalResp)
 		}
 	} else {
 		ws.sendSignalMsgResp(conn, errCode, errMsg, m, nil)
 	}
 
 }
-func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *pbRtc.SignalResp) {
+func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *sdkws.SignalResp) {
 	// := make(map[string]interface{})
 	log.Debug(m.OperationID, "sendSignalMsgResp is", pb.String())
 	b, _ := proto.Marshal(pb)
@@ -386,19 +363,19 @@ func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqI
 }
 
 func SetTokenKicked(userID string, platformID int, operationID string) {
-	m, err := db.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
-	if err != nil {
-		log.Error(operationID, "GetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
-		return
-	}
-	for k, _ := range m {
-		m[k] = constant.KickedToken
-	}
-	err = db.DB.SetTokenMapByUidPid(userID, platformID, m)
-	if err != nil {
-		log.Error(operationID, "SetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
-		return
-	}
+	//m, err := db.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
+	//if err != nil {
+	//	log.Error(operationID, "GetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
+	//	return
+	//}
+	//for k, _ := range m {
+	//	m[k] = constant.KickedToken
+	//}
+	//err = db.DB.SetTokenMapByUidPid(userID, platformID, m)
+	//if err != nil {
+	//	log.Error(operationID, "SetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
+	//	return
+	//}
 }
 
 func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
@@ -406,10 +383,10 @@ func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
 	if isPass {
 		req := pData.(*sdkws.SetAppBackgroundStatusReq)
 		conn.IsBackground = req.IsBackground
-		callbackResp := callbackUserOnline(m.OperationID, conn.userID, int(conn.PlatformID), conn.token, conn.IsBackground, conn.connID)
-		if callbackResp.ErrCode != 0 {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
-		}
+		//callbackResp := callbackUserOnline(m.OperationID, conn.userID, int(conn.PlatformID), conn.token, conn.IsBackground, conn.connID)
+		//if callbackResp.ErrCode != 0 {
+		//	log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+		//}
 		log.NewInfo(m.OperationID, "SetUserDeviceBackground", "success", *conn, req.IsBackground)
 	}
 	ws.setUserDeviceBackgroundResp(conn, m, errCode, errMsg)

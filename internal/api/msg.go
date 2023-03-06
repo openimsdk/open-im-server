@@ -17,7 +17,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
 )
 
 var _ context.Context // 解决goland编辑器bug
@@ -27,12 +26,11 @@ func NewMsg(zk *openKeeper.ZkClient) *Msg {
 }
 
 type Msg struct {
-	zk *openKeeper.ZkClient
+	zk       *openKeeper.ZkClient
+	validate *validator.Validate
 }
 
-var validate *validator.Validate
-
-func SetOptions(options map[string]bool, value bool) {
+func () SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
@@ -240,7 +238,7 @@ func (o *Msg) ManagementSendMsg(c *gin.Context) {
 	log.Info(params.OperationID, "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
 	resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
 	log.Info(params.OperationID, "ManagementSendMsg return", resp)
-	c.JSON(http.StatusOK, resp)
+	apiresp.GinSuccess(c, resp)
 }
 
 func (o *Msg) ManagementBatchSendMsg(c *gin.Context) {

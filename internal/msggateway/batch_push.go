@@ -7,6 +7,7 @@ import (
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
+	"google.golang.org/grpc"
 	"strings"
 )
 
@@ -74,28 +75,22 @@ func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdkws.M
 }
 
 func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, userID string) []*sdkws.MsgData {
-	seqList, err := r.GenPullSeqList(currentMsgSeq, operationID, userID)
+	seqs, err := r.GenPullSeqList(currentMsgSeq, operationID, userID)
 	if err != nil {
 		log.Error(operationID, "GenPullSeqList failed ", err.Error(), currentMsgSeq, userID)
 		return nil
 	}
-	if len(seqList) == 0 {
+	if len(seqs) == 0 {
 		log.Error(operationID, "GenPullSeqList len == 0 ", currentMsgSeq, userID)
 		return nil
 	}
-	rpcReq := sdkws.PullMessageBySeqListReq{}
-	rpcReq.SeqList = seqList
+	rpcReq := sdkws.PullMessageBySeqsReq{}
+	//rpcReq.Seqs = seqs
 	rpcReq.UserID = userID
-	rpcReq.OperationID = operationID
-	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
-	if grpcConn == nil {
-		errMsg := "getcdv3.GetDefaultConn == nil"
-		log.NewError(rpcReq.OperationID, errMsg)
-		return nil
-	}
+	var grpcConn *grpc.ClientConn
 
 	msgClient := pbChat.NewMsgClient(grpcConn)
-	reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
+	reply, err := msgClient.PullMessageBySeqs(context.Background(), &rpcReq)
 	if err != nil {
 		log.Error(operationID, "PullMessageBySeqList failed ", err.Error(), rpcReq.String())
 		return nil
