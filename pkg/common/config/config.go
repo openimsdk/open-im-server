@@ -2,6 +2,7 @@ package config
 
 import (
 	"OpenIM/pkg/discoveryregistry"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -500,10 +501,14 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 	if configFolderPath == "" {
 		configFolderPath = DefaultFolderPath
 	}
-	_, err := os.Stat(filepath.Join(configFolderPath, configName))
-	var configPath string
-	if os.IsNotExist(err) {
+	configPath := filepath.Join(configFolderPath, configName)
+	_, err := os.Stat(configPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
 		configPath = filepath.Join(Root, "config", configName)
+		fmt.Println(configPath, "not exist, use", configPath)
 	}
 	Root = filepath.Dir(configPath)
 	return c.unmarshalConfig(config, configPath)
