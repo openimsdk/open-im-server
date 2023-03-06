@@ -35,7 +35,7 @@ type FriendDatabase interface {
 	PageFriendRequestToMe(ctx context.Context, userID string, pageNumber, showNumber int32) (friends []*relation.FriendRequestModel, total int64, err error)
 	// 获取某人指定好友的信息
 	FindFriendsWithError(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*relation.FriendModel, err error)
-	GetFriendIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
+	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 }
 
 type friendDatabase struct {
@@ -240,6 +240,6 @@ func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID s
 	return
 }
 
-func (f *friendDatabase) GetFriendIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error) {
+func (f *friendDatabase) FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error) {
 	return f.friend.FindFriendUserIDs(ctx, ownerUserID)
 }

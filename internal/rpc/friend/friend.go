@@ -244,7 +244,7 @@ func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriend
 		return nil, err
 	}
 	resp = &pbfriend.GetFriendIDsResp{}
-	resp.FriendIDs, err = s.FriendDatabase.GetFriendIDs(ctx, req.UserID)
+	resp.FriendIDs, err = s.FriendDatabase.FindFriendUserIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
