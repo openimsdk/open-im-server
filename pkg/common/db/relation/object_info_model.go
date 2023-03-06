@@ -6,6 +6,7 @@ import (
 	"OpenIM/pkg/utils"
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 func NewObjectInfo(db *gorm.DB) relation.ObjectInfoModelInterface {
@@ -42,4 +43,11 @@ func (o *ObjectInfoGorm) Take(ctx context.Context, name string) (info *relation.
 	}()
 	info = &relation.ObjectInfoModel{}
 	return info, utils.Wrap1(o.DB.Where("name = ?", name).Take(info).Error)
+}
+
+func (o *ObjectInfoGorm) DeleteExpiration(ctx context.Context, expiration time.Time) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "expiration", expiration)
+	}()
+	return utils.Wrap1(o.DB.Where("expiration_time IS NOT NULL AND expiration_time <= ?", expiration).Delete(&relation.ObjectInfoModel{}).Error)
 }

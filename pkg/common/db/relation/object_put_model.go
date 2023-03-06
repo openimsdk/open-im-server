@@ -6,6 +6,7 @@ import (
 	"OpenIM/pkg/utils"
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 func NewObjectPut(db *gorm.DB) relation.ObjectPutModelInterface {
@@ -44,4 +45,19 @@ func (o *ObjectPutGorm) SetCompleted(ctx context.Context, putID string) (err err
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "putID", putID)
 	}()
 	return utils.Wrap1(o.DB.Model(&relation.ObjectPutModel{}).Where("put_id = ?", putID).Update("complete", true).Error)
+}
+
+func (o *ObjectPutGorm) FindExpirationPut(ctx context.Context, expirationTime time.Time, num int) (list []*relation.ObjectPutModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "expirationTime", expirationTime, "num", num, "list", list)
+	}()
+	err = o.DB.Where("effective_time <= ?", expirationTime).Limit(num).Find(&list).Error
+	return list, utils.Wrap1(err)
+}
+
+func (o *ObjectPutGorm) DelPut(ctx context.Context, ids []string) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ids", ids)
+	}()
+	return utils.Wrap1(o.DB.Where("put_id IN ?", ids).Delete(&relation.ObjectPutModel{}).Error)
 }
