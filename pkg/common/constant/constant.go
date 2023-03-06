@@ -325,3 +325,5 @@ const BigVersion = "v2"
 const LogFileName = "OpenIM.log"
 
 const CurrentVersion = "v2.3.4-rc0"
+
+const LocalHost = "0.0.0.0"

@@ -1,6 +1,6 @@
 module OpenIM
 
-go 1.18
+go 1.16
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -54,6 +54,7 @@ require (
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/spf13/cobra v1.6.1
 	github.com/ugorji/go/codec v1.2.8 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect

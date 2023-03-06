@@ -499,11 +499,9 @@ func (c *config) unmarshalConfig(config interface{}, configPath string) error {
 
 func (c *config) initConfig(config interface{}, configName, configPath string) error {
 	if configPath == "" {
-		if configPath == "" {
-			configPath = DefaultPath
-		}
+		configPath = DefaultPath
 	}
-	_, err := os.Stat(configPath)
+	_, err := os.Stat(filepath.Join(configPath, configName))
 	if os.IsNotExist(err) {
 		configPath = filepath.Join(Root, "config", configName)
 	}

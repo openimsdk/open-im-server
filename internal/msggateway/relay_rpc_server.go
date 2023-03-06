@@ -52,7 +52,7 @@ func (r *RPCServer) onInit(rpcPort int) {
 func (r *RPCServer) run() {
 	listenIP := ""
 	if config.Config.ListenIP == "" {
-		listenIP = "0.0.0.0"
+		listenIP = constant.LocalHost
 	} else {
 		listenIP = config.Config.ListenIP
 	}
