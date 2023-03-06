@@ -15,6 +15,7 @@ service_filename=(
   open_im_auth
   ${msg_name}
   open_im_conversation
+  open_im_third
 )
 
 #service config port name
@@ -28,6 +29,7 @@ service_port_name=(
   openImAuthPort
   openImMessagePort
   openImConversationPort
+  openImThirdPort
 )
 
 service_prometheus_port_name=(
@@ -40,6 +42,7 @@ service_prometheus_port_name=(
   authPrometheusPort
   messagePrometheusPort
   conversationPrometheusPort
+  thirdPrometheusPort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do

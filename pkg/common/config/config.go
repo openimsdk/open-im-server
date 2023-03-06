@@ -152,6 +152,7 @@ type config struct {
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
 		OpenImRtcPort            []int `yaml:"openImRtcPort"`
+		OpenImThirdPort          []int `yaml:"openImThirdPort"`
 	}
 	RpcRegisterName struct {
 		OpenImUserName           string `yaml:"openImUserName"`
@@ -301,8 +302,9 @@ type config struct {
 		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
 		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
 		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
-		RtcPrometheusPort             []int `yaml:"RtcPrometheusPort"`
+		RtcPrometheusPort             []int `yaml:"rtcPrometheusPort"`
 		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
+		ThirdPrometheusPort           []int `yaml:"thirdPrometheusPort"`
 	} `yaml:"prometheus"`
 }
 

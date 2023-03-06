@@ -7,7 +7,7 @@ BIN_DIR=../../bin/
 all: gotool build
 
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s"
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o ${BINARY_NAME}
 
 run:
 	@go run ./
