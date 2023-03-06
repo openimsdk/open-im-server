@@ -1115,9 +1115,8 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	return resp, nil
 }
 
-func (s *groupServer) GetGroupMemberUserID(ctx context.Context, req *pbGroup.GetGroupMemberUserIDReq) (*pbGroup.GetGroupMemberUserIDResp, error) {
-	resp := &pbGroup.GetGroupMemberUserIDResp{}
-	var err error
+func (s *groupServer) GetGroupMemberUserIDs(ctx context.Context, req *pbGroup.GetGroupMemberUserIDsReq) (resp *pbGroup.GetGroupMemberUserIDsResp, err error) {
+	resp = &pbGroup.GetGroupMemberUserIDsResp{}
 	resp.UserIDs, err = s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
