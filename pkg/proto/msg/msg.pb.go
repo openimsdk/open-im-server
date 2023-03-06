@@ -37,7 +37,7 @@ func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
 func (m *MsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMQ) ProtoMessage()    {}
 func (*MsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{0}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{0}
 }
 func (m *MsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMQ.Unmarshal(m, b)
@@ -82,7 +82,7 @@ func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
 func (m *MsgDataToDB) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToDB) ProtoMessage()    {}
 func (*MsgDataToDB) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{1}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{1}
 }
 func (m *MsgDataToDB) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToDB.Unmarshal(m, b)
@@ -121,7 +121,7 @@ func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
 func (m *PushMsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*PushMsgDataToMQ) ProtoMessage()    {}
 func (*PushMsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{2}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{2}
 }
 func (m *PushMsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgDataToMQ.Unmarshal(m, b)
@@ -169,7 +169,7 @@ func (m *MsgDataToMongoByMQ) Reset()         { *m = MsgDataToMongoByMQ{} }
 func (m *MsgDataToMongoByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMongoByMQ) ProtoMessage()    {}
 func (*MsgDataToMongoByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{3}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{3}
 }
 func (m *MsgDataToMongoByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMongoByMQ.Unmarshal(m, b)
@@ -228,7 +228,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{4}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{4}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -267,7 +267,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{5}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{5}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -312,7 +312,7 @@ func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
 func (m *SendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsgReq) ProtoMessage()    {}
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{6}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{6}
 }
 func (m *SendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgReq.Unmarshal(m, b)
@@ -352,7 +352,7 @@ func (m *SendMsgResp) Reset()         { *m = SendMsgResp{} }
 func (m *SendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsgResp) ProtoMessage()    {}
 func (*SendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{7}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{7}
 }
 func (m *SendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgResp.Unmarshal(m, b)
@@ -404,7 +404,7 @@ func (m *ClearMsgReq) Reset()         { *m = ClearMsgReq{} }
 func (m *ClearMsgReq) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgReq) ProtoMessage()    {}
 func (*ClearMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{8}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{8}
 }
 func (m *ClearMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgReq.Unmarshal(m, b)
@@ -441,7 +441,7 @@ func (m *ClearMsgResp) Reset()         { *m = ClearMsgResp{} }
 func (m *ClearMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgResp) ProtoMessage()    {}
 func (*ClearMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{9}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{9}
 }
 func (m *ClearMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgResp.Unmarshal(m, b)
@@ -474,7 +474,7 @@ func (m *SetMsgMinSeqReq) Reset()         { *m = SetMsgMinSeqReq{} }
 func (m *SetMsgMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqReq) ProtoMessage()    {}
 func (*SetMsgMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{10}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{10}
 }
 func (m *SetMsgMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqReq.Unmarshal(m, b)
@@ -525,7 +525,7 @@ func (m *SetMsgMinSeqResp) Reset()         { *m = SetMsgMinSeqResp{} }
 func (m *SetMsgMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqResp) ProtoMessage()    {}
 func (*SetMsgMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{11}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{11}
 }
 func (m *SetMsgMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqResp.Unmarshal(m, b)
@@ -556,7 +556,7 @@ func (m *SetSendMsgStatusReq) Reset()         { *m = SetSendMsgStatusReq{} }
 func (m *SetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusReq) ProtoMessage()    {}
 func (*SetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{12}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{12}
 }
 func (m *SetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusReq.Unmarshal(m, b)
@@ -593,7 +593,7 @@ func (m *SetSendMsgStatusResp) Reset()         { *m = SetSendMsgStatusResp{} }
 func (m *SetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusResp) ProtoMessage()    {}
 func (*SetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{13}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{13}
 }
 func (m *SetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusResp.Unmarshal(m, b)
@@ -623,7 +623,7 @@ func (m *GetSendMsgStatusReq) Reset()         { *m = GetSendMsgStatusReq{} }
 func (m *GetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusReq) ProtoMessage()    {}
 func (*GetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{14}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{14}
 }
 func (m *GetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusReq.Unmarshal(m, b)
@@ -654,7 +654,7 @@ func (m *GetSendMsgStatusResp) Reset()         { *m = GetSendMsgStatusResp{} }
 func (m *GetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusResp) ProtoMessage()    {}
 func (*GetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{15}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{15}
 }
 func (m *GetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusResp.Unmarshal(m, b)
@@ -693,7 +693,7 @@ func (m *DelSuperGroupMsgReq) Reset()         { *m = DelSuperGroupMsgReq{} }
 func (m *DelSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgReq) ProtoMessage()    {}
 func (*DelSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{16}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{16}
 }
 func (m *DelSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgReq.Unmarshal(m, b)
@@ -737,7 +737,7 @@ func (m *DelSuperGroupMsgResp) Reset()         { *m = DelSuperGroupMsgResp{} }
 func (m *DelSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgResp) ProtoMessage()    {}
 func (*DelSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{17}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{17}
 }
 func (m *DelSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgResp.Unmarshal(m, b)
@@ -769,7 +769,7 @@ func (m *GetSuperGroupMsgReq) Reset()         { *m = GetSuperGroupMsgReq{} }
 func (m *GetSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgReq) ProtoMessage()    {}
 func (*GetSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{18}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{18}
 }
 func (m *GetSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgReq.Unmarshal(m, b)
@@ -814,7 +814,7 @@ func (m *GetSuperGroupMsgResp) Reset()         { *m = GetSuperGroupMsgResp{} }
 func (m *GetSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgResp) ProtoMessage()    {}
 func (*GetSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{19}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{19}
 }
 func (m *GetSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgResp.Unmarshal(m, b)
@@ -852,7 +852,7 @@ func (m *GetWriteDiffMsgReq) Reset()         { *m = GetWriteDiffMsgReq{} }
 func (m *GetWriteDiffMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgReq) ProtoMessage()    {}
 func (*GetWriteDiffMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{20}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{20}
 }
 func (m *GetWriteDiffMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgReq.Unmarshal(m, b)
@@ -890,7 +890,7 @@ func (m *GetWriteDiffMsgResp) Reset()         { *m = GetWriteDiffMsgResp{} }
 func (m *GetWriteDiffMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgResp) ProtoMessage()    {}
 func (*GetWriteDiffMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{21}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{21}
 }
 func (m *GetWriteDiffMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgResp.Unmarshal(m, b)
@@ -936,7 +936,7 @@ func (m *ModifyMessageReactionExtensionsReq) Reset()         { *m = ModifyMessag
 func (m *ModifyMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*ModifyMessageReactionExtensionsReq) ProtoMessage()    {}
 func (*ModifyMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{22}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{22}
 }
 func (m *ModifyMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyMessageReactionExtensionsReq.Unmarshal(m, b)
@@ -1038,7 +1038,7 @@ func (m *SetMessageReactionExtensionsReq) Reset()         { *m = SetMessageReact
 func (m *SetMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*SetMessageReactionExtensionsReq) ProtoMessage()    {}
 func (*SetMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{23}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{23}
 }
 func (m *SetMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMessageReactionExtensionsReq.Unmarshal(m, b)
@@ -1135,7 +1135,7 @@ func (m *SetMessageReactionExtensionsResp) Reset()         { *m = SetMessageReac
 func (m *SetMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*SetMessageReactionExtensionsResp) ProtoMessage()    {}
 func (*SetMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{24}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{24}
 }
 func (m *SetMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMessageReactionExtensionsResp.Unmarshal(m, b)
@@ -1197,7 +1197,7 @@ func (m *GetMessagesReactionExtensionsReq) Reset()         { *m = GetMessagesRea
 func (m *GetMessagesReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*GetMessagesReactionExtensionsReq) ProtoMessage()    {}
 func (*GetMessagesReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{25}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{25}
 }
 func (m *GetMessagesReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessagesReactionExtensionsReq.Unmarshal(m, b)
@@ -1261,7 +1261,7 @@ func (m *GetMessagesReactionExtensionsReq_MessageReactionKey) String() string {
 }
 func (*GetMessagesReactionExtensionsReq_MessageReactionKey) ProtoMessage() {}
 func (*GetMessagesReactionExtensionsReq_MessageReactionKey) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{25, 0}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{25, 0}
 }
 func (m *GetMessagesReactionExtensionsReq_MessageReactionKey) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessagesReactionExtensionsReq_MessageReactionKey.Unmarshal(m, b)
@@ -1306,7 +1306,7 @@ func (m *GetMessagesReactionExtensionsResp) Reset()         { *m = GetMessagesRe
 func (m *GetMessagesReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*GetMessagesReactionExtensionsResp) ProtoMessage()    {}
 func (*GetMessagesReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{26}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{26}
 }
 func (m *GetMessagesReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessagesReactionExtensionsResp.Unmarshal(m, b)
@@ -1345,7 +1345,7 @@ func (m *SingleMessageExtensionResult) Reset()         { *m = SingleMessageExten
 func (m *SingleMessageExtensionResult) String() string { return proto.CompactTextString(m) }
 func (*SingleMessageExtensionResult) ProtoMessage()    {}
 func (*SingleMessageExtensionResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{27}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{27}
 }
 func (m *SingleMessageExtensionResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SingleMessageExtensionResult.Unmarshal(m, b)
@@ -1391,7 +1391,7 @@ func (m *ModifyMessageReactionExtensionsResp) Reset()         { *m = ModifyMessa
 func (m *ModifyMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*ModifyMessageReactionExtensionsResp) ProtoMessage()    {}
 func (*ModifyMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{28}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{28}
 }
 func (m *ModifyMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyMessageReactionExtensionsResp.Unmarshal(m, b)
@@ -1443,7 +1443,7 @@ func (m *DeleteMessagesReactionExtensionsReq) Reset()         { *m = DeleteMessa
 func (m *DeleteMessagesReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteMessagesReactionExtensionsReq) ProtoMessage()    {}
 func (*DeleteMessagesReactionExtensionsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{29}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{29}
 }
 func (m *DeleteMessagesReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteMessagesReactionExtensionsReq.Unmarshal(m, b)
@@ -1530,7 +1530,7 @@ func (m *DeleteMessagesReactionExtensionsResp) Reset()         { *m = DeleteMess
 func (m *DeleteMessagesReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteMessagesReactionExtensionsResp) ProtoMessage()    {}
 func (*DeleteMessagesReactionExtensionsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{30}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{30}
 }
 func (m *DeleteMessagesReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteMessagesReactionExtensionsResp.Unmarshal(m, b)
@@ -1568,7 +1568,7 @@ func (m *ExtendMsgResp) Reset()         { *m = ExtendMsgResp{} }
 func (m *ExtendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ExtendMsgResp) ProtoMessage()    {}
 func (*ExtendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{31}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{31}
 }
 func (m *ExtendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExtendMsgResp.Unmarshal(m, b)
@@ -1610,7 +1610,7 @@ func (m *ExtendMsg) Reset()         { *m = ExtendMsg{} }
 func (m *ExtendMsg) String() string { return proto.CompactTextString(m) }
 func (*ExtendMsg) ProtoMessage()    {}
 func (*ExtendMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{32}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{32}
 }
 func (m *ExtendMsg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExtendMsg.Unmarshal(m, b)
@@ -1678,7 +1678,7 @@ func (m *KeyValueResp) Reset()         { *m = KeyValueResp{} }
 func (m *KeyValueResp) String() string { return proto.CompactTextString(m) }
 func (*KeyValueResp) ProtoMessage()    {}
 func (*KeyValueResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{33}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{33}
 }
 func (m *KeyValueResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KeyValueResp.Unmarshal(m, b)
@@ -1732,7 +1732,7 @@ func (m *MsgDataToModifyByMQ) Reset()         { *m = MsgDataToModifyByMQ{} }
 func (m *MsgDataToModifyByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToModifyByMQ) ProtoMessage()    {}
 func (*MsgDataToModifyByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{34}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{34}
 }
 func (m *MsgDataToModifyByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToModifyByMQ.Unmarshal(m, b)
@@ -1785,7 +1785,7 @@ func (m *DelMsgsReq) Reset()         { *m = DelMsgsReq{} }
 func (m *DelMsgsReq) String() string { return proto.CompactTextString(m) }
 func (*DelMsgsReq) ProtoMessage()    {}
 func (*DelMsgsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{35}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{35}
 }
 func (m *DelMsgsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelMsgsReq.Unmarshal(m, b)
@@ -1829,7 +1829,7 @@ func (m *DelMsgsResp) Reset()         { *m = DelMsgsResp{} }
 func (m *DelMsgsResp) String() string { return proto.CompactTextString(m) }
 func (*DelMsgsResp) ProtoMessage()    {}
 func (*DelMsgsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_fadfaac491b17a8b, []int{36}
+	return fileDescriptor_msg_b6efe9433739ba68, []int{36}
 }
 func (m *DelMsgsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelMsgsResp.Unmarshal(m, b)
@@ -2347,9 +2347,9 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	Metadata: "msg/msg.proto",
 }
 
-func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_fadfaac491b17a8b) }
+func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_b6efe9433739ba68) }
 
-var fileDescriptor_msg_fadfaac491b17a8b = []byte{
+var fileDescriptor_msg_b6efe9433739ba68 = []byte{
 	// 1497 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x58, 0xdd, 0x72, 0xdb, 0x44,
 	0x14, 0x1e, 0xd9, 0xf9, 0xf3, 0x71, 0xd3, 0xa4, 0x9b, 0x50, 0x5c, 0x11, 0xa6, 0xee, 0xb6, 0x69,
