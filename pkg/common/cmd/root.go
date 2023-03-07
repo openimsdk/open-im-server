@@ -6,7 +6,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type RootCmd cobra.Command
+type RootCmd struct {
+	Command cobra.Command
+}
 
 func NewRootCmd() RootCmd {
 	c := cobra.Command{
@@ -18,11 +20,13 @@ func NewRootCmd() RootCmd {
 		},
 	}
 	c.Flags()
-	return RootCmd(c)
+	rootCmd := RootCmd{Command: c}
+	rootCmd.init()
+	return rootCmd
 }
 
-func (r RootCmd) Init() {
-	cobra.Command(r).Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+func (r RootCmd) init() {
+	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
 
 func getConfFromCmdAndInit(cmdLines *cobra.Command) error {
