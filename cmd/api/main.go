@@ -2,6 +2,7 @@ package main
 
 import (
 	"OpenIM/internal/api"
+	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	"fmt"
@@ -19,7 +20,6 @@ var startCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		port, _ := cmd.Flags().GetInt(constant.FlagPort)
 		configFolderPath, _ := cmd.Flags().GetString(constant.FlagConf)
-		fmt.Printf("Starting server on port %d with config file at %s\n", port, configFolderPath)
 		if err := run(configFolderPath, port); err != nil {
 			panic(err.Error())
 		}
@@ -27,13 +27,16 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().IntP(constant.FlagPort, "p", 10002, "Port to listen on")
+	startCmd.Flags().IntP(constant.FlagPort, "p", 0, "Port to listen on")
 	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
 
 func run(configFolderPath string, port int) error {
 	if err := config.InitConfig(configFolderPath); err != nil {
 		return err
+	}
+	if port == 0 {
+		port = config.Config.Api.GinPort[0]
 	}
 	log.NewPrivateLog(constant.LogFileName)
 	router := api.NewGinRouter()
@@ -51,6 +54,8 @@ func run(configFolderPath string, port int) error {
 }
 
 func main() {
+	rootCmd := cmd.NewRootCmd()
+	rootCmd.AddCommand(startCmd)
 	if err := startCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
