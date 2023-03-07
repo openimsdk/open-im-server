@@ -29,7 +29,7 @@ func run(rootCmd cmd.RootCmd) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
-	zk, err := openKeeper.NewClient(nil, "", 10, "", "")
+	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, "", 10, "", "")
 	if err != nil {
 		return err
 	}
