@@ -12,6 +12,7 @@ import (
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	pbConversation "OpenIM/pkg/proto/conversation"
 	pbGroup "OpenIM/pkg/proto/group"
 	"OpenIM/pkg/proto/sdkws"
@@ -65,7 +66,7 @@ func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error
 			return err
 		}
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
-			return constant.ErrNoPermission.Wrap("no group owner or admin")
+			return errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
 	return nil
@@ -92,7 +93,7 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 	if *groupID != "" {
 		_, err := s.GroupDatabase.TakeGroup(ctx, *groupID)
 		if err == nil {
-			return constant.ErrGroupIDExisted.Wrap("group id existed " + *groupID)
+			return errs.ErrGroupIDExisted.Wrap("group id existed " + *groupID)
 		} else if s.IsNotFound(err) {
 			return nil
 		} else {
@@ -114,7 +115,7 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 			return err
 		}
 	}
-	return constant.ErrData.Wrap("group id gen error")
+	return errs.ErrData.Wrap("group id gen error")
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
@@ -123,17 +124,17 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return nil, err
 	}
 	if req.OwnerUserID == "" {
-		return nil, constant.ErrArgs.Wrap("no group owner")
+		return nil, errs.ErrArgs.Wrap("no group owner")
 	}
 	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
 	if utils.Duplicate(userIDs) {
-		return nil, constant.ErrArgs.Wrap("group member repeated")
+		return nil, errs.ErrArgs.Wrap("group member repeated")
 	}
 	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeCreateGroup(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err := CallbackBeforeCreateGroup(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	var groupMembers []*relationTb.GroupMemberModel
@@ -149,7 +150,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != constant.ErrCallbackContinue {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -233,17 +234,17 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
 	resp := &pbGroup.InviteUserToGroupResp{}
 	if len(req.InvitedUserIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("user empty")
+		return nil, errs.ErrArgs.Wrap("user empty")
 	}
 	if utils.Duplicate(req.InvitedUserIDs) {
-		return nil, constant.ErrArgs.Wrap("userID duplicate")
+		return nil, errs.ErrArgs.Wrap("userID duplicate")
 	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, constant.ErrDismissedAlready.Wrap()
+		return nil, errs.ErrDismissedAlready.Wrap()
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{group.GroupID}, nil, nil)
 	if err != nil {
@@ -253,7 +254,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return e.UserID
 	})
 	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
-		return nil, constant.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
+		return nil, errs.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
 	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
 	if err != nil {
@@ -264,7 +265,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			opUserID := tracelog.GetOpUserID(ctx)
 			member, ok := memberMap[opUserID]
 			if !ok {
-				return nil, constant.ErrNoPermission.Wrap("not in group")
+				return nil, errs.ErrNoPermission.Wrap("not in group")
 			}
 			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
 				var requests []*relationTb.GroupRequestModel
@@ -309,7 +310,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			member.OperatorUserID = opUserID
 			member.InviterUserID = opUserID
 			member.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != constant.ErrCallbackContinue {
+			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 				return nil, err
 			}
 			groupMembers = append(groupMembers, member)
@@ -329,7 +330,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {
-		return nil, constant.ErrArgs.Wrap("unsupported super group")
+		return nil, errs.ErrArgs.Wrap("unsupported super group")
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, nil, nil)
 	if err != nil {
@@ -379,14 +380,14 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		return nil, err
 	}
 	if len(req.KickedUserIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("KickedUserIDs empty")
+		return nil, errs.ErrArgs.Wrap("KickedUserIDs empty")
 	}
 	if utils.IsDuplicateStringSlice(req.KickedUserIDs) {
-		return nil, constant.ErrArgs.Wrap("KickedUserIDs duplicate")
+		return nil, errs.ErrArgs.Wrap("KickedUserIDs duplicate")
 	}
 	opUserID := tracelog.GetOpUserID(ctx)
 	if utils.IsContain(opUserID, req.KickedUserIDs) {
-		return nil, constant.ErrArgs.Wrap("opUserID in KickedUserIDs")
+		return nil, errs.ErrArgs.Wrap("opUserID in KickedUserIDs")
 	}
 	if group.GroupType == constant.SuperGroup {
 		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, req.KickedUserIDs); err != nil {
@@ -408,13 +409,13 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		for _, userID := range req.KickedUserIDs {
 			if _, ok := memberMap[userID]; !ok {
-				return nil, constant.ErrUserIDNotFound.Wrap(userID)
+				return nil, errs.ErrUserIDNotFound.Wrap(userID)
 			}
 		}
 		if !tokenverify.IsAppManagerUid(ctx) {
 			member := memberMap[opUserID]
 			if member == nil {
-				return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("opUserID %s no in group", opUserID))
+				return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("opUserID %s no in group", opUserID))
 			}
 			switch member.RoleLevel {
 			case constant.GroupOwner:
@@ -424,11 +425,11 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 						continue
 					}
 					if member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin {
-						return nil, constant.ErrNoPermission.Wrap("userID:" + member.UserID)
+						return nil, errs.ErrNoPermission.Wrap("userID:" + member.UserID)
 					}
 				}
 			default:
-				return nil, constant.ErrNoPermission.Wrap("opUserID is OrdinaryUser")
+				return nil, errs.ErrNoPermission.Wrap("opUserID is OrdinaryUser")
 			}
 		}
 		if err := s.GroupDatabase.DeleteGroupMember(ctx, group.GroupID, req.KickedUserIDs); err != nil {
@@ -442,10 +443,10 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
 	resp := &pbGroup.GetGroupMembersInfoResp{}
 	if len(req.Members) == 0 {
-		return nil, constant.ErrArgs.Wrap("members empty")
+		return nil, errs.ErrArgs.Wrap("members empty")
 	}
 	if req.GroupID == "" {
-		return nil, constant.ErrArgs.Wrap("groupID empty")
+		return nil, errs.ErrArgs.Wrap("groupID empty")
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, req.Members, nil)
 	if err != nil {
@@ -498,7 +499,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	if ids := utils.Single(utils.Keys(groupMap), groupIDs); len(ids) > 0 {
-		return nil, constant.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	groupMemberNumMap, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
@@ -520,7 +521,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
 	resp := &pbGroup.GetGroupsInfoResp{}
 	if len(req.GroupIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("groupID is empty")
+		return nil, errs.ErrArgs.Wrap("groupID is empty")
 	}
 	groups, err := s.GroupDatabase.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
@@ -546,7 +547,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	resp := &pbGroup.GroupApplicationResponseResp{}
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
-		return nil, constant.ErrArgs.Wrap("HandleResult unknown")
+		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
 	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
@@ -554,7 +555,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
-			return nil, constant.ErrNoPermission.Wrap("no group owner or admin")
+			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
@@ -566,7 +567,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	if groupRequest.HandleResult != 0 {
-		return nil, constant.ErrArgs.Wrap("group request already processed")
+		return nil, errs.ErrArgs.Wrap("group request already processed")
 	}
 	var join bool
 	if _, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
@@ -592,7 +593,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			OperatorUserID: tracelog.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != constant.ErrCallbackContinue {
+		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}
 	}
@@ -620,11 +621,11 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, constant.ErrDismissedAlready.Wrap()
+		return nil, errs.ErrDismissedAlready.Wrap()
 	}
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
-			return nil, constant.ErrGroupTypeNotSupport.Wrap()
+			return nil, errs.ErrGroupTypeNotSupport.Wrap()
 		}
 		user, err := s.UserCheck.GetUserInfo(ctx, tracelog.GetOpUserID(ctx))
 		if err != nil {
@@ -636,7 +637,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != constant.ErrCallbackContinue {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
@@ -688,7 +689,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 			return nil, err
 		}
 		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
-			return nil, constant.ErrNoPermission.Wrap("no group owner or admin")
+			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupInfoForSet.GroupID)
@@ -696,7 +697,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
 	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
 	if err != nil {
@@ -739,10 +740,10 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
 	if req.OldOwnerUserID == req.NewOwnerUserID {
-		return nil, constant.ErrArgs.Wrap("OldOwnerUserID == NewOwnerUserID")
+		return nil, errs.ErrArgs.Wrap("OldOwnerUserID == NewOwnerUserID")
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, []string{req.OldOwnerUserID, req.NewOwnerUserID}, nil)
 	if err != nil {
@@ -750,11 +751,11 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	}
 	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) string { return e.UserID })
 	if ids := utils.Single([]string{req.OldOwnerUserID, req.NewOwnerUserID}, utils.Keys(memberMap)); len(ids) > 0 {
-		return nil, constant.ErrArgs.Wrap("user not in group " + strings.Join(ids, ","))
+		return nil, errs.ErrArgs.Wrap("user not in group " + strings.Join(ids, ","))
 	}
 	newOwner := memberMap[req.NewOwnerUserID]
 	if newOwner == nil {
-		return nil, constant.ErrArgs.Wrap("NewOwnerUser not in group " + req.NewOwnerUserID)
+		return nil, errs.ErrArgs.Wrap("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
 	oldOwner := memberMap[req.OldOwnerUserID]
 	if tokenverify.IsAppManagerUid(ctx) {
@@ -766,10 +767,10 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		}
 	} else {
 		if oldOwner == nil {
-			return nil, constant.ErrArgs.Wrap("OldOwnerUser not in group " + req.NewOwnerUserID)
+			return nil, errs.ErrArgs.Wrap("OldOwnerUser not in group " + req.NewOwnerUserID)
 		}
 		if oldOwner.GroupID != tracelog.GetOpUserID(ctx) {
-			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", tracelog.GetOpUserID(ctx)))
+			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", tracelog.GetOpUserID(ctx)))
 		}
 	}
 	if err := s.GroupDatabase.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
@@ -805,7 +806,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(ownerMemberMap)); len(ids) > 0 {
-		return nil, constant.ErrDB.Wrap("group not owner " + strings.Join(ids, ","))
+		return nil, errs.ErrDatabase.Wrap("group not owner " + strings.Join(ids, ","))
 	}
 	groupMemberNumMap, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
@@ -865,7 +866,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
-		return nil, constant.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	owners, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
@@ -875,7 +876,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 		return e.GroupID
 	})
 	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
-		return nil, constant.ErrData.Wrap("group no owner", strings.Join(ids, ","))
+		return nil, errs.ErrData.Wrap("group no owner", strings.Join(ids, ","))
 	}
 	groupMemberNum, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
 	if err != nil {
@@ -897,7 +898,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, constant.ErrArgs.Wrap("group status is dismissed")
+		return nil, errs.ErrArgs.Wrap("group status is dismissed")
 	}
 	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID); err != nil {
 		return nil, err
@@ -924,7 +925,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 			return nil, err
 		}
 		if opMember.RoleLevel <= member.RoleLevel {
-			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
 		}
 	}
 	data := UpdateGroupMemberMutedTimeMap(time.Now().Add(time.Second * time.Duration(req.MutedSeconds)))
@@ -947,7 +948,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 			return nil, err
 		}
 		if opMember.RoleLevel <= member.RoleLevel {
-			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
 		}
 	}
 	data := UpdateGroupMemberMutedTimeMap(time.Unix(0, 0))
@@ -985,7 +986,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (*pbGroup.SetGroupMemberInfoResp, error) {
 	resp := &pbGroup.SetGroupMemberInfoResp{}
 	if len(req.Members) == 0 {
-		return nil, constant.ErrArgs.Wrap("members empty")
+		return nil, errs.ErrArgs.Wrap("members empty")
 	}
 	duplicateMap := make(map[[2]string]struct{})
 	userIDMap := make(map[string]struct{})
@@ -993,7 +994,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	for _, member := range req.Members {
 		key := [...]string{member.GroupID, member.UserID}
 		if _, ok := duplicateMap[key]; ok {
-			return nil, constant.ErrArgs.Wrap("group user duplicate")
+			return nil, errs.ErrArgs.Wrap("group user duplicate")
 		}
 		duplicateMap[key] = struct{}{}
 		userIDMap[member.UserID] = struct{}{}
@@ -1009,7 +1010,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
 	}
 	if len(duplicateMap) > 0 {
-		return nil, constant.ErrArgs.Wrap("group not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
+		return nil, errs.ErrArgs.Wrap("group not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
 			return fmt.Sprintf("[group: %s user: %s]", e[0], e[1])
 		}), ","))
 	}
@@ -1024,10 +1025,10 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			}
 			opMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
 			if !ok {
-				return nil, constant.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
 			}
 			if member.RoleLevel >= opMember.RoleLevel {
-				return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("group %s : %s RoleLevel %d >= %s RoleLevel %d", member.GroupID, member.UserID, member.RoleLevel, opMember.UserID, opMember.RoleLevel))
+				return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("group %s : %s RoleLevel %d >= %s RoleLevel %d", member.GroupID, member.UserID, member.RoleLevel, opMember.UserID, opMember.RoleLevel))
 			}
 		}
 	}
@@ -1036,7 +1037,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			continue
 		}
 		if memberMap[[...]string{member.GroupID, member.UserID}].RoleLevel == constant.GroupOwner {
-			return nil, constant.ErrArgs.Wrap(fmt.Sprintf("group %s user %s is owner", member.GroupID, member.UserID))
+			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("group %s user %s is owner", member.GroupID, member.UserID))
 		}
 	}
 	for i := 0; i < len(req.Members); i++ {
@@ -1063,10 +1064,10 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
 	resp := &pbGroup.GetGroupAbstractInfoResp{}
 	if len(req.GroupIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("groupIDs empty")
+		return nil, errs.ErrArgs.Wrap("groupIDs empty")
 	}
 	if utils.Duplicate(req.GroupIDs) {
-		return nil, constant.ErrArgs.Wrap("groupIDs duplicate")
+		return nil, errs.ErrArgs.Wrap("groupIDs duplicate")
 	}
 	groups, err := s.GroupDatabase.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
@@ -1075,14 +1076,14 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	if ids := utils.Single(req.GroupIDs, utils.Slice(groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
 	})); len(ids) > 0 {
-		return nil, constant.ErrGroupIDNotFound.Wrap("not found group " + strings.Join(ids, ","))
+		return nil, errs.ErrGroupIDNotFound.Wrap("not found group " + strings.Join(ids, ","))
 	}
 	groupUserMap, err := s.GroupDatabase.MapGroupMemberUserID(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
 	if ids := utils.Single(req.GroupIDs, utils.Keys(groupUserMap)); len(ids) > 0 {
-		return nil, constant.ErrGroupIDNotFound.Wrap(fmt.Sprintf("group %s not found member", strings.Join(ids, ",")))
+		return nil, errs.ErrGroupIDNotFound.Wrap(fmt.Sprintf("group %s not found member", strings.Join(ids, ",")))
 	}
 	resp.GroupAbstractInfos = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
 		users := groupUserMap[group.GroupID]
@@ -1094,7 +1095,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.GetUserInGroupMembersReq) (*pbGroup.GetUserInGroupMembersResp, error) {
 	resp := &pbGroup.GetUserInGroupMembersResp{}
 	if len(req.GroupIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("groupIDs empty")
+		return nil, errs.ErrArgs.Wrap("groupIDs empty")
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.UserID}, req.GroupIDs, nil)
 	if err != nil {
@@ -1127,7 +1128,7 @@ func (s *groupServer) GetGroupMemberUserIDs(ctx context.Context, req *pbGroup.Ge
 func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.GetGroupMemberRoleLevelReq) (*pbGroup.GetGroupMemberRoleLevelResp, error) {
 	resp := &pbGroup.GetGroupMemberRoleLevelResp{}
 	if len(req.RoleLevels) == 0 {
-		return nil, constant.ErrArgs.Wrap("RoleLevels empty")
+		return nil, errs.ErrArgs.Wrap("RoleLevels empty")
 	}
 	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, nil, req.RoleLevels)
 	if err != nil {

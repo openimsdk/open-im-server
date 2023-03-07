@@ -1,7 +1,6 @@
 package errs
 
 import (
-	"OpenIM/pkg/utils"
 	"fmt"
 	"github.com/pkg/errors"
 	"strings"
@@ -10,7 +9,7 @@ import (
 type Coderr interface {
 	Code() int
 	Msg() string
-	Warp(msg ...string) error
+	Wrap(msg ...string) error
 	error
 }
 
@@ -35,7 +34,7 @@ func (e *errInfo) Msg() string {
 	return e.msg
 }
 
-func (e *errInfo) Warp(w ...string) error {
+func (e *errInfo) Wrap(w ...string) error {
 	return errors.Wrap(e, strings.Join(w, ", "))
 }
 
@@ -44,5 +43,14 @@ func (e *errInfo) Error() string {
 }
 
 func Unwrap(err error) error {
-	return utils.Unwrap(err)
+	for err != nil {
+		unwrap, ok := err.(interface {
+			Unwrap() error
+		})
+		if !ok {
+			break
+		}
+		err = unwrap.Unwrap()
+	}
+	return err
 }

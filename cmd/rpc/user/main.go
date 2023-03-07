@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := config.InitConfig(); err != nil {
+	if err := config.InitConfig(""); err != nil {
 		panic(err.Error())
 	}
 	if err := startrpc.Start(config.Config.RpcPort.OpenImUserPort[0], config.Config.RpcRegisterName.OpenImUserName, config.Config.Prometheus.UserPrometheusPort[0], user.Start); err != nil {

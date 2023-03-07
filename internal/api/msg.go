@@ -7,6 +7,7 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -192,22 +193,22 @@ func (o *Msg) ManagementSendMsg(c *gin.Context) {
 		return
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
-		apiresp.GinError(c, constant.ErrData)
+		apiresp.GinError(c, errs.ErrData)
 		return
 	} else if err := o.validate.Struct(data); err != nil {
-		apiresp.GinError(c, constant.ErrData)
+		apiresp.GinError(c, errs.ErrData)
 		return
 	}
 	log.NewInfo(params.OperationID, data, params)
 	switch params.SessionType {
 	case constant.SingleChatType:
 		if len(params.RecvID) == 0 {
-			apiresp.GinError(c, constant.ErrData)
+			apiresp.GinError(c, errs.ErrData)
 			return
 		}
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		if len(params.GroupID) == 0 {
-			apiresp.GinError(c, constant.ErrData)
+			apiresp.GinError(c, errs.ErrData)
 			return
 		}
 	}
@@ -215,7 +216,7 @@ func (o *Msg) ManagementSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(&params)
 	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
-		apiresp.GinError(c, constant.ErrInternalServer)
+		apiresp.GinError(c, errs.ErrInternalServer)
 		return
 	}
 	client := msg.NewMsgClient(conn)

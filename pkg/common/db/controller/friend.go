@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/tx"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
 	"errors"
@@ -235,7 +236,7 @@ func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID s
 		return
 	}
 	if len(friends) != len(friendUserIDs) {
-		err = constant.ErrRecordNotFound.Wrap()
+		err = errs.ErrRecordNotFound.Wrap()
 	}
 	return
 }

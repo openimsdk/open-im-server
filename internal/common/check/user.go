@@ -2,8 +2,8 @@ package check
 
 import (
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/proto/user"
 	"OpenIM/pkg/utils"
@@ -41,7 +41,7 @@ func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complet
 		if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
 			return e.UserID
 		})); len(ids) > 0 {
-			return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
+			return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 		}
 	}
 	return resp.UsersInfo, nil

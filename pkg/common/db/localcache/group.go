@@ -2,8 +2,8 @@ package localcache
 
 import (
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/group"
 	"context"
 	"sync"
@@ -46,7 +46,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 		return nil, err
 	}
 	if len(resp.GroupAbstractInfos) < 0 {
-		return nil, constant.ErrGroupIDNotFound
+		return nil, errs.ErrGroupIDNotFound
 	}
 	localHashInfo, ok := g.cache[groupID]
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {

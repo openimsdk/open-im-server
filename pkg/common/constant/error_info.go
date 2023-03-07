@@ -1,11 +1,7 @@
 package constant
 
 import (
-	"OpenIM/pkg/utils"
-	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"strings"
 )
 
@@ -58,35 +54,36 @@ func toDetail(err error, info *ErrInfo) *ErrInfo {
 }
 
 func ToAPIErrWithErr(err error) *ErrInfo {
-	unwrap := utils.Unwrap(err)
-	if unwrap == gorm.ErrRecordNotFound {
-		return &ErrInfo{
-			ErrCode:      ErrRecordNotFound.Code(),
-			ErrMsg:       ErrRecordNotFound.Msg(),
-			DetailErrMsg: fmt.Sprintf("%+v", err),
-		}
-	}
-	if errInfo, ok := unwrap.(*ErrInfo); ok {
-		return &ErrInfo{
-			ErrCode:      errInfo.Code(),
-			ErrMsg:       errInfo.Msg(),
-			DetailErrMsg: fmt.Sprintf("%+v", err),
-		}
-	}
-
-	errComm := errors.New("")
-	var marshalErr *json.MarshalerError
-	errInfo := &ErrInfo{}
-	switch {
-	case errors.As(err, &errComm):
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return toDetail(err, ErrRecordNotFound)
-		}
-		return toDetail(err, ErrData)
-	case errors.As(err, &marshalErr):
-		return toDetail(err, ErrData)
-	case errors.As(err, &errInfo):
-		return toDetail(err, errInfo)
-	}
-	return toDetail(err, ErrDefaultOther)
+	return &ErrInfo{}
+	//unwrap := utils.Unwrap(err)
+	//if unwrap == gorm.ErrRecordNotFound {
+	//	return &ErrInfo{
+	//		ErrCode:      ErrRecordNotFound.Code(),
+	//		ErrMsg:       ErrRecordNotFound.Msg(),
+	//		DetailErrMsg: fmt.Sprintf("%+v", err),
+	//	}
+	//}
+	//if errInfo, ok := unwrap.(*ErrInfo); ok {
+	//	return &ErrInfo{
+	//		ErrCode:      errInfo.Code(),
+	//		ErrMsg:       errInfo.Msg(),
+	//		DetailErrMsg: fmt.Sprintf("%+v", err),
+	//	}
+	//}
+	//
+	//errComm := errors.New("")
+	//var marshalErr *json.MarshalerError
+	//errInfo := &ErrInfo{}
+	//switch {
+	//case errors.As(err, &errComm):
+	//	if errors.Is(err, gorm.ErrRecordNotFound) {
+	//		return toDetail(err, ErrRecordNotFound)
+	//	}
+	//	return toDetail(err, ErrData)
+	//case errors.As(err, &marshalErr):
+	//	return toDetail(err, ErrData)
+	//case errors.As(err, &errInfo):
+	//	return toDetail(err, errInfo)
+	//}
+	//return toDetail(err, ErrDefaultOther)
 }

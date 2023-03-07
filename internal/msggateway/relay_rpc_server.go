@@ -143,7 +143,7 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *msggateway.GetU
 	log.NewInfo(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
 	if !tokenverify.IsManagerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "no permission GetUsersOnlineStatus ", req.OpUserID)
-		return &msggateway.GetUsersOnlineStatusResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &msggateway.GetUsersOnlineStatusResp{ErrCode: errs.ErrAccess.ErrCode, ErrMsg: errs.ErrAccess.ErrMsg}, nil
 	}
 	var resp msggateway.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDList {

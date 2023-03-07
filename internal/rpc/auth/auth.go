@@ -10,6 +10,7 @@ import (
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	pbAuth "OpenIM/pkg/proto/auth"
 	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/utils"
@@ -60,19 +61,19 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 		return nil, err
 	}
 	if len(m) == 0 {
-		return nil, constant.ErrTokenNotExist.Wrap()
+		return nil, errs.ErrTokenNotExist.Wrap()
 	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
 			return claims, nil
 		case constant.KickedToken:
-			return nil, constant.ErrTokenKicked.Wrap()
+			return nil, errs.ErrTokenKicked.Wrap()
 		default:
-			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
+			return nil, utils.Wrap(errs.ErrTokenUnknown, "")
 		}
 	}
-	return nil, constant.ErrTokenNotExist.Wrap()
+	return nil, errs.ErrTokenNotExist.Wrap()
 }
 
 func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
@@ -110,5 +111,5 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")
 	}
-	return constant.ErrInternalServer.Wrap()
+	return errs.ErrInternalServer.Wrap()
 }

@@ -3,6 +3,7 @@ package msg
 import (
 	"OpenIM/pkg/common/constant"
 	promePkg "OpenIM/pkg/common/prome"
+	"OpenIM/pkg/errs"
 	pbConversation "OpenIM/pkg/proto/conversation"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
@@ -16,7 +17,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 	resp = &msg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	// callback
-	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -30,7 +31,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		return nil, err
 	}
 	// callback
-	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -62,7 +63,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	_, err = m.messageVerification(ctx, req)
@@ -77,17 +78,17 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if isSend {
 		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
 		if err != nil {
-			return nil, constant.ErrInternalServer.Wrap("insert to mq")
+			return nil, errs.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
 	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
 		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
 		if err != nil {
-			return nil, constant.ErrInternalServer.Wrap("insert to mq")
+			return nil, errs.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
 	err = CallbackAfterSendSingleMsg(ctx, req)
-	if err != nil && err != constant.ErrCallbackContinue {
+	if err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
@@ -103,7 +104,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	// callback
 	promePkg.Inc(promePkg.GroupChatMsgRecvSuccessCounter)
 	err = CallbackBeforeSendGroupMsg(ctx, req)
-	if err != nil && err != constant.ErrCallbackContinue {
+	if err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -168,7 +169,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 
 	// callback
 	err = CallbackAfterSendGroupMsg(ctx, req)
-	if err != nil && err != constant.ErrCallbackContinue {
+	if err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 
@@ -235,10 +236,10 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 	resp = &msg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)
 	if !flag {
-		return nil, constant.ErrMessageHasReadDisable.Wrap()
+		return nil, errs.ErrMessageHasReadDisable.Wrap()
 	}
 	m.encapsulateMsgData(req.MsgData)
-	if err := CallbackMsgModify(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err := CallbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	switch req.MsgData.SessionType {
@@ -251,7 +252,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 	case constant.SuperGroupChatType:
 		return m.sendMsgSuperGroupChat(ctx, req)
 	default:
-		return nil, constant.ErrArgs.Wrap("unknown sessionType")
+		return nil, errs.ErrArgs.Wrap("unknown sessionType")
 	}
 }
 

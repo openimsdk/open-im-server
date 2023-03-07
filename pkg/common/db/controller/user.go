@@ -3,6 +3,7 @@ package controller
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
 )
@@ -60,7 +61,7 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 		return
 	}
 	if len(users) != len(userIDs) {
-		err = constant.ErrRecordNotFound.Wrap()
+		err = errs.ErrRecordNotFound.Wrap()
 	}
 	return
 }
@@ -114,7 +115,7 @@ func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err 
 			if total == int64(len(userIDs)) {
 				return userIDs, nil
 			}
-			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
+			return nil, errs.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
 		}
 		userIDs = append(userIDs, tmp...)
 		pageNumber++

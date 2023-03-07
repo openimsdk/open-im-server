@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
@@ -43,6 +44,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	resp, err = handler(ctx, req)
 	if err != nil {
 		tracelog.SetCtxInfo(ctx, funcName, err)
+
 		errInfo := constant.ToAPIErrWithErr(err)
 		var code codes.Code
 		if errInfo.ErrCode == 0 {
@@ -69,15 +71,15 @@ func rpcString(v interface{}) string {
 
 func RpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
 	//if cc == nil {
-	//	return utils.Wrap(constant.ErrRpcConn, "")
+	//	return utils.Wrap(errs.ErrRpcConn, "")
 	//}
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
-		return utils.Wrap(constant.ErrArgs, "ctx missing operationID")
+		return utils.Wrap(errs.ErrArgs, "ctx missing operationID")
 	}
 	opUserID, ok := ctx.Value("opUserID").(string)
 	if !ok {
-		return utils.Wrap(constant.ErrArgs, "ctx missing opUserID")
+		return utils.Wrap(errs.ErrArgs, "ctx missing opUserID")
 	}
 	md := metadata.Pairs(constant.OperationID, operationID, "opUserID", opUserID)
 	return invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
