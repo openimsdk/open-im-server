@@ -330,6 +330,7 @@ const LocalHost = "0.0.0.0"
 
 // flag parse
 const (
-	FlagPort = "port"
-	FlagConf = "config_folder_path"
+	FlagPort       = "port"
+	PrometheusPort = "prometheus_port"
+	FlagConf       = "config_folder_path"
 )

@@ -2,11 +2,55 @@ package main
 
 import (
 	"OpenIM/internal/tools"
+	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
-	"context"
+	"OpenIM/pkg/common/constant"
 	"flag"
+	"fmt"
+	"github.com/spf13/cobra"
+	"os"
 )
 
+
+var showSeqCmd = &cobra.Command{
+	Use:   "show-seq",
+	Short: "Start the server",
+	Run: func(cmd *cobra.Command, args []string) {
+		configFolderPath, _ := cmd.Flags().GetString(constant.FlagConf)
+		config.InitConfig(configFolderPath)
+	},
+}
+
+var
+
+
+func init() {
+	showSeqCmd.Flags().StringP("userID", "u", "", "openIM userID")
+	showSeqCmd.Flags().StringP("groupID", "g", "", "openIM groupID")
+	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+
+}
+
+func run(configFolderPath string, cmd *cobra.Command) error {
+	if err := config.InitConfig(configFolderPath); err != nil {
+		return err
+	}
+
+
+	return nil
+}
+
+func main() {
+	rootCmd := cmd.NewRootCmd()
+	rootCmd.AddCommand(showSeqCmd)
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+
+//
 func main() {
 	if err := config.InitConfig(""); err != nil {
 		panic(err.Error())
