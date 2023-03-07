@@ -13,8 +13,3 @@ type SvcDiscoveryRegistry interface {
 	RegisterConf2Registry(key string, conf []byte) error
 	GetConfFromRegistry(key string) ([]byte, error)
 }
-
-func GetConns(serviceName string) {
-	GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
-
-}
