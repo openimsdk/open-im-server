@@ -6,6 +6,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/utils"
 	"bytes"
@@ -303,8 +304,8 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 func (ws *WServer) sendKickMsg(oldConn *UserConn) {
 	mReply := Resp{
 		ReqIdentifier: constant.WSKickOnlineMsg,
-		ErrCode:       constant.ErrTokenInvalid.ErrCode,
-		ErrMsg:        constant.ErrTokenInvalid.ErrMsg,
+		ErrCode:       int32(errs.ErrTokenInvalid.Code()),
+		ErrMsg:        errs.ErrTokenInvalid.Msg(),
 	}
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
@@ -443,47 +444,47 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
 		if ok, err, msg := tokenverify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
-			if errors.Is(err, constant.ErrTokenExpired) {
-				status = int(constant.ErrTokenExpired.ErrCode)
+			if errors.Is(err, errs.ErrTokenExpired) {
+				status = int(errs.ErrTokenExpired.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenInvalid) {
-				status = int(constant.ErrTokenInvalid.ErrCode)
+			if errors.Is(err, errs.ErrTokenInvalid) {
+				status = int(errs.ErrTokenInvalid.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenMalformed) {
-				status = int(constant.ErrTokenMalformed.ErrCode)
+			if errors.Is(err, errs.ErrTokenMalformed) {
+				status = int(errs.ErrTokenMalformed.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenNotValidYet) {
-				status = int(constant.ErrTokenNotValidYet.ErrCode)
+			if errors.Is(err, errs.ErrTokenNotValidYet) {
+				status = int(errs.ErrTokenNotValidYet.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenUnknown) {
-				status = int(constant.ErrTokenUnknown.ErrCode)
+			if errors.Is(err, errs.ErrTokenUnknown) {
+				status = int(errs.ErrTokenUnknown.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenKicked) {
-				status = int(constant.ErrTokenKicked.ErrCode)
+			if errors.Is(err, errs.ErrTokenKicked) {
+				status = int(errs.ErrTokenKicked.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenDifferentPlatformID) {
-				status = int(constant.ErrTokenDifferentPlatformID.ErrCode)
+			if errors.Is(err, errs.ErrTokenDifferentPlatformID) {
+				status = int(errs.ErrTokenDifferentPlatformID.ErrCode)
 			}
-			if errors.Is(err, constant.ErrTokenDifferentUserID) {
-				status = int(constant.ErrTokenDifferentUserID.ErrCode)
+			if errors.Is(err, errs.ErrTokenDifferentUserID) {
+				status = int(errs.ErrTokenDifferentUserID.ErrCode)
 			}
 			//switch errors.Cause(err) {
-			//case constant.ErrTokenExpired:
-			//	status = int(constant.ErrTokenExpired.ErrCode)
-			//case constant.ErrTokenInvalid:
-			//	status = int(constant.ErrTokenInvalid.ErrCode)
-			//case constant.ErrTokenMalformed:
-			//	status = int(constant.ErrTokenMalformed.ErrCode)
-			//case constant.ErrTokenNotValidYet:
-			//	status = int(constant.ErrTokenNotValidYet.ErrCode)
-			//case constant.ErrTokenUnknown:
-			//	status = int(constant.ErrTokenUnknown.ErrCode)
-			//case constant.ErrTokenKicked:
-			//	status = int(constant.ErrTokenKicked.ErrCode)
-			//case constant.ErrTokenDifferentPlatformID:
-			//	status = int(constant.ErrTokenDifferentPlatformID.ErrCode)
-			//case constant.ErrTokenDifferentUserID:
-			//	status = int(constant.ErrTokenDifferentUserID.ErrCode)
+			//case errs.ErrTokenExpired:
+			//	status = int(errs.ErrTokenExpired.ErrCode)
+			//case errs.ErrTokenInvalid:
+			//	status = int(errs.ErrTokenInvalid.ErrCode)
+			//case errs.ErrTokenMalformed:
+			//	status = int(errs.ErrTokenMalformed.ErrCode)
+			//case errs.ErrTokenNotValidYet:
+			//	status = int(errs.ErrTokenNotValidYet.ErrCode)
+			//case errs.ErrTokenUnknown:
+			//	status = int(errs.ErrTokenUnknown.ErrCode)
+			//case errs.ErrTokenKicked:
+			//	status = int(errs.ErrTokenKicked.ErrCode)
+			//case errs.ErrTokenDifferentPlatformID:
+			//	status = int(errs.ErrTokenDifferentPlatformID.ErrCode)
+			//case errs.ErrTokenDifferentUserID:
+			//	status = int(errs.ErrTokenDifferentUserID.ErrCode)
 			//}
 
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error(), "status: ", status)
@@ -502,7 +503,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			return true, compression
 		}
 	} else {
-		status = int(constant.ErrArgs.ErrCode)
+		status = int(errs.ErrArgs.ErrCode)
 		log.Error(operationID, "Args err ", "query ", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
 		errMsg := "args err, need token, sendID, platformID"

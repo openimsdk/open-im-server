@@ -3,8 +3,6 @@ package main
 import (
 	"OpenIM/internal/tools"
 	"OpenIM/pkg/common/cmd"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
 	"context"
 	"fmt"
 	"github.com/spf13/cobra"

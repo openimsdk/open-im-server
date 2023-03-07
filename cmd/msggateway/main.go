@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if err := config.InitConfig(); err != nil {
+	if err := config.InitConfig(""); err != nil {
 		panic(err.Error())
 	}
 	log.NewPrivateLog(constant.LogFileName)

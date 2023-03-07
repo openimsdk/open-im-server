@@ -9,7 +9,7 @@ package http
 import (
 	"OpenIM/pkg/callbackstruct"
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/errs"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -76,15 +76,15 @@ func callBackPostReturn(url, command string, input interface{}, output callbacks
 	b, err := Post(url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return constant.ErrCallbackContinue
+			return errs.ErrCallbackContinue
 		}
-		return constant.NewErrNetwork(err)
+		return errs.ErrNetwork.Wrap(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return constant.ErrCallbackContinue
+			return errs.ErrCallbackContinue
 		}
-		return constant.NewErrData(err)
+		return errs.ErrData.Wrap(err.Error())
 	}
 	return output.Parse()
 }

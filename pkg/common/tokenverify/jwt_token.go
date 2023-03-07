@@ -2,8 +2,8 @@ package tokenverify
 
 import (
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
@@ -40,22 +40,22 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, utils.Wrap(constant.ErrTokenMalformed, "")
+				return nil, utils.Wrap(errs.ErrTokenMalformed, "")
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, utils.Wrap(constant.ErrTokenExpired, "")
+				return nil, utils.Wrap(errs.ErrTokenExpired, "")
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
+				return nil, utils.Wrap(errs.ErrTokenNotValidYet, "")
 			} else {
-				return nil, utils.Wrap(constant.ErrTokenUnknown, "")
+				return nil, utils.Wrap(errs.ErrTokenUnknown, "")
 			}
 		} else {
-			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
+			return nil, utils.Wrap(errs.ErrTokenUnknown, "")
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			return claims, nil
 		}
-		return nil, utils.Wrap(constant.ErrTokenUnknown, "")
+		return nil, utils.Wrap(errs.ErrTokenUnknown, "")
 	}
 }
 
@@ -70,7 +70,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
+	return errs.ErrIdentity.Wrap(utils.GetSelfFuncName())
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
@@ -81,7 +81,7 @@ func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	return constant.ErrIdentity.Wrap()
+	return errs.ErrIdentity.Wrap()
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {

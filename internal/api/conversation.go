@@ -20,7 +20,7 @@ type Conversation struct {
 }
 
 func (o *Conversation) client() (conversation.ConversationClient, error) {
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
 		return nil, err
 	}

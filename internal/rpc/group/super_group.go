@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/errs"
 	pbGroup "OpenIM/pkg/proto/group"
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -29,7 +30,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
-		return nil, constant.ErrData.Wrap(fmt.Sprintf("super group %s not owner", strings.Join(ids, ",")))
+		return nil, errs.ErrData.Wrap(fmt.Sprintf("super group %s not owner", strings.Join(ids, ",")))
 	}
 	groups, err := s.GroupDatabase.FindGroup(ctx, joinSuperGroup.GroupIDs)
 	if err != nil {
@@ -39,7 +40,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(groupMap)); len(ids) > 0 {
-		return nil, constant.ErrData.Wrap(fmt.Sprintf("super group info %s not found", strings.Join(ids, ",")))
+		return nil, errs.ErrData.Wrap(fmt.Sprintf("super group info %s not found", strings.Join(ids, ",")))
 	}
 	superGroupMembers, err := s.GroupDatabase.FindSuperGroup(ctx, joinSuperGroup.GroupIDs)
 	if err != nil {
@@ -57,7 +58,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSuperGroupsInfoReq) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
 	resp = &pbGroup.GetSuperGroupsInfoResp{}
 	if len(req.GroupIDs) == 0 {
-		return nil, constant.ErrArgs.Wrap("groupIDs empty")
+		return nil, errs.ErrArgs.Wrap("groupIDs empty")
 	}
 	groups, err := s.GroupDatabase.FindGroup(ctx, req.GroupIDs)
 	if err != nil {

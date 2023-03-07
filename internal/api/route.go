@@ -3,7 +3,7 @@ package api
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/middleware"
+	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"github.com/OpenIMSDK/openKeeper"
 	"github.com/gin-gonic/gin"
@@ -11,15 +11,14 @@ import (
 	"os"
 )
 
-func NewGinRouter() *gin.Engine {
+func NewGinRouter(zk *openKeeper.ZkClient) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(middleware.GinParseOperationID)
 	log.Info("load config: ", config.Config)
+	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -27,8 +26,7 @@ func NewGinRouter() *gin.Engine {
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-
-	var zk *openKeeper.ZkClient
+	zk.AddOption(mw.GrpcClient()) // 默认RPC中间件
 
 	userRouterGroup := r.Group("/user")
 	{
@@ -148,25 +146,3 @@ func NewGinRouter() *gin.Engine {
 	}
 	return r
 }
-
-/*
-
-	{
-		GetSeq
-		SendMsg
-		PullMsgBySeqList
-		DelMsg
-		DelSuperGroupMsg
-		ClearMsg
-		SetMsgMinSeq
-		SetMessageReactionExtensions
-		GetMessageListReactionExtensions
-		AddMessageReactionExtensions
-		DeleteMessageReactionExtensions
-		ManagementSendMsg
-		ManagementBatchSendMsg
-		CheckMsgIsSendSuccess
-	}
-
-
-*/

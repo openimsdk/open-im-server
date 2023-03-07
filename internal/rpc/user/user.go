@@ -12,6 +12,7 @@ import (
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	registry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/sdkws"
 	pbuser "OpenIM/pkg/proto/user"
 	"OpenIM/pkg/utils"
@@ -38,7 +39,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname) {
-		return constant.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
+		return errs.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
 	}
 	for k, v := range config.Config.Manager.AppManagerUid {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
@@ -114,7 +115,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
 	resp = &pbuser.AccountCheckResp{}
 	if utils.Duplicate(req.CheckUserIDs) {
-		return nil, constant.ErrArgs.Wrap("userID repeated")
+		return nil, errs.ErrArgs.Wrap("userID repeated")
 	}
 	err = tokenverify.CheckAdmin(ctx)
 	if err != nil {
@@ -156,7 +157,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
 	resp = &pbuser.UserRegisterResp{}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
-		return nil, constant.ErrArgs.Wrap("userID repeated")
+		return nil, errs.ErrArgs.Wrap("userID repeated")
 	}
 	userIDs := make([]string, 0)
 	for _, v := range req.Users {
@@ -167,7 +168,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, err
 	}
 	if exist {
-		return nil, constant.ErrRegisteredAlready.Wrap("userID registered already")
+		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
 	}
 	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
 	if err != nil {

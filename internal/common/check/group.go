@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/group"
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -41,7 +42,7 @@ func (g *GroupChecker) GetGroupInfos(ctx context.Context, groupIDs []string, com
 		if ids := utils.Single(groupIDs, utils.Slice(resp.GroupInfos, func(e *sdkws.GroupInfo) string {
 			return e.GroupID
 		})); len(ids) > 0 {
-			return nil, constant.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+			return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
 		}
 	}
 	return resp.GroupInfos, nil
@@ -81,7 +82,7 @@ func (g *GroupChecker) GetGroupMemberInfos(ctx context.Context, groupID string, 
 		if ids := utils.Single(userIDs, utils.Slice(resp.Members, func(e *sdkws.GroupMemberFullInfo) string {
 			return e.UserID
 		})); len(ids) > 0 {
-			return nil, constant.ErrNotInGroupYet.Wrap(strings.Join(ids, ","))
+			return nil, errs.ErrNotInGroupYet.Wrap(strings.Join(ids, ","))
 		}
 	}
 	return resp.Members, nil

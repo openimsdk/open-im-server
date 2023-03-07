@@ -1,7 +1,7 @@
 package callbackstruct
 
 import (
-	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/errs"
 	"fmt"
 )
 
@@ -44,11 +44,8 @@ type CommonCallbackResp struct {
 }
 
 func (c CommonCallbackResp) Parse() error {
-	if c.ActionCode != constant.NoError || c.ErrCode != constant.NoError {
-		newErr := constant.ErrCallback
-		newErr.ErrCode = c.ErrCode
-		newErr.DetailErrMsg = fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg)
-		return newErr.Wrap()
+	if c.ActionCode != errs.NoError || c.ErrCode != errs.NoError {
+		return errs.NewCodeError(int(c.ErrCode), "Callback").Wrap(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
 	}
 	return nil
 }

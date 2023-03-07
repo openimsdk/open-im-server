@@ -1,10 +1,10 @@
 module OpenIM
 
-go 1.18
+go 1.16
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/openKeeper v0.0.1
+	github.com/OpenIMSDK/openKeeper v0.0.3
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1

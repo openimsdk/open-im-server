@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/friend"
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"context"
@@ -67,7 +68,7 @@ func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID strin
 			if tmp.Total == int32(len(resp)) {
 				return resp, nil
 			}
-			return nil, constant.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
+			return nil, errs.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
 		}
 		resp = append(resp, tmp.FriendsInfo...)
 		page++

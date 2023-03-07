@@ -5,7 +5,7 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/middleware"
+	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
 	"flag"
@@ -36,7 +36,7 @@ func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(
 	if err != nil {
 		return err
 	}
-	options = append(options, grpc.UnaryInterceptor(middleware.RpcServerInterceptor)) // ctx 中间件
+	options = append(options, mw.GrpcServer()) // ctx 中间件
 	if config.Config.Prometheus.Enable {
 		prome.NewGrpcRequestCounter()
 		prome.NewGrpcRequestFailedCounter()

@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println(time.Now(), "start cronTask")
-	if err := config.InitConfig(); err != nil {
+	if err := config.InitConfig(""); err != nil {
 		panic(err.Error())
 	}
 	if err := tools.StartCronTask(); err != nil {

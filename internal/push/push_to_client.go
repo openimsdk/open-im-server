@@ -20,6 +20,7 @@ import (
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -67,7 +68,7 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 	var userIDs = []string{userID}
 	log.Debug(operationID, "Get msg from msg_transfer And push msg", msg.String(), userID)
 	// callback
-	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != constant.ErrCallbackContinue {
+	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != errs.ErrCallbackContinue {
 		return err
 	}
 	// push
@@ -110,7 +111,7 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 	operationID := tracelog.GetOperationID(ctx)
 	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
 	var pushToUserIDs []string
-	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil && err != constant.ErrCallbackContinue {
+	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil && err != errs.ErrCallbackContinue {
 		return err
 	}
 	if len(pushToUserIDs) == 0 {

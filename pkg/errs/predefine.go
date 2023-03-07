@@ -1,13 +1,14 @@
 package errs
 
 var (
-	ErrArgs           = NewCodeError(ArgsError, "ArgsError")
-	ErrDatabase       = NewCodeError(DatabaseError, "DatabaseError")
-	ErrInternalServer = NewCodeError(ServerInternalError, "ServerInternalError")
-	ErrNetwork        = NewCodeError(NetworkError, "NetworkError")
-	ErrNoPermission   = NewCodeError(NoPermissionError, "NoPermissionError")
-	ErrIdentity       = NewCodeError(IdentityError, "IdentityError")
-	ErrCallback       = NewCodeError(CallbackError, "CallbackError")
+	ErrArgs             = NewCodeError(ArgsError, "ArgsError")
+	ErrDatabase         = NewCodeError(DatabaseError, "DatabaseError")
+	ErrInternalServer   = NewCodeError(ServerInternalError, "ServerInternalError")
+	ErrNetwork          = NewCodeError(NetworkError, "NetworkError")
+	ErrNoPermission     = NewCodeError(NoPermissionError, "NoPermissionError")
+	ErrIdentity         = NewCodeError(IdentityError, "IdentityError")
+	ErrCallback         = NewCodeError(CallbackError, "CallbackError")
+	ErrCallbackContinue = NewCodeError(CallbackError, "ErrCallbackContinue")
 
 	ErrUserIDNotFound  = NewCodeError(UserIDNotFoundError, "UserIDNotFoundError")
 	ErrGroupIDNotFound = NewCodeError(GroupIDNotFoundError, "GroupIDNotFoundError")

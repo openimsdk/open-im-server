@@ -3,6 +3,7 @@ package new
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"errors"
 	"fmt"
@@ -131,7 +132,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	context := newContext(w, r)
 	if ws.onlineUserConnNum >= ws.wsMaxConnNum {
-		httpError(context, constant.ErrConnOverMaxNumLimit)
+		httpError(context, errs.ErrConnOverMaxNumLimit)
 		return
 	}
 	var (
@@ -145,17 +146,17 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, exists = context.Query(TOKEN)
 	if !exists {
-		httpError(context, constant.ErrConnArgsErr)
+		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
 	userID, exists = context.Query(WS_USERID)
 	if !exists {
-		httpError(context, constant.ErrConnArgsErr)
+		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
 	platformID, exists = context.Query(PLATFORM_ID)
 	if !exists {
-		httpError(context, constant.ErrConnArgsErr)
+		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
 	err := tokenverify.WsVerifyToken(token, userID, platformID)

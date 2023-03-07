@@ -1,14 +1,12 @@
 package msggateway
 
 import (
-	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
 	pbChat "OpenIM/pkg/proto/msg"
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
-	"strings"
 )
 
 var MaxPullMsgNum = 100

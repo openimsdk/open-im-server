@@ -3,6 +3,7 @@ package msg
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
@@ -80,7 +81,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, err
 		}
 		if black {
-			return nil, constant.ErrBlockedByPeer.Wrap()
+			return nil, errs.ErrBlockedByPeer.Wrap()
 		}
 		if *config.Config.MessageVerify.FriendVerify {
 			friend, err := m.friend.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
@@ -88,7 +89,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 				return nil, err
 			}
 			if !friend {
-				return nil, constant.ErrNotPeersFriend.Wrap()
+				return nil, errs.ErrNotPeersFriend.Wrap()
 			}
 			return nil, nil
 		}
@@ -108,14 +109,14 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return userIDList, nil
 		}
 		if !utils.IsContain(data.MsgData.SendID, userIDList) {
-			return nil, constant.ErrNotInGroupYet.Wrap()
+			return nil, errs.ErrNotInGroupYet.Wrap()
 		}
 		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			return nil, err
 		}
 		if isMute {
-			return nil, constant.ErrMutedInGroup.Wrap()
+			return nil, errs.ErrMutedInGroup.Wrap()
 		}
 
 		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
@@ -127,7 +128,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		}
 
 		if isMute {
-			return nil, constant.ErrMutedGroup.Wrap()
+			return nil, errs.ErrMutedGroup.Wrap()
 		}
 		return userIDList, nil
 	case constant.SuperGroupChatType:
@@ -139,7 +140,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			revokeMessage := new(MessageRevoked)
 			err := utils.JsonStringToStruct(string(data.MsgData.Content), revokeMessage)
 			if err != nil {
-				return nil, constant.ErrArgs.Wrap()
+				return nil, errs.ErrArgs.Wrap()
 			}
 
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
@@ -153,7 +154,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 					revokeMessage.SourceMessageSendID = resp[0].SendID
 					data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
 				} else {
-					return nil, constant.ErrData.Wrap("MsgData")
+					return nil, errs.ErrData.Wrap("MsgData")
 				}
 			}
 		}
@@ -172,7 +173,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return userIDList, nil
 		} else {
 			if !utils.IsContain(data.MsgData.SendID, userIDList) {
-				return nil, constant.ErrNotInGroupYet.Wrap()
+				return nil, errs.ErrNotInGroupYet.Wrap()
 			}
 		}
 		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
@@ -180,7 +181,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, err
 		}
 		if isMute {
-			return nil, constant.ErrMutedInGroup.Wrap()
+			return nil, errs.ErrMutedInGroup.Wrap()
 		}
 
 		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
@@ -191,7 +192,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return userIDList, nil
 		}
 		if isMute {
-			return nil, constant.ErrMutedGroup.Wrap()
+			return nil, errs.ErrMutedGroup.Wrap()
 		}
 		return userIDList, nil
 
@@ -328,7 +329,7 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 		}
 		if isSend {
 			if v == "" || groupPB.MsgData.SendID == "" {
-				return constant.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
+				return errs.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
 			}
 			err := m.MsgDatabase.MsgToMQ(ctx, v, &msgToMQGroup)
 			if err != nil {

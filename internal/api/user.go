@@ -20,7 +20,7 @@ type User struct {
 }
 
 func (o *User) client() (user.UserClient, error) {
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,6 @@ func (o *User) GetAllUsersID(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
 }
 
-//
 func (u *User) AccountCheck(c *gin.Context) {
 	a2r.Call(user.UserClient.AccountCheck, u.client, c)
 }

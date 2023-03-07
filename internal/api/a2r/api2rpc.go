@@ -2,7 +2,7 @@ package a2r
 
 import (
 	"OpenIM/internal/apiresp"
-	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/errs"
 	"context"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -15,18 +15,18 @@ func Call[A, B, C any](
 ) {
 	var req A
 	if err := c.BindJSON(&req); err != nil {
-		apiresp.GinError(c, constant.ErrArgs.Wrap(err.Error())) // 参数错误
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数错误
 		return
 	}
 	if check, ok := any(&req).(interface{ Check() error }); ok {
 		if err := check.Check(); err != nil {
-			apiresp.GinError(c, constant.ErrArgs.Wrap(err.Error())) // 参数校验失败
+			apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数校验失败
 			return
 		}
 	}
 	cli, err := client()
 	if err != nil {
-		apiresp.GinError(c, constant.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
+		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
 		return
 	}
 	data, err := rpc(cli, c, &req)

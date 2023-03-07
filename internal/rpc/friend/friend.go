@@ -12,6 +12,7 @@ import (
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	registry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	pbfriend "OpenIM/pkg/proto/friend"
 	"OpenIM/pkg/utils"
 	"context"
@@ -50,11 +51,11 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != constant.ErrCallbackContinue {
+	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
 	if req.ToUserID == req.FromUserID {
-		return nil, constant.ErrCanNotAddYourself.Wrap()
+		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
 	if _, err := s.userCheck.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}, true); err != nil {
 		return nil, err
@@ -64,7 +65,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	if in1 && in2 {
-		return nil, constant.ErrRelationshipAlready.Wrap()
+		return nil, errs.ErrRelationshipAlready.Wrap()
 	}
 	if err = s.FriendDatabase.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
@@ -84,10 +85,10 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 	}
 
 	if utils.Contain(req.OwnerUserID, req.FriendUserIDs...) {
-		return nil, constant.ErrCanNotAddYourself.Wrap()
+		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, constant.ErrArgs.Wrap("friend userID repeated")
+		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
 
 	if err := s.FriendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport, tracelog.GetOpUserID(ctx)); err != nil {
@@ -119,7 +120,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		s.notification.FriendApplicationRefusedNotification(ctx, req)
 		return resp, nil
 	}
-	return nil, constant.ErrArgs.Wrap("req.HandleResult != -1/1")
+	return nil, errs.ErrArgs.Wrap("req.HandleResult != -1/1")
 }
 
 // ok
@@ -162,7 +163,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.G
 	resp = &pbfriend.GetDesignatedFriendsResp{}
 
 	if utils.Duplicate(req.FriendUserIDs) {
-		return nil, constant.ErrArgs.Wrap("friend userID repeated")
+		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
 	friends, err := s.FriendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
