@@ -8,36 +8,24 @@ import (
 	"OpenIM/pkg/common/mw"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
-	"github.com/spf13/cobra"
 	"os"
 	"strconv"
 
 	"OpenIM/pkg/common/constant"
 )
 
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start the server",
-	Run: func(cmd *cobra.Command, args []string) {
-		port, _ := cmd.Flags().GetInt(constant.FlagPort)
-		if err := run(port); err != nil {
-			panic(err.Error())
-		}
-	},
-}
-
 func main() {
-	startCmd.Flags().IntP(constant.FlagPort, "p", 0, "Port to listen on")
-	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
-	rootCmd := cmd.NewRootCmd(nil)
-	rootCmd.Command.AddCommand(startCmd)
-	if err := startCmd.Execute(); err != nil {
+	rootCmd := cmd.NewRootCmd()
+	rootCmd.AddPortFlag()
+	rootCmd.AddRunE(run)
+	if err := rootCmd.Command.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run(port int) error {
+func run(rootCmd cmd.RootCmd) error {
+	port := rootCmd.GetPortFlag()
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
