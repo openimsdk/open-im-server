@@ -19,6 +19,5 @@ func (t *thirdServer) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) 
 }
 
 func (t *thirdServer) CleanObject(ctx context.Context, now time.Time) {
-	//清理过期的对象
-
+	t.s3dataBase.CleanExpirationObject(ctx, now)
 }

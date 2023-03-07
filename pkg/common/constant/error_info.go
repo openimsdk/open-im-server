@@ -1,7 +1,9 @@
 package constant
 
 import (
+	"OpenIM/pkg/utils"
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"strings"
@@ -29,6 +31,14 @@ func (e *ErrInfo) Code() int32 {
 	return e.ErrCode
 }
 
+func (e *ErrInfo) Msg() string {
+	return e.ErrMsg
+}
+
+func (e *ErrInfo) Detail() string {
+	return e.DetailErrMsg
+}
+
 func (e *ErrInfo) Wrap(msg ...string) error {
 	return errors.Wrap(e, strings.Join(msg, "--"))
 }
@@ -48,6 +58,22 @@ func toDetail(err error, info *ErrInfo) *ErrInfo {
 }
 
 func ToAPIErrWithErr(err error) *ErrInfo {
+	unwrap := utils.Unwrap(err)
+	if unwrap == gorm.ErrRecordNotFound {
+		return &ErrInfo{
+			ErrCode:      ErrRecordNotFound.Code(),
+			ErrMsg:       ErrRecordNotFound.Msg(),
+			DetailErrMsg: fmt.Sprintf("%+v", err),
+		}
+	}
+	if errInfo, ok := unwrap.(*ErrInfo); ok {
+		return &ErrInfo{
+			ErrCode:      errInfo.Code(),
+			ErrMsg:       errInfo.Msg(),
+			DetailErrMsg: fmt.Sprintf("%+v", err),
+		}
+	}
+
 	errComm := errors.New("")
 	var marshalErr *json.MarshalerError
 	errInfo := &ErrInfo{}

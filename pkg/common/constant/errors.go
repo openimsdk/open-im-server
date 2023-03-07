@@ -8,7 +8,7 @@ var (
 	ErrNetwork          = &ErrInfo{NetworkError, "NetworkError", ""}
 	ErrNoPermission     = &ErrInfo{NoPermissionError, "NoPermissionError", ""}
 	ErrIdentity         = &ErrInfo{IdentityError, "IdentityError", ""}
-	ErrCallback         = &ErrInfo{ErrMsg: "CallbackError"}
+	ErrCallback         = &ErrInfo{CallbackError, "CallbackError", ""}
 	ErrCallbackContinue = &ErrInfo{ErrMsg: "CallbackContinueError"}
 
 	ErrUserIDNotFound  = &ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
@@ -95,6 +95,8 @@ const (
 	IdentityError = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
 
 	ConfigError = 90009
+
+	CallbackError = 80000
 )
 
 // 账号错误码
