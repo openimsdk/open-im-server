@@ -18,7 +18,7 @@ func main() {
 	rootCmd := cmd.NewRootCmd()
 	rootCmd.AddPortFlag()
 	rootCmd.AddRunE(run)
-	if err := rootCmd.Command.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

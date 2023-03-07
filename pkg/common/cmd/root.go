@@ -32,6 +32,7 @@ func NewRootCmd() RootCmd {
 		return rootCmd.getConfFromCmdAndInit(cmd)
 	}
 	rootCmd.init()
+	rootCmd
 	return rootCmd
 }
 
@@ -72,4 +73,8 @@ func (r RootCmd) GetPrometheusPortFlag(cmd *cobra.Command) int {
 func (r RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	return config.InitConfig(configFolderPath)
+}
+
+func (r RootCmd) Execute() error {
+	return r.Command.Execute()
 }
