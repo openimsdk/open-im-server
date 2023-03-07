@@ -107,7 +107,7 @@ func newUserSendMsgReq(params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 }
 
 func (o *Msg) client() (msg.MsgClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return nil, err
 	}

@@ -7,13 +7,11 @@ import (
 	"OpenIM/pkg/common/prome"
 	"github.com/OpenIMSDK/openKeeper"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
 	"io"
 	"os"
 )
 
-func NewGinRouter() *gin.Engine {
-	openKeeper.DefaultOptions = []grpc.DialOption{mw.GrpcClient()} // 默认RPC中间件
+func NewGinRouter(zk *openKeeper.ZkClient) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -28,8 +26,7 @@ func NewGinRouter() *gin.Engine {
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-
-	var zk *openKeeper.ZkClient
+	zk.AddOption(mw.GrpcClient()) // 默认RPC中间件
 
 	userRouterGroup := r.Group("/user")
 	{

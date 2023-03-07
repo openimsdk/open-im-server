@@ -20,7 +20,7 @@ type User struct {
 }
 
 func (o *User) client() (user.UserClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImUserName)
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		return nil, err
 	}

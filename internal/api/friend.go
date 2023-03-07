@@ -20,7 +20,7 @@ type Friend struct {
 }
 
 func (o *Friend) client() (friend.FriendClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImFriendName)
+	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return nil, err
 	}
