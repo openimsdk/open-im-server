@@ -20,7 +20,7 @@ type Group struct {
 }
 
 func (o *Group) client() (group.GroupClient, error) {
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}

@@ -6,39 +6,39 @@ import (
 	"strings"
 )
 
-type Coderr interface {
+type CodeError interface {
 	Code() int
 	Msg() string
 	Wrap(msg ...string) error
 	error
 }
 
-func NewCodeError(code int, msg string) Coderr {
-	return &errInfo{
+func NewCodeError(code int, msg string) CodeError {
+	return &codeError{
 		code: code,
 		msg:  msg,
 	}
 }
 
-type errInfo struct {
+type codeError struct {
 	code   int
 	msg    string
 	detail string
 }
 
-func (e *errInfo) Code() int {
+func (e *codeError) Code() int {
 	return e.code
 }
 
-func (e *errInfo) Msg() string {
+func (e *codeError) Msg() string {
 	return e.msg
 }
 
-func (e *errInfo) Wrap(w ...string) error {
+func (e *codeError) Wrap(w ...string) error {
 	return errors.Wrap(e, strings.Join(w, ", "))
 }
 
-func (e *errInfo) Error() string {
+func (e *codeError) Error() string {
 	return fmt.Sprintf("[%d]%s", e.code, e.msg)
 }
 

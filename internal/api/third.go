@@ -20,7 +20,7 @@ type Third struct {
 }
 
 func (o *Third) client() (third.ThirdClient, error) {
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImThirdName)
+	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
 		return nil, err
 	}
