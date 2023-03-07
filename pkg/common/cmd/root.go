@@ -36,45 +36,45 @@ func NewRootCmd() RootCmd {
 	return rootCmd
 }
 
-func (r RootCmd) AddRunE(f func(cmd RootCmd) error) {
+func (r *RootCmd) AddRunE(f func(cmd RootCmd) error) {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(r)
+		return f(*r)
 	}
 }
 
-func (r RootCmd) init() {
+func (r *RootCmd) init() {
 	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
 
-func (r RootCmd) AddPortFlag() {
+func (r *RootCmd) AddPortFlag() {
 	r.Command.Flags().StringP(constant.FlagPort, "p", "", "server listen port")
 	r.portFlag = true
 }
 
-func (r RootCmd) getPortFlag(cmd *cobra.Command) int {
+func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.FlagPort)
 	return port
 }
 
-func (r RootCmd) GetPortFlag() int {
+func (r *RootCmd) GetPortFlag() int {
 	return r.port
 }
 
-func (r RootCmd) AddPrometheusPortFlag() {
+func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().StringP(constant.PrometheusPort, "pp", "", "server listen port")
 	r.prometheusPortFlag = true
 }
 
-func (r RootCmd) GetPrometheusPortFlag(cmd *cobra.Command) int {
+func (r *RootCmd) GetPrometheusPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.PrometheusPort)
 	return port
 }
 
-func (r RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
+func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	return config.InitConfig(configFolderPath)
 }
 
-func (r RootCmd) Execute() error {
+func (r *RootCmd) Execute() error {
 	return r.Command.Execute()
 }
