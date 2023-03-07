@@ -1,7 +1,7 @@
 package cmd
 
 type MsgUtilsCmd struct {
-	RootCmd
+	*RootCmd
 	userID     string
 	userIDFlag bool
 

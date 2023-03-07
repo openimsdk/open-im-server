@@ -15,13 +15,13 @@ type RootCmd struct {
 	prometheusPortFlag bool
 }
 
-func NewRootCmd() RootCmd {
+func NewRootCmd() *RootCmd {
 	c := cobra.Command{
 		Use:   "start",
 		Short: "Start the server",
 		Long:  `Start the server`,
 	}
-	rootCmd := RootCmd{}
+	rootCmd := &RootCmd{}
 	c.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		if rootCmd.portFlag {
 			rootCmd.port = rootCmd.getPortFlag(cmd)
@@ -31,8 +31,8 @@ func NewRootCmd() RootCmd {
 		}
 		return rootCmd.getConfFromCmdAndInit(cmd)
 	}
-	rootCmd.init()
 	rootCmd.Command = c
+	rootCmd.init()
 	return rootCmd
 }
 
@@ -47,7 +47,7 @@ func (r *RootCmd) init() {
 }
 
 func (r *RootCmd) AddPortFlag() {
-	//r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
+	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
 	r.portFlag = true
 }
 
