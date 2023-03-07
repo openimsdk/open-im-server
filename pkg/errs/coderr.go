@@ -7,16 +7,10 @@ import (
 	"strings"
 )
 
-type Code interface {
+type Coderr interface {
 	Code() int
 	Msg() string
-}
-
-type Coderr interface {
-	Code
-	Detail() string
-	WithDetail(string) Coderr
-	Warp(...string) error
+	Warp(msg ...string) error
 	error
 }
 
@@ -33,25 +27,12 @@ type errInfo struct {
 	detail string
 }
 
-func (e *errInfo) WithDetail(s string) Coderr {
-	if e.detail == "" {
-		e.detail = s
-	} else {
-		e.detail = s + ", " + e.detail
-	}
-	return e
-}
-
 func (e *errInfo) Code() int {
 	return e.code
 }
 
 func (e *errInfo) Msg() string {
 	return e.msg
-}
-
-func (e *errInfo) Detail() string {
-	return e.detail
 }
 
 func (e *errInfo) Warp(w ...string) error {
@@ -64,17 +45,4 @@ func (e *errInfo) Error() string {
 
 func Unwrap(err error) error {
 	return utils.Unwrap(err)
-}
-
-func GetCode(err error) Code {
-	if err == nil {
-		return NewCodeError(UnknownCode, "nil")
-	}
-	if code, ok := Unwrap(err).(Code); ok {
-		if code.Code() == 0 {
-			return NewCodeError(UnknownCode, "code == 0")
-		}
-		return code
-	}
-	return NewCodeError(UnknownCode, "unknown code")
 }

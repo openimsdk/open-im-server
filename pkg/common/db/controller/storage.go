@@ -22,6 +22,7 @@ type S3Database interface {
 	ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*third.ApplyPutResp, error)
 	GetPut(ctx context.Context, req *third.GetPutReq) (*third.GetPutResp, error)
 	ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (*third.ConfirmPutResp, error)
+	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
 func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface) S3Database {
