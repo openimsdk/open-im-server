@@ -47,7 +47,7 @@ func (r *RootCmd) init() {
 }
 
 func (r *RootCmd) AddPortFlag() {
-	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
+	//r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
 	r.portFlag = true
 }
 
