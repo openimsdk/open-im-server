@@ -10,7 +10,7 @@ type RootCmd struct {
 	Command cobra.Command
 }
 
-func NewRootCmd() RootCmd {
+func NewRootCmd(f func() error) RootCmd {
 	c := cobra.Command{
 		Use:   "start",
 		Short: "Start the server",

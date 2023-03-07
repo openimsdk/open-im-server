@@ -29,7 +29,7 @@ var startCmd = &cobra.Command{
 func main() {
 	startCmd.Flags().IntP(constant.FlagPort, "p", 0, "Port to listen on")
 	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
-	rootCmd := cmd.NewRootCmd()
+	rootCmd := cmd.NewRootCmd(nil)
 	rootCmd.Command.AddCommand(startCmd)
 	if err := startCmd.Execute(); err != nil {
 		fmt.Println(err)
