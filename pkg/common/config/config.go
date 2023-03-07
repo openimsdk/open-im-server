@@ -527,6 +527,9 @@ func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegi
 }
 
 func InitConfig(configFolderPath string) error {
+	defer func() {
+		fmt.Println("use config folder", configFolderPath)
+	}()
 	err := Config.initConfig(&Config, FileName, configFolderPath)
 	if err != nil {
 		return err

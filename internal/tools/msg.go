@@ -180,10 +180,10 @@ func (c *MsgTool) ShowSuperGroupUserSeqs(ctx context.Context, groupID, userID st
 
 }
 
-func (c *MsgTool) FixAllSeq(ctx context.Context) {
+func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 	userIDs, err := c.userDatabase.GetAllUserID(ctx)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	for _, userID := range userIDs {
 		userCurrentMinSeq, err := c.msgDatabase.GetUserMinSeq(ctx, userID)
@@ -204,7 +204,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) {
 	fmt.Println("fix users seq success")
 	groupIDs, err := c.groupDatabase.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	for _, groupID := range groupIDs {
 		maxSeq, err := c.msgDatabase.GetGroupMaxSeq(ctx, groupID)
@@ -232,4 +232,5 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) {
 		}
 	}
 	fmt.Println("fix all seq finished")
+	return nil
 }
