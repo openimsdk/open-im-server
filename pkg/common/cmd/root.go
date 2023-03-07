@@ -27,7 +27,7 @@ func NewRootCmd() RootCmd {
 			rootCmd.port = rootCmd.getPortFlag(cmd)
 		}
 		if rootCmd.prometheusPortFlag {
-			rootCmd.prometheusPort = rootCmd.GetPrometheusPortFlag(cmd)
+			rootCmd.prometheusPort = rootCmd.getPrometheusPortFlag(cmd)
 		}
 		return rootCmd.getConfFromCmdAndInit(cmd)
 	}
@@ -47,7 +47,7 @@ func (r *RootCmd) init() {
 }
 
 func (r *RootCmd) AddPortFlag() {
-	r.Command.Flags().StringP(constant.FlagPort, "p", "", "server listen port")
+	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
 	r.portFlag = true
 }
 
@@ -65,7 +65,7 @@ func (r *RootCmd) AddPrometheusPortFlag() {
 	r.prometheusPortFlag = true
 }
 
-func (r *RootCmd) GetPrometheusPortFlag(cmd *cobra.Command) int {
+func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.PrometheusPort)
 	return port
 }
@@ -77,4 +77,8 @@ func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 
 func (r *RootCmd) Execute() error {
 	return r.Command.Execute()
+}
+
+func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
+	r.Command.AddCommand(cmds...)
 }

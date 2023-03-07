@@ -93,15 +93,16 @@ var clearCmd = &cobra.Command{
 }
 
 func main() {
-	cmd.RootCmd.PersistentFlags().StringP("userID", "u", "", "openIM userID")
-	cmd.RootCmd.PersistentFlags().StringP("groupID", "u", "", "openIM superGroupID")
+	rootCmd := cmd.NewMsgUtilsCmd()
+	rootCmd.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
+	rootCmd.Command.PersistentFlags().StringP("groupID", "u", "", "openIM superGroupID")
 	seqCmd.Flags().BoolP("fixAll", "c", false, "openIM fix all seqs")
 	msgCmd.Flags().BoolP("clearAll", "c", false, "openIM clear all timeout msgs")
-	cmd.RootCmd.AddCommand(getCmd, fixCmd, clearCmd)
 	getCmd.AddCommand(seqCmd, msgCmd)
 	fixCmd.AddCommand(seqCmd)
 	clearCmd.AddCommand(msgCmd)
-	if err := cmd.RootCmd.Execute(); err != nil {
+	rootCmd.AddCommand(getCmd, fixCmd, clearCmd)
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
