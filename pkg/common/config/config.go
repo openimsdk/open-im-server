@@ -2,7 +2,7 @@ package config
 
 import (
 	"OpenIM/pkg/discoveryregistry"
-	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -21,7 +21,7 @@ const (
 	FileName             = "config.yaml"
 	NotificationFileName = "notification.yaml"
 	ENV                  = "CONFIG_NAME"
-	DefaultPath          = "../config/"
+	DefaultFolderPath    = "../config/"
 	ConfKey              = "conf"
 )
 
@@ -497,15 +497,18 @@ func (c *config) unmarshalConfig(config interface{}, configPath string) error {
 	return nil
 }
 
-func (c *config) initConfig(config interface{}, configName, configPath string) error {
-	if configPath == "" {
-		if configPath == "" {
-			configPath = DefaultPath
-		}
+func (c *config) initConfig(config interface{}, configName, configFolderPath string) error {
+	if configFolderPath == "" {
+		configFolderPath = DefaultFolderPath
 	}
+	configPath := filepath.Join(configFolderPath, configName)
 	_, err := os.Stat(configPath)
-	if os.IsNotExist(err) {
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
 		configPath = filepath.Join(Root, "config", configName)
+		fmt.Println(configPath, "not exist, use", configPath)
 	}
 	Root = filepath.Dir(configPath)
 	return c.unmarshalConfig(config, configPath)
@@ -523,14 +526,12 @@ func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegi
 	return registry.GetConfFromRegistry(ConfKey)
 }
 
-func InitConfig() error {
-	configPath := flag.String("config_path", os.Getenv(ENV), "folder for config")
-	flag.Parse()
-	err := Config.initConfig(&Config, FileName, *configPath)
+func InitConfig(configFolderPath string) error {
+	err := Config.initConfig(&Config, FileName, configFolderPath)
 	if err != nil {
 		return err
 	}
-	err = Config.initConfig(&Config.Notification, NotificationFileName, *configPath)
+	err = Config.initConfig(&Config.Notification, NotificationFileName, configFolderPath)
 	if err != nil {
 		return err
 	}

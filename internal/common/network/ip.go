@@ -1,6 +1,9 @@
 package network
 
-import utils "github.com/OpenIMSDK/open_utils"
+import (
+	"OpenIM/pkg/common/constant"
+	utils "github.com/OpenIMSDK/open_utils"
+)
 
 func GetRpcRegisterIP(configIP string) (string, error) {
 	registerIP := configIP
@@ -16,7 +19,7 @@ func GetRpcRegisterIP(configIP string) (string, error) {
 
 func GetListenIP(configIP string) string {
 	if configIP == "" {
-		return "0.0.0.0"
+		return constant.LocalHost
 	} else {
 		return configIP
 	}

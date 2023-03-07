@@ -4,30 +4,55 @@ import (
 	"OpenIM/internal/api"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
-	"flag"
 	"fmt"
+	"github.com/spf13/cobra"
+	"os"
 
 	"strconv"
 
 	"OpenIM/pkg/common/constant"
 )
 
-func main() {
-	if err := config.InitConfig(); err != nil {
-		panic(err.Error())
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start the server",
+	Run: func(cmd *cobra.Command, args []string) {
+		port, _ := cmd.Flags().GetInt(constant.FlagPort)
+		configFolderPath, _ := cmd.Flags().GetString(constant.FlagConf)
+		fmt.Printf("Starting server on port %d with config file at %s\n", port, configFolderPath)
+		if err := run(configFolderPath, port); err != nil {
+			panic(err.Error())
+		}
+	},
+}
+
+func init() {
+	startCmd.Flags().IntP(constant.FlagPort, "p", 10002, "Port to listen on")
+	startCmd.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+}
+
+func run(configFolderPath string, port int) error {
+	if err := config.InitConfig(configFolderPath); err != nil {
+		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
 	router := api.NewGinRouter()
-	ginPort := flag.Int("port", config.Config.Api.GinPort[0], "get ginServerPort from cmd,default 10002 as port")
-	flag.Parse()
-	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
+	address := constant.LocalHost + ":" + strconv.Itoa(port)
 	if config.Config.Api.ListenIP != "" {
-		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
+		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(port)
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
 	err := router.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())
-		panic("api start failed " + err.Error())
+		return err
+	}
+	return nil
+}
+
+func main() {
+	if err := startCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
