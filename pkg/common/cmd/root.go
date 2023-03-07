@@ -32,7 +32,7 @@ func NewRootCmd() RootCmd {
 		return rootCmd.getConfFromCmdAndInit(cmd)
 	}
 	rootCmd.init()
-	rootCmd
+	rootCmd.Command = c
 	return rootCmd
 }
 
