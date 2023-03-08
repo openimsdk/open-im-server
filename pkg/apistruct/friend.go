@@ -10,7 +10,7 @@ package apistruct
 //	ParamsCommFriend
 //}
 //type AddBlacklistResp struct {
-//	CommResp
+//
 //}
 //
 //type ImportFriendReq struct {
@@ -23,7 +23,7 @@ package apistruct
 //	Result int32  `json:"result"`
 //}
 //type ImportFriendResp struct {
-//	CommResp
+//
 //	UserIDResultList []UserIDResult `json:"data"`
 //}
 //
@@ -32,7 +32,7 @@ package apistruct
 //	ReqMsg string `json:"reqMsg"`
 //}
 //type AddFriendResp struct {
-//	CommResp
+//
 //}
 //
 //type AddFriendResponseReq struct {
@@ -41,14 +41,14 @@ package apistruct
 //	HandleMsg string `json:"handleMsg"`
 //}
 //type AddFriendResponseResp struct {
-//	CommResp
+//
 //}
 //
 //type DeleteFriendReq struct {
 //	ParamsCommFriend
 //}
 //type DeleteFriendResp struct {
-//	CommResp
+//
 //}
 //
 //type GetBlackListReq struct {
@@ -56,7 +56,7 @@ package apistruct
 //	FromUserID  string `json:"fromUserID" binding:"required"`
 //}
 //type GetBlackListResp struct {
-//	CommResp
+//
 //	BlackUserInfoList []*sdkws.PublicUserInfo `json:"-"`
 //	Map              []map[string]interface{}      `json:"data" swaggerignore:"true"`
 //}
@@ -73,14 +73,14 @@ package apistruct
 //	Remark string `json:"remark"`
 //}
 //type SetFriendRemarkResp struct {
-//	CommResp
+//
 //}
 //
 //type RemoveBlacklistReq struct {
 //	ParamsCommFriend
 //}
 //type RemoveBlacklistResp struct {
-//	CommResp
+//
 //}
 //
 //type IsFriendReq struct {
@@ -90,7 +90,7 @@ package apistruct
 //	Friend bool `json:"isFriend"`
 //}
 //type IsFriendResp struct {
-//	CommResp
+//
 //	Response Response `json:"data"`
 //}
 //
@@ -98,7 +98,7 @@ package apistruct
 //	ParamsCommFriend
 //}
 //type GetFriendsInfoResp struct {
-//	CommResp
+//
 //	FriendInfoList []*sdkws.FriendInfo `json:"-"`
 //	Map           []map[string]interface{}  `json:"data" swaggerignore:"true"`
 //}
@@ -108,7 +108,7 @@ package apistruct
 //	FromUserID  string `json:"fromUserID" binding:"required"`
 //}
 //type GetFriendListResp struct {
-//	CommResp
+//
 //	FriendInfoList []*sdkws.FriendInfo `json:"-"`
 //	Map           []map[string]interface{}  `json:"data" swaggerignore:"true"`
 //}
@@ -118,7 +118,7 @@ package apistruct
 //	FromUserID  string `json:"fromUserID" binding:"required"`
 //}
 //type GetFriendApplyListResp struct {
-//	CommResp
+//
 //	FriendRequestList []*sdkws.FriendRequest `json:"-"`
 //	Map              []map[string]interface{}     `json:"data" swaggerignore:"true"`
 //}
@@ -128,7 +128,7 @@ package apistruct
 //	FromUserID  string `json:"fromUserID" binding:"required"`
 //}
 //type GetSelfApplyListResp struct {
-//	CommResp
+//
 //	FriendRequestList []*sdkws.FriendRequest `json:"-"`
 //	Map              []map[string]interface{}     `json:"data" swaggerignore:"true"`
 //}
@@ -180,7 +180,7 @@ type ImportFriendReq struct {
 }
 
 type ImportFriendResp struct {
-	//CommResp
+	//
 }
 
 type AddFriendReq struct {
@@ -189,7 +189,7 @@ type AddFriendReq struct {
 	ReqMsg     string `json:"reqMsg"`
 }
 type AddFriendResp struct {
-	//CommResp
+	//
 }
 
 type AddFriendResponseReq struct {

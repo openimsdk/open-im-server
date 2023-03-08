@@ -9,7 +9,6 @@ type GetAllConversationMessageOptReq struct {
 	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetAllConversationMessageOptResp struct {
-	CommResp
 	ConversationOptResultList []*OptResult `json:"data"`
 }
 type GetReceiveMessageOptReq struct {
@@ -18,7 +17,6 @@ type GetReceiveMessageOptReq struct {
 	FromUserID         string   `json:"fromUserID" binding:"required"`
 }
 type GetReceiveMessageOptResp struct {
-	CommResp
 	ConversationOptResultList []*OptResult `json:"data"`
 }
 type SetReceiveMessageOptReq struct {
@@ -28,7 +26,6 @@ type SetReceiveMessageOptReq struct {
 	ConversationIDList []string `json:"conversationIDList" binding:"required"`
 }
 type SetReceiveMessageOptResp struct {
-	CommResp
 	ConversationOptResultList []*OptResult `json:"data"`
 }
 
@@ -58,7 +55,6 @@ type SetConversationReq struct {
 }
 
 type SetConversationResp struct {
-	CommResp
 }
 type ModifyConversationFieldReq struct {
 	Conversation
@@ -67,7 +63,6 @@ type ModifyConversationFieldReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 }
 type ModifyConversationFieldResp struct {
-	CommResp
 }
 
 type BatchSetConversationsReq struct {
@@ -78,7 +73,6 @@ type BatchSetConversationsReq struct {
 }
 
 type BatchSetConversationsResp struct {
-	CommResp
 	Data struct {
 		Success []string `json:"success"`
 		Failed  []string `json:"failed"`
@@ -92,7 +86,6 @@ type GetConversationReq struct {
 }
 
 type GetConversationResp struct {
-	CommResp
 	Conversation Conversation `json:"data"`
 }
 
@@ -102,7 +95,6 @@ type GetAllConversationsReq struct {
 }
 
 type GetAllConversationsResp struct {
-	CommResp
 	Conversations []Conversation `json:"data"`
 }
 
@@ -113,7 +105,6 @@ type GetConversationsReq struct {
 }
 
 type GetConversationsResp struct {
-	CommResp
 	Conversations []Conversation `json:"data"`
 }
 
@@ -126,5 +117,4 @@ type SetRecvMsgOptReq struct {
 }
 
 type SetRecvMsgOptResp struct {
-	CommResp
 }

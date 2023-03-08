@@ -9,14 +9,12 @@ type DeleteUsersReq struct {
 	DeleteUserIDList []string `json:"deleteUserIDList" binding:"required"`
 }
 type DeleteUsersResp struct {
-	CommResp
 	FailedUserIDList []string `json:"data"`
 }
 type GetAllUsersUidReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 type GetAllUsersUidResp struct {
-	CommResp
 	UserIDList []string `json:"data"`
 }
 type GetUsersOnlineStatusReq struct {
@@ -24,7 +22,7 @@ type GetUsersOnlineStatusReq struct {
 	UserIDList  []string `json:"userIDList" binding:"required,lte=200"`
 }
 type GetUsersOnlineStatusResp struct {
-	CommResp
+
 	//SuccessResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
 }
 type AccountCheckReq struct {
@@ -32,7 +30,7 @@ type AccountCheckReq struct {
 	CheckUserIDList []string `json:"checkUserIDList" binding:"required,lte=100"`
 }
 type AccountCheckResp struct {
-	CommResp
+
 	//ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
 }
 
@@ -69,7 +67,6 @@ type ManagementBatchSendMsgReq struct {
 }
 
 type ManagementBatchSendMsgResp struct {
-	CommResp
 	Data struct {
 		ResultList   []*SingleReturnResult `json:"resultList"`
 		FailedIDList []string
@@ -87,7 +84,6 @@ type CheckMsgIsSendSuccessReq struct {
 }
 
 type CheckMsgIsSendSuccessResp struct {
-	CommResp
 	Status int32 `json:"status"`
 }
 
@@ -119,7 +115,6 @@ type CMSUser struct {
 }
 
 type GetUsersResp struct {
-	CommResp
 	Data struct {
 		UserList    []*CMSUser `json:"userList"`
 		TotalNum    int32      `json:"totalNum"`

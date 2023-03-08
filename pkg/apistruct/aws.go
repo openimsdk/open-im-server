@@ -14,7 +14,6 @@ type AwsStorageCredentialRespData struct {
 }
 
 type AwsStorageCredentialResp struct {
-	CommResp
 	CosData AwsStorageCredentialRespData
 	Data    map[string]interface{} `json:"data"`
 }
