@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"OpenIM/internal/msggateway"
+	//"OpenIM/internal/msggateway"
 	"OpenIM/pkg/common/constant"
 	"github.com/spf13/cobra"
 )
@@ -25,8 +25,8 @@ func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 
 func (m *MsgGatewayCmd) addRun() {
 	m.Command.Run = func(cmd *cobra.Command, args []string) {
-		msggateway.Init(m.getPortFlag(cmd), m.getWsPortFlag(cmd))
-		msggateway.Run(m.getPrometheusPortFlag(cmd))
+		//msggateway.Init(m.getPortFlag(cmd), m.getWsPortFlag(cmd))
+		//msggateway.Run(m.getPrometheusPortFlag(cmd))
 	}
 }
 
