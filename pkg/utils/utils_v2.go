@@ -34,7 +34,19 @@ func SliceSubAny[E comparable, T any](a []E, b []T, fn func(t T) E) []E {
 
 // SliceAnySub a中存在,b中不存在 (a-b) fn 返回的是uuid
 func SliceAnySub[E any, T comparable](a, b []E, fn func(t E) T) []E {
-	panic("todo")
+	m := make(map[T]E)
+	for i := 0; i < len(b); i++ {
+		v := b[i]
+		m[fn(v)] = v
+	}
+	var es []E
+	for i := 0; i < len(a); i++ {
+		v := a[i]
+		if _, ok := m[fn(v)]; !ok {
+			es = append(es, v)
+		}
+	}
+	return es
 }
 
 // DistinctAny 去重
