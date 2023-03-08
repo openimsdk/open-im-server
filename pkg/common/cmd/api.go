@@ -12,6 +12,6 @@ func NewApiCmd() *ApiCmd {
 
 func (a *ApiCmd) AddApi(f func(port int) error) {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(a.GetPortFlag())
+		return f(a.getPortFlag(cmd))
 	}
 }
