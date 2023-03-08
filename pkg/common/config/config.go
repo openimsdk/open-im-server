@@ -8,8 +8,12 @@ import (
 	"path/filepath"
 	"runtime"
 
+	_ "embed"
 	"gopkg.in/yaml.v3"
 )
+
+//go:embed version
+var Version string
 
 var (
 	_, b, _, _ = runtime.Caller(0)
