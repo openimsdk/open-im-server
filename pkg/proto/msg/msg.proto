@@ -2,7 +2,7 @@ syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
 import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
 option go_package = "OpenIM/pkg/proto/msg;msg";
-package msg;
+package OpenIMServer.msg;
 
 message MsgDataToMQ{
   string token = 1;
