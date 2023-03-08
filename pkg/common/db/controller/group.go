@@ -76,6 +76,9 @@ func NewGroupDatabase(
 }
 
 func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.Database) GroupDatabase {
+	rcOptions := rockscache.NewDefaultOptions()
+	rcOptions.StrongConsistency = true
+	rcOptions.RandomExpireAdjustment = 0.2
 	return NewGroupDatabase(
 		relation.NewGroupDB(db),
 		relation.NewGroupMemberDB(db),
@@ -83,10 +86,7 @@ func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.D
 		tx.NewGorm(db),
 		tx.NewMongo(database.Client()),
 		unrelation.NewSuperGroupMongoDriver(database),
-		cache.NewGroupCacheRedis(rdb, relation.NewGroupDB(db), relation.NewGroupMemberDB(db), relation.NewGroupRequest(db), unrelation.NewSuperGroupMongoDriver(database), rockscache.Options{
-			StrongConsistency:      true,
-			RandomExpireAdjustment: 2.0,
-		}),
+		cache.NewGroupCacheRedis(rdb, relation.NewGroupDB(db), relation.NewGroupMemberDB(db), relation.NewGroupRequest(db), unrelation.NewSuperGroupMongoDriver(database), rcOptions),
 	)
 }
 
