@@ -320,17 +320,15 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
-const BigVersion = "v2"
-
 const LogFileName = "OpenIM.log"
-
-const CurrentVersion = "v2.3.4-rc0"
 
 const LocalHost = "0.0.0.0"
 
 // flag parse
 const (
-	FlagPort       = "port"
-	PrometheusPort = "prometheus_port"
-	FlagConf       = "config_folder_path"
+	FlagPort   = "port"
+	FlagWsPort = "ws_port"
+
+	FlagPrometheusPort = "prometheus_port"
+	FlagConf           = "config_folder_path"
 )

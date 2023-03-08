@@ -9,8 +9,7 @@ import (
 
 func main() {
 	cronTaskCmd := cmd.NewCronTaskCmd()
-	cronTaskCmd.AddRunE(tools.StartCronTask)
-	if err := cronTaskCmd.Execute(); err != nil {
+	if err := cronTaskCmd.Exec(tools.StartCronTask); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

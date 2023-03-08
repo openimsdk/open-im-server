@@ -9,6 +9,7 @@ import (
 	"OpenIM/pkg/common/db/unrelation"
 	"OpenIM/pkg/common/prome"
 	"fmt"
+	"sync"
 )
 
 type MsgTransfer struct {
@@ -64,6 +65,8 @@ func (m *MsgTransfer) initPrometheus() {
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
+	var wg sync.WaitGroup
+	wg.Add(4)
 	if config.Config.ChatPersistenceMysql {
 		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
 	} else {
@@ -76,5 +79,6 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+	wg.Wait()
 	return nil
 }

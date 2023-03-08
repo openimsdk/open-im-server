@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"OpenIM/internal/startrpc"
 	"OpenIM/pkg/discoveryregistry"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -8,14 +9,20 @@ import (
 
 type RpcCmd struct {
 	*RootCmd
+	rpcRegisterName string
 }
 
-func NewRpcCmd() *RpcCmd {
-	return &RpcCmd{NewRootCmd()}
+func NewRpcCmd(rpcRegisterName string) *RpcCmd {
+	return &RpcCmd{NewRootCmd(), rpcRegisterName}
 }
 
-func (r *RpcCmd) AddRpc(f func(port, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error) {
+func (r *RpcCmd) AddRpc(rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(r.port, r.prometheusPort)
+		return startrpc.Start(r.getPortFlag(cmd), r.rpcRegisterName, r.getPrometheusPortFlag(cmd), rpcFn)
 	}
+}
+
+func (r *RpcCmd) Exec(rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+	r.AddRpc(rpcFn)
+	return r.Execute()
 }

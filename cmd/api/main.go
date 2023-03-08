@@ -39,7 +39,7 @@ func run(port int) error {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(port)
 	}
-	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
+	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
 	err = router.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())

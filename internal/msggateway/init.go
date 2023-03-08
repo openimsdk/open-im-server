@@ -37,6 +37,8 @@ func Init(rpcPort, wsPort int) {
 }
 
 func Run(prometheusPort int) {
+	var wg sync.WaitGroup
+	wg.Add(3)
 	go ws.run()
 	go rpcSvr.run()
 	go func() {
@@ -45,4 +47,5 @@ func Run(prometheusPort int) {
 			panic(err)
 		}
 	}()
+	wg.Wait()
 }

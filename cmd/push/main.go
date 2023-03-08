@@ -1,19 +1,18 @@
 package main
 
 import (
-	"OpenIM/internal/push"
-	"OpenIM/internal/startrpc"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/cmd"
+	"fmt"
+	"os"
 )
 
 func main() {
-	if err := config.InitConfig(); err != nil {
-		panic(err.Error())
-	}
-	log.NewPrivateLog(constant.LogFileName)
-	if err := startrpc.Start(config.Config.RpcPort.OpenImAuthPort[0], config.Config.RpcRegisterName.OpenImAuthName, config.Config.Prometheus.AuthPrometheusPort[0], push.Start); err != nil {
-		panic(err.Error())
+	pushCmd := cmd.NewPushCmd()
+	pushCmd.AddPortFlag()
+	pushCmd.AddPrometheusPortFlag()
+	pushCmd.AddPush()
+	if err := pushCmd.Execute(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 }

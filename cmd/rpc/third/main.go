@@ -2,15 +2,18 @@ package main
 
 import (
 	"OpenIM/internal/rpc/third"
-	"OpenIM/internal/startrpc"
+	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
+	"fmt"
+	"os"
 )
 
 func main() {
-	if err := config.InitConfig(""); err != nil {
-		panic(err.Error())
-	}
-	if err := startrpc.Start(config.Config.RpcPort.OpenImThirdPort[0], config.Config.RpcRegisterName.OpenImThirdName, config.Config.Prometheus.ThirdPrometheusPort[0], third.Start); err != nil {
-		panic(err.Error())
+	rpcCmd := cmd.NewRpcCmd(config.Config.RpcRegisterName.OpenImThirdName)
+	rpcCmd.AddPortFlag()
+	rpcCmd.AddPrometheusPortFlag()
+	if err := rpcCmd.Exec(third.Start); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 }
