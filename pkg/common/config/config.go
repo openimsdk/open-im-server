@@ -516,8 +516,9 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 		}
 		configPath = filepath.Join(Root, "config", configName)
 		fmt.Println(configPath, "not exist, use", configPath)
+	} else {
+		Root = filepath.Dir(configPath)
 	}
-	Root = filepath.Dir(configPath)
 	return c.unmarshalConfig(config, configPath)
 }
 
