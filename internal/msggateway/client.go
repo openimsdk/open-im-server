@@ -1,12 +1,11 @@
-package new
+package msggateway
 
 import (
-	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"runtime/debug"
 	"sync"
 )
@@ -39,45 +38,30 @@ type Client struct {
 	isBackground   bool
 	connID         string
 	onlineAt       int64 // 上线时间戳（毫秒）
-	handler        MessageHandler
-	unregisterChan chan *Client
-	compressor     Compressor
-	encoder        Encoder
-	validate       *validator.Validate
+	longConnServer LongConnServer
 	closed         bool
 }
 
-func newClient(ctx *UserConnContext, conn LongConn, isCompress bool, compressor Compressor, encoder Encoder,
-	handler MessageHandler, unregisterChan chan *Client, validate *validator.Validate) *Client {
+func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 	return &Client{
-		w:              new(sync.Mutex),
-		conn:           conn,
-		platformID:     utils.StringToInt(ctx.GetPlatformID()),
-		isCompress:     isCompress,
-		userID:         ctx.GetUserID(),
-		compressor:     compressor,
-		encoder:        encoder,
-		connID:         ctx.GetConnID(),
-		onlineAt:       utils.GetCurrentTimestampByMill(),
-		handler:        handler,
-		unregisterChan: unregisterChan,
-		validate:       validate,
+		w:          new(sync.Mutex),
+		conn:       conn,
+		platformID: utils.StringToInt(ctx.GetPlatformID()),
+		isCompress: isCompress,
+		userID:     ctx.GetUserID(),
+		connID:     ctx.GetConnID(),
+		onlineAt:   utils.GetCurrentTimestampByMill(),
 	}
 }
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, compressor Compressor, encoder Encoder,
-	handler MessageHandler, unregisterChan chan *Client, validate *validator.Validate) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.platformID = utils.StringToInt(ctx.GetPlatformID())
 	c.isCompress = isCompress
 	c.userID = ctx.GetUserID()
-	c.compressor = compressor
-	c.encoder = encoder
 	c.connID = ctx.GetConnID()
 	c.onlineAt = utils.GetCurrentTimestampByMill()
-	c.handler = handler
-	c.unregisterChan = unregisterChan
-	c.validate = validate
+	c.longConnServer = longConnServer
 }
 func (c *Client) readMessage() {
 	defer func() {
@@ -117,41 +101,41 @@ func (c *Client) readMessage() {
 func (c *Client) handleMessage(message []byte) error {
 	if c.isCompress {
 		var decompressErr error
-		message, decompressErr = c.compressor.DeCompress(message)
+		message, decompressErr = c.longConnServer.DeCompress(message)
 		if decompressErr != nil {
 			return utils.Wrap(decompressErr, "")
 		}
 	}
 	var binaryReq Req
-	err := c.encoder.Decode(message, &binaryReq)
+	err := c.longConnServer.Decode(message, &binaryReq)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	if err := c.validate.Struct(binaryReq); err != nil {
+	if err := c.longConnServer.Validate(binaryReq); err != nil {
 		return utils.Wrap(err, "")
 	}
 	if binaryReq.SendID != c.userID {
 		return errors.New("exception conn userID not same to req userID")
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, CONN_ID, c.connID)
-	ctx = context.WithValue(ctx, OPERATION_ID, binaryReq.OperationID)
-	ctx = context.WithValue(ctx, COMMON_USERID, binaryReq.SendID)
-	ctx = context.WithValue(ctx, PLATFORM_ID, c.platformID)
+	ctx = context.WithValue(ctx, ConnID, c.connID)
+	ctx = context.WithValue(ctx, OperationID, binaryReq.OperationID)
+	ctx = context.WithValue(ctx, CommonUserID, binaryReq.SendID)
+	ctx = context.WithValue(ctx, PlatformID, c.platformID)
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
-	case constant.WSGetNewestSeq:
-		resp, messageErr = c.handler.GetSeq(ctx, binaryReq)
-	case constant.WSSendMsg:
-		resp, messageErr = c.handler.SendMessage(ctx, binaryReq)
-	case constant.WSSendSignalMsg:
-		resp, messageErr = c.handler.SendSignalMessage(ctx, binaryReq)
-	case constant.WSPullMsgBySeqList:
-		resp, messageErr = c.handler.PullMessageBySeqList(ctx, binaryReq)
-	case constant.WsLogoutMsg:
-		resp, messageErr = c.handler.UserLogout(ctx, binaryReq)
-	case constant.WsSetBackgroundStatus:
+	case WSGetNewestSeq:
+		resp, messageErr = c.longConnServer.GetSeq(ctx, binaryReq)
+	case WSSendMsg:
+		resp, messageErr = c.longConnServer.SendMessage(ctx, binaryReq)
+	case WSSendSignalMsg:
+		resp, messageErr = c.longConnServer.SendSignalMessage(ctx, binaryReq)
+	case WSPullMsgBySeqList:
+		resp, messageErr = c.longConnServer.PullMessageBySeqList(ctx, binaryReq)
+	case WsLogoutMsg:
+		resp, messageErr = c.longConnServer.UserLogout(ctx, binaryReq)
+	case WsSetBackgroundStatus:
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
 	default:
 		return errors.New(fmt.Sprintf("ReqIdentifier failed,sendID:%d,msgIncr:%s,reqIdentifier:%s", binaryReq.SendID, binaryReq.MsgIncr, binaryReq.ReqIdentifier))
@@ -161,7 +145,7 @@ func (c *Client) handleMessage(message []byte) error {
 
 }
 func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, error) {
-	resp, isBackground, messageErr := c.handler.SetUserDeviceBackground(ctx, req)
+	resp, isBackground, messageErr := c.longConnServer.SetUserDeviceBackground(ctx, req)
 	if messageErr != nil {
 		return nil, messageErr
 	}
@@ -174,7 +158,7 @@ func (c *Client) close() {
 	c.w.Lock()
 	defer c.w.Unlock()
 	c.conn.Close()
-	c.unregisterChan <- c
+	c.longConnServer.UnRegister(c)
 
 }
 func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
@@ -186,6 +170,13 @@ func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
 	}
 	_ = c.writeMsg(mReply)
 }
+func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
+	return nil
+}
+
+func (c *Client) KickOnlineMessage(ctx context.Context) error {
+	return nil
+}
 
 func (c *Client) writeMsg(resp Resp) error {
 	c.w.Lock()
@@ -195,14 +186,14 @@ func (c *Client) writeMsg(resp Resp) error {
 	}
 	encodedBuf := bufferPool.Get().([]byte)
 	resultBuf := bufferPool.Get().([]byte)
-	encodeBuf, err := c.encoder.Encode(resp)
+	encodeBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	_ = c.conn.SetWriteTimeout(60)
 	if c.isCompress {
 		var compressErr error
-		resultBuf, compressErr = c.compressor.Compress(encodeBuf)
+		resultBuf, compressErr = c.longConnServer.Compress(encodeBuf)
 		if compressErr != nil {
 			return utils.Wrap(compressErr, "")
 		}

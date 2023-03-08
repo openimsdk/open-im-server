@@ -90,3 +90,6 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
 }
+func WsVerifyToken(token, userID, platformID string) error {
+	return nil
+}

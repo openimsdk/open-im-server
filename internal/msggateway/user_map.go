@@ -1,4 +1,4 @@
-package new
+package msggateway
 
 import "sync"
 
@@ -16,15 +16,20 @@ func (u *UserMap) GetAll(key string) ([]*Client, bool) {
 	}
 	return nil, ok
 }
-func (u *UserMap) Get(key string, platformID int) (*Client, bool, bool) {
+func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 	allClients, userExisted := u.m.Load(key)
 	if userExisted {
+		var clients []*Client
 		for _, client := range allClients.([]*Client) {
 			if client.platformID == platformID {
-				return client, userExisted, true
+				clients = append(clients, client)
 			}
 		}
-		return nil, userExisted, false
+		if len(clients) > 0 {
+			return clients, userExisted, true
+
+		}
+		return clients, userExisted, false
 	}
 	return nil, userExisted, false
 }
@@ -35,7 +40,7 @@ func (u *UserMap) Set(key string, v *Client) {
 		oldClients = append(oldClients, v)
 		u.m.Store(key, oldClients)
 	} else {
-		clients := make([]*Client, 3)
+		var clients []*Client
 		clients = append(clients, v)
 		u.m.Store(key, clients)
 	}
@@ -44,7 +49,7 @@ func (u *UserMap) delete(key string, platformID int) (isDeleteUser bool) {
 	allClients, existed := u.m.Load(key)
 	if existed {
 		oldClients := allClients.([]*Client)
-		a := make([]*Client, 3)
+		var a []*Client
 		for _, client := range oldClients {
 			if client.platformID != platformID {
 				a = append(a, client)

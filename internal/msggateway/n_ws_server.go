@@ -1,19 +1,29 @@
-package new
+package msggateway
 
 import (
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 )
+
+type LongConnServer interface {
+	Run() error
+	wsHandler(w http.ResponseWriter, r *http.Request)
+	GetUserAllCons(userID string) ([]*Client, bool)
+	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
+	Validate(s interface{}) error
+	UnRegister(c *Client)
+	Compressor
+	Encoder
+	MessageHandler
+}
 
 var bufferPool = sync.Pool{
 	New: func() interface{} {
@@ -21,35 +31,41 @@ var bufferPool = sync.Pool{
 	},
 }
 
-type LongConnServer interface {
-	Run() error
-}
-
-type Server struct {
-	rpcPort        int
-	wsMaxConnNum   int
-	longConnServer *LongConnServer
-	//rpcServer      *RpcServer
-}
 type WsServer struct {
 	port                            int
 	wsMaxConnNum                    int64
-	wsUpGrader                      *websocket.Upgrader
 	registerChan                    chan *Client
 	unregisterChan                  chan *Client
 	clients                         *UserMap
 	clientPool                      sync.Pool
 	onlineUserNum                   int64
 	onlineUserConnNum               int64
-	gzipCompressor                  Compressor
-	encoder                         Encoder
-	handler                         MessageHandler
 	handshakeTimeout                time.Duration
 	readBufferSize, WriteBufferSize int
 	validate                        *validator.Validate
+	Compressor
+	Encoder
+	MessageHandler
 }
 
-func newWsServer(opts ...Option) (*WsServer, error) {
+func (ws *WsServer) UnRegister(c *Client) {
+	ws.unregisterChan <- c
+}
+
+func (ws *WsServer) Validate(s interface{}) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (ws *WsServer) GetUserAllCons(userID string) ([]*Client, bool) {
+	return ws.clients.GetAll(userID)
+}
+
+func (ws *WsServer) GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool) {
+	return ws.clients.Get(userID, platform)
+}
+
+func NewWsServer(opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
@@ -58,6 +74,7 @@ func newWsServer(opts ...Option) (*WsServer, error) {
 		return nil, errors.New("port not allow to listen")
 
 	}
+	v := validator.New()
 	return &WsServer{
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
@@ -68,8 +85,13 @@ func newWsServer(opts ...Option) (*WsServer, error) {
 				return new(Client)
 			},
 		},
-		validate: validator.New(),
-		clients:  newUserMap(),
+		registerChan:   make(chan *Client, 1000),
+		unregisterChan: make(chan *Client, 1000),
+		validate:       v,
+		clients:        newUserMap(),
+		Compressor:     NewGzipCompressor(),
+		Encoder:        NewGobEncoder(),
+		MessageHandler: NewGrpcHandler(v, nil),
 		//handler:  NewGrpcHandler(validate),
 	}, nil
 }
@@ -93,7 +115,7 @@ func (ws *WsServer) registerClient(client *Client) {
 	var (
 		userOK   bool
 		clientOK bool
-		cli      *Client
+		cli      []*Client
 	)
 	cli, userOK, clientOK = ws.clients.Get(client.userID, client.platformID)
 	if !userOK {
@@ -116,10 +138,11 @@ func (ws *WsServer) registerClient(client *Client) {
 
 }
 
-func (ws *WsServer) multiTerminalLoginChecker(client *Client) {
+func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
 
 }
 func (ws *WsServer) unregisterClient(client *Client) {
+	defer ws.clientPool.Put(client)
 	isDeleteUser := ws.clients.delete(client.userID, client.platformID)
 	if isDeleteUser {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
@@ -141,20 +164,19 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		platformID  string
 		exists      bool
 		compression bool
-		compressor  Compressor
 	)
 
-	token, exists = context.Query(TOKEN)
+	token, exists = context.Query(Token)
 	if !exists {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
-	userID, exists = context.Query(WS_USERID)
+	userID, exists = context.Query(WsUserID)
 	if !exists {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
-	platformID, exists = context.Query(PLATFORM_ID)
+	platformID, exists = context.Query(PlatformID)
 	if !exists {
 		httpError(context, errs.ErrConnArgsErr)
 		return
@@ -164,28 +186,26 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(context, err)
 		return
 	}
-	wsLongConn := newGWebSocket(constant.WebSocket, ws.handshakeTimeout, ws.readBufferSize)
+	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.readBufferSize)
 	err = wsLongConn.GenerateLongConn(w, r)
 	if err != nil {
 		httpError(context, err)
 		return
 	}
-	compressProtoc, exists := context.Query(COMPRESSION)
+	compressProtoc, exists := context.Query(Compression)
 	if exists {
-		if compressProtoc == GZIP_COMPRESSION_PROTOCAL {
+		if compressProtoc == GzipCompressionProtocol {
 			compression = true
-			compressor = ws.gzipCompressor
 		}
 	}
-	compressProtoc, exists = context.GetHeader(COMPRESSION)
+	compressProtoc, exists = context.GetHeader(Compression)
 	if exists {
-		if compressProtoc == GZIP_COMPRESSION_PROTOCAL {
+		if compressProtoc == GzipCompressionProtocol {
 			compression = true
-			compressor = ws.gzipCompressor
 		}
 	}
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(context, wsLongConn, compression, compressor, ws.encoder, ws.handler, ws.unregisterChan, ws.validate)
+	client.ResetClient(context, wsLongConn, compression, ws)
 	ws.registerChan <- client
 	go client.readMessage()
 }

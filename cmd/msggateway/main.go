@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -25,7 +26,16 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort, *prometheusPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	msggateway.Init(*rpcPort, *wsPort)
-	msggateway.Run(*prometheusPort)
+	longServer, err := msggateway.NewWsServer(
+		msggateway.WithPort(*wsPort),
+		msggateway.WithMaxConnNum(int64(config.Config.LongConnSvr.WebsocketMaxConnNum)),
+		msggateway.WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeOut)*time.Second),
+		msggateway.WithMessageMaxMsgLength(config.Config.LongConnSvr.WebsocketMaxMsgLen))
+	if err != nil {
+		panic(err.Error())
+	}
+	hubServer := msggateway.NewServer(*rpcPort, longServer)
+	go hubServer.Start()
+	go hubServer.LongConnServer.Run()
 	wg.Wait()
 }

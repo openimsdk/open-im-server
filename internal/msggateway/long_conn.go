@@ -1,4 +1,4 @@
-package new
+package msggateway
 
 import (
 	"github.com/gorilla/websocket"
