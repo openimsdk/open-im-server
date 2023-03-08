@@ -4,16 +4,6 @@ import (
 	sdkws "OpenIM/pkg/proto/sdkws"
 )
 
-type    struct {
-	ErrCode int32  `json:"errCode"`
-	ErrMsg  string `json:"errMsg"`
-}
-
-type CommDataResp struct {
-
-	Data []map[string]interface{} `json:"data"`
-}
-
 type KickGroupMemberReq struct {
 	GroupID          string   `json:"groupID" binding:"required"`
 	KickedUserIDList []string `json:"kickedUserIDList" binding:"required"`
@@ -31,7 +21,6 @@ type GetGroupMembersInfoReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 }
 type GetGroupMembersInfoResp struct {
-
 	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
 	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
@@ -52,7 +41,6 @@ type GetJoinedGroupListReq struct {
 	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetJoinedGroupListResp struct {
-
 	GroupInfoList []*sdkws.GroupInfo       `json:"-"`
 	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
@@ -64,7 +52,6 @@ type GetGroupMemberListReq struct {
 	OperationID string `json:"operationID"`
 }
 type GetGroupMemberListResp struct {
-
 	NextSeq    int32                        `json:"nextSeq"`
 	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
 	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
@@ -77,7 +64,6 @@ type GetGroupAllMemberReq struct {
 	Count       int32  `json:"count"`
 }
 type GetGroupAllMemberResp struct {
-
 	MemberList []*sdkws.GroupMemberFullInfo `json:"-"`
 	Data       []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
@@ -108,7 +94,6 @@ type CreateGroupReq struct {
 	GroupID      string                `json:"groupID"`
 }
 type CreateGroupResp struct {
-
 	GroupInfo sdkws.GroupInfo        `json:"-"`
 	Data      map[string]interface{} `json:"data" swaggerignore:"true"`
 }
@@ -118,7 +103,6 @@ type GetGroupApplicationListReq struct {
 	FromUserID  string `json:"fromUserID" binding:"required"` //作为管理员或群主收到的 进群申请
 }
 type GetGroupApplicationListResp struct {
-
 	GroupRequestList []*sdkws.GroupRequest    `json:"-"`
 	Data             []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
@@ -137,7 +121,6 @@ type GetGroupInfoReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 }
 type GetGroupInfoResp struct {
-
 	GroupInfoList []*sdkws.GroupInfo       `json:"-"`
 	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
@@ -171,7 +154,6 @@ type ApplicationGroupResponseReq struct {
 	HandleResult int32  `json:"handleResult" binding:"required,oneof=-1 1"`
 }
 type ApplicationGroupResponseResp struct {
-
 }
 
 type JoinGroupReq struct {
@@ -183,7 +165,6 @@ type JoinGroupReq struct {
 }
 
 type JoinGroupResp struct {
-
 }
 
 type QuitGroupReq struct {
@@ -191,7 +172,6 @@ type QuitGroupReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 type QuitGroupResp struct {
-
 }
 
 type SetGroupInfoReq struct {
@@ -208,7 +188,6 @@ type SetGroupInfoReq struct {
 }
 
 type SetGroupInfoResp struct {
-
 }
 
 type TransferGroupOwnerReq struct {
@@ -218,7 +197,6 @@ type TransferGroupOwnerReq struct {
 	OperationID    string `json:"operationID" binding:"required"`
 }
 type TransferGroupOwnerResp struct {
-
 }
 
 type DismissGroupReq struct {
@@ -226,7 +204,6 @@ type DismissGroupReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 type DismissGroupResp struct {
-
 }
 
 type MuteGroupMemberReq struct {
@@ -236,7 +213,6 @@ type MuteGroupMemberReq struct {
 	MutedSeconds uint32 `json:"mutedSeconds" binding:"required"`
 }
 type MuteGroupMemberResp struct {
-
 }
 
 type CancelMuteGroupMemberReq struct {
@@ -245,7 +221,6 @@ type CancelMuteGroupMemberReq struct {
 	UserID      string `json:"userID" binding:"required"`
 }
 type CancelMuteGroupMemberResp struct {
-
 }
 
 type MuteGroupReq struct {
@@ -253,7 +228,6 @@ type MuteGroupReq struct {
 	GroupID     string `json:"groupID" binding:"required"`
 }
 type MuteGroupResp struct {
-
 }
 
 type CancelMuteGroupReq struct {
@@ -261,7 +235,6 @@ type CancelMuteGroupReq struct {
 	GroupID     string `json:"groupID" binding:"required"`
 }
 type CancelMuteGroupResp struct {
-
 }
 
 type SetGroupMemberNicknameReq struct {
@@ -272,7 +245,6 @@ type SetGroupMemberNicknameReq struct {
 }
 
 type SetGroupMemberNicknameResp struct {
-
 }
 
 type SetGroupMemberInfoReq struct {
@@ -286,7 +258,6 @@ type SetGroupMemberInfoReq struct {
 }
 
 type SetGroupMemberInfoResp struct {
-
 }
 
 type GetGroupAbstractInfoReq struct {
@@ -295,7 +266,6 @@ type GetGroupAbstractInfoReq struct {
 }
 
 type GetGroupAbstractInfoResp struct {
-
 	GroupMemberNumber   int32  `json:"groupMemberNumber"`
 	GroupMemberListHash uint64 `json:"groupMemberListHash"`
 }
