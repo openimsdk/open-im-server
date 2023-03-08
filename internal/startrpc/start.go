@@ -8,7 +8,6 @@ import (
 	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
-	"flag"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -17,7 +16,6 @@ import (
 )
 
 func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
-	flag.Parse()
 	fmt.Println("start group rpc server, port: ", rpcPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
