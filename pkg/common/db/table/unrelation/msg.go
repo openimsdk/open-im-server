@@ -10,7 +10,7 @@ import (
 
 const (
 	singleGocMsgNum = 5000
-	CChat           = "msg"
+	msg             = "msg"
 	OldestList      = 0
 	NewestList      = -1
 )
@@ -38,7 +38,7 @@ type MsgDocModelInterface interface {
 }
 
 func (MsgDocModel) TableName() string {
-	return CChat
+	return msg
 }
 
 func (MsgDocModel) GetSingleGocMsgNum() int64 {

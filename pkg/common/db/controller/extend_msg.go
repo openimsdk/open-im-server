@@ -5,6 +5,7 @@ import (
 	"context"
 )
 
+// for mongoDB
 type ExtendMsgDatabase interface {
 	CreateExtendMsgSet(ctx context.Context, set *unRelationTb.ExtendMsgSetModel) error
 	GetAllExtendMsgSet(ctx context.Context, ID string, opts *unRelationTb.GetAllExtendMsgSetOpts) (sets []*unRelationTb.ExtendMsgSetModel, err error)
