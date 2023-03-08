@@ -511,6 +511,7 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 	}()
 	_, err := os.Stat(configPath)
 	if err != nil {
+		fmt.Println(err.Error())
 		if !os.IsNotExist(err) {
 			return err
 		}
