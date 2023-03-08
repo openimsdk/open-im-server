@@ -16,7 +16,6 @@ type OSSCredentialRespData struct {
 }
 
 type OSSCredentialResp struct {
-	CommResp
 	OssData OSSCredentialRespData  `json:"-"`
 	Data    map[string]interface{} `json:"data"`
 }

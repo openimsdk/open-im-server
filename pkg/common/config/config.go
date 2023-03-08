@@ -8,8 +8,12 @@ import (
 	"path/filepath"
 	"runtime"
 
+	_ "embed"
 	"gopkg.in/yaml.v3"
 )
+
+//go:embed version
+var Version string
 
 var (
 	_, b, _, _ = runtime.Caller(0)
@@ -502,6 +506,9 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 		configFolderPath = DefaultFolderPath
 	}
 	configPath := filepath.Join(configFolderPath, configName)
+	defer func() {
+		fmt.Println("use config", configPath)
+	}()
 	_, err := os.Stat(configPath)
 	if err != nil {
 		if !os.IsNotExist(err) {

@@ -1,13 +1,73 @@
 package cmd
 
 import (
+	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/constant"
 	"github.com/spf13/cobra"
 )
 
-func NewRootCmd() *cobra.Command {
-	return &cobra.Command{
+type RootCmd struct {
+	Command cobra.Command
+}
+
+func NewRootCmd() (rootCmd *RootCmd) {
+	rootCmd = &RootCmd{}
+	c := cobra.Command{
 		Use:   "start",
 		Short: "Start the server",
 		Long:  `Start the server`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return rootCmd.getConfFromCmdAndInit(cmd)
+		},
 	}
+	rootCmd.Command = c
+	rootCmd.init()
+	return rootCmd
+}
+
+func (r *RootCmd) AddRunE(f func(cmd RootCmd) error) {
+	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return f(*r)
+	}
+}
+
+func (r *RootCmd) AddRpc(f func(port, prometheusPort int) error) {
+	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return f(r.getPortFlag(cmd), r.getPrometheusPortFlag(cmd))
+	}
+}
+
+func (r *RootCmd) init() {
+	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+}
+
+func (r *RootCmd) AddPortFlag() {
+	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
+}
+
+func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
+	port, _ := cmd.Flags().GetInt(constant.FlagPort)
+	return port
+}
+
+func (r *RootCmd) AddPrometheusPortFlag() {
+	r.Command.Flags().String(constant.FlagPrometheusPort, "", "server prometheus listen port")
+}
+
+func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
+	port, _ := cmd.Flags().GetInt(constant.FlagPrometheusPort)
+	return port
+}
+
+func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
+	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
+	return config.InitConfig(configFolderPath)
+}
+
+func (r *RootCmd) Execute() error {
+	return r.Command.Execute()
+}
+
+func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
+	r.Command.AddCommand(cmds...)
 }

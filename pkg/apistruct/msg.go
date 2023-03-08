@@ -12,7 +12,6 @@ type DelMsgReq struct {
 }
 
 type DelMsgResp struct {
-	CommResp
 }
 
 type CleanUpMsgReq struct {
@@ -21,7 +20,6 @@ type CleanUpMsgReq struct {
 }
 
 type CleanUpMsgResp struct {
-	CommResp
 }
 
 type DelSuperGroupMsgReq struct {
@@ -33,7 +31,6 @@ type DelSuperGroupMsgReq struct {
 }
 
 type DelSuperGroupMsgResp struct {
-	CommResp
 }
 
 type MsgDeleteNotificationElem struct {
@@ -50,7 +47,6 @@ type SetMsgMinSeqReq struct {
 }
 
 type SetMsgMinSeqResp struct {
-	CommResp
 }
 
 type ModifyMessageReactionExtensionsReq struct {
@@ -67,7 +63,6 @@ type ModifyMessageReactionExtensionsReq struct {
 }
 
 type ModifyMessageReactionExtensionsResp struct {
-	CommResp
 	Data struct {
 		ResultKeyValue     []*msg.KeyValueResp `json:"result"`
 		MsgFirstModifyTime int64               `json:"msgFirstModifyTime"`
@@ -83,7 +78,6 @@ type ModifyMessageReactionExtensionsResp struct {
 //}
 
 type OperateMessageListReactionExtensionsResp struct {
-	CommResp
 	Data struct {
 		SuccessList []*msg.ExtendMsgResp `json:"successList"`
 		FailedList  []*msg.ExtendMsgResp `json:"failedList"`
@@ -97,7 +91,6 @@ type SetMessageReactionExtensionsCallbackResp ModifyMessageReactionExtensionsRes
 //type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
 
 type GetMessageListReactionExtensionsResp struct {
-	CommResp
 	Data []*msg.SingleMessageExtensionResult `json:"data"`
 }
 
@@ -116,7 +109,6 @@ type DeleteMessageReactionExtensionsReq struct {
 }
 
 type DeleteMessageReactionExtensionsResp struct {
-	CommResp
 	Data []*msg.KeyValueResp
 }
 

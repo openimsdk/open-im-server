@@ -3,24 +3,24 @@ package api
 import (
 	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/conversation"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
 	"github.com/gin-gonic/gin"
 )
 
 var _ context.Context // 解决goland编辑器bug
 
-func NewConversation(zk *openKeeper.ZkClient) *Conversation {
-	return &Conversation{zk: zk}
+func NewConversation(c discoveryregistry.SvcDiscoveryRegistry) *Conversation {
+	return &Conversation{c: c}
 }
 
 type Conversation struct {
-	zk *openKeeper.ZkClient
+	c discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Conversation) client() (conversation.ConversationClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImConversationName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
 		return nil, err
 	}

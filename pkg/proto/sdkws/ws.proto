@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
 option go_package = "OpenIM/pkg/proto/sdkws;sdkws";
-package sdkws;
+package OpenIMServer.sdkws;
 
 
 ////////////////////////////////base///////////////////////////////

@@ -3,24 +3,25 @@ package api
 import (
 	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/group"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
+
 	"github.com/gin-gonic/gin"
 )
 
 var _ context.Context // 解决goland编辑器bug
 
-func NewGroup(zk *openKeeper.ZkClient) *Group {
-	return &Group{zk: zk}
+func NewGroup(c discoveryregistry.SvcDiscoveryRegistry) *Group {
+	return &Group{c: c}
 }
 
 type Group struct {
-	zk *openKeeper.ZkClient
+	c discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Group) client() (group.GroupClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImGroupName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}

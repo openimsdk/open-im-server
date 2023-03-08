@@ -3,24 +3,25 @@ package api
 import (
 	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/friend"
 	"context"
-	"github.com/OpenIMSDK/openKeeper"
+
 	"github.com/gin-gonic/gin"
 )
 
 var _ context.Context // 解决goland编辑器bug
 
-func NewFriend(zk *openKeeper.ZkClient) *Friend {
-	return &Friend{zk: zk}
+func NewFriend(c discoveryregistry.SvcDiscoveryRegistry) *Friend {
+	return &Friend{c: c}
 }
 
 type Friend struct {
-	zk *openKeeper.ZkClient
+	c discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Friend) client() (friend.FriendClient, error) {
-	conn, err := o.zk.GetDefaultConn(config.Config.RpcRegisterName.OpenImFriendName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return nil, err
 	}

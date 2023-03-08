@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	"OpenIM/pkg/common/db/unrelation"
+	"OpenIM/pkg/common/kafka"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tracelog"
@@ -68,7 +70,7 @@ type MsgDatabase interface {
 	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error
+	MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error
 	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
@@ -79,6 +81,7 @@ func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel ca
 	return &msgDatabase{
 		msgDocDatabase: msgDocModel,
 		cache:          cacheModel,
+		producer:       kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic),
 	}
 }
 
@@ -93,6 +96,8 @@ type msgDatabase struct {
 	msgDocDatabase    unRelationTb.MsgDocModelInterface
 	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
 	cache             cache.Model
+	producer          *kafka.Producer
+	// model
 	msg               unRelationTb.MsgDocModel
 	extendMsgSetModel unRelationTb.ExtendMsgSetModel
 }
@@ -165,9 +170,9 @@ func (db *msgDatabase) GetSendMsgStatus(ctx context.Context, id string) (int32, 
 	return db.cache.GetSendMsgStatus(ctx, id)
 }
 
-func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, mq *pbMsg.MsgDataToMQ) error {
-	//TODO implement me
-	panic("implement me")
+func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error {
+	_, _, err := db.producer.SendMessage(ctx, key, msg2mq)
+	return err
 }
 
 func (db *msgDatabase) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {

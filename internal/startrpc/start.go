@@ -20,7 +20,7 @@ func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(
 	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
 	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts, "groupPrometheusPort default listen port")
 	flag.Parse()
-	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", constant.CurrentVersion)
+	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, *flagRpcPort))
 	if err != nil {

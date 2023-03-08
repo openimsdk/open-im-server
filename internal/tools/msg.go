@@ -11,6 +11,7 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"math"
@@ -21,6 +22,8 @@ type MsgTool struct {
 	userDatabase  controller.UserDatabase
 	groupDatabase controller.GroupDatabase
 }
+
+var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
 
 func NewMsgTool(msgDatabase controller.MsgDatabase, userDatabase controller.UserDatabase, groupDatabase controller.GroupDatabase) *MsgTool {
 	return &MsgTool{
@@ -125,7 +128,9 @@ func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []str
 			continue
 		}
 	}
-	c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+	if err := c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion); err != nil {
+		log.NewWarn(tracelog.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+	}
 	return nil
 }
 
@@ -162,10 +167,11 @@ func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, grou
 	return minSeqCache, nil
 }
 
-func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, maxSeqCache, maxSeqMongo int64, diffusionType int) {
+func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, maxSeqCache, maxSeqMongo int64, diffusionType int) error {
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		log.NewWarn(tracelog.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", sourceID, maxSeqCache, maxSeqMongo, diffusionType)
+		return errSeq
 	}
+	return nil
 }
 
 func (c *MsgTool) ShowUserSeqs(ctx context.Context, userID string) {
@@ -180,10 +186,10 @@ func (c *MsgTool) ShowSuperGroupUserSeqs(ctx context.Context, groupID, userID st
 
 }
 
-func (c *MsgTool) FixAllSeq(ctx context.Context) {
+func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 	userIDs, err := c.userDatabase.GetAllUserID(ctx)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	for _, userID := range userIDs {
 		userCurrentMinSeq, err := c.msgDatabase.GetUserMinSeq(ctx, userID)
@@ -204,7 +210,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) {
 	fmt.Println("fix users seq success")
 	groupIDs, err := c.groupDatabase.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	for _, groupID := range groupIDs {
 		maxSeq, err := c.msgDatabase.GetGroupMaxSeq(ctx, groupID)
@@ -232,4 +238,5 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) {
 		}
 	}
 	fmt.Println("fix all seq finished")
+	return nil
 }
