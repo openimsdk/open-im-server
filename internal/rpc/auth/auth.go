@@ -9,7 +9,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
-	discoveryRegistry "OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/errs"
 	pbAuth "OpenIM/pkg/proto/auth"
 	"OpenIM/pkg/proto/msggateway"
@@ -21,10 +21,10 @@ import (
 type authServer struct {
 	authDatabase   controller.AuthDatabase
 	userCheck      *check.UserCheck
-	RegisterCenter discoveryRegistry.SvcDiscoveryRegistry
+	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
-func Start(client discoveryRegistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err

@@ -1,66 +1,31 @@
 package msggateway
 
 import (
-	"OpenIM/internal/common/network"
+	"OpenIM/internal/startrpc"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msggateway"
 	"OpenIM/pkg/utils"
 	"context"
-	"fmt"
-	"github.com/OpenIMSDK/openKeeper"
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
-	"net"
 )
 
-func (s *Server) Start() error {
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
-	if err != nil {
-		return err
-	}
-	defer zkClient.Close()
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
-	if err != nil {
-		return err
-	}
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, s.rpcPort))
-	if err != nil {
-		panic("listening err:" + err.Error())
-	}
-	defer listener.Close()
-	var options []grpc.ServerOption
-	options = append(options, mw.GrpcServer()) // ctx 中间件
-	if config.Config.Prometheus.Enable {
-		prome.NewGrpcRequestCounter()
-		prome.NewGrpcRequestFailedCounter()
-		prome.NewGrpcRequestSuccessCounter()
-		options = append(options, []grpc.ServerOption{
-			//grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
-		}...)
-	}
-	srv := grpc.NewServer(options...)
-	defer srv.GracefulStop()
-	msggateway.RegisterMsgGatewayServer(srv, s)
-	err = zkClient.Register("", registerIP, s.rpcPort)
-	if err != nil {
-		return err
-	}
-	err = srv.Serve(listener)
-	if err != nil {
-		return err
-	}
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	msggateway.RegisterMsgGatewayServer(server, &Server{})
 	return nil
+}
+
+func (s *Server) Start() error {
+	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, Start)
 }
 
 type Server struct {
 	rpcPort        int
+	prometheusPort int
 	LongConnServer LongConnServer
 	pushTerminal   []int
 	//rpcServer      *RpcServer

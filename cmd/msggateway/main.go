@@ -1,41 +1,18 @@
 package main
 
 import (
-	"OpenIM/internal/msggateway"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/log"
-	"flag"
+	"OpenIM/pkg/common/cmd"
 	"fmt"
-	"sync"
-	"time"
+	"os"
 )
 
 func main() {
-	if err := config.InitConfig(""); err != nil {
-		panic(err.Error())
+	msgGatewayCmd := cmd.NewMsgGatewayCmd()
+	msgGatewayCmd.AddWsPortFlag()
+	msgGatewayCmd.AddPortFlag()
+	msgGatewayCmd.AddPrometheusPortFlag()
+	if err := msgGatewayCmd.Exec(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
-	log.NewPrivateLog(constant.LogFileName)
-	defaultRpcPorts := config.Config.RpcPort.OpenImMessageGatewayPort
-	defaultWsPorts := config.Config.LongConnSvr.WebsocketPort
-	defaultPromePorts := config.Config.Prometheus.MessageGatewayPrometheusPort
-	rpcPort := flag.Int("rpc_port", defaultRpcPorts[0], "rpc listening port")
-	wsPort := flag.Int("ws_port", defaultWsPorts[0], "ws listening port")
-	prometheusPort := flag.Int("prometheus_port", defaultPromePorts[0], "PushrometheusPort default listen port")
-	flag.Parse()
-	var wg sync.WaitGroup
-	wg.Add(1)
-	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort, *prometheusPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	longServer, err := msggateway.NewWsServer(
-		msggateway.WithPort(*wsPort),
-		msggateway.WithMaxConnNum(int64(config.Config.LongConnSvr.WebsocketMaxConnNum)),
-		msggateway.WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeOut)*time.Second),
-		msggateway.WithMessageMaxMsgLength(config.Config.LongConnSvr.WebsocketMaxMsgLen))
-	if err != nil {
-		panic(err.Error())
-	}
-	hubServer := msggateway.NewServer(*rpcPort, longServer)
-	go hubServer.Start()
-	go hubServer.LongConnServer.Run()
-	wg.Wait()
 }

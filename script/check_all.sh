@@ -10,7 +10,7 @@ service_port_name=(
   openImUserPort
   openImFriendPort
   openImMessagePort
-#  openImMessageGatewayPort
+  openImMessageGatewayPort
   openImGroupPort
   openImAuthPort
   openImPushPort

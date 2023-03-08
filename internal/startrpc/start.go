@@ -16,13 +16,11 @@ import (
 	"net"
 )
 
-func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
-	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
-	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts, "groupPrometheusPort default listen port")
+func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
 	flag.Parse()
-	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", config.Version)
+	fmt.Println("start group rpc server, port: ", rpcPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, *flagRpcPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
 	if err != nil {
 		return err
 	}
@@ -49,12 +47,12 @@ func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
-	err = zkClient.Register(rpcRegisterName, registerIP, *flagRpcPort)
+	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort)
 	if err != nil {
 		return err
 	}
-	if config.Config.Prometheus.Enable {
-		err := prome.StartPrometheusSrv(*flagPrometheusPort)
+	if config.Config.Prometheus.Enable && prometheusPort != 0 {
+		err := prome.StartPrometheusSrv(prometheusPort)
 		if err != nil {
 			return err
 		}
