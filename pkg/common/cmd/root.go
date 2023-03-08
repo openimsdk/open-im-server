@@ -7,12 +7,10 @@ import (
 )
 
 type RootCmd struct {
-	Command  cobra.Command
-	port     int
-	portFlag bool
+	Command cobra.Command
+	port    int
 
-	prometheusPort     int
-	prometheusPortFlag bool
+	prometheusPort int
 }
 
 func NewRootCmd() (rootCmd *RootCmd) {
@@ -22,12 +20,8 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		Short: "Start the server",
 		Long:  `Start the server`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			//if rootCmd.portFlag {
 			rootCmd.port = rootCmd.getPortFlag(cmd)
-			//}
-			//if rootCmd.prometheusPortFlag {
 			rootCmd.prometheusPort = rootCmd.getPrometheusPortFlag(cmd)
-			//}
 			return rootCmd.getConfFromCmdAndInit(cmd)
 		},
 	}
@@ -54,7 +48,6 @@ func (r *RootCmd) init() {
 
 func (r *RootCmd) AddPortFlag() {
 	r.Command.Flags().IntP(constant.FlagPort, "p", 0, "server listen port")
-	r.portFlag = true
 }
 
 func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
@@ -68,12 +61,15 @@ func (r *RootCmd) GetPortFlag() int {
 
 func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().StringP(constant.PrometheusPort, "pp", "", "server listen port")
-	r.prometheusPortFlag = true
 }
 
 func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.PrometheusPort)
 	return port
+}
+
+func (r *RootCmd) GetPrometheusPortFlag() int {
+	return r.prometheusPort
 }
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {

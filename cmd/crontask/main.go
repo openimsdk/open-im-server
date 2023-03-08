@@ -2,17 +2,16 @@ package main
 
 import (
 	"OpenIM/internal/tools"
-	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/cmd"
 	"fmt"
-	"time"
+	"os"
 )
 
 func main() {
-	fmt.Println(time.Now(), "start cronTask")
-	if err := config.InitConfig(""); err != nil {
-		panic(err.Error())
-	}
-	if err := tools.StartCronTask(); err != nil {
-		panic(err.Error())
+	cronTaskCmd := cmd.NewCronTaskCmd()
+	cronTaskCmd.AddRunE(tools.StartCronTask)
+	if err := cronTaskCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }

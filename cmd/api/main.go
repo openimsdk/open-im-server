@@ -15,17 +15,16 @@ import (
 )
 
 func main() {
-	rootCmd := cmd.NewRootCmd()
-	rootCmd.AddPortFlag()
-	rootCmd.AddRunE(run)
-	if err := rootCmd.Execute(); err != nil {
+	apiCmd := cmd.NewApiCmd()
+	apiCmd.AddPortFlag()
+	apiCmd.AddApi(run)
+	if err := apiCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run(rootCmd cmd.RootCmd) error {
-	port := rootCmd.GetPortFlag()
+func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
