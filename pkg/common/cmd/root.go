@@ -22,12 +22,12 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		Short: "Start the server",
 		Long:  `Start the server`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if rootCmd.portFlag {
-				rootCmd.port = rootCmd.getPortFlag(cmd)
-			}
-			if rootCmd.prometheusPortFlag {
-				rootCmd.prometheusPort = rootCmd.getPrometheusPortFlag(cmd)
-			}
+			//if rootCmd.portFlag {
+			rootCmd.port = rootCmd.getPortFlag(cmd)
+			//}
+			//if rootCmd.prometheusPortFlag {
+			rootCmd.prometheusPort = rootCmd.getPrometheusPortFlag(cmd)
+			//}
 			return rootCmd.getConfFromCmdAndInit(cmd)
 		},
 	}
@@ -39,6 +39,12 @@ func NewRootCmd() (rootCmd *RootCmd) {
 func (r *RootCmd) AddRunE(f func(cmd RootCmd) error) {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return f(*r)
+	}
+}
+
+func (r *RootCmd) AddRpc(f func(port, prometheusPort int) error) {
+	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
+		return f(r.port, r.prometheusPort)
 	}
 }
 
