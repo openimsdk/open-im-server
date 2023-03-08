@@ -28,7 +28,7 @@ func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
-	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, "", 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
+	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
 	if err != nil {
 		return err
 	}
