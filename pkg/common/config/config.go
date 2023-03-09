@@ -159,17 +159,17 @@ type config struct {
 		OpenImThirdPort          []int `yaml:"openImThirdPort"`
 	}
 	RpcRegisterName struct {
-		OpenImUserName           string `yaml:"openImUserName"`
-		OpenImFriendName         string `yaml:"openImFriendName"`
-		OpenImMsgName            string `yaml:"openImMsgName"`
-		OpenImPushName           string `yaml:"openImPushName"`
-		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
-		OpenImGroupName          string `yaml:"openImGroupName"`
-		OpenImAuthName           string `yaml:"openImAuthName"`
-		OpenImConversationName   string `yaml:"openImConversationName"`
-		OpenImCacheName          string `yaml:"openImCacheName"`
-		OpenImRtcName            string `yaml:"openImRtcName"`
-		OpenImThirdName          string `yaml:"openImThirdName"`
+		OpenImUserName           string  `yaml:"openImUserName"`
+		OpenImFriendName         string  `yaml:"openImFriendName"`
+		OpenImMsgName            string  `yaml:"openImMsgName"`
+		OpenImPushName           string  `yaml:"openImPushName"`
+		OpenImMessageGatewayName string  `yaml:"openImMessageGatewayName"`
+		OpenImGroupName          string  `yaml:"openImGroupName"`
+		OpenImAuthName           *string `yaml:"openImAuthName"`
+		OpenImConversationName   string  `yaml:"openImConversationName"`
+		OpenImCacheName          string  `yaml:"openImCacheName"`
+		OpenImRtcName            string  `yaml:"openImRtcName"`
+		OpenImThirdName          string  `yaml:"openImThirdName"`
 	}
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
