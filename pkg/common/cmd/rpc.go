@@ -14,7 +14,9 @@ type RpcCmd struct {
 }
 
 func NewRpcCmd(rpcRegisterName string) *RpcCmd {
-	return &RpcCmd{NewRootCmd(), rpcRegisterName}
+	rpcCmd := &RpcCmd{NewRootCmd(), rpcRegisterName}
+	fmt.Println(*rpcCmd)
+	return rpcCmd
 }
 
 func (r *RpcCmd) AddRpc(rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) {
