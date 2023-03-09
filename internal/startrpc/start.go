@@ -17,7 +17,7 @@ import (
 )
 
 func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
-	fmt.Println("start group rpc server, port: ", rpcPort, ", OpenIM version: ", config.Version)
+	fmt.Println("start", rpcRegisterName, "rpc server, port: ", rpcPort, "prometheusPort:", prometheusPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
 	if err != nil {
