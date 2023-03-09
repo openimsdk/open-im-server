@@ -8,7 +8,7 @@ import (
 )
 
 type PushCmd struct {
-	*AuthCmd
+	*RpcCmd
 }
 
 func NewPushCmd() *PushCmd {

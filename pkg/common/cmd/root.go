@@ -23,7 +23,7 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		},
 	}
 	rootCmd.Command = c
-	rootCmd.init()
+	rootCmd.addConfFlag()
 	return rootCmd
 }
 
@@ -39,7 +39,7 @@ func (r *RootCmd) AddRpc(f func(port, prometheusPort int) error) {
 	}
 }
 
-func (r *RootCmd) init() {
+func (r *RootCmd) addConfFlag() {
 	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
 

@@ -12,7 +12,11 @@ func main() {
 	rpcCmd := cmd.NewRpcCmd()
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
-	if err := rpcCmd.Exec(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
+	if err := rpcCmd.Exec(); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
