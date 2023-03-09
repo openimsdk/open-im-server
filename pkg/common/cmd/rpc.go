@@ -15,7 +15,7 @@ type RpcCmd struct {
 
 func NewRpcCmd(rpcRegisterName string) *RpcCmd {
 	rpcCmd := &RpcCmd{NewRootCmd(), rpcRegisterName}
-	fmt.Println(*rpcCmd)
+	fmt.Println("line 18", *rpcCmd, rpcCmd)
 	return rpcCmd
 }
 
