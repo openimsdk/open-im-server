@@ -23,7 +23,7 @@ func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 		return err
 	}
 	defer listener.Close()
-	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema)
+	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, rpcRegisterName)
 	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
 	if err != nil {
 		return err
