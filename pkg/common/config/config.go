@@ -515,7 +515,6 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 			return err
 		}
 		configPath = filepath.Join(Root, "config", configName)
-		fmt.Println("use", configPath)
 	} else {
 		Root = filepath.Dir(configPath)
 	}
