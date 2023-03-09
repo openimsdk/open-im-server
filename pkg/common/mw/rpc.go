@@ -15,6 +15,9 @@ import (
 	"runtime/debug"
 )
 
+const OperationID = "operationID"
+const OpUserID = "opUserID"
+
 func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	var operationID string
 	defer func() {
@@ -27,13 +30,13 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
 	}
-	if opts := md.Get(constant.OperationID); len(opts) != 1 || opts[0] == "" {
+	if opts := md.Get(OperationID); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "operationID error").Err()
 	} else {
 		operationID = opts[0]
 	}
 	var opUserID string
-	if opts := md.Get(constant.OpUserID); len(opts) == 1 {
+	if opts := md.Get(OpUserID); len(opts) == 1 {
 		opUserID = opts[0]
 	}
 	ctx = tracelog.NewRpcCtx(ctx, funcName, operationID)
