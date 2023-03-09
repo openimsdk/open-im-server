@@ -78,7 +78,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) ConsumeClaim(sess sarama.ConsumerGr
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			ctx := mc.historyConsumerGroup.GetContextFromMsg(msg)
+			ctx := mc.historyConsumerGroup.GetContextFromMsg(msg, "mongoDB consumer")
 			mc.handleChatWs2Mongo(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "mongo msg get from kafka but is nil", msg.Key)

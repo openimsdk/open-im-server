@@ -39,7 +39,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get(OpUserID); len(opts) == 1 {
 		opUserID = opts[0]
 	}
-	ctx = tracelog.NewRpcCtx(ctx, funcName, operationID)
+	ctx = tracelog.SetFuncInfos(ctx, funcName, operationID)
 	defer log.ShowLog(ctx)
 	tracelog.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)

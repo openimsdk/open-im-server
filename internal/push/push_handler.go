@@ -68,7 +68,7 @@ func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
+		ctx := c.pushConsumerGroup.GetContextFromMsg(msg, "push consumer")
 		c.handleMs2PsChat(ctx, msg.Value)
 		sess.MarkMessage(msg, "")
 	}

@@ -1,7 +1,6 @@
 package tracelog
 
 import (
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/sirupsen/logrus"
@@ -15,24 +14,27 @@ import (
 
 const TraceLogKey = "tracelog"
 
-func NewCtx(c *gin.Context, api string) context.Context {
-	req := &ApiInfo{ApiName: api, GinCtx: c, OperationID: c.GetHeader(constant.OperationID), Funcs: &[]FuncInfo{}}
-	return context.WithValue(c, TraceLogKey, req)
+func SetFuncInfos(c context.Context, rootFuncName string, operationID string) context.Context {
+	req := &FuncInfos{RootFuncName: rootFuncName, Funcs: &[]FuncInfo{}}
+	ctx := context.WithValue(c, TraceLogKey, req)
+	SetOperationID(ctx, operationID)
+	return ctx
 }
 
-func NewRpcCtx(c context.Context, rpc string, operationID string) context.Context {
-	req := &ApiInfo{ApiName: rpc, Funcs: &[]FuncInfo{}}
+func NewCtx(rootFuncName string, operationID string) context.Context {
+	c := context.Background()
+	req := &FuncInfos{RootFuncName: rootFuncName, Funcs: &[]FuncInfo{}}
 	ctx := context.WithValue(c, TraceLogKey, req)
 	SetOperationID(ctx, operationID)
 	return ctx
 }
 
 func SetOperationID(ctx context.Context, operationID string) {
-	ctx.Value(TraceLogKey).(*ApiInfo).OperationID = operationID
+	ctx.Value(TraceLogKey).(*FuncInfos).OperationID = operationID
 }
 
 func GetOperationID(ctx context.Context) string {
-	return ctx.Value(TraceLogKey).(*ApiInfo).OperationID
+	return ctx.Value(TraceLogKey).(*FuncInfos).OperationID
 }
 
 func GetOpUserID(ctx context.Context) string {
@@ -53,11 +55,11 @@ func Unwrap(err error) error {
 	return err
 }
 
-type ApiInfo struct {
-	ApiName     string
-	OperationID string
-	Funcs       *[]FuncInfo
-	GinCtx      *gin.Context
+type FuncInfos struct {
+	RootFuncName string
+	OperationID  string
+	Funcs        *[]FuncInfo
+	GinCtx       *gin.Context
 }
 
 type FuncInfo struct {
@@ -99,7 +101,7 @@ func SetCtxWarn(ctx context.Context, funcName string, err error, args ...interfa
 }
 
 func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level, err error, args ...interface{}) {
-	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	t := ctx.Value(TraceLogKey).(*FuncInfos)
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	argsHandle(args, funcInfo.Args)
@@ -117,7 +119,7 @@ func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level,
 }
 
 func SetRpcReqInfo(ctx context.Context, funcName string, req string) {
-	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	t := ctx.Value(TraceLogKey).(*FuncInfos)
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	var args []interface{}
@@ -128,7 +130,7 @@ func SetRpcReqInfo(ctx context.Context, funcName string, req string) {
 }
 
 func SetRpcRespInfo(ctx context.Context, funcName string, resp string) {
-	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	t := ctx.Value(TraceLogKey).(*FuncInfos)
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	var args []interface{}
