@@ -9,9 +9,9 @@ import (
 	"OpenIM/pkg/common/http"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/proto/group"
+	"OpenIM/pkg/proto/wrapperspb"
 	"OpenIM/pkg/utils"
 	"context"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 	"time"
 )
 
