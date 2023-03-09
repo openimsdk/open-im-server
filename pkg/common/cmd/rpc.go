@@ -2,34 +2,27 @@ package cmd
 
 import (
 	"OpenIM/internal/startrpc"
-	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/discoveryregistry"
-	"fmt"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
 
 type RpcCmd struct {
 	*RootCmd
-	rpcRegisterName string
 }
 
-func NewRpcCmd(rpcRegisterName string) *RpcCmd {
-	rpcCmd := &RpcCmd{NewRootCmd(), rpcRegisterName}
-	fmt.Println("line 18", *rpcCmd, rpcCmd, rpcRegisterName, config.Config.RpcRegisterName)
+func NewRpcCmd() *RpcCmd {
+	rpcCmd := &RpcCmd{NewRootCmd()}
 	return rpcCmd
 }
 
-func (r *RpcCmd) AddRpc(rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) {
+func (r *RpcCmd) addRpc(rpcRegisterName string, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return startrpc.Start(r.getPortFlag(cmd), r.rpcRegisterName, r.getPrometheusPortFlag(cmd), rpcFn)
+		return startrpc.Start(r.getPortFlag(cmd), rpcRegisterName, r.getPrometheusPortFlag(cmd), rpcFn)
 	}
 }
 
-func (r *RpcCmd) Exec(rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
-	fmt.Println(r)
-
-	r.AddRpc(rpcFn)
-	fmt.Println(r)
+func (r *RpcCmd) Exec(rpcRegisterName string, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+	r.addRpc(rpcRegisterName, rpcFn)
 	return r.Execute()
 }

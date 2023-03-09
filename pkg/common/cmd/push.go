@@ -12,7 +12,7 @@ type PushCmd struct {
 }
 
 func NewPushCmd() *PushCmd {
-	return &PushCmd{NewRpcCmd(config.Config.RpcRegisterName.OpenImPushName)}
+	return &PushCmd{NewRpcCmd()}
 }
 
 func (r *RpcCmd) AddPush() {

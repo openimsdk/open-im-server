@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	rpcCmd := cmd.NewRpcCmd(config.Config.RpcRegisterName.OpenImMsgName)
+	rpcCmd := cmd.NewRpcCmd()
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
-	if err := rpcCmd.Exec(msg.Start); err != nil {
+	if err := rpcCmd.Exec(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
