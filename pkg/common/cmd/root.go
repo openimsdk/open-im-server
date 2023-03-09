@@ -7,7 +7,9 @@ import (
 )
 
 type RootCmd struct {
-	Command cobra.Command
+	Command        cobra.Command
+	port           int
+	prometheusPort int
 }
 
 func NewRootCmd() (rootCmd *RootCmd) {
@@ -50,6 +52,10 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	return port
 }
 
+func (r *RootCmd) GetPortFlag() int {
+	return r.port
+}
+
 func (r *RootCmd) AddPrometheusPortFlag() {
 	r.Command.Flags().String(constant.FlagPrometheusPort, "", "server prometheus listen port")
 }
@@ -57,6 +63,10 @@ func (r *RootCmd) AddPrometheusPortFlag() {
 func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.FlagPrometheusPort)
 	return port
+}
+
+func (r *RootCmd) GetPrometheusPortFlag() int {
+	return r.prometheusPort
 }
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {

@@ -20,7 +20,7 @@ type Auth struct {
 }
 
 func (o *Auth) client() (auth.AuthClient, error) {
-	conn, err := o.c.GetConn(*config.Config.RpcRegisterName.OpenImAuthName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImAuthName)
 	if err != nil {
 		return nil, err
 	}
