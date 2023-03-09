@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 	"gopkg.in/yaml.v3"
 	"net"
 	"strconv"
@@ -133,7 +134,10 @@ func UnRegisterEtcd() {
 func registerConf(key, conf string) {
 	etcdAddr := strings.Join(config.Config.Etcd.EtcdAddr, ",")
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
+		Endpoints:   strings.Split(etcdAddr, ","),
+		DialTimeout: 5 * time.Second,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	})
 
 	if err != nil {
 		panic(err.Error())
