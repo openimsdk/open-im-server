@@ -18,8 +18,8 @@ func NewAuthCmd() *AuthCmd {
 
 func (a *AuthCmd) Execute() error {
 	a.Command.Run = func(cmd *cobra.Command, args []string) {
-		a.port = a.getPortFlag(cmd)
-		a.prometheusPort = a.getPrometheusPortFlag(cmd)
+		//a.port = a.getPortFlag(cmd)
+		//a.prometheusPort = a.getPrometheusPortFlag(cmd)
 	}
 	return a.Execute()
 }
