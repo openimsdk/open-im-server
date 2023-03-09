@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"OpenIM/internal/push"
 	"OpenIM/internal/startrpc"
-	"OpenIM/pkg/common/config"
-	"github.com/spf13/cobra"
+	"OpenIM/pkg/discoveryregistry"
+	"google.golang.org/grpc"
 )
 
 type PushCmd struct {
@@ -12,11 +11,9 @@ type PushCmd struct {
 }
 
 func NewPushCmd() *PushCmd {
-	return &PushCmd{NewAuthCmd()}
+	return &PushCmd{NewRpcCmd()}
 }
 
-func (r *PushCmd) AddPush() {
-	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return startrpc.Start(r.getPortFlag(cmd), config.Config.RpcRegisterName.OpenImPushName, r.getPrometheusPortFlag(cmd), push.Start)
-	}
+func (r *PushCmd) StartSvr(name string, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+	return startrpc.Start(r.GetPortFlag(), name, r.GetPrometheusPortFlag(), rpcFn)
 }

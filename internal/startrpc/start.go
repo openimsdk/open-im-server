@@ -16,7 +16,7 @@ import (
 	"net"
 )
 
-func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
+func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 	fmt.Println("start", rpcRegisterName, "rpc server, port: ", rpcPort, "prometheusPort:", prometheusPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
@@ -60,6 +60,6 @@ func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	return rpcFn(zkClient, srv)
 }
 
-func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
-	return start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
-}
+//func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
+//	return start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
+//}
