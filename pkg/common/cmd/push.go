@@ -17,6 +17,6 @@ func NewPushCmd() *PushCmd {
 
 func (r *RpcCmd) AddPush() {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return startrpc.Start(r.getPortFlag(cmd), r.rpcRegisterName, r.getPrometheusPortFlag(cmd), push.Start)
+		return startrpc.Start(r.getPortFlag(cmd), config.Config.RpcRegisterName.OpenImPushName, r.getPrometheusPortFlag(cmd), push.Start)
 	}
 }
