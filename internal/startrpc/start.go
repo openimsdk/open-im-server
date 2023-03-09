@@ -13,6 +13,7 @@ import (
 	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 )
 
@@ -47,7 +48,7 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
-	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort)
+	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return utils.Wrap1(err)
 	}
