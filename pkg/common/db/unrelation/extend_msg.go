@@ -39,7 +39,7 @@ func (e *ExtendMsgSetMongoDriver) GetAllExtendMsgSet(ctx context.Context, ID str
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	err = cursor.All(context.Background(), &sets)
+	err = cursor.All(ctx, &sets)
 	if err != nil {
 		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
