@@ -30,25 +30,20 @@ type AccountCheckReq struct {
 	CheckUserIDList []string `json:"checkUserIDList" binding:"required,lte=100"`
 }
 type AccountCheckResp struct {
-
-	//ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
 }
 
 type ManagementSendMsg struct {
-	OperationID         string `json:"operationID" binding:"required"`
-	BusinessOperationID string `json:"businessOperationID"`
-	SendID              string `json:"sendID" binding:"required"`
-	GroupID             string `json:"groupID" `
-	SenderNickname      string `json:"senderNickname" `
-	SenderFaceURL       string `json:"senderFaceURL" `
-	SenderPlatformID    int32  `json:"senderPlatformID"`
-	//ForceList        []string                     `json:"forceList" `
-	Content         map[string]interface{} `json:"content" binding:"required" swaggerignore:"true"`
-	ContentType     int32                  `json:"contentType" binding:"required"`
-	SessionType     int32                  `json:"sessionType" binding:"required"`
-	IsOnlineOnly    bool                   `json:"isOnlineOnly"`
-	NotOfflinePush  bool                   `json:"notOfflinePush"`
-	OfflinePushInfo *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
+	SendID           string                 `json:"sendID" binding:"required"`
+	GroupID          string                 `json:"groupID" `
+	SenderNickname   string                 `json:"senderNickname" `
+	SenderFaceURL    string                 `json:"senderFaceURL" `
+	SenderPlatformID int32                  `json:"senderPlatformID"`
+	Content          map[string]interface{} `json:"content" binding:"required" swaggerignore:"true"`
+	ContentType      int32                  `json:"contentType" binding:"required"`
+	SessionType      int32                  `json:"sessionType" binding:"required"`
+	IsOnlineOnly     bool                   `json:"isOnlineOnly"`
+	NotOfflinePush   bool                   `json:"notOfflinePush"`
+	OfflinePushInfo  *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
 type ManagementSendMsgReq struct {
@@ -85,40 +80,4 @@ type CheckMsgIsSendSuccessReq struct {
 
 type CheckMsgIsSendSuccessResp struct {
 	Status int32 `json:"status"`
-}
-
-type GetUsersReq struct {
-	OperationID string `json:"operationID" binding:"required"`
-	UserName    string `json:"userName"`
-	UserID      string `json:"userID"`
-	Content     string `json:"content"`
-	PageNumber  int32  `json:"pageNumber" binding:"required"`
-	ShowNumber  int32  `json:"showNumber" binding:"required"`
-}
-
-type CMSUser struct {
-	UserID           string `json:"userID"`
-	Nickname         string `json:"nickname"`
-	FaceURL          string `json:"faceURL"`
-	Gender           int32  `json:"gender"`
-	PhoneNumber      string `json:"phoneNumber"`
-	Birth            uint32 `json:"birth"`
-	Email            string `json:"email"`
-	Ex               string `json:"ex"`
-	CreateIp         string `json:"createIp"`
-	CreateTime       uint32 `json:"createTime"`
-	LastLoginIp      string `json:"LastLoginIp"`
-	LastLoginTime    uint32 `json:"LastLoginTime"`
-	AppMangerLevel   int32  `json:"appMangerLevel"`
-	GlobalRecvMsgOpt int32  `json:"globalRecvMsgOpt"`
-	IsBlock          bool   `json:"isBlock"`
-}
-
-type GetUsersResp struct {
-	Data struct {
-		UserList    []*CMSUser `json:"userList"`
-		TotalNum    int32      `json:"totalNum"`
-		CurrentPage int32      `json:"currentPage"`
-		ShowNumber  int32      `json:"showNumber"`
-	} `json:"data"`
 }

@@ -131,3 +131,90 @@ type ReactionMessageDeleteNotification struct {
 	ClientMsgID               string                     `json:"clientMsgID" binding:"required"`
 	MsgFirstModifyTime        int64                      `json:"msgFirstModifyTime"`
 }
+
+type PictureBaseInfo struct {
+	UUID   string `mapstructure:"uuid"`
+	Type   string `mapstructure:"type" `
+	Size   int64  `mapstructure:"size" `
+	Width  int32  `mapstructure:"width" `
+	Height int32  `mapstructure:"height"`
+	Url    string `mapstructure:"url" `
+}
+
+type PictureElem struct {
+	SourcePath      string          `mapstructure:"sourcePath"`
+	SourcePicture   PictureBaseInfo `mapstructure:"sourcePicture"`
+	BigPicture      PictureBaseInfo `mapstructure:"bigPicture" `
+	SnapshotPicture PictureBaseInfo `mapstructure:"snapshotPicture"`
+}
+type SoundElem struct {
+	UUID      string `mapstructure:"uuid"`
+	SoundPath string `mapstructure:"soundPath"`
+	SourceURL string `mapstructure:"sourceUrl"`
+	DataSize  int64  `mapstructure:"dataSize"`
+	Duration  int64  `mapstructure:"duration"`
+}
+type VideoElem struct {
+	VideoPath      string `mapstructure:"videoPath"`
+	VideoUUID      string `mapstructure:"videoUUID"`
+	VideoURL       string `mapstructure:"videoUrl"`
+	VideoType      string `mapstructure:"videoType"`
+	VideoSize      int64  `mapstructure:"videoSize"`
+	Duration       int64  `mapstructure:"duration"`
+	SnapshotPath   string `mapstructure:"snapshotPath"`
+	SnapshotUUID   string `mapstructure:"snapshotUUID"`
+	SnapshotSize   int64  `mapstructure:"snapshotSize"`
+	SnapshotURL    string `mapstructure:"snapshotUrl"`
+	SnapshotWidth  int32  `mapstructure:"snapshotWidth"`
+	SnapshotHeight int32  `mapstructure:"snapshotHeight"`
+}
+type FileElem struct {
+	FilePath  string `mapstructure:"filePath"`
+	UUID      string `mapstructure:"uuid"`
+	SourceURL string `mapstructure:"sourceUrl"`
+	FileName  string `mapstructure:"fileName"`
+	FileSize  int64  `mapstructure:"fileSize"`
+}
+type AtElem struct {
+	Text       string   `mapstructure:"text"`
+	AtUserList []string `mapstructure:"atUserList"`
+	IsAtSelf   bool     `mapstructure:"isAtSelf"`
+}
+type LocationElem struct {
+	Description string  `mapstructure:"description"`
+	Longitude   float64 `mapstructure:"longitude"`
+	Latitude    float64 `mapstructure:"latitude"`
+}
+type CustomElem struct {
+	Data        string `mapstructure:"data" validate:"required"`
+	Description string `mapstructure:"description"`
+	Extension   string `mapstructure:"extension"`
+}
+type TextElem struct {
+	Text string `mapstructure:"text" validate:"required"`
+}
+
+type RevokeElem struct {
+	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
+}
+type OANotificationElem struct {
+	NotificationName    string      `mapstructure:"notificationName" json:"notificationName" validate:"required"`
+	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
+	NotificationType    int32       `mapstructure:"notificationType" json:"notificationType" validate:"required"`
+	Text                string      `mapstructure:"text" json:"text" validate:"required"`
+	Url                 string      `mapstructure:"url" json:"url"`
+	MixType             int32       `mapstructure:"mixType" json:"mixType"`
+	PictureElem         PictureElem `mapstructure:"pictureElem" json:"pictureElem"`
+	SoundElem           SoundElem   `mapstructure:"soundElem" json:"soundElem"`
+	VideoElem           VideoElem   `mapstructure:"videoElem" json:"videoElem"`
+	FileElem            FileElem    `mapstructure:"fileElem" json:"fileElem"`
+	Ex                  string      `mapstructure:"ex" json:"ex"`
+}
+type MessageRevoked struct {
+	RevokerID       string `mapstructure:"revokerID" json:"revokerID" validate:"required"`
+	RevokerRole     int32  `mapstructure:"revokerRole" json:"revokerRole" validate:"required"`
+	ClientMsgID     string `mapstructure:"clientMsgID" json:"clientMsgID" validate:"required"`
+	RevokerNickname string `mapstructure:"revokerNickname" json:"revokerNickname"`
+	SessionType     int32  `mapstructure:"sessionType" json:"sessionType" validate:"required"`
+	Seq             uint32 `mapstructure:"seq" json:"seq" validate:"required"`
+}
