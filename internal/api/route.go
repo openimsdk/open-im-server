@@ -121,7 +121,6 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry) *gin.Engine {
 		chatGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)
 		chatGroup.POST("/clear_msg", m.ClearMsg)
 
-		chatGroup.POST("/send_msg", m.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		chatGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		chatGroup.POST("/get_users_online_status", m.GetUsersOnlineStatus)
