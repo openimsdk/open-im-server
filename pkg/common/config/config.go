@@ -170,7 +170,7 @@ type config struct {
 		OpenImCacheName          string `yaml:"openImCacheName"`
 		OpenImRtcName            string `yaml:"openImRtcName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
-	}
+	} `yaml:"rpcregistername"`
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
 		ZkAddr   []string `yaml:"zkAddr"`
