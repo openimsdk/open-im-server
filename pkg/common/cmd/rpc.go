@@ -17,9 +17,10 @@ func NewAuthCmd() *AuthCmd {
 }
 
 func (a *AuthCmd) Exec() error {
-	a.Command.Run = func(cmd *cobra.Command, args []string) {
+	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		a.port = a.getPortFlag(cmd)
 		a.prometheusPort = a.getPrometheusPortFlag(cmd)
+		return a.getConfFromCmdAndInit(cmd)
 	}
 	return a.Execute()
 }

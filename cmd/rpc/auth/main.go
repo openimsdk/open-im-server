@@ -12,7 +12,7 @@ func main() {
 	authCmd := cmd.NewAuthCmd()
 	authCmd.AddPortFlag()
 	authCmd.AddPrometheusPortFlag()
-	if err := authCmd.Execute(); err != nil {
+	if err := authCmd.Exec(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
