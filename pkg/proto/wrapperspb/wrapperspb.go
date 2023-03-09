@@ -52,9 +52,6 @@ func (m *DoubleValue) UnmarshalJSON(p []byte) error {
 }
 
 func (m *DoubleValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatFloat(m.Value, 'f', -1, 64)), nil
 }
 
@@ -68,9 +65,6 @@ func (m *FloatValue) UnmarshalJSON(p []byte) error {
 }
 
 func (m *FloatValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatFloat(float64(m.Value), 'f', -1, 32)), nil
 }
 
@@ -84,9 +78,6 @@ func (m *Int64Value) UnmarshalJSON(p []byte) error {
 }
 
 func (m *Int64Value) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatInt(m.Value, 10)), nil
 }
 
@@ -100,9 +91,6 @@ func (m *UInt64Value) UnmarshalJSON(p []byte) error {
 }
 
 func (m *UInt64Value) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatUint(m.Value, 10)), nil
 }
 
@@ -116,9 +104,6 @@ func (m *Int32Value) UnmarshalJSON(p []byte) error {
 }
 
 func (m *Int32Value) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatInt(int64(m.Value), 10)), nil
 }
 
@@ -132,9 +117,6 @@ func (m *UInt32Value) UnmarshalJSON(p []byte) error {
 }
 
 func (m *UInt32Value) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatUint(uint64(m.Value), 10)), nil
 }
 
@@ -148,9 +130,6 @@ func (m *BoolValue) UnmarshalJSON(p []byte) error {
 }
 
 func (m *BoolValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(strconv.FormatBool(m.Value)), nil
 }
 
@@ -163,9 +142,6 @@ func (m *StringValue) UnmarshalJSON(p []byte) error {
 }
 
 func (m *StringValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(`"` + m.Value + `"`), nil
 }
 
@@ -182,8 +158,5 @@ func (m *BytesValue) UnmarshalJSON(p []byte) error {
 }
 
 func (m *BytesValue) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte("null"), nil
-	}
 	return []byte(`"` + base64.StdEncoding.EncodeToString(m.Value) + `"`), nil
 }
