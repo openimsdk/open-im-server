@@ -3,6 +3,7 @@ package cmd
 import (
 	"OpenIM/internal/startrpc"
 	"OpenIM/pkg/discoveryregistry"
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
 
@@ -15,11 +16,11 @@ func NewAuthCmd() *AuthCmd {
 	return authCmd
 }
 
-func (a *AuthCmd) Execute() error {
-	//a.Command.Run = func(cmd *cobra.Command, args []string) {
-	//	a.port = a.getPortFlag(cmd)
-	//	a.prometheusPort = a.getPrometheusPortFlag(cmd)
-	//}
+func (a *AuthCmd) Exec() error {
+	a.Command.Run = func(cmd *cobra.Command, args []string) {
+		a.port = a.getPortFlag(cmd)
+		a.prometheusPort = a.getPrometheusPortFlag(cmd)
+	}
 	return a.Execute()
 }
 
