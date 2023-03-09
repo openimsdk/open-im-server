@@ -39,7 +39,7 @@ func (m *ApplyPutReq) Reset()         { *m = ApplyPutReq{} }
 func (m *ApplyPutReq) String() string { return proto.CompactTextString(m) }
 func (*ApplyPutReq) ProtoMessage()    {}
 func (*ApplyPutReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{0}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{0}
 }
 func (m *ApplyPutReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyPutReq.Unmarshal(m, b)
@@ -109,7 +109,7 @@ func (m *ApplyPutResp) Reset()         { *m = ApplyPutResp{} }
 func (m *ApplyPutResp) String() string { return proto.CompactTextString(m) }
 func (*ApplyPutResp) ProtoMessage()    {}
 func (*ApplyPutResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{1}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{1}
 }
 func (m *ApplyPutResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyPutResp.Unmarshal(m, b)
@@ -168,7 +168,7 @@ func (m *ConfirmPutReq) Reset()         { *m = ConfirmPutReq{} }
 func (m *ConfirmPutReq) String() string { return proto.CompactTextString(m) }
 func (*ConfirmPutReq) ProtoMessage()    {}
 func (*ConfirmPutReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{2}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{2}
 }
 func (m *ConfirmPutReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfirmPutReq.Unmarshal(m, b)
@@ -206,7 +206,7 @@ func (m *ConfirmPutResp) Reset()         { *m = ConfirmPutResp{} }
 func (m *ConfirmPutResp) String() string { return proto.CompactTextString(m) }
 func (*ConfirmPutResp) ProtoMessage()    {}
 func (*ConfirmPutResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{3}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{3}
 }
 func (m *ConfirmPutResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ConfirmPutResp.Unmarshal(m, b)
@@ -244,7 +244,7 @@ func (m *GetPutReq) Reset()         { *m = GetPutReq{} }
 func (m *GetPutReq) String() string { return proto.CompactTextString(m) }
 func (*GetPutReq) ProtoMessage()    {}
 func (*GetPutReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{4}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{4}
 }
 func (m *GetPutReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPutReq.Unmarshal(m, b)
@@ -283,7 +283,7 @@ func (m *GetPutFragment) Reset()         { *m = GetPutFragment{} }
 func (m *GetPutFragment) String() string { return proto.CompactTextString(m) }
 func (*GetPutFragment) ProtoMessage()    {}
 func (*GetPutFragment) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{5}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{5}
 }
 func (m *GetPutFragment) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPutFragment.Unmarshal(m, b)
@@ -333,7 +333,7 @@ func (m *GetPutResp) Reset()         { *m = GetPutResp{} }
 func (m *GetPutResp) String() string { return proto.CompactTextString(m) }
 func (*GetPutResp) ProtoMessage()    {}
 func (*GetPutResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{6}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{6}
 }
 func (m *GetPutResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPutResp.Unmarshal(m, b)
@@ -406,7 +406,7 @@ func (m *GetSignalInvitationInfoReq) Reset()         { *m = GetSignalInvitationI
 func (m *GetSignalInvitationInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetSignalInvitationInfoReq) ProtoMessage()    {}
 func (*GetSignalInvitationInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{7}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{7}
 }
 func (m *GetSignalInvitationInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSignalInvitationInfoReq.Unmarshal(m, b)
@@ -445,7 +445,7 @@ func (m *GetSignalInvitationInfoResp) Reset()         { *m = GetSignalInvitation
 func (m *GetSignalInvitationInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetSignalInvitationInfoResp) ProtoMessage()    {}
 func (*GetSignalInvitationInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{8}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{8}
 }
 func (m *GetSignalInvitationInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSignalInvitationInfoResp.Unmarshal(m, b)
@@ -490,7 +490,7 @@ func (m *GetSignalInvitationInfoStartAppReq) Reset()         { *m = GetSignalInv
 func (m *GetSignalInvitationInfoStartAppReq) String() string { return proto.CompactTextString(m) }
 func (*GetSignalInvitationInfoStartAppReq) ProtoMessage()    {}
 func (*GetSignalInvitationInfoStartAppReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{9}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{9}
 }
 func (m *GetSignalInvitationInfoStartAppReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSignalInvitationInfoStartAppReq.Unmarshal(m, b)
@@ -529,7 +529,7 @@ func (m *GetSignalInvitationInfoStartAppResp) Reset()         { *m = GetSignalIn
 func (m *GetSignalInvitationInfoStartAppResp) String() string { return proto.CompactTextString(m) }
 func (*GetSignalInvitationInfoStartAppResp) ProtoMessage()    {}
 func (*GetSignalInvitationInfoStartAppResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{10}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{10}
 }
 func (m *GetSignalInvitationInfoStartAppResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSignalInvitationInfoStartAppResp.Unmarshal(m, b)
@@ -577,7 +577,7 @@ func (m *FcmUpdateTokenReq) Reset()         { *m = FcmUpdateTokenReq{} }
 func (m *FcmUpdateTokenReq) String() string { return proto.CompactTextString(m) }
 func (*FcmUpdateTokenReq) ProtoMessage()    {}
 func (*FcmUpdateTokenReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{11}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{11}
 }
 func (m *FcmUpdateTokenReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_FcmUpdateTokenReq.Unmarshal(m, b)
@@ -635,7 +635,7 @@ func (m *FcmUpdateTokenResp) Reset()         { *m = FcmUpdateTokenResp{} }
 func (m *FcmUpdateTokenResp) String() string { return proto.CompactTextString(m) }
 func (*FcmUpdateTokenResp) ProtoMessage()    {}
 func (*FcmUpdateTokenResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{12}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{12}
 }
 func (m *FcmUpdateTokenResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_FcmUpdateTokenResp.Unmarshal(m, b)
@@ -667,7 +667,7 @@ func (m *SetAppBadgeReq) Reset()         { *m = SetAppBadgeReq{} }
 func (m *SetAppBadgeReq) String() string { return proto.CompactTextString(m) }
 func (*SetAppBadgeReq) ProtoMessage()    {}
 func (*SetAppBadgeReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{13}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{13}
 }
 func (m *SetAppBadgeReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetAppBadgeReq.Unmarshal(m, b)
@@ -711,7 +711,7 @@ func (m *SetAppBadgeResp) Reset()         { *m = SetAppBadgeResp{} }
 func (m *SetAppBadgeResp) String() string { return proto.CompactTextString(m) }
 func (*SetAppBadgeResp) ProtoMessage()    {}
 func (*SetAppBadgeResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_third_bcb47e8b7c85b36b, []int{14}
+	return fileDescriptor_third_ed6a664e4920a6b2, []int{14}
 }
 func (m *SetAppBadgeResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetAppBadgeResp.Unmarshal(m, b)
@@ -1019,9 +1019,9 @@ var _Third_serviceDesc = grpc.ServiceDesc{
 	Metadata: "third/third.proto",
 }
 
-func init() { proto.RegisterFile("third/third.proto", fileDescriptor_third_bcb47e8b7c85b36b) }
+func init() { proto.RegisterFile("third/third.proto", fileDescriptor_third_ed6a664e4920a6b2) }
 
-var fileDescriptor_third_bcb47e8b7c85b36b = []byte{
+var fileDescriptor_third_ed6a664e4920a6b2 = []byte{
 	// 717 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xc1, 0x6e, 0xd3, 0x4a,
 	0x14, 0x95, 0x93, 0x26, 0xaf, 0xb9, 0xe9, 0x4b, 0x5f, 0xaf, 0xaa, 0x47, 0x64, 0x4a, 0x9b, 0x4e,

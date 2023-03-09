@@ -35,7 +35,7 @@ func (m *UserTokenReq) Reset()         { *m = UserTokenReq{} }
 func (m *UserTokenReq) String() string { return proto.CompactTextString(m) }
 func (*UserTokenReq) ProtoMessage()    {}
 func (*UserTokenReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{0}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{0}
 }
 func (m *UserTokenReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserTokenReq.Unmarshal(m, b)
@@ -81,7 +81,7 @@ func (m *UserTokenResp) Reset()         { *m = UserTokenResp{} }
 func (m *UserTokenResp) String() string { return proto.CompactTextString(m) }
 func (*UserTokenResp) ProtoMessage()    {}
 func (*UserTokenResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{1}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{1}
 }
 func (m *UserTokenResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserTokenResp.Unmarshal(m, b)
@@ -127,7 +127,7 @@ func (m *ForceLogoutReq) Reset()         { *m = ForceLogoutReq{} }
 func (m *ForceLogoutReq) String() string { return proto.CompactTextString(m) }
 func (*ForceLogoutReq) ProtoMessage()    {}
 func (*ForceLogoutReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{2}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{2}
 }
 func (m *ForceLogoutReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ForceLogoutReq.Unmarshal(m, b)
@@ -171,7 +171,7 @@ func (m *ForceLogoutResp) Reset()         { *m = ForceLogoutResp{} }
 func (m *ForceLogoutResp) String() string { return proto.CompactTextString(m) }
 func (*ForceLogoutResp) ProtoMessage()    {}
 func (*ForceLogoutResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{3}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{3}
 }
 func (m *ForceLogoutResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ForceLogoutResp.Unmarshal(m, b)
@@ -202,7 +202,7 @@ func (m *ParseTokenReq) Reset()         { *m = ParseTokenReq{} }
 func (m *ParseTokenReq) String() string { return proto.CompactTextString(m) }
 func (*ParseTokenReq) ProtoMessage()    {}
 func (*ParseTokenReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{4}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{4}
 }
 func (m *ParseTokenReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParseTokenReq.Unmarshal(m, b)
@@ -242,7 +242,7 @@ func (m *ParseTokenResp) Reset()         { *m = ParseTokenResp{} }
 func (m *ParseTokenResp) String() string { return proto.CompactTextString(m) }
 func (*ParseTokenResp) ProtoMessage()    {}
 func (*ParseTokenResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_auth_6fb89f4c8f0019ff, []int{5}
+	return fileDescriptor_auth_e4a939906f8bb8e6, []int{5}
 }
 func (m *ParseTokenResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParseTokenResp.Unmarshal(m, b)
@@ -436,9 +436,9 @@ var _Auth_serviceDesc = grpc.ServiceDesc{
 	Metadata: "auth/auth.proto",
 }
 
-func init() { proto.RegisterFile("auth/auth.proto", fileDescriptor_auth_6fb89f4c8f0019ff) }
+func init() { proto.RegisterFile("auth/auth.proto", fileDescriptor_auth_e4a939906f8bb8e6) }
 
-var fileDescriptor_auth_6fb89f4c8f0019ff = []byte{
+var fileDescriptor_auth_e4a939906f8bb8e6 = []byte{
 	// 320 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x92, 0xdf, 0x4b, 0x02, 0x41,
 	0x10, 0xc7, 0x59, 0x7f, 0x91, 0x53, 0x2a, 0x4e, 0x11, 0x72, 0x84, 0xd8, 0x5a, 0xe0, 0x43, 0x9c,

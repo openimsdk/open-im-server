@@ -36,7 +36,7 @@ func (m *GetPaginationFriendsReq) Reset()         { *m = GetPaginationFriendsReq
 func (m *GetPaginationFriendsReq) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsReq) ProtoMessage()    {}
 func (*GetPaginationFriendsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{0}
+	return fileDescriptor_friend_10585ad6091091a7, []int{0}
 }
 func (m *GetPaginationFriendsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsReq.Unmarshal(m, b)
@@ -82,7 +82,7 @@ func (m *GetPaginationFriendsResp) Reset()         { *m = GetPaginationFriendsRe
 func (m *GetPaginationFriendsResp) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsResp) ProtoMessage()    {}
 func (*GetPaginationFriendsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{1}
+	return fileDescriptor_friend_10585ad6091091a7, []int{1}
 }
 func (m *GetPaginationFriendsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsResp.Unmarshal(m, b)
@@ -130,7 +130,7 @@ func (m *ApplyToAddFriendReq) Reset()         { *m = ApplyToAddFriendReq{} }
 func (m *ApplyToAddFriendReq) String() string { return proto.CompactTextString(m) }
 func (*ApplyToAddFriendReq) ProtoMessage()    {}
 func (*ApplyToAddFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{2}
+	return fileDescriptor_friend_10585ad6091091a7, []int{2}
 }
 func (m *ApplyToAddFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyToAddFriendReq.Unmarshal(m, b)
@@ -188,7 +188,7 @@ func (m *ApplyToAddFriendResp) Reset()         { *m = ApplyToAddFriendResp{} }
 func (m *ApplyToAddFriendResp) String() string { return proto.CompactTextString(m) }
 func (*ApplyToAddFriendResp) ProtoMessage()    {}
 func (*ApplyToAddFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{3}
+	return fileDescriptor_friend_10585ad6091091a7, []int{3}
 }
 func (m *ApplyToAddFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyToAddFriendResp.Unmarshal(m, b)
@@ -220,7 +220,7 @@ func (m *ImportFriendReq) Reset()         { *m = ImportFriendReq{} }
 func (m *ImportFriendReq) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendReq) ProtoMessage()    {}
 func (*ImportFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{4}
+	return fileDescriptor_friend_10585ad6091091a7, []int{4}
 }
 func (m *ImportFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendReq.Unmarshal(m, b)
@@ -264,7 +264,7 @@ func (m *ImportFriendResp) Reset()         { *m = ImportFriendResp{} }
 func (m *ImportFriendResp) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendResp) ProtoMessage()    {}
 func (*ImportFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{5}
+	return fileDescriptor_friend_10585ad6091091a7, []int{5}
 }
 func (m *ImportFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendResp.Unmarshal(m, b)
@@ -296,7 +296,7 @@ func (m *GetPaginationFriendsApplyToReq) Reset()         { *m = GetPaginationFri
 func (m *GetPaginationFriendsApplyToReq) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsApplyToReq) ProtoMessage()    {}
 func (*GetPaginationFriendsApplyToReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{6}
+	return fileDescriptor_friend_10585ad6091091a7, []int{6}
 }
 func (m *GetPaginationFriendsApplyToReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsApplyToReq.Unmarshal(m, b)
@@ -342,7 +342,7 @@ func (m *GetPaginationFriendsApplyToResp) Reset()         { *m = GetPaginationFr
 func (m *GetPaginationFriendsApplyToResp) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsApplyToResp) ProtoMessage()    {}
 func (*GetPaginationFriendsApplyToResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{7}
+	return fileDescriptor_friend_10585ad6091091a7, []int{7}
 }
 func (m *GetPaginationFriendsApplyToResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsApplyToResp.Unmarshal(m, b)
@@ -388,7 +388,7 @@ func (m *GetDesignatedFriendsReq) Reset()         { *m = GetDesignatedFriendsReq
 func (m *GetDesignatedFriendsReq) String() string { return proto.CompactTextString(m) }
 func (*GetDesignatedFriendsReq) ProtoMessage()    {}
 func (*GetDesignatedFriendsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{8}
+	return fileDescriptor_friend_10585ad6091091a7, []int{8}
 }
 func (m *GetDesignatedFriendsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDesignatedFriendsReq.Unmarshal(m, b)
@@ -433,7 +433,7 @@ func (m *GetDesignatedFriendsResp) Reset()         { *m = GetDesignatedFriendsRe
 func (m *GetDesignatedFriendsResp) String() string { return proto.CompactTextString(m) }
 func (*GetDesignatedFriendsResp) ProtoMessage()    {}
 func (*GetDesignatedFriendsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{9}
+	return fileDescriptor_friend_10585ad6091091a7, []int{9}
 }
 func (m *GetDesignatedFriendsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDesignatedFriendsResp.Unmarshal(m, b)
@@ -472,7 +472,7 @@ func (m *AddBlackReq) Reset()         { *m = AddBlackReq{} }
 func (m *AddBlackReq) String() string { return proto.CompactTextString(m) }
 func (*AddBlackReq) ProtoMessage()    {}
 func (*AddBlackReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{10}
+	return fileDescriptor_friend_10585ad6091091a7, []int{10}
 }
 func (m *AddBlackReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlackReq.Unmarshal(m, b)
@@ -516,7 +516,7 @@ func (m *AddBlackResp) Reset()         { *m = AddBlackResp{} }
 func (m *AddBlackResp) String() string { return proto.CompactTextString(m) }
 func (*AddBlackResp) ProtoMessage()    {}
 func (*AddBlackResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{11}
+	return fileDescriptor_friend_10585ad6091091a7, []int{11}
 }
 func (m *AddBlackResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlackResp.Unmarshal(m, b)
@@ -548,7 +548,7 @@ func (m *RemoveBlackReq) Reset()         { *m = RemoveBlackReq{} }
 func (m *RemoveBlackReq) String() string { return proto.CompactTextString(m) }
 func (*RemoveBlackReq) ProtoMessage()    {}
 func (*RemoveBlackReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{12}
+	return fileDescriptor_friend_10585ad6091091a7, []int{12}
 }
 func (m *RemoveBlackReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveBlackReq.Unmarshal(m, b)
@@ -592,7 +592,7 @@ func (m *RemoveBlackResp) Reset()         { *m = RemoveBlackResp{} }
 func (m *RemoveBlackResp) String() string { return proto.CompactTextString(m) }
 func (*RemoveBlackResp) ProtoMessage()    {}
 func (*RemoveBlackResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{13}
+	return fileDescriptor_friend_10585ad6091091a7, []int{13}
 }
 func (m *RemoveBlackResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveBlackResp.Unmarshal(m, b)
@@ -624,7 +624,7 @@ func (m *GetPaginationBlacksReq) Reset()         { *m = GetPaginationBlacksReq{}
 func (m *GetPaginationBlacksReq) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationBlacksReq) ProtoMessage()    {}
 func (*GetPaginationBlacksReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{14}
+	return fileDescriptor_friend_10585ad6091091a7, []int{14}
 }
 func (m *GetPaginationBlacksReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationBlacksReq.Unmarshal(m, b)
@@ -670,7 +670,7 @@ func (m *GetPaginationBlacksResp) Reset()         { *m = GetPaginationBlacksResp
 func (m *GetPaginationBlacksResp) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationBlacksResp) ProtoMessage()    {}
 func (*GetPaginationBlacksResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{15}
+	return fileDescriptor_friend_10585ad6091091a7, []int{15}
 }
 func (m *GetPaginationBlacksResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationBlacksResp.Unmarshal(m, b)
@@ -716,7 +716,7 @@ func (m *IsFriendReq) Reset()         { *m = IsFriendReq{} }
 func (m *IsFriendReq) String() string { return proto.CompactTextString(m) }
 func (*IsFriendReq) ProtoMessage()    {}
 func (*IsFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{16}
+	return fileDescriptor_friend_10585ad6091091a7, []int{16}
 }
 func (m *IsFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendReq.Unmarshal(m, b)
@@ -762,7 +762,7 @@ func (m *IsFriendResp) Reset()         { *m = IsFriendResp{} }
 func (m *IsFriendResp) String() string { return proto.CompactTextString(m) }
 func (*IsFriendResp) ProtoMessage()    {}
 func (*IsFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{17}
+	return fileDescriptor_friend_10585ad6091091a7, []int{17}
 }
 func (m *IsFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendResp.Unmarshal(m, b)
@@ -808,7 +808,7 @@ func (m *IsBlackReq) Reset()         { *m = IsBlackReq{} }
 func (m *IsBlackReq) String() string { return proto.CompactTextString(m) }
 func (*IsBlackReq) ProtoMessage()    {}
 func (*IsBlackReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{18}
+	return fileDescriptor_friend_10585ad6091091a7, []int{18}
 }
 func (m *IsBlackReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsBlackReq.Unmarshal(m, b)
@@ -854,7 +854,7 @@ func (m *IsBlackResp) Reset()         { *m = IsBlackResp{} }
 func (m *IsBlackResp) String() string { return proto.CompactTextString(m) }
 func (*IsBlackResp) ProtoMessage()    {}
 func (*IsBlackResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{19}
+	return fileDescriptor_friend_10585ad6091091a7, []int{19}
 }
 func (m *IsBlackResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsBlackResp.Unmarshal(m, b)
@@ -900,7 +900,7 @@ func (m *DeleteFriendReq) Reset()         { *m = DeleteFriendReq{} }
 func (m *DeleteFriendReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendReq) ProtoMessage()    {}
 func (*DeleteFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{20}
+	return fileDescriptor_friend_10585ad6091091a7, []int{20}
 }
 func (m *DeleteFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendReq.Unmarshal(m, b)
@@ -944,7 +944,7 @@ func (m *DeleteFriendResp) Reset()         { *m = DeleteFriendResp{} }
 func (m *DeleteFriendResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendResp) ProtoMessage()    {}
 func (*DeleteFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{21}
+	return fileDescriptor_friend_10585ad6091091a7, []int{21}
 }
 func (m *DeleteFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendResp.Unmarshal(m, b)
@@ -979,7 +979,7 @@ func (m *RespondFriendApplyReq) Reset()         { *m = RespondFriendApplyReq{} }
 func (m *RespondFriendApplyReq) String() string { return proto.CompactTextString(m) }
 func (*RespondFriendApplyReq) ProtoMessage()    {}
 func (*RespondFriendApplyReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{22}
+	return fileDescriptor_friend_10585ad6091091a7, []int{22}
 }
 func (m *RespondFriendApplyReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespondFriendApplyReq.Unmarshal(m, b)
@@ -1037,7 +1037,7 @@ func (m *RespondFriendApplyResp) Reset()         { *m = RespondFriendApplyResp{}
 func (m *RespondFriendApplyResp) String() string { return proto.CompactTextString(m) }
 func (*RespondFriendApplyResp) ProtoMessage()    {}
 func (*RespondFriendApplyResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{23}
+	return fileDescriptor_friend_10585ad6091091a7, []int{23}
 }
 func (m *RespondFriendApplyResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespondFriendApplyResp.Unmarshal(m, b)
@@ -1070,7 +1070,7 @@ func (m *SetFriendRemarkReq) Reset()         { *m = SetFriendRemarkReq{} }
 func (m *SetFriendRemarkReq) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkReq) ProtoMessage()    {}
 func (*SetFriendRemarkReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{24}
+	return fileDescriptor_friend_10585ad6091091a7, []int{24}
 }
 func (m *SetFriendRemarkReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkReq.Unmarshal(m, b)
@@ -1121,7 +1121,7 @@ func (m *SetFriendRemarkResp) Reset()         { *m = SetFriendRemarkResp{} }
 func (m *SetFriendRemarkResp) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkResp) ProtoMessage()    {}
 func (*SetFriendRemarkResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{25}
+	return fileDescriptor_friend_10585ad6091091a7, []int{25}
 }
 func (m *SetFriendRemarkResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkResp.Unmarshal(m, b)
@@ -1153,7 +1153,7 @@ func (m *GetPaginationFriendsApplyFromReq) Reset()         { *m = GetPaginationF
 func (m *GetPaginationFriendsApplyFromReq) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsApplyFromReq) ProtoMessage()    {}
 func (*GetPaginationFriendsApplyFromReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{26}
+	return fileDescriptor_friend_10585ad6091091a7, []int{26}
 }
 func (m *GetPaginationFriendsApplyFromReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsApplyFromReq.Unmarshal(m, b)
@@ -1199,7 +1199,7 @@ func (m *GetPaginationFriendsApplyFromResp) Reset()         { *m = GetPagination
 func (m *GetPaginationFriendsApplyFromResp) String() string { return proto.CompactTextString(m) }
 func (*GetPaginationFriendsApplyFromResp) ProtoMessage()    {}
 func (*GetPaginationFriendsApplyFromResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{27}
+	return fileDescriptor_friend_10585ad6091091a7, []int{27}
 }
 func (m *GetPaginationFriendsApplyFromResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetPaginationFriendsApplyFromResp.Unmarshal(m, b)
@@ -1244,7 +1244,7 @@ func (m *GetFriendIDsReq) Reset()         { *m = GetFriendIDsReq{} }
 func (m *GetFriendIDsReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendIDsReq) ProtoMessage()    {}
 func (*GetFriendIDsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{28}
+	return fileDescriptor_friend_10585ad6091091a7, []int{28}
 }
 func (m *GetFriendIDsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendIDsReq.Unmarshal(m, b)
@@ -1282,7 +1282,7 @@ func (m *GetFriendIDsResp) Reset()         { *m = GetFriendIDsResp{} }
 func (m *GetFriendIDsResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendIDsResp) ProtoMessage()    {}
 func (*GetFriendIDsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_9d5fa64eec103c7c, []int{29}
+	return fileDescriptor_friend_10585ad6091091a7, []int{29}
 }
 func (m *GetFriendIDsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendIDsResp.Unmarshal(m, b)
@@ -1906,9 +1906,9 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 	Metadata: "friend/friend.proto",
 }
 
-func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_9d5fa64eec103c7c) }
+func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_10585ad6091091a7) }
 
-var fileDescriptor_friend_9d5fa64eec103c7c = []byte{
+var fileDescriptor_friend_10585ad6091091a7 = []byte{
 	// 1029 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xcf, 0x6f, 0xdb, 0xc6,
 	0x12, 0x06, 0xe5, 0x67, 0xc7, 0x1e, 0x29, 0x92, 0xdf, 0xc8, 0x71, 0x05, 0xb6, 0x71, 0xe8, 0x6d,
