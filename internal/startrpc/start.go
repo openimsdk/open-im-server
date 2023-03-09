@@ -8,6 +8,7 @@ import (
 	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/utils"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -26,7 +27,7 @@ func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, rpcRegisterName)
 	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
 	if err != nil {
-		return err
+		return utils.Wrap1(err)
 	}
 	defer zkClient.Close()
 	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
@@ -48,7 +49,7 @@ func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	defer srv.GracefulStop()
 	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort)
 	if err != nil {
-		return err
+		return utils.Wrap1(err)
 	}
 	if config.Config.Prometheus.Enable && prometheusPort != 0 {
 		err := prome.StartPrometheusSrv(prometheusPort)
