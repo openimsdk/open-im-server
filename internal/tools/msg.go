@@ -58,9 +58,8 @@ func (c *MsgTool) getCronTaskOperationID() string {
 }
 
 func (c *MsgTool) AllUserClearMsgAndFixSeq() {
-	operationID := c.getCronTaskOperationID()
-	ctx := context.Background()
-	tracelog.SetOperationID(ctx, operationID)
+	operationID := "AllUserAndGroupClearMsgAndFixSeq"
+	ctx := tracelog.NewCtx(utils.GetSelfFuncName(), "")
 	log.NewInfo(operationID, "============================ start del cron task ============================")
 	var err error
 	userIDList, err := c.userDatabase.GetAllUserID(ctx)
