@@ -95,7 +95,6 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 				return nil
 			}
 		}
-
 		if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
 			return err
 		}
