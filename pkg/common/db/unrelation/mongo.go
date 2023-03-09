@@ -61,7 +61,7 @@ func (m *Mongo) GetDatabase() *mongo.Database {
 }
 
 func (m *Mongo) CreateMsgIndex() error {
-	return m.createMongoIndex(unrelation.CChat, false, "uid")
+	return m.createMongoIndex(unrelation.Msg, false, "uid")
 }
 
 func (m *Mongo) CreateSuperGroupIndex() error {

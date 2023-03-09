@@ -7,13 +7,13 @@ import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
 	"OpenIM/pkg/utils"
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/openKeeper"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
@@ -22,12 +22,12 @@ import (
 
 var _ context.Context // 解决goland编辑器bug
 
-func NewMsg(zk *openKeeper.ZkClient) *Msg {
-	return &Msg{zk: zk, validate: validator.New()}
+func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Msg {
+	return &Msg{c: c, validate: validator.New()}
 }
 
 type Msg struct {
-	zk       *openKeeper.ZkClient
+	c        discoveryregistry.SvcDiscoveryRegistry
 	validate *validator.Validate
 }
 
@@ -107,7 +107,7 @@ func newUserSendMsgReq(params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 }
 
 func (o *Msg) client() (msg.MsgClient, error) {
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (o *Msg) ManagementSendMsg(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 	pbData := newUserSendMsgReq(&params)
-	conn, err := o.zk.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		apiresp.GinError(c, errs.ErrInternalServer)
 		return

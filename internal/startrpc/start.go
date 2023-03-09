@@ -8,7 +8,7 @@ import (
 	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
-	"flag"
+	"OpenIM/pkg/utils"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -16,20 +16,18 @@ import (
 	"net"
 )
 
-func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
-	flagRpcPort := flag.Int("port", rpcPort, "get RpcGroupPort from cmd,default 16000 as port")
-	flagPrometheusPort := flag.Int("prometheus_port", prometheusPorts, "groupPrometheusPort default listen port")
-	flag.Parse()
-	fmt.Println("start group rpc server, port: ", *flagRpcPort, ", OpenIM version: ", config.Version)
+func start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options []grpc.ServerOption) error {
+	fmt.Println("start", rpcRegisterName, "rpc server, port: ", rpcPort, "prometheusPort:", prometheusPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, *flagRpcPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
 	if err != nil {
 		return err
 	}
 	defer listener.Close()
+	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, rpcRegisterName)
 	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
 	if err != nil {
-		return err
+		return utils.Wrap1(err)
 	}
 	defer zkClient.Close()
 	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
@@ -49,12 +47,12 @@ func start(rpcPort int, rpcRegisterName string, prometheusPorts int, rpcFn func(
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
-	err = zkClient.Register(rpcRegisterName, registerIP, *flagRpcPort)
+	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort)
 	if err != nil {
-		return err
+		return utils.Wrap1(err)
 	}
-	if config.Config.Prometheus.Enable {
-		err := prome.StartPrometheusSrv(*flagPrometheusPort)
+	if config.Config.Prometheus.Enable && prometheusPort != 0 {
+		err := prome.StartPrometheusSrv(prometheusPort)
 		if err != nil {
 			return err
 		}

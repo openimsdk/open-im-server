@@ -5,13 +5,13 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/mw"
 	"OpenIM/pkg/common/prome"
-	"github.com/OpenIMSDK/openKeeper"
+	"OpenIM/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
 	"io"
 	"os"
 )
 
-func NewGinRouter(zk *openKeeper.ZkClient) *gin.Engine {
+func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -27,7 +27,6 @@ func NewGinRouter(zk *openKeeper.ZkClient) *gin.Engine {
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
 	zk.AddOption(mw.GrpcClient()) // 默认RPC中间件
-
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(zk)

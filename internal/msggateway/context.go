@@ -1,4 +1,4 @@
-package new
+package msggateway
 
 import (
 	"OpenIM/pkg/utils"
@@ -47,8 +47,8 @@ func (c *UserConnContext) GetConnID() string {
 	return c.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))
 }
 func (c *UserConnContext) GetUserID() string {
-	return c.Req.URL.Query().Get(WS_USERID)
+	return c.Req.URL.Query().Get(WsUserID)
 }
 func (c *UserConnContext) GetPlatformID() string {
-	return c.Req.URL.Query().Get(PLATFORM_ID)
+	return c.Req.URL.Query().Get(PlatformID)
 }

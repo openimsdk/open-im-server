@@ -46,7 +46,7 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	return &p
 }
 
-func (p *Producer) SendMessage(ctx context.Context, m proto.Message, key string) (int32, int64, error) {
+func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
 	operationID := tracelog.GetOperationID(ctx)
 	log.Info(operationID, "SendMessage", "key ", key, m.String(), p.producer)
 	kMsg := &sarama.ProducerMessage{}

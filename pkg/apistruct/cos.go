@@ -13,7 +13,6 @@ type TencentCloudStorageCredentialRespData struct {
 }
 
 type TencentCloudStorageCredentialResp struct {
-	CommResp
 	CosData TencentCloudStorageCredentialRespData `json:"-"`
 
 	Data map[string]interface{} `json:"data"`

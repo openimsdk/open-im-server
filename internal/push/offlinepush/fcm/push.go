@@ -39,7 +39,7 @@ func NewClient(cache cache.Model) *Fcm {
 		panic(err.Error())
 		return nil
 	}
-	return &Fcm{fcmMsgCli: fcmMsgClient}
+	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}
 }
 
 func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {

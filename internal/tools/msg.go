@@ -11,6 +11,7 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"math"
@@ -21,6 +22,8 @@ type MsgTool struct {
 	userDatabase  controller.UserDatabase
 	groupDatabase controller.GroupDatabase
 }
+
+var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
 
 func NewMsgTool(msgDatabase controller.MsgDatabase, userDatabase controller.UserDatabase, groupDatabase controller.GroupDatabase) *MsgTool {
 	return &MsgTool{
@@ -125,7 +128,9 @@ func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []str
 			continue
 		}
 	}
-	c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+	if err := c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion); err != nil {
+		log.NewWarn(tracelog.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+	}
 	return nil
 }
 
@@ -162,10 +167,11 @@ func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, grou
 	return minSeqCache, nil
 }
 
-func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, maxSeqCache, maxSeqMongo int64, diffusionType int) {
+func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, maxSeqCache, maxSeqMongo int64, diffusionType int) error {
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		log.NewWarn(tracelog.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", sourceID, maxSeqCache, maxSeqMongo, diffusionType)
+		return errSeq
 	}
+	return nil
 }
 
 func (c *MsgTool) ShowUserSeqs(ctx context.Context, userID string) {

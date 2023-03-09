@@ -83,13 +83,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	friends, err := s.friendCheck.GetAllPageFriends(ctx, req.UserInfo.UserID)
+	friends, err := s.friendCheck.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	go func() {
 		for _, v := range friends {
-			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
+			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v, tracelog.GetOpUserID(ctx))
 		}
 	}()
 	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)

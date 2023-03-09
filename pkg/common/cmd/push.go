@@ -8,15 +8,15 @@ import (
 )
 
 type PushCmd struct {
-	*RpcCmd
+	*AuthCmd
 }
 
 func NewPushCmd() *PushCmd {
-	return &PushCmd{NewRpcCmd(config.Config.RpcRegisterName.OpenImPushName)}
+	return &PushCmd{NewAuthCmd()}
 }
 
-func (r *RpcCmd) AddPush() {
+func (r *PushCmd) AddPush() {
 	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return startrpc.Start(r.getPortFlag(cmd), r.rpcRegisterName, r.getPrometheusPortFlag(cmd), push.Start)
+		return startrpc.Start(r.getPortFlag(cmd), config.Config.RpcRegisterName.OpenImPushName, r.getPrometheusPortFlag(cmd), push.Start)
 	}
 }

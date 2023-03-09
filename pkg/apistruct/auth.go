@@ -13,7 +13,6 @@ type UserTokenInfo struct {
 	ExpiredTime int64  `json:"expiredTime"`
 }
 type UserRegisterResp struct {
-	CommResp
 	UserToken UserTokenInfo `json:"data"`
 }
 
@@ -25,7 +24,6 @@ type UserTokenReq struct {
 }
 
 type UserTokenResp struct {
-	CommResp
 	UserToken UserTokenInfo `json:"data"`
 }
 
@@ -36,7 +34,6 @@ type ForceLogoutReq struct {
 }
 
 type ForceLogoutResp struct {
-	CommResp
 }
 
 type ParseTokenReq struct {
@@ -44,7 +41,7 @@ type ParseTokenReq struct {
 }
 
 //type ParseTokenResp struct {
-//	CommResp
+//
 //	ExpireTime int64 `json:"expireTime" binding:"required"`
 //}
 
@@ -53,7 +50,6 @@ type ExpireTime struct {
 }
 
 type ParseTokenResp struct {
-	CommResp
 	Data       map[string]interface{} `json:"data" swaggerignore:"true"`
 	ExpireTime ExpireTime             `json:"-"`
 }

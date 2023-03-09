@@ -1,9 +1,8 @@
-package new
+package msggateway
 
 import (
 	"OpenIM/internal/common/notification"
 	"OpenIM/pkg/proto/msg"
-	pbRtc "OpenIM/pkg/proto/rtc"
 	"OpenIM/pkg/proto/sdkws"
 	"context"
 	"github.com/go-playground/validator/v10"
@@ -86,7 +85,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 }
 
 func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byte, error) {
-	signalReq := pbRtc.SignalReq{}
+	signalReq := sdkws.SignalReq{}
 	if err := proto.Unmarshal(data.Data, &signalReq); err != nil {
 		return nil, err
 	}
@@ -107,7 +106,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byt
 }
 
 func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]byte, error) {
-	req := sdkws.PullMessageBySeqListReq{}
+	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
 	}

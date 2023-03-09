@@ -1,4 +1,4 @@
-package new
+package msggateway
 
 import (
 	"OpenIM/pkg/utils"

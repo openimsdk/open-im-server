@@ -2,9 +2,7 @@ package check
 
 import (
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/friend"
 	sdkws "OpenIM/pkg/proto/sdkws"
 	"context"
@@ -51,26 +49,15 @@ func (f *FriendChecker) IsFriend(ctx context.Context, possibleFriendUserID, user
 
 }
 
-func (f *FriendChecker) GetAllPageFriends(ctx context.Context, ownerUserID string) (resp []*sdkws.FriendInfo, err error) {
+func (f *FriendChecker) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
 	cc, err := f.getConn()
 	if err != nil {
 		return nil, err
 	}
-	page := int32(0)
-	req := friend.GetPaginationFriendsReq{UserID: ownerUserID}
-	for {
-		req.Pagination = &sdkws.RequestPagination{PageNumber: page, ShowNumber: constant.ShowNumber}
-		tmp, err := friend.NewFriendClient(cc).GetPaginationFriends(ctx, &req)
-		if err != nil {
-			return nil, err
-		}
-		if len(tmp.FriendsInfo) == 0 {
-			if tmp.Total == int32(len(resp)) {
-				return resp, nil
-			}
-			return nil, errs.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
-		}
-		resp = append(resp, tmp.FriendsInfo...)
-		page++
+	req := friend.GetFriendIDsReq{UserID: ownerUserID}
+	resp, err := friend.NewFriendClient(cc).GetFriendIDs(ctx, &req)
+	if err != nil {
+		return nil, err
 	}
+	return resp.FriendIDs, err
 }

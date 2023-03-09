@@ -22,22 +22,19 @@ func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error
 }
 
 func Wrap1(err error) error {
-	if err != nil {
-		return Wrap(err, "")
-	}
-	return nil
+	return errors.Wrap(err, "==> " + printCallerNameAndLine())
 }
 
 func Wrap2[T any](a T, err error) (T, error) {
 	if err != nil {
-		return a, Wrap(err, "")
+		return a, errors.Wrap(err, "==> " + printCallerNameAndLine())
 	}
 	return a, nil
 }
 
 func Wrap3[T any, V any](a T, b V, err error) (T, V, error) {
 	if err != nil {
-		return a, b, Wrap(err, "")
+		return a, b, errors.Wrap(err, "==> " + printCallerNameAndLine())
 	}
 	return a, b, nil
 }

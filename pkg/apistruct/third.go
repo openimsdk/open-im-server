@@ -29,7 +29,6 @@ type MinioUploadFile struct {
 }
 
 type MinioUploadFileResp struct {
-	CommResp
 	Data struct {
 		MinioUploadFile
 	} `json:"data"`
@@ -46,7 +45,6 @@ type UploadUpdateAppReq struct {
 }
 
 type UploadUpdateAppResp struct {
-	CommResp
 }
 
 type GetDownloadURLReq struct {
@@ -56,7 +54,6 @@ type GetDownloadURLReq struct {
 }
 
 type GetDownloadURLResp struct {
-	CommResp
 	Data struct {
 		HasNewVersion bool   `json:"hasNewVersion"`
 		ForceUpdate   bool   `json:"forceUpdate"`
@@ -73,7 +70,6 @@ type GetRTCInvitationInfoReq struct {
 }
 
 type GetRTCInvitationInfoResp struct {
-	CommResp
 	Data struct {
 		OpUserID   string `json:"opUserID"`
 		Invitation struct {
@@ -110,7 +106,6 @@ type FcmUpdateTokenReq struct {
 }
 
 type FcmUpdateTokenResp struct {
-	CommResp
 }
 type SetAppBadgeReq struct {
 	OperationID    string `json:"operationID" binding:"required"`
@@ -119,5 +114,4 @@ type SetAppBadgeReq struct {
 }
 
 type SetAppBadgeResp struct {
-	CommResp
 }

@@ -3,49 +3,28 @@ package msggateway
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-
-	"OpenIM/pkg/statistics"
+	"OpenIM/pkg/common/log"
 	"fmt"
 	"sync"
-
-	prome "OpenIM/pkg/common/prome"
-
-	"github.com/go-playground/validator/v10"
+	"time"
 )
 
-var (
-	rwLock              *sync.RWMutex
-	validate            *validator.Validate
-	ws                  WServer
-	rpcSvr              RPCServer
-	sendMsgAllCount     uint64
-	sendMsgFailedCount  uint64
-	sendMsgSuccessCount uint64
-	userCount           uint64
-
-	sendMsgAllCountLock sync.RWMutex
-)
-
-func Init(rpcPort, wsPort int) {
-	rwLock = new(sync.RWMutex)
-	validate = validator.New()
-	statistics.NewStatistics(&sendMsgAllCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	statistics.NewStatistics(&userCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second add user conn", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	ws.onInit(wsPort)
-	rpcSvr.onInit(rpcPort)
-	initPrometheus()
-}
-
-func Run(prometheusPort int) {
+func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	var wg sync.WaitGroup
-	wg.Add(3)
-	go ws.run()
-	go rpcSvr.run()
-	go func() {
-		err := prome.StartPrometheusSrv(prometheusPort)
-		if err != nil {
-			panic(err)
-		}
-	}()
+	wg.Add(1)
+	log.NewPrivateLog(constant.LogFileName)
+	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
+	longServer, err := NewWsServer(
+		WithPort(wsPort),
+		WithMaxConnNum(int64(config.Config.LongConnSvr.WebsocketMaxConnNum)),
+		WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeOut)*time.Second),
+		WithMessageMaxMsgLength(config.Config.LongConnSvr.WebsocketMaxMsgLen))
+	if err != nil {
+		return err
+	}
+	hubServer := NewServer(rpcPort, longServer)
+	go hubServer.Start()
+	go hubServer.LongConnServer.Run()
 	wg.Wait()
+	return nil
 }
