@@ -176,7 +176,7 @@ type config struct {
 		ZkAddr   []string `yaml:"zkAddr"`
 		UserName string   `yaml:"userName"`
 		Password string   `yaml:"password"`
-	}
+	} `yaml:"zookeeper"`
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
 		RotationTime          int      `yaml:"rotationTime"`
@@ -511,12 +511,11 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 	}()
 	_, err := os.Stat(configPath)
 	if err != nil {
-		fmt.Println(err.Error())
 		if !os.IsNotExist(err) {
 			return err
 		}
 		configPath = filepath.Join(Root, "config", configName)
-		fmt.Println(configPath, "not exist, use", configPath)
+		fmt.Println("use", configPath)
 	} else {
 		Root = filepath.Dir(configPath)
 	}
