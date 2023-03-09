@@ -1,8 +1,7 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
-option go_package = "OpenIM/pkg/proto/sdkws;sdkws";
 package OpenIMServer.sdkws;
-
+option go_package = "OpenIM/pkg/proto/sdkws;sdkws";
+import "Open-IM-Server/pkg/proto/wrapperspb/wrapperspb.proto";
 
 ////////////////////////////////base///////////////////////////////
 
@@ -33,9 +32,9 @@ message GroupInfoForSet{
   string introduction = 4;
   string faceURL = 5;
   string ex = 6;
-  google.protobuf.Int32Value needVerification = 7;
-  google.protobuf.Int32Value lookMemberInfo = 8;
-  google.protobuf.Int32Value applyMemberFriend = 9;
+  OpenIMServer.protobuf.Int32Value needVerification = 7;
+  OpenIMServer.protobuf.Int32Value lookMemberInfo = 8;
+  OpenIMServer.protobuf.Int32Value applyMemberFriend = 9;
 }
 
 

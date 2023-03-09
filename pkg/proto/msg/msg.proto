@@ -1,6 +1,6 @@
 syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
-import "Open-IM-Server/pkg/proto/sdkws/wrappers.proto";
+import "Open-IM-Server/pkg/proto/wrapperspb/wrapperspb.proto";
 option go_package = "OpenIM/pkg/proto/msg;msg";
 package OpenIMServer.msg;
 
@@ -103,8 +103,8 @@ message ModifyMessageReactionExtensionsReq {
   int32 sessionType = 2;
   map <string, sdkws.KeyValue>reactionExtensions = 3;
   string clientMsgID = 4;
-  google.protobuf.StringValue ex = 5;
-  google.protobuf.StringValue attachedInfo = 6;
+  OpenIMServer.protobuf.StringValue ex = 5;
+  OpenIMServer.protobuf.StringValue attachedInfo = 6;
   bool isReact = 7;
   bool isExternalExtensions = 8;
   int64 msgFirstModifyTime = 9;
@@ -114,8 +114,8 @@ message SetMessageReactionExtensionsReq {
   int32 sessionType = 2;
   map <string, sdkws.KeyValue>reactionExtensions = 3;
   string clientMsgID = 4;
-  google.protobuf.StringValue ex = 5;
-  google.protobuf.StringValue attachedInfo = 6;
+  OpenIMServer.protobuf.StringValue ex = 5;
+  OpenIMServer.protobuf.StringValue attachedInfo = 6;
   bool isReact = 7;
   bool isExternalExtensions = 8;
   int64 msgFirstModifyTime = 9;
