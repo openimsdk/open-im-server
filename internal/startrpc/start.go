@@ -52,11 +52,16 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	if config.Config.Prometheus.Enable && prometheusPort != 0 {
-		err := prome.StartPrometheusSrv(prometheusPort)
-		if err != nil {
-			return err
+	go func() {
+		if config.Config.Prometheus.Enable && prometheusPort != 0 {
+			if err := prome.StartPrometheusSrv(prometheusPort); err != nil {
+				panic(err.Error())
+			}
 		}
+	}()
+	err = srv.Serve(listener)
+	if err != nil {
+		return utils.Wrap1(err)
 	}
 	return rpcFn(zkClient, srv)
 }
