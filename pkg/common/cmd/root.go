@@ -27,18 +27,6 @@ func NewRootCmd() (rootCmd *RootCmd) {
 	return rootCmd
 }
 
-func (r *RootCmd) AddRunE(f func(cmd RootCmd) error) {
-	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(*r)
-	}
-}
-
-func (r *RootCmd) AddRpc(f func(port, prometheusPort int) error) {
-	r.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(r.getPortFlag(cmd), r.getPrometheusPortFlag(cmd))
-	}
-}
-
 func (r *RootCmd) addConfFlag() {
 	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
 }
