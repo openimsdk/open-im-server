@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"OpenIM/internal/startrpc"
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/discoveryregistry"
 	"fmt"
 	"github.com/spf13/cobra"
@@ -15,7 +16,7 @@ type RpcCmd struct {
 
 func NewRpcCmd(rpcRegisterName string) *RpcCmd {
 	rpcCmd := &RpcCmd{NewRootCmd(), rpcRegisterName}
-	fmt.Println("line 18", *rpcCmd, rpcCmd, rpcRegisterName)
+	fmt.Println("line 18", *rpcCmd, rpcCmd, rpcRegisterName, config.Config.RpcRegisterName)
 	return rpcCmd
 }
 
