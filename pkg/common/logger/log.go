@@ -95,7 +95,7 @@ func NewZapLogger() (*ZapLogger, error) {
 		Encoding:         "json",
 		EncoderConfig:    zap.NewProductionEncoderConfig(),
 		OutputPaths:      []string{config.Config.Log.StorageLocation},
-		ErrorOutputPaths: []string{"stderr"},
+		ErrorOutputPaths: []string{config.Config.Log.StorageLocation},
 	}
 	l, err := zapConfig.Build()
 	if err != nil {
