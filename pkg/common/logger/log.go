@@ -1,7 +1,6 @@
 package log
 
 import (
-	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tracelog"
 	"context"
@@ -65,12 +64,11 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:      true,
-		Encoding:         "json",
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
-		OutputPaths:      []string{"stdout", config.Config.Log.StorageLocation + "openIM2.log"},
-		ErrorOutputPaths: []string{config.Config.Log.StorageLocation},
+		Level:         zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Development:   true,
+		Encoding:      "json",
+		EncoderConfig: zap.NewProductionEncoderConfig(),
+		OutputPaths:   []string{"stdout"},
 		Sampling: &zap.SamplingConfig{
 			Initial:    0,
 			Thereafter: 0,
