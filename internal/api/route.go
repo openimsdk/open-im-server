@@ -7,6 +7,8 @@ import (
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"os"
 )
@@ -26,7 +28,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry) *gin.Engine {
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	zk.AddOption(mw.GrpcClient()) // 默认RPC中间件
+	zk.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(zk)
