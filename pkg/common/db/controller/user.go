@@ -105,20 +105,5 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 }
 
 func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
-	pageNumber := int32(0)
-	for {
-		tmp, total, err := u.userDB.PageUserID(ctx, pageNumber, constant.ShowNumber)
-		if err != nil {
-			return nil, err
-		}
-		if len(tmp) == 0 {
-			if total == int64(len(userIDs)) {
-				return userIDs, nil
-			}
-			return nil, errs.ErrData.Wrap("The total number of results and expectations are different, but result is nil")
-		}
-		userIDs = append(userIDs, tmp...)
-		pageNumber++
-	}
-	return userIDs, nil
+	return u.userDB.GetAllUserID(ctx)
 }

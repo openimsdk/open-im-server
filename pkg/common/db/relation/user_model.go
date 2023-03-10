@@ -13,7 +13,7 @@ type UserGorm struct {
 }
 
 func NewUserGorm(DB *gorm.DB) relation.UserModelInterface {
-	return &UserGorm{DB: DB}
+	return &UserGorm{DB: DB.Model(&relation.UserModel{})}
 }
 
 // 插入多条
@@ -29,7 +29,7 @@ func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[stri
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
+	return utils.Wrap(u.DB.Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
 // 更新多个用户信息 非零值
@@ -64,7 +64,7 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32) (user
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
-	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Count(&count).Error, "")
+	err = utils.Wrap(u.DB.Count(&count).Error, "")
 	if err != nil {
 		return
 	}
@@ -73,14 +73,10 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32) (user
 }
 
 // 获取所有用户ID
-func (u *UserGorm) PageUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, count int64, err error) {
+func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "userIDs", userIDs, "count", count)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs)
 	}()
-	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Count(&count).Error, "")
-	if err != nil {
-		return
-	}
-	err = u.DB.Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Pluck("user_id", &userIDs).Error
-	return userIDs, count, err
+	err = u.DB.Pluck("user_id", &userIDs).Error
+	return userIDs, err
 }

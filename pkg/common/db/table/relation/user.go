@@ -38,5 +38,5 @@ type UserModelInterface interface {
 	Take(ctx context.Context, userID string) (user *UserModel, err error)
 	// 获取用户信息 不存在，不返回错误
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*UserModel, count int64, err error)
-	PageUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, count int64, err error)
+	GetAllUserID(ctx context.Context) (userIDs []string, err error)
 }

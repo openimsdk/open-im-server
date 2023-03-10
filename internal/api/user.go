@@ -3,6 +3,7 @@ package api
 import (
 	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/user"
 	"context"
@@ -19,38 +20,41 @@ type User struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *User) client() (user.UserClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImUserName)
+func (u *User) client() (user.UserClient, error) {
+	conn, err := u.c.GetConn(config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		log.NewInfo("client", conn, err)
+	}()
 	return user.NewUserClient(conn), nil
 }
 
-func (o *User) UserRegister(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegister, o.client, c)
+func (u *User) UserRegister(c *gin.Context) {
+	a2r.Call(user.UserClient.UserRegister, u.client, c)
 }
 
-func (o *User) UpdateUserInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.UpdateUserInfo, o.client, c)
+func (u *User) UpdateUserInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.UpdateUserInfo, u.client, c)
 }
 
-func (o *User) SetGlobalRecvMessageOpt(c *gin.Context) {
-	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, o.client, c)
+func (u *User) SetGlobalRecvMessageOpt(c *gin.Context) {
+	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.client, c)
 }
 
-func (o *User) GetUsersPublicInfo(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
+func (u *User) GetUsersPublicInfo(c *gin.Context) {
+	a2r.Call(user.UserClient.GetDesignateUsers, u.client, c)
 }
 
-func (o *User) GetAllUsersID(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, o.client, c)
+func (u *User) GetAllUsersID(c *gin.Context) {
+	a2r.Call(user.UserClient.GetDesignateUsers, u.client, c)
 }
 
 func (u *User) AccountCheck(c *gin.Context) {
 	a2r.Call(user.UserClient.AccountCheck, u.client, c)
 }
 
-func (o *User) GetUsers(c *gin.Context) {
-	a2r.Call(user.UserClient.GetPaginationUsers, o.client, c)
+func (u *User) GetUsers(c *gin.Context) {
+	a2r.Call(user.UserClient.GetPaginationUsers, u.client, c)
 }
