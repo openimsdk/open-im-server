@@ -2,6 +2,7 @@ package a2r
 
 import (
 	"OpenIM/internal/apiresp"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/errs"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -27,10 +28,12 @@ func Call[A, B, C any](
 	cli, err := client()
 	if err != nil {
 		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
+		log.Error("0", "get rpc client conn err:", err.Error())
 		return
 	}
 	data, err := rpc(cli, c, &req)
 	if err != nil {
+		log.Error("0", "rpc call err:", err.Error())
 		apiresp.GinError(c, err) // RPC调用失败
 		return
 	}
