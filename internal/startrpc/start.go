@@ -59,16 +59,11 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 			}
 		}
 	}()
-
-	err = rpcFn(zkClient, srv)
-	if err != nil {
-		return utils.Wrap1(err)
-	}
 	err = srv.Serve(listener)
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	return nil
+	return rpcFn(zkClient, srv)
 }
 
 //func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
