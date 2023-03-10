@@ -118,7 +118,7 @@ func (c *MsgTool) FixGroupSeq(ctx context.Context, groupID string) error {
 func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []string) error {
 	_, maxSeqMongo, maxSeqCache, err := c.msgDatabase.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
 	if err != nil {
-		if err != unrelation.ErrMsgNotFound {
+		if err == unrelation.ErrMsgNotFound {
 			return nil
 		}
 		return err

@@ -34,7 +34,11 @@ func SetOperationID(ctx context.Context, operationID string) {
 }
 
 func GetOperationID(ctx context.Context) string {
-	return ctx.Value(TraceLogKey).(*FuncInfos).OperationID
+	f, ok := ctx.Value(TraceLogKey).(*FuncInfos)
+	if ok {
+		return f.OperationID
+	}
+	return utils.GetFuncName(1)
 }
 
 func GetOpUserID(ctx context.Context) string {

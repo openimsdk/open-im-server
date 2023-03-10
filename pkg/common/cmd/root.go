@@ -3,6 +3,7 @@ package cmd
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	log "OpenIM/pkg/common/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +20,28 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		Short: "Start the server",
 		Long:  `Start the server`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			log.InitFromConfig(log.Config{
+				JSON:               true,
+				Level:              "",
+				Sample:             false,
+				SampleInitial:      0,
+				SampleInterval:     0,
+				ItemSampleSeconds:  0,
+				ItemSampleInitial:  0,
+				ItemSampleInterval: 0,
+			}, "newlog")
 			return rootCmd.getConfFromCmdAndInit(cmd)
 		},
 	}
 	rootCmd.Command = c
 	rootCmd.addConfFlag()
 	return rootCmd
+}
+
+func (r *RootCmd) SetDesc(use, short, long string) {
+	r.Command.Use = use
+	r.Command.Short = short
+	r.Command.Long = long
 }
 
 func (r *RootCmd) addConfFlag() {

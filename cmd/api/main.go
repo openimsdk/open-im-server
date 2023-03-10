@@ -5,7 +5,9 @@ import (
 	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
+	log2 "OpenIM/pkg/common/logger"
 	"OpenIM/pkg/common/mw"
+	"context"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
 	"os"
@@ -40,6 +42,7 @@ func run(port int) error {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(port)
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
+	log2.Info(context.Background(), "start server success", "address", address, "version", config.Version)
 	err = router.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())
