@@ -120,6 +120,9 @@ func (m *MsgMongoDriver) GetOldestMsg(ctx context.Context, sourceID string) (*ta
 }
 
 func (m *MsgMongoDriver) Delete(ctx context.Context, docIDs []string) error {
+	if docIDs == nil {
+		return nil
+	}
 	_, err := m.MsgCollection.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": docIDs}})
 	return err
 }
