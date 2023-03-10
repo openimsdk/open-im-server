@@ -22,7 +22,7 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			log.InitFromConfig(log.Config{
 				JSON:               true,
-				Level:              "",
+				Level:              "-1",
 				Sample:             false,
 				SampleInitial:      0,
 				SampleInterval:     0,
