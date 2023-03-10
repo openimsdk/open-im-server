@@ -27,6 +27,8 @@ func (u *User) client() (user.UserClient, error) {
 	}
 	defer func() {
 		log.NewInfo("client", conn, err)
+		conns, err := u.c.GetConns(config.Config.RpcRegisterName.OpenImUserName)
+		log.NewInfo("conns", conns, err)
 	}()
 	return user.NewUserClient(conn), nil
 }
