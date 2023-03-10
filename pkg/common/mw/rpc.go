@@ -64,10 +64,13 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
+	log.Info("", "rpc come here")
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
 		return nil
 	}
+	log.Info("", "rpc come here err")
+
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.NewCodeError(errs.DefaultOtherError, err.Error()).Wrap()

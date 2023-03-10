@@ -32,8 +32,7 @@ func (o *Auth) UserRegister(c *gin.Context) {
 }
 
 func (o *Auth) UserToken(c *gin.Context) {
-
-	a2r.Call2(auth.AuthClient.UserToken, o.client, c)
+	a2r.Call(auth.AuthClient.UserToken, o.client, c)
 }
 
 func (o *Auth) ParseToken(c *gin.Context) {
