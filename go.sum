@@ -391,6 +391,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OpenIMSDK/openKeeper v0.0.3 h1:pkyLFuIau58SjQLeg4CWMSkP79nbmR3DP0NfBJZ7Kr8=
 github.com/OpenIMSDK/openKeeper v0.0.3/go.mod h1:RvyRXEcvWbonkmHLtT8KxGSCNlXY7OfDohhu53E6INU=
+github.com/OpenIMSDK/openKeeper v0.0.4 h1:WwieeVzNCMYvd6HWRFh0cqrem3OoXDSJePA7taZ1ahQ=
+github.com/OpenIMSDK/openKeeper v0.0.4/go.mod h1:RvyRXEcvWbonkmHLtT8KxGSCNlXY7OfDohhu53E6INU=
 github.com/OpenIMSDK/open_utils v1.0.8 h1:IopxWgJwEF5ZAPsRuiZZOfcxNOQOCt/p8VDENcHN9r4=
 github.com/OpenIMSDK/open_utils v1.0.8/go.mod h1:FLoaQblWUVKQgqt2LrNzfSZLT6D3DICBn1kcOMDLUOI=
 github.com/Shopify/sarama v1.29.0 h1:ARid8o8oieau9XrHI55f/L3EoRAhm9px6sonbD7yuUE=

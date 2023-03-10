@@ -573,12 +573,12 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	if err != nil || msgs.DocID == "" {
 		if err != nil {
 			if err == unrelation.ErrMsgListNotExist {
-				//log.NewInfo(operationID, utils.GetSelfFuncName(), "ID:", sourceID, "index:", index, err.Error())
+				log.NewDebug(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "ID:", sourceID, "index:", index, err.Error())
 			} else {
 				//log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
 			}
 		}
-		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList)
+		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
 		err = db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs)
 		if err != nil {
 			return 0, err
@@ -614,6 +614,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 				msg.SendTime = 0
 				hasMarkDelFlag = true
 			} else {
+				// 到本条消息不需要删除, minSeq置为这条消息的seq
 				if err := db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs); err != nil {
 					return 0, err
 				}
@@ -622,7 +623,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
 				}
-				return msgPb.Seq + 1, nil
+				return msgPb.Seq, nil
 			}
 		}
 	}

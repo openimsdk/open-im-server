@@ -137,7 +137,9 @@ func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []str
 func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqCache, maxSeqMongo int64, err error) {
 	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgDatabase.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
 	if err != nil {
-		log.NewWarn(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", userID)
+		if err != unrelation.ErrMsgNotFound {
+			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", userID)
+		}
 		return 0, 0, err
 	}
 	log.NewDebug(tracelog.GetOperationID(ctx), userID, minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache)
