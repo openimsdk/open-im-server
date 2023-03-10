@@ -1,6 +1,7 @@
 package log
 
 import (
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tracelog"
 	"context"
@@ -18,8 +19,12 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(conf Config, name string) {
-	l, err := NewZapLogger(&conf)
+func InitFromConfig(name string) {
+	//var c zap.Config
+	//file, _ := os.Create(config.Config.Log.StorageLocation)
+	//writeSyncer := zapcore.AddSync(file)
+
+	l, err := NewZapLogger()
 	if err == nil {
 		setLogger(l, name)
 	}
@@ -83,55 +88,50 @@ type ZapLogger struct {
 	SampleInterval int
 }
 
-func NewZapLogger(conf *Config) (*ZapLogger, error) {
-	lvl := ParseZapLevel(conf.Level)
+func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:            zap.NewAtomicLevelAt(lvl),
-		Development:      false,
-		Encoding:         "console",
-		EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
-		OutputPaths:      []string{"stderr"},
+		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Development:      true,
+		Encoding:         "json",
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
+		OutputPaths:      []string{config.Config.Log.StorageLocation},
 		ErrorOutputPaths: []string{"stderr"},
-	}
-	if conf.JSON {
-		zapConfig.Encoding = "json"
-		zapConfig.EncoderConfig = zap.NewProductionEncoderConfig()
 	}
 	l, err := zapConfig.Build()
 	if err != nil {
 		return nil, err
 	}
 	zl := &ZapLogger{
-		unsampled:      l.Sugar(),
-		SampleDuration: time.Duration(conf.ItemSampleSeconds) * time.Second,
-		SampleInitial:  conf.ItemSampleInitial,
-		SampleInterval: conf.ItemSampleInterval,
+		unsampled: l.Sugar(),
+		//SampleDuration: time.Duration(conf.ItemSampleSeconds) * time.Second,
+		//SampleInitial:  conf.ItemSampleInitial,
+		//SampleInterval: conf.ItemSampleInterval,
 	}
 
-	if conf.Sample {
-		// use a sampling logger for the main logger
-		samplingConf := &zap.SamplingConfig{
-			Initial:    conf.SampleInitial,
-			Thereafter: conf.SampleInterval,
-		}
-		// sane defaults
-		if samplingConf.Initial == 0 {
-			samplingConf.Initial = 20
-		}
-		if samplingConf.Thereafter == 0 {
-			samplingConf.Thereafter = 100
-		}
-		zl.zap = l.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-			return zapcore.NewSamplerWithOptions(
-				core,
-				time.Second,
-				samplingConf.Initial,
-				samplingConf.Thereafter,
-			)
-		})).Sugar()
-	} else {
-		zl.zap = zl.unsampled
-	}
+	//if conf.Sample {
+	//	// use a sampling logger for the main logger
+	//	samplingConf := &zap.SamplingConfig{
+	//		Initial:    conf.SampleInitial,
+	//		Thereafter: conf.SampleInterval,
+	//	}
+	//	// sane defaults
+	//	if samplingConf.Initial == 0 {
+	//		samplingConf.Initial = 20
+	//	}
+	//	if samplingConf.Thereafter == 0 {
+	//		samplingConf.Thereafter = 100
+	//	}
+	//	zl.zap = l.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+	//		return zapcore.NewSamplerWithOptions(
+	//			core,
+	//			time.Second,
+	//			samplingConf.Initial,
+	//			samplingConf.Thereafter,
+	//		)
+	//	})).Sugar()
+	//} else {
+	//	zl.zap = zl.unsampled
+	//}
 	return zl, nil
 }
 
