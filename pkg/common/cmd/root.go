@@ -24,8 +24,7 @@ func NewRootCmd() (rootCmd *RootCmd) {
 			if err != nil {
 				return err
 			}
-			log.InitFromConfig("newlog")
-			return nil
+			return log.InitFromConfig("newlog")
 		},
 	}
 	rootCmd.Command = c

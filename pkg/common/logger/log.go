@@ -69,8 +69,13 @@ func NewZapLogger() (*ZapLogger, error) {
 		Development:      true,
 		Encoding:         "json",
 		EncoderConfig:    zap.NewProductionEncoderConfig(),
-		OutputPaths:      []string{config.Config.Log.StorageLocation + "openIM2.log"},
+		OutputPaths:      []string{"stdout", config.Config.Log.StorageLocation + "openIM2.log"},
 		ErrorOutputPaths: []string{config.Config.Log.StorageLocation},
+		Sampling: &zap.SamplingConfig{
+			Initial:    0,
+			Thereafter: 0,
+			Hook:       nil,
+		},
 	}
 	l, err := zapConfig.Build()
 	if err != nil {
