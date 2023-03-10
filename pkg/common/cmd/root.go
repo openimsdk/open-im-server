@@ -20,17 +20,12 @@ func NewRootCmd() (rootCmd *RootCmd) {
 		Short: "Start the server",
 		Long:  `Start the server`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			log.InitFromConfig(log.Config{
-				JSON:               true,
-				Level:              "-1",
-				Sample:             false,
-				SampleInitial:      0,
-				SampleInterval:     0,
-				ItemSampleSeconds:  0,
-				ItemSampleInitial:  0,
-				ItemSampleInterval: 0,
-			}, "newlog")
-			return rootCmd.getConfFromCmdAndInit(cmd)
+			err := rootCmd.getConfFromCmdAndInit(cmd)
+			if err != nil {
+				return err
+			}
+			log.InitFromConfig("newlog")
+			return nil
 		},
 	}
 	rootCmd.Command = c
