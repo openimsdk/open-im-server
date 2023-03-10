@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
