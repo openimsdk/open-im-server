@@ -64,11 +64,12 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:         zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:   true,
-		Encoding:      "json",
-		EncoderConfig: zap.NewProductionEncoderConfig(),
-		OutputPaths:   []string{"stdout"},
+		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Development:      true,
+		Encoding:         "json",
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stdout"},
 		Sampling: &zap.SamplingConfig{
 			Initial:    0,
 			Thereafter: 0,
