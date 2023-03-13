@@ -25,6 +25,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.NewError(operationID, info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, "stack:", string(debug.Stack()))
 		}
 	}()
+	log.Info("", "rpc come here,in rpc call")
 	funcName := info.FullMethod
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -63,7 +64,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
-	log.Info("", "rpc come here")
+	log.Info("", "rpc come here before")
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
 		return nil
