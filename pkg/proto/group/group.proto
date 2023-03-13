@@ -200,6 +200,17 @@ message InviteUserToGroupResp {
   repeated  Id2Result Id2ResultList = 3; // 0 ok, -1 error
 }
 
+message InviteUserToGroupsReq {
+  string OperationID = 1;
+  repeated string groupIDList = 2;
+  string Reason = 3;
+  string invitedUserID = 4;
+  string OpUserID = 5; //group member or app manager
+}
+message InviteUserToGroupsResp {
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+}
 
 message GetGroupAllMemberReq {
   string GroupID = 1;
@@ -413,6 +424,7 @@ service group{
   rpc kickGroupMember(KickGroupMemberReq) returns (KickGroupMemberResp);
   rpc getJoinedGroupList(GetJoinedGroupListReq) returns (GetJoinedGroupListResp);
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
+  rpc inviteUserToGroups(InviteUserToGroupsReq) returns (InviteUserToGroupsResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);

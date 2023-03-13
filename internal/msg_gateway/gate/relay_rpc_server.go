@@ -101,47 +101,48 @@ func (r *RPCServer) run() {
 	}
 }
 func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgReq) (*pbRelay.OnlinePushMsgResp, error) {
-	log.NewInfo(in.OperationID, "PushMsgToUser is arriving", in.String())
-	var resp []*pbRelay.SingleMsgToUserPlatform
-	msgBytes, _ := proto.Marshal(in.MsgData)
-	mReply := Resp{
-		ReqIdentifier: constant.WSPushMsg,
-		OperationID:   in.OperationID,
-		Data:          msgBytes,
-	}
-	var replyBytes bytes.Buffer
-	enc := gob.NewEncoder(&replyBytes)
-	err := enc.Encode(mReply)
-	if err != nil {
-		log.NewError(in.OperationID, "data encode err", err.Error())
-	}
-	var tag bool
-	recvID := in.PushToUserID
-	for _, v := range r.platformList {
-		if conn := ws.getUserConn(recvID, v); conn != nil {
-			tag = true
-			resultCode := sendMsgToUser(conn, replyBytes.Bytes(), in, v, recvID)
-			temp := &pbRelay.SingleMsgToUserPlatform{
-				ResultCode:     resultCode,
-				RecvID:         recvID,
-				RecvPlatFormID: int32(v),
-			}
-			resp = append(resp, temp)
-		} else {
-			temp := &pbRelay.SingleMsgToUserPlatform{
-				ResultCode:     -1,
-				RecvID:         recvID,
-				RecvPlatFormID: int32(v),
-			}
-			resp = append(resp, temp)
-		}
-	}
-	if !tag {
-		log.NewDebug(in.OperationID, "push err ,no matched ws conn not in map", in.String())
-	}
-	return &pbRelay.OnlinePushMsgResp{
-		Resp: resp,
-	}, nil
+	//log.NewInfo(in.OperationID, "PushMsgToUser is arriving", in.String())
+	//var resp []*pbRelay.SingleMsgToUserPlatform
+	//msgBytes, _ := proto.Marshal(in.MsgData)
+	//mReply := Resp{
+	//	ReqIdentifier: constant.WSPushMsg,
+	//	OperationID:   in.OperationID,
+	//	Data:          msgBytes,
+	//}
+	//var replyBytes bytes.Buffer
+	//enc := gob.NewEncoder(&replyBytes)
+	//err := enc.Encode(mReply)
+	//if err != nil {
+	//	log.NewError(in.OperationID, "data encode err", err.Error())
+	//}
+	//var tag bool
+	//recvID := in.PushToUserID
+	//for _, v := range r.platformList {
+	//	if conn := ws.getUserConn(recvID, v); conn != nil {
+	//		tag = true
+	//		resultCode := sendMsgToUser(conn, replyBytes.Bytes(), in, v, recvID)
+	//		temp := &pbRelay.SingleMsgToUserPlatform{
+	//			ResultCode:     resultCode,
+	//			RecvID:         recvID,
+	//			RecvPlatFormID: int32(v),
+	//		}
+	//		resp = append(resp, temp)
+	//	} else {
+	//		temp := &pbRelay.SingleMsgToUserPlatform{
+	//			ResultCode:     -1,
+	//			RecvID:         recvID,
+	//			RecvPlatFormID: int32(v),
+	//		}
+	//		resp = append(resp, temp)
+	//	}
+	//}
+	//if !tag {
+	//	log.NewDebug(in.OperationID, "push err ,no matched ws conn not in map", in.String())
+	//}
+	//return &pbRelay.OnlinePushMsgResp{
+	//	Resp: resp,
+	//}, nil
+	return nil, nil
 }
 func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUsersOnlineStatusReq) (*pbRelay.GetUsersOnlineStatusResp, error) {
 	log.NewInfo(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
@@ -154,13 +155,13 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUser
 		temp := new(pbRelay.GetUsersOnlineStatusResp_SuccessResult)
 		temp.UserID = userID
 		userConnMap := ws.getUserAllCons(userID)
-		for platform, userConn := range userConnMap {
-			if userConn != nil {
+		for platform, userConns := range userConnMap {
+			if len(userConns) != 0 {
 				ps := new(pbRelay.GetUsersOnlineStatusResp_SuccessDetail)
 				ps.Platform = constant.PlatformIDToName(platform)
 				ps.Status = constant.OnlineStatus
-				ps.ConnID = userConn.connID
-				ps.IsBackground = userConn.IsBackground
+				ps.ConnID = userConns[0].connID
+				ps.IsBackground = userConns[0].IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
 			}
@@ -196,25 +197,29 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 			UserID: v,
 		}
 		userConnMap := ws.getUserAllCons(v)
-		for platform, userConn := range userConnMap {
-			if userConn != nil {
-				temp := &pbRelay.SingleMsgToUserPlatform{
-					RecvID:         v,
-					RecvPlatFormID: int32(platform),
-				}
-				if !userConn.IsBackground {
-					resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
-					if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
-						tempT.OnlinePush = true
-						promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
-						log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
-						temp.ResultCode = resultCode
+		for platform, userConns := range userConnMap {
+			if len(userConns) != 0 {
+				log.NewWarn(req.OperationID, "conns is ", len(userConns), platform, userConns)
+				for _, userConn := range userConns {
+					temp := &pbRelay.SingleMsgToUserPlatform{
+						RecvID:         v,
+						RecvPlatFormID: int32(platform),
+					}
+					if !userConn.IsBackground || req.MsgData.ContentType == constant.SuperGroupUpdateNotification {
+						resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
+						if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
+							tempT.OnlinePush = true
+							promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
+							log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
+							temp.ResultCode = resultCode
+							resp = append(resp, temp)
+						}
+					} else {
+						temp.ResultCode = -2
 						resp = append(resp, temp)
 					}
-				} else {
-					temp.ResultCode = -2
-					resp = append(resp, temp)
 				}
+
 			}
 		}
 		tempT.Resp = resp
@@ -247,22 +252,28 @@ func (r *RPCServer) SuperGroupBackgroundOnlinePush(_ context.Context, req *pbRel
 			UserID: v,
 		}
 		userConnMap := ws.getUserAllCons(v)
-		for platform, userConn := range userConnMap {
-			if userConn != nil && userConn.IsBackground {
-				temp := &pbRelay.SingleMsgToUserPlatform{
-					RecvID:         v,
-					RecvPlatFormID: int32(platform),
-				}
-				if constant.PlatformIDToClass(int(userConn.PlatformID)) == constant.TerminalPC || userConn.PlatformID == constant.WebPlatformID {
-					resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
-					if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
-						tempT.OnlinePush = true
-						promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
-						log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
-						temp.ResultCode = resultCode
+		for platform, userConns := range userConnMap {
+			if len(userConns) != 0 {
+				for _, userConn := range userConns {
+					temp := &pbRelay.SingleMsgToUserPlatform{
+						RecvID:         v,
+						RecvPlatFormID: int32(platform),
+					}
+					if !userConn.IsBackground {
+						resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
+						if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
+							tempT.OnlinePush = true
+							promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
+							log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
+							temp.ResultCode = resultCode
+							resp = append(resp, temp)
+						}
+					} else {
+						temp.ResultCode = -2
 						resp = append(resp, temp)
 					}
 				}
+
 			}
 		}
 		tempT.Resp = resp
@@ -274,76 +285,77 @@ func (r *RPCServer) SuperGroupBackgroundOnlinePush(_ context.Context, req *pbRel
 	}, nil
 }
 func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.OnlineBatchPushOneMsgReq) (*pbRelay.OnlineBatchPushOneMsgResp, error) {
-	log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
-	var singleUserResult []*pbRelay.SingelMsgToUserResultList
-
-	for _, v := range req.PushToUserIDList {
-		var resp []*pbRelay.SingleMsgToUserPlatform
-		tempT := &pbRelay.SingelMsgToUserResultList{
-			UserID: v,
-		}
-		userConnMap := ws.getUserAllCons(v)
-		var platformList []int
-		for k, _ := range userConnMap {
-			platformList = append(platformList, k)
-		}
-		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList, req.MsgData.String())
-		needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
-		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms end", req.MsgData.Seq, v, platformList, len(needPushMapList))
-		for platform, list := range needPushMapList {
-			if list != nil {
-				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:")
-				//for _, v := range list {
-				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList), v.String())
-				//	req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
-				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
-				//}
-				msgBytes, err := proto.Marshal(list)
-				if err != nil {
-					log.Error(req.OperationID, "proto marshal err", err.Error())
-					continue
-				}
-				req.MsgData.MsgDataList = msgBytes
-				//req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
-				log.Debug(req.OperationID, "r.encodeWsData  no string")
-				//log.Debug(req.OperationID, "r.encodeWsData  data0 list ", req.MsgData.MsgDataList[0].String())
-
-				log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
-				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
-				if err != nil {
-					log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
-					continue
-				}
-				log.Debug(req.OperationID, "encodeWsData", "len: ", replyBytes.Len())
-				resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
-				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
-					tempT.OnlinePush = true
-					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recv PlatForm", constant.PlatformIDToName(platform), "recvID", v)
-					temp := &pbRelay.SingleMsgToUserPlatform{
-						ResultCode:     resultCode,
-						RecvID:         v,
-						RecvPlatFormID: int32(platform),
-					}
-					resp = append(resp, temp)
-				}
-			} else {
-				if utils.IsContainInt(platform, r.pushTerminal) {
-					tempT.OnlinePush = true
-					temp := &pbRelay.SingleMsgToUserPlatform{
-						ResultCode:     0,
-						RecvID:         v,
-						RecvPlatFormID: int32(platform),
-					}
-					resp = append(resp, temp)
-				}
-			}
-		}
-		tempT.Resp = resp
-		singleUserResult = append(singleUserResult, tempT)
-	}
-	return &pbRelay.OnlineBatchPushOneMsgResp{
-		SinglePushResult: singleUserResult,
-	}, nil
+	//log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
+	//var singleUserResult []*pbRelay.SingelMsgToUserResultList
+	//
+	//for _, v := range req.PushToUserIDList {
+	//	var resp []*pbRelay.SingleMsgToUserPlatform
+	//	tempT := &pbRelay.SingelMsgToUserResultList{
+	//		UserID: v,
+	//	}
+	//	userConnMap := ws.getUserAllCons(v)
+	//	var platformList []int
+	//	for k, _ := range userConnMap {
+	//		platformList = append(platformList, k)
+	//	}
+	//	log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList, req.MsgData.String())
+	//	needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
+	//	log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms end", req.MsgData.Seq, v, platformList, len(needPushMapList))
+	//	for platform, list := range needPushMapList {
+	//		if list != nil {
+	//			log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:")
+	//			//for _, v := range list {
+	//			//	log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList), v.String())
+	//			//	req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+	//			//	log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
+	//			//}
+	//			msgBytes, err := proto.Marshal(list)
+	//			if err != nil {
+	//				log.Error(req.OperationID, "proto marshal err", err.Error())
+	//				continue
+	//			}
+	//			req.MsgData.MsgDataList = msgBytes
+	//			//req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+	//			log.Debug(req.OperationID, "r.encodeWsData  no string")
+	//			//log.Debug(req.OperationID, "r.encodeWsData  data0 list ", req.MsgData.MsgDataList[0].String())
+	//
+	//			log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
+	//			replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
+	//			if err != nil {
+	//				log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
+	//				continue
+	//			}
+	//			log.Debug(req.OperationID, "encodeWsData", "len: ", replyBytes.Len())
+	//			resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
+	//			if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
+	//				tempT.OnlinePush = true
+	//				log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recv PlatForm", constant.PlatformIDToName(platform), "recvID", v)
+	//				temp := &pbRelay.SingleMsgToUserPlatform{
+	//					ResultCode:     resultCode,
+	//					RecvID:         v,
+	//					RecvPlatFormID: int32(platform),
+	//				}
+	//				resp = append(resp, temp)
+	//			}
+	//		} else {
+	//			if utils.IsContainInt(platform, r.pushTerminal) {
+	//				tempT.OnlinePush = true
+	//				temp := &pbRelay.SingleMsgToUserPlatform{
+	//					ResultCode:     0,
+	//					RecvID:         v,
+	//					RecvPlatFormID: int32(platform),
+	//				}
+	//				resp = append(resp, temp)
+	//			}
+	//		}
+	//	}
+	//	tempT.Resp = resp
+	//	singleUserResult = append(singleUserResult, tempT)
+	//}
+	//return &pbRelay.OnlineBatchPushOneMsgResp{
+	//	SinglePushResult: singleUserResult,
+	//}, nil
+	return nil, nil
 }
 func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (bytes.Buffer, error) {
 	log.Debug(operationID, "encodeWsData begin", wsData.String())
@@ -374,10 +386,11 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 		log.NewWarn(req.OperationID, "SetTokenKicked ", v, req.PlatformID, req.OperationID)
 		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 		oldConnMap := ws.getUserAllCons(v)
-		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
+		if conns, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
 			log.NewWarn(req.OperationID, "send kick msg, close connection ", req.PlatformID, v)
-			ws.sendKickMsg(conn, req.OperationID)
-			conn.Close()
+			for _, conn := range conns {
+				ws.sendKickMsg(conn, req.OperationID)
+			}
 		}
 	}
 	return &pbRelay.KickUserOfflineResp{}, nil

@@ -111,6 +111,8 @@ func main() {
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
+		//only for supergroup
+		groupRouterGroup.POST("/invite_user_to_groups", group.InviteUserToGroups)
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
 		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)

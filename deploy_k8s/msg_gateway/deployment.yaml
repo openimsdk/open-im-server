@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: msg-gateway
-        image: openim/msg_gateway:v2.3.4
+        image: openim/msg_gateway:v2.3.8
         # imagePullPolicy: Always
         ports:
         - name: rpc-port
@@ -26,9 +26,6 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
-          - name: usualconfig
-            mountPath: /Open-IM-Server/config
-            readOnly: true
         env:
           - name: CONFIG_NAME
             value: "/Open-IM-Server"
@@ -36,11 +33,12 @@ spec:
             value: "/Open-IM-Server"
       volumes:
         - name: config
-          configMap:
-            name: config
-        - name: usualconfig
-            configMap:
-              name: usualconfig
+          projected:
+            sources:
+            - configMap:
+                name: openim-config
+            - configMap:
+                name: openim-usualconfig
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---

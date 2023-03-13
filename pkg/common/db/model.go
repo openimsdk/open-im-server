@@ -112,6 +112,10 @@ func init() {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		panic(err.Error() + "index create failed " + cTag + " tag_id")
 	}
+	if err := createMongoIndex(mongoClient, cUserToSuperGroup, true, "user_id"); err != nil {
+		panic(err.Error() + "index create failed " + cUserToSuperGroup + " user_id")
+	}
+
 	DB.mongoClient = mongoClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
