@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -68,11 +67,9 @@ func NewGormDB() (*gorm.DB, error) {
 type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
-	var s []string
+	var s = []string{format}
 	for _, v := range args {
 		s = append(s, fmt.Sprintf("%v", v))
 	}
-	log.ZDebug(context.Background(), format, "sql", strings.Join(s, ""))
-	fmt.Println(format)
-	fmt.Println(strings.Join(s, ""))
+	log.ZDebug(context.Background(), "msg", s)
 }
