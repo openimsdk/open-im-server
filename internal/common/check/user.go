@@ -2,6 +2,7 @@ package check
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/sdkws"
@@ -29,12 +30,14 @@ func (u *UserCheck) getConn() (*grpc.ClientConn, error) {
 func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error) {
 	cc, err := u.getConn()
 	if err != nil {
+		log.Error("", "call getConn err", err.Error())
 		return nil, err
 	}
 	resp, err := user.NewUserClient(cc).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
 	if err != nil {
+		log.Error("", "call GetDesignateUsers err", err.Error())
 		return nil, err
 	}
 	if complete {
