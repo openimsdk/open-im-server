@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -41,7 +42,6 @@ func newMysqlGormDB() (*gorm.DB, error) {
 			SlowThreshold:             time.Duration(config.Config.Mysql.SlowThreshold) * time.Millisecond, // Slow SQL threshold
 			LogLevel:                  logger.LogLevel(config.Config.Mysql.LogLevel),                       // Log level
 			IgnoreRecordNotFoundError: true,                                                                // Ignore ErrRecordNotFound error for logger
-			Colorful:                  true,                                                                // Disable color
 		},
 	)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -68,5 +68,9 @@ func NewGormDB() (*gorm.DB, error) {
 type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
-	log.ZDebug(context.Background(), format)
+	var s []string
+	for _, v := range args {
+		s = append(s, fmt.Sprintf("%v", v))
+	}
+	log.ZDebug(context.Background(), format, "sql", strings.Join(s, ""))
 }
