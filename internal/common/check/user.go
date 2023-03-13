@@ -30,6 +30,7 @@ func (u *UserCheck) getConn() (*grpc.ClientConn, error) {
 func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error) {
 	cc, err := u.getConn()
 	if err != nil {
+		log.Error("", "call getConn err", err.Error())
 		return nil, err
 	}
 	resp, err := user.NewUserClient(cc).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
