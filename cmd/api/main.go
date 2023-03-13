@@ -9,8 +9,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"strconv"
 
@@ -36,7 +34,7 @@ func run(port int) error {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
-	zk.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	zk.AddOption(mw.GrpcClient())
 	router := api.NewGinRouter(zk)
 	address := constant.LocalHost + ":" + strconv.Itoa(port)
 	if config.Config.Api.ListenIP != "" {
