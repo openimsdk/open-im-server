@@ -69,7 +69,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if err == nil {
 		return nil
 	}
-	log.Info("", "rpc come here err")
+	log.Info("", "rpc come here err", err.Error())
 
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
