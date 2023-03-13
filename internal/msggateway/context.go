@@ -44,7 +44,7 @@ func (c *UserConnContext) ErrReturn(error string, code int) {
 	http.Error(c.RespWriter, error, code)
 }
 func (c *UserConnContext) GetConnID() string {
-	return c.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))
+	return utils.Md5(c.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill())))
 }
 func (c *UserConnContext) GetUserID() string {
 	return c.Req.URL.Query().Get(WsUserID)

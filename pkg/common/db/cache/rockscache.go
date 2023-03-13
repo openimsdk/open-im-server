@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
