@@ -45,7 +45,7 @@ func (u *UserGorm) Find(ctx context.Context, userIDs []string) (users []*relatio
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
-	err = utils.Wrap(u.DB.Where("user_id in ?", userIDs).Find(&users).Error, "")
+	err = utils.Wrap(u.DB.Debug().Where("user_id in ?", userIDs).Find(&users).Error, "")
 	return users, err
 }
 
