@@ -65,7 +65,7 @@ func NewZapLogger() (*ZapLogger, error) {
 	}
 	zapConfig.EncoderConfig.EncodeTime = zl.timeEncoder
 	zapConfig.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
-	zapConfig.EncoderConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	opts, err := zl.cores()
 	if err != nil {
 		return nil, err

@@ -2,6 +2,8 @@ package relation
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
+	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"time"
@@ -66,5 +68,5 @@ func NewGormDB() (*gorm.DB, error) {
 type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
-	fmt.Printf(format, args...)
+	log.ZDebug(context.Background(), format, args)
 }
