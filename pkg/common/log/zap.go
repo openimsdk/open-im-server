@@ -63,7 +63,14 @@ func NewZapLogger() (*ZapLogger, error) {
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
-	l, err := zapConfig.Build(zl.cores())
+	zapConfig.EncoderConfig.EncodeTime = zl.timeEncoder
+	zapConfig.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
+	zapConfig.EncoderConfig.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+	opts, err := zl.cores()
+	if err != nil {
+		return nil, err
+	}
+	l, err := zapConfig.Build(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +78,16 @@ func NewZapLogger() (*ZapLogger, error) {
 	return zl, nil
 }
 
-func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
 
-func (l *ZapLogger) cores() zap.Option {
+func (l *ZapLogger) cores() (zap.Option, error) {
 	fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
-	writer := l.getWriter()
+	writer, err := l.getWriter()
+	if err != nil {
+		return nil, err
+	}
 	var cores []zapcore.Core
 	if config.Config.Log.StorageLocation != "" {
 		cores = []zapcore.Core{
@@ -86,16 +96,18 @@ func (l *ZapLogger) cores() zap.Option {
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
-	})
+	}), nil
 }
 
-func (l *ZapLogger) getWriter() zapcore.WriteSyncer {
-	logf, _ := rotatelogs.New(config.Config.Log.StorageLocation+sp+"openIM"+"-"+".%Y_%m%d_%H",
-		rotatelogs.WithLinkName(config.Config.Log.StorageLocation+sp+"openIM"+"-"),
-		rotatelogs.WithMaxAge(2*24*time.Hour),
-		rotatelogs.WithRotationTime(time.Minute),
+func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
+	logf, err := rotatelogs.New(config.Config.Log.StorageLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
+		rotatelogs.WithRotationCount(config.Config.Log.RemainRotationCount),
+		rotatelogs.WithRotationTime(time.Duration(config.Config.Log.RotationTime)*time.Hour),
 	)
-	return zapcore.AddSync(logf)
+	if err != nil {
+		return nil, err
+	}
+	return zapcore.AddSync(logf), nil
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {

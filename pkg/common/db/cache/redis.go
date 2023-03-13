@@ -3,6 +3,7 @@ package cache
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
 	pbMsg "OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
@@ -91,6 +92,38 @@ func NewCacheModel(client redis.UniversalClient) Model {
 
 type cache struct {
 	rdb redis.UniversalClient
+}
+
+// 兼容老版本调用
+func (c *cache) DelKeys() {
+	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE:", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE:", "JOINED_GROUP_LIST_CACHE:",
+		"GROUP_MEMBER_INFO_CACHE:", "GROUP_ALL_MEMBER_INFO_CACHE:", "ALL_FRIEND_INFO_CACHE:"} {
+		fName := utils.GetSelfFuncName()
+		var cursor uint64
+		var n int
+		for {
+			var keys []string
+			var err error
+			keys, cursor, err = c.rdb.Scan(context.Background(), cursor, key+"*", scanCount).Result()
+			if err != nil {
+				panic(err.Error())
+			}
+			n += len(keys)
+			// for each for redis cluster
+			for _, key := range keys {
+				if err = c.rdb.Del(context.Background(), key).Err(); err != nil {
+					log.NewError("", fName, key, err.Error())
+					err = c.rdb.Del(context.Background(), key).Err()
+					if err != nil {
+						panic(err.Error())
+					}
+				}
+			}
+			if cursor == 0 {
+				break
+			}
+		}
+	}
 }
 
 func (c *cache) IncrUserSeq(ctx context.Context, userID string) (int64, error) {

@@ -107,18 +107,6 @@ func InfoKv(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	}).Infoln(keysAndValues)
 }
 
-func DebugKv(ctx context.Context, msg string, keysAndValues ...interface{}) {
-
-}
-
-func ErrorKv(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
-
-}
-
-func WarnKv(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
-
-}
-
 func Info(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
 		"OperationID": OperationID,

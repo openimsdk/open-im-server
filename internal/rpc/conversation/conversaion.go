@@ -13,7 +13,6 @@ import (
 	pbConversation "OpenIM/pkg/proto/conversation"
 	"OpenIM/pkg/utils"
 	"context"
-	"github.com/dtm-labs/rockscache"
 	"google.golang.org/grpc"
 )
 
@@ -35,12 +34,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	opts := rockscache.NewDefaultOptions()
-	opts.RandomExpireAdjustment = 0.2
-	opts.StrongConsistency = true
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		groupChecker:         check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, opts), tx.NewGorm(db)),
+		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt()), tx.NewGorm(db)),
 	})
 	return nil
 }
