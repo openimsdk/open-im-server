@@ -8,11 +8,11 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	pbGroup "OpenIM/pkg/proto/group"
 	"OpenIM/pkg/proto/sdkws"
+	"OpenIM/pkg/proto/wrapperspb"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func (c *Check) setOpUserInfo(ctx context.Context, groupID string, groupMemberInfo *sdkws.GroupMemberFullInfo) error {
