@@ -48,6 +48,10 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
+	err = rpcFn(zkClient, srv)
+	if err != nil {
+		return utils.Wrap1(err)
+	}
 	err = zkClient.Register(rpcRegisterName, registerIP, rpcPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return utils.Wrap1(err)
@@ -63,7 +67,7 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	return rpcFn(zkClient, srv)
+	return nil
 }
 
 //func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
