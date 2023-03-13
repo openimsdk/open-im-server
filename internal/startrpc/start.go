@@ -70,7 +70,3 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	}
 	return nil
 }
-
-//func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
-//	return start(rpcPort, rpcRegisterName, prometheusPort, rpcFn, options)
-//}

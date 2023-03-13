@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/openKeeper"
-	"os"
+	"net"
 	"strconv"
 
 	"OpenIM/pkg/common/constant"
@@ -20,8 +20,7 @@ func main() {
 	apiCmd.AddPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err.Error())
 	}
 }
 
@@ -36,9 +35,11 @@ func run(port int) error {
 	log.NewPrivateLog(constant.LogFileName)
 	zk.AddOption(mw.GrpcClient())
 	router := api.NewGinRouter(zk)
-	address := constant.LocalHost + ":" + strconv.Itoa(port)
+	var address string
 	if config.Config.Api.ListenIP != "" {
-		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(port)
+		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
+	} else {
+		address = net.JoinHostPort("0.0.0.0", strconv.Itoa(port))
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
 	log.ZInfo(context.Background(), "start server success", "address", address, "version", config.Version)

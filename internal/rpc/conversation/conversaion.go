@@ -35,15 +35,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-
+	opts := rockscache.NewDefaultOptions()
+	opts.RandomExpireAdjustment = 0.2
+	opts.StrongConsistency = true
 	pbConversation.RegisterConversationServer(server, &conversationServer{
-		groupChecker: check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, rockscache.Options{
-			RandomExpireAdjustment: 0.2,
-			DisableCacheRead:       false,
-			DisableCacheDelete:     false,
-			StrongConsistency:      true,
-		}), tx.NewGorm(db)),
+		groupChecker:         check.NewGroupChecker(client),
+		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, opts), tx.NewGorm(db)),
 	})
 	return nil
 }

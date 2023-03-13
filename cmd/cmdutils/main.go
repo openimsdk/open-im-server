@@ -2,8 +2,6 @@ package main
 
 import (
 	"OpenIM/pkg/common/cmd"
-	"fmt"
-	"os"
 )
 
 func main() {
@@ -17,7 +15,6 @@ func main() {
 	cmd.GetCmd.AddCommand(msgCmd.Command)
 	msgUtilsCmd.AddCommand(cmd.GetCmd, cmd.FixCmd, cmd.ClearCmd)
 	if err := msgUtilsCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err.Error())
 	}
 }

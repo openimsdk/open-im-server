@@ -70,18 +70,25 @@ type MsgDatabase interface {
 	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error
 	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
+
+	MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error
+	MsgToModifyMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ) error
+	MsgToPushMQ(ctx context.Context, sourceID string, msg2mq *pbMsg.MsgDataToMQ) error
+	MsgToMongoMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error
 }
 
 func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.Model) MsgDatabase {
 	return &msgDatabase{
-		msgDocDatabase: msgDocModel,
-		cache:          cacheModel,
-		producer:       kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic),
+		msgDocDatabase:   msgDocModel,
+		cache:            cacheModel,
+		producer:         kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic),
+		producerToMongo:  kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic),
+		producerToPush:   kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic),
+		producerToModify: kafka.NewKafkaProducer(config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.MsgToModify.Topic),
 	}
 }
 
@@ -97,6 +104,9 @@ type msgDatabase struct {
 	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
 	cache             cache.Model
 	producer          *kafka.Producer
+	producerToMongo   *kafka.Producer
+	producerToModify  *kafka.Producer
+	producerToPush    *kafka.Producer
 	// model
 	msg               unRelationTb.MsgDocModel
 	extendMsgSetModel unRelationTb.ExtendMsgSetModel
@@ -175,6 +185,27 @@ func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.Ms
 	return err
 }
 
+func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ) error {
+	if len(messages) > 0 {
+		_, _, err := db.producerToModify.SendMessage(ctx, aggregationID, &pbMsg.MsgDataToModifyByMQ{AggregationID: aggregationID, Messages: messages, TriggerID: triggerID})
+		return err
+	}
+	return nil
+}
+
+func (db *msgDatabase) MsgToPushMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error {
+	mqPushMsg := pbMsg.PushMsgDataToMQ{MsgData: msg2mq.MsgData, SourceID: key}
+	_, _, err := db.producerToPush.SendMessage(ctx, key, &mqPushMsg)
+	return err
+}
+
+func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error {
+	if len(messages) > 0 {
+		_, _, err := db.producerToModify.SendMessage(ctx, aggregationID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, Messages: messages, TriggerID: triggerID})
+		return err
+	}
+	return nil
+}
 func (db *msgDatabase) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
 	return db.cache.GetUserMaxSeq(ctx, userID)
 }
