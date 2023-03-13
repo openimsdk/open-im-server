@@ -43,6 +43,7 @@ func run(port int) error {
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
 	log2.Info(context.Background(), "start server success", "address", address, "version", config.Version)
+	log.Info("s", "start server")
 	err = router.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())

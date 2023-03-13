@@ -16,10 +16,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logger *Logger
-var ctxLogger *Logger
+var logger *LogrusLogger
+var ctxLogger *LogrusLogger
 
-type Logger struct {
+type LogrusLogger struct {
 	*logrus.Logger
 	Pid  int
 	Type string
@@ -35,7 +35,7 @@ func NewPrivateLog(moduleName string) {
 	ctxLogger = ctxLoggerInit(moduleName)
 }
 
-func ctxLoggerInit(moduleName string) *Logger {
+func ctxLoggerInit(moduleName string) *LogrusLogger {
 	var ctxLogger = logrus.New()
 	ctxLogger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
 	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
@@ -55,14 +55,14 @@ func ctxLoggerInit(moduleName string) *Logger {
 	//Log file segmentation hook
 	hook := NewLfsHook(time.Duration(config.Config.Log.RotationTime)*time.Hour, config.Config.Log.RemainRotationCount, moduleName)
 	ctxLogger.AddHook(hook)
-	return &Logger{
+	return &LogrusLogger{
 		ctxLogger,
 		os.Getpid(),
 		"ctxLogger",
 	}
 }
 
-func loggerInit(moduleName string) *Logger {
+func loggerInit(moduleName string) *LogrusLogger {
 	var logger = logrus.New()
 	//All logs will be printed
 	logger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
@@ -93,7 +93,7 @@ func loggerInit(moduleName string) *Logger {
 	//Log file segmentation hook
 	hook := NewLfsHook(time.Duration(config.Config.Log.RotationTime)*time.Hour, config.Config.Log.RemainRotationCount, moduleName)
 	logger.AddHook(hook)
-	return &Logger{
+	return &LogrusLogger{
 		logger,
 		os.Getpid(),
 		"",
