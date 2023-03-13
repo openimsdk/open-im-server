@@ -68,5 +68,5 @@ func NewGormDB() (*gorm.DB, error) {
 type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
-	log.ZDebug(context.Background(), format, args)
+	log.ZDebug(context.Background(), format)
 }
