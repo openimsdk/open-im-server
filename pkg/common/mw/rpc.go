@@ -45,6 +45,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	resp, err = handler(ctx, req)
 	if err != nil {
 		tracelog.SetCtxInfo(ctx, funcName, err)
+		log.Info("", "rpc come here,in rpc call,err:", err.Error())
 		return nil, rpcErrorToCode(err).Err()
 	}
 	tracelog.SetCtxInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
