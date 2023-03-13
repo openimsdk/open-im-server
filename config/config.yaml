@@ -24,7 +24,6 @@ mysql:
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
-  #dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbAddress: [ 127.0.0.1:37017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
   dbTimeout: 60
@@ -161,6 +160,8 @@ log:
   remainRotationCount: 2 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
   remainLogLevel: 6
+  stderr: false
+
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
