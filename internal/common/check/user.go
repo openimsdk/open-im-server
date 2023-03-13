@@ -2,6 +2,7 @@ package check
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/sdkws"
@@ -35,6 +36,7 @@ func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complet
 		UserIDs: userIDs,
 	})
 	if err != nil {
+		log.Error("", "call GetDesignateUsers err", err.Error())
 		return nil, err
 	}
 	if complete {
