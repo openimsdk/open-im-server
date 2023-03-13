@@ -82,7 +82,7 @@ func loggerInit(moduleName string) *LogrusLogger {
 		HideKeys:        false,
 		FieldsOrder:     []string{"PID", "FilePath", "OperationID"},
 	})
-
+	logger.SetFormatter(&logrus.JSONFormatter{})
 	//File name and line number display hook
 	logger.AddHook(newFileHook())
 
@@ -158,47 +158,6 @@ func Warning(token, OperationID, format string, args ...interface{}) {
 
 }
 
-//Deprecated
-func InfoByArgs(format string, args ...interface{}) {
-	logger.WithFields(logrus.Fields{}).Infof(format, args)
-}
-
-//Deprecated
-func ErrorByArgs(format string, args ...interface{}) {
-	logger.WithFields(logrus.Fields{}).Errorf(format, args...)
-}
-
-//Print log information in k, v format,
-//kv is best to appear in pairs. tipInfo is the log prompt information for printing,
-//and kv is the key and value for printing.
-//Deprecated
-func InfoByKv(tipInfo, OperationID string, args ...interface{}) {
-	fields := make(logrus.Fields)
-	argsHandle(OperationID, fields, args)
-	logger.WithFields(fields).Info(tipInfo)
-}
-
-//Deprecated
-func ErrorByKv(tipInfo, OperationID string, args ...interface{}) {
-	fields := make(logrus.Fields)
-	argsHandle(OperationID, fields, args)
-	logger.WithFields(fields).Error(tipInfo)
-}
-
-//Deprecated
-func DebugByKv(tipInfo, OperationID string, args ...interface{}) {
-	fields := make(logrus.Fields)
-	argsHandle(OperationID, fields, args)
-	logger.WithFields(fields).Debug(tipInfo)
-}
-
-//Deprecated
-func WarnByKv(tipInfo, OperationID string, args ...interface{}) {
-	fields := make(logrus.Fields)
-	argsHandle(OperationID, fields, args)
-	logger.WithFields(fields).Warn(tipInfo)
-}
-
 //internal method
 func argsHandle(OperationID string, fields logrus.Fields, args []interface{}) {
 	for i := 0; i < len(args); i += 2 {
@@ -240,7 +199,6 @@ func ShowLog(ctx context.Context) {
 	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.FuncInfos)
 	OperationID := tracelog.GetOperationID(ctx)
 	for _, v := range *t.Funcs {
-
 		if v.Err != nil {
 			ctxLogger.WithFields(logrus.Fields{
 				"OperationID": OperationID,
