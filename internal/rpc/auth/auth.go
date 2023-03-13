@@ -39,6 +39,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.Info("", "rpc come UserToken")
+	operationID, ok := ctx.Value(constant.OperationID).(string)
+	if !ok {
+		log.Error("2222", "ctx missing operationID", operationID)
+	}
 	resp := pbAuth.UserTokenResp{}
 	if _, err := s.userCheck.GetUserInfo(ctx, req.UserID); err != nil {
 		log.Info("", "UserToken err:", err.Error())

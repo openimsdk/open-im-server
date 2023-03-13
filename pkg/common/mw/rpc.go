@@ -41,6 +41,8 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		opUserID = opts[0]
 	}
 	ctx = tracelog.SetFuncInfos(ctx, funcName, operationID)
+	ctx = context.WithValue(ctx, OperationID, operationID)
+	ctx = context.WithValue(ctx, OpUserID, opUserID)
 	tracelog.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err != nil {
@@ -58,6 +60,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	}
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
+		log.Error("1111", "ctx missing operationID")
 		return errs.ErrArgs.Wrap("ctx missing operationID")
 	}
 	md := metadata.Pairs(constant.OperationID, operationID)
