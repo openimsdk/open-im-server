@@ -40,7 +40,7 @@ func GetOperationID(ctx context.Context) string {
 			return f.OperationID
 		}
 	}
-	return utils.GetFuncName(2)
+	return utils.GetFuncName(3)
 }
 
 func GetOpUserID(ctx context.Context) string {

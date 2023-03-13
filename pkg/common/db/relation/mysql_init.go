@@ -73,4 +73,6 @@ func (w Writer) Printf(format string, args ...interface{}) {
 		s = append(s, fmt.Sprintf("%v", v))
 	}
 	log.ZDebug(context.Background(), format, "sql", strings.Join(s, ""))
+	fmt.Println(format)
+	fmt.Println(strings.Join(s, ""))
 }
