@@ -16,8 +16,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logger *LogrusLogger
-var ctxLogger *LogrusLogger
+var logger Logger = *LogrusLogger
+var ctxLogger Logger = *LogrusLogger
 
 type LogrusLogger struct {
 	*logrus.Logger
@@ -32,7 +32,6 @@ func init() {
 
 func NewPrivateLog(moduleName string) {
 	logger = loggerInit(moduleName)
-	ctxLogger = ctxLoggerInit(moduleName)
 }
 
 func ctxLoggerInit(moduleName string) *LogrusLogger {

@@ -10,8 +10,4 @@ type Logger interface {
 	WithValues(keysAndValues ...interface{}) LogrusLogger
 	WithName(name string) LogrusLogger
 	WithCallDepth(depth int) LogrusLogger
-
-	WithItemSampler() LogrusLogger
-	// WithoutSampler returns the original logger without sampling
-	WithoutSampler() LogrusLogger
 }
