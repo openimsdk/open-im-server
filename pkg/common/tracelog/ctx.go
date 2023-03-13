@@ -105,7 +105,11 @@ func SetCtxWarn(ctx context.Context, funcName string, err error, args ...interfa
 }
 
 func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level, err error, args ...interface{}) {
-	t := ctx.Value(TraceLogKey).(*FuncInfos)
+	var t *FuncInfos
+	var ok bool
+	if t, ok = ctx.Value(TraceLogKey).(*FuncInfos); !ok {
+		return
+	}
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	argsHandle(args, funcInfo.Args)
