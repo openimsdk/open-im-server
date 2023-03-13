@@ -1,9 +1,12 @@
 package log
 
 import (
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/tracelog"
 	"context"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -12,6 +15,7 @@ import (
 
 var (
 	pkgLogger Logger = &ZapLogger{}
+	sp               = string(filepath.Separator)
 )
 
 // InitFromConfig initializes a Zap-based logger
@@ -24,39 +28,25 @@ func InitFromConfig(name string) error {
 	return nil
 }
 
-func Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func ZDebug(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	pkgLogger.Debug(ctx, msg, keysAndValues...)
 }
 
-func Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func ZInfo(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	pkgLogger.Info(ctx, msg, keysAndValues...)
 }
 
-func Warn(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
+func ZWarn(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	pkgLogger.Warn(ctx, msg, err, keysAndValues...)
 }
 
-func Error(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
+func ZError(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	pkgLogger.Error(ctx, msg, err, keysAndValues...)
-}
-
-type Logger interface {
-	Debug(ctx context.Context, msg string, keysAndValues ...interface{})
-	Info(ctx context.Context, msg string, keysAndValues ...interface{})
-	Warn(ctx context.Context, msg string, err error, keysAndValues ...interface{})
-	Error(ctx context.Context, msg string, err error, keysAndValues ...interface{})
-	WithValues(keysAndValues ...interface{}) Logger
-	WithName(name string) Logger
-	WithCallDepth(depth int) Logger
-	WithItemSampler() Logger
-	// WithoutSampler returns the original logger without sampling
-	WithoutSampler() Logger
 }
 
 type ZapLogger struct {
 	zap *zap.SugaredLogger
 	// store original logger without sampling to avoid multiple samplers
-	unsampled      *zap.SugaredLogger
 	SampleDuration time.Duration
 	SampleInitial  int
 	SampleInterval int
@@ -64,27 +54,48 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:      true,
-		Encoding:         "json",
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
-		OutputPaths:      []string{"stdout"},
-		ErrorOutputPaths: []string{"stdout"},
-		Sampling: &zap.SamplingConfig{
-			Initial:    0,
-			Thereafter: 0,
-			Hook:       nil,
-		},
+		Level:         zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Development:   true,
+		Encoding:      "json",
+		EncoderConfig: zap.NewProductionEncoderConfig(),
 	}
-	l, err := zapConfig.Build()
+	zl := &ZapLogger{}
+	if config.Config.Log.Stderr {
+		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
+	}
+	l, err := zapConfig.Build(zl.cores())
 	if err != nil {
 		return nil, err
 	}
-	zl := &ZapLogger{
-		unsampled: l.Sugar(),
-	}
-
+	zl.zap = l.Sugar()
 	return zl, nil
+}
+
+func timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format("2006-01-02 15:04:05"))
+}
+
+func (l *ZapLogger) cores() zap.Option {
+	fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	writer := l.getWriter()
+	var cores []zapcore.Core
+	if config.Config.Log.StorageLocation != "" {
+		cores = []zapcore.Core{
+			zapcore.NewCore(fileEncoder, writer, zapcore.DebugLevel),
+		}
+	}
+	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+		return zapcore.NewTee(cores...)
+	})
+}
+
+func (l *ZapLogger) getWriter() zapcore.WriteSyncer {
+	logf, _ := rotatelogs.New(config.Config.Log.StorageLocation+sp+"openIM"+"-"+".%Y_%m%d_%H",
+		rotatelogs.WithLinkName(config.Config.Log.StorageLocation+sp+"openIM"+"-"),
+		rotatelogs.WithMaxAge(2*24*time.Hour),
+		rotatelogs.WithRotationTime(time.Minute),
+	)
+	return zapcore.AddSync(logf)
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
@@ -120,57 +131,17 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 	dup := *l
 	dup.zap = l.zap.With(keysAndValues...)
-	if l.unsampled == l.zap {
-		dup.unsampled = dup.zap
-	} else {
-		dup.unsampled = l.unsampled.With(keysAndValues...)
-	}
 	return &dup
 }
 
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
 	dup.zap = l.zap.Named(name)
-	if l.unsampled == l.zap {
-		dup.unsampled = dup.zap
-	} else {
-		dup.unsampled = l.unsampled.Named(name)
-	}
 	return &dup
 }
 
 func (l *ZapLogger) WithCallDepth(depth int) Logger {
 	dup := *l
 	dup.zap = l.zap.WithOptions(zap.AddCallerSkip(depth))
-	if l.unsampled == l.zap {
-		dup.unsampled = dup.zap
-	} else {
-		dup.unsampled = l.unsampled.WithOptions(zap.AddCallerSkip(depth))
-	}
-	return &dup
-}
-
-func (l *ZapLogger) WithItemSampler() Logger {
-	if l.SampleDuration == 0 {
-		return l
-	}
-	dup := *l
-	dup.zap = l.unsampled.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-		return zapcore.NewSamplerWithOptions(
-			core,
-			l.SampleDuration,
-			l.SampleInitial,
-			l.SampleInterval,
-		)
-	}))
-	return &dup
-}
-
-func (l *ZapLogger) WithoutSampler() Logger {
-	if l.SampleDuration == 0 {
-		return l
-	}
-	dup := *l
-	dup.zap = l.unsampled
 	return &dup
 }

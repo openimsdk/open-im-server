@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	authCmd := cmd.NewRpcCmd()
+	authCmd := cmd.NewRpcCmd("auth")
 	authCmd.AddPortFlag()
 	authCmd.AddPrometheusPortFlag()
 	if err := authCmd.Exec(); err != nil {

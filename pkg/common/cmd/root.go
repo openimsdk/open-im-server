@@ -3,34 +3,34 @@ package cmd
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/log"
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
 type RootCmd struct {
 	Command        cobra.Command
+	Name           string
 	port           int
 	prometheusPort int
 }
 
-func NewRootCmd() (rootCmd *RootCmd) {
-	rootCmd = &RootCmd{}
+func NewRootCmd(name string) (rootCmd *RootCmd) {
+	rootCmd = &RootCmd{Name: name}
 	c := cobra.Command{
 		Use:   "start",
-		Short: "Start the server",
-		Long:  `Start the server`,
+		Short: fmt.Sprintf(`Start %s server`, name),
+		Long:  fmt.Sprintf(`Start %s server`, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return rootCmd.getConfFromCmdAndInit(cmd)
+			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
+				return err
+			}
+			return log.InitFromConfig(name)
 		},
 	}
 	rootCmd.Command = c
 	rootCmd.addConfFlag()
 	return rootCmd
-}
-
-func (r *RootCmd) SetDesc(use, short, long string) {
-	r.Command.Use = use
-	r.Command.Short = short
-	r.Command.Long = long
 }
 
 func (r *RootCmd) addConfFlag() {

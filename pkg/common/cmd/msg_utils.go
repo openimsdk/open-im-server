@@ -18,7 +18,7 @@ type MsgUtilsCmd struct {
 }
 
 func NewMsgUtilsCmd() MsgUtilsCmd {
-	return MsgUtilsCmd{RootCmd: NewRootCmd()}
+	return MsgUtilsCmd{RootCmd: NewRootCmd("msgUtils")}
 }
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {

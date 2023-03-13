@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	pushCmd := cmd.NewRpcCmd()
+	pushCmd := cmd.NewRpcCmd("push")
 	pushCmd.AddPortFlag()
 	pushCmd.AddPrometheusPortFlag()
 	if err := pushCmd.Exec(); err != nil {

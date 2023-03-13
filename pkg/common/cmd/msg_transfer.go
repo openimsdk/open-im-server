@@ -10,7 +10,7 @@ type MsgTransferCmd struct {
 }
 
 func NewMsgTransferCmd() MsgTransferCmd {
-	return MsgTransferCmd{NewRootCmd()}
+	return MsgTransferCmd{NewRootCmd("msgTransfer")}
 }
 
 func (m *MsgTransferCmd) addRunE() {

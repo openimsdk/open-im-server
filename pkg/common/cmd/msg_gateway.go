@@ -12,7 +12,7 @@ type MsgGatewayCmd struct {
 }
 
 func NewMsgGatewayCmd() MsgGatewayCmd {
-	return MsgGatewayCmd{NewRootCmd()}
+	return MsgGatewayCmd{NewRootCmd("msgGateway")}
 }
 
 func (m *MsgGatewayCmd) AddWsPortFlag() {

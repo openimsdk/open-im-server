@@ -7,7 +7,7 @@ type ApiCmd struct {
 }
 
 func NewApiCmd() *ApiCmd {
-	return &ApiCmd{NewRootCmd()}
+	return &ApiCmd{NewRootCmd("api")}
 }
 
 func (a *ApiCmd) AddApi(f func(port int) error) {

@@ -55,6 +55,7 @@ require (
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	github.com/spf13/cobra v1.6.1
 	github.com/ugorji/go/codec v1.2.8 // indirect
 	go.uber.org/zap v1.24.0

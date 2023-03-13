@@ -11,8 +11,8 @@ type RpcCmd struct {
 	*RootCmd
 }
 
-func NewRpcCmd() *RpcCmd {
-	authCmd := &RpcCmd{NewRootCmd()}
+func NewRpcCmd(name string) *RpcCmd {
+	authCmd := &RpcCmd{NewRootCmd(name)}
 	return authCmd
 }
 
