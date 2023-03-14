@@ -7,6 +7,7 @@ import (
 	"OpenIM/pkg/errs"
 	"context"
 	"fmt"
+	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"strings"
 	"time"
@@ -65,7 +66,22 @@ func newMysqlGormDB() (*gorm.DB, error) {
 // gorm mysql
 func NewGormDB() (*gorm.DB, error) {
 	specialerror.AddReplace(gorm.ErrRecordNotFound, errs.ErrRecordNotFound)
+	specialerror.AddErrHandler(replaceDuplicateKey)
 	return newMysqlGormDB()
+}
+
+func replaceDuplicateKey(err error) errs.CodeError {
+	if IsMysqlDuplicateKey(err) {
+		return errs.ErrDuplicateKey
+	}
+	return nil
+}
+
+func IsMysqlDuplicateKey(err error) bool {
+	if mysqlErr, ok := err.(*mysqlDriver.MySQLError); ok {
+		return mysqlErr.Number == 1062
+	}
+	return false
 }
 
 type Writer struct{}
