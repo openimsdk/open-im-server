@@ -3,6 +3,8 @@ package relation
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/mw/specialerror"
+	"OpenIM/pkg/errs"
 	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
@@ -62,6 +64,7 @@ func newMysqlGormDB() (*gorm.DB, error) {
 
 // gorm mysql
 func NewGormDB() (*gorm.DB, error) {
+	specialerror.AddReplace(gorm.ErrRecordNotFound, errs.ErrRecordNotFound)
 	return newMysqlGormDB()
 }
 

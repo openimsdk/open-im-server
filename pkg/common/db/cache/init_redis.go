@@ -2,6 +2,8 @@ package cache
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/mw/specialerror"
+	"OpenIM/pkg/errs"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -9,6 +11,7 @@ import (
 )
 
 func NewRedis() (redis.UniversalClient, error) {
+	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
 	if config.Config.Redis.EnableCluster {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{

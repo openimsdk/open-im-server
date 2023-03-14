@@ -3,6 +3,8 @@ package unrelation
 import (
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/table/unrelation"
+	"OpenIM/pkg/common/mw/specialerror"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
@@ -18,6 +20,7 @@ type Mongo struct {
 }
 
 func NewMongo() (*Mongo, error) {
+	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.DBUri != "" {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
