@@ -18,6 +18,10 @@ func (t *thirdServer) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) 
 	return t.s3dataBase.ConfirmPut(ctx, req)
 }
 
+func (t *thirdServer) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error) {
+	return t.s3dataBase.GetUrl(ctx, req)
+}
+
 func (t *thirdServer) CleanObject(ctx context.Context, now time.Time) {
 	t.s3dataBase.CleanExpirationObject(ctx, now)
 }

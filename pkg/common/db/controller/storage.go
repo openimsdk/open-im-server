@@ -2,9 +2,11 @@ package controller
 
 import "C"
 import (
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/obj"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/tracelog"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/third"
 	"OpenIM/pkg/utils"
 	"context"
@@ -22,6 +24,7 @@ type S3Database interface {
 	ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*third.ApplyPutResp, error)
 	GetPut(ctx context.Context, req *third.GetPutReq) (*third.GetPutResp, error)
 	ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (*third.ConfirmPutResp, error)
+	GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error)
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
@@ -82,10 +85,12 @@ func (c *s3Database) CheckHash(hash string) error {
 }
 
 func (c *s3Database) urlName(name string) string {
-	if name[0] != '/' {
-		name = "/" + name
-	}
-	return "http://127.0.0.1:8080" + name
+	//if name[0] != '/' {
+	//	name = "/" + name
+	//}
+	//config.Config.Credential.ObjectURL + name
+	//return "http://127.0.0.1:8080" + name
+	return config.Config.Credential.ObjectURL + name
 }
 
 func (c *s3Database) UUID() string {
@@ -353,6 +358,25 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	}
 	return &third.ConfirmPutResp{
 		Url: c.urlName(o.Name),
+	}, nil
+}
+
+func (c *s3Database) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error) {
+	info, err := c.info.Take(ctx, req.Name)
+	if err != nil {
+		return nil, err
+	}
+	if info.ExpirationTime != nil && info.ExpirationTime.Before(time.Now()) {
+		return nil, errs.ErrRecordNotFound.Wrap("object expired")
+	}
+	hash, err := c.hash.Take(ctx, info.Hash, c.obj.Name())
+	if err != nil {
+		return nil, err
+	}
+	return &third.GetUrlResp{
+		Url:  c.obj.GetURL(hash.Bucket, hash.Name),
+		Size: hash.Size,
+		Hash: hash.Hash,
 	}, nil
 }
 

@@ -15,7 +15,7 @@ message ApplyPutResp {
   string url = 1;
   string putID = 2;
   int64 fragmentSize = 3;
-//  int64 expirationTime = 4;
+  //  int64 expirationTime = 4;
   repeated string PutURLs = 5;
 }
 
@@ -25,6 +25,16 @@ message ConfirmPutReq {
 
 message ConfirmPutResp {
   string url = 1;
+}
+
+message GetUrlReq {
+  string name = 1;
+}
+
+message GetUrlResp {
+  string url = 1;
+  int64 size = 2;
+  string hash = 3;
 }
 
 message GetPutReq {
@@ -85,6 +95,7 @@ service third {
   rpc ApplyPut(ApplyPutReq) returns(ApplyPutResp);
   rpc GetPut(GetPutReq) returns(GetPutResp);
   rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
+  rpc GetUrl(GetUrlReq) returns(GetUrlResp);
 
   rpc GetSignalInvitationInfo(GetSignalInvitationInfoReq) returns(GetSignalInvitationInfoResp);
   rpc GetSignalInvitationInfoStartApp(GetSignalInvitationInfoStartAppReq) returns(GetSignalInvitationInfoStartAppResp);

@@ -1,12 +1,15 @@
 package obj
 
 import (
+	"OpenIM/pkg/common/config"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -15,12 +18,29 @@ func NewMinioClient() {
 }
 
 func NewMinioInterface() (Interface, error) {
-	//client, err := minio.New("127.0.0.1:9000", &minio.Options{
-	//	Creds:  credentials.NewStaticV4("minioadmin", "minioadmin", ""),
-	//	Secure: false,
-	//})
+	if true {
+		return &minioImpl{}, nil // todo
+	}
+	conf := config.Config.Object.Minio
+	u, err := url.Parse(conf.Endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("minio endpoint parse %w", err)
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return nil, fmt.Errorf("invalid minio endpoint scheme %s", u.Scheme)
+	}
+	client, err := minio.New(u.Host, &minio.Options{
+		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("minio new client %w", err)
+	}
 	// todo 初始化连接和桶
-	return &minioImpl{}, nil
+	return &minioImpl{
+		client: client,
+		//tempBucket: conf.Bucket,
+	}, nil
 }
 
 type minioImpl struct {

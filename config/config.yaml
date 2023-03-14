@@ -92,33 +92,38 @@ sdk:
 
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
+
+
+object:
+  enable: minio
+  apiURL: http://127.0.0.1:10002/api/third/object?name=
   tencent:
-    appID:  
-    region:  
-    bucket:  
-    secretID:  
-    secretKey:  
+    appID:
+    region:
+    bucket:
+    secretID:
+    secretKey:
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
     location: us-east-1
     endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
-    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
+    #      endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: root
     secretAccessKey: openIM123
     storageTime: 50 #文件在minio中保存的时间
     isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
-    regionID:  
-    accessKeyID: 
-    accessKeySecret: 
-    stsEndpoint:  
-    ossEndpoint:  
-    bucket:  
-    finalHost:  
-    stsDurationSeconds:  
-    OssRoleArn:  
+    regionID:
+    accessKeyID:
+    accessKeySecret:
+    stsEndpoint:
+    ossEndpoint:
+    bucket:
+    finalHost:
+    stsDurationSeconds:
+    OssRoleArn:
   aws:
     accessKeyID:                              #AssumeRole用户关联的accessKeyID
     accessKeySecret:                          #AssumeRole用户关联的accessKeySecrect
@@ -128,7 +133,6 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     roleArn:                                  #RoleArn
     externalId:                               #角色扩展Id
     roleSessionName:                          #角色SESSION名称
-
 
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]

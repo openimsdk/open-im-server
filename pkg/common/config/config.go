@@ -68,6 +68,11 @@ type config struct {
 		DataDir []string `yaml:"dataDir"`
 	}
 	Credential struct {
+	}
+
+	Object struct {
+		Enable  string `yaml:"enable"`
+		ApiURL  string `yaml:"apiURL"`
 		Tencent struct {
 			AppID     string `yaml:"appID"`
 			Region    string `yaml:"region"`
