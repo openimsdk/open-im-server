@@ -60,8 +60,7 @@ type ConversationRedis struct {
 }
 
 func (c *ConversationRedis) GetUserConversationIDs(ctx context.Context, userID string, fn FuncDB) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, nil
 }
 
 func (c *ConversationRedis) GetConversation(ctx context.Context, ownerUserID, conversationID string, fn FuncDB) (*relationTb.ConversationModel, error) {
