@@ -41,6 +41,7 @@ var (
 	ErrTokenNotExist            = NewCodeError(TokenNotExistError, "TokenNotExistError") //在redis中不存在
 	ErrTokenDifferentPlatformID = NewCodeError(TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError")
 	ErrTokenDifferentUserID     = NewCodeError(TokenDifferentUserIDError, "TokenDifferentUserIDError")
+	ErrDuplicateKey             = NewCodeError(DuplicateKeyError, "DuplicateKeyError")
 
 	ErrMessageHasReadDisable = NewCodeError(MessageHasReadDisable, "MessageHasReadDisable")
 

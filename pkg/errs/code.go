@@ -40,6 +40,8 @@ const (
 	CallbackError = 80000
 )
 
+const DuplicateKeyError = 12345
+
 // 账号错误码
 const (
 	UserIDNotFoundError  = 91001 //UserID不存在 或未注册
