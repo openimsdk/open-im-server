@@ -35,7 +35,6 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, string(debug.Stack()))
 		}
 	}()
-	log.Info("", "rpc come here,in rpc call")
 	funcName := info.FullMethod
 	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -89,6 +88,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
+	log.ZInfo(ctx, "rpc input", "req", req)
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
 		log.ZError(ctx, "ctx missing operationID", errors.New("ctx missing operationID"))
@@ -99,13 +99,12 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
-	log.Info(operationID, "OpUserID", "RPC", method, "Req", rpcString(req))
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
-		log.Info(operationID, "Resp", rpcString(reply))
+		log.ZInfo(ctx, "rpc return", "resp", rpcString(reply))
 		return nil
 	}
-	log.Info(operationID, "rpc error:", err.Error())
+	log.ZError(ctx, "rpc result error:", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())

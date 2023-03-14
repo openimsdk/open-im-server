@@ -86,7 +86,7 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
-	fileEncoder := zapcore.NewConsoleEncoder(c)
+	fileEncoder := zapcore.NewJSONEncoder(c)
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
 	if err != nil {
