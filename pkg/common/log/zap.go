@@ -143,7 +143,14 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 }
 
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx), constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+	operationID := tracelog.GetOperationID(ctx)
+	opUserID := tracelog.GetOpUserID(ctx)
+	if opUserID != "" {
+		keysAndValues = append([]interface{}{constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+	}
+	if operationID != "" {
+		keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	}
 	return keysAndValues
 }
 
