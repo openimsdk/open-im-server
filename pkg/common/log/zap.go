@@ -47,10 +47,6 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 
 type ZapLogger struct {
 	zap *zap.SugaredLogger
-	// store original logger without sampling to avoid multiple samplers
-	SampleDuration time.Duration
-	SampleInitial  int
-	SampleInterval int
 }
 
 func NewZapLogger() (*ZapLogger, error) {
@@ -61,10 +57,10 @@ func NewZapLogger() (*ZapLogger, error) {
 		DisableStacktrace: true,
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 	}
-	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
+	zl := &ZapLogger{}
 	opts, err := zl.cores()
 	if err != nil {
 		return nil, err
