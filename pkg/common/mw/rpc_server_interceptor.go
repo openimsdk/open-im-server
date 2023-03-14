@@ -72,7 +72,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			grpcStatus = details
 		}
 	}
-	log.ZWarn(ctx, "rpc resp", unwrap, "funcName", funcName)
+	log.ZWarn(ctx, "rpc resp", err, "funcName", funcName)
 	return nil, grpcStatus.Err()
 }
 
