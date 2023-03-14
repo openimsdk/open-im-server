@@ -3,7 +3,6 @@ package controller
 import "C"
 import (
 	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/obj"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/log"
