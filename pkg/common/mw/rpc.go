@@ -20,6 +20,13 @@ import (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 
+func rpcString(v interface{}) string {
+	if s, ok := v.(interface{ String() string }); ok {
+		return s.String()
+	}
+	return fmt.Sprintf("%+v", v)
+}
+
 func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	var operationID string
 	defer func() {
@@ -42,39 +49,39 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get(OpUserID); len(opts) == 1 {
 		opUserID = opts[0]
 	}
-	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Req", rpcString(req))
+	log.Info(operationID, "opUserID", opUserID, "RPC", funcName, "Req", rpcString(req))
 	ctx = tracelog.SetFuncInfos(ctx, funcName, operationID)
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
 	resp, err = handler(ctx, req)
-	if err != nil {
-		log.Info(operationID, "rpc error:", err.Error())
-		unwrap := errs.Unwrap(err)
-		codeErr := specialerror.ErrCode(unwrap)
-		if codeErr == nil {
-			log.Error(operationID, "rpc InternalServer:", err.Error())
-			codeErr = errs.ErrInternalServer
-		}
-		if unwrap != err {
-			log.Info(operationID, "rpc error stack:", fmt.Sprintf("%+v", err))
-		}
-		code := codeErr.Code()
-		if code <= 0 || code > math.MaxUint32 {
-			log.Error(operationID, "rpc UnknownCode:", code, "err:", err.Error())
-			code = errs.UnknownCode
-		}
-		grpcStatus := status.New(codes.Code(code), codeErr.Msg())
-		if errs.Unwrap(err) != err {
-			stack := fmt.Sprintf("%+v", err)
-			log.Info(operationID, "rpc stack:", stack)
-			if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
-				grpcStatus = details
-			}
-		}
-		return nil, grpcStatus.Err()
+	if err == nil {
+		log.Info(operationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
+		return resp, nil
 	}
-	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
-	return resp, nil
+	log.Info(operationID, "rpc error:", err.Error())
+	unwrap := errs.Unwrap(err)
+	codeErr := specialerror.ErrCode(unwrap)
+	if codeErr == nil {
+		log.Error(operationID, "rpc InternalServer:", err.Error())
+		codeErr = errs.ErrInternalServer
+	}
+	var stack string
+	if unwrap != err {
+		stack = fmt.Sprintf("%+v", err)
+		log.Info(operationID, "rpc error stack:", stack)
+	}
+	code := codeErr.Code()
+	if code <= 0 || code > math.MaxUint32 {
+		log.Error(operationID, "rpc UnknownCode:", code, "err:", err.Error())
+		code = errs.ServerInternalError
+	}
+	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
+	if errs.Unwrap(err) != err {
+		if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
+			grpcStatus = details
+		}
+	}
+	return nil, grpcStatus.Err()
 }
 
 func rpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
@@ -83,7 +90,6 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	}
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
-		log.Error("1111", "ctx missing operationID")
 		return errs.ErrArgs.Wrap("ctx missing operationID")
 	}
 	md := metadata.Pairs(constant.OperationID, operationID)
@@ -91,27 +97,25 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
-	log.Info("", "rpc come here before")
+	log.Info(operationID, "OpUserID", "RPC", method, "Req", rpcString(req))
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
+		log.Info(operationID, "Resp", rpcString(reply))
 		return nil
 	}
-	log.Info("", "rpc come here err", err.Error())
-
+	log.Info(operationID, "rpc error:", err.Error())
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())
 	}
 	sta := rpcErr.GRPCStatus()
 	if sta.Code() == 0 {
-		return errs.NewCodeError(errs.DefaultOtherError, err.Error()).Wrap()
+		return errs.NewCodeError(errs.ServerInternalError, err.Error()).Wrap()
 	}
-	details := sta.Details()
-	if len(details) == 0 {
-		return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
-	}
-	if v, ok := details[0].(*wrapperspb.StringValue); ok {
-		return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap(v.String())
+	if details := sta.Details(); len(details) > 0 {
+		if v, ok := details[0].(*wrapperspb.StringValue); ok {
+			return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap(v.String())
+		}
 	}
 	return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
 }
