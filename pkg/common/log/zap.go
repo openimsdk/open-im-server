@@ -70,6 +70,7 @@ func NewZapLogger() (*ZapLogger, error) {
 		return nil, err
 	}
 	zl.zap = l.Sugar()
+	zl.zap.WithOptions(zap.AddStacktrace(zap.DPanicLevel))
 	return zl, nil
 }
 
@@ -100,6 +101,14 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	}), nil
+}
+
+func NewErrStackCore(c zapcore.Core) zapcore.Core {
+	return &errStackCore{c}
+}
+
+type errStackCore struct {
+	zapcore.Core
 }
 
 func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
