@@ -85,7 +85,7 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
-	c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+	//c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 	fileEncoder := zapcore.NewJSONEncoder(c)
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
@@ -99,7 +99,7 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 		}
 	}
 	if config.Config.Log.Stderr {
-		cores = append(cores, zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()), zapcore.Lock(os.Stdout), zapcore.DebugLevel))
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zapcore.DebugLevel))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
@@ -115,10 +115,6 @@ func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
 		return nil, err
 	}
 	return zapcore.AddSync(logf), nil
-}
-
-func (l *ZapLogger) GetConsoleWriter() {
-	return
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
@@ -154,11 +150,15 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
 	operationID := tracelog.GetOperationID(ctx)
 	opUserID := tracelog.GetOpUserID(ctx)
+	connID := tracelog.GetConnID(ctx)
 	if opUserID != "" {
 		keysAndValues = append([]interface{}{constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
 	}
 	if operationID != "" {
 		keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	}
+	if connID != "" {
+		keysAndValues = append([]interface{}{constant.ConnID, tracelog.GetConnID(ctx)}, keysAndValues...)
 	}
 	return keysAndValues
 }

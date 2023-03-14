@@ -54,6 +54,16 @@ func GetOpUserID(ctx context.Context) string {
 	return ""
 }
 
+func GetConnID(ctx context.Context) string {
+	if ctx.Value(constant.ConnID) != "" {
+		s, ok := ctx.Value(constant.ConnID).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
+
 func Unwrap(err error) error {
 	for err != nil {
 		unwrap, ok := err.(interface {

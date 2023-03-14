@@ -5,7 +5,6 @@ import (
 	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/mw"
 	"context"
 	"errors"
 	"fmt"
@@ -34,7 +33,6 @@ func run(port int) error {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
-	zk.AddOption(mw.GrpcClient())
 	router := api.NewGinRouter(zk)
 	var address string
 	if config.Config.Api.ListenIP != "" {

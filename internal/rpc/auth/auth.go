@@ -6,7 +6,6 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/discoveryregistry"
@@ -38,19 +37,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 }
 
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
-	log.Info("", "rpc come UserToken")
-	operationID, ok := ctx.Value(constant.OperationID).(string)
-	if !ok {
-		log.Error("2222", "ctx missing operationID", operationID)
-	}
 	resp := pbAuth.UserTokenResp{}
 	if _, err := s.userCheck.GetUserInfo(ctx, req.UserID); err != nil {
-		log.Info("", "UserToken err:", err.Error())
 		return nil, err
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))
 	if err != nil {
-		log.Info("", "Create Token  err:", err.Error())
 		return nil, err
 	}
 	resp.Token = token
@@ -114,7 +106,6 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
-		log.NewInfo(operationID, "KickUserOffline ", client, kickReq.String())
 		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")
 	}
