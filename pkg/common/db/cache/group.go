@@ -3,7 +3,6 @@ package cache
 import (
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	unrelation2 "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"

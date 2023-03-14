@@ -5,7 +5,6 @@ import (
 	"OpenIM/pkg/common/db/obj"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/proto/third"
 	"OpenIM/pkg/utils"
 	"context"

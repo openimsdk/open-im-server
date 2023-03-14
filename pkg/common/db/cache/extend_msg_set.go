@@ -2,7 +2,6 @@ package cache
 
 import (
 	"OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
