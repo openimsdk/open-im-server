@@ -22,84 +22,64 @@ const (
 
 // 通用错误码
 const (
-	NoError             = 0     //无错误
-	ArgsError           = 90001 //输入参数错误
-	DatabaseError       = 90002 //redis/mysql等db错误
-	ServerInternalError = 90003 //服务器内部错误
-	NetworkError        = 90004 //网络错误
-	NoPermissionError   = 90005 //权限不足
-	GRPCConnIsNil       = 90006 //grpc连接空
-
-	DefaultOtherError = 90006 //其他错误
-	DataError         = 90007 //数据错误
-
-	IdentityError = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
-
-	ConfigError = 90009
-
-	CallbackError = 80000
-)
-
-const DuplicateKeyError = 12345
-
-// 账号错误码
-const (
-	UserIDNotFoundError  = 91001 //UserID不存在 或未注册
-	GroupIDNotFoundError = 91002 //GroupID不存在
-	RecordNotFoundError  = 91002 //记录不存在
-	GroupIDIDExisted     = 91002 //GroupID已存在
-	UserIDExisted        = 91002 //UserID已存在
-)
-
-// 关系链错误码
-const (
+	NoError                  = 0     //无错误
+	DatabaseError            = 90002 //redis/mysql等db错误
+	NetworkError             = 90004 //网络错误
+	IdentityError            = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
+	GRPCConnIsNil            = 90006 //grpc连接空
+	DefaultOtherError        = 90006 //其他错误
+	DataError                = 90007 //数据错误
+	ConfigError              = 90009
+	CallbackError            = 80000
 	RelationshipAlreadyError = 92001 //已经是好友关系（或者黑名单）
 	NotRelationshipYetError  = 92002 //不是好友关系（或者黑名单）
-	CanNotAddYourselfError   = 92003 //不能添加自己为好友
-	BlockedByPeer            = 92004 //被对方拉黑
-	NotPeersFriend           = 92005 //不是对方的好友
-)
 
-// 群组错误码
-const (
-	OnlyOneOwnerError        = 93001 //只能有一个群主
-	InGroupAlreadyError      = 93003 //已在群组中
-	NotInGroupYetError       = 93004 //不在群组中
-	DismissedAlreadyError    = 93004 //群组已经解散
-	OwnerNotAllowedQuitError = 93004 //群主不能退群
-	GroupTypeNotSupport      = 93005
-	GroupNoOwner             = 93006
+	//通用错误码
+	ServerInternalError = 500  //服务器内部错误
+	ArgsError           = 1001 //输入参数错误
+	NoPermissionError   = 1002 //权限不足
+	DuplicateKeyError   = 1003
+	RecordNotFoundError = 1004 //记录不存在
 
-	MutedInGroup = 93007 //群成员被禁言
-	MutedGroup   = 93008 //群被禁言
-)
+	// 账号错误码
+	UserIDNotFoundError    = 1101 //UserID不存在 或未注册
+	UserIDExisted          = 1102 //UserID已存在
+	RegisteredAlreadyError = 1103 //用户已经注册过了
 
-// 用户错误码
-const (
-	RegisteredAlreadyError = 94001 //用户已经注册过了
-)
+	// 群组错误码
+	GroupIDNotFoundError     = 1201 //GroupID不存在
+	GroupIDIDExisted         = 1202 //GroupID已存在
+	OnlyOneOwnerError        = 1203 //只能有一个群主
+	InGroupAlreadyError      = 1204 //已在群组中
+	NotInGroupYetError       = 1205 //不在群组中
+	DismissedAlreadyError    = 1206 //群组已经解散
+	OwnerNotAllowedQuitError = 1207 //群主不能退群
+	GroupTypeNotSupport      = 1208
+	GroupNoOwner             = 1209
 
-// token错误码
-const (
-	TokenExpiredError             = 95001
-	TokenInvalidError             = 95002
-	TokenMalformedError           = 95003
-	TokenNotValidYetError         = 95004
-	TokenUnknownError             = 95005
-	TokenKickedError              = 95006
-	TokenDifferentPlatformIDError = 95007
-	TokenDifferentUserIDError     = 95008
-	TokenNotExistError            = 95009
-)
+	// 关系链错误码
+	CanNotAddYourselfError = 1301 //不能添加自己为好友
+	BlockedByPeer          = 1302 //被对方拉黑
+	NotPeersFriend         = 1303 //不是对方的好友
 
-// 消息错误码
-const (
-	MessageHasReadDisable = 96001
-)
+	// 消息错误码
+	MessageHasReadDisable = 1401
+	MutedInGroup          = 1402 //群成员被禁言
+	MutedGroup            = 1403 //群被禁言
 
-// 长连接网关错误码
-const (
-	ConnOverMaxNumLimit = 970001
-	ConnArgsErr         = 970002
-	ConnUpdateErr       = 970003
+	// token错误码
+	TokenExpiredError             = 1501
+	TokenInvalidError             = 1502
+	TokenMalformedError           = 1503
+	TokenNotValidYetError         = 1504
+	TokenUnknownError             = 1505
+	TokenKickedError              = 1506
+	TokenDifferentPlatformIDError = 1507
+	TokenDifferentUserIDError     = 1508
+	TokenNotExistError            = 1509
+
+	// 长连接网关错误码
+	ConnOverMaxNumLimit = 1601
+	ConnArgsErr         = 1602
+	ConnUpdateErr       = 1603
 )

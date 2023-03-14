@@ -4,11 +4,9 @@ import (
 	"OpenIM/internal/common/check"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
 	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	"OpenIM/pkg/proto/msg"
 	"OpenIM/pkg/proto/sdkws"
-	utils2 "OpenIM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 )
@@ -44,10 +42,6 @@ type NotificationMsg struct {
 
 func (c *Check) Notification(ctx context.Context, notificationMsg *NotificationMsg) error {
 	var err error
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils2.GetFuncName(1), err, "notificationMsg", notificationMsg)
-	}()
-
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo

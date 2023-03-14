@@ -3,7 +3,6 @@ package cache
 import (
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
@@ -60,8 +59,7 @@ type ConversationRedis struct {
 }
 
 func (c *ConversationRedis) GetUserConversationIDs(ctx context.Context, userID string, fn FuncDB) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, nil
 }
 
 func (c *ConversationRedis) GetConversation(ctx context.Context, ownerUserID, conversationID string, fn FuncDB) (*relationTb.ConversationModel, error) {
@@ -200,9 +198,6 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 //}
 
 func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)
-	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationIDsKey(ownerUserID)), "DelUserConversationIDs err")
 }
 
@@ -213,9 +208,6 @@ func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUse
 //}
 
 func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, conversationID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationID", conversationID)
-	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationKey(ownerUserID, conversationID)), "DelConversation err")
 }
 

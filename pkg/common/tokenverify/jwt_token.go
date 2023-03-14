@@ -61,9 +61,6 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := tracelog.GetOpUserID(ctx)
-	defer func() {
-		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "ownerUserID", ownerUserID)
-	}()
 	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
 		return nil
 	}

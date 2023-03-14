@@ -3,7 +3,6 @@ package cache
 import (
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	unrelation2 "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
@@ -111,9 +110,6 @@ func (g *GroupCacheRedis) BatchDelJoinedSuperGroupIDs(ctx context.Context, userI
 }
 
 func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getJoinedSuperGroupsIDKey(userID))
 }
 
@@ -163,9 +159,6 @@ func (g *GroupCacheRedis) GetGroupMemberHash1(ctx context.Context, groupIDs []st
 }
 
 func (g *GroupCacheRedis) DelGroupMembersHash(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMembersHashKey(groupID))
 }
 
@@ -177,9 +170,6 @@ func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string)
 }
 
 func (g *GroupCacheRedis) DelGroupMemberIDs(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMemberIDsKey(groupID))
 }
 
@@ -208,9 +198,6 @@ func (g *GroupCacheRedis) DelGroupMemberIDs(ctx context.Context, groupID string)
 //}
 
 func (g *GroupCacheRedis) DelJoinedGroupID(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getJoinedGroupsKey(userID))
 }
 
@@ -283,9 +270,6 @@ func (g *GroupCacheRedis) GetGroupMemberInfo(ctx context.Context, groupID, userI
 //}
 
 func (g *GroupCacheRedis) DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMemberInfoKey(groupID, userID))
 }
 
@@ -309,16 +293,10 @@ func (g *GroupCacheRedis) DelGroupMemberInfo(ctx context.Context, groupID, userI
 //}
 
 func (g *GroupCacheRedis) DelGroupMemberNum(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMemberNumKey(groupID))
 }
 
 func (g *GroupCacheRedis) DelGroupInfo(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
 	return g.rcClient.TagAsDeleted(g.getGroupInfoKey(groupID))
 }
 

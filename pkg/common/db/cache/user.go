@@ -3,7 +3,6 @@ package cache
 import (
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -58,9 +57,6 @@ func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userIn
 		}
 		return string(bytes), nil
 	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "userInfo", *userInfo)
-	}()
 	userInfoStr, err := u.rcClient.Fetch(u.getUserInfoKey(userID), u.expireTime, getUserInfo)
 	if err != nil {
 		return nil, err
@@ -83,9 +79,6 @@ func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]
 }
 
 func (u *UserCacheRedis) DelUserInfo(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return u.rcClient.TagAsDeleted(u.getUserInfoKey(userID))
 }
 
@@ -106,9 +99,6 @@ func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID str
 		}
 		return strconv.Itoa(int(userInfo.GlobalRecvMsgOpt)), nil
 	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "opt", opt)
-	}()
 	optStr, err := u.rcClient.Fetch(u.getUserInfoKey(userID), u.expireTime, getUserGlobalRecvMsgOpt)
 	if err != nil {
 		return 0, err
@@ -117,8 +107,5 @@ func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID str
 }
 
 func (u *UserCacheRedis) DelUserGlobalRecvMsgOpt(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return u.rcClient.TagAsDeleted(u.getUserGlobalRecvMsgOptKey(userID))
 }
