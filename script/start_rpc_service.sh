@@ -79,7 +79,7 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
     fi
     echo $cmd
-    echo "=====================start ${service_filename[$i]}======================">>../logs/openIM.log 2>&1 &
+    echo "=====================start ${service_filename[$i]}======================">>../logs/openIM.log
     nohup $cmd >>../logs/openIM.log 2>&1 &
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
