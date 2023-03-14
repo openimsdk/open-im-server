@@ -55,11 +55,12 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:         zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:   true,
-		Encoding:      "json",
-		EncoderConfig: zap.NewProductionEncoderConfig(),
-		InitialFields: map[string]interface{}{"PID": os.Getegid()},
+		Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		Development:       true,
+		Encoding:          "json",
+		EncoderConfig:     zap.NewProductionEncoderConfig(),
+		DisableStacktrace: true,
+		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 	}
 	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
