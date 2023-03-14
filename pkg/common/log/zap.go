@@ -59,7 +59,7 @@ func NewZapLogger() (*ZapLogger, error) {
 		Development:   true,
 		Encoding:      "json",
 		EncoderConfig: zap.NewProductionEncoderConfig(),
-		InitialFields: map[string]interface{}{"PID": os.Getegid()},
+		//InitialFields: map[string]interface{}{"PID": os.Getegid()},
 	}
 	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
@@ -83,8 +83,8 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 
 func (l *ZapLogger) cores() (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
-	c.EncodeTime = zapcore.ISO8601TimeEncoder
-	//c.EncodeDuration = zapcore.SecondsDurationEncoder
+	c.EncodeTime = l.timeEncoder
+	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	//c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	fileEncoder := zapcore.NewJSONEncoder(c)
 	fileEncoder.AddInt("PID", os.Getpid())
