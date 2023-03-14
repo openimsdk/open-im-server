@@ -272,6 +272,7 @@ const (
 
 const OperationID = "operationID"
 const OpUserID = "opUserID"
+const ConnID = "connID"
 
 const (
 	UnreliableNotification    = 1

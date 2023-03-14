@@ -4,9 +4,9 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/mw/specialerror"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/errs"
 	"context"
+	"errors"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,11 +24,11 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	var operationID string
 	defer func() {
 		if r := recover(); r != nil {
-			log.NewError(operationID, info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, "stack:", string(debug.Stack()))
+			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, string(debug.Stack()))
 		}
 	}()
-	log.Info("", "rpc come here,in rpc call")
 	funcName := info.FullMethod
+	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
@@ -42,25 +42,23 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get(OpUserID); len(opts) == 1 {
 		opUserID = opts[0]
 	}
-	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Req", rpcString(req))
-	ctx = tracelog.SetFuncInfos(ctx, funcName, operationID)
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
 	resp, err = handler(ctx, req)
 	if err != nil {
-		log.Info(operationID, "rpc error:", err.Error())
+		log.ZError(ctx, "handler rpc error", err, "req", req)
 		unwrap := errs.Unwrap(err)
 		codeErr := specialerror.ErrCode(unwrap)
 		if codeErr == nil {
-			log.Error(operationID, "rpc InternalServer:", err.Error())
+			log.ZError(ctx, "rpc InternalServer:", err, "req", req)
 			codeErr = errs.ErrInternalServer
 		}
 		if unwrap != err {
-			log.Info(operationID, "rpc error stack:", fmt.Sprintf("%+v", err))
+			log.ZError(ctx, "rpc error stack:", err)
 		}
 		code := codeErr.Code()
 		if code <= 0 || code > math.MaxUint32 {
-			log.Error(operationID, "rpc UnknownCode:", code, "err:", err.Error())
+			log.ZError(ctx, "rpc UnknownError", err, "rpc UnknownCode:", code)
 			code = errs.UnknownCode
 		}
 		grpcStatus := status.New(codes.Code(code), codeErr.Msg())
@@ -73,7 +71,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 		return nil, grpcStatus.Err()
 	}
-	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
+	log.ZInfo(ctx, "rpc resp", "funcName", funcName, "Resp", rpcString(resp))
 	return resp, nil
 }
 
@@ -83,7 +81,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	}
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
-		log.Error("1111", "ctx missing operationID")
+		log.ZError(ctx, "ctx missing operationID", errors.New("ctx missing operationID"))
 		return errs.ErrArgs.Wrap("ctx missing operationID")
 	}
 	md := metadata.Pairs(constant.OperationID, operationID)
@@ -91,13 +89,10 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
-	log.Info("", "rpc come here before")
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
 		return nil
 	}
-	log.Info("", "rpc come here err", err.Error())
-
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())
