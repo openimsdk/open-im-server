@@ -3,6 +3,7 @@ package mw
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/common/mw/specialerror"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/errs"
 	"context"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+	"math"
 	"runtime/debug"
 )
 
@@ -40,18 +42,39 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get(OpUserID); len(opts) == 1 {
 		opUserID = opts[0]
 	}
+	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Req", rpcString(req))
 	ctx = tracelog.SetFuncInfos(ctx, funcName, operationID)
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
-	tracelog.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err != nil {
-		tracelog.SetCtxInfo(ctx, funcName, err)
-		log.Info("", "rpc come here,in rpc call,err:", err.Error())
-		return nil, rpcErrorToCode(err).Err()
+		log.Info(operationID, "rpc error:", err.Error())
+		unwrap := errs.Unwrap(err)
+		codeErr := specialerror.ErrCode(unwrap)
+		if codeErr == nil {
+			log.Error(operationID, "rpc InternalServer:", err.Error())
+			codeErr = errs.ErrInternalServer
+		}
+		if unwrap != err {
+			log.Info(operationID, "rpc error stack:", fmt.Sprintf("%+v", err))
+		}
+		code := codeErr.Code()
+		if code <= 0 || code > math.MaxUint32 {
+			log.Error(operationID, "rpc UnknownCode:", code, "err:", err.Error())
+			code = errs.UnknownCode
+		}
+		grpcStatus := status.New(codes.Code(code), codeErr.Msg())
+		if errs.Unwrap(err) != err {
+			stack := fmt.Sprintf("%+v", err)
+			log.Info(operationID, "rpc stack:", stack)
+			if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
+				grpcStatus = details
+			}
+		}
+		return nil, grpcStatus.Err()
 	}
-	tracelog.SetCtxInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
-	return
+	log.Info(OperationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
+	return resp, nil
 }
 
 func rpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
@@ -77,7 +100,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
-		return errs.NewCodeError(errs.DefaultOtherError, err.Error()).Wrap()
+		return errs.ErrInternalServer.Wrap(err.Error())
 	}
 	sta := rpcErr.GRPCStatus()
 	if sta.Code() == 0 {
