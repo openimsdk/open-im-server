@@ -56,7 +56,6 @@ type ZapLogger struct {
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:       true,
 		Encoding:          "json",
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		DisableStacktrace: true,
@@ -76,10 +75,6 @@ func NewZapLogger() (*ZapLogger, error) {
 	}
 	zl.zap = l.Sugar()
 	return zl, nil
-}
-
-func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
 
 func (l *ZapLogger) cores() (zap.Option, error) {
