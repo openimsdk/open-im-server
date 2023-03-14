@@ -1,6 +1,7 @@
 package tracelog
 
 import (
+	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/sirupsen/logrus"
@@ -40,12 +41,17 @@ func GetOperationID(ctx context.Context) string {
 			return f.OperationID
 		}
 	}
-	return utils.GetFuncName(3)
+	return ""
 }
 
 func GetOpUserID(ctx context.Context) string {
-	s, _ := ctx.Value("opUserID").(string)
-	return s
+	if ctx.Value(constant.OpUserID) != "" {
+		s, ok := ctx.Value(constant.OpUserID).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
 }
 
 func Unwrap(err error) error {

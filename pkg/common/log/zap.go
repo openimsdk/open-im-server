@@ -65,9 +65,6 @@ func NewZapLogger() (*ZapLogger, error) {
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
-	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	zapConfig.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
-	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	opts, err := zl.cores()
 	if err != nil {
 		return nil, err
@@ -85,7 +82,12 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 }
 
 func (l *ZapLogger) cores() (zap.Option, error) {
-	fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	c := zap.NewProductionEncoderConfig()
+	c.EncodeTime = zapcore.ISO8601TimeEncoder
+	c.EncodeDuration = zapcore.SecondsDurationEncoder
+	//c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+	fileEncoder := zapcore.NewJSONEncoder(c)
+	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
 	if err != nil {
 		return nil, err
@@ -143,7 +145,14 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 }
 
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx), constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+	operationID := tracelog.GetOperationID(ctx)
+	opUserID := tracelog.GetOpUserID(ctx)
+	if opUserID != "" {
+		keysAndValues = append([]interface{}{constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+	}
+	if operationID != "" {
+		keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	}
 	return keysAndValues
 }
 
