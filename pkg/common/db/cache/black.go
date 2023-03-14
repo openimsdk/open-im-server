@@ -2,8 +2,6 @@ package cache
 
 import (
 	"OpenIM/pkg/common/db/relation"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
@@ -47,8 +45,5 @@ func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (black
 }
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return b.rcClient.TagAsDeleted(b.getBlackIDsKey(userID))
 }

@@ -3,7 +3,6 @@ package cache
 import (
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
@@ -199,9 +198,6 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 //}
 
 func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)
-	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationIDsKey(ownerUserID)), "DelUserConversationIDs err")
 }
 
@@ -212,9 +208,6 @@ func (c *ConversationRedis) DelUserConversationIDs(ctx context.Context, ownerUse
 //}
 
 func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, conversationID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationID", conversationID)
-	}()
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationKey(ownerUserID, conversationID)), "DelConversation err")
 }
 

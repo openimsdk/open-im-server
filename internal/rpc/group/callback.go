@@ -19,9 +19,6 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
 		return nil
 	}
-	defer func() {
-		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", req)
-	}()
 	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
 		OperationID:     tracelog.GetOperationID(ctx),
@@ -67,9 +64,6 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, groupMember *relation.Gr
 	if !config.Config.Callback.CallbackBeforeMemberJoinGroup.Enable {
 		return nil
 	}
-	defer func() {
-		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "groupMember", *groupMember, "groupEx", groupEx)
-	}()
 	callbackReq := &callbackstruct.CallbackBeforeMemberJoinGroupReq{
 		CallbackCommand: constant.CallbackBeforeMemberJoinGroupCommand,
 		OperationID:     tracelog.GetOperationID(ctx),
@@ -97,9 +91,6 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
 		return nil
 	}
-	defer func() {
-		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", *req)
-	}()
 	callbackReq := callbackstruct.CallbackBeforeSetGroupMemberInfoReq{
 		CallbackCommand: constant.CallbackBeforeSetGroupMemberInfoCommand,
 		OperationID:     tracelog.GetOperationID(ctx),

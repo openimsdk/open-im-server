@@ -43,7 +43,7 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 }
 
 func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage, rootFuncName string) context.Context {
-	ctx := tracelog.NewCtx(rootFuncName, "")
+	ctx := tracelog.NewCtx(rootFuncName)
 	var operationID string
 	for _, v := range cMsg.Headers {
 		if string(v.Key) == constant.OperationID {

@@ -117,7 +117,7 @@ func (m *minioImpl) GetObjectInfo(ctx context.Context, args *BucketObject) (*Obj
 	}, nil
 }
 
-func (m *minioImpl) CopyObjet(ctx context.Context, src *BucketObject, dst *BucketObject) error {
+func (m *minioImpl) CopyObject(ctx context.Context, src *BucketObject, dst *BucketObject) error {
 	_, err := m.client.CopyObject(ctx, minio.CopyDestOptions{
 		Bucket: dst.Bucket,
 		Object: dst.Name,
@@ -128,15 +128,15 @@ func (m *minioImpl) CopyObjet(ctx context.Context, src *BucketObject, dst *Bucke
 	return err
 }
 
-func (m *minioImpl) DeleteObjet(ctx context.Context, info *BucketObject) error {
+func (m *minioImpl) DeleteObject(ctx context.Context, info *BucketObject) error {
 	return m.client.RemoveObject(ctx, info.Bucket, info.Name, minio.RemoveObjectOptions{})
 }
 
-func (m *minioImpl) MoveObjetInfo(ctx context.Context, src *BucketObject, dst *BucketObject) error {
-	if err := m.CopyObjet(ctx, src, dst); err != nil {
+func (m *minioImpl) MoveObjectInfo(ctx context.Context, src *BucketObject, dst *BucketObject) error {
+	if err := m.CopyObject(ctx, src, dst); err != nil {
 		return err
 	}
-	return m.DeleteObjet(ctx, src)
+	return m.DeleteObject(ctx, src)
 }
 
 func (m *minioImpl) ComposeObject(ctx context.Context, src []BucketObject, dst *BucketObject) error {
@@ -155,7 +155,7 @@ func (m *minioImpl) ComposeObject(ctx context.Context, src []BucketObject, dst *
 	if err != nil {
 		return err
 	}
-	return m.MoveObjetInfo(ctx, &BucketObject{
+	return m.MoveObjectInfo(ctx, &BucketObject{
 		Bucket: destOptions.Bucket,
 		Name:   destOptions.Object,
 	}, &BucketObject{
