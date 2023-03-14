@@ -6,7 +6,6 @@ import (
 	"OpenIM/pkg/common/mw/specialerror"
 	"OpenIM/pkg/errs"
 	"context"
-	"errors"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -20,6 +19,13 @@ import (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 
+func rpcString(v interface{}) string {
+	if s, ok := v.(interface{ String() string }); ok {
+		return s.String()
+	}
+	return fmt.Sprintf("%+v", v)
+}
+
 func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	var operationID string
 	defer func() {
@@ -27,6 +33,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, string(debug.Stack()))
 		}
 	}()
+	log.Info("", "rpc come here,in rpc call")
 	funcName := info.FullMethod
 	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -45,34 +52,35 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
 	resp, err = handler(ctx, req)
-	if err != nil {
-		log.ZError(ctx, "handler rpc error", err, "req", req)
-		unwrap := errs.Unwrap(err)
-		codeErr := specialerror.ErrCode(unwrap)
-		if codeErr == nil {
-			log.ZError(ctx, "rpc InternalServer:", err, "req", req)
-			codeErr = errs.ErrInternalServer
+	if err == nil {
+		log.Info(operationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
+		return resp, nil
+	}
+	log.ZError(ctx, "rpc InternalServer:", err, "req", req)
+	unwrap := errs.Unwrap(err)
+	codeErr := specialerror.ErrCode(unwrap)
+	if codeErr == nil {
+		log.ZError(ctx, "rpc InternalServer:", err, "req", req)
+		codeErr = errs.ErrInternalServer
+	}
+	var stack string
+	if unwrap != err {
+		stack = fmt.Sprintf("%+v", err)
+		log.ZError(ctx, "rpc error stack:", err)
+	}
+	code := codeErr.Code()
+	if code <= 0 || code > math.MaxUint32 {
+		log.ZError(ctx, "rpc UnknownError", err, "rpc UnknownCode:", code)
+		code = errs.ServerInternalError
+	}
+	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
+	if errs.Unwrap(err) != err {
+		if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
+			grpcStatus = details
 		}
-		if unwrap != err {
-			log.ZError(ctx, "rpc error stack:", err)
-		}
-		code := codeErr.Code()
-		if code <= 0 || code > math.MaxUint32 {
-			log.ZError(ctx, "rpc UnknownError", err, "rpc UnknownCode:", code)
-			code = errs.UnknownCode
-		}
-		grpcStatus := status.New(codes.Code(code), codeErr.Msg())
-		if errs.Unwrap(err) != err {
-			stack := fmt.Sprintf("%+v", err)
-			log.Info(operationID, "rpc stack:", stack)
-			if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
-				grpcStatus = details
-			}
-		}
-		return nil, grpcStatus.Err()
 	}
 	log.ZInfo(ctx, "rpc resp", "funcName", funcName, "Resp", rpcString(resp))
-	return resp, nil
+	return nil, grpcStatus.Err()
 }
 
 func rpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
@@ -89,24 +97,25 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
+	log.Info(operationID, "OpUserID", "RPC", method, "Req", rpcString(req))
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
+		log.Info(operationID, "Resp", rpcString(reply))
 		return nil
 	}
+	log.Info(operationID, "rpc error:", err.Error())
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())
 	}
 	sta := rpcErr.GRPCStatus()
 	if sta.Code() == 0 {
-		return errs.NewCodeError(errs.DefaultOtherError, err.Error()).Wrap()
+		return errs.NewCodeError(errs.ServerInternalError, err.Error()).Wrap()
 	}
-	details := sta.Details()
-	if len(details) == 0 {
-		return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
-	}
-	if v, ok := details[0].(*wrapperspb.StringValue); ok {
-		return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap(v.String())
+	if details := sta.Details(); len(details) > 0 {
+		if v, ok := details[0].(*wrapperspb.StringValue); ok {
+			return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap(v.String())
+		}
 	}
 	return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
 }
