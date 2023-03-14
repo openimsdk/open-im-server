@@ -98,6 +98,9 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 			zapcore.NewCore(fileEncoder, writer, zapcore.DebugLevel),
 		}
 	}
+	if config.Config.Log.Stderr {
+		cores = append(cores, zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()), zapcore.Lock(os.Stdout), zapcore.DebugLevel))
+	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	}), nil
@@ -112,6 +115,10 @@ func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
 		return nil, err
 	}
 	return zapcore.AddSync(logf), nil
+}
+
+func (l *ZapLogger) GetConsoleWriter() {
+	return
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
