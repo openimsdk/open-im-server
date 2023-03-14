@@ -27,6 +27,7 @@ for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
       if [ $prome_port != "" ]; then
         cmd="$cmd --prometheus_port $prome_port"
       fi
+      echo "==========================start msg_transfer server===========================">>../logs/openIM.log 2>&1 &
       $cmd >>../logs/openIM.log 2>&1 &
 done
 

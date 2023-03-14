@@ -22,6 +22,7 @@ echo "==========================================================">>../logs/openI
 
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
+  echo "=====================exec ${i}======================">>../logs/openIM.log 2>&1 &
   ./$i
     if [ $? -ne 0 ]; then
         exit -1

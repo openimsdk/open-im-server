@@ -24,6 +24,7 @@ fi
 #Waiting port recycling
 sleep 1
 cd ${sdk_server_binary_root}
+  echo "==========================start js sdk server===========================">>../logs/openIM.log 2>&1 &
   nohup ./${sdk_server_name}  -openIM_ws_address ${ws_address}  -sdk_ws_port ${sdkws_ports[0]} -openIM_api_address ${api_address} -openIM_log_level ${logLevel} >>../logs/openIM.log 2>&1 &
 
 #Check launched service process
