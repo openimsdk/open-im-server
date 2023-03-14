@@ -59,7 +59,7 @@ func NewZapLogger() (*ZapLogger, error) {
 		Development:   true,
 		Encoding:      "json",
 		EncoderConfig: zap.NewProductionEncoderConfig(),
-		//InitialFields: map[string]interface{}{"PID": os.Getegid()},
+		InitialFields: map[string]interface{}{"PID": os.Getegid()},
 	}
 	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
