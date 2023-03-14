@@ -65,9 +65,6 @@ func NewZapLogger() (*ZapLogger, error) {
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
-	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	zapConfig.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
-	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	opts, err := zl.cores()
 	if err != nil {
 		return nil, err
@@ -85,7 +82,12 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 }
 
 func (l *ZapLogger) cores() (zap.Option, error) {
-	fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	c := zap.NewProductionEncoderConfig()
+	c.EncodeTime = zapcore.ISO8601TimeEncoder
+	c.EncodeDuration = zapcore.SecondsDurationEncoder
+	c.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	fileEncoder := zapcore.NewJSONEncoder(c)
+	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
 	if err != nil {
 		return nil, err
