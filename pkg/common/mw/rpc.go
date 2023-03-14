@@ -36,7 +36,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 	}()
 	funcName := info.FullMethod
-	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
+	log.ZInfo(ctx, "rpc input", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
@@ -54,7 +54,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
 	resp, err = handler(ctx, req)
 	if err == nil {
-		log.Info(operationID, "opUserID", opUserID, "RPC", funcName, "Resp", rpcString(resp))
+		log.ZInfo(ctx, "server handle rpc success", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
 	}
 	log.ZError(ctx, "rpc InternalServer:", err, "req", req)
