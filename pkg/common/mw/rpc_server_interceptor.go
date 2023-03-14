@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 	"math"
 	"runtime/debug"
 )
@@ -33,7 +32,6 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 	}()
 	funcName := info.FullMethod
-	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
@@ -49,15 +47,16 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
+	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err == nil {
-		log.ZInfo(ctx, "server handle rpc success", "funcName", funcName, "resp", rpcString(resp))
+		log.ZInfo(ctx, "rpc resp", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
 	}
 	unwrap := errs.Unwrap(err)
 	codeErr := specialerror.ErrCode(unwrap)
 	if codeErr == nil {
-		log.ZError(ctx, "rpc InternalServer:", err, "req", req)
+		log.ZError(ctx, "rpc InternalServer error", err, "req", req)
 		codeErr = errs.ErrInternalServer
 	}
 	code := codeErr.Code()
@@ -66,13 +65,13 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		code = errs.ServerInternalError
 	}
 	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
-	if unwrap != err {
-		stack := fmt.Sprintf("%+v", err)
-		if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
-			grpcStatus = details
-		}
-	}
-	log.ZWarn(ctx, "rpc resp", err, "funcName", funcName)
+	//if unwrap != err {
+	//	stack := fmt.Sprintf("%+v", err)
+	//	if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
+	//		grpcStatus = details
+	//	}
+	//}
+	log.ZWarn(ctx, "rpc resp", unwrap, "funcName", funcName)
 	return nil, grpcStatus.Err()
 }
 
