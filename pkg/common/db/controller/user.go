@@ -54,7 +54,6 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-
 	users, err = u.userDB.Find(ctx, userIDs)
 	if err != nil {
 		return

@@ -22,7 +22,7 @@ const (
 
 // 通用错误码
 const (
-	//NoError             = 0     //无错误
+	NoError                  = 0     //无错误
 	DatabaseError            = 90002 //redis/mysql等db错误
 	NetworkError             = 90004 //网络错误
 	IdentityError            = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
