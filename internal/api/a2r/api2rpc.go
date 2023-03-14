@@ -2,7 +2,6 @@ package a2r
 
 import (
 	"OpenIM/internal/apiresp"
-	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/errs"
 	"context"
 	"github.com/gin-gonic/gin"
