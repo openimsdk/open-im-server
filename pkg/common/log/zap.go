@@ -6,6 +6,7 @@ import (
 	"OpenIM/pkg/common/tracelog"
 	"context"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -58,12 +59,13 @@ func NewZapLogger() (*ZapLogger, error) {
 		Development:   true,
 		Encoding:      "json",
 		EncoderConfig: zap.NewProductionEncoderConfig(),
+		InitialFields: map[string]interface{}{"PID": os.Getegid()},
 	}
 	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
-	zapConfig.EncoderConfig.EncodeTime = zl.timeEncoder
+	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	zapConfig.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
 	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	opts, err := zl.cores()
@@ -115,12 +117,12 @@ func (l *ZapLogger) ToZap() *zap.SugaredLogger {
 }
 
 func (l *ZapLogger) Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Debugw(msg, keysAndValues...)
 }
 
 func (l *ZapLogger) Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Infow(msg, keysAndValues...)
 }
 
@@ -128,7 +130,7 @@ func (l *ZapLogger) Warn(ctx context.Context, msg string, err error, keysAndValu
 	if err != nil {
 		keysAndValues = append(keysAndValues, "error", err)
 	}
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Warnw(msg, keysAndValues...)
 }
 
@@ -138,6 +140,11 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 	}
 	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
 	l.zap.Errorw(msg, keysAndValues...)
+}
+
+func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
+	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx), constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+	return keysAndValues
 }
 
 func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {

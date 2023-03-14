@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -67,6 +68,11 @@ func NewGormDB() (*gorm.DB, error) {
 type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
-	sql := fmt.Sprintf(format, args...)
-	log.ZDebug(context.Background(), "", "sql", sql)
+	s := fmt.Sprintf(format, args...)
+	l := strings.Split(s, "\n")
+	if len(l) == 2 {
+		log.ZDebug(context.Background(), "sql exec detail", "gorm", l[0], "sql", l[1])
+	} else {
+		log.ZDebug(context.Background(), "sql exec detail", "sql", s)
+	}
 }
