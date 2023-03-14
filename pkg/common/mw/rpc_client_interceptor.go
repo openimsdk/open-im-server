@@ -33,7 +33,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	}
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
 	if err == nil {
-		log.ZInfo(ctx, "rpc client resp", "funcName", method, rpcString(resp))
+		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
 	}
 	log.ZError(ctx, "rpc resp error", err)
