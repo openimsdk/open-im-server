@@ -14,6 +14,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"math"
 	"runtime/debug"
+
+	"errors"
 )
 
 const OperationID = "operationID"
