@@ -77,7 +77,6 @@ func NewZapLogger() (*ZapLogger, error) {
 		return nil, err
 	}
 	zl.zap = l.Sugar()
-	zl.WithValues("PID", os.Getegid())
 	return zl, nil
 }
 
