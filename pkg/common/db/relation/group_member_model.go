@@ -3,8 +3,6 @@ package relation
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/utils"
 	"context"
 	"gorm.io/gorm"
