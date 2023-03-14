@@ -36,7 +36,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		log.ZInfo(ctx, "rpc resp", "funcName", method, rpcString(resp))
 		return nil
 	}
-	log.ZError(ctx, "rpc resp error:", err)
+	log.ZError(ctx, "rpc resp error", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())
