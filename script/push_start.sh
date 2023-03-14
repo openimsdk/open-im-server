@@ -25,7 +25,7 @@ sleep 1
 cd ${push_binary_root}
 
 for ((i = 0; i < ${#rpc_ports[@]}; i++)); do
-  echo "==========================start push server===========================">>../logs/openIM.log 2>&1 &
+  echo "==========================start push server===========================">>../logs/openIM.log
   nohup ./${push_name} --port ${rpc_ports[$i]} --prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
 done
 

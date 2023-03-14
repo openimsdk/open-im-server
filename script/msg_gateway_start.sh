@@ -31,7 +31,7 @@ fi
 sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
-  echo "==========================start msg_gateway server===========================">>../logs/openIM.log 2>&1 &
+  echo "==========================start msg_gateway server===========================">>../logs/openIM.log
   nohup ./${msg_gateway_name} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
 done
 
