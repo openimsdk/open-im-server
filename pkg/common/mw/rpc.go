@@ -36,7 +36,6 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 	}()
 	funcName := info.FullMethod
-	log.ZInfo(ctx, "rpc input", "funcName", funcName, "req", rpcString(req))
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
@@ -52,6 +51,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
+	log.ZInfo(ctx, "server rpc input", "funcName", funcName, "req", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err == nil {
 		log.ZInfo(ctx, "server handle rpc success", "funcName", funcName, "resp", rpcString(resp))
@@ -80,7 +80,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			grpcStatus = details
 		}
 	}
-	log.ZInfo(ctx, "rpc resp", "funcName", funcName, "Resp", rpcString(resp))
+	log.ZInfo(ctx, "server rpc output", "funcName", funcName, "Resp", rpcString(resp))
 	return nil, grpcStatus.Err()
 }
 
@@ -88,7 +88,6 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
-	log.ZInfo(ctx, "rpc input", "req", req)
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
 		log.ZError(ctx, "ctx missing operationID", errors.New("ctx missing operationID"))
@@ -101,10 +100,10 @@ func rpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	}
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
 	if err == nil {
-		log.ZInfo(ctx, "rpc return", "resp", rpcString(reply))
+		log.ZInfo(ctx, "client rpc output", "resp", rpcString(reply))
 		return nil
 	}
-	log.ZError(ctx, "rpc result error:", err)
+	log.ZError(ctx, "client rpc output error:", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())

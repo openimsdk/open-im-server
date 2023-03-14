@@ -47,8 +47,5 @@ func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (black
 }
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
-	}()
 	return b.rcClient.TagAsDeleted(b.getBlackIDsKey(userID))
 }

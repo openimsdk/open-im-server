@@ -63,9 +63,6 @@ func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string)
 }
 
 func (f *FriendCacheRedis) DelFriendIDs(ctx context.Context, ownerUserID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)
-	}()
 	return f.rcClient.TagAsDeleted(f.getFriendIDsKey(ownerUserID))
 }
 
@@ -87,9 +84,6 @@ func (f *FriendCacheRedis) GetTwoWayFriendIDs(ctx context.Context, ownerUserID s
 }
 
 func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID)
-	}()
 	return f.rcClient.TagAsDeleted(f.getTwoWayFriendsIDsKey(ownerUserID))
 }
 
@@ -115,8 +109,5 @@ func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUse
 }
 
 func (f *FriendCacheRedis) DelFriend(ctx context.Context, ownerUserID, friendUserID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID)
-	}()
 	return f.rcClient.TagAsDeleted(f.getFriendKey(ownerUserID, friendUserID))
 }

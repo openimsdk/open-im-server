@@ -53,12 +53,7 @@ func (c *Check) ExtendMessageDeleteNotification(ctx context.Context, sendID stri
 
 	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
-func (c *Check) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) {
-	var err error
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sendID", sendID, "sourceID", sourceID, "sessionType", sessionType)
-	}()
-
+func (c *Check) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) error {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
@@ -87,5 +82,6 @@ func (c *Check) messageReactionSender(ctx context.Context, sendID string, source
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	_, err = c.Msg.SendMsg(ctx, &pbData)
+	_, err := c.Msg.SendMsg(ctx, &pbData)
+	return err
 }

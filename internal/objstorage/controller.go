@@ -60,7 +60,7 @@ func (c *Controller) ApplyPut(ctx context.Context, args *FragmentPutArgs) (*PutA
 			Name:   args.Name,
 		}
 		// 直接拷贝一份
-		err := c.i.CopyObjetInfo(ctx, &src, dst)
+		err := c.i.CopyObjectInfo(ctx, &src, dst)
 		if err == nil {
 			info, err := c.i.GetObjectInfo(ctx, dst)
 			if err != nil {
@@ -195,7 +195,7 @@ func (c *Controller) ConfirmPut(ctx context.Context, putID string) (*ObjectInfo,
 			log.Println("del key:", err)
 		}
 		for _, b := range src {
-			err = c.i.DeleteObjetInfo(ctx, &b)
+			err = c.i.DeleteObjectInfo(ctx, &b)
 			if err != nil {
 				log.Println("del obj:", err)
 			}

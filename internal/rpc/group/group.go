@@ -9,6 +9,7 @@ import (
 	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/unrelation"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/discoveryregistry"
@@ -727,7 +728,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 			UserIDList: userIDs,
 		}
 		if err := s.ConversationChecker.ModifyConversationField(ctx, &args); err != nil {
-			tracelog.SetCtxWarn(ctx, "ModifyConversationField", err, args)
+			log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
 		}
 	}
 	return resp, nil

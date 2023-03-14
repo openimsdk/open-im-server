@@ -53,8 +53,5 @@ func (e *ExtendMsgSetCache) GetExtendMsg(ctx context.Context, sourceID string, s
 }
 
 func (e *ExtendMsgSetCache) DelExtendMsg(ctx context.Context, clientMsgID string) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "clientMsgID", clientMsgID)
-	}()
 	return utils.Wrap(e.rcClient.TagAsDeleted(e.getKey(clientMsgID)), "DelExtendMsg err")
 }

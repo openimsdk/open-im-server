@@ -26,9 +26,6 @@ func (o *ObjectInfoGorm) NewTx(tx any) relation.ObjectInfoModelInterface {
 }
 
 func (o *ObjectInfoGorm) SetObject(ctx context.Context, obj *relation.ObjectInfoModel) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "objectInfo", obj)
-	}()
 	return utils.Wrap1(o.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("name = ?", obj.Name).Delete(&relation.ObjectInfoModel{}).Error; err != nil {
 			return err
@@ -38,16 +35,10 @@ func (o *ObjectInfoGorm) SetObject(ctx context.Context, obj *relation.ObjectInfo
 }
 
 func (o *ObjectInfoGorm) Take(ctx context.Context, name string) (info *relation.ObjectInfoModel, err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "name", name, "info", info)
-	}()
 	info = &relation.ObjectInfoModel{}
 	return info, utils.Wrap1(o.DB.Where("name = ?", name).Take(info).Error)
 }
 
 func (o *ObjectInfoGorm) DeleteExpiration(ctx context.Context, expiration time.Time) (err error) {
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "expiration", expiration)
-	}()
 	return utils.Wrap1(o.DB.Where("expiration_time IS NOT NULL AND expiration_time <= ?", expiration).Delete(&relation.ObjectInfoModel{}).Error)
 }

@@ -45,10 +45,10 @@ type Interface interface {
 	PresignedPutURL(ctx context.Context, args *ApplyPutArgs) (string, error)
 	// GetObjectInfo 获取对象信息
 	GetObjectInfo(ctx context.Context, args *BucketObject) (*ObjectInfo, error)
-	// CopyObjet 复制对象
-	CopyObjet(ctx context.Context, src *BucketObject, dst *BucketObject) error
-	// DeleteObjet 删除对象(不存在返回nil)
-	DeleteObjet(ctx context.Context, info *BucketObject) error
+	// CopyObject 复制对象
+	CopyObject(ctx context.Context, src *BucketObject, dst *BucketObject) error
+	// DeleteObject 删除对象(不存在返回nil)
+	DeleteObject(ctx context.Context, info *BucketObject) error
 	// ComposeObject 合并对象
 	ComposeObject(ctx context.Context, src []BucketObject, dst *BucketObject) error
 	// IsNotFound 判断是不是不存在导致的错误
