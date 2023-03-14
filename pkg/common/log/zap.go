@@ -83,9 +83,9 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 
 func (l *ZapLogger) cores() (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
-	c.EncodeTime = l.timeEncoder
+	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
-	//c.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	//c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 	fileEncoder := zapcore.NewJSONEncoder(c)
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
