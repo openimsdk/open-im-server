@@ -1,10 +1,17 @@
 package mw
 
 import (
+	"OpenIM/internal/apiresp"
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/constant"
+	"OpenIM/pkg/common/db/cache"
+	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/tokenverify"
+	"OpenIM/pkg/errs"
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"io"
 	"net/http"
 )
@@ -59,5 +66,53 @@ func GinParseOperationID() gin.HandlerFunc {
 			return
 		}
 		c.Next()
+	}
+}
+func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
+	dataBase := controller.NewAuthDatabase(cache.NewCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire)
+	return func(c *gin.Context) {
+		switch c.Request.Method {
+		case http.MethodPost:
+			token := c.Request.Header.Get(constant.Token)
+			if token == "" {
+				apiresp.GinError(c, errs.ErrArgs.Wrap())
+				c.Abort()
+				return
+			}
+			claims, err := tokenverify.GetClaimFromToken(token)
+			if err != nil {
+				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				c.Abort()
+				return
+			}
+			m, err := dataBase.GetTokensWithoutError(c, claims.UID, claims.Platform)
+			if err != nil {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if len(m) == 0 {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if v, ok := m[token]; ok {
+				switch v {
+				case constant.NormalToken:
+				case constant.KickedToken:
+					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					c.Abort()
+					return
+				default:
+					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					c.Abort()
+					return
+				}
+			}
+			c.Set(constant.OpUserIDPlatformID, constant.PlatformNameToID(claims.Platform))
+			c.Set(constant.OpUserID, claims.UID)
+			c.Next()
+		}
+
 	}
 }

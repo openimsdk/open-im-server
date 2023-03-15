@@ -7,20 +7,22 @@ import (
 	"OpenIM/pkg/common/prome"
 	"OpenIM/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"os"
 )
 
-func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry) *gin.Engine {
+func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.UniversalClient) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.New()
 	log.Info("load config: ", config.Config)
-	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
+	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), mw.GinParseToken(cache))
+
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
