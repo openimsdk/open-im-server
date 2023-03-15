@@ -8,15 +8,15 @@ import (
 )
 
 type FriendGorm struct {
-	DB *gorm.DB
+	*MetaDB
 }
 
 func NewFriendGorm(db *gorm.DB) relation.FriendModelInterface {
-	return &FriendGorm{DB: db}
+	return &FriendGorm{NewMetaDB(db, &relation.FriendModel{})}
 }
 
 func (f *FriendGorm) NewTx(tx any) relation.FriendModelInterface {
-	return &FriendGorm{DB: tx.(*gorm.DB)}
+	return &FriendGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendModel{})}
 }
 
 // 插入多条记录

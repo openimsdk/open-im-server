@@ -8,29 +8,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type Conversation interface {
-	Create(ctx context.Context, conversations []*relation.ConversationModel) (err error)
-	Delete(ctx context.Context, groupIDs []string) (err error)
-	UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, conversations []*relation.ConversationModel) (err error)
-	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error)
-	FindUserID(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
-	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
-	Take(ctx context.Context, userID, conversationID string) (conversation *relation.ConversationModel, err error)
-	FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error)
-	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
-	NewTx(tx any) Conversation
-}
 type ConversationGorm struct {
-	DB *gorm.DB
+	*MetaDB
 }
 
-func NewConversationGorm(DB *gorm.DB) Conversation {
-	return &ConversationGorm{DB: DB}
+func NewConversationGorm(db *gorm.DB) relation.ConversationModelInterface {
+	return &ConversationGorm{NewMetaDB(db, &relation.ConversationModel{})}
 }
 
-func (c *ConversationGorm) NewTx(tx any) Conversation {
-	return &ConversationGorm{DB: tx.(*gorm.DB)}
+func (c *ConversationGorm) NewTx(tx any) relation.ConversationModelInterface {
+	return &ConversationGorm{NewMetaDB(tx.(*gorm.DB), &relation.ConversationModel{})}
 }
 
 func (c *ConversationGorm) Create(ctx context.Context, conversations []*relation.ConversationModel) (err error) {

@@ -32,7 +32,7 @@ type ConversationDatabase interface {
 	SetUsersConversationFiledTx(ctx context.Context, userIDList []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 }
 
-func NewConversationDatabase(conversation relation.Conversation, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
+func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
 	return &ConversationDataBase{
 		conversationDB: conversation,
 		cache:          cache,
@@ -41,7 +41,7 @@ func NewConversationDatabase(conversation relation.Conversation, cache cache.Con
 }
 
 type ConversationDataBase struct {
-	conversationDB relation.Conversation
+	conversationDB relationTb.ConversationModelInterface
 	cache          cache.ConversationCache
 	tx             tx.Tx
 }

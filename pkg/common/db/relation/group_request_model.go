@@ -8,19 +8,17 @@ import (
 )
 
 type GroupRequestGorm struct {
-	DB *gorm.DB
-}
-
-func (g *GroupRequestGorm) NewTx(tx any) relation.GroupRequestModelInterface {
-	return &GroupRequestGorm{
-		DB: tx.(*gorm.DB),
-	}
+	*MetaDB
 }
 
 func NewGroupRequest(db *gorm.DB) relation.GroupRequestModelInterface {
 	return &GroupRequestGorm{
-		DB: db,
+		NewMetaDB(db, &relation.GroupRequestModel{}),
 	}
+}
+
+func (g *GroupRequestGorm) NewTx(tx any) relation.GroupRequestModelInterface {
+	return &GroupRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.GroupRequestModel{})}
 }
 
 func (g *GroupRequestGorm) Create(ctx context.Context, groupRequests []*relation.GroupRequestModel) (err error) {

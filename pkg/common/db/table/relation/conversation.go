@@ -1,5 +1,7 @@
 package relation
 
+import "context"
+
 const (
 	conversationModelTableName = "conversations"
 )
@@ -28,4 +30,15 @@ func (ConversationModel) TableName() string {
 }
 
 type ConversationModelInterface interface {
+	Create(ctx context.Context, conversations []*ConversationModel) (err error)
+	Delete(ctx context.Context, groupIDs []string) (err error)
+	UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error)
+	Update(ctx context.Context, conversations []*ConversationModel) (err error)
+	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*ConversationModel, err error)
+	FindUserID(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
+	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
+	Take(ctx context.Context, userID, conversationID string) (conversation *ConversationModel, err error)
+	FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error)
+	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	NewTx(tx any) ConversationModelInterface
 }

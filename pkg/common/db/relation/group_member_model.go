@@ -11,15 +11,15 @@ import (
 var _ relation.GroupMemberModelInterface = (*GroupMemberGorm)(nil)
 
 type GroupMemberGorm struct {
-	DB *gorm.DB
+	*MetaDB
 }
 
 func NewGroupMemberDB(db *gorm.DB) relation.GroupMemberModelInterface {
-	return &GroupMemberGorm{DB: db}
+	return &GroupMemberGorm{NewMetaDB(db, &relation.GroupMemberModel{})}
 }
 
 func (g *GroupMemberGorm) NewTx(tx any) relation.GroupMemberModelInterface {
-	return &GroupMemberGorm{DB: tx.(*gorm.DB)}
+	return &GroupMemberGorm{NewMetaDB(tx.(*gorm.DB), &relation.GroupMemberModel{})}
 }
 
 func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*relation.GroupMemberModel) (err error) {
