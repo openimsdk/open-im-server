@@ -13,12 +13,11 @@ type UserGorm struct {
 }
 
 func NewUserGorm(db *gorm.DB) relation.UserModelInterface {
-	return &UserGorm{DB: db.Model(&relation.UserModel{})}
+	return &UserGorm{DB: db}
 }
 
 func (u *UserGorm) db() *gorm.DB {
-	newDB := *u.DB
-	return &newDB
+	return u.DB.Model(&relation.UserModel{})
 }
 
 // 插入多条
