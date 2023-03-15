@@ -9,11 +9,11 @@ import (
 )
 
 type UserGorm struct {
-	DB *gorm.DB
+	DB gorm.DB
 }
 
 func NewUserGorm(DB *gorm.DB) relation.UserModelInterface {
-	return &UserGorm{DB: DB.Model(&relation.UserModel{})}
+	return &UserGorm{DB: *DB.Model(&relation.UserModel{})}
 }
 
 // 插入多条
