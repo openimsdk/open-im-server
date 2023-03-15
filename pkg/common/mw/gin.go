@@ -41,7 +41,8 @@ func GinParseOperationID() gin.HandlerFunc {
 			if operationID == "" {
 				body, err := io.ReadAll(c.Request.Body)
 				if err != nil {
-					c.String(400, "read request body error: "+err.Error())
+					log.ZWarn(c, "read request body error", errs.ErrArgs.Wrap("read request body error: "+err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("read request body error: "+err.Error()))
 					c.Abort()
 					return
 				}
@@ -49,12 +50,14 @@ func GinParseOperationID() gin.HandlerFunc {
 					OperationID string `json:"operationID"`
 				}{}
 				if err := json.Unmarshal(body, &req); err != nil {
-					c.String(400, "get operationID error: "+err.Error())
+					log.ZWarn(c, "json unmarshal error", errs.ErrArgs.Wrap(err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("json unmarshal error"+err.Error()))
 					c.Abort()
 					return
 				}
 				if req.OperationID == "" {
-					c.String(400, "operationID empty")
+					log.ZWarn(c, "header must have operationID", errs.ErrArgs.Wrap(err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("header must have operationID"+err.Error()))
 					c.Abort()
 					return
 				}
