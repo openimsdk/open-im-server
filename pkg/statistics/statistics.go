@@ -2,6 +2,7 @@ package statistics
 
 import (
 	"OpenIM/pkg/common/log"
+	"context"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func (s *Statistics) output() {
 			intervalCount = *s.AllCount - sum
 		}
 		timeIntervalNum++
-		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum, "avg", (*s.AllCount)/(timeIntervalNum)/s.SleepTime)
+		log.ZWarn(context.Background(), " system stat ", nil, "args", s.PrintArgs, "intervalCount", intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum, "avg", (*s.AllCount)/(timeIntervalNum)/s.SleepTime)
 	}
 }
 

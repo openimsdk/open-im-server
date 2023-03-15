@@ -51,11 +51,10 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Encoding:          "json",
-		EncoderConfig:     zap.NewProductionEncoderConfig(),
-		DisableStacktrace: true,
-		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
+		Level:         zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel)),
+		Encoding:      "json",
+		EncoderConfig: zap.NewProductionEncoderConfig(),
+		InitialFields: map[string]interface{}{"PID": os.Getegid()},
 	}
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
@@ -70,7 +69,6 @@ func NewZapLogger() (*ZapLogger, error) {
 		return nil, err
 	}
 	zl.zap = l.Sugar()
-	zl.zap.WithOptions(zap.AddStacktrace(zap.DPanicLevel))
 	return zl, nil
 }
 
@@ -82,7 +80,6 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	c.LevelKey = "level"
 	c.TimeKey = "time"
 	c.CallerKey = "caller"
-	//c.EncodeLevel = zapcore.LowercaseColorLevelEncoder
 	fileEncoder := zapcore.NewJSONEncoder(c)
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
@@ -92,23 +89,15 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	var cores []zapcore.Core
 	if config.Config.Log.StorageLocation != "" {
 		cores = []zapcore.Core{
-			zapcore.NewCore(fileEncoder, writer, zapcore.DebugLevel),
+			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))),
 		}
 	}
 	if config.Config.Log.Stderr {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zapcore.DebugLevel))
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	}), nil
-}
-
-func NewErrStackCore(c zapcore.Core) zapcore.Core {
-	return &errStackCore{c}
-}
-
-type errStackCore struct {
-	zapcore.Core
 }
 
 func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
@@ -138,7 +127,7 @@ func (l *ZapLogger) Info(ctx context.Context, msg string, keysAndValues ...inter
 
 func (l *ZapLogger) Warn(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	if err != nil {
-		keysAndValues = append(keysAndValues, "error", err)
+		keysAndValues = append(keysAndValues, "error", err.Error())
 	}
 	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Warnw(msg, keysAndValues...)
@@ -146,7 +135,7 @@ func (l *ZapLogger) Warn(ctx context.Context, msg string, err error, keysAndValu
 
 func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	if err != nil {
-		keysAndValues = append(keysAndValues, "error", err)
+		keysAndValues = append(keysAndValues, "error", err.Error())
 	}
 	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
 	l.zap.Errorw(msg, keysAndValues...)
