@@ -16,9 +16,9 @@ func NewUserGorm(db *gorm.DB) relation.UserModelInterface {
 	return &UserGorm{DB: db.Model(&relation.UserModel{})}
 }
 
-func (u *UserGorm) db() gorm.DB {
+func (u *UserGorm) db() *gorm.DB {
 	newDB := *u.DB
-	return newDB
+	return &newDB
 }
 
 // 插入多条
