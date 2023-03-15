@@ -21,33 +21,33 @@ func (f *FriendGorm) NewTx(tx any) relation.FriendModelInterface {
 
 // 插入多条记录
 func (f *FriendGorm) Create(ctx context.Context, friends []*relation.FriendModel) (err error) {
-	return utils.Wrap(f.DB.Create(&friends).Error, "")
+	return utils.Wrap(f.db(ctx).Create(&friends).Error, "")
 }
 
 // 删除ownerUserID指定的好友
 func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
-	err = utils.Wrap(f.DB.Where("owner_user_id = ? AND friend_user_id in ( ?)", ownerUserID, friendUserIDs).Delete(&relation.FriendModel{}).Error, "")
+	err = utils.Wrap(f.db(ctx).Where("owner_user_id = ? AND friend_user_id in ( ?)", ownerUserID, friendUserIDs).Delete(&relation.FriendModel{}).Error, "")
 	return err
 }
 
 // 更新ownerUserID单个好友信息 更新零值
 func (f *FriendGorm) UpdateByMap(ctx context.Context, ownerUserID string, friendUserID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(f.DB.Model(&relation.FriendModel{}).Where("owner_user_id = ? AND friend_user_id = ? ", ownerUserID, friendUserID).Updates(args).Error, "")
+	return utils.Wrap(f.db(ctx).Where("owner_user_id = ? AND friend_user_id = ? ", ownerUserID, friendUserID).Updates(args).Error, "")
 }
 
 // 更新好友信息的非零值
 func (f *FriendGorm) Update(ctx context.Context, friends []*relation.FriendModel) (err error) {
-	return utils.Wrap(f.DB.Updates(&friends).Error, "")
+	return utils.Wrap(f.db(ctx).Updates(&friends).Error, "")
 }
 
 // 更新好友备注（也支持零值 ）
 func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
 	if remark != "" {
-		return utils.Wrap(f.DB.Model(&relation.FriendModel{}).Where("owner_user_id = ? and friend_user_id = ?", ownerUserID, friendUserID).Update("remark", remark).Error, "")
+		return utils.Wrap(f.db(ctx).Where("owner_user_id = ? and friend_user_id = ?", ownerUserID, friendUserID).Update("remark", remark).Error, "")
 	}
 	m := make(map[string]interface{}, 1)
 	m["remark"] = ""
-	return utils.Wrap(f.DB.Model(&relation.FriendModel{}).Where("owner_user_id = ?", ownerUserID).Updates(m).Error, "")
+	return utils.Wrap(f.db(ctx).Where("owner_user_id = ?", ownerUserID).Updates(m).Error, "")
 
 }
 
