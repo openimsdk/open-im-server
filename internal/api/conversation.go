@@ -28,6 +28,7 @@ func (o *Conversation) client() (conversation.ConversationClient, error) {
 }
 
 func (o *Conversation) GetAllConversations(c *gin.Context) {
+	return
 	a2r.Call(conversation.ConversationClient.GetAllConversations, o.client, c)
 }
 

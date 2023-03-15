@@ -20,7 +20,7 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
-	log.ZInfo(ctx, "rpc client req", "req", "funcName", method, rpcString(req))
+	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req))
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
 		log.ZWarn(ctx, "ctx missing operationID", errors.New("ctx missing operationID"), "funcName", method)

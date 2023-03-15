@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/mw/specialerror"
 	"OpenIM/pkg/errs"
+	"OpenIM/pkg/proto/wrapperspb"
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
@@ -65,13 +66,13 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		code = errs.ServerInternalError
 	}
 	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
-	//if unwrap != err {
-	//	stack := fmt.Sprintf("%+v", err)
-	//	if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
-	//		grpcStatus = details
-	//	}
-	//}
-	log.ZWarn(ctx, "rpc resp", unwrap, "funcName", funcName)
+	if unwrap != err {
+		stack := fmt.Sprintf("%+v", err)
+		if details, err := grpcStatus.WithDetails(wrapperspb.String(stack)); err == nil {
+			grpcStatus = details
+		}
+	}
+	log.ZWarn(ctx, "rpc resp", err, "funcName", funcName)
 	return nil, grpcStatus.Err()
 }
 

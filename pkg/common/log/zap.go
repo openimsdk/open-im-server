@@ -47,25 +47,20 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 
 type ZapLogger struct {
 	zap *zap.SugaredLogger
-	// store original logger without sampling to avoid multiple samplers
-	SampleDuration time.Duration
-	SampleInitial  int
-	SampleInterval int
 }
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		Development:       true,
 		Encoding:          "json",
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		DisableStacktrace: true,
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 	}
-	zl := &ZapLogger{}
 	if config.Config.Log.Stderr {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
 	}
+	zl := &ZapLogger{}
 	opts, err := zl.cores()
 	if err != nil {
 		return nil, err
@@ -75,11 +70,8 @@ func NewZapLogger() (*ZapLogger, error) {
 		return nil, err
 	}
 	zl.zap = l.Sugar()
+	zl.zap.WithOptions(zap.AddStacktrace(zap.DPanicLevel))
 	return zl, nil
-}
-
-func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
 
 func (l *ZapLogger) cores() (zap.Option, error) {
@@ -109,6 +101,14 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	}), nil
+}
+
+func NewErrStackCore(c zapcore.Core) zapcore.Core {
+	return &errStackCore{c}
+}
+
+type errStackCore struct {
+	zapcore.Core
 }
 
 func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
