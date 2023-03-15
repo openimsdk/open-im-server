@@ -10,7 +10,7 @@ import (
 	"fmt"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
-	"gorm.io/gorm/utils"
+	gormUtils "gorm.io/gorm/utils"
 	"strings"
 	"time"
 
@@ -128,25 +128,24 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 	case err != nil && l.LogLevel >= logger.Error && (!errors.Is(err, gorm.ErrRecordNotFound) || !l.IgnoreRecordNotFoundError):
 		sql, rows := fc()
 		if rows == -1 {
-			log.ZError(ctx, utils.FileWithLineNum(), err, "time", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
+			log.ZError(ctx, "sql exec detail", err, "gorm", gormUtils.FileWithLineNum(), "time(ms)", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
 		} else {
-			log.ZError(ctx, utils.FileWithLineNum(), err, "time", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
+			log.ZError(ctx, "sql exec detail", err, "gorm", gormUtils.FileWithLineNum(), "time(ms)", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
 		}
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= logger.Warn:
 		sql, rows := fc()
 		slowLog := fmt.Sprintf("SLOW SQL >= %v", l.SlowThreshold)
 		if rows == -1 {
-			log.ZWarn(ctx, utils.FileWithLineNum(), nil, "slow sql", slowLog, "time", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
+			log.ZWarn(ctx, "sql exec detail", nil, "gorm", gormUtils.FileWithLineNum(), nil, "slow sql", slowLog, "time(ms)", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
 		} else {
-			log.ZWarn(ctx, utils.FileWithLineNum(), nil, "slow sql", slowLog, "time", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
+			log.ZWarn(ctx, "sql exec detail", nil, "gorm", gormUtils.FileWithLineNum(), nil, "slow sql", slowLog, "time(ms)", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
 		}
 	case l.LogLevel == logger.Info:
 		sql, rows := fc()
 		if rows == -1 {
-			log.ZDebug(ctx, utils.FileWithLineNum(), "time", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
+			log.ZDebug(ctx, "sql exec detail", "gorm", gormUtils.FileWithLineNum(), "time(ms)", float64(elapsed.Nanoseconds())/1e6, "sql", sql)
 		} else {
-			log.ZDebug(ctx, utils.FileWithLineNum(), "time", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
-
+			log.ZDebug(ctx, "sql exec detail", "gorm", gormUtils.FileWithLineNum(), "time(ms)", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
 		}
 	}
 }
