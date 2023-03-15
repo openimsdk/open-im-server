@@ -2,25 +2,18 @@ package obj
 
 import (
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
-	"net/http"
 	"net/url"
 	"time"
 )
 
-func NewMinioClient() {
-
-}
-
 func NewMinioInterface() (Interface, error) {
-	if true {
-		return &minioImpl{}, nil // todo
-	}
 	conf := config.Config.Object.Minio
 	u, err := url.Parse(conf.Endpoint)
 	if err != nil {
@@ -31,41 +24,42 @@ func NewMinioInterface() (Interface, error) {
 	}
 	client, err := minio.New(u.Host, &minio.Options{
 		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, ""),
-		Secure: false,
+		Secure: u.Scheme == "https",
 	})
 	if err != nil {
 		return nil, fmt.Errorf("minio new client %w", err)
 	}
-	// todo 初始化连接和桶
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+	for _, bucket := range utils.Distinct([]string{conf.TempBucket, conf.DataBucket}) {
+		exists, err := client.BucketExists(ctx, bucket)
+		if err != nil {
+			return nil, fmt.Errorf("minio bucket %s exists %w", bucket, err)
+		}
+		if exists {
+			continue
+		}
+		opt := minio.MakeBucketOptions{
+			Region:        conf.Location,
+			ObjectLocking: conf.IsDistributedMod,
+		}
+		if err := client.MakeBucket(ctx, conf.TempBucket, opt); err != nil {
+			return nil, fmt.Errorf("minio make bucket %s %w", bucket, err)
+		}
+	}
 	return &minioImpl{
-		client: client,
-		//tempBucket: conf.Bucket,
+		client:     client,
+		tempBucket: conf.TempBucket,
+		dataBucket: conf.DataBucket,
 	}, nil
 }
 
 type minioImpl struct {
-	tempBucket      string // 上传桶
-	permanentBucket string // 永久桶
-	clearBucket     string // 自动清理桶
-	urlstr          string // 访问地址
-	client          *minio.Client
+	tempBucket string // 上传桶
+	dataBucket string // 永久桶
+	urlstr     string // 访问地址
+	client     *minio.Client
 }
-
-//func (m *minioImpl) Init() error {
-//	client, err := minio.New("127.0.0.1:9000", &minio.Options{
-//		Creds:  credentials.NewStaticV4("minioadmin", "minioadmin", ""),
-//		Secure: false,
-//	})
-//	if err != nil {
-//		return fmt.Errorf("minio client error: %w", err)
-//	}
-//	m.urlstr = "http://127.0.0.1:9000"
-//	m.client = client
-//	m.tempBucket = "temp"
-//	m.permanentBucket = "permanent"
-//	m.clearBucket = "clear"
-//	return nil
-//}
 
 func (m *minioImpl) Name() string {
 	return "minio"
@@ -83,26 +77,20 @@ func (m *minioImpl) MinExpirationTime() time.Duration {
 	return time.Hour * 24
 }
 
-func (m *minioImpl) AppendHeader() http.Header {
-	return map[string][]string{
-		"x-amz-object-append": {"true"},
-	}
-}
-
 func (m *minioImpl) TempBucket() string {
 	return m.tempBucket
 }
 
 func (m *minioImpl) DataBucket() string {
-	return m.permanentBucket
+	return m.dataBucket
 }
 
-func (m *minioImpl) ClearBucket() string {
-	return m.clearBucket
-}
-
-func (m *minioImpl) GetURL(bucket string, name string) string {
-	return fmt.Sprintf("%s/%s/%s", m.urlstr, bucket, name)
+func (m *minioImpl) GetURL(ctx context.Context, bucket string, name string, expires time.Duration) (string, error) {
+	u, err := m.client.PresignedGetObject(ctx, bucket, name, expires, nil)
+	if err != nil {
+		return "", err
+	}
+	return u.String(), nil
 }
 
 func (m *minioImpl) PresignedPutURL(ctx context.Context, args *ApplyPutArgs) (string, error) {
@@ -131,7 +119,6 @@ func (m *minioImpl) GetObjectInfo(ctx context.Context, args *BucketObject) (*Obj
 		return nil, err
 	}
 	return &ObjectInfo{
-		URL:  m.GetURL(args.Bucket, args.Name),
 		Size: info.Size,
 		Hash: info.ETag,
 	}, nil

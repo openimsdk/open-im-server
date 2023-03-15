@@ -92,16 +92,13 @@ type config struct {
 			OssRoleArn         string `yaml:"OssRoleArn"`
 		}
 		Minio struct {
-			Bucket              string `yaml:"bucket"`
-			AppBucket           string `yaml:"appBucket"`
-			Location            string `yaml:"location"`
-			Endpoint            string `yaml:"endpoint"`
-			AccessKeyID         string `yaml:"accessKeyID"`
-			SecretAccessKey     string `yaml:"secretAccessKey"`
-			EndpointInner       string `yaml:"endpointInner"`
-			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
-			StorageTime         int    `yaml:"storageTime"`
-			IsDistributedMod    bool   `yaml:"isDistributedMod"`
+			TempBucket       string `yaml:"tempBucket"`
+			DataBucket       string `yaml:"dataBucket"`
+			Location         string `yaml:"location"`
+			Endpoint         string `yaml:"endpoint"`
+			AccessKeyID      string `yaml:"accessKeyID"`
+			SecretAccessKey  string `yaml:"secretAccessKey"`
+			IsDistributedMod bool   `yaml:"isDistributedMod"`
 		} `yaml:"minio"`
 		Aws struct {
 			AccessKeyID     string `yaml:"accessKeyID"`

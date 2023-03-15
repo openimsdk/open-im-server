@@ -1,6 +1,7 @@
 package third
 
 import (
+	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/proto/third"
 	"context"
 	"time"
@@ -19,6 +20,11 @@ func (t *thirdServer) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) 
 }
 
 func (t *thirdServer) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error) {
+	if req.Expires <= 0 {
+		if err := tokenverify.CheckAdmin(ctx); err != nil {
+			return nil, err
+		}
+	}
 	return t.s3dataBase.GetUrl(ctx, req)
 }
 

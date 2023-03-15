@@ -28,7 +28,8 @@ message ConfirmPutResp {
 }
 
 message GetUrlReq {
-  string name = 1;
+  string name = 1; // 文件名
+  int64 expires = 2; // url有效时间
 }
 
 message GetUrlResp {
