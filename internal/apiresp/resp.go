@@ -2,7 +2,6 @@ package apiresp
 
 import (
 	"OpenIM/pkg/errs"
-	"fmt"
 )
 
 type apiResponse struct {
@@ -22,7 +21,7 @@ func apiError(err error) *apiResponse {
 	unwrap := errs.Unwrap(err)
 	var dlt string
 	if unwrap != err {
-		dlt = fmt.Sprintf("%+v", dlt)
+		dlt = err.Error()
 	}
 	if codeErr, ok := unwrap.(errs.CodeError); ok {
 		return &apiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: dlt}

@@ -6,6 +6,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/db/controller"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tokenverify"
 	"OpenIM/pkg/errs"
 	"bytes"
@@ -74,7 +75,8 @@ func GinParseOperationID() gin.HandlerFunc {
 			if operationID == "" {
 				body, err := io.ReadAll(c.Request.Body)
 				if err != nil {
-					c.String(400, "read request body error: "+err.Error())
+					log.ZWarn(c, "read request body error", errs.ErrArgs.Wrap("read request body error: "+err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("read request body error: "+err.Error()))
 					c.Abort()
 					return
 				}
@@ -82,12 +84,14 @@ func GinParseOperationID() gin.HandlerFunc {
 					OperationID string `json:"operationID"`
 				}{}
 				if err := json.Unmarshal(body, &req); err != nil {
-					c.String(400, "get operationID error: "+err.Error())
+					log.ZWarn(c, "json unmarshal error", errs.ErrArgs.Wrap(err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("json unmarshal error"+err.Error()))
 					c.Abort()
 					return
 				}
 				if req.OperationID == "" {
-					c.String(400, "operationID empty")
+					log.ZWarn(c, "header must have operationID", errs.ErrArgs.Wrap(err.Error()))
+					apiresp.GinError(c, errs.ErrArgs.Wrap("header must have operationID"+err.Error()))
 					c.Abort()
 					return
 				}
@@ -109,23 +113,27 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 		case http.MethodPost:
 			token := c.Request.Header.Get(constant.Token)
 			if token == "" {
+				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
 				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
 				c.Abort()
 				return
 			}
 			claims, err := tokenverify.GetClaimFromToken(token)
 			if err != nil {
+				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
 				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
 				c.Abort()
 				return
 			}
 			m, err := dataBase.GetTokensWithoutError(c, claims.UID, claims.Platform)
 			if err != nil {
+				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
 			}
 			if len(m) == 0 {
+				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
 				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
 				c.Abort()
 				return
@@ -134,10 +142,12 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 				switch v {
 				case constant.NormalToken:
 				case constant.KickedToken:
+					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
 					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
 					c.Abort()
 					return
 				default:
+					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
 					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
 					c.Abort()
 					return
