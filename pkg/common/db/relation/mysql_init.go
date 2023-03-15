@@ -11,7 +11,6 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	gormUtils "gorm.io/gorm/utils"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
