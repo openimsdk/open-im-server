@@ -38,7 +38,7 @@ func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel) (err
 
 // 获取指定用户信息  不存在，也不返回错误
 func (u *UserGorm) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	log.ZDebug(ctx, "Find args", "userIDs", userIDs)
+	log.ZDebug(ctx, "Find args", "userIDs", userIDs, "db", u.db())
 	err = utils.Wrap(u.db().Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
 }

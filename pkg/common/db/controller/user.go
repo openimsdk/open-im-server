@@ -48,7 +48,6 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 	if len(miss) > 0 {
 		_ = u.userDB.Create(ctx, miss)
 	}
-
 	return nil
 }
 
