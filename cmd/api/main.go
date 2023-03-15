@@ -28,7 +28,7 @@ func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
-	cache, err := cache.NewRedis()
+	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func run(port int) error {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
-	router := api.NewGinRouter(zk, cache)
+	router := api.NewGinRouter(zk, rdb)
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))

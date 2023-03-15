@@ -16,6 +16,40 @@ import (
 	"net/http"
 )
 
+type GinMwOptions func( *gin.RouterGroup )
+
+func WithRecovery() GinMwOptions {
+	return func(group *gin.RouterGroup) {
+		group.Use(gin.Recovery())
+	}
+}
+
+func WithCorsHandler() GinMwOptions {
+	return func(group *gin.RouterGroup) {
+		group.Use(CorsHandler())
+	}
+}
+
+func WithGinParseOperationID() GinMwOptions {
+	return func(group *gin.RouterGroup) {
+		group.Use(GinParseOperationID())
+	}
+}
+
+func WithGinParseToken(rdb redis.UniversalClient) GinMwOptions {
+	return func(group *gin.RouterGroup) {
+		group.Use(GinParseToken(rdb))
+	}
+}
+
+func NewRouterGroup(routerGroup *gin.RouterGroup, route string, options ...GinMwOptions) *gin.RouterGroup {
+	routerGroup = routerGroup.Group(route)
+	for _, option := range options {
+		option(routerGroup)
+	}
+	return routerGroup
+}
+
 func CorsHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		context.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -113,6 +147,5 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 			c.Set(constant.OpUserID, claims.UID)
 			c.Next()
 		}
-
 	}
 }

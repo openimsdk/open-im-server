@@ -10,19 +10,17 @@ import (
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"io"
-	"os"
 )
 
-func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.UniversalClient) *gin.Engine {
+func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
+	zk.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
-	f, _ := os.Create("../logs/api.log")
-	gin.DefaultWriter = io.MultiWriter(f)
-	//	gin.SetMode(gin.DebugMode)
+	//f, _ := os.Create("../logs/api.log")
+	//gin.DefaultWriter = io.MultiWriter(f)
+	//gin.SetMode(gin.DebugMode)
 	r := gin.New()
 	log.Info("load config: ", config.Config)
-	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), mw.GinParseToken(cache))
-
+	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -30,17 +28,18 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	zk.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(zk)
-		userRouterGroup.POST("/user_register", u.UserRegister)
-		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo) //1
-		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo) //1
-		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
-		userRouterGroup.POST("/account_check", u.AccountCheck)        // todo
-		userRouterGroup.POST("/get_users", u.GetUsers)
+		userRouterGroupChild1 := mw.NewRouterGroup(userRouterGroup, "",)
+		userRouterGroupChild2 := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
+		userRouterGroupChild1.POST("/user_register", u.UserRegister)
+		userRouterGroupChild2.POST("/update_user_info", u.UpdateUserInfo) //1
+		userRouterGroupChild2.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
+		userRouterGroupChild2.POST("/get_users_info", u.GetUsersPublicInfo) //1
+		userRouterGroupChild2.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
+		userRouterGroupChild2.POST("/account_check", u.AccountCheck)        // todo
+		userRouterGroupChild2.POST("/get_users", u.GetUsers)
 	}
 	////friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -58,7 +57,6 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)                    //1
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
 		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
-
 	}
 	groupRouterGroup := r.Group("/group")
 	g := NewGroup(zk)
@@ -96,10 +94,12 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 	{
 		a := NewAuth(zk)
 		u := NewUser(zk)
-		authRouterGroup.POST("/user_register", u.UserRegister) //1
-		authRouterGroup.POST("/user_token", a.UserToken)       //1
-		authRouterGroup.POST("/parse_token", a.ParseToken)     //1
-		authRouterGroup.POST("/force_logout", a.ForceLogout)   //1
+		authRouterGroupChild1 := mw.NewRouterGroup(authRouterGroup, "",)
+		authRouterGroupChild2 := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
+		authRouterGroupChild1.POST("/user_register", u.UserRegister) //1
+		authRouterGroupChild1.POST("/user_token", a.UserToken)       //1
+		authRouterGroupChild2.POST("/parse_token", a.ParseToken)     //1
+		authRouterGroupChild2.POST("/force_logout", a.ForceLogout)   //1
 	}
 	////Third service
 	thirdGroup := r.Group("/third")
@@ -115,7 +115,6 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 		thirdGroup.POST("/confirm_put", t.ConfirmPut)
 		thirdGroup.GET("/get_url", t.GetURL)
 		thirdGroup.GET("/object", t.GetURL)
-
 	}
 	////Message
 	chatGroup := r.Group("/msg")
@@ -139,7 +138,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 	}
 	////Conversation
 	conversationGroup := r.Group("/conversation")
-	{ //1
+	{
 		c := NewConversation(zk)
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
@@ -151,3 +150,4 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, cache redis.Univers
 	}
 	return r
 }
+
