@@ -53,8 +53,7 @@ func (ws *WsServer) UnRegister(c *Client) {
 }
 
 func (ws *WsServer) Validate(s interface{}) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (ws *WsServer) GetUserAllCons(userID string) ([]*Client, bool) {
