@@ -4,10 +4,11 @@ import (
 	"OpenIM/internal/api/a2r"
 	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/discoveryregistry"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/third"
 	"context"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 var _ context.Context // 解决goland编辑器bug
@@ -54,4 +55,35 @@ func (o *Third) FcmUpdateToken(c *gin.Context) {
 
 func (o *Third) SetAppBadge(c *gin.Context) {
 	a2r.Call(third.ThirdClient.SetAppBadge, o.client, c)
+}
+
+func (o *Third) GetURL(c *gin.Context) {
+	if c.Request.Method == http.MethodPost {
+		a2r.Call(third.ThirdClient.GetUrl, o.client, c)
+		return
+	}
+	name := c.Query("name")
+	if name == "" {
+		c.String(http.StatusBadRequest, "name is empty")
+		return
+	}
+	client, err := o.client()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	resp, err := client.GetUrl(c, &third.GetUrlReq{Name: name})
+	if err != nil {
+		if errs.ErrArgs.Is(err) {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		if errs.ErrRecordNotFound.Is(err) {
+			c.String(http.StatusNotFound, err.Error())
+			return
+		}
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.Redirect(http.StatusTemporaryRedirect, resp.Url)
 }

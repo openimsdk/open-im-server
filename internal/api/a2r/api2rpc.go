@@ -2,6 +2,7 @@ package a2r
 
 import (
 	"OpenIM/internal/apiresp"
+	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/errs"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -15,11 +16,13 @@ func Call[A, B, C any](
 ) {
 	var req A
 	if err := c.BindJSON(&req); err != nil {
+		log.ZWarn(c, "gin bind json error", err, req)
 		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数错误
 		return
 	}
 	if check, ok := any(&req).(interface{ Check() error }); ok {
 		if err := check.Check(); err != nil {
+			log.ZWarn(c, "custom check  error", err, req)
 			apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数校验失败
 			return
 		}

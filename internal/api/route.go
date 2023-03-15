@@ -111,6 +111,9 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry) *gin.Engine {
 		thirdGroup.POST("/apply_put", t.ApplyPut)
 		thirdGroup.POST("/get_put", t.GetPut)
 		thirdGroup.POST("/confirm_put", t.ConfirmPut)
+		thirdGroup.GET("/get_url", t.GetURL)
+		thirdGroup.GET("/object", t.GetURL)
+
 	}
 	////Message
 	chatGroup := r.Group("/msg")
