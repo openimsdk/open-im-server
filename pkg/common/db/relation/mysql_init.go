@@ -41,14 +41,6 @@ func newMysqlGormDB() (*gorm.DB, error) {
 	}
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
-	//newLogger := logger.New(
-	//	Writer{},
-	//	logger.Config{
-	//		SlowThreshold:             time.Duration(config.Config.Mysql.SlowThreshold) * time.Millisecond, // Slow SQL threshold
-	//		LogLevel:                  logger.LogLevel(config.Config.Mysql.LogLevel),                       // Log level
-	//		IgnoreRecordNotFoundError: true,                                                                // Ignore ErrRecordNotFound error for logger
-	//	},
-	//)
 	sqlLogger := NewSqlLogger(logger.LogLevel(config.Config.Mysql.LogLevel), true, time.Duration(config.Config.Mysql.SlowThreshold)*time.Millisecond)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: sqlLogger,
@@ -147,17 +139,5 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 		} else {
 			log.ZDebug(ctx, "sql exec detail", "gorm", gormUtils.FileWithLineNum(), "time(ms)", float64(elapsed.Nanoseconds())/1e6, "rows", rows, "sql", sql)
 		}
-	}
-}
-
-type Writer struct{}
-
-func (w Writer) Printf(format string, args ...interface{}) {
-	s := fmt.Sprintf(format, args...)
-	l := strings.Split(s, "\n")
-	if len(l) == 2 {
-		log.ZDebug(context.Background(), "sql exec detail", "gorm", l[0], "sql", l[1])
-	} else {
-		log.ZDebug(context.Background(), "sql exec detail", "sql", s)
 	}
 }
