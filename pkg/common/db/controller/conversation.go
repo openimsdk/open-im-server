@@ -3,7 +3,6 @@ package controller
 import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/relation"
 	relationTb "OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/tx"
 	"OpenIM/pkg/utils"
