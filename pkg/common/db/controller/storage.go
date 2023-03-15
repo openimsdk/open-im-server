@@ -2,9 +2,11 @@ package controller
 
 import "C"
 import (
+	"OpenIM/pkg/common/config"
 	"OpenIM/pkg/common/db/obj"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/log"
+	"OpenIM/pkg/errs"
 	"OpenIM/pkg/proto/third"
 	"OpenIM/pkg/utils"
 	"context"
@@ -18,10 +20,17 @@ import (
 	"time"
 )
 
+const (
+	hashPrefix     = "hash"
+	tempPrefix     = "temp"
+	fragmentPrefix = "fragment_"
+)
+
 type S3Database interface {
 	ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*third.ApplyPutResp, error)
 	GetPut(ctx context.Context, req *third.GetPutReq) (*third.GetPutResp, error)
 	ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (*third.ConfirmPutResp, error)
+	GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error)
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
@@ -48,7 +57,7 @@ func (c *s3Database) today() string {
 
 // fragmentName 根据序号生成文件名
 func (c *s3Database) fragmentName(index int) string {
-	return "fragment_" + strconv.Itoa(index+1)
+	return fragmentPrefix + strconv.Itoa(index+1)
 }
 
 // getFragmentNum 获取分片大小和分片数量
@@ -76,16 +85,13 @@ func (c *s3Database) CheckHash(hash string) error {
 		return err
 	}
 	if len(val) != md5.Size {
-		return errors.New("hash value error")
+		return errs.ErrArgs.Wrap("invalid hash")
 	}
 	return nil
 }
 
 func (c *s3Database) urlName(name string) string {
-	if name[0] != '/' {
-		name = "/" + name
-	}
-	return "http://127.0.0.1:8080" + name
+	return config.Config.Object.ApiURL + name
 }
 
 func (c *s3Database) UUID() string {
@@ -93,7 +99,7 @@ func (c *s3Database) UUID() string {
 }
 
 func (c *s3Database) HashName(hash string) string {
-	return path.Join("hash", c.today(), c.UUID())
+	return path.Join(hashPrefix, hash+"_"+c.today()+"_"+c.UUID())
 }
 
 func (c *s3Database) isNotFound(err error) bool {
@@ -141,7 +147,7 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 		ExpirationTime: expirationTime,
 		EffectiveTime:  time.Now().Add(effective),
 	}
-	put.Path = path.Join("upload", c.today(), req.Hash, put.PutID)
+	put.Path = path.Join(tempPrefix, c.today(), req.Hash, put.PutID)
 	putURLs := make([]string, 0, pack)
 	for i := 0; i < pack; i++ {
 		url, err := c.obj.PresignedPutURL(ctx, &obj.ApplyPutArgs{
@@ -353,6 +359,29 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	}
 	return &third.ConfirmPutResp{
 		Url: c.urlName(o.Name),
+	}, nil
+}
+
+func (c *s3Database) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error) {
+	info, err := c.info.Take(ctx, req.Name)
+	if err != nil {
+		return nil, err
+	}
+	if info.ExpirationTime != nil && info.ExpirationTime.Before(time.Now()) {
+		return nil, errs.ErrRecordNotFound.Wrap("object expired")
+	}
+	hash, err := c.hash.Take(ctx, info.Hash, c.obj.Name())
+	if err != nil {
+		return nil, err
+	}
+	u, err := c.obj.GetURL(ctx, hash.Bucket, hash.Name, time.Duration(req.Expires)*time.Millisecond)
+	if err != nil {
+		return nil, err
+	}
+	return &third.GetUrlResp{
+		Url:  u,
+		Size: hash.Size,
+		Hash: hash.Hash,
 	}, nil
 }
 

@@ -9,6 +9,7 @@ import (
 type CodeError interface {
 	Code() int
 	Msg() string
+	Is(err error) bool
 	Wrap(msg ...string) error
 	error
 }
@@ -36,6 +37,17 @@ func (e *codeError) Msg() string {
 
 func (e *codeError) Wrap(w ...string) error {
 	return errors.Wrap(e, strings.Join(w, ", "))
+}
+
+func (e *codeError) Is(err error) bool {
+	if err == nil {
+		return false
+	}
+	codeErr, ok := Unwrap(err).(CodeError)
+	if ok {
+		return codeErr.Code() == e.code
+	}
+	return false
 }
 
 func (e *codeError) Error() string {
