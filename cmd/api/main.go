@@ -4,6 +4,7 @@ import (
 	"OpenIM/internal/api"
 	"OpenIM/pkg/common/cmd"
 	"OpenIM/pkg/common/config"
+	"OpenIM/pkg/common/db/cache"
 	"OpenIM/pkg/common/log"
 	"context"
 	"fmt"
@@ -27,12 +28,16 @@ func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
+	cache, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
 	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
 	if err != nil {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
-	router := api.NewGinRouter(zk)
+	router := api.NewGinRouter(zk, cache)
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
