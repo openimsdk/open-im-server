@@ -1,17 +1,17 @@
 package group
 
 import (
-	"OpenIM/pkg/apistruct"
-	"OpenIM/pkg/callbackstruct"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/http"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/proto/group"
-	"OpenIM/pkg/proto/wrapperspb"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"time"
 )
 

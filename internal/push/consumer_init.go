@@ -7,11 +7,11 @@
 package push
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/statistics"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/statistics"
 )
 
 type Consumer struct {

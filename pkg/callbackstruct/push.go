@@ -1,6 +1,6 @@
 package callbackstruct
 
-import common "OpenIM/pkg/proto/sdkws"
+import common "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 
 type CallbackBeforePushReq struct {
 	UserStatusBatchCallbackReq

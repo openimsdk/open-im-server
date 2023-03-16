@@ -1,11 +1,11 @@
 package tokenverify
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )

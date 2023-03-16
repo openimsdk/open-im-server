@@ -1,12 +1,12 @@
 package friend
 
 import (
-	"OpenIM/internal/common/convert"
-	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/common/tracelog"
-	pbFriend "OpenIM/pkg/proto/friend"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/convert"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 )
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {

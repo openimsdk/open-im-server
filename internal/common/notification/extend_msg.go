@@ -1,13 +1,13 @@
 package notification
 
 import (
-	"OpenIM/pkg/apistruct"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/proto/msg"
-	sdkws "OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,

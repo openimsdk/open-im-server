@@ -1,13 +1,13 @@
 package msg
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"math/rand"
 	"strconv"
 	"sync"

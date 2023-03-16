@@ -1,10 +1,10 @@
 package msg
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
-	pbMsg "OpenIM/pkg/proto/msg"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
 func (m *msgServer) SetSendMsgStatus(ctx context.Context, req *pbMsg.SetSendMsgStatusReq) (*pbMsg.SetSendMsgStatusResp, error) {

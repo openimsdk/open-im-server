@@ -1,13 +1,13 @@
 package jpush
 
 import (
-	"OpenIM/internal/push/offlinepush"
-	"OpenIM/internal/push/offlinepush/jpush/body"
-	"OpenIM/pkg/common/config"
-	http2 "OpenIM/pkg/common/http"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/jpush/body"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 )
 
 type JPush struct{}

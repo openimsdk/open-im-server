@@ -1,18 +1,18 @@
 package msgtransfer
 
 import (
-	"OpenIM/pkg/apistruct"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/controller"
-	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
-	kfk "OpenIM/pkg/common/kafka"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	pbMsg "OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 
 	"github.com/golang/protobuf/proto"

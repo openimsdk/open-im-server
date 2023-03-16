@@ -7,15 +7,15 @@
 package push
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	kfk "OpenIM/pkg/common/kafka"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	pbChat "OpenIM/pkg/proto/msg"
-	pbPush "OpenIM/pkg/proto/push"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )

@@ -1,16 +1,16 @@
 package msgtransfer
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/controller"
-	kfk "OpenIM/pkg/common/kafka"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	pbMsg "OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )

@@ -1,11 +1,11 @@
 package unrelation
 
 import (
-	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -1,9 +1,9 @@
 package msg
 
 import (
-	"OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {

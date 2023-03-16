@@ -1,9 +1,9 @@
 package main
 
 import (
-	"OpenIM/internal/rpc/group"
-	"OpenIM/pkg/common/cmd"
-	"OpenIM/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/rpc/group"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 func main() {

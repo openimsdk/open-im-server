@@ -1,13 +1,13 @@
 package friend
 
 import (
-	cbapi "OpenIM/pkg/callbackstruct"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/http"
-	"OpenIM/pkg/common/tracelog"
-	pbfriend "OpenIM/pkg/proto/friend"
 	"context"
+	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 )
 
 func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {

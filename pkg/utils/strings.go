@@ -7,8 +7,8 @@
 package utils
 
 import (
-	"OpenIM/pkg/common/constant"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"math/rand"
 	"strconv"
 )

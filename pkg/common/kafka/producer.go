@@ -1,18 +1,18 @@
 package kafka
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	log "OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/utils"
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	log "github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 
-	prome "OpenIM/pkg/common/prome"
+	prome "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 )
 
 type Producer struct {

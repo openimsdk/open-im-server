@@ -1,19 +1,19 @@
 package auth
 
 import (
-	"OpenIM/internal/common/check"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/errs"
-	pbAuth "OpenIM/pkg/proto/auth"
-	"OpenIM/pkg/proto/msggateway"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	pbAuth "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 

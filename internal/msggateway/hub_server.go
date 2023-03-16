@@ -1,16 +1,16 @@
 package msggateway
 
 import (
-	"OpenIM/internal/startrpc"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/proto/msggateway"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/startrpc"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 

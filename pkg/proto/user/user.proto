@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
-import "Open-IM-Server/pkg/proto/conversation/conversation.proto";
-option go_package = "OpenIM/pkg/proto/user;user";
+import "sdkws/sdkws.proto";
+import "conversation/conversation.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user";
 package OpenIMServer.user;
 
 

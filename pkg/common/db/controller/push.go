@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 type PushDatabase interface {

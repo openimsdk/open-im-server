@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"OpenIM/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"testing"
 	"time"
 

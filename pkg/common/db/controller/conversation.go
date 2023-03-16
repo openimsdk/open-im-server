@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/db/tx"
-	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type ConversationDatabase interface {

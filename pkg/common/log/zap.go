@@ -1,10 +1,10 @@
 package log
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"os"
 	"path/filepath"

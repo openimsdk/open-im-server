@@ -1,9 +1,9 @@
 package unrelation
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"strconv"
 	"strings"
 )

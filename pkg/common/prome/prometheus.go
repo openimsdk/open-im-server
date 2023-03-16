@@ -1,8 +1,8 @@
 package prome
 
 import (
-	"OpenIM/pkg/common/config"
 	"bytes"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"net/http"
 	"strconv"
 

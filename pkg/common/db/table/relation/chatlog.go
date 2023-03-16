@@ -3,7 +3,7 @@ package relation
 import (
 	"time"
 
-	pbMsg "OpenIM/pkg/proto/msg"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
 const (

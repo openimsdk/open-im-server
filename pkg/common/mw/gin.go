@@ -1,9 +1,9 @@
 package mw
 
 import (
-	"OpenIM/pkg/common/constant"
 	"bytes"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"

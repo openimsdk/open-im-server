@@ -1,10 +1,10 @@
 package log
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/tracelog"
 	"bufio"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 
 	//"bufio"
 	"fmt"
@@ -128,7 +128,7 @@ func Debug(OperationID string, args ...interface{}) {
 	}).Debugln(args)
 }
 
-//Deprecated
+// Deprecated
 func Warning(token, OperationID, format string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
 		"PID":         logger.Pid,
@@ -137,7 +137,7 @@ func Warning(token, OperationID, format string, args ...interface{}) {
 
 }
 
-//internal method
+// internal method
 func argsHandle(OperationID string, fields logrus.Fields, args []interface{}) {
 	for i := 0; i < len(args); i += 2 {
 		if i+1 < len(args) {

@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/db/tx"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/utils"
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
 )
 

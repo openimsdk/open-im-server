@@ -7,9 +7,9 @@
 package log
 
 import (
-	"OpenIM/pkg/common/config"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	elasticV7 "github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 	"log"
@@ -18,13 +18,13 @@ import (
 	"time"
 )
 
-//esHook CUSTOMIZED ES hook
+// esHook CUSTOMIZED ES hook
 type esHook struct {
 	moduleName string
 	client     *elasticV7.Client
 }
 
-//newEsHook Initialization
+// newEsHook Initialization
 func newEsHook(moduleName string) *esHook {
 	//https://github.com/sohlich/elogrus
 	//client, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"))
@@ -61,7 +61,7 @@ func newEsHook(moduleName string) *esHook {
 	return &esHook{client: es, moduleName: moduleName}
 }
 
-//Fire log hook interface
+// Fire log hook interface
 func (hook *esHook) Fire(entry *logrus.Entry) error {
 	doc := newEsLog(entry)
 	go hook.sendEs(doc)
@@ -72,7 +72,7 @@ func (hook *esHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-//sendEs
+// sendEs
 func (hook *esHook) sendEs(doc appLogDocModel) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -86,7 +86,7 @@ func (hook *esHook) sendEs(doc appLogDocModel) {
 
 }
 
-//appLogDocModel es model
+// appLogDocModel es model
 type appLogDocModel map[string]interface{}
 
 func newEsLog(e *logrus.Entry) appLogDocModel {

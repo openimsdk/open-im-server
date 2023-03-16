@@ -1,11 +1,11 @@
 package cache
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/mw/specialerror"
-	"OpenIM/pkg/errs"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/go-redis/redis/v8"
 	"time"
 )

@@ -1,9 +1,9 @@
 package msggateway
 
 import (
-	"OpenIM/pkg/utils"
 	"bytes"
 	"encoding/gob"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type Encoder interface {

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"OpenIM/internal/tools"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/tools"
 	"github.com/spf13/cobra"
 )
 

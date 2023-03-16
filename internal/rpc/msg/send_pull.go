@@ -1,14 +1,14 @@
 package msg
 
 import (
-	"OpenIM/pkg/common/constant"
-	promePkg "OpenIM/pkg/common/prome"
-	"OpenIM/pkg/errs"
-	pbConversation "OpenIM/pkg/proto/conversation"
-	"OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/proto"
 	"sync"
 )

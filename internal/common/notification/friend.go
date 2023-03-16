@@ -1,11 +1,11 @@
 package notification
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	pbFriend "OpenIM/pkg/proto/friend"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )

@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"OpenIM/pkg/common/db/relation"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"time"
