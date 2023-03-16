@@ -8,9 +8,7 @@ import (
 	"OpenIM/pkg/common/log"
 	"OpenIM/pkg/common/tracelog"
 	pbMsg "OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/statistics"
 	"OpenIM/pkg/utils"
-	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"sync"
@@ -71,7 +69,7 @@ func NewOnlineHistoryRedisConsumerHandler(database controller.MsgDatabase) *Onli
 	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
-	statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	//statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	return &och
 }
 
