@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-func NewObjectPut(db *gorm.DB) relation.ObjectPutModelInterface {
-	return &ObjectPutGorm{
-		DB: db,
-	}
+type ObjectPutGorm struct {
+	*MetaDB
 }
 
-type ObjectPutGorm struct {
-	DB *gorm.DB
+func NewObjectPut(db *gorm.DB) relation.ObjectPutModelInterface {
+	return &ObjectPutGorm{
+		NewMetaDB(db, &relation.ObjectPutModel{}),
+	}
 }
 
 func (o *ObjectPutGorm) NewTx(tx any) relation.ObjectPutModelInterface {
 	return &ObjectPutGorm{
-		DB: tx.(*gorm.DB),
+		NewMetaDB(tx.(*gorm.DB), &relation.ObjectPutModel{}),
 	}
 }
 

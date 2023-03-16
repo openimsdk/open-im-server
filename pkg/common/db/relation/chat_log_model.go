@@ -14,11 +14,11 @@ import (
 )
 
 type ChatLogGorm struct {
-	DB *gorm.DB
+	*MetaDB
 }
 
 func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
-	return &ChatLogGorm{DB: db}
+	return &ChatLogGorm{NewMetaDB(db, &relation.ChatLogModel{})}
 }
 
 func (c *ChatLogGorm) Create(msg pbMsg.MsgDataToMQ) error {

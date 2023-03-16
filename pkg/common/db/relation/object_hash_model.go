@@ -7,19 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewObjectHash(db *gorm.DB) relation.ObjectHashModelInterface {
-	return &ObjectHashGorm{
-		DB: db,
-	}
+type ObjectHashGorm struct {
+	*MetaDB
 }
 
-type ObjectHashGorm struct {
-	DB *gorm.DB
+func NewObjectHash(db *gorm.DB) relation.ObjectHashModelInterface {
+	return &ObjectHashGorm{
+		NewMetaDB(db, &relation.ObjectHashModel{}),
+	}
 }
 
 func (o *ObjectHashGorm) NewTx(tx any) relation.ObjectHashModelInterface {
 	return &ObjectHashGorm{
-		DB: tx.(*gorm.DB),
+		NewMetaDB(tx.(*gorm.DB), &relation.ObjectHashModel{}),
 	}
 }
 

@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-func NewObjectInfo(db *gorm.DB) relation.ObjectInfoModelInterface {
-	return &ObjectInfoGorm{
-		DB: db,
-	}
+type ObjectInfoGorm struct {
+	*MetaDB
 }
 
-type ObjectInfoGorm struct {
-	DB *gorm.DB
+func NewObjectInfo(db *gorm.DB) relation.ObjectInfoModelInterface {
+	return &ObjectInfoGorm{
+		NewMetaDB(db, &relation.ObjectInfoModel{}),
+	}
 }
 
 func (o *ObjectInfoGorm) NewTx(tx any) relation.ObjectInfoModelInterface {
 	return &ObjectInfoGorm{
-		DB: tx.(*gorm.DB),
+		NewMetaDB(tx.(*gorm.DB), &relation.ObjectInfoModel{}),
 	}
 }
 

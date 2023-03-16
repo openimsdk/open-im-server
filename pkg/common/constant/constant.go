@@ -273,6 +273,8 @@ const (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 const ConnID = "connID"
+const OpUserIDPlatformID = "platformID"
+const Token = "token"
 
 const (
 	UnreliableNotification    = 1

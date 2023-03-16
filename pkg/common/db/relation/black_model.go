@@ -8,11 +8,11 @@ import (
 )
 
 type BlackGorm struct {
-	DB *gorm.DB
+	*MetaDB
 }
 
 func NewBlackGorm(db *gorm.DB) relation.BlackModelInterface {
-	return &BlackGorm{db}
+	return &BlackGorm{NewMetaDB(db, &relation.BlackModel{})}
 }
 
 func (b *BlackGorm) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {

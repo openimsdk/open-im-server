@@ -46,9 +46,8 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 	}
 	miss := utils.SliceAnySub(users, result, func(e *relation.UserModel) string { return e.UserID })
 	if len(miss) > 0 {
-		u.userDB.Create(ctx, miss)
+		_ = u.userDB.Create(ctx, miss)
 	}
-
 	return nil
 }
 

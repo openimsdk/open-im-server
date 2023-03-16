@@ -7,16 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewFriendRequestGorm(db *gorm.DB) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{db}
+type FriendRequestGorm struct {
+	*MetaDB
 }
 
-type FriendRequestGorm struct {
-	DB *gorm.DB
+func NewFriendRequestGorm(db *gorm.DB) relation.FriendRequestModelInterface {
+	return &FriendRequestGorm{NewMetaDB(db, &relation.FriendModel{})}
 }
 
 func (f *FriendRequestGorm) NewTx(tx any) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{DB: tx.(*gorm.DB)}
+	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendModel{})}
 }
 
 // 插入多条记录
