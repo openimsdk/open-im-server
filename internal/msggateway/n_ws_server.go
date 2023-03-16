@@ -1,11 +1,11 @@
 package msggateway
 
 import (
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/utils"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"sync"

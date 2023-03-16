@@ -1,8 +1,8 @@
 package check
 
 import (
-	"OpenIM/pkg/common/tokenverify"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 )
 
 func (u *UserCheck) Access(ctx context.Context, ownerUserID string) (err error) {

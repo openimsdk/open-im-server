@@ -1,12 +1,12 @@
 package relation
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/table/relation"
-	pbMsg "OpenIM/pkg/proto/msg"
-	sdkws "OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/jinzhu/copier"

@@ -1,18 +1,18 @@
 package tools
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/relation"
-	"OpenIM/pkg/common/db/unrelation"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-redis/redis/v8"
 	"math"
 )

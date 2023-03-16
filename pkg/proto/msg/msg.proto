@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "Open-IM-Server/pkg/proto/sdkws/ws.proto";
-import "Open-IM-Server/pkg/proto/wrapperspb/wrapperspb.proto";
-option go_package = "OpenIM/pkg/proto/msg;msg";
+import "sdkws/sdkws.proto";
+import "wrapperspb/wrapperspb.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg";
 package OpenIMServer.msg;
 
 message MsgDataToMQ{

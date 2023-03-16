@@ -1,11 +1,11 @@
 package api
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/mw"
-	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"

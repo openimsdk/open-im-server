@@ -1,18 +1,18 @@
 package tools
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 
-	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/db/unrelation"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 
 	"testing"
 	"time"

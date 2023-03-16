@@ -1,8 +1,8 @@
 package controller
 
 import (
-	unRelationTb "OpenIM/pkg/common/db/table/unrelation"
 	"context"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 // for mongoDB

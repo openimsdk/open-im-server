@@ -1,8 +1,8 @@
 package config
 
 import (
-	"OpenIM/pkg/discoveryregistry"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"io/ioutil"
 	"os"
 	"path/filepath"

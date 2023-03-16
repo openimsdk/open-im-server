@@ -1,11 +1,11 @@
 package mw
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/errs"
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"

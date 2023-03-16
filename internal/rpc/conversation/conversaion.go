@@ -1,18 +1,18 @@
 package conversation
 
 import (
-	"OpenIM/internal/common/check"
-	"OpenIM/internal/common/notification"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/relation"
-	tableRelation "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/db/tx"
-	"OpenIM/pkg/discoveryregistry"
-	pbConversation "OpenIM/pkg/proto/conversation"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	tableRelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 

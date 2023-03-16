@@ -7,9 +7,9 @@
 package kafka
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/tracelog"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/Shopify/sarama"
 )
 

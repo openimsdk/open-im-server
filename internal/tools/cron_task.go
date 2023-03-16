@@ -1,9 +1,9 @@
 package tools
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/log"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/robfig/cron/v3"
 	"sync"
 )

@@ -1,7 +1,7 @@
 package apistruct
 
 import (
-	sdkws "OpenIM/pkg/proto/sdkws"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 type KickGroupMemberReq struct {

@@ -1,8 +1,8 @@
 package check
 
 import (
-	discoveryRegistry "OpenIM/pkg/discoveryregistry"
 	"context"
+	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 )
 
 type BlackChecker struct {

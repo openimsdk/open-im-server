@@ -1,8 +1,8 @@
 package callbackstruct
 
 import (
-	"OpenIM/pkg/errs"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
 type CommonCallbackReq struct {

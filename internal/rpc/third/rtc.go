@@ -1,8 +1,8 @@
 package third
 
 import (
-	"OpenIM/pkg/proto/third"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 )
 
 func (t *thirdServer) GetSignalInvitationInfo(ctx context.Context, req *third.GetSignalInvitationInfoReq) (resp *third.GetSignalInvitationInfoResp, err error) {

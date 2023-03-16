@@ -1,11 +1,11 @@
 package check
 
 import (
-	"OpenIM/pkg/common/config"
-	discoveryRegistry "OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/proto/friend"
-	sdkws "OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"google.golang.org/grpc"
 )
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package OpenIMServer.protobuf;
 
-option go_package = "OpenIM/pkg/proto/wrapperspb;wrapperspb";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb";
 
 // Wrapper message for `double`.
 //

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"OpenIM/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

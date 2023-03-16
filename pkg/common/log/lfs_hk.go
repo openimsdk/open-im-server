@@ -1,7 +1,7 @@
 package log
 
 import (
-	"OpenIM/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"

@@ -1,7 +1,7 @@
 package apiresp
 
 import (
-	"OpenIM/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
 type apiResponse struct {

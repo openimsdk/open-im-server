@@ -1,9 +1,9 @@
 package third
 
 import (
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/proto/third"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"time"
 )
 

@@ -1,13 +1,13 @@
 package fcm
 
 import (
-	"OpenIM/internal/push/offlinepush"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/api/option"
 	"path/filepath"

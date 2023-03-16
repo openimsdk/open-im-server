@@ -1,7 +1,7 @@
 package body
 
 import (
-	"OpenIM/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 type Notification struct {

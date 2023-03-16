@@ -1,13 +1,13 @@
 package unrelation
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/common/mw/specialerror"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"

@@ -1,15 +1,14 @@
 package cache
 
 import (
-	"OpenIM/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 	"time"
 )
 
 const scanCount = 3000
-
 
 func GetDefaultOpt() rockscache.Options {
 	opts := rockscache.NewDefaultOptions()

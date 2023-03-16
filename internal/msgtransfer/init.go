@@ -1,14 +1,14 @@
 package msgtransfer
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/db/unrelation"
-	"OpenIM/pkg/common/prome"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"sync"
 )
 

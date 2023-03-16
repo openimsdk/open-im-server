@@ -1,21 +1,21 @@
 package getui
 
 import (
-	"OpenIM/internal/push/offlinepush"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/db/cache"
-	http2 "OpenIM/pkg/common/http"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tracelog"
-	"OpenIM/pkg/utils/splitter"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
 	"sync"
 
-	"OpenIM/pkg/utils"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"strconv"
 	"time"
 )

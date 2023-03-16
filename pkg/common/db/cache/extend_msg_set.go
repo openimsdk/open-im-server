@@ -1,9 +1,9 @@
 package cache
 
 import (
-	"OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 	"time"
 )

@@ -1,6 +1,6 @@
 package specialerror
 
-import "OpenIM/pkg/errs"
+import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 var handlers []func(err error) errs.CodeError
 

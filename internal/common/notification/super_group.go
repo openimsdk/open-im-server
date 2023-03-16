@@ -1,8 +1,8 @@
 package notification
 
 import (
-	"OpenIM/pkg/common/constant"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	//"github.com/golang/protobuf/jsonpb"
 	//"github.com/golang/protobuf/proto"
 )

@@ -1,9 +1,9 @@
 package relation
 
 import (
-	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
 )
 

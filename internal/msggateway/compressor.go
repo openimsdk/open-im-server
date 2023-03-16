@@ -1,9 +1,9 @@
 package msggateway
 
 import (
-	"OpenIM/pkg/utils"
 	"bytes"
 	"compress/gzip"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"io/ioutil"
 )
 

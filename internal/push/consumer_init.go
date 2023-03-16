@@ -7,7 +7,11 @@
 package push
 
 import (
-	"OpenIM/pkg/common/prome"
+	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/statistics"
 )
 
 type Consumer struct {
@@ -27,6 +31,6 @@ func (c *Consumer) initPrometheus() {
 }
 
 func (c *Consumer) Start() {
-	//statistics.NewStatistics(&c.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	statistics.NewStatistics(&c.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&c.pushCh)
 }

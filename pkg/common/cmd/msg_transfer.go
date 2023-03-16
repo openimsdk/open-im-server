@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"OpenIM/internal/msgtransfer"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/msgtransfer"
 	"github.com/spf13/cobra"
 )
 

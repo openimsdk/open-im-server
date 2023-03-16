@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "OpenIM/pkg/proto/conversation;conversation";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 package OpenIMServer.conversation;
 
 message Conversation{

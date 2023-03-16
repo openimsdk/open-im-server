@@ -1,7 +1,7 @@
 package msggateway
 
 import (
-	"OpenIM/pkg/utils"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"net/http"
 	"strconv"
 )

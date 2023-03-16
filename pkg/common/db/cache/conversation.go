@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"time"

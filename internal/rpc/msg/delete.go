@@ -1,9 +1,9 @@
 package msg
 
 import (
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/proto/msg"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
 func (m *msgServer) DelMsgs(ctx context.Context, req *msg.DelMsgsReq) (*msg.DelMsgsResp, error) {

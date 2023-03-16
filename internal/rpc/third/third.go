@@ -1,15 +1,15 @@
 package third
 
 import (
-	"OpenIM/internal/common/check"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/obj"
-	"OpenIM/pkg/common/db/relation"
-	relationTb "OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/proto/third"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"google.golang.org/grpc"
 )
 

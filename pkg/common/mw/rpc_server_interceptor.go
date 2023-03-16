@@ -1,12 +1,12 @@
 package mw
 
 import (
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/mw/specialerror"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/proto/wrapperspb"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"

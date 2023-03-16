@@ -1,8 +1,8 @@
 package statistics
 
 import (
-	"OpenIM/pkg/common/log"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"time"
 )
 

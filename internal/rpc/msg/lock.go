@@ -1,8 +1,8 @@
 package msg
 
 import (
-	"OpenIM/pkg/common/db/cache"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"time"
 )
 

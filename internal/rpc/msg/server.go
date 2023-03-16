@@ -1,14 +1,14 @@
 package msg
 
 import (
-	"OpenIM/internal/common/check"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/localcache"
-	"OpenIM/pkg/common/db/unrelation"
-	"OpenIM/pkg/common/prome"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"google.golang.org/grpc"
 )
 

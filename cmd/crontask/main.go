@@ -1,8 +1,8 @@
 package main
 
 import (
-	"OpenIM/internal/tools"
-	"OpenIM/pkg/common/cmd"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/tools"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
 )
 
 func main() {

@@ -1,14 +1,14 @@
 package check
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/errs"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/proto/user"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 	"strings"
 )

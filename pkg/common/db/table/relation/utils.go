@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"OpenIM/pkg/utils"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
 )
 

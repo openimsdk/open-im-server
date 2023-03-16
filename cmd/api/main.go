@@ -1,18 +1,18 @@
 package main
 
 import (
-	"OpenIM/internal/api"
-	"OpenIM/pkg/common/cmd"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/log"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/api"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/openKeeper"
 	"net"
 	"strconv"
 
-	"OpenIM/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func main() {

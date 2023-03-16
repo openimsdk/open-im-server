@@ -1,8 +1,8 @@
 package tracelog
 
 import (
-	"OpenIM/pkg/common/constant"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func NewCtx(operationID string) context.Context {

@@ -1,8 +1,8 @@
 package tx
 
 import (
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

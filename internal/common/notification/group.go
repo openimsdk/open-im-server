@@ -1,16 +1,16 @@
 package notification
 
 import (
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/common/tokenverify"
-	"OpenIM/pkg/common/tracelog"
-	pbGroup "OpenIM/pkg/proto/group"
-	"OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/proto/wrapperspb"
-	"OpenIM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )

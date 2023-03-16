@@ -1,12 +1,12 @@
 package api
 
 import (
-	"OpenIM/internal/api/a2r"
-	"OpenIM/pkg/common/config"
-	"OpenIM/pkg/common/log"
-	"OpenIM/pkg/discoveryregistry"
-	"OpenIM/pkg/proto/user"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/api/a2r"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/gin-gonic/gin"
 )
 

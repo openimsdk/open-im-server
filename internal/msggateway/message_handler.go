@@ -1,10 +1,10 @@
 package msggateway
 
 import (
-	"OpenIM/internal/common/notification"
-	"OpenIM/pkg/proto/msg"
-	"OpenIM/pkg/proto/sdkws"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 )

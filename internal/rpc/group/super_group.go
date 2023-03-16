@@ -1,15 +1,15 @@
 package group
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/table/relation"
-	"OpenIM/pkg/common/db/table/unrelation"
-	"OpenIM/pkg/errs"
-	pbGroup "OpenIM/pkg/proto/group"
-	sdkws "OpenIM/pkg/proto/sdkws"
-	"OpenIM/pkg/utils"
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"strings"
 )
 

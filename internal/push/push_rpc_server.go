@@ -1,13 +1,13 @@
 package push
 
 import (
-	"OpenIM/pkg/common/constant"
-	"OpenIM/pkg/common/db/cache"
-	"OpenIM/pkg/common/db/controller"
-	"OpenIM/pkg/common/db/localcache"
-	"OpenIM/pkg/discoveryregistry"
-	pbPush "OpenIM/pkg/proto/push"
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"google.golang.org/grpc"
 	"sync"
 )
