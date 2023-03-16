@@ -1,8 +1,6 @@
 package apiresp
 
 import (
-	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
