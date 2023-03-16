@@ -22,6 +22,7 @@ func main() {
 	if err := apiCmd.Execute(); err != nil {
 		panic(err.Error())
 	}
+	if err := apiCmd.Execute()
 }
 
 func run(port int) error {

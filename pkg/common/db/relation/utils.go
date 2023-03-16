@@ -7,7 +7,7 @@ import (
 
 func gormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {
 	var count int64
-	if err := db.Model(new(E)).Count(&count).Error; err != nil {
+	if err := db.Count(&count).Error; err != nil {
 		return 0, nil, utils.Wrap(err, "")
 	}
 	var es []*E
