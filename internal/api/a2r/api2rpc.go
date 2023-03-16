@@ -29,6 +29,7 @@ func Call[A, B, C any](
 	}
 	cli, err := client()
 	if err != nil {
+		log.ZError(c, "get conn error", err, "req", req)
 		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
 		return
 	}
