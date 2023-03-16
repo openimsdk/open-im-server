@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
+	"strconv"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/openKeeper"
-	"net"
-	"strconv"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
@@ -22,7 +23,6 @@ func main() {
 	if err := apiCmd.Execute(); err != nil {
 		panic(err.Error())
 	}
-	if err := apiCmd.Execute()
 }
 
 func run(port int) error {
