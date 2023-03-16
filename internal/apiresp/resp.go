@@ -2,6 +2,7 @@ package apiresp
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"reflect"
 )
 
 type apiResponse struct {
@@ -11,7 +12,28 @@ type apiResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
+func isEmptyStruct(v any) bool {
+	typeOf := reflect.TypeOf(v)
+	if typeOf.Kind() == reflect.Ptr {
+		typeOf = typeOf.Elem()
+	}
+	if typeOf.Kind() != reflect.Struct {
+		return false
+	}
+	num := typeOf.NumField()
+	for i := 0; i < num; i++ {
+		v := typeOf.Field(i).Name[0]
+		if v >= 'A' && v <= 'Z' {
+			return false
+		}
+	}
+	return true
+}
+
 func apiSuccess(data any) *apiResponse {
+	if isEmptyStruct(data) {
+		return &apiResponse{}
+	}
 	return &apiResponse{
 		Data: data,
 	}
