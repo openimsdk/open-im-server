@@ -91,7 +91,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
 
-	if err := s.FriendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport, tracelog.GetOpUserID(ctx)); err != nil {
+	if err := s.FriendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
 	}
 	return resp, nil

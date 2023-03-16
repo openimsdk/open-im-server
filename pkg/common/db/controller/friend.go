@@ -4,6 +4,7 @@ import (
 	"OpenIM/pkg/common/constant"
 	"OpenIM/pkg/common/db/table/relation"
 	"OpenIM/pkg/common/db/tx"
+	"OpenIM/pkg/common/tracelog"
 	"OpenIM/pkg/errs"
 	"OpenIM/pkg/utils"
 	"context"
@@ -17,7 +18,7 @@ type FriendDatabase interface {
 	// 增加或者更新好友申请
 	AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error)
 	// 先判断是否在好友表，如果在则不插入
-	BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error)
+	BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32) (err error)
 	// 拒绝好友申请
 	RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error)
 	// 同意好友申请
@@ -95,15 +96,16 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 }
 
 // (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
-func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32, OperatorUserID string) (err error) {
+func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32) (err error) {
 	return f.tx.Transaction(func(tx any) error {
 		//先find 找出重复的 去掉重复的
 		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
+		opUserID := tracelog.GetOperationID(ctx)
 		for _, v := range friendUserIDs {
-			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: OperatorUserID})
+			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
 		}
 		fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
 			return e.FriendUserID
@@ -119,7 +121,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			return err
 		}
 		for _, v := range friendUserIDs {
-			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: OperatorUserID})
+			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
 		}
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
