@@ -45,9 +45,9 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 				Cause: fmt.Sprintf("%s", r),
 				Warp:  nil,
 			}
-			sta, err := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
-			if err != nil {
-				panic(err)
+			sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
+			if err_ != nil {
+				panic(err_)
 			}
 			err = sta.Err()
 		}
