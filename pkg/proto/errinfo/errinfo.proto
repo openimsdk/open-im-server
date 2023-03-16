@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package OpenIMServer.protobuf;
+
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo";
+
+message ErrorInfo {
+  string path = 1;
+  uint32 line = 2;
+  string name = 3;
+  string cause = 4;
+  repeated string warp = 5;
+}

@@ -19,12 +19,8 @@ func apiSuccess(data any) *apiResponse {
 
 func apiError(err error) *apiResponse {
 	unwrap := errs.Unwrap(err)
-	var dlt string
-	if unwrap != err {
-		dlt = err.Error()
-	}
 	if codeErr, ok := unwrap.(errs.CodeError); ok {
-		return &apiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: dlt}
+		return &apiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: codeErr.Detail()}
 	}
-	return &apiResponse{ErrCode: errs.ServerInternalError, ErrMsg: err.Error(), ErrDlt: dlt}
+	return &apiResponse{ErrCode: errs.ServerInternalError, ErrMsg: err.Error()}
 }

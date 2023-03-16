@@ -6,10 +6,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	"strings"
 )
 
 func GrpcClient() grpc.DialOption {
@@ -46,8 +47,10 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		return errs.NewCodeError(errs.ServerInternalError, err.Error()).Wrap()
 	}
 	if details := sta.Details(); len(details) > 0 {
-		if v, ok := details[0].(*wrapperspb.StringValue); ok {
-			return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap(v.String())
+		errInfo, ok := details[0].(*errinfo.ErrorInfo)
+		if ok {
+			s := strings.Join(errInfo.Warp, "->") + errInfo.Cause
+			return errs.NewCodeError(int(sta.Code()), sta.Message()).WithDetail(s).Wrap()
 		}
 	}
 	return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()

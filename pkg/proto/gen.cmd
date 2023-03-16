@@ -1,5 +1,6 @@
 protoc --go_out=plugins=grpc:./auth --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth auth/auth.proto
 protoc --go_out=plugins=grpc:./conversation --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation conversation/conversation.proto
+protoc --go_out=plugins=grpc:./errinfo --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo errinfo/errinfo.proto
 protoc --go_out=plugins=grpc:./friend --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend friend/friend.proto
 protoc --go_out=plugins=grpc:./group --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group group/group.proto
 protoc --go_out=plugins=grpc:./msg --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg msg/msg.proto

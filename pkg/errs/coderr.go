@@ -9,6 +9,8 @@ import (
 type CodeError interface {
 	Code() int
 	Msg() string
+	Detail() string
+	WithDetail(detail string) CodeError
 	Is(err error) bool
 	Wrap(msg ...string) error
 	error
@@ -33,6 +35,24 @@ func (e *codeError) Code() int {
 
 func (e *codeError) Msg() string {
 	return e.msg
+}
+
+func (e *codeError) Detail() string {
+	return e.detail
+}
+
+func (e *codeError) WithDetail(detail string) CodeError {
+	var d string
+	if e.detail == "" {
+		d = detail
+	} else {
+		d = e.detail + ", " + detail
+	}
+	return &codeError{
+		code:   e.code,
+		msg:    e.msg,
+		detail: d,
+	}
 }
 
 func (e *codeError) Wrap(w ...string) error {
