@@ -75,7 +75,6 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 
 // ok
 func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) (resp *pbfriend.ImportFriendResp, err error) {
-	resp = &pbfriend.ImportFriendResp{}
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
@@ -93,7 +92,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 	if err := s.FriendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return &pbfriend.ImportFriendResp{}, nil
 }
 
 // ok
