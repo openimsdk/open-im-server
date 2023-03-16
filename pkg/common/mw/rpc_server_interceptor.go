@@ -29,7 +29,9 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	var operationID string
 	defer func() {
 		if r := recover(); r != nil {
-			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, string(debug.Stack()))
+			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
+			fmt.Println("stack info:", string(debug.Stack()))
+			err = errs.ErrInternalServer
 		}
 	}()
 	funcName := info.FullMethod

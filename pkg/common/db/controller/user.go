@@ -15,7 +15,7 @@ type UserDatabase interface {
 	//插入多条 外部保证userID 不重复 且在db中不存在
 	Create(ctx context.Context, users []*relation.UserModel) (err error)
 	//更新（非零值） 外部保证userID存在
-	Update(ctx context.Context, users []*relation.UserModel) (err error)
+	Update(ctx context.Context, user *relation.UserModel) (err error)
 	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	//如果没找到，不返回错误
@@ -75,8 +75,8 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 }
 
 // 更新（非零值） 外部保证userID存在
-func (u *userDatabase) Update(ctx context.Context, users []*relation.UserModel) (err error) {
-	return u.userDB.Update(ctx, users)
+func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
+	return u.userDB.Update(ctx, user)
 }
 
 // 更新（零值） 外部保证userID存在
