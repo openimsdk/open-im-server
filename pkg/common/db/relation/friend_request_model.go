@@ -32,7 +32,7 @@ func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID str
 
 // 更新零值
 func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? AND to_user_id ", formUserID, toUserID).Updates(args).Error, "")
+	return utils.Wrap(f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? AND to_user_id =?", formUserID, toUserID).Updates(args).Error, "")
 }
 
 // 更新多条记录 （非零值）
