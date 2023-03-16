@@ -35,7 +35,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
 			fmt.Println("stack info:", string(debug.Stack()))
 			pc, file, line, ok := runtime.Caller(4)
-			if ok {
+			if !ok {
 				panic("get runtime.Caller failed")
 			}
 			errInfo := &errinfo.ErrorInfo{
@@ -45,9 +45,9 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 				Cause: fmt.Sprintf("%s", r),
 				Warp:  nil,
 			}
-			sta, err := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
-			if err != nil {
-				panic(err)
+			sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
+			if err_ != nil {
+				panic(err_)
 			}
 			err = sta.Err()
 		}
