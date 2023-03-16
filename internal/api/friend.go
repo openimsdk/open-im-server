@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -32,6 +33,10 @@ func (o *Friend) ApplyToAddFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.ApplyToAddFriend, o.client, c)
 }
 
+func (o *Friend) RespondFriendApply(c *gin.Context) {
+	a2r.Call(friend.FriendClient.RespondFriendApply, o.client, c)
+}
+
 func (o *Friend) DeleteFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.DeleteFriend, o.client, c)
 }
@@ -46,10 +51,6 @@ func (o *Friend) GetSelfApplyList(c *gin.Context) {
 
 func (o *Friend) GetFriendList(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetDesignatedFriends, o.client, c)
-}
-
-func (o *Friend) RespondFriendApply(c *gin.Context) {
-	a2r.Call(friend.FriendClient.RespondFriendApply, o.client, c)
 }
 
 func (o *Friend) SetFriendRemark(c *gin.Context) {

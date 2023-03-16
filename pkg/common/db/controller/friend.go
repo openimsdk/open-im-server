@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
@@ -88,7 +89,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			return nil
 		}
 		//gorm.ErrRecordNotFound 错误，则新增
-		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{&relation.FriendRequestModel{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}); err != nil {
+		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}); err != nil {
 			return err
 		}
 		return nil

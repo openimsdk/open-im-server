@@ -46,11 +46,11 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	{
 		f := NewFriend(zk)
 		friendRouterGroup.Use(mw.GinParseToken(rdb))
-		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)                 //1
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList) //1
 		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)               //1
+		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)                 //1
 		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)      //1
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)           //1
 		friendRouterGroup.POST("/add_black", f.AddBlack)                          //1

@@ -2,12 +2,13 @@ package friend
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
-	"time"
 )
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {
@@ -56,6 +57,10 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) (*pbFriend.AddBlackResp, error) {
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
+	_, err := s.userCheck.GetUsersInfos(ctx, []string{req.OwnerUserID, req.BlackUserID}, true)
+	if err != nil {
 		return nil, err
 	}
 	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx), CreateTime: time.Now()}

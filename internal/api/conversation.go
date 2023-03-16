@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -28,7 +29,6 @@ func (o *Conversation) client() (conversation.ConversationClient, error) {
 }
 
 func (o *Conversation) GetAllConversations(c *gin.Context) {
-	return
 	a2r.Call(conversation.ConversationClient.GetAllConversations, o.client, c)
 }
 
