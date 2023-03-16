@@ -79,7 +79,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	err = s.Update(ctx, []*tablerelation.UserModel{user})
+	err = s.Update(ctx, user)
 	if err != nil {
 		return nil, err
 	}
