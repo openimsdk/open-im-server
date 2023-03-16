@@ -1,6 +1,8 @@
 package apiresp
 
 import (
+	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
@@ -12,6 +14,9 @@ type apiResponse struct {
 }
 
 func apiSuccess(data any) *apiResponse {
+	log.ZDebug(context.Background(), "apiSuccess", "resp", &apiResponse{
+		Data: data,
+	})
 	return &apiResponse{
 		Data: data,
 	}
