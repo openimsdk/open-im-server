@@ -24,7 +24,7 @@ type userServer struct {
 	controller.UserDatabase
 	notification        *notification.Check
 	userCheck           *check.UserCheck
-	ConversationChecker *check.ConversationChecker
+	conversationChecker *check.ConversationChecker
 	RegisterCenter      registry.SvcDiscoveryRegistry
 	friendCheck         *check.FriendChecker
 }
@@ -45,10 +45,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
 	}
 	u := &userServer{
-		UserDatabase:   controller.NewUserDatabase(relation.NewUserGorm(db)),
-		notification:   notification.NewCheck(client),
-		userCheck:      check.NewUserCheck(client),
-		RegisterCenter: client,
+		UserDatabase:        controller.NewUserDatabase(relation.NewUserGorm(db)),
+		notification:        notification.NewCheck(client),
+		userCheck:           check.NewUserCheck(client),
+		friendCheck:         check.NewFriendChecker(client),
+		conversationChecker: check.NewConversationChecker(client),
+		RegisterCenter:      client,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
