@@ -14,9 +14,6 @@ type apiResponse struct {
 }
 
 func apiSuccess(data any) *apiResponse {
-	log.ZDebug(context.Background(), "apiSuccess", "resp", &apiResponse{
-		Data: data,
-	})
 	return &apiResponse{
 		Data: data,
 	}
