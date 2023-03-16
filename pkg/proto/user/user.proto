@@ -151,5 +151,7 @@ service user {
   rpc getPaginationUsers(getPaginationUsersReq) returns (getPaginationUsersResp);
   //用户注册
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
+  //获取所有用户ID
+  rpc getAllUserID(getAllUserIDReq) returns (getAllUserIDResp);
 }
 
