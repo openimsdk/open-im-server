@@ -77,6 +77,7 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
+	c.EncodeLevel = zapcore.CapitalLevelEncoder
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"

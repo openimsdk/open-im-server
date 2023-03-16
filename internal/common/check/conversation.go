@@ -31,5 +31,16 @@ func (c *ConversationChecker) getConn() (*grpc.ClientConn, error) {
 }
 
 func (c *ConversationChecker) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
-	panic("implement me")
+	cc, err := c.getConn()
+	if err != nil {
+		return 0, err
+	}
+	var req conversation.GetConversationReq
+	req.OwnerUserID = userID
+	req.ConversationID = conversationID
+	sConversation, err := conversation.NewConversationClient(cc).GetConversation(ctx, &req)
+	if err != nil {
+		return 0, err
+	}
+	return sConversation.GetConversation().RecvMsgOpt, err
 }
