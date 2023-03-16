@@ -31,15 +31,15 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(zk)
-		userRouterGroupChild1 := mw.NewRouterGroup(userRouterGroup, "",)
-		userRouterGroupChild2 := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
-		userRouterGroupChild1.POST("/user_register", u.UserRegister)
-		userRouterGroupChild2.POST("/update_user_info", u.UpdateUserInfo) //1
-		userRouterGroupChild2.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
-		userRouterGroupChild2.POST("/get_users_info", u.GetUsersPublicInfo) //1
-		userRouterGroupChild2.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
-		userRouterGroupChild2.POST("/account_check", u.AccountCheck)        // todo
-		userRouterGroupChild2.POST("/get_users", u.GetUsers)
+		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "",)
+		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
+		userRouterGroupChild.POST("/user_register", u.UserRegister)
+		userRouterGroupChildToken.POST("/update_user_info", u.UpdateUserInfo) //1
+		userRouterGroupChildToken.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
+		userRouterGroupChildToken.POST("/get_users_info", u.GetUsersPublicInfo) //1
+		userRouterGroupChildToken.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
+		userRouterGroupChildToken.POST("/account_check", u.AccountCheck)        // todo
+		userRouterGroupChildToken.POST("/get_users", u.GetUsers)
 	}
 	////friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -94,12 +94,12 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	{
 		a := NewAuth(zk)
 		u := NewUser(zk)
-		authRouterGroupChild1 := mw.NewRouterGroup(authRouterGroup, "",)
-		authRouterGroupChild2 := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
-		authRouterGroupChild1.POST("/user_register", u.UserRegister) //1
-		authRouterGroupChild1.POST("/user_token", a.UserToken)       //1
-		authRouterGroupChild2.POST("/parse_token", a.ParseToken)     //1
-		authRouterGroupChild2.POST("/force_logout", a.ForceLogout)   //1
+		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "",)
+		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
+		authRouterGroupChild.POST("/user_register", u.UserRegister) //1
+		authRouterGroupChild.POST("/user_token", a.UserToken)       //1
+		authRouterGroupChildToken.POST("/parse_token", a.ParseToken)     //1
+		authRouterGroupChildToken.POST("/force_logout", a.ForceLogout)   //1
 	}
 	////Third service
 	thirdGroup := r.Group("/third")
