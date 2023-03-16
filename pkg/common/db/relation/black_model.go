@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -49,7 +50,8 @@ func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pag
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(b.db(ctx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&blacks).Error, "")
+	totalUint32, blacks, err := gormPage[relation.BlackModel](b.db(ctx), pageNumber, showNumber)
+	total = int64(totalUint32)
 	return
 }
 
