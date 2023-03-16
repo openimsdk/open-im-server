@@ -3,6 +3,7 @@ package a2r
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/apiresp"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"

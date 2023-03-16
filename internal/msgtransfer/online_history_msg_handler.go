@@ -1,7 +1,6 @@
 package msgtransfer
 
 import (
-	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -9,7 +8,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/statistics"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

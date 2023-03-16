@@ -3,14 +3,21 @@ package mw
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/apiresp"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"io"
 	"net/http"
-	"github.com/go-redis/redis/v8"
 )
 
-type GinMwOptions func( *gin.RouterGroup )
+type GinMwOptions func(*gin.RouterGroup)
 
 func WithRecovery() GinMwOptions {
 	return func(group *gin.RouterGroup) {
