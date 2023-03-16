@@ -2,6 +2,7 @@ package tokenverify
 
 import (
 	"context"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -78,7 +79,7 @@ func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	return errs.ErrIdentity.Wrap("operate user is not admin")
+	return errs.ErrIdentity.Wrap(fmt.Sprintf("user %s is not admin userID", tracelog.GetOpUserID(ctx)))
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
