@@ -17,12 +17,12 @@ func Call[A, B, C any](
 	var req A
 	if err := c.BindJSON(&req); err != nil {
 		log.ZWarn(c, "gin bind json error", err, "req", req)
-		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数错误
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap()) // 参数错误
 		return
 	}
 	if check, ok := any(&req).(interface{ Check() error }); ok {
 		if err := check.Check(); err != nil {
-			log.ZWarn(c, "custom check  error", err, "req", req)
+			log.ZWarn(c, "custom check error", err, "req", req)
 			apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error())) // 参数校验失败
 			return
 		}

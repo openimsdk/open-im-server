@@ -41,7 +41,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		userRouterGroupChildToken.POST("/account_check", u.AccountCheck)        // todo
 		userRouterGroupChildToken.POST("/get_users", u.GetUsers)
 	}
-	////friend routing group
+	//friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
 		f := NewFriend(zk)
