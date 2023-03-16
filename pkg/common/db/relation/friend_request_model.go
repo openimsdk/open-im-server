@@ -13,11 +13,11 @@ type FriendRequestGorm struct {
 }
 
 func NewFriendRequestGorm(db *gorm.DB) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{NewMetaDB(db, &relation.FriendModel{})}
+	return &FriendRequestGorm{NewMetaDB(db, &relation.FriendRequestModel{})}
 }
 
 func (f *FriendRequestGorm) NewTx(tx any) relation.FriendRequestModelInterface {
-	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendModel{})}
+	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendRequestModel{})}
 }
 
 // 插入多条记录
