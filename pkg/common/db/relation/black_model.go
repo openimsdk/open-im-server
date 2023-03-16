@@ -16,19 +16,19 @@ func NewBlackGorm(db *gorm.DB) relation.BlackModelInterface {
 }
 
 func (b *BlackGorm) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return utils.Wrap(b.DB.Model(&relation.BlackModel{}).Create(&blacks).Error, "")
+	return utils.Wrap(b.db(ctx).Create(&blacks).Error, "")
 }
 
 func (b *BlackGorm) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return utils.Wrap(b.DB.Model(&relation.BlackModel{}).Delete(blacks).Error, "")
+	return utils.Wrap(b.db(ctx).Delete(blacks).Error, "")
 }
 
 func (b *BlackGorm) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(b.DB.Model(&relation.BlackModel{}).Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
+	return utils.Wrap(b.db(ctx).Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
 }
 
 func (b *BlackGorm) Update(ctx context.Context, blacks []*relation.BlackModel) (err error) {
-	return utils.Wrap(b.DB.Model(&relation.BlackModel{}).Updates(&blacks).Error, "")
+	return utils.Wrap(b.db(ctx).Updates(&blacks).Error, "")
 }
 
 func (b *BlackGorm) Find(ctx context.Context, blacks []*relation.BlackModel) (blackList []*relation.BlackModel, err error) {
@@ -36,23 +36,23 @@ func (b *BlackGorm) Find(ctx context.Context, blacks []*relation.BlackModel) (bl
 	for _, black := range blacks {
 		where = append(where, []interface{}{black.OwnerUserID, black.BlockUserID})
 	}
-	return blackList, utils.Wrap(b.DB.Model(&relation.BlackModel{}).Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
+	return blackList, utils.Wrap(b.db(ctx).Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
 }
 
 func (b *BlackGorm) Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.BlackModel, err error) {
 	black = &relation.BlackModel{}
-	return black, utils.Wrap(b.DB.Model(&relation.BlackModel{}).Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error, "")
+	return black, utils.Wrap(b.db(ctx).Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error, "")
 }
 
 func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error) {
-	err = b.DB.Model(&relation.BlackModel{}).Model(b).Count(&total).Error
+	err = b.db(ctx).Count(&total).Error
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(b.DB.Model(&relation.BlackModel{}).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&blacks).Error, "")
+	err = utils.Wrap(b.db(ctx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&blacks).Error, "")
 	return
 }
 
 func (b *BlackGorm) FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error) {
-	return blackUserIDs, utils.Wrap(b.DB.Model(&relation.BlackModel{}).Where("owner_user_id = ?", blackUserIDs).Pluck("block_user_id", &blackUserIDs).Error, "")
+	return blackUserIDs, utils.Wrap(b.db(ctx).Where("owner_user_id = ?", blackUserIDs).Pluck("block_user_id", &blackUserIDs).Error, "")
 }
