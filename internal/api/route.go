@@ -31,7 +31,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	userRouterGroup := r.Group("/user")
 	{
 		u := NewUser(zk)
-		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "",)
+		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "")
 		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
 		userRouterGroupChild.POST("/user_register", u.UserRegister)
 		userRouterGroupChildToken.POST("/update_user_info", u.UpdateUserInfo) //1
@@ -45,6 +45,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	friendRouterGroup := r.Group("/friend")
 	{
 		f := NewFriend(zk)
+		friendRouterGroup.Use(mw.GinParseToken(rdb))
 		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)                 //1
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
@@ -61,6 +62,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	groupRouterGroup := r.Group("/group")
 	g := NewGroup(zk)
 	{
+		groupRouterGroup.Use(mw.GinParseToken(rdb))
 		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
 		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
@@ -86,6 +88,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
+		superGroupRouterGroup.Use(mw.GinParseToken(rdb))
 		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
 		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
@@ -94,17 +97,18 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	{
 		a := NewAuth(zk)
 		u := NewUser(zk)
-		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "",)
+		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "")
 		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
-		authRouterGroupChild.POST("/user_register", u.UserRegister) //1
-		authRouterGroupChild.POST("/user_token", a.UserToken)       //1
-		authRouterGroupChildToken.POST("/parse_token", a.ParseToken)     //1
-		authRouterGroupChildToken.POST("/force_logout", a.ForceLogout)   //1
+		authRouterGroupChild.POST("/user_register", u.UserRegister)    //1
+		authRouterGroupChild.POST("/user_token", a.UserToken)          //1
+		authRouterGroupChildToken.POST("/parse_token", a.ParseToken)   //1
+		authRouterGroupChildToken.POST("/force_logout", a.ForceLogout) //1
 	}
 	////Third service
 	thirdGroup := r.Group("/third")
 	{
 		t := NewThird(zk)
+		thirdGroup.Use(mw.GinParseToken(rdb))
 		thirdGroup.POST("/get_rtc_invitation_info", t.GetSignalInvitationInfo)
 		thirdGroup.POST("/get_rtc_invitation_start_app", t.GetSignalInvitationInfoStartApp)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
@@ -117,29 +121,31 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		thirdGroup.GET("/object", t.GetURL)
 	}
 	////Message
-	chatGroup := r.Group("/msg")
+	msgGroup := r.Group("/msg")
 	{
 		m := NewMsg(zk)
-		chatGroup.POST("/newest_seq", m.GetSeq)
-		chatGroup.POST("/send_msg", m.SendMsg)
-		chatGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
-		chatGroup.POST("/del_msg", m.DelMsg)
-		chatGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)
-		chatGroup.POST("/clear_msg", m.ClearMsg)
+		msgGroup.Use(mw.GinParseToken(rdb))
+		msgGroup.POST("/newest_seq", m.GetSeq)
+		msgGroup.POST("/send_msg", m.SendMsg)
+		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
+		msgGroup.POST("/del_msg", m.DelMsg)
+		msgGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)
+		msgGroup.POST("/clear_msg", m.ClearMsg)
 
-		chatGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
-		chatGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
-		chatGroup.POST("/get_users_online_status", m.GetUsersOnlineStatus)
-		chatGroup.POST("/account_check", m.AccountCheck)
-		//chatGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
-		//chatGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
-		//chatGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
-		//chatGroup.POST("/delete_message_reaction_extensions", msg.DeleteMessageReactionExtensions)
+		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
+		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
+		msgGroup.POST("/get_users_online_status", m.GetUsersOnlineStatus)
+		msgGroup.POST("/account_check", m.AccountCheck)
+		//msgGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
+		//msgGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
+		//msgGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
+		//msgGroup.POST("/delete_message_reaction_extensions", msg.DeleteMessageReactionExtensions)
 	}
 	////Conversation
 	conversationGroup := r.Group("/conversation")
 	{
 		c := NewConversation(zk)
+		conversationGroup.Use(mw.GinParseToken(rdb))
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
@@ -150,4 +156,3 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	}
 	return r
 }
-

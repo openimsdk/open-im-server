@@ -11,7 +11,6 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
@@ -159,9 +158,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 
 // ok
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.GetDesignatedFriendsReq) (resp *pbfriend.GetDesignatedFriendsResp, err error) {
-
 	resp = &pbfriend.GetDesignatedFriendsResp{}
-
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
@@ -173,7 +170,6 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.G
 		return nil, err
 	}
 	return resp, nil
-
 }
 
 // ok 获取接收到的好友申请（即别人主动申请的）

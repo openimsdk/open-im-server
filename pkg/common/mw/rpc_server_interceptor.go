@@ -48,10 +48,10 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	ctx = context.WithValue(ctx, OperationID, operationID)
 	ctx = context.WithValue(ctx, OpUserID, opUserID)
-	log.ZInfo(ctx, "rpc req", "funcName", funcName, "req", rpcString(req))
+	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err == nil {
-		log.ZInfo(ctx, "rpc resp", "funcName", funcName, "resp", rpcString(resp))
+		log.ZInfo(ctx, "rpc server resp", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
 	}
 	unwrap := errs.Unwrap(err)
@@ -72,7 +72,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			grpcStatus = details
 		}
 	}
-	log.ZWarn(ctx, "rpc resp", err, "funcName", funcName)
+	log.ZError(ctx, "rpc server resp", err, "funcName", funcName)
 	return nil, grpcStatus.Err()
 }
 

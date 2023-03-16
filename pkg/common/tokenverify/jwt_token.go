@@ -78,7 +78,7 @@ func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	return errs.ErrIdentity.Wrap()
+	return errs.ErrIdentity.Wrap("is not admin")
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
