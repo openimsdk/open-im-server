@@ -1,7 +1,7 @@
 syntax = "proto3";
+package OpenIMServer.msggateway;
 import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway";
-package OpenIMServer.msggateway;
 
 message OnlinePushMsgReq {
   sdkws.MsgData msgData = 1;

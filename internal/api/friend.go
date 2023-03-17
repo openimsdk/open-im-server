@@ -46,7 +46,7 @@ func (o *Friend) GetFriendApplyList(c *gin.Context) {
 }
 
 func (o *Friend) GetSelfApplyList(c *gin.Context) {
-	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyFrom, o.client, c)
+	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyTo, o.client, c)
 }
 
 func (o *Friend) GetFriendList(c *gin.Context) {

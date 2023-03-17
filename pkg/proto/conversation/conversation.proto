@@ -1,6 +1,6 @@
 syntax = "proto3";
-option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 package OpenIMServer.conversation;
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 
 message Conversation{
   string ownerUserID = 1;
@@ -31,7 +31,7 @@ message ModifyConversationFieldResp{
 }
 
 message SetConversationReq{
-  Conversation Conversation = 1;
+  Conversation conversation = 1;
   int32 notificationType = 2;
 }
 
@@ -39,9 +39,9 @@ message SetConversationResp{
 }
 
 message SetRecvMsgOptReq {
-  string OwnerUserID = 1;
-  string ConversationID = 2;
-  int32 RecvMsgOpt = 3;
+  string ownerUserID = 1;
+  string conversationID = 2;
+  int32 recvMsgOpt = 3;
   int32 notificationType = 4;
 }
 
@@ -49,40 +49,40 @@ message SetRecvMsgOptResp {
 }
 
 message GetConversationReq{
-  string ConversationID = 1;
-  string OwnerUserID = 2;
+  string conversationID = 1;
+  string ownerUserID = 2;
 }
 
 message GetConversationResp{
-  Conversation Conversation = 2;
+  Conversation conversation = 2;
 }
 
 message GetConversationsReq{
-  string OwnerUserID = 1;
-  repeated string ConversationIDs = 2;
+  string ownerUserID = 1;
+  repeated string conversationIDs = 2;
 }
 
 message GetConversationsResp{
-  repeated Conversation Conversations = 2;
+  repeated Conversation conversations = 2;
 }
 
 message GetAllConversationsReq{
-  string OwnerUserID = 1;
+  string ownerUserID = 1;
 }
 
 message GetAllConversationsResp{
-  repeated Conversation Conversations = 2;
+  repeated Conversation conversations = 2;
 }
 
 message BatchSetConversationsReq{
   repeated Conversation Conversations = 1;
-  string OwnerUserID = 2;
+  string ownerUserID = 2;
   int32 notificationType = 3;
 }
 
 message BatchSetConversationsResp{
-  repeated string Success = 1;
-  repeated string Failed = 2;
+  repeated string success = 1;
+  repeated string failed = 2;
 }
 
 message GetRecvMsgNotNotifyUserIDsReq {

@@ -1,8 +1,8 @@
 syntax = "proto3";
+package OpenIMServer.group;
 import "sdkws/sdkws.proto";
 import "wrapperspb/wrapperspb.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group";
-package OpenIMServer.group;
 
 
 

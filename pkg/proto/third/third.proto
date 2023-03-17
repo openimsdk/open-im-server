@@ -1,7 +1,7 @@
 syntax = "proto3";
+package OpenIMServer.third;
 import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third";
-package OpenIMServer.third;
 
 message ApplyPutReq {
   string name = 1;

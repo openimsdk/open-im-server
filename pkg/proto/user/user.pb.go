@@ -1665,7 +1665,7 @@ var file_user_user_proto_rawDesc = []byte{
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x4f, 0x70, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2a, 0x0a,
 	0x10, 0x67, 0x6c, 0x6f, 0x62, 0x61, 0x6c, 0x52, 0x65, 0x63, 0x76, 0x4d, 0x73, 0x67, 0x4f, 0x70,
 	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x10, 0x67, 0x6c, 0x6f, 0x62, 0x61, 0x6c, 0x52,
-	0x65, 0x63, 0x76, 0x4d, 0x73, 0x67, 0x4f, 0x70, 0x74, 0x32, 0xde, 0x05, 0x0a, 0x04, 0x75, 0x73,
+	0x65, 0x63, 0x76, 0x4d, 0x73, 0x67, 0x4f, 0x70, 0x74, 0x32, 0xb7, 0x06, 0x0a, 0x04, 0x75, 0x73,
 	0x65, 0x72, 0x12, 0x66, 0x0a, 0x11, 0x67, 0x65, 0x74, 0x44, 0x65, 0x73, 0x69, 0x67, 0x6e, 0x61,
 	0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x27, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d,
 	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x67, 0x65, 0x74, 0x44,
@@ -1711,11 +1711,17 @@ var file_user_user_proto_rawDesc = []byte{
 	0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74,
 	0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x23, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65,
 	0x72, 0x76, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x52, 0x65,
-	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53,
-	0x44, 0x4b, 0x2f, 0x4f, 0x70, 0x65, 0x6e, 0x2d, 0x49, 0x4d, 0x2d, 0x53, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x75, 0x73, 0x65, 0x72,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x12, 0x57, 0x0a, 0x0c, 0x67, 0x65,
+	0x74, 0x41, 0x6c, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x22, 0x2e, 0x4f, 0x70, 0x65,
+	0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x67,
+	0x65, 0x74, 0x41, 0x6c, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x52, 0x65, 0x71, 0x1a, 0x23,
+	0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x75, 0x73,
+	0x65, 0x72, 0x2e, 0x67, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x52,
+	0x65, 0x73, 0x70, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x44, 0x4b, 0x2f, 0x4f, 0x70, 0x65, 0x6e,
+	0x2d, 0x49, 0x4d, 0x2d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -1785,15 +1791,17 @@ var file_user_user_proto_depIdxs = []int32{
 	2,  // 16: OpenIMServer.user.user.accountCheck:input_type -> OpenIMServer.user.accountCheckReq
 	22, // 17: OpenIMServer.user.user.getPaginationUsers:input_type -> OpenIMServer.user.getPaginationUsersReq
 	24, // 18: OpenIMServer.user.user.userRegister:input_type -> OpenIMServer.user.userRegisterReq
-	5,  // 19: OpenIMServer.user.user.getDesignateUsers:output_type -> OpenIMServer.user.getDesignateUsersResp
-	7,  // 20: OpenIMServer.user.user.updateUserInfo:output_type -> OpenIMServer.user.updateUserInfoResp
-	9,  // 21: OpenIMServer.user.user.setGlobalRecvMessageOpt:output_type -> OpenIMServer.user.setGlobalRecvMessageOptResp
-	27, // 22: OpenIMServer.user.user.getGlobalRecvMessageOpt:output_type -> OpenIMServer.user.getGlobalRecvMessageOptResp
-	3,  // 23: OpenIMServer.user.user.accountCheck:output_type -> OpenIMServer.user.accountCheckResp
-	23, // 24: OpenIMServer.user.user.getPaginationUsers:output_type -> OpenIMServer.user.getPaginationUsersResp
-	25, // 25: OpenIMServer.user.user.userRegister:output_type -> OpenIMServer.user.userRegisterResp
-	19, // [19:26] is the sub-list for method output_type
-	12, // [12:19] is the sub-list for method input_type
+	0,  // 19: OpenIMServer.user.user.getAllUserID:input_type -> OpenIMServer.user.getAllUserIDReq
+	5,  // 20: OpenIMServer.user.user.getDesignateUsers:output_type -> OpenIMServer.user.getDesignateUsersResp
+	7,  // 21: OpenIMServer.user.user.updateUserInfo:output_type -> OpenIMServer.user.updateUserInfoResp
+	9,  // 22: OpenIMServer.user.user.setGlobalRecvMessageOpt:output_type -> OpenIMServer.user.setGlobalRecvMessageOptResp
+	27, // 23: OpenIMServer.user.user.getGlobalRecvMessageOpt:output_type -> OpenIMServer.user.getGlobalRecvMessageOptResp
+	3,  // 24: OpenIMServer.user.user.accountCheck:output_type -> OpenIMServer.user.accountCheckResp
+	23, // 25: OpenIMServer.user.user.getPaginationUsers:output_type -> OpenIMServer.user.getPaginationUsersResp
+	25, // 26: OpenIMServer.user.user.userRegister:output_type -> OpenIMServer.user.userRegisterResp
+	1,  // 27: OpenIMServer.user.user.getAllUserID:output_type -> OpenIMServer.user.getAllUserIDResp
+	20, // [20:28] is the sub-list for method output_type
+	12, // [12:20] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -2200,6 +2208,8 @@ type UserClient interface {
 	GetPaginationUsers(ctx context.Context, in *GetPaginationUsersReq, opts ...grpc.CallOption) (*GetPaginationUsersResp, error)
 	// 用户注册
 	UserRegister(ctx context.Context, in *UserRegisterReq, opts ...grpc.CallOption) (*UserRegisterResp, error)
+	// 获取所有用户ID
+	GetAllUserID(ctx context.Context, in *GetAllUserIDReq, opts ...grpc.CallOption) (*GetAllUserIDResp, error)
 }
 
 type userClient struct {
@@ -2273,6 +2283,15 @@ func (c *userClient) UserRegister(ctx context.Context, in *UserRegisterReq, opts
 	return out, nil
 }
 
+func (c *userClient) GetAllUserID(ctx context.Context, in *GetAllUserIDReq, opts ...grpc.CallOption) (*GetAllUserIDResp, error) {
+	out := new(GetAllUserIDResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.user.user/getAllUserID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 type UserServer interface {
 	// 获取指定的用户信息 全字段
@@ -2289,6 +2308,8 @@ type UserServer interface {
 	GetPaginationUsers(context.Context, *GetPaginationUsersReq) (*GetPaginationUsersResp, error)
 	// 用户注册
 	UserRegister(context.Context, *UserRegisterReq) (*UserRegisterResp, error)
+	// 获取所有用户ID
+	GetAllUserID(context.Context, *GetAllUserIDReq) (*GetAllUserIDResp, error)
 }
 
 // UnimplementedUserServer can be embedded to have forward compatible implementations.
@@ -2315,6 +2336,9 @@ func (*UnimplementedUserServer) GetPaginationUsers(context.Context, *GetPaginati
 }
 func (*UnimplementedUserServer) UserRegister(context.Context, *UserRegisterReq) (*UserRegisterResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserRegister not implemented")
+}
+func (*UnimplementedUserServer) GetAllUserID(context.Context, *GetAllUserIDReq) (*GetAllUserIDResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUserID not implemented")
 }
 
 func RegisterUserServer(s *grpc.Server, srv UserServer) {
@@ -2447,6 +2471,24 @@ func _User_UserRegister_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_GetAllUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllUserIDReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetAllUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/OpenIMServer.user.user/GetAllUserID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetAllUserID(ctx, req.(*GetAllUserIDReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _User_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "OpenIMServer.user.user",
 	HandlerType: (*UserServer)(nil),
@@ -2478,6 +2520,10 @@ var _User_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "userRegister",
 			Handler:    _User_UserRegister_Handler,
+		},
+		{
+			MethodName: "getAllUserID",
+			Handler:    _User_GetAllUserID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

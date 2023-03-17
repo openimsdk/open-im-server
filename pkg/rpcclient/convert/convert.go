@@ -2,13 +2,14 @@ package convert
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	utils2 "github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
-	"time"
 )
 
 type DBFriend struct {
@@ -39,7 +40,7 @@ func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*relation.FriendM
 	return
 }
 
-func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
+func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) (pbFriends []*sdk.FriendInfo, err error) {
 	userIDs := utils2.Slice(friends, func(e *relation.FriendModel) string { return e.FriendUserID })
 	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
@@ -51,6 +52,12 @@ func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) 
 		utils.CopyStructFields(pbfriend.FriendUser, users[v.FriendUserID])
 		pbfriend.CreateTime = v.CreateTime.Unix()
 		pbfriend.FriendUser.CreateTime = v.CreateTime.Unix()
+		pbfriend.OperatorUserID = v.OperatorUserID
+		pbfriend.OwnerUserID = v.OwnerUserID
+		pbfriend.Remark = v.Remark
+		pbfriend.AddSource = v.AddSource
+		pbfriend.Ex = v.Ex
+		pbFriends = append(pbFriends, pbfriend)
 	}
 	return
 }
@@ -110,20 +117,30 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 	if len(friendRequests) > 0 {
 		userIDs = append(userIDs, friendRequests[0].FromUserID)
 	}
+	for _, v := range friendRequests {
+		userIDs = append(userIDs, v.ToUserID)
+	}
 	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
 	for _, v := range friendRequests {
 		pbFriendRequest := &sdk.FriendRequest{}
+		pbFriendRequest.FromUserID = users[v.FromUserID].UserID
 		pbFriendRequest.FromNickname = users[v.FromUserID].Nickname
 		pbFriendRequest.FromFaceURL = users[v.FromUserID].FaceURL
 		pbFriendRequest.FromGender = users[v.FromUserID].Gender
+		pbFriendRequest.ToUserID = users[v.ToUserID].UserID
 		pbFriendRequest.ToNickname = users[v.ToUserID].Nickname
 		pbFriendRequest.ToFaceURL = users[v.ToUserID].FaceURL
 		pbFriendRequest.ToGender = users[v.ToUserID].Gender
-		pbFriendRequest.CreateTime = db.CreateTime.Unix()
-		pbFriendRequest.HandleTime = db.HandleTime.Unix()
+		pbFriendRequest.CreateTime = v.CreateTime.Unix()
+		pbFriendRequest.HandleTime = v.HandleTime.Unix()
+		pbFriendRequest.HandlerUserID = v.HandlerUserID
+		pbFriendRequest.HandleResult = v.HandleResult
+		pbFriendRequest.Ex = v.Ex
+		pbFriendRequest.HandleMsg = v.HandleMsg
+		pbFriendRequest.ReqMsg = v.ReqMsg
 		PBFriendRequests = append(PBFriendRequests, pbFriendRequest)
 	}
 	return
@@ -189,8 +206,11 @@ func (db *DBBlack) DB2PB(ctx context.Context, blacks []*relation.BlackModel) (PB
 	}
 
 	for _, v := range blacks {
-		pbBlack := &sdk.BlackInfo{}
-		utils.CopyStructFields(pbBlack, users[v.OwnerUserID])
+		pbBlack := &sdk.BlackInfo{BlackUserInfo: &sdk.PublicUserInfo{}}
+		pbBlack.OwnerUserID = v.OwnerUserID
+		pbBlack.AddSource = v.AddSource
+		pbBlack.CreateTime = v.CreateTime.Unix()
+		pbBlack.Ex = v.Ex
 		utils.CopyStructFields(pbBlack.BlackUserInfo, users[v.BlockUserID])
 		PBBlacks = append(PBBlacks, pbBlack)
 	}
