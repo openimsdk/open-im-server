@@ -2,7 +2,6 @@ package msggateway
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
@@ -10,6 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )

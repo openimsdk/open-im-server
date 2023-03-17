@@ -2,9 +2,6 @@ package user
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -16,6 +13,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
