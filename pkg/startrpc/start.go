@@ -2,11 +2,11 @@ package startrpc
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/network"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/network"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"

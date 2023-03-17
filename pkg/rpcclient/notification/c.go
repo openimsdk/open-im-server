@@ -2,12 +2,12 @@ package notification
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	utils "github.com/OpenIMSDK/open_utils"
 )
 
