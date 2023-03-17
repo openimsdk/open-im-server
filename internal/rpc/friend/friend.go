@@ -2,6 +2,7 @@ package friend
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
@@ -195,7 +196,12 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, total, err := s.FriendDatabase.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	var pageNumber, showNumber int32
+	if req.Pagination != nil {
+		pageNumber = req.Pagination.PageNumber
+		showNumber = req.Pagination.ShowNumber
+	}
+	friendRequests, total, err := s.FriendDatabase.PageFriendRequestFromMe(ctx, req.UserID, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}
