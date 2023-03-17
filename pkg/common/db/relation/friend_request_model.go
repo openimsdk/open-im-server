@@ -36,8 +36,8 @@ func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, 
 }
 
 // 更新多条记录 （非零值）
-func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relation.FriendRequestModel) (err error) {
-	return utils.Wrap(f.db(ctx).Updates(&friendRequests).Error, "")
+func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests *relation.FriendRequestModel) (err error) {
+	return utils.Wrap(f.db(ctx).Updates(friendRequests).Error, "")
 }
 
 // 获取来指定用户的好友申请  未找到 不返回错误

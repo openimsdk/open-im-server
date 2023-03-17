@@ -31,7 +31,7 @@ type FriendRequestModelInterface interface {
 	// 更新零值
 	UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}) (err error)
 	// 更新多条记录 （非零值）
-	Update(ctx context.Context, friendRequests []*FriendRequestModel) (err error)
+	Update(ctx context.Context, friendRequests *FriendRequestModel) (err error)
 	// 获取来指定用户的好友申请  未找到 不返回错误
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)

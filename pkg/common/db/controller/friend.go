@@ -142,7 +142,7 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 		return err
 	}
 	friendRequest.HandleResult = constant.FriendResponseRefuse
-	err = f.friendRequest.Update(ctx, []*relation.FriendRequestModel{friendRequest})
+	err = f.friendRequest.Update(ctx, friendRequest)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		}
 		friendRequest.HandlerUserID = friendRequest.FromUserID
 		friendRequest.HandleResult = constant.FriendResponseAgree
-		err = f.friendRequest.NewTx(tx).Update(ctx, []*relation.FriendRequestModel{friendRequest})
+		err = f.friendRequest.NewTx(tx).Update(ctx, friendRequest)
 		if err != nil {
 			return err
 		}
