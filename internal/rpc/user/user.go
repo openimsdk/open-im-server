@@ -199,6 +199,6 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbuser.GetAllUserIDResp{UserIDList: userIDs}
+	resp = &pbuser.GetAllUserIDResp{UserIDs: userIDs}
 	return resp, nil
 }
