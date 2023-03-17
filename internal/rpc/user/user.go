@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -190,5 +191,14 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 		return nil, err
 	}
 	resp.GlobalRecvMsgOpt = user[0].GlobalRecvMsgOpt
+	return resp, nil
+}
+
+func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
+	userIDs, err := s.UserDatabase.GetAllUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp = &pbuser.GetAllUserIDResp{UserIDList: userIDs}
 	return resp, nil
 }

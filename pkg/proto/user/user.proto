@@ -9,7 +9,7 @@ message getAllUserIDReq{
 }
 message getAllUserIDResp{
   int32 total = 1;
-  repeated string userIDList = 2;
+  repeated string userIDs = 2;
 }
 
 
