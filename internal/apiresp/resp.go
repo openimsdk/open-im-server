@@ -12,7 +12,7 @@ type apiResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func isEmptyStruct(v any) bool {
+func isAllFieldsPrivate(v any) bool {
 	typeOf := reflect.TypeOf(v)
 	if typeOf.Kind() == reflect.Ptr {
 		typeOf = typeOf.Elem()
@@ -22,8 +22,8 @@ func isEmptyStruct(v any) bool {
 	}
 	num := typeOf.NumField()
 	for i := 0; i < num; i++ {
-		v := typeOf.Field(i).Name[0]
-		if v >= 'A' && v <= 'Z' {
+		c := typeOf.Field(i).Name[0]
+		if c >= 'A' && c <= 'Z' {
 			return false
 		}
 	}
@@ -31,7 +31,7 @@ func isEmptyStruct(v any) bool {
 }
 
 func apiSuccess(data any) *apiResponse {
-	if isEmptyStruct(data) {
+	if isAllFieldsPrivate(data) {
 		return &apiResponse{}
 	}
 	return &apiResponse{
