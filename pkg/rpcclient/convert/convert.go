@@ -2,13 +2,14 @@ package convert
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	utils2 "github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
-	"time"
 )
 
 type DBFriend struct {
@@ -110,20 +111,26 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 	if len(friendRequests) > 0 {
 		userIDs = append(userIDs, friendRequests[0].FromUserID)
 	}
+	for _, v := range friendRequests {
+		userIDs = append(userIDs, v.ToUserID)
+	}
 	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
 	for _, v := range friendRequests {
 		pbFriendRequest := &sdk.FriendRequest{}
+		pbFriendRequest.FromUserID = users[v.FromUserID].UserID
 		pbFriendRequest.FromNickname = users[v.FromUserID].Nickname
 		pbFriendRequest.FromFaceURL = users[v.FromUserID].FaceURL
 		pbFriendRequest.FromGender = users[v.FromUserID].Gender
+		pbFriendRequest.ToUserID = users[v.ToUserID].UserID
 		pbFriendRequest.ToNickname = users[v.ToUserID].Nickname
 		pbFriendRequest.ToFaceURL = users[v.ToUserID].FaceURL
 		pbFriendRequest.ToGender = users[v.ToUserID].Gender
-		pbFriendRequest.CreateTime = db.CreateTime.Unix()
-		pbFriendRequest.HandleTime = db.HandleTime.Unix()
+		pbFriendRequest.CreateTime = v.CreateTime.Unix()
+		pbFriendRequest.HandleTime = v.HandleTime.Unix()
+		pbFriendRequest.HandlerUserID = v.HandlerUserID
 		PBFriendRequests = append(PBFriendRequests, pbFriendRequest)
 	}
 	return

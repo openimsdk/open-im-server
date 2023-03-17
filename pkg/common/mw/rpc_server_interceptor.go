@@ -3,6 +3,12 @@ package mw
 import (
 	"context"
 	"fmt"
+	"math"
+	"runtime"
+	"runtime/debug"
+	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -12,10 +18,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"math"
-	"runtime"
-	"runtime/debug"
-	"strings"
 )
 
 const OperationID = "operationID"
@@ -87,23 +89,25 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
 	var errInfo *errinfo.ErrorInfo
-	if unwrap != err {
-		sti, ok := err.(interface{ StackTrace() errors.StackTrace })
-		if ok {
-			log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName, "unwrap", unwrap.Error(), "stack", fmt.Sprintf("%+v", err))
-			if fs := sti.StackTrace(); len(fs) > 0 {
-				pc := uintptr(fs[0])
-				fn := runtime.FuncForPC(pc)
-				file, line := fn.FileLine(pc)
-				errInfo = &errinfo.ErrorInfo{
-					Path:  file,
-					Line:  uint32(line),
-					Name:  fn.Name(),
-					Cause: unwrap.Error(),
-					Warp:  nil,
-				}
-				if arr := strings.Split(err.Error(), ": "); len(arr) > 1 {
-					errInfo.Warp = arr[:len(arr)-1]
+	if config.Config.Log.WithStack {
+		if unwrap != err {
+			sti, ok := err.(interface{ StackTrace() errors.StackTrace })
+			if ok {
+				log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName, "unwrap", unwrap.Error(), "stack", fmt.Sprintf("%+v", err))
+				if fs := sti.StackTrace(); len(fs) > 0 {
+					pc := uintptr(fs[0])
+					fn := runtime.FuncForPC(pc)
+					file, line := fn.FileLine(pc)
+					errInfo = &errinfo.ErrorInfo{
+						Path:  file,
+						Line:  uint32(line),
+						Name:  fn.Name(),
+						Cause: unwrap.Error(),
+						Warp:  nil,
+					}
+					if arr := strings.Split(err.Error(), ": "); len(arr) > 1 {
+						errInfo.Warp = arr[:len(arr)-1]
+					}
 				}
 			}
 		}

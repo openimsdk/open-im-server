@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"errors"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -73,7 +73,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 	return f.tx.Transaction(func(tx any) error {
 		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
 		//有db错误
-		if err != nil && errors.Unwrap(err) != gorm.ErrRecordNotFound {
+		if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
 		//无错误 则更新
@@ -89,7 +89,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			return nil
 		}
 		//gorm.ErrRecordNotFound 错误，则新增
-		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex}}); err != nil {
+		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}}); err != nil {
 			return err
 		}
 		return nil
@@ -142,7 +142,8 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 		return err
 	}
 	friendRequest.HandleResult = constant.FriendResponseRefuse
-	err = f.friendRequest.Update(ctx, []*relation.FriendRequestModel{friendRequest})
+	friendRequest.HandleTime = time.Now()
+	err = f.friendRequest.Update(ctx, friendRequest)
 	if err != nil {
 		return err
 	}
@@ -158,7 +159,8 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		}
 		friendRequest.HandlerUserID = friendRequest.FromUserID
 		friendRequest.HandleResult = constant.FriendResponseAgree
-		err = f.friendRequest.NewTx(tx).Update(ctx, []*relation.FriendRequestModel{friendRequest})
+		friendRequest.HandleTime = time.Now()
+		err = f.friendRequest.NewTx(tx).Update(ctx, friendRequest)
 		if err != nil {
 			return err
 		}
