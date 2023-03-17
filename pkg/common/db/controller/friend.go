@@ -89,7 +89,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			return nil
 		}
 		//gorm.ErrRecordNotFound 错误，则新增
-		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now()}}); err != nil {
+		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}}); err != nil {
 			return err
 		}
 		return nil
