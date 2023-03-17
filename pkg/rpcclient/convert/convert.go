@@ -40,7 +40,7 @@ func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*relation.FriendM
 	return
 }
 
-func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
+func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) (pbFriends []*sdk.FriendInfo, err error) {
 	userIDs := utils2.Slice(friends, func(e *relation.FriendModel) string { return e.FriendUserID })
 	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
@@ -52,6 +52,7 @@ func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) 
 		utils.CopyStructFields(pbfriend.FriendUser, users[v.FriendUserID])
 		pbfriend.CreateTime = v.CreateTime.Unix()
 		pbfriend.FriendUser.CreateTime = v.CreateTime.Unix()
+		pbFriends = append(pbFriends, pbfriend)
 	}
 	return
 }
@@ -131,6 +132,10 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 		pbFriendRequest.CreateTime = v.CreateTime.Unix()
 		pbFriendRequest.HandleTime = v.HandleTime.Unix()
 		pbFriendRequest.HandlerUserID = v.HandlerUserID
+		pbFriendRequest.HandleResult = v.HandleResult
+		pbFriendRequest.Ex = v.Ex
+		pbFriendRequest.HandleMsg = v.HandleMsg
+		pbFriendRequest.ReqMsg = v.ReqMsg
 		PBFriendRequests = append(PBFriendRequests, pbFriendRequest)
 	}
 	return
