@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/api/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/apiresp"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"

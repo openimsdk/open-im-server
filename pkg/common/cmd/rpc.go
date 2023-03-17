@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/internal/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )

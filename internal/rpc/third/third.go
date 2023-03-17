@@ -2,7 +2,6 @@ package third
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
@@ -10,6 +9,7 @@ import (
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	"google.golang.org/grpc"
 )
 

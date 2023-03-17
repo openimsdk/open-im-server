@@ -2,10 +2,10 @@ package convert
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	utils2 "github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"

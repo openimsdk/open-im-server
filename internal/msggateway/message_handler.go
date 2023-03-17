@@ -2,9 +2,9 @@ package msggateway
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 )

@@ -3,7 +3,7 @@ package mw
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/apiresp"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"

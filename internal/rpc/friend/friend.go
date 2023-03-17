@@ -2,10 +2,6 @@ package friend
 
 import (
 	"context"
-
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
@@ -15,6 +11,9 @@ import (
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
@@ -47,6 +46,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 
 // ok
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
+	resp = &pbfriend.ApplyToAddFriendResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	s.notification.FriendApplicationAddNotification(ctx, req)
-	return &pbfriend.ApplyToAddFriendResp{}, nil
+	return resp, nil
 }
 
 // ok
