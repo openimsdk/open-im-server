@@ -31,13 +31,13 @@ func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID str
 }
 
 // 更新零值
-func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, formUserID string, toUserID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? AND to_user_id =?", formUserID, toUserID).Updates(args).Error, "")
+func (f *FriendRequestGorm) UpdateByMap(ctx context.Context, fromUserID string, toUserID string, args map[string]interface{}) (err error) {
+	return utils.Wrap(f.db(ctx).Model(&relation.FriendRequestModel{}).Where("from_user_id = ? AND to_user_id =?", fromUserID, toUserID).Updates(args).Error, "")
 }
 
-// 更新多条记录 （非零值）
-func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests *relation.FriendRequestModel) (err error) {
-	return utils.Wrap(f.db(ctx).Updates(friendRequests).Error, "")
+// 更新记录 （非零值）
+func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
+	return utils.Wrap(f.db(ctx).Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).Updates(friendRequest).Error, "")
 }
 
 // 获取来指定用户的好友申请  未找到 不返回错误
