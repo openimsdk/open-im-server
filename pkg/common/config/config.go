@@ -2,13 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+
 	_ "embed"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -189,6 +191,7 @@ type config struct {
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
 		ElasticSearchPassword string   `yaml:"elasticSearchPassword"`
+		isJson                bool     `yaml:"isJson"`
 	}
 	ModuleName struct {
 		LongConnSvrName string `yaml:"longConnSvrName"`

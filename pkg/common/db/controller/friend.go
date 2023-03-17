@@ -7,7 +7,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -73,7 +72,6 @@ func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (
 func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error) {
 	return f.tx.Transaction(func(tx any) error {
 		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
-		log.ZError(ctx, "fr error", err)
 		//有db错误
 		if err != nil && errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err

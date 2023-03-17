@@ -43,14 +43,14 @@ func (f *FriendRequestGorm) Update(ctx context.Context, friendRequests []*relati
 // 获取来指定用户的好友申请  未找到 不返回错误
 func (f *FriendRequestGorm) Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *relation.FriendRequestModel, err error) {
 	friendRequest = &relation.FriendRequestModel{}
-	utils.Wrap(f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Find(friendRequest).Error, "")
-	return
+	err = utils.Wrap(f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Find(friendRequest).Error, "")
+	return friendRequest, err
 }
 
 func (f *FriendRequestGorm) Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *relation.FriendRequestModel, err error) {
 	friendRequest = &relation.FriendRequestModel{}
-	utils.Wrap(f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Take(friendRequest).Error, "")
-	return
+	err = utils.Wrap(f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Take(friendRequest).Error, "")
+	return friendRequest, err
 }
 
 // 获取toUserID收到的好友申请列表
