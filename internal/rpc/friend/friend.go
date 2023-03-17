@@ -2,6 +2,7 @@ package friend
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/common/check"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/common/notification"
@@ -46,7 +47,6 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 
 // ok
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
-	resp = &pbfriend.ApplyToAddFriendResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 		return nil, err
 	}
 	s.notification.FriendApplicationAddNotification(ctx, req)
-	return resp, nil
+	return &pbfriend.ApplyToAddFriendResp{}, nil
 }
 
 // ok
