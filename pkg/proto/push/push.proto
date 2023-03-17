@@ -1,7 +1,7 @@
 syntax = "proto3";
+package OpenIMServer.push;
 import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push";
-package OpenIMServer.push;
 
 message PushMsgReq {
   sdkws.MsgData msgData = 1;

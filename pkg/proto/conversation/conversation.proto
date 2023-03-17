@@ -1,6 +1,6 @@
 syntax = "proto3";
-option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 package OpenIMServer.conversation;
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 
 message Conversation{
   string ownerUserID = 1;
@@ -63,7 +63,7 @@ message GetConversationsReq{
 }
 
 message GetConversationsResp{
-  repeated conversation conversations = 2;
+  repeated Conversation conversations = 2;
 }
 
 message GetAllConversationsReq{

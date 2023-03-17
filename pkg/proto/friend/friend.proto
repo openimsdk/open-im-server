@@ -1,7 +1,7 @@
 syntax = "proto3";
+package OpenIMServer.friend;
 import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend";
-package OpenIMServer.friend;
 
 message getPaginationFriendsReq{
   sdkws.RequestPagination pagination = 1;

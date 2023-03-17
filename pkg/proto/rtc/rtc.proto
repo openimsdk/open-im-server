@@ -1,7 +1,7 @@
 syntax = "proto3";
+package OpenIMServer.rtc;
 import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/rtc";
-package OpenIMServer.rtc;
 
 message SignalMessageAssembleReq {
  sdkws.SignalReq signalReq = 1;
