@@ -52,6 +52,11 @@ func (db *DBFriend) DB2PB(ctx context.Context, friends []*relation.FriendModel) 
 		utils.CopyStructFields(pbfriend.FriendUser, users[v.FriendUserID])
 		pbfriend.CreateTime = v.CreateTime.Unix()
 		pbfriend.FriendUser.CreateTime = v.CreateTime.Unix()
+		pbfriend.OperatorUserID = v.OperatorUserID
+		pbfriend.OwnerUserID = v.OwnerUserID
+		pbfriend.Remark = v.Remark
+		pbfriend.AddSource = v.AddSource
+		pbfriend.Ex = v.Ex
 		pbFriends = append(pbFriends, pbfriend)
 	}
 	return
@@ -201,8 +206,11 @@ func (db *DBBlack) DB2PB(ctx context.Context, blacks []*relation.BlackModel) (PB
 	}
 
 	for _, v := range blacks {
-		pbBlack := &sdk.BlackInfo{}
-		utils.CopyStructFields(pbBlack, users[v.OwnerUserID])
+		pbBlack := &sdk.BlackInfo{BlackUserInfo: &sdk.PublicUserInfo{}}
+		pbBlack.OwnerUserID = v.OwnerUserID
+		pbBlack.AddSource = v.AddSource
+		pbBlack.CreateTime = v.CreateTime.Unix()
+		pbBlack.Ex = v.Ex
 		utils.CopyStructFields(pbBlack.BlackUserInfo, users[v.BlockUserID])
 		PBBlacks = append(PBBlacks, pbBlack)
 	}
