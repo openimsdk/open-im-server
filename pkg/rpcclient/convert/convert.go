@@ -2,13 +2,14 @@ package convert
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	utils2 "github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
-	"time"
 )
 
 type DBFriend struct {
@@ -109,6 +110,9 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 	userIDs := make([]string, 0)
 	if len(friendRequests) > 0 {
 		userIDs = append(userIDs, friendRequests[0].FromUserID)
+	}
+	for _, v := range friendRequests {
+		userIDs = append(userIDs, v.ToUserID)
 	}
 	users, err := db.userCheck.GetUsersInfoMap(ctx, userIDs, true)
 	if err != nil {
