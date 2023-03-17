@@ -86,3 +86,13 @@ func Unwrap(err error) error {
 	}
 	return err
 }
+
+func Wrap(err error, msg ...string) error {
+	if err == nil {
+		return nil
+	}
+	if len(msg) == 0 {
+		return errors.WithStack(err)
+	}
+	return errors.Wrap(err, strings.Join(msg, ", "))
+}
