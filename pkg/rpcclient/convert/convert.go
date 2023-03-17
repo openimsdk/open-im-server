@@ -126,8 +126,8 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 		pbFriendRequest.ToNickname = users[v.ToUserID].Nickname
 		pbFriendRequest.ToFaceURL = users[v.ToUserID].FaceURL
 		pbFriendRequest.ToGender = users[v.ToUserID].Gender
-		pbFriendRequest.CreateTime = db.CreateTime.Unix()
-		pbFriendRequest.HandleTime = db.HandleTime.Unix()
+		pbFriendRequest.CreateTime = v.CreateTime.Unix()
+		pbFriendRequest.HandleTime = v.HandleTime.Unix()
 		PBFriendRequests = append(PBFriendRequests, pbFriendRequest)
 	}
 	return
