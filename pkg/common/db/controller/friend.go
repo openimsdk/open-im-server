@@ -74,8 +74,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 	return f.tx.Transaction(func(tx any) error {
 		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
 		//有db错误
-		if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
-			// errors.Unwrap()
+		if err != nil && errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			log.ZDebug(ctx, "AddFriendRequest err", "bool", errors.Unwrap(err) != gorm.ErrRecordNotFound, "err", err.Error(), "unwrap", errors.Unwrap(err).Error())
 			return err
 		}
