@@ -187,6 +187,7 @@ type config struct {
 		RemainRotationCount   uint     `yaml:"remainRotationCount"`
 		RemainLogLevel        int      `yaml:"remainLogLevel"`
 		Stderr                bool     `yaml:"stderr"`
+		WithStack             bool     `yaml:"withStack"`
 		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
