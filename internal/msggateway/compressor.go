@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"io/ioutil"
+	"io"
 )
 
 type Compressor interface {
@@ -35,7 +35,7 @@ func (g *GzipCompressor) DeCompress(compressedData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "NewReader failed")
 	}
-	compressedData, err = ioutil.ReadAll(reader)
+	compressedData, err = io.ReadAll(reader)
 	if err != nil {
 		return nil, utils.Wrap(err, "ReadAll failed")
 	}
