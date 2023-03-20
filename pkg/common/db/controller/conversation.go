@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -186,18 +187,18 @@ func (c *ConversationDataBase) GetConversation(ctx context.Context, ownerUserID 
 }
 
 func (c *ConversationDataBase) GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
-	getConversationIDList := func() (string, error) {
-		conversationIDList, err := c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
+	getConversationIDs := func() (string, error) {
+		conversationIDs, err := c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
 		if err != nil {
 			return "", utils.Wrap(err, "getConversationIDList failed")
 		}
-		bytes, err := json.Marshal(conversationIDList)
+		bytes, err := json.Marshal(conversationIDs)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
 		return string(bytes), nil
 	}
-	conversationIDList, err := c.cache.GetUserConversationIDs(ctx, ownerUserID, getConversationIDList)
+	conversationIDList, err := c.cache.GetUserConversationIDs(ctx, ownerUserID, getConversationIDs)
 	if err != nil {
 		return nil, err
 	}

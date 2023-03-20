@@ -3,6 +3,12 @@ package group
 import (
 	"context"
 	"fmt"
+	"math/big"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -22,11 +28,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
-	"math/big"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -120,7 +121,6 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-	resp := &pbGroup.CreateGroupResp{GroupInfo: &sdkws.GroupInfo{}}
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
@@ -151,6 +151,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
+		groupMember.JoinTime = time.Now()
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return err
 		}
@@ -179,6 +180,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := s.GroupDatabase.CreateGroup(ctx, []*relationTb.GroupModel{group}, groupMembers); err != nil {
 		return nil, err
 	}
+	resp := &pbGroup.CreateGroupResp{GroupInfo: &sdkws.GroupInfo{}}
 	resp.GroupInfo = DbToPbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
 	if req.GroupInfo.GroupType == constant.SuperGroup {

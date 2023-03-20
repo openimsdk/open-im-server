@@ -249,7 +249,6 @@ func (db *DBBlack) Convert(ctx context.Context) (*sdk.BlackInfo, error) {
 
 type DBGroup struct {
 	*relation.GroupModel
-	zk         discoveryRegistry.SvcDiscoveryRegistry
 	groupCheck *check.GroupChecker
 }
 
