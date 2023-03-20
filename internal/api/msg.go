@@ -163,7 +163,7 @@ func RequiredIf(fl validator.FieldLevel) bool {
 	default:
 		return true
 	}
-	return false
+	return true
 }
 func (m *Message) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
