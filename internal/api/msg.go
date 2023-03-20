@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
@@ -153,17 +154,17 @@ func RequiredIf(fl validator.FieldLevel) bool {
 	sessionType := fl.Parent().FieldByName("SessionType").Int()
 	switch sessionType {
 	case 1, 4:
-		log.ZDebug(context.Background(), "1", sessionType)
+		fmt.Println("1", sessionType)
 		if fl.StructFieldName() == "RecvID" {
-			log.ZDebug(context.Background(), "2", sessionType)
+			fmt.Println("2", sessionType)
 
 			return fl.Field().String() != ""
 		}
 	case 2, 3:
-		log.ZDebug(context.Background(), "3", sessionType)
+		fmt.Println("3", sessionType)
 
 		if fl.StructFieldName() == "GroupID" {
-			log.ZDebug(context.Background(), "4", sessionType)
+			fmt.Println("4", sessionType)
 
 			return fl.Field().String() != ""
 		}
