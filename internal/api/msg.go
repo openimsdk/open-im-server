@@ -15,6 +15,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
@@ -148,12 +149,30 @@ func (m *Message) AddMessageReactionExtensions(c *gin.Context) {
 func (m *Message) DeleteMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.client, c)
 }
-
+func RequiredIf(fl validator.FieldLevel) bool {
+	sessionType := fl.Parent().FieldByName("SessionType").Int()
+	switch sessionType {
+	case 1, 4:
+		if fl.StructFieldName() == "RecvID" {
+			return fl.Field().String() != ""
+		}
+	case 2, 3:
+		if fl.StructFieldName() == "GroupID" {
+			return fl.Field().String() != ""
+		}
+	default:
+		return true
+	}
+	return false
+}
 func (m *Message) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
+	}
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
 	var data interface{}
 	switch params.ContentType {
