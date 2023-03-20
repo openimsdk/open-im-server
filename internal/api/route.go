@@ -126,7 +126,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		m := NewMsg(zk)
 		msgGroup.Use(mw.GinParseToken(rdb))
 		msgGroup.POST("/newest_seq", m.GetSeq)
-		msgGroup.POST("/send_msg", m.SendMsg)
+		msgGroup.POST("/send_msg", m.SendMessage)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
 		msgGroup.POST("/del_msg", m.DelMsg)
 		msgGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)

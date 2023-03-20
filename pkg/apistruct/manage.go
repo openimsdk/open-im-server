@@ -34,7 +34,7 @@ type AccountCheckResp struct {
 
 type ManagementSendMsg struct {
 	SendID           string                 `json:"sendID" binding:"required"`
-	GroupID          string                 `json:"groupID" `
+	GroupID          string                 `json:"groupID" binding:"required_if=SessionType 2|required_if=SessionType 3"`
 	SenderNickname   string                 `json:"senderNickname" `
 	SenderFaceURL    string                 `json:"senderFaceURL" `
 	SenderPlatformID int32                  `json:"senderPlatformID"`
@@ -47,8 +47,18 @@ type ManagementSendMsg struct {
 }
 
 type ManagementSendMsgReq struct {
-	ManagementSendMsg
-	RecvID string `json:"recvID" `
+	SendID           string                 `json:"sendID" binding:"required"`
+	RecvID           string                 `json:"recvID" binding:"required_if=SessionType 1|required_if=SessionType 4"`
+	GroupID          string                 `json:"groupID" binding:"required_if=SessionType 2|required_if=SessionType 3"`
+	SenderNickname   string                 `json:"senderNickname" `
+	SenderFaceURL    string                 `json:"senderFaceURL" `
+	SenderPlatformID int32                  `json:"senderPlatformID"`
+	Content          map[string]interface{} `json:"content" binding:"required" swaggerignore:"true"`
+	ContentType      int32                  `json:"contentType" binding:"required"`
+	SessionType      int32                  `json:"sessionType" binding:"required"`
+	IsOnlineOnly     bool                   `json:"isOnlineOnly"`
+	NotOfflinePush   bool                   `json:"notOfflinePush"`
+	OfflinePushInfo  *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
 type ManagementSendMsgResp struct {

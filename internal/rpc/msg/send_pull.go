@@ -3,8 +3,8 @@ package msg
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -259,6 +259,9 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 }
 
 func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
+	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+		return nil, err
+	}
 	resp := new(sdkws.GetMaxAndMinSeqResp)
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
 	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
@@ -275,7 +278,6 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil && errs.Unwrap(err) != redis.Nil {
-				log.ZDebug(ctx, "redis err", "err", err.Error())
 				return nil, err
 			}
 			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
