@@ -119,7 +119,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if err != nil {
 		panic(err)
 	}
-	log.ZError(ctx, "rpc server resp", err, "funcName", funcName)
+	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
 	return nil, details.Err()
 }
 

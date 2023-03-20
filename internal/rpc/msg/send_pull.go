@@ -9,6 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"sync"
 )
@@ -260,24 +261,23 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	resp := new(sdkws.GetMaxAndMinSeqResp)
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
 	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		return nil, err
 	}
 	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		return nil, err
 	}
 	resp.MaxSeq = maxSeq
 	resp.MinSeq = minSeq
 	if len(req.GroupIDs) > 0 {
-		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
 		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
-			if err != nil {
+			if err != nil && err != redis.Nil {
 				return nil, err
 			}
 			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
-			if err != nil {
+			if err != nil && err != redis.Nil {
 				return nil, err
 			}
 			m2[groupID] = &sdkws.MaxAndMinSeq{
@@ -286,6 +286,7 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 			}
 		}
 	}
+	resp.GroupMaxAndMinSeq = m2
 	return resp, nil
 }
 
