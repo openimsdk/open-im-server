@@ -262,11 +262,11 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	resp := new(sdkws.GetMaxAndMinSeqResp)
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
 	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
-	if err != nil && err != redis.Nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
-	if err != nil && err != redis.Nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	resp.MaxSeq = maxSeq
@@ -274,12 +274,12 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	if len(req.GroupIDs) > 0 {
 		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
-			if err != nil && err != redis.Nil {
+			if err != nil && errs.Unwrap(err) != redis.Nil {
 				log.ZDebug(ctx, "redis err", "err", err.Error())
 				return nil, err
 			}
 			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
-			if err != nil && err != redis.Nil {
+			if err != nil && errs.Unwrap(err) != redis.Nil {
 				return nil, err
 			}
 			m2[groupID] = &sdkws.MaxAndMinSeq{
