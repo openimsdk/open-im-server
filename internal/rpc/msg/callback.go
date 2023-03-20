@@ -147,6 +147,8 @@ func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 	commonCallbackReq.CallbackCommand = constant.CallbackMsgModifyCommand
 	req := cbApi.CallbackMsgModifyCommandReq{
 		CommonCallbackReq: commonCallbackReq,
+		GroupID:           msg.MsgData.GroupID,
+		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbApi.CallbackMsgModifyCommandResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
