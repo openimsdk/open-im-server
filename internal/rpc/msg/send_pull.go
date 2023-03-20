@@ -275,7 +275,7 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil && err != redis.Nil {
-				log.ZDebug(ctx, "redis err", err.Error())
+				log.ZDebug(ctx, "redis err", "err", err.Error())
 				return nil, err
 			}
 			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
