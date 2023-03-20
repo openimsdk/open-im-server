@@ -3,6 +3,7 @@ package msg
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
@@ -274,6 +275,7 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 		for _, groupID := range req.GroupIDs {
 			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
 			if err != nil && err != redis.Nil {
+				log.ZDebug(ctx, "redis err", err.Error())
 				return nil, err
 			}
 			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
