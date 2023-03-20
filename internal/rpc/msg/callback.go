@@ -135,6 +135,8 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	commonCallbackReq.CallbackCommand = constant.CallbackWordFilterCommand
 	req := cbApi.CallbackWordFilterReq{
 		CommonCallbackReq: commonCallbackReq,
+		GroupID:           msg.MsgData.GroupID,
+		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbApi.CallbackWordFilterResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	//utils.CopyStructFields(&req., msg.MsgData)

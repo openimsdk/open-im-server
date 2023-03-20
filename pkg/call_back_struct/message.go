@@ -39,6 +39,8 @@ type CallbackAfterSendGroupMsgResp struct {
 
 type CallbackWordFilterReq struct {
 	CommonCallbackReq
+	RecvID  string `json:"recvID,omitempty"`
+	GroupID string `json:"groupID,omitempty"`
 }
 
 type CallbackWordFilterResp struct {
