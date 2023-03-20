@@ -40,6 +40,8 @@ type CallbackAfterSendGroupMsgResp struct {
 
 type CallbackMsgModifyCommandReq struct {
 	CommonCallbackReq
+	RecvID  string `json:"recvID,omitempty"`
+	GroupID string `json:"groupID,omitempty"`
 }
 
 type CallbackMsgModifyCommandResp struct {
