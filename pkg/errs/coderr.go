@@ -11,7 +11,8 @@ type CodeError interface {
 	Msg() string
 	Detail() string
 	WithDetail(detail string) CodeError
-	Is(err error) bool
+	// Is 判断是否是某个错误, loose为false时, 只有错误码相同就认为是同一个错误, 默认为true
+	Is(err error, loose ...bool) bool
 	Wrap(msg ...string) error
 	error
 }
@@ -59,13 +60,23 @@ func (e *codeError) Wrap(w ...string) error {
 	return errors.Wrap(e, strings.Join(w, ", "))
 }
 
-func (e *codeError) Is(err error) bool {
+func (e *codeError) Is(err error, loose ...bool) bool {
 	if err == nil {
 		return false
 	}
+	var allowSubclasses bool
+	if len(loose) == 0 {
+		allowSubclasses = true
+	} else {
+		allowSubclasses = loose[0]
+	}
 	codeErr, ok := Unwrap(err).(CodeError)
 	if ok {
-		return codeErr.Code() == e.code
+		if allowSubclasses {
+			return Relation.Is(e.code, codeErr.Code())
+		} else {
+			return codeErr.Code() == e.code
+		}
 	}
 	return false
 }
