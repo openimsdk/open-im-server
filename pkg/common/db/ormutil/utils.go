@@ -1,11 +1,11 @@
-package relation
+package ormutil
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
 )
 
-func gormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {
+func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {
 	var count int64
 	if err := db.Count(&count).Error; err != nil {
 		return 0, nil, utils.Wrap(err, "")
@@ -17,7 +17,7 @@ func gormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, e
 	return uint32(count), es, nil
 }
 
-func gormSearch[E any](db *gorm.DB, fields []string, value string, pageNumber, showNumber int32) (uint32, []*E, error) {
+func GormSearch[E any](db *gorm.DB, fields []string, value string, pageNumber, showNumber int32) (uint32, []*E, error) {
 	if len(fields) > 0 && value != "" {
 		value = "%" + value + "%"
 		if len(fields) == 1 {
@@ -30,17 +30,17 @@ func gormSearch[E any](db *gorm.DB, fields []string, value string, pageNumber, s
 			db = db.Where(t)
 		}
 	}
-	return gormPage[E](db, pageNumber, showNumber)
+	return GormPage[E](db, pageNumber, showNumber)
 }
 
-func gormIn[E any](db **gorm.DB, field string, es []E) {
+func GormIn[E any](db **gorm.DB, field string, es []E) {
 	if len(es) == 0 {
 		return
 	}
 	*db = (*db).Where(field+" in (?)", es)
 }
 
-func mapCount(db *gorm.DB, field string) (map[string]uint32, error) {
+func MapCount(db *gorm.DB, field string) (map[string]uint32, error) {
 	var items []struct {
 		ID    string `gorm:"column:id"`
 		Count uint32 `gorm:"column:count"`

@@ -3,6 +3,7 @@ package relation
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -71,14 +72,14 @@ func (g *GroupMemberGorm) TakeOwner(ctx context.Context, groupID string) (groupM
 
 func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, groupList []*relation.GroupMemberModel, err error) {
 	db := g.DB
-	gormIn(&db, "group_id", groupIDs)
-	gormIn(&db, "user_id", userIDs)
-	gormIn(&db, "role_level", roleLevels)
-	return gormSearch[relation.GroupMemberModel](db, []string{"nickname"}, keyword, pageNumber, showNumber)
+	ormutil.GormIn(&db, "group_id", groupIDs)
+	ormutil.GormIn(&db, "user_id", userIDs)
+	ormutil.GormIn(&db, "role_level", roleLevels)
+	return ormutil.GormSearch[relation.GroupMemberModel](db, []string{"nickname"}, keyword, pageNumber, showNumber)
 }
 
 func (g *GroupMemberGorm) MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error) {
-	return mapCount(g.DB.Where("group_id in (?)", groupIDs), "group_id")
+	return ormutil.MapCount(g.DB.Where("group_id in (?)", groupIDs), "group_id")
 }
 
 func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error) {
