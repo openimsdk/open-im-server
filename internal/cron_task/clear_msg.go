@@ -188,9 +188,10 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	}
 	if err != nil {
 		if err == goRedis.Nil {
-			return nil
+
+		} else {
+			return utils.Wrap(err, "GetUserMaxSeq failed")
 		}
-		return utils.Wrap(err, "GetUserMaxSeq failed")
 	}
 	msg, err := db.DB.GetNewestMsg(ID)
 	if err != nil {
