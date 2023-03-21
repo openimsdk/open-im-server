@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('open-im,www.open-im.io').
-** author("fg,Gordon@open-im.io").
-** time(2021/3/5 14:31).
- */
 package push
 
 import (
