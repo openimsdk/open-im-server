@@ -48,8 +48,8 @@ type ManagementSendMsg struct {
 
 type ManagementSendMsgReq struct {
 	SendID           string                 `json:"sendID" binding:"required"`
-	RecvID           string                 `json:"recvID" binding:"required_if"`
-	GroupID          string                 `json:"groupID" binding:"required_if"`
+	RecvID           string                 `json:"recvID" binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType"`
+	GroupID          string                 `json:"groupID" binding:"required_if" message:"groupID is required if sessionType is GroupChatType or SuperGroupChatType"`
 	SenderNickname   string                 `json:"senderNickname" `
 	SenderFaceURL    string                 `json:"senderFaceURL" `
 	SenderPlatformID int32                  `json:"senderPlatformID"`
