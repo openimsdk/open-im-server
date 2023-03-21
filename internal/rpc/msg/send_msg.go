@@ -270,9 +270,10 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	}
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
 	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
-	if err != nil {
-		return false, err
-	}
+	//if err != nil {
+	//	return false, err
+	//}
+	return true, nil
 	switch singleOpt {
 	case constant.ReceiveMessage:
 		return true, nil
