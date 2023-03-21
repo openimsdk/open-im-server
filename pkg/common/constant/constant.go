@@ -275,6 +275,8 @@ const OpUserID = "opUserID"
 const ConnID = "connID"
 const OpUserPlatform = "platform"
 const Token = "token"
+const RpcMwCustom = "hCustom"
+const CheckKey = "CheckKey"
 
 const (
 	UnreliableNotification    = 1

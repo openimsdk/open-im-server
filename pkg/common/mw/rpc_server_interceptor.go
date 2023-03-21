@@ -56,16 +56,26 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
 	}
+	args := make([]string, 0, 4)
 	if opts := md.Get(constant.OperationID); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "operationID error").Err()
 	} else {
+		args = append(args, constant.OperationID, opts[0])
 		ctx = context.WithValue(ctx, constant.OperationID, opts[0])
 	}
 	if opts := md.Get(constant.OpUserID); len(opts) == 1 {
+		args = append(args, constant.OpUserID, opts[0])
 		ctx = context.WithValue(ctx, constant.OpUserID, opts[0])
 	}
 	if opts := md.Get(constant.OpUserPlatform); len(opts) == 1 {
 		ctx = context.WithValue(ctx, constant.OpUserPlatform, opts[0])
+	}
+	if opts := md.Get(constant.CheckKey); len(opts) != 1 || opts[0] == "" {
+		return nil, status.New(codes.InvalidArgument, "check key empty").Err()
+	} else {
+		if err := verifyReqKey(args, opts[0]); err != nil {
+			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
+		}
 	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
 	resp, err = handler(ctx, req)
