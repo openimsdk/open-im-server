@@ -325,3 +325,5 @@ const (
 	FlagPrometheusPort = "prometheus_port"
 	FlagConf           = "config_folder_path"
 )
+
+const OpenIMCommonConfigKey = "OpenIMServerConfig"
