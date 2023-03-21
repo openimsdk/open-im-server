@@ -192,18 +192,6 @@ func (m *Message) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 		return
 	}
-	//switch params.SessionType {
-	//case constant.SingleChatType:
-	//	if len(params.RecvID) == 0 {
-	//		apiresp.GinError(c, errs.ErrData)
-	//		return
-	//	}
-	//case constant.GroupChatType, constant.SuperGroupChatType:
-	//	if len(params.GroupID) == 0 {
-	//		apiresp.GinError(c, errs.ErrData)
-	//		return
-	//	}
-	//}
 	pbReq := m.newUserSendMsgReq(c, &params)
 	conn, err := m.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {

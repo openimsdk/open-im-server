@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
@@ -166,19 +166,12 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 func RequiredIf(fl validator.FieldLevel) bool {
 	sessionType := fl.Parent().FieldByName("SessionType").Int()
 	switch sessionType {
-	case 1, 4:
-		fmt.Println("1", sessionType)
+	case constant.SingleChatType, constant.NotificationChatType:
 		if fl.FieldName() == "RecvID" {
-			fmt.Println("2", sessionType)
-
 			return fl.Field().String() != ""
 		}
-	case 2, 3:
-		fmt.Println("3", sessionType)
-
+	case constant.GroupChatType, constant.SuperGroupChatType:
 		if fl.FieldName() == "GroupID" {
-			fmt.Println("4", sessionType)
-
 			return fl.Field().String() != ""
 		}
 	default:
