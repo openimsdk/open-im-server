@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('OpenIM,www.OpenIM.io').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/5/13 10:33).
- */
 package push
 
 import (

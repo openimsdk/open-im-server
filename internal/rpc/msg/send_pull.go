@@ -16,11 +16,6 @@ import (
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	resp = &msg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
-	// callback
-	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
-
 	if _, err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
@@ -63,9 +58,6 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
 	_, err = m.messageVerification(ctx, req)
 	if err != nil {
 		return nil, err
@@ -103,10 +95,6 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	// callback
 	promePkg.Inc(promePkg.GroupChatMsgRecvSuccessCounter)
-	err = CallbackBeforeSendGroupMsg(ctx, req)
-	if err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
 
 	var memberUserIDList []string
 	if memberUserIDList, err = m.messageVerification(ctx, req); err != nil {

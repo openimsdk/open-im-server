@@ -18,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
 	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase       controller.MsgDatabase
@@ -29,8 +30,22 @@ type msgServer struct {
 	*localcache.GroupLocalCache
 	black         *check.BlackChecker
 	MessageLocker MessageLocker
+	Handlers      MessageInterceptorChain
 }
 
+func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
+	m.Handlers = append(m.Handlers, interceptorFunc...)
+}
+func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsgReq) error {
+	for _, handler := range m.Handlers {
+		msgData, err := handler(ctx, req)
+		if err != nil {
+			return err
+		}
+		req.MsgData = msgData
+	}
+	return nil
+}
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -40,7 +55,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-
 	cacheModel := cache.NewCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
@@ -60,6 +74,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		friend:            check.NewFriendChecker(client),
 		MessageLocker:     NewLockerMessage(cacheModel),
 	}
+	s.addInterceptorHandler(MessageHasReadEnabled, MessageModifyCallback)
 	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)
 	return nil
