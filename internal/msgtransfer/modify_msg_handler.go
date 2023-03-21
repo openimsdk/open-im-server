@@ -10,7 +10,7 @@ import (
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
@@ -54,7 +54,7 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	log.NewInfo("msg come here ModifyMsg!!!", "", "msg", string(cMsg.Value), msgKey)
 	msgFromMQ := pbMsg.MsgDataToModifyByMQ{}
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	err := proto.Unmarshal(cMsg.Value, &msgFromMQ)
 	if err != nil {
 		log.NewError(msgFromMQ.TriggerID, "msg_transfer Unmarshal msg err", "msg", string(cMsg.Value), "err", err.Error())
@@ -66,7 +66,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 		if !isReactionFromCache {
 			continue
 		}
-		tracelog.SetOperationID(ctx, operationID)
+		mcontext.SetOperationID(ctx, operationID)
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
 			notification := &apistruct.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {

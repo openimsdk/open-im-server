@@ -6,8 +6,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbAuth "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
@@ -92,7 +92,7 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, tracelog.GetOperationID(ctx)); err != nil {
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
 		return nil, err
 	}
 	return &resp, nil

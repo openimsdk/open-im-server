@@ -7,7 +7,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -251,7 +251,7 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 		}
 	}
 	if len(failedMsgs) != 0 {
-		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedMsgs, tracelog.GetOperationID(ctx)))
+		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedMsgs, mcontext.GetOperationID(ctx)))
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err

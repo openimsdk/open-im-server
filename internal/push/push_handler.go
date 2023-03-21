@@ -12,7 +12,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -50,7 +50,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	if nowSec-sec > 10 {
 		return
 	}
-	tracelog.SetOperationID(ctx, "")
+	mcontext.SetOperationID(ctx, "")
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:

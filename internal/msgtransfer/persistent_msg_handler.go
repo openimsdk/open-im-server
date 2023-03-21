@@ -13,7 +13,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
@@ -37,7 +37,7 @@ func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *Persiste
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg), msgKey)
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}

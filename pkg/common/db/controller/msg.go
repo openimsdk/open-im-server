@@ -9,8 +9,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/gogo/protobuf/sortkeys"
 	"sync"
 	"time"
@@ -498,7 +498,7 @@ func (db *msgDatabase) GetMsgBySeqs(ctx context.Context, userID string, seqs []i
 	if err != nil {
 		if err != redis.Nil {
 			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
-			log.Error(tracelog.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
+			log.Error(mcontext.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
 		}
 	}
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
@@ -519,7 +519,7 @@ func (db *msgDatabase) GetSuperGroupMsgBySeqs(ctx context.Context, groupID strin
 	if err != nil {
 		if err != redis.Nil {
 			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
-			log.Error(tracelog.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
+			log.Error(mcontext.GetOperationID(ctx), "get message from redis exception", err.Error(), failedSeqs)
 		}
 	}
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
@@ -604,7 +604,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	if err != nil || msgs.DocID == "" {
 		if err != nil {
 			if err == unrelation.ErrMsgListNotExist {
-				log.NewDebug(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "ID:", sourceID, "index:", index, err.Error())
+				log.NewDebug(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), "ID:", sourceID, "index:", index, err.Error())
 			} else {
 				//log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
 			}
@@ -618,7 +618,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	}
 	//log.NewDebug(operationID, "ID:", sourceID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
-		log.NewWarn(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "msgs too large:", len(msgs.Msg), "docID:", msgs.DocID)
+		log.NewWarn(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), "msgs too large:", len(msgs.Msg), "docID:", msgs.DocID)
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgs.IsFull() {
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgs.DocID)

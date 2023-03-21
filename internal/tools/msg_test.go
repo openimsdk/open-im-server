@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/proto"
@@ -66,7 +66,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	mongoClient := mgo.GetDatabase().Collection(unRelationTb.MsgDocModel{}.TableName())
 
 	ctx := context.Background()
-	tracelog.SetOperationID(ctx, operationID)
+	mcontext.SetOperationID(ctx, operationID)
 	testUID1 := "test_del_id1"
 	_, err = mongoClient.DeleteOne(ctx, bson.M{"uid": testUID1 + ":" + strconv.Itoa(0)})
 	if err != nil {

@@ -153,7 +153,7 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 					return
 				}
 			}
-			c.Set(constant.OpUserIDPlatformID, constant.PlatformNameToID(claims.Platform))
+			c.Set(constant.OpUserPlatform, claims.Platform)
 			c.Set(constant.OpUserID, claims.UID)
 			c.Next()
 		}

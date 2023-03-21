@@ -8,7 +8,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -99,7 +99,7 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 		tips.JsonDetail = utils.StructToJsonString(params.Content)
 		pbData.MsgData.Content, err = proto.Marshal(&tips)
 		if err != nil {
-			log.Error(tracelog.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
+			log.Error(mcontext.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
 		}
 	}
 	return &pbData
@@ -211,7 +211,7 @@ func (m *Message) SendMessage(c *gin.Context) {
 		Status: int32(status),
 	})
 	if err != nil {
-		log.NewError(tracelog.GetOperationID(c), "SetSendMsgStatus failed")
+		log.NewError(mcontext.GetOperationID(c), "SetSendMsgStatus failed")
 	}
 	//resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: respPb.ServerMsgID, ClientMsgID: respPb.ClientMsgID, SendTime: respPb.SendTime}}
 	apiresp.GinSuccess(c, respPb)

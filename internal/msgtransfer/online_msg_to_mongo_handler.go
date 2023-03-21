@@ -7,7 +7,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -33,7 +33,7 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.MsgDatabase) *Onli
 func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, session sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	msgFromMQ := pbMsg.MsgDataToMongoByMQ{}
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
 		log.Error("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())

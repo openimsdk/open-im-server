@@ -7,7 +7,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -104,7 +104,7 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
-		opUserID := tracelog.GetOperationID(ctx)
+		opUserID := mcontext.GetOperationID(ctx)
 		for _, v := range friendUserIDs {
 			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: opUserID})
 		}

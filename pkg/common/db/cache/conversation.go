@@ -133,7 +133,7 @@ func (c *ConversationRedis) getSuperGroupRecvNotNotifyUserIDsKey(groupID string)
 //	//	return string(bytes), nil
 //	//}
 //	//defer func() {
-//	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
+//	//	mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
 //	//}()
 //	//conversationIDsStr, err := c.rcClient.Fetch(c.getConversationIDsKey(ownerUserID), time.Second*30*60, getConversationIDs)
 //	//err = json.Unmarshal([]byte(conversationIDsStr), &conversationIDs)
@@ -159,7 +159,7 @@ func (c *ConversationRedis) GetUserConversationIDs1(ctx context.Context, ownerUs
 	//	return string(bytes), nil
 	//}
 	//defer func() {
-	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
+	//	mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
 	//}()
 	//conversationIDsStr, err := c.rcClient.Fetch(c.getConversationIDsKey(ownerUserID), time.Second*30*60, getConversationIDs)
 	//err = json.Unmarshal([]byte(conversationIDsStr), &conversationIDs)
@@ -213,7 +213,7 @@ func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, co
 
 //func (c *ConversationRedis) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []relationTb.ConversationModel, err error) {
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs, "conversations", conversations)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs, "conversations", conversations)
 //	}()
 //	for _, conversationID := range conversationIDs {
 //		conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
@@ -227,7 +227,7 @@ func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, co
 
 //func (c *ConversationRedis) GetUserAllConversations(ctx context.Context, ownerUserID string) (conversations []relationTb.ConversationModel, err error) {
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversations", conversations)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversations", conversations)
 //	}()
 //	IDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
 //	if err != nil {
@@ -253,7 +253,7 @@ func (c *ConversationRedis) DelConversation(ctx context.Context, ownerUserID, co
 //	//	return strconv.Itoa(int(conversation.RecvMsgOpt)), nil
 //	//}
 //	//defer func() {
-//	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationID", conversationID, "opt", opt)
+//	//	mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationID", conversationID, "opt", opt)
 //	//}()
 //	//optStr, err := c.rcClient.Fetch(c.getConversationKey(ownerUserID, conversationID), c.expireTime, getConversation)
 //	//if err != nil {

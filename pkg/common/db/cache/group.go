@@ -187,7 +187,7 @@ func (g *GroupCacheRedis) DelGroupMemberIDs(ctx context.Context, groupID string)
 //		return string(bytes), nil
 //	}
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "joinedGroupIDs", joinedGroupIDs)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "joinedGroupIDs", joinedGroupIDs)
 //	}()
 //	joinedGroupIDListStr, err := g.rcClient.Fetch(g.getJoinedGroupsKey(userID), time.Second*30*60, getJoinedGroupIDList)
 //	if err != nil {
@@ -203,7 +203,7 @@ func (g *GroupCacheRedis) DelJoinedGroupID(ctx context.Context, userID string) (
 
 //func (g *GroupCacheRedis) DelJoinedGroupIDs(ctx context.Context, userIDs []string) (err error) {
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 //	}()
 //	for _, userID := range userIDs {
 //		if err := g.DelJoinedGroupID(ctx, userID); err != nil {
@@ -226,7 +226,7 @@ func (g *GroupCacheRedis) GetGroupMemberInfo(ctx context.Context, groupID, userI
 
 //func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relation.GroupMember, err error) {
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "count", count, "offset", offset, "groupID", groupID, "groupMember", groupMembers)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "count", count, "offset", offset, "groupID", groupID, "groupMember", groupMembers)
 //	}()
 //	groupMemberIDList, err := g.GetGroupMemberIDs(ctx, groupID)
 //	if err != nil {
@@ -283,7 +283,7 @@ func (g *GroupCacheRedis) DelGroupMemberInfo(ctx context.Context, groupID, userI
 //		return strconv.Itoa(int(num)), nil
 //	}
 //	defer func() {
-//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "num", num)
+//		mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "num", num)
 //	}()
 //	groupMember, err := g.rcClient.Fetch(g.getGroupMemberNumKey(groupID), time.Second*30*60, getGroupMemberNum)
 //	if err != nil {

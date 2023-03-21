@@ -273,7 +273,7 @@ const (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 const ConnID = "connID"
-const OpUserIDPlatformID = "platformID"
+const OpUserPlatform = "platform"
 const Token = "token"
 
 const (

@@ -5,8 +5,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
@@ -16,7 +16,7 @@ import (
 )
 
 func (c *Check) setOpUserInfo(ctx context.Context, groupID string, groupMemberInfo *sdkws.GroupMemberFullInfo) error {
-	opUserID := tracelog.GetOpUserID(ctx)
+	opUserID := mcontext.GetOpUserID(ctx)
 	if tokenverify.IsManagerUserID(opUserID) {
 		user, err := c.user.GetUsersInfos(ctx, []string{opUserID}, true)
 		if err != nil {
@@ -221,7 +221,7 @@ func (c *Check) GroupCreatedNotification(ctx context.Context, groupID string, in
 		}
 	}
 
-	c.groupNotification(ctx, constant.GroupCreatedNotification, &GroupCreatedTips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupCreatedNotification, &GroupCreatedTips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 // 群信息改变后掉用
@@ -246,7 +246,7 @@ func (c *Check) GroupInfoSetNotification(ctx context.Context, groupID string, gr
 	if err := c.setOpUserInfo(ctx, groupID, GroupInfoChangedTips.OpUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupInfoSetNotification, &GroupInfoChangedTips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupInfoSetNotification, &GroupInfoChangedTips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupMutedNotification(ctx context.Context, groupID string) {
@@ -258,7 +258,7 @@ func (c *Check) GroupMutedNotification(ctx context.Context, groupID string) {
 	if err := c.setOpUserInfo(ctx, groupID, tips.OpUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupMutedNotification, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupMutedNotification, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupCancelMutedNotification(ctx context.Context, groupID string) {
@@ -270,7 +270,7 @@ func (c *Check) GroupCancelMutedNotification(ctx context.Context, groupID string
 	if err := c.setOpUserInfo(ctx, groupID, tips.OpUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupCancelMutedNotification, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupCancelMutedNotification, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) {
@@ -286,7 +286,7 @@ func (c *Check) GroupMemberMutedNotification(ctx context.Context, groupID, group
 	if err := c.setGroupMemberInfo(ctx, groupID, groupMemberUserID, tips.MutedUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupMemberMutedNotification, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupMemberMutedNotification, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) {
@@ -301,7 +301,7 @@ func (c *Check) GroupMemberInfoSetNotification(ctx context.Context, groupID, gro
 	if err := c.setGroupMemberInfo(ctx, groupID, groupMemberUserID, tips.ChangedUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupMemberInfoSetNotification, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupMemberInfoSetNotification, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupMemberRoleLevelChangeNotification(ctx context.Context, operationID, opUserID, groupID, groupMemberUserID string, notificationType int32) {
@@ -323,7 +323,7 @@ func (c *Check) GroupMemberRoleLevelChangeNotification(ctx context.Context, oper
 		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, groupMemberUserID)
 		return
 	}
-	c.groupNotification(ctx, notificationType, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, notificationType, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 func (c *Check) GroupMemberCancelMutedNotification(ctx context.Context, groupID, groupMemberUserID string) {
@@ -338,7 +338,7 @@ func (c *Check) GroupMemberCancelMutedNotification(ctx context.Context, groupID,
 	if err := c.setGroupMemberInfo(ctx, groupID, groupMemberUserID, tips.MutedUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupMemberCancelMutedNotification, &tips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.GroupMemberCancelMutedNotification, &tips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 //	message ReceiveJoinApplicationTips{
@@ -359,7 +359,7 @@ func (c *Check) JoinGroupApplicationNotification(ctx context.Context, req *pbGro
 
 		return
 	}
-	if err = c.setPublicUserInfo(ctx, tracelog.GetOpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
+	if err = c.setPublicUserInfo(ctx, mcontext.GetOpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
 
 		return
 	}
@@ -369,7 +369,7 @@ func (c *Check) JoinGroupApplicationNotification(ctx context.Context, req *pbGro
 		return
 	}
 	for _, v := range managerList {
-		c.groupNotification(ctx, constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, tracelog.GetOpUserID(ctx), "", v.UserID)
+		c.groupNotification(ctx, constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, mcontext.GetOpUserID(ctx), "", v.UserID)
 	}
 }
 
@@ -382,7 +382,7 @@ func (c *Check) MemberQuitNotification(ctx context.Context, req *pbGroup.QuitGro
 		return
 	}
 
-	c.groupNotification(ctx, constant.MemberQuitNotification, &MemberQuitTips, tracelog.GetOpUserID(ctx), req.GroupID, "")
+	c.groupNotification(ctx, constant.MemberQuitNotification, &MemberQuitTips, mcontext.GetOpUserID(ctx), req.GroupID, "")
 }
 
 //	message ApplicationProcessedTips{
@@ -402,17 +402,17 @@ func (c *Check) GroupApplicationAcceptedNotification(ctx context.Context, req *p
 		return
 	}
 
-	c.groupNotification(ctx, constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, tracelog.GetOpUserID(ctx), "", req.FromUserID)
+	c.groupNotification(ctx, constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, mcontext.GetOpUserID(ctx), "", req.FromUserID)
 	adminList, err := c.group.GetOwnerAndAdminInfos(ctx, req.GroupID)
 	if err != nil {
 		return
 	}
 	for _, v := range adminList {
-		if v.UserID == tracelog.GetOpUserID(ctx) {
+		if v.UserID == mcontext.GetOpUserID(ctx) {
 			continue
 		}
 		GroupApplicationAcceptedTips.ReceiverAs = 1
-		c.groupNotification(ctx, constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, tracelog.GetOpUserID(ctx), "", v.UserID)
+		c.groupNotification(ctx, constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, mcontext.GetOpUserID(ctx), "", v.UserID)
 	}
 }
 
@@ -424,17 +424,17 @@ func (c *Check) GroupApplicationRejectedNotification(ctx context.Context, req *p
 	if err := c.setOpUserInfo(ctx, req.GroupID, GroupApplicationRejectedTips.OpUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, tracelog.GetOpUserID(ctx), "", req.FromUserID)
+	c.groupNotification(ctx, constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, mcontext.GetOpUserID(ctx), "", req.FromUserID)
 	adminList, err := c.group.GetOwnerAndAdminInfos(ctx, req.GroupID)
 	if err != nil {
 		return
 	}
 	for _, v := range adminList {
-		if v.UserID == tracelog.GetOpUserID(ctx) {
+		if v.UserID == mcontext.GetOpUserID(ctx) {
 			continue
 		}
 		GroupApplicationRejectedTips.ReceiverAs = 1
-		c.groupNotification(ctx, constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, tracelog.GetOpUserID(ctx), "", v.UserID)
+		c.groupNotification(ctx, constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, mcontext.GetOpUserID(ctx), "", v.UserID)
 	}
 }
 
@@ -449,7 +449,7 @@ func (c *Check) GroupOwnerTransferredNotification(ctx context.Context, req *pbGr
 	if err := c.setGroupMemberInfo(ctx, req.GroupID, req.NewOwnerUserID, GroupOwnerTransferredTips.NewGroupOwner); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, tracelog.GetOpUserID(ctx), req.GroupID, "")
+	c.groupNotification(ctx, constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, mcontext.GetOpUserID(ctx), req.GroupID, "")
 }
 
 func (c *Check) GroupDismissedNotification(ctx context.Context, req *pbGroup.DismissGroupReq) {
@@ -462,7 +462,7 @@ func (c *Check) GroupDismissedNotification(ctx context.Context, req *pbGroup.Dis
 
 		return
 	}
-	c.groupNotification(ctx, constant.GroupDismissedNotification, &tips, tracelog.GetOpUserID(ctx), req.GroupID, "")
+	c.groupNotification(ctx, constant.GroupDismissedNotification, &tips, mcontext.GetOpUserID(ctx), req.GroupID, "")
 }
 
 //	message MemberKickedTips{
@@ -488,7 +488,7 @@ func (c *Check) MemberKickedNotification(ctx context.Context, req *pbGroup.KickG
 		}
 		MemberKickedTips.KickedUserList = append(MemberKickedTips.KickedUserList, &groupMemberInfo)
 	}
-	c.groupNotification(ctx, constant.MemberKickedNotification, &MemberKickedTips, tracelog.GetOpUserID(ctx), req.GroupID, "")
+	c.groupNotification(ctx, constant.MemberKickedNotification, &MemberKickedTips, mcontext.GetOpUserID(ctx), req.GroupID, "")
 	//
 	//for _, v := range kickedUserIDList {
 	//	groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, "", v, req.OperationID)
@@ -519,7 +519,7 @@ func (c *Check) MemberInvitedNotification(ctx context.Context, groupID, reason s
 		}
 		MemberInvitedTips.InvitedUserList = append(MemberInvitedTips.InvitedUserList, &groupMemberInfo)
 	}
-	c.groupNotification(ctx, constant.MemberInvitedNotification, &MemberInvitedTips, tracelog.GetOpUserID(ctx), groupID, "")
+	c.groupNotification(ctx, constant.MemberInvitedNotification, &MemberInvitedTips, mcontext.GetOpUserID(ctx), groupID, "")
 }
 
 // 群成员主动申请进群，管理员同意后调用，
@@ -531,7 +531,7 @@ func (c *Check) MemberEnterNotification(ctx context.Context, req *pbGroup.GroupA
 	if err := c.setGroupMemberInfo(ctx, req.GroupID, req.FromUserID, MemberEnterTips.EntrantUser); err != nil {
 		return
 	}
-	c.groupNotification(ctx, constant.MemberEnterNotification, &MemberEnterTips, tracelog.GetOpUserID(ctx), req.GroupID, "")
+	c.groupNotification(ctx, constant.MemberEnterNotification, &MemberEnterTips, mcontext.GetOpUserID(ctx), req.GroupID, "")
 }
 
 func (c *Check) MemberEnterDirectlyNotification(ctx context.Context, groupID string, entrantUserID string, operationID string) {

@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
@@ -86,8 +86,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				notStoragePushMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
 				log.Debug(triggerID, "msg arrived channel", "channel id", channelID, msgList, msgChannelValue.aggregationID, len(msgList))
 				var modifyMsgList []*pbMsg.MsgDataToMQ
-				ctx := tracelog.NewCtx("redis consumer")
-				tracelog.SetOperationID(ctx, triggerID)
+				ctx := mcontext.NewCtx("redis consumer")
+				mcontext.SetOperationID(ctx, triggerID)
 				for _, v := range msgList {
 					log.Debug(triggerID, "msg come to storage center", v.String())
 					isHistory := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsHistory)

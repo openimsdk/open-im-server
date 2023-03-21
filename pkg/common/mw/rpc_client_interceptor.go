@@ -32,6 +32,10 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	if ok {
 		md.Append(constant.OpUserID, opUserID)
 	}
+	opUserIDPlatformID, ok := ctx.Value(constant.OpUserPlatform).(string)
+	if ok {
+		md.Append(constant.OpUserPlatform, opUserIDPlatformID)
+	}
 	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
 	if err == nil {
 		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))

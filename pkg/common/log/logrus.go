@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 
 	//"bufio"
 	"fmt"
@@ -99,7 +99,7 @@ func loggerInit(moduleName string) *LogrusLogger {
 }
 
 func InfoKv(ctx context.Context, msg string, keysAndValues ...interface{}) {
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	logger.WithFields(logrus.Fields{
 		"OperationID": operationID,
 		"PID":         logger.Pid,

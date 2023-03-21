@@ -35,7 +35,7 @@ func (e *ExtendMsgSetCache) GetExtendMsg(ctx context.Context, sourceID string, s
 	//	return string(bytes), nil
 	//}
 	//defer func() {
-	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sourceID", sourceID, "sessionType",
+	//	mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sourceID", sourceID, "sessionType",
 	//		sessionType, "clientMsgID", clientMsgID, "firstModifyTime", firstModifyTime, "extendMsg", extendMsg)
 	//}()
 	//extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)

@@ -1,8 +1,9 @@
-package tracelog
+package mcontext
 
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
 func NewCtx(operationID string) context.Context {
@@ -32,6 +33,26 @@ func GetOperationID(ctx context.Context) string {
 		}
 	}
 	return ""
+}
+func GetMustCtxInfo(ctx context.Context) (operationID, opUserID, platform, connID string, err error) {
+	operationID, ok := ctx.Value(constant.OperationID).(string)
+	if !ok {
+		err = errs.ErrArgs.Wrap("ctx missing operationID")
+		return
+	}
+	opUserID, ok1 := ctx.Value(constant.OpUserID).(string)
+	if !ok1 {
+		err = errs.ErrArgs.Wrap("ctx missing opUserID")
+		return
+	}
+	platform, ok2 := ctx.Value(constant.OpUserPlatform).(string)
+	if !ok2 {
+		err = errs.ErrArgs.Wrap("ctx missing platform")
+		return
+	}
+	connID, _ = ctx.Value(constant.ConnID).(string)
+	return
+
 }
 
 func GetOpUserID(ctx context.Context) string {

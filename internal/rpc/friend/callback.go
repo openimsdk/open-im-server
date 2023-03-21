@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 )
 
@@ -19,7 +19,7 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		FromUserID:      req.FromUserID,
 		ToUserID:        req.ToUserID,
 		ReqMsg:          req.ReqMsg,
-		OperationID:     tracelog.GetOperationID(ctx),
+		OperationID:     mcontext.GetOperationID(ctx),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
 	return http.CallBackPostReturn(config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend)

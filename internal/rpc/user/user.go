@@ -8,8 +8,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -92,10 +92,10 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	}
 	go func() {
 		for _, v := range friends {
-			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v, tracelog.GetOpUserID(ctx))
+			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v, mcontext.GetOpUserID(ctx))
 		}
 	}()
-	s.notification.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
+	s.notification.UserInfoUpdatedNotification(ctx, mcontext.GetOpUserID(ctx), req.UserInfo.UserID)
 	return resp, nil
 }
 

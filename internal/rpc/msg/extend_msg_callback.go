@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
@@ -15,10 +15,10 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 		return nil
 	}
 	req := &cbapi.CallbackBeforeSetMessageReactionExtReq{
-		OperationID:           tracelog.GetOperationID(ctx),
+		OperationID:           mcontext.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackBeforeSetMessageReactionExtensionCommand,
 		SourceID:              setReq.SourceID,
-		OpUserID:              tracelog.GetOpUserID(ctx),
+		OpUserID:              mcontext.GetOpUserID(ctx),
 		SessionType:           setReq.SessionType,
 		ReactionExtensionList: setReq.ReactionExtensions,
 		ClientMsgID:           setReq.ClientMsgID,
@@ -58,10 +58,10 @@ func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 		return nil
 	}
 	req := &cbapi.CallbackGetMessageListReactionExtReq{
-		OperationID:     tracelog.GetOperationID(ctx),
+		OperationID:     mcontext.GetOperationID(ctx),
 		CallbackCommand: constant.CallbackGetMessageListReactionExtensionsCommand,
 		SourceID:        getReq.SourceID,
-		OpUserID:        tracelog.GetOperationID(ctx),
+		OpUserID:        mcontext.GetOperationID(ctx),
 		SessionType:     getReq.SessionType,
 		TypeKeyList:     getReq.TypeKeys,
 	}
@@ -71,10 +71,10 @@ func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 
 func CallbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.ModifyMessageReactionExtensionsReq) error {
 	req := &cbapi.CallbackAddMessageReactionExtReq{
-		OperationID:           tracelog.GetOperationID(ctx),
+		OperationID:           mcontext.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackAddMessageListReactionExtensionsCommand,
 		SourceID:              setReq.SourceID,
-		OpUserID:              tracelog.GetOperationID(ctx),
+		OpUserID:              mcontext.GetOperationID(ctx),
 		SessionType:           setReq.SessionType,
 		ReactionExtensionList: setReq.ReactionExtensions,
 		ClientMsgID:           setReq.ClientMsgID,

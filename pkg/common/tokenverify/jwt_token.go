@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
@@ -61,7 +61,7 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 }
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
-	opUserID := tracelog.GetOpUserID(ctx)
+	opUserID := mcontext.GetOpUserID(ctx)
 	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
 		return nil
 	}
@@ -72,14 +72,14 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
-	return utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid)
+	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUid)
 }
 
 func CheckAdmin(ctx context.Context) error {
-	if utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
+	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	return errs.ErrIdentity.Wrap(fmt.Sprintf("user %s is not admin userID", tracelog.GetOpUserID(ctx)))
+	return errs.ErrIdentity.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
