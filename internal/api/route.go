@@ -1,12 +1,15 @@
 package api
 
 import (
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,6 +22,9 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	//gin.DefaultWriter = io.MultiWriter(f)
 	//gin.SetMode(gin.DebugMode)
 	r := gin.New()
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("required_if", RequiredIf)
+	}
 	log.Info("load config: ", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	if config.Config.Prometheus.Enable {
@@ -155,4 +161,28 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 	}
 	return r
+}
+
+func RequiredIf(fl validator.FieldLevel) bool {
+	sessionType := fl.Parent().FieldByName("SessionType").Int()
+	switch sessionType {
+	case 1, 4:
+		fmt.Println("1", sessionType)
+		if fl.FieldName() == "RecvID" {
+			fmt.Println("2", sessionType)
+
+			return fl.Field().String() != ""
+		}
+	case 2, 3:
+		fmt.Println("3", sessionType)
+
+		if fl.FieldName() == "GroupID" {
+			fmt.Println("4", sessionType)
+
+			return fl.Field().String() != ""
+		}
+	default:
+		return true
+	}
+	return true
 }
