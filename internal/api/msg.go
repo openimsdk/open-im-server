@@ -213,8 +213,8 @@ func (m *Message) SendMessage(c *gin.Context) {
 	if err != nil {
 		log.NewError(tracelog.GetOperationID(c), "SetSendMsgStatus failed")
 	}
-	resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: respPb.ServerMsgID, ClientMsgID: respPb.ClientMsgID, SendTime: respPb.SendTime}}
-	apiresp.GinSuccess(c, resp)
+	//resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: respPb.ServerMsgID, ClientMsgID: respPb.ClientMsgID, SendTime: respPb.SendTime}}
+	apiresp.GinSuccess(c, respPb)
 }
 
 func (m *Message) ManagementBatchSendMsg(c *gin.Context) {
