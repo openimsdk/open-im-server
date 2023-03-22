@@ -6,6 +6,17 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
+var mapper = []string{constant.OperationID, constant.OpUserID, constant.OpUserPlatform, constant.ConnID}
+
+func WithOpUserIDContext(ctx context.Context, opUserID string) context.Context {
+	return context.WithValue(ctx, constant.OpUserID, opUserID)
+}
+func WithOpUserPlatformContext(ctx context.Context, platform string) context.Context {
+	return context.WithValue(ctx, constant.OpUserPlatform, platform)
+}
+func WithTriggerIDContext(ctx context.Context, triggerID string) context.Context {
+	return context.WithValue(ctx, constant.TriggerID, triggerID)
+}
 func NewCtx(operationID string) context.Context {
 	c := context.Background()
 	ctx := context.WithValue(c, constant.OperationID, operationID)
@@ -34,6 +45,34 @@ func GetOperationID(ctx context.Context) string {
 	}
 	return ""
 }
+func GetOpUserID(ctx context.Context) string {
+	if ctx.Value(constant.OpUserID) != "" {
+		s, ok := ctx.Value(constant.OpUserID).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
+func GetConnID(ctx context.Context) string {
+	if ctx.Value(constant.ConnID) != "" {
+		s, ok := ctx.Value(constant.ConnID).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
+
+func GetTriggerID(ctx context.Context) string {
+	if ctx.Value(constant.TriggerID) != "" {
+		s, ok := ctx.Value(constant.TriggerID).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
 func GetMustCtxInfo(ctx context.Context) (operationID, opUserID, platform, connID string, err error) {
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
@@ -54,23 +93,12 @@ func GetMustCtxInfo(ctx context.Context) (operationID, opUserID, platform, connI
 	return
 
 }
+func WithMustInfoCtx(values []string) context.Context {
+	ctx := context.Background()
+	for i, v := range values {
+		ctx = context.WithValue(ctx, mapper[i], v)
 
-func GetOpUserID(ctx context.Context) string {
-	if ctx.Value(constant.OpUserID) != "" {
-		s, ok := ctx.Value(constant.OpUserID).(string)
-		if ok {
-			return s
-		}
 	}
-	return ""
-}
+	return ctx
 
-func GetConnID(ctx context.Context) string {
-	if ctx.Value(constant.ConnID) != "" {
-		s, ok := ctx.Value(constant.ConnID).(string)
-		if ok {
-			return s
-		}
-	}
-	return ""
 }

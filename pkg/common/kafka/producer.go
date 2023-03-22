@@ -47,7 +47,24 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	p.producer = producer
 	return &p
 }
-
+func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) {
+	operationID, opUserID, platform, connID, err := mcontext.GetMustCtxInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return []sarama.RecordHeader{
+		{Key: []byte(constant.OperationID), Value: []byte(operationID)},
+		{Key: []byte(constant.OpUserID), Value: []byte(opUserID)},
+		{Key: []byte(constant.OpUserPlatform), Value: []byte(platform)},
+		{Key: []byte(constant.ConnID), Value: []byte(connID)}}, err
+}
+func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
+	var values []string
+	for _, recordHeader := range header {
+		values = append(values, string(recordHeader.Value))
+	}
+	return mcontext.WithMustInfoCtx(values)
+}
 func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
 	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m.String())
 	kMsg := &sarama.ProducerMessage{}
@@ -65,15 +82,11 @@ func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message)
 		return 0, 0, utils.Wrap(emptyMsg, "")
 	}
 	kMsg.Metadata = ctx
-	operationID, opUserID, platform, connID, err := mcontext.GetMustCtxInfo(ctx)
+	header, err := GetMQHeaderWithContext(ctx)
 	if err != nil {
 		return 0, 0, utils.Wrap(err, "")
 	}
-	kMsg.Headers = []sarama.RecordHeader{
-		{Key: []byte(constant.OperationID), Value: []byte(operationID)},
-		{Key: []byte(constant.OpUserID), Value: []byte(opUserID)},
-		{Key: []byte(constant.OpUserPlatform), Value: []byte(platform)},
-		{Key: []byte(constant.ConnID), Value: []byte(connID)}}
+	kMsg.Headers = header
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key ", kMsg.Key, "key length", kMsg.Value.Length())
 	if err == nil {

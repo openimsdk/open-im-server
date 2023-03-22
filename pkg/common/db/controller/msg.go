@@ -77,7 +77,7 @@ type MsgDatabase interface {
 
 	MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error
 	MsgToModifyMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ) error
-	MsgToPushMQ(ctx context.Context, sourceID string, msg2mq *pbMsg.MsgDataToMQ) error
+	MsgToPushMQ(ctx context.Context, sourceID string, msg2mq *pbMsg.MsgDataToMQ) (int32, int64, error)
 	MsgToMongoMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error
 }
 
@@ -193,10 +193,9 @@ func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, aggregationID string, 
 	return nil
 }
 
-func (db *msgDatabase) MsgToPushMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error {
+func (db *msgDatabase) MsgToPushMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) (int32, int64, error) {
 	mqPushMsg := pbMsg.PushMsgDataToMQ{MsgData: msg2mq.MsgData, SourceID: key}
-	_, _, err := db.producerToPush.SendMessage(ctx, key, &mqPushMsg)
-	return err
+	return db.producerToPush.SendMessage(ctx, key, &mqPushMsg)
 }
 
 func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error {
