@@ -92,6 +92,7 @@ func (c *Client) readMessage() {
 			}
 			returnErr = c.handleMessage(message)
 			if returnErr != nil {
+				log.ZError(context.Background(), "WSGetNewestSeq", returnErr)
 				break
 			}
 
