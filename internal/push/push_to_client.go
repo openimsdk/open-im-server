@@ -58,9 +58,8 @@ func NewOfflinePusher(cache cache.Model) offlinepush.OfflinePusher {
 }
 
 func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgData) error {
-	operationID := mcontext.GetOperationID(ctx)
 	var userIDs = []string{userID}
-	log.Debug(operationID, "Get msg from msg_transfer And push msg", msg.String(), userID)
+	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userID", userID, "msg", msg.String())
 	// callback
 	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != errs.ErrCallbackContinue {
 		return err
@@ -71,7 +70,8 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 		return err
 	}
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
-	log.NewInfo(operationID, "push_result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
+	//log.NewInfo(operationID, "push_result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
+	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
 	p.successCount++
 	if isOfflinePush && userID != msg.SendID {
 		// save invitation info for offline push
