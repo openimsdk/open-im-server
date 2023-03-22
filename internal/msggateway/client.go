@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"runtime/debug"
@@ -127,6 +128,8 @@ func (c *Client) handleMessage(message []byte) error {
 	switch binaryReq.ReqIdentifier {
 	case WSGetNewestSeq:
 		resp, messageErr = c.longConnServer.GetSeq(ctx, binaryReq)
+		log.ZError(ctx, "WSGetNewestSeq", messageErr, "resp", resp)
+
 	case WSSendMsg:
 		resp, messageErr = c.longConnServer.SendMessage(ctx, binaryReq)
 	case WSSendSignalMsg:
