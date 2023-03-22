@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	block cipher.Block
 	once  sync.Once
+	block cipher.Block
 )
 
 func init() {
@@ -37,7 +37,7 @@ func initAesKey() {
 func genReqKey(args []string) string {
 	initAesKey()
 	plaintext := md5.Sum([]byte(strings.Join(args, ":")))
-	var iv = make([]byte, aes.BlockSize, aes.BlockSize+md5.Size)
+	iv := make([]byte, aes.BlockSize, aes.BlockSize+md5.Size)
 	if _, err := rand.Read(iv); err != nil {
 		panic(err)
 	}

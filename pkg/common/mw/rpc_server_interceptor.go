@@ -56,6 +56,15 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
 	}
+	if keys := md.Get(constant.RpcCustomHeader); len(keys) > 0 {
+		for _, key := range keys {
+			values := md.Get(key)
+			if len(values) == 0 {
+				return nil, status.New(codes.InvalidArgument, fmt.Sprintf("missing metadata key %s", key)).Err()
+			}
+			ctx = context.WithValue(ctx, key, values)
+		}
+	}
 	args := make([]string, 0, 4)
 	if opts := md.Get(constant.OperationID); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "operationID error").Err()
