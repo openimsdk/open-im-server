@@ -28,7 +28,6 @@ func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
-	log.ZDebug(ctx, "msg come from kafka  And push!!!", "msg", string(msg))
 	msgFromMQ := pbChat.PushMsgDataToMQ{}
 	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
 		log.ZError(ctx, "push Unmarshal msg err", err, "msg", string(msg))
@@ -59,7 +58,6 @@ func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg, "push consumer")
 		c.handleMs2PsChat(ctx, msg.Value)
 		sess.MarkMessage(msg, "")

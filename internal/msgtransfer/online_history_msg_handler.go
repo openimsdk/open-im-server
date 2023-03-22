@@ -205,7 +205,8 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 		}
 	}
 	rwLock := new(sync.RWMutex)
-	log.ZDebug(context.Background(), "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
+	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
+		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	cMsg := make([]*sarama.ConsumerMessage, 0, 1000)
 	t := time.NewTicker(time.Duration(100) * time.Millisecond)
 	go func() {
