@@ -58,7 +58,7 @@ func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		ctx := c.pushConsumerGroup.GetContextFromMsg(msg, "push consumer")
+		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
 		c.handleMs2PsChat(ctx, msg.Value)
 		sess.MarkMessage(msg, "")
 	}
