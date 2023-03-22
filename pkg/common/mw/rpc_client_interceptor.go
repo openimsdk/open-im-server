@@ -24,14 +24,18 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	}
 	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req))
 	md := metadata.Pairs()
-	if keys, _ := ctx.Value(constant.RpcMwCustom).([]string); len(keys) > 0 {
+	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
 		for _, key := range keys {
 			val, ok := ctx.Value(key).([]string)
 			if !ok {
 				return errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx missing key %s", key))
 			}
+			if len(val) == 0 {
+				return errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx key %s value is empty", key))
+			}
 			md.Set(key, val...)
 		}
+		md.Set(constant.RpcCustomHeader, keys...)
 	}
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {
