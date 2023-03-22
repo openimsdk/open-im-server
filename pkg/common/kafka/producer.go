@@ -75,7 +75,7 @@ func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message)
 		{Key: []byte(constant.OpUserPlatform), Value: []byte(platform)},
 		{Key: []byte(constant.ConnID), Value: []byte(connID)}}
 	partition, offset, err := p.producer.SendMessage(kMsg)
-	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key ", kMsg.Key.Length(), "key length", kMsg.Value.Length())
+	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key ", kMsg.Key, "key length", kMsg.Value.Length())
 	if err == nil {
 		prome.Inc(prome.SendMsgCounter)
 	}
