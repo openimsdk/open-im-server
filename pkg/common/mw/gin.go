@@ -3,6 +3,7 @@ package mw
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -90,8 +91,9 @@ func GinParseOperationID() gin.HandlerFunc {
 					return
 				}
 				if req.OperationID == "" {
-					log.ZWarn(c, "header must have operationID", errs.ErrArgs.Wrap(err.Error()))
-					apiresp.GinError(c, errs.ErrArgs.Wrap("header must have operationID"+err.Error()))
+					err := errors.New("header must have operationID")
+					log.ZWarn(c, "header must have operationID", err)
+					apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 					c.Abort()
 					return
 				}
