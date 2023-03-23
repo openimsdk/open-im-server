@@ -277,6 +277,7 @@ const OpUserPlatform = "platform"
 const Token = "token"
 const RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
 const CheckKey = "CheckKey"
+const TriggerID = "triggerID"
 
 const (
 	UnreliableNotification    = 1

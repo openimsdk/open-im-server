@@ -78,7 +78,7 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg, "mysql consumer")
+			ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg)
 			pc.handleChatWs2Mysql(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)

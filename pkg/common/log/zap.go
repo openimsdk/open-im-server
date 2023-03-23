@@ -147,14 +147,18 @@ func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) [
 	operationID := mcontext.GetOperationID(ctx)
 	opUserID := mcontext.GetOpUserID(ctx)
 	connID := mcontext.GetConnID(ctx)
+	triggerID := mcontext.GetTriggerID(ctx)
 	if opUserID != "" {
-		keysAndValues = append([]interface{}{constant.OpUserID, mcontext.GetOpUserID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.OpUserID, opUserID}, keysAndValues...)
 	}
 	if operationID != "" {
-		keysAndValues = append([]interface{}{constant.OperationID, mcontext.GetOperationID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.OperationID, operationID}, keysAndValues...)
 	}
 	if connID != "" {
-		keysAndValues = append([]interface{}{constant.ConnID, mcontext.GetConnID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.ConnID, connID}, keysAndValues...)
+	}
+	if triggerID != "" {
+		keysAndValues = append([]interface{}{constant.TriggerID, triggerID}, keysAndValues...)
 	}
 	return keysAndValues
 }

@@ -185,7 +185,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
 		if err != nil {
-			log.NewError(mcontext.GetOperationID(ctx), msg, len(pushToUserIDs), "err", err)
+
 			continue
 		}
 		if reply != nil && reply.SinglePushResult != nil {
