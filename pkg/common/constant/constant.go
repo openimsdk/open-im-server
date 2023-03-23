@@ -278,6 +278,7 @@ const Token = "token"
 const RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
 const CheckKey = "CheckKey"
 const TriggerID = "triggerID"
+const RemoteAddr = "remoteAddr"
 
 const (
 	UnreliableNotification    = 1

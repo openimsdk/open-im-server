@@ -32,17 +32,18 @@ func (c *UserConnContext) Err() error {
 func (c *UserConnContext) Value(key any) any {
 	switch key {
 	case constant.OpUserID:
-		c.GetUserID()
+		return c.GetUserID()
 	case constant.OperationID:
-		c.GetOperationID()
+		return c.GetOperationID()
 	case constant.ConnID:
-		c.GetConnID()
+		return c.GetConnID()
 	case constant.OpUserPlatform:
-		constant.PlatformIDToName(utils.StringToInt(c.GetPlatformID()))
+		return constant.PlatformIDToName(utils.StringToInt(c.GetPlatformID()))
+	case constant.RemoteAddr:
+		return c.RemoteAddr
 	default:
 		return ""
 	}
-	return ""
 }
 
 func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnContext {
