@@ -9,7 +9,7 @@ require (
 	github.com/Shopify/sarama v1.32.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/dtm-labs/rockscache v0.0.11
+	github.com/dtm-labs/rockscache v0.1.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-redis/redis/v8 v8.11.5

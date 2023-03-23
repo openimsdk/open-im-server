@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -46,7 +47,7 @@ func (g *GroupMemberGorm) UpdateRoleLevel(ctx context.Context, groupID string, u
 	return db.RowsAffected, utils.Wrap(db.Error, "")
 }
 
-func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupList []*relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*relation.GroupMemberModel, err error) {
 	db := g.DB
 	if len(groupIDs) > 0 {
 		db = db.Where("group_id in (?)", groupIDs)
@@ -57,7 +58,7 @@ func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs [
 	if len(roleLevels) > 0 {
 		db = db.Where("role_level in (?)", roleLevels)
 	}
-	return groupList, utils.Wrap(db.Find(&groupList).Error, "")
+	return groupMembers, utils.Wrap(db.Find(&groupMembers).Error, "")
 }
 
 func (g *GroupMemberGorm) Take(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMemberModel, err error) {
@@ -99,4 +100,12 @@ func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string)
 
 func (g *GroupMemberGorm) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
 	return userIDs, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Pluck("user_id", &userIDs).Error, "")
+}
+
+func (g *GroupMemberGorm) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
+	return groupIDs, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("user_id = ?", userID).Pluck("group_id", &groupIDs).Error, "")
+}
+
+func (g *GroupMemberGorm) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
+	return count, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Count(&count).Error, "")
 }

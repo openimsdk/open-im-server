@@ -32,13 +32,16 @@ func (ConversationModel) TableName() string {
 type ConversationModelInterface interface {
 	Create(ctx context.Context, conversations []*ConversationModel) (err error)
 	Delete(ctx context.Context, groupIDs []string) (err error)
-	UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error)
+	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) (err error)
 	Update(ctx context.Context, conversations []*ConversationModel) (err error)
 	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*ConversationModel, err error)
-	FindUserID(ctx context.Context, userIDList []string, conversationID string) ([]string, error)
+	FindUserID(ctx context.Context, userIDs []string, conversationID string) ([]string, error)
 	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
 	Take(ctx context.Context, userID, conversationID string) (conversation *ConversationModel, err error)
-	FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error)
+	FindConversationID(ctx context.Context, userID string, conversationIDs []string) (existConversationID []string, err error)
+	FindUserIDAllConversations(ctx context.Context, userID string) (conversations []*ConversationModel, err error)
 	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
+	FindSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	NewTx(tx any) ConversationModelInterface
 }

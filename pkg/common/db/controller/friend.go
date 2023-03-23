@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -45,10 +46,11 @@ type friendDatabase struct {
 	friend        relation.FriendModelInterface
 	friendRequest relation.FriendRequestModelInterface
 	tx            tx.Tx
+	cache         cache.FriendCache
 }
 
-func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, tx tx.Tx) FriendDatabase {
-	return &friendDatabase{friend: friend, friendRequest: friendRequest, tx: tx}
+func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relation.FriendRequestModelInterface, cache cache.FriendCache, tx tx.Tx) FriendDatabase {
+	return &friendDatabase{friend: friend, friendRequest: friendRequest, cache: cache, tx: tx}
 }
 
 // ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
@@ -116,13 +118,14 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
-
 		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
 		}
+		var newFriendIDs []string
 		for _, v := range friendUserIDs {
 			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: opUserID})
+			newFriendIDs = append(newFriendIDs, v)
 		}
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
@@ -131,7 +134,8 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 		if err != nil {
 			return err
 		}
-		return nil
+		newFriendIDs = append(newFriendIDs, ownerUserID)
+		return f.cache.DelFriendIDs(newFriendIDs...).ExecDel(ctx)
 	})
 }
 
@@ -200,18 +204,30 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 		if err != nil {
 			return err
 		}
-		return nil
+		return f.cache.DelFriendIDs(ownerUserID, friendRequest.ToUserID).ExecDel(ctx)
 	})
 }
 
 // 删除好友  外部判断是否好友关系
 func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
-	return f.friend.Delete(ctx, ownerUserID, friendUserIDs)
+	return f.tx.Transaction(func(tx any) error {
+		if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
+			return err
+		}
+		return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
+	})
+
 }
 
 // 更新好友备注 零值也支持
 func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
-	return f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark)
+	return f.tx.Transaction(func(tx any) error {
+		err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark)
+		if err != nil {
+			return err
+		}
+		return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
+	})
 }
 
 // 获取ownerUserID的好友列表 无结果不返回错误
@@ -247,5 +263,5 @@ func (f *friendDatabase) FindFriendsWithError(ctx context.Context, ownerUserID s
 }
 
 func (f *friendDatabase) FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error) {
-	return f.friend.FindFriendUserIDs(ctx, ownerUserID)
+	return f.cache.GetFriendIDs(ctx, ownerUserID)
 }
