@@ -71,7 +71,7 @@ func (c *Client) readMessage() {
 		if r := recover(); r != nil {
 			fmt.Println("socket have panic err:", r, string(debug.Stack()))
 		}
-		//c.close()
+		c.close()
 	}()
 	//var returnErr error
 	for {
