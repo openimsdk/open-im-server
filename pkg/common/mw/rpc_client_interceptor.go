@@ -23,39 +23,11 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
 	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req))
-	md := metadata.Pairs()
-	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
-		for _, key := range keys {
-			val, ok := ctx.Value(key).([]string)
-			if !ok {
-				return errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx missing key %s", key))
-			}
-			if len(val) == 0 {
-				return errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx key %s value is empty", key))
-			}
-			md.Set(key, val...)
-		}
-		md.Set(constant.RpcCustomHeader, keys...)
+	ctx, err = getRpcContext(ctx, method)
+	if err != nil {
+		return err
 	}
-	operationID, ok := ctx.Value(constant.OperationID).(string)
-	if !ok {
-		log.ZWarn(ctx, "ctx missing operationID", errors.New("ctx missing operationID"), "funcName", method)
-		return errs.ErrArgs.Wrap("ctx missing operationID")
-	}
-	md.Set(constant.OperationID, operationID)
-	args := make([]string, 0, 4)
-	args = append(args, constant.OperationID, operationID)
-	opUserID, ok := ctx.Value(constant.OpUserID).(string)
-	if ok {
-		md.Set(constant.OpUserID, opUserID)
-		args = append(args, constant.OpUserID, opUserID)
-	}
-	opUserIDPlatformID, ok := ctx.Value(constant.OpUserPlatform).(string)
-	if ok {
-		md.Set(constant.OpUserPlatform, opUserIDPlatformID)
-	}
-	md.Set(constant.CheckKey, genReqKey(args))
-	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
+	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
 		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
@@ -77,4 +49,44 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		}
 	}
 	return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
+}
+
+func getRpcContext(ctx context.Context, method string) (context.Context, error) {
+	md := metadata.Pairs()
+	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
+		for _, key := range keys {
+			val, ok := ctx.Value(key).([]string)
+			if !ok {
+				return nil, errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx missing key %s", key))
+			}
+			if len(val) == 0 {
+				return nil, errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx key %s value is empty", key))
+			}
+			md.Set(key, val...)
+		}
+		md.Set(constant.RpcCustomHeader, keys...)
+	}
+	operationID, ok := ctx.Value(constant.OperationID).(string)
+	if !ok {
+		log.ZWarn(ctx, "ctx missing operationID", errors.New("ctx missing operationID"), "funcName", method)
+		return nil, errs.ErrArgs.Wrap("ctx missing operationID")
+	}
+	md.Set(constant.OperationID, operationID)
+	var checkArgs []string
+	checkArgs = append(checkArgs, constant.OperationID, operationID)
+	opUserID, ok := ctx.Value(constant.OpUserID).(string)
+	if ok {
+		md.Set(constant.OpUserID, opUserID)
+		checkArgs = append(checkArgs, constant.OpUserID, opUserID)
+	}
+	opUserIDPlatformID, ok := ctx.Value(constant.OpUserPlatform).(string)
+	if ok {
+		md.Set(constant.OpUserPlatform, opUserIDPlatformID)
+	}
+	connID, ok := ctx.Value(constant.ConnID).(string)
+	if ok {
+		md.Set(constant.ConnID, connID)
+	}
+	md.Set(constant.CheckKey, genReqKey(checkArgs))
+	return metadata.NewOutgoingContext(ctx, md), nil
 }

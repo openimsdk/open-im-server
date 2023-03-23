@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"runtime/debug"
@@ -119,11 +121,7 @@ func (c *Client) handleMessage(message []byte) error {
 	if binaryReq.SendID != c.userID {
 		return errors.New("exception conn userID not same to req userID")
 	}
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, ConnID, c.ctx.GetConnID())
-	ctx = context.WithValue(ctx, OperationID, binaryReq.OperationID)
-	ctx = context.WithValue(ctx, CommonUserID, binaryReq.SendID)
-	ctx = context.WithValue(ctx, PlatformID, c.platformID)
+	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
