@@ -16,11 +16,6 @@ import (
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	resp = &msg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
-	// callback
-	if err = CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
-
 	if _, err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
@@ -63,9 +58,6 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err = CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
 	_, err = m.messageVerification(ctx, req)
 	if err != nil {
 		return nil, err
@@ -103,10 +95,6 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	// callback
 	promePkg.Inc(promePkg.GroupChatMsgRecvSuccessCounter)
-	err = CallbackBeforeSendGroupMsg(ctx, req)
-	if err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
 
 	var memberUserIDList []string
 	if memberUserIDList, err = m.messageVerification(ctx, req); err != nil {
@@ -229,81 +217,5 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	resp.SendTime = msgToMQSingle.MsgData.SendTime
 	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
 	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
-	return resp, nil
-}
-
-func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
-	resp = &msg.SendMsgResp{}
-	flag := isMessageHasReadEnabled(req.MsgData)
-	if !flag {
-		return nil, errs.ErrMessageHasReadDisable.Wrap()
-	}
-	m.encapsulateMsgData(req.MsgData)
-	if err := CallbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
-	switch req.MsgData.SessionType {
-	case constant.SingleChatType:
-		return m.sendMsgSingleChat(ctx, req)
-	case constant.GroupChatType:
-		return m.sendMsgGroupChat(ctx, req)
-	case constant.NotificationChatType:
-		return m.sendMsgNotification(ctx, req)
-	case constant.SuperGroupChatType:
-		return m.sendMsgSuperGroupChat(ctx, req)
-	default:
-		return nil, errs.ErrArgs.Wrap("unknown sessionType")
-	}
-}
-
-func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
-	resp := new(sdkws.GetMaxAndMinSeqResp)
-	m2 := make(map[string]*sdkws.MaxAndMinSeq)
-	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	resp.MaxSeq = maxSeq
-	resp.MinSeq = minSeq
-	if len(req.GroupIDs) > 0 {
-		resp.GroupMaxAndMinSeq = make(map[string]*sdkws.MaxAndMinSeq)
-		for _, groupID := range req.GroupIDs {
-			maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
-			if err != nil {
-				return nil, err
-			}
-			minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
-			if err != nil {
-				return nil, err
-			}
-			m2[groupID] = &sdkws.MaxAndMinSeq{
-				MaxSeq: maxSeq,
-				MinSeq: minSeq,
-			}
-		}
-	}
-	return resp, nil
-}
-
-func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	resp := &sdkws.PullMessageBySeqsResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
-	if err != nil {
-		return nil, err
-	}
-	resp.List = msgs
-	for groupID, list := range req.GroupSeqs {
-		msgs, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, groupID, list.Seqs)
-		if err != nil {
-			return nil, err
-		}
-		resp.GroupMsgDataList[groupID] = &sdkws.MsgDataList{
-			MsgDataList: msgs,
-		}
-	}
 	return resp, nil
 }

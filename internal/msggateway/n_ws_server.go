@@ -2,9 +2,10 @@ package msggateway
 
 import (
 	"errors"
-	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"net/http"
@@ -19,6 +20,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s interface{}) error
+	SetMessageHandler(rpcClient *notification.Check)
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -42,10 +44,15 @@ type WsServer struct {
 	onlineUserConnNum               int64
 	handshakeTimeout                time.Duration
 	readBufferSize, WriteBufferSize int
+	hubServer                       *Server
 	validate                        *validator.Validate
 	Compressor
 	Encoder
 	MessageHandler
+}
+
+func (ws *WsServer) SetMessageHandler(rpcClient *notification.Check) {
+	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcClient)
 }
 
 func (ws *WsServer) UnRegister(c *Client) {
@@ -90,8 +97,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		clients:        newUserMap(),
 		Compressor:     NewGzipCompressor(),
 		Encoder:        NewGobEncoder(),
-		MessageHandler: NewGrpcHandler(v, nil),
-		//handler:  NewGrpcHandler(validate),
 	}, nil
 }
 func (ws *WsServer) Run() error {
@@ -121,8 +126,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		ws.clients.Set(client.userID, client)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
-		fmt.Println("R在线用户数量:", ws.onlineUserNum)
-		fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+
 	} else {
 		if clientOK { //已经有同平台的连接存在
 			ws.clients.Set(client.userID, client)
@@ -130,11 +134,9 @@ func (ws *WsServer) registerClient(client *Client) {
 		} else {
 			ws.clients.Set(client.userID, client)
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
-			fmt.Println("R在线用户数量:", ws.onlineUserNum)
-			fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
 		}
 	}
-
+	log.ZInfo(client.ctx, "user online", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
@@ -147,8 +149,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
-	fmt.Println("R在线用户数量:", ws.onlineUserNum)
-	fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+	log.ZInfo(client.ctx, "user offline", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {

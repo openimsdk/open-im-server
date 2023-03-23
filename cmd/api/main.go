@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"net"
 	"strconv"
 
@@ -35,6 +37,13 @@ func run(port int) error {
 	}
 	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
 	if err != nil {
+		return err
+	}
+	buf := bytes.NewBuffer(nil)
+	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {
+		return err
+	}
+	if err := zk.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)

@@ -3,6 +3,7 @@ package mw
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -22,17 +23,11 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
 	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req))
-	operationID, ok := ctx.Value(constant.OperationID).(string)
-	if !ok {
-		log.ZWarn(ctx, "ctx missing operationID", errors.New("ctx missing operationID"), "funcName", method)
-		return errs.ErrArgs.Wrap("ctx missing operationID")
+	ctx, err = getRpcContext(ctx, method)
+	if err != nil {
+		return err
 	}
-	md := metadata.Pairs(constant.OperationID, operationID)
-	opUserID, ok := ctx.Value(constant.OpUserID).(string)
-	if ok {
-		md.Append(constant.OpUserID, opUserID)
-	}
-	err = invoker(metadata.NewOutgoingContext(ctx, md), method, req, resp, cc, opts...)
+	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
 		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
@@ -54,4 +49,44 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 		}
 	}
 	return errs.NewCodeError(int(sta.Code()), sta.Message()).Wrap()
+}
+
+func getRpcContext(ctx context.Context, method string) (context.Context, error) {
+	md := metadata.Pairs()
+	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
+		for _, key := range keys {
+			val, ok := ctx.Value(key).([]string)
+			if !ok {
+				return nil, errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx missing key %s", key))
+			}
+			if len(val) == 0 {
+				return nil, errs.ErrInternalServer.Wrap(fmt.Sprintf("ctx key %s value is empty", key))
+			}
+			md.Set(key, val...)
+		}
+		md.Set(constant.RpcCustomHeader, keys...)
+	}
+	operationID, ok := ctx.Value(constant.OperationID).(string)
+	if !ok {
+		log.ZWarn(ctx, "ctx missing operationID", errors.New("ctx missing operationID"), "funcName", method)
+		return nil, errs.ErrArgs.Wrap("ctx missing operationID")
+	}
+	md.Set(constant.OperationID, operationID)
+	var checkArgs []string
+	checkArgs = append(checkArgs, constant.OperationID, operationID)
+	opUserID, ok := ctx.Value(constant.OpUserID).(string)
+	if ok {
+		md.Set(constant.OpUserID, opUserID)
+		checkArgs = append(checkArgs, constant.OpUserID, opUserID)
+	}
+	opUserIDPlatformID, ok := ctx.Value(constant.OpUserPlatform).(string)
+	if ok {
+		md.Set(constant.OpUserPlatform, opUserIDPlatformID)
+	}
+	connID, ok := ctx.Value(constant.ConnID).(string)
+	if ok {
+		md.Set(constant.ConnID, connID)
+	}
+	md.Set(constant.CheckKey, genReqKey(checkArgs))
+	return metadata.NewOutgoingContext(ctx, md), nil
 }

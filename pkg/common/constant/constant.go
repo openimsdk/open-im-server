@@ -273,8 +273,12 @@ const (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 const ConnID = "connID"
-const OpUserIDPlatformID = "platformID"
+const OpUserPlatform = "platform"
 const Token = "token"
+const RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
+const CheckKey = "CheckKey"
+const TriggerID = "triggerID"
+const RemoteAddr = "remoteAddr"
 
 const (
 	UnreliableNotification    = 1
@@ -325,3 +329,5 @@ const (
 	FlagPrometheusPort = "prometheus_port"
 	FlagConf           = "config_folder_path"
 )
+
+const OpenIMCommonConfigKey = "OpenIMServerConfig"

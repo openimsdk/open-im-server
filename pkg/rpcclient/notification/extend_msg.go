@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -14,7 +14,7 @@ func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID str
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m apistruct.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
-	m.OpUserID = tracelog.GetOpUserID(ctx)
+	m.OpUserID = mcontext.GetOpUserID(ctx)
 	m.SessionType = req.SessionType
 	keyMap := make(map[string]*sdkws.KeyValue)
 	for _, valueResp := range resp.Result {

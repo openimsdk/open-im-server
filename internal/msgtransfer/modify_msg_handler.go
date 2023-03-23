@@ -10,7 +10,7 @@ import (
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
@@ -41,7 +41,7 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "ModifyMsgConsumerHandler", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			ctx := mmc.modifyMsgConsumerGroup.GetContextFromMsg(msg, "modify consumer")
+			ctx := mmc.modifyMsgConsumerGroup.GetContextFromMsg(msg)
 			mmc.ModifyMsg(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)
@@ -54,7 +54,7 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	log.NewInfo("msg come here ModifyMsg!!!", "", "msg", string(cMsg.Value), msgKey)
 	msgFromMQ := pbMsg.MsgDataToModifyByMQ{}
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	err := proto.Unmarshal(cMsg.Value, &msgFromMQ)
 	if err != nil {
 		log.NewError(msgFromMQ.TriggerID, "msg_transfer Unmarshal msg err", "msg", string(cMsg.Value), "err", err.Error())
@@ -66,7 +66,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 		if !isReactionFromCache {
 			continue
 		}
-		tracelog.SetOperationID(ctx, operationID)
+		ctx = mcontext.SetOperationID(ctx, operationID)
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
 			notification := &apistruct.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {

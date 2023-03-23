@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
 )
@@ -63,7 +63,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err != nil {
 		return nil, err
 	}
-	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx), CreateTime: time.Now()}
+	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: mcontext.GetOpUserID(ctx), CreateTime: time.Now()}
 	if err := s.BlackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}

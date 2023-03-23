@@ -16,8 +16,8 @@ import (
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
@@ -63,7 +63,7 @@ type groupServer struct {
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !tokenverify.IsAppManagerUid(ctx) {
-		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, tracelog.GetOpUserID(ctx))
+		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 		}
 	}
 	for i := 0; i < 10; i++ {
-		id := utils.Md5(strings.Join([]string{tracelog.GetOperationID(ctx), strconv.FormatInt(time.Now().UnixNano(), 10), strconv.Itoa(rand.Int())}, ",;,"))
+		id := utils.Md5(strings.Join([]string{mcontext.GetOperationID(ctx), strconv.FormatInt(time.Now().UnixNano(), 10), strconv.Itoa(rand.Int())}, ",;,"))
 		bi := big.NewInt(0)
 		bi.SetString(id[0:8], 16)
 		id = bi.String()
@@ -148,9 +148,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.Nickname = ""
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = roleLevel
-		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
+		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
-		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
+		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinTime = time.Now()
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return err
@@ -265,7 +265,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !tokenverify.IsAppManagerUid(ctx) {
-			opUserID := tracelog.GetOpUserID(ctx)
+			opUserID := mcontext.GetOpUserID(ctx)
 			member, ok := memberMap[opUserID]
 			if !ok {
 				return nil, errs.ErrNoPermission.Wrap("not in group")
@@ -303,7 +303,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			s.Notification.SuperGroupNotification(ctx, userID, userID)
 		}
 	} else {
-		opUserID := tracelog.GetOpUserID(ctx)
+		opUserID := mcontext.GetOpUserID(ctx)
 		var groupMembers []*relationTb.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
 			member := PbToDbGroupMember(userMap[userID])
@@ -388,7 +388,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	if utils.IsDuplicateStringSlice(req.KickedUserIDs) {
 		return nil, errs.ErrArgs.Wrap("KickedUserIDs duplicate")
 	}
-	opUserID := tracelog.GetOpUserID(ctx)
+	opUserID := mcontext.GetOpUserID(ctx)
 	if utils.IsContain(opUserID, req.KickedUserIDs) {
 		return nil, errs.ErrArgs.Wrap("opUserID in KickedUserIDs")
 	}
@@ -593,7 +593,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
 			InviterUserID:  groupRequest.InviterUserID,
-			OperatorUserID: tracelog.GetOpUserID(ctx),
+			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
 		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
@@ -616,7 +616,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
-	if _, err := s.UserCheck.GetPublicUserInfo(ctx, tracelog.GetOpUserID(ctx)); err != nil {
+	if _, err := s.UserCheck.GetPublicUserInfo(ctx, mcontext.GetOpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
@@ -630,27 +630,27 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
 		}
-		user, err := s.UserCheck.GetUserInfo(ctx, tracelog.GetOpUserID(ctx))
+		user, err := s.UserCheck.GetUserInfo(ctx, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
 		groupMember := PbToDbGroupMember(user)
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = constant.GroupOrdinaryUsers
-		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
+		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
-		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
+		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
+		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, mcontext.GetOpUserID(ctx), mcontext.GetOperationID(ctx))
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
-		UserID:     tracelog.GetOpUserID(ctx),
+		UserID:     mcontext.GetOpUserID(ctx),
 		ReqMsg:     req.ReqMessage,
 		GroupID:    req.GroupID,
 		JoinSource: req.JoinSource,
@@ -670,12 +670,12 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {
-		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
+		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		s.Notification.SuperGroupNotification(ctx, tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
+		s.Notification.SuperGroupNotification(ctx, mcontext.GetOpUserID(ctx), mcontext.GetOpUserID(ctx))
 	} else {
-		_, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
+		_, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -687,7 +687,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
 	resp := &pbGroup.SetGroupInfoResp{}
 	if !tokenverify.IsAppManagerUid(ctx) {
-		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, tracelog.GetOpUserID(ctx))
+		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -721,7 +721,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		args := pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
-				OwnerUserID:      tracelog.GetOpUserID(ctx),
+				OwnerUserID:      mcontext.GetOpUserID(ctx),
 				ConversationID:   utils.GetConversationIDBySessionType(group.GroupID, constant.GroupChatType),
 				ConversationType: constant.GroupChatType,
 				GroupID:          group.GroupID,
@@ -772,8 +772,8 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		if oldOwner == nil {
 			return nil, errs.ErrArgs.Wrap("OldOwnerUser not in group " + req.NewOwnerUserID)
 		}
-		if oldOwner.GroupID != tracelog.GetOpUserID(ctx) {
-			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", tracelog.GetOpUserID(ctx)))
+		if oldOwner.GroupID != mcontext.GetOpUserID(ctx) {
+			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", mcontext.GetOpUserID(ctx)))
 		}
 	}
 	if err := s.GroupDatabase.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
@@ -922,7 +922,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err != nil {
 		return nil, err
 	}
-	if !(tracelog.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
+	if !(mcontext.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
 		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
 		if err != nil {
 			return nil, err
@@ -945,8 +945,8 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err != nil {
 		return nil, err
 	}
-	if !(tracelog.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
-		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
+	if !(mcontext.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
+		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -1005,7 +1005,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	}
 	groupIDs := utils.Keys(groupIDMap)
 	userIDs := utils.Keys(userIDMap)
-	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, append(userIDs, tracelog.GetOpUserID(ctx)), nil)
+	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, append(userIDs, mcontext.GetOpUserID(ctx)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1021,7 +1021,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		return [...]string{e.GroupID, e.UserID}
 	})
 	if !tokenverify.IsAppManagerUid(ctx) {
-		opUserID := tracelog.GetOpUserID(ctx)
+		opUserID := mcontext.GetOpUserID(ctx)
 		for _, member := range members {
 			if member.UserID == opUserID {
 				continue

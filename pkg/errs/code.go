@@ -48,7 +48,7 @@ const (
 
 	// 群组错误码
 	GroupIDNotFoundError     = 1201 //GroupID不存在
-	GroupIDIDExisted         = 1202 //GroupID已存在
+	GroupIDExisted           = 1202 //GroupID已存在
 	OnlyOneOwnerError        = 1203 //只能有一个群主
 	InGroupAlreadyError      = 1204 //已在群组中
 	NotInGroupYetError       = 1205 //不在群组中

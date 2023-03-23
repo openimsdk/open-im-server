@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
@@ -23,7 +23,7 @@ func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDa
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackOfflinePushCommand,
-				OperationID:     tracelog.GetOperationID(ctx),
+				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 			},
@@ -60,7 +60,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		UserStatusBatchCallbackReq: callbackstruct.UserStatusBatchCallbackReq{
 			UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackOnlinePushCommand,
-				OperationID:     tracelog.GetOperationID(ctx),
+				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      int(msg.SenderPlatformID),
 				Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 			},
@@ -85,7 +85,7 @@ func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg
 	req := callbackstruct.CallbackBeforeSuperGroupOnlinePushReq{
 		UserStatusBaseCallback: callbackstruct.UserStatusBaseCallback{
 			CallbackCommand: constant.CallbackSuperGroupOnlinePushCommand,
-			OperationID:     tracelog.GetOperationID(ctx),
+			OperationID:     mcontext.GetOperationID(ctx),
 			PlatformID:      int(msg.SenderPlatformID),
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},

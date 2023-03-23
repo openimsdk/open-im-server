@@ -2,14 +2,13 @@ package api
 
 import (
 	"context"
-	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -23,23 +22,23 @@ import (
 
 var _ context.Context // 解决goland编辑器bug
 
-func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Msg {
-	return &Msg{c: c, validate: validator.New()}
+func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Message {
+	return &Message{c: c, validate: validator.New()}
 }
 
-type Msg struct {
+type Message struct {
 	c        discoveryregistry.SvcDiscoveryRegistry
 	validate *validator.Validate
 }
 
-func (Msg) SetOptions(options map[string]bool, value bool) {
+func (Message) SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
-func (m Msg) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
+func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 	var newContent string
 	var err error
 	switch params.ContentType {
@@ -100,13 +99,13 @@ func (m Msg) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendM
 		tips.JsonDetail = utils.StructToJsonString(params.Content)
 		pbData.MsgData.Content, err = proto.Marshal(&tips)
 		if err != nil {
-			log.Error(tracelog.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
+			log.Error(mcontext.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
 		}
 	}
 	return &pbData
 }
 
-func (m *Msg) client() (msg.MsgClient, error) {
+func (m *Message) client() (msg.MsgClient, error) {
 	conn, err := m.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return nil, err
@@ -114,48 +113,49 @@ func (m *Msg) client() (msg.MsgClient, error) {
 	return msg.NewMsgClient(conn), nil
 }
 
-func (m *Msg) GetSeq(c *gin.Context) {
+func (m *Message) GetSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMaxAndMinSeq, m.client, c)
 }
 
-func (m *Msg) PullMsgBySeqs(c *gin.Context) {
+func (m *Message) PullMsgBySeqs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.client, c)
 }
 
-func (m *Msg) DelMsg(c *gin.Context) {
+func (m *Message) DelMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DelMsgs, m.client, c)
 }
 
-func (m *Msg) DelSuperGroupMsg(c *gin.Context) {
+func (m *Message) DelSuperGroupMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DelSuperGroupMsg, m.client, c)
 }
 
-func (m *Msg) ClearMsg(c *gin.Context) {
+func (m *Message) ClearMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearMsg, m.client, c)
 }
 
-func (m *Msg) SetMessageReactionExtensions(c *gin.Context) {
+func (m *Message) SetMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.client, c)
 }
 
-func (m *Msg) GetMessageListReactionExtensions(c *gin.Context) {
+func (m *Message) GetMessageListReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.client, c)
 }
 
-func (m *Msg) AddMessageReactionExtensions(c *gin.Context) {
+func (m *Message) AddMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.client, c)
 }
 
-func (m *Msg) DeleteMessageReactionExtensions(c *gin.Context) {
+func (m *Message) DeleteMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.client, c)
 }
 
-func (m *Msg) SendMsg(c *gin.Context) {
+func (m *Message) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
-		apiresp.GinError(c, err)
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+
 	var data interface{}
 	switch params.ContentType {
 	case constant.Text:
@@ -181,31 +181,16 @@ func (m *Msg) SendMsg(c *gin.Context) {
 		data = apistruct.CustomElem{}
 	case constant.CustomOnlineOnly:
 		data = apistruct.CustomElem{}
-	//case constant.HasReadReceipt:
-	//case constant.Typing:
-	//case constant.Quote:
 	default:
-		apiresp.GinError(c, errors.New("wrong contentType"))
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("not support err contentType").Wrap())
 		return
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
-		apiresp.GinError(c, errs.ErrData)
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 		return
 	} else if err := m.validate.Struct(data); err != nil {
-		apiresp.GinError(c, errs.ErrData)
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 		return
-	}
-	switch params.SessionType {
-	case constant.SingleChatType:
-		if len(params.RecvID) == 0 {
-			apiresp.GinError(c, errs.ErrData)
-			return
-		}
-	case constant.GroupChatType, constant.SuperGroupChatType:
-		if len(params.GroupID) == 0 {
-			apiresp.GinError(c, errs.ErrData)
-			return
-		}
 	}
 	pbReq := m.newUserSendMsgReq(c, &params)
 	conn, err := m.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
@@ -226,24 +211,24 @@ func (m *Msg) SendMsg(c *gin.Context) {
 		Status: int32(status),
 	})
 	if err != nil {
-		log.NewError(tracelog.GetOperationID(c), "SetSendMsgStatus failed")
+		log.NewError(mcontext.GetOperationID(c), "SetSendMsgStatus failed")
 	}
-	resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: respPb.ServerMsgID, ClientMsgID: respPb.ClientMsgID, SendTime: respPb.SendTime}}
-	apiresp.GinSuccess(c, resp)
+	//resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: respPb.ServerMsgID, ClientMsgID: respPb.ClientMsgID, SendTime: respPb.SendTime}}
+	apiresp.GinSuccess(c, respPb)
 }
 
-func (m *Msg) ManagementBatchSendMsg(c *gin.Context) {
+func (m *Message) ManagementBatchSendMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SendMsg, m.client, c)
 }
 
-func (m *Msg) CheckMsgIsSendSuccess(c *gin.Context) {
+func (m *Message) CheckMsgIsSendSuccess(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
 }
 
-func (m *Msg) GetUsersOnlineStatus(c *gin.Context) {
+func (m *Message) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
 }
 
-func (m *Msg) AccountCheck(c *gin.Context) {
+func (m *Message) AccountCheck(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
 }

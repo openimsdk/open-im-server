@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func CallbackUserOnline(ctx context.Context, userID string, platformID int, isAp
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackUserOnlineCommand,
-				OperationID:     tracelog.GetOperationID(ctx),
+				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
 			},
@@ -44,7 +44,7 @@ func CallbackUserOffline(ctx context.Context, userID string, platformID int, con
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackUserOfflineCommand,
-				OperationID:     tracelog.GetOperationID(ctx),
+				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
 			},
@@ -65,7 +65,7 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 		UserStatusCallbackReq: cbapi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbapi.UserStatusBaseCallback{
 				CallbackCommand: constant.CallbackUserKickOffCommand,
-				OperationID:     tracelog.GetOperationID(ctx),
+				OperationID:     mcontext.GetOperationID(ctx),
 				PlatformID:      platformID,
 				Platform:        constant.PlatformIDToName(platformID),
 			},

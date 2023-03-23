@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"runtime/debug"
@@ -36,7 +39,7 @@ type Client struct {
 	isCompress     bool
 	userID         string
 	isBackground   bool
-	connID         string
+	ctx            *UserConnContext
 	onlineAt       int64 // 上线时间戳（毫秒）
 	longConnServer LongConnServer
 	closed         bool
@@ -49,7 +52,7 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		platformID: utils.StringToInt(ctx.GetPlatformID()),
 		isCompress: isCompress,
 		userID:     ctx.GetUserID(),
-		connID:     ctx.GetConnID(),
+		ctx:        ctx,
 		onlineAt:   utils.GetCurrentTimestampByMill(),
 	}
 }
@@ -59,7 +62,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.platformID = utils.StringToInt(ctx.GetPlatformID())
 	c.isCompress = isCompress
 	c.userID = ctx.GetUserID()
-	c.connID = ctx.GetConnID()
+	c.ctx = ctx
 	c.onlineAt = utils.GetCurrentTimestampByMill()
 	c.longConnServer = longConnServer
 }
@@ -68,7 +71,7 @@ func (c *Client) readMessage() {
 		if r := recover(); r != nil {
 			fmt.Println("socket have panic err:", r, string(debug.Stack()))
 		}
-		//c.close()
+		c.close()
 	}()
 	//var returnErr error
 	for {
@@ -91,6 +94,7 @@ func (c *Client) readMessage() {
 			}
 			returnErr = c.handleMessage(message)
 			if returnErr != nil {
+				log.ZError(context.Background(), "WSGetNewestSeq", returnErr)
 				break
 			}
 
@@ -117,16 +121,14 @@ func (c *Client) handleMessage(message []byte) error {
 	if binaryReq.SendID != c.userID {
 		return errors.New("exception conn userID not same to req userID")
 	}
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, ConnID, c.connID)
-	ctx = context.WithValue(ctx, OperationID, binaryReq.OperationID)
-	ctx = context.WithValue(ctx, CommonUserID, binaryReq.SendID)
-	ctx = context.WithValue(ctx, PlatformID, c.platformID)
+	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
 	case WSGetNewestSeq:
 		resp, messageErr = c.longConnServer.GetSeq(ctx, binaryReq)
+		log.ZError(ctx, "WSGetNewestSeq", messageErr, "resp", resp)
+
 	case WSSendMsg:
 		resp, messageErr = c.longConnServer.SendMessage(ctx, binaryReq)
 	case WSSendSignalMsg:

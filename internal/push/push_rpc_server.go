@@ -22,7 +22,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	cacheModel := cache.NewCacheModel(rdb)
-
 	offlinePusher := NewOfflinePusher(cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
 	pusher := NewPusher(client, offlinePusher, database, localcache.NewGroupLocalCache(client), localcache.NewConversationLocalCache(client))

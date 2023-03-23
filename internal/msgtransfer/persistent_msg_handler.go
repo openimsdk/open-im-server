@@ -14,7 +14,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
@@ -38,7 +38,7 @@ func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *Persiste
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg), msgKey)
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
@@ -79,7 +79,7 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg, "mysql consumer")
+			ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg)
 			pc.handleChatWs2Mysql(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.Error("", "msg get from kafka but is nil", msg.Key)

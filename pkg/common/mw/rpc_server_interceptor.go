@@ -3,6 +3,7 @@ package mw
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"math"
 	"runtime"
 	"runtime/debug"
@@ -20,9 +21,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const OperationID = "operationID"
-const OpUserID = "opUserID"
-
 func rpcString(v interface{}) string {
 	if s, ok := v.(interface{ String() string }); ok {
 		return s.String()
@@ -31,7 +29,6 @@ func rpcString(v interface{}) string {
 }
 
 func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	var operationID string
 	defer func() {
 		if r := recover(); r != nil {
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
@@ -59,17 +56,39 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
 	}
-	if opts := md.Get(OperationID); len(opts) != 1 || opts[0] == "" {
+	if keys := md.Get(constant.RpcCustomHeader); len(keys) > 0 {
+		for _, key := range keys {
+			values := md.Get(key)
+			if len(values) == 0 {
+				return nil, status.New(codes.InvalidArgument, fmt.Sprintf("missing metadata key %s", key)).Err()
+			}
+			ctx = context.WithValue(ctx, key, values)
+		}
+	}
+	args := make([]string, 0, 4)
+	if opts := md.Get(constant.OperationID); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "operationID error").Err()
 	} else {
-		operationID = opts[0]
+		args = append(args, constant.OperationID, opts[0])
+		ctx = context.WithValue(ctx, constant.OperationID, opts[0])
 	}
-	var opUserID string
-	if opts := md.Get(OpUserID); len(opts) == 1 {
-		opUserID = opts[0]
+	if opts := md.Get(constant.OpUserID); len(opts) == 1 {
+		args = append(args, constant.OpUserID, opts[0])
+		ctx = context.WithValue(ctx, constant.OpUserID, opts[0])
 	}
-	ctx = context.WithValue(ctx, OperationID, operationID)
-	ctx = context.WithValue(ctx, OpUserID, opUserID)
+	if opts := md.Get(constant.OpUserPlatform); len(opts) == 1 {
+		ctx = context.WithValue(ctx, constant.OpUserPlatform, opts[0])
+	}
+	if opts := md.Get(constant.ConnID); len(opts) == 1 {
+		ctx = context.WithValue(ctx, constant.ConnID, opts[0])
+	}
+	if opts := md.Get(constant.CheckKey); len(opts) != 1 || opts[0] == "" {
+		return nil, status.New(codes.InvalidArgument, "check key empty").Err()
+	} else {
+		if err := verifyReqKey(args, opts[0]); err != nil {
+			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
+		}
+	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err == nil {
@@ -119,7 +138,7 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if err != nil {
 		panic(err)
 	}
-	log.ZError(ctx, "rpc server resp", err, "funcName", funcName)
+	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
 	return nil, details.Err()
 }
 

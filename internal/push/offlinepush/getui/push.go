@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
 	"sync"
@@ -71,7 +71,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 				go func(index int, userIDs []string) {
 					defer wg.Done()
 					if err2 := g.batchPush(ctx, token, userIDs, pushReq); err2 != nil {
-						log.NewError(tracelog.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
+						log.NewError(mcontext.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
 						err = err2
 					}
 				}(i, v.Item)
@@ -132,7 +132,7 @@ func (g *Client) batchPush(ctx context.Context, token string, userIDs []string, 
 }
 
 func (g *Client) singlePush(ctx context.Context, token, userID string, pushReq PushReq) error {
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	pushReq.RequestID = &operationID
 	pushReq.Audience = &Audience{Alias: []string{userID}}
 	return g.request(ctx, pushURL, pushReq, token, nil)

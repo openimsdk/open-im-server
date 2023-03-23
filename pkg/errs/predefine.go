@@ -12,7 +12,7 @@ var (
 
 	ErrUserIDNotFound  = NewCodeError(UserIDNotFoundError, "UserIDNotFoundError")
 	ErrGroupIDNotFound = NewCodeError(GroupIDNotFoundError, "GroupIDNotFoundError")
-	ErrGroupIDExisted  = NewCodeError(GroupIDIDExisted, "GroupIDExisted")
+	ErrGroupIDExisted  = NewCodeError(GroupIDExisted, "GroupIDExisted")
 	ErrUserIDExisted   = NewCodeError(UserIDExisted, "UserIDExisted")
 
 	ErrRecordNotFound = NewCodeError(RecordNotFoundError, "RecordNotFoundError")

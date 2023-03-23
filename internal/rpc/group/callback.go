@@ -8,7 +8,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -21,7 +21,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	}
 	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
-		OperationID:     tracelog.GetOperationID(ctx),
+		OperationID:     mcontext.GetOperationID(ctx),
 		GroupInfo:       *req.GroupInfo,
 	}
 	cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
@@ -66,7 +66,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, groupMember *relation.Gr
 	}
 	callbackReq := &callbackstruct.CallbackBeforeMemberJoinGroupReq{
 		CallbackCommand: constant.CallbackBeforeMemberJoinGroupCommand,
-		OperationID:     tracelog.GetOperationID(ctx),
+		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         groupMember.GroupID,
 		UserID:          groupMember.UserID,
 		Ex:              groupMember.Ex,
@@ -93,7 +93,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	}
 	callbackReq := callbackstruct.CallbackBeforeSetGroupMemberInfoReq{
 		CallbackCommand: constant.CallbackBeforeSetGroupMemberInfoCommand,
-		OperationID:     tracelog.GetOperationID(ctx),
+		OperationID:     mcontext.GetOperationID(ctx),
 		GroupID:         req.GroupID,
 		UserID:          req.UserID,
 	}

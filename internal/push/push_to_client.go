@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('open-im,www.open-im.io').
-** author("fg,Gordon@open-im.io").
-** time(2021/3/5 14:31).
- */
 package push
 
 import (
@@ -19,8 +13,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
@@ -64,9 +58,8 @@ func NewOfflinePusher(cache cache.Model) offlinepush.OfflinePusher {
 }
 
 func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgData) error {
-	operationID := tracelog.GetOperationID(ctx)
 	var userIDs = []string{userID}
-	log.Debug(operationID, "Get msg from msg_transfer And push msg", msg.String(), userID)
+	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userID", userID, "msg", msg.String())
 	// callback
 	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != errs.ErrCallbackContinue {
 		return err
@@ -77,7 +70,8 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 		return err
 	}
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
-	log.NewInfo(operationID, "push_result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
+	//log.NewInfo(operationID, "push_result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush)
+	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userID)
 	p.successCount++
 	if isOfflinePush && userID != msg.SendID {
 		// save invitation info for offline push
@@ -107,7 +101,7 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 }
 
 func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
-	operationID := tracelog.GetOperationID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
 	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
 	var pushToUserIDs []string
 	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil && err != errs.ErrCallbackContinue {
@@ -183,6 +177,7 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 
 func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	conns, err := p.client.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +186,6 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
 		if err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), msg, len(pushToUserIDs), "err", err)
 			continue
 		}
 		if reply != nil && reply.SinglePushResult != nil {

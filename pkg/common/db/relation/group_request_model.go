@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -39,5 +40,5 @@ func (g *GroupRequestGorm) Take(ctx context.Context, groupID string, userID stri
 }
 
 func (g *GroupRequestGorm) Page(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, groups []*relation.GroupRequestModel, err error) {
-	return gormSearch[relation.GroupRequestModel](g.DB.Where("user_id = ?", userID), nil, "", pageNumber, showNumber)
+	return ormutil.GormSearch[relation.GroupRequestModel](g.DB.Where("user_id = ?", userID), nil, "", pageNumber, showNumber)
 }

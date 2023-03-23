@@ -6,7 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
@@ -21,7 +21,7 @@ func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command strin
 		ServerMsgID:      msg.MsgData.ServerMsgID,
 		CallbackCommand:  command,
 		ClientMsgID:      msg.MsgData.ClientMsgID,
-		OperationID:      tracelog.GetOperationID(ctx),
+		OperationID:      mcontext.GetOperationID(ctx),
 		SenderPlatformID: msg.MsgData.SenderPlatformID,
 		SenderNickname:   msg.MsgData.SenderNickname,
 		SessionType:      msg.MsgData.SessionType,

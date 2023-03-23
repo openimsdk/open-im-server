@@ -9,26 +9,37 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	msggateway.RegisterMsgGatewayServer(server, &Server{})
+func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	s.LongConnServer.SetMessageHandler(notification.NewCheck(client))
+	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
 
 func (s *Server) Start() error {
-	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, Start)
+	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, s.InitServer)
 }
 
 type Server struct {
+	notification   *notification.Check
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
 	pushTerminal   []int
 	//rpcServer      *RpcServer
+}
+
+func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
+	s.LongConnServer = LongConnServer
+}
+
+func (s *Server) Notification() *notification.Check {
+	return s.notification
 }
 
 func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
@@ -56,7 +67,7 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 				ps := new(msggateway.GetUsersOnlineStatusResp_SuccessDetail)
 				ps.Platform = constant.PlatformIDToName(client.platformID)
 				ps.Status = constant.OnlineStatus
-				ps.ConnID = client.connID
+				ps.ConnID = client.ctx.GetConnID()
 				ps.IsBackground = client.isBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)

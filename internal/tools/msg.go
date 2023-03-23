@@ -11,7 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-redis/redis/v8"
 	"math"
@@ -59,7 +59,7 @@ func (c *MsgTool) getCronTaskOperationID() string {
 
 func (c *MsgTool) AllUserClearMsgAndFixSeq() {
 	operationID := "AllUserAndGroupClearMsgAndFixSeq"
-	ctx := tracelog.NewCtx(utils.GetSelfFuncName())
+	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 	log.NewInfo(operationID, "============================ start del cron task ============================")
 	var err error
 	userIDList, err := c.userDatabase.GetAllUserID(ctx)
@@ -81,7 +81,7 @@ func (c *MsgTool) AllUserClearMsgAndFixSeq() {
 func (c *MsgTool) ClearUsersMsg(ctx context.Context, userIDs []string) {
 	for _, userID := range userIDs {
 		if err := c.msgDatabase.DeleteUserMsgsAndSetMinSeq(ctx, userID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), userID)
+			log.NewError(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), userID)
 		}
 		maxSeqCache, maxSeqMongo, err := c.GetAndFixUserSeqs(ctx, userID)
 		if err != nil {
@@ -95,14 +95,14 @@ func (c *MsgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDs []string
 	for _, groupID := range superGroupIDs {
 		userIDs, err := c.groupDatabase.FindGroupMemberUserID(ctx, groupID)
 		if err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "FindGroupMemberUserID", err.Error(), groupID)
+			log.NewError(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), "FindGroupMemberUserID", err.Error(), groupID)
 			continue
 		}
 		if err := c.msgDatabase.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "DeleteUserSuperGroupMsgsAndSetMinSeq failed", groupID, userIDs, config.Config.Mongo.DBRetainChatRecords)
+			log.NewError(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "DeleteUserSuperGroupMsgsAndSetMinSeq failed", groupID, userIDs, config.Config.Mongo.DBRetainChatRecords)
 		}
 		if err := c.fixGroupSeq(ctx, groupID, userIDs); err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), groupID, userIDs)
+			log.NewError(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), groupID, userIDs)
 		}
 	}
 }
@@ -129,7 +129,7 @@ func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []str
 		}
 	}
 	if err := c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion); err != nil {
-		log.NewWarn(tracelog.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+		log.NewWarn(mcontext.GetOperationID(ctx), "cache max seq and mongo max seq is diff > 10", groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
 	}
 	return nil
 }
@@ -138,16 +138,16 @@ func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqC
 	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgDatabase.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
 	if err != nil {
 		if err != unrelation.ErrMsgNotFound {
-			log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", userID)
+			log.NewError(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), err.Error(), "GetUserMinMaxSeqInMongoAndCache failed", userID)
 		}
 		return 0, 0, err
 	}
-	log.NewDebug(tracelog.GetOperationID(ctx), userID, minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache)
+	log.NewDebug(mcontext.GetOperationID(ctx), userID, minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache)
 	if minSeqCache > maxSeqCache {
 		if err := c.msgDatabase.SetUserMinSeq(ctx, userID, maxSeqCache); err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), "SetUserMinSeq failed", userID, minSeqCache, maxSeqCache)
+			log.NewError(mcontext.GetOperationID(ctx), "SetUserMinSeq failed", userID, minSeqCache, maxSeqCache)
 		} else {
-			log.NewWarn(tracelog.GetOperationID(ctx), "SetUserMinSeq success", userID, minSeqCache, maxSeqCache)
+			log.NewWarn(mcontext.GetOperationID(ctx), "SetUserMinSeq success", userID, minSeqCache, maxSeqCache)
 		}
 	}
 	return maxSeqCache, maxSeqMongo, nil
@@ -156,14 +156,14 @@ func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqC
 func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, groupID string, maxSeqCache int64) (minSeqCache int64, err error) {
 	minSeqCache, err = c.msgDatabase.GetGroupUserMinSeq(ctx, groupID, userID)
 	if err != nil {
-		log.NewError(tracelog.GetOperationID(ctx), "GetGroupUserMinSeq failed", groupID, userID)
+		log.NewError(mcontext.GetOperationID(ctx), "GetGroupUserMinSeq failed", groupID, userID)
 		return 0, err
 	}
 	if minSeqCache > maxSeqCache {
 		if err := c.msgDatabase.SetGroupUserMinSeq(ctx, groupID, userID, maxSeqCache); err != nil {
-			log.NewError(tracelog.GetOperationID(ctx), "SetGroupUserMinSeq failed", userID, minSeqCache, maxSeqCache)
+			log.NewError(mcontext.GetOperationID(ctx), "SetGroupUserMinSeq failed", userID, minSeqCache, maxSeqCache)
 		} else {
-			log.NewWarn(tracelog.GetOperationID(ctx), "SetGroupUserMinSeq success", userID, minSeqCache, maxSeqCache)
+			log.NewWarn(mcontext.GetOperationID(ctx), "SetGroupUserMinSeq success", userID, minSeqCache, maxSeqCache)
 		}
 	}
 	return minSeqCache, nil

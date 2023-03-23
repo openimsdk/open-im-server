@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tracelog"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"os"
 	"path/filepath"
@@ -139,22 +139,34 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 	if err != nil {
 		keysAndValues = append(keysAndValues, "error", err.Error())
 	}
-	keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+	keysAndValues = append([]interface{}{constant.OperationID, mcontext.GetOperationID(ctx)}, keysAndValues...)
 	l.zap.Errorw(msg, keysAndValues...)
 }
 
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
-	operationID := tracelog.GetOperationID(ctx)
-	opUserID := tracelog.GetOpUserID(ctx)
-	connID := tracelog.GetConnID(ctx)
+	operationID := mcontext.GetOperationID(ctx)
+	opUserID := mcontext.GetOpUserID(ctx)
+	connID := mcontext.GetConnID(ctx)
+	triggerID := mcontext.GetTriggerID(ctx)
+	opUserPlatform := mcontext.GetOpUserPlatform(ctx)
+	remoteAddr := mcontext.GetRemoteAddr(ctx)
 	if opUserID != "" {
-		keysAndValues = append([]interface{}{constant.OpUserID, tracelog.GetOpUserID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.OpUserID, opUserID}, keysAndValues...)
 	}
 	if operationID != "" {
-		keysAndValues = append([]interface{}{constant.OperationID, tracelog.GetOperationID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.OperationID, operationID}, keysAndValues...)
 	}
 	if connID != "" {
-		keysAndValues = append([]interface{}{constant.ConnID, tracelog.GetConnID(ctx)}, keysAndValues...)
+		keysAndValues = append([]interface{}{constant.ConnID, connID}, keysAndValues...)
+	}
+	if triggerID != "" {
+		keysAndValues = append([]interface{}{constant.TriggerID, triggerID}, keysAndValues...)
+	}
+	if opUserPlatform != "" {
+		keysAndValues = append([]interface{}{constant.OpUserPlatform, opUserPlatform}, keysAndValues...)
+	}
+	if remoteAddr != "" {
+		keysAndValues = append([]interface{}{constant.RemoteAddr, remoteAddr}, keysAndValues...)
 	}
 	return keysAndValues
 }
