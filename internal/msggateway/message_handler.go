@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
@@ -53,6 +54,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	if err := g.validate.Struct(req); err != nil {
 		return nil, err
 	}
+	log.ZDebug(context, "msggateway GetSeq", "notification", g.notification, "msg", g.notification.Msg)
 	resp, err := g.notification.Msg.GetMaxAndMinSeq(context, &req)
 	if err != nil {
 		return nil, err
