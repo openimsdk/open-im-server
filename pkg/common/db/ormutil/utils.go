@@ -1,18 +1,19 @@
 package ormutil
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"gorm.io/gorm"
 )
 
 func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {
 	var count int64
-	if err := db.Count(&count).Error; err != nil {
-		return 0, nil, utils.Wrap(err, "")
+	var model E
+	if err := db.Model(&model).Count(&count).Error; err != nil {
+		return 0, nil, errs.Wrap(err)
 	}
 	var es []*E
 	if err := db.Limit(int(showNumber)).Offset(int(pageNumber * showNumber)).Find(&es).Error; err != nil {
-		return 0, nil, utils.Wrap(err, "")
+		return 0, nil, errs.Wrap(err)
 	}
 	return uint32(count), es, nil
 }
@@ -46,7 +47,7 @@ func MapCount(db *gorm.DB, field string) (map[string]uint32, error) {
 		Count uint32 `gorm:"column:count"`
 	}
 	if err := db.Select(field + " as id, count(1) as count").Group(field).Find(&items).Error; err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	m := make(map[string]uint32)
 	for _, item := range items {
