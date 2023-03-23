@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -13,8 +16,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"strconv"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -251,7 +252,7 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 		}
 	}
 	if len(failedMsgs) != 0 {
-		return len(failedMsgs), errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedMsgs, tracelog.GetOperationID(ctx)))
+		return len(failedMsgs), fmt.Errorf("set msg to cache failed, failed lists: %v, %s", failedMsgs, tracelog.GetOperationID(ctx))
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err

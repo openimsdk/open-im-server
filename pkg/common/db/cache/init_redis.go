@@ -3,11 +3,12 @@ package cache
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/go-redis/redis/v8"
-	"time"
 )
 
 func NewRedis() (redis.UniversalClient, error) {

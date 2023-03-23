@@ -2,14 +2,11 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"time"
+
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
-	"strconv"
-	"time"
 )
 
 const (
@@ -19,21 +16,38 @@ const (
 )
 
 type UserCache interface {
+	metaCache
+	NewCache() UserCache
+	GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error)
+	GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error)
+	DelUsersInfo(userIDs []string) UserCache
+	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
+	DelUsersGlobalRecvMsgOpt(userIDs []string) UserCache
 }
 
 type UserCacheRedis struct {
-	userDB *relation.UserGorm
-
+	metaCache
+	userDB     relationTb.UserModelInterface
 	expireTime time.Duration
-
-	rcClient *rockscache.Client
+	rcClient   *rockscache.Client
 }
 
-func NewUserCacheRedis(rdb redis.UniversalClient, userDB *relation.UserGorm, options rockscache.Options) *UserCacheRedis {
+func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationTb.UserModelInterface, options rockscache.Options) UserCache {
+	rcClient := rockscache.NewClient(rdb, options)
 	return &UserCacheRedis{
+		metaCache:  NewMetaCacheRedis(rcClient),
 		userDB:     userDB,
 		expireTime: userExpireTime,
-		rcClient:   rockscache.NewClient(rdb, options),
+		rcClient:   rcClient,
+	}
+}
+
+func (u *UserCacheRedis) NewCache() UserCache {
+	return &UserCacheRedis{
+		metaCache:  u.metaCache,
+		userDB:     u.userDB,
+		expireTime: u.expireTime,
+		rcClient:   u.rcClient,
 	}
 }
 
@@ -46,66 +60,50 @@ func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
 }
 
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error) {
-	getUserInfo := func() (string, error) {
-		userInfo, err := u.userDB.Take(ctx, userID)
-		if err != nil {
-			return "", err
-		}
-		bytes, err := json.Marshal(userInfo)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	userInfoStr, err := u.rcClient.Fetch(u.getUserInfoKey(userID), u.expireTime, getUserInfo)
-	if err != nil {
-		return nil, err
-	}
-	userInfo = &relationTb.UserModel{}
-	err = json.Unmarshal([]byte(userInfoStr), userInfo)
-	return userInfo, utils.Wrap(err, "")
+	return getCache(ctx, u.rcClient, u.getUserInfoKey(userID), u.expireTime, func(ctx context.Context) (*relationTb.UserModel, error) {
+		return u.userDB.Take(ctx, userID)
+	})
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error) {
-	var users []*relationTb.UserModel
-	//for _, userID := range userIDs {
-	//	user, err := GetUserInfoFromCache(ctx, userID)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	users = append(users, user)
-	//}
-	return users, nil
-}
-
-func (u *UserCacheRedis) DelUserInfo(ctx context.Context, userID string) (err error) {
-	return u.rcClient.TagAsDeleted(u.getUserInfoKey(userID))
-}
-
-func (u *UserCacheRedis) DelUsersInfo(ctx context.Context, userIDs []string) (err error) {
+	var keys []string
 	for _, userID := range userIDs {
-		if err := u.DelUserInfo(ctx, userID); err != nil {
-			return err
-		}
+		keys = append(keys, u.getUserInfoKey(userID))
 	}
-	return nil
+	return batchGetCache(ctx, u.rcClient, keys, u.expireTime, func(user *relationTb.UserModel, keys []string) (int, error) {
+		for i, key := range keys {
+			if key == u.getUserInfoKey(user.UserID) {
+				return i, nil
+			}
+		}
+		return 0, errIndex
+	}, func(ctx context.Context) ([]*relationTb.UserModel, error) {
+		return u.userDB.Find(ctx, userIDs)
+	})
+}
+
+func (u *UserCacheRedis) DelUsersInfo(userIDs []string) UserCache {
+	var keys []string
+	for _, userID := range userIDs {
+		keys = append(keys, u.getUserInfoKey(userID))
+	}
+	cache := u.NewCache()
+	cache.AddKeys(keys...)
+	return cache
 }
 
 func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
-	getUserGlobalRecvMsgOpt := func() (string, error) {
-		userInfo, err := u.userDB.Take(ctx, userID)
-		if err != nil {
-			return "", err
-		}
-		return strconv.Itoa(int(userInfo.GlobalRecvMsgOpt)), nil
-	}
-	optStr, err := u.rcClient.Fetch(u.getUserInfoKey(userID), u.expireTime, getUserGlobalRecvMsgOpt)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(optStr)
+	return getCache(ctx, u.rcClient, u.getUserGlobalRecvMsgOptKey(userID), u.expireTime, func(ctx context.Context) (int, error) {
+		return u.userDB.GetUserGlobalRecvMsgOpt(ctx, userID)
+	})
 }
 
-func (u *UserCacheRedis) DelUserGlobalRecvMsgOpt(ctx context.Context, userID string) (err error) {
-	return u.rcClient.TagAsDeleted(u.getUserGlobalRecvMsgOptKey(userID))
+func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs []string) UserCache {
+	var keys []string
+	for _, userID := range userIDs {
+		keys = append(keys, u.getUserGlobalRecvMsgOptKey(userID))
+	}
+	cache := u.NewCache()
+	cache.AddKeys(keys...)
+	return cache
 }

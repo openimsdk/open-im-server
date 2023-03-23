@@ -10,6 +10,7 @@ import (
 	tableRelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
@@ -35,9 +36,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		groupChecker:         check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt()), tx.NewGorm(db)),
+		ConversationDatabase: controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
 }
@@ -54,7 +56,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 		}
 		return resp, nil
 	}
-	return nil, nil
+	return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
 }
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
@@ -70,11 +72,11 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 }
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
-	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	conversations, err := c.ConversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	if err := utils.CopyStructFields(&resp.Conversations, conversations); err != nil {
 		return nil, err
 	}
@@ -82,7 +84,6 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbConver
 }
 
 func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbConversation.BatchSetConversationsReq) (*pbConversation.BatchSetConversationsResp, error) {
-	resp := &pbConversation.BatchSetConversationsResp{}
 	var conversations []*tableRelation.ConversationModel
 	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
 		return nil, err
@@ -92,15 +93,30 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 		return nil, err
 	}
 	c.notify.ConversationChangeNotification(ctx, req.OwnerUserID)
+	resp := &pbConversation.BatchSetConversationsResp{}
 	return resp, nil
 }
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbConversation.SetConversationReq) (*pbConversation.SetConversationResp, error) {
-	panic("implement me")
+	var conversation tableRelation.ConversationModel
+	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
+		return nil, err
+	}
+	err := c.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
+	if err != nil {
+		return nil, err
+	}
+	c.notify.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
+	resp := &pbConversation.SetConversationResp{}
+	return resp, nil
 }
 
 func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversation.SetRecvMsgOptReq) (*pbConversation.SetRecvMsgOptResp, error) {
-	panic("implement me")
+	conversation := tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}
+	if err := c.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &conversation, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
+		return nil, err
+	}
+	return &pbConversation.SetRecvMsgOptResp{}, nil
 }
 
 func (c *conversationServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {

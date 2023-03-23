@@ -8,6 +8,7 @@ package msgtransfer
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -65,7 +66,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMs
 		}
 		if tag {
 			log.NewInfo(operationID, "msg_transfer msg persisting", string(msg))
-			if err = pc.chatLogDatabase.CreateChatLog(msgFromMQ); err != nil {
+			if err = pc.chatLogDatabase.CreateChatLog(&msgFromMQ); err != nil {
 				log.NewError(operationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}

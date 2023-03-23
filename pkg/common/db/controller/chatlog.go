@@ -6,7 +6,7 @@ import (
 )
 
 type ChatLogDatabase interface {
-	CreateChatLog(msg pbMsg.MsgDataToMQ) error
+	CreateChatLog(msg *pbMsg.MsgDataToMQ) error
 	GetChatLog(chatLog *relationTb.ChatLogModel, pageNumber, showNumber int32, contentTypes []int32) (int64, []relationTb.ChatLogModel, error)
 }
 
@@ -18,7 +18,7 @@ type chatLogDatabase struct {
 	chatLogModel relationTb.ChatLogModelInterface
 }
 
-func (c *chatLogDatabase) CreateChatLog(msg pbMsg.MsgDataToMQ) error {
+func (c *chatLogDatabase) CreateChatLog(msg *pbMsg.MsgDataToMQ) error {
 	return c.chatLogModel.Create(msg)
 }
 

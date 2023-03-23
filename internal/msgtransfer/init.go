@@ -2,14 +2,16 @@ package msgtransfer
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"sync"
 )
 
 type MsgTransfer struct {
@@ -38,9 +40,9 @@ func StartTransfer(prometheusPort int) error {
 	cacheModel := cache.NewCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
-
+	extendMsgCache := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
-	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel)
+	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
 
 	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase)

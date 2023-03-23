@@ -8,6 +8,7 @@ package push
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
@@ -59,7 +60,7 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		err = c.pusher.MsgToUser(ctx, pbData.SourceID, pbData.MsgData)
 	}
 	if err != nil {
-		log.NewError("", "push failed", *pbData)
+		log.NewError("", "push failed", pbData)
 	}
 }
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
