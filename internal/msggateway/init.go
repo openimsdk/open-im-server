@@ -24,6 +24,9 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	}
 	hubServer := NewServer(rpcPort)
 	go hubServer.Start()
+	if hubServer.Notification() == nil {
+		panic("notification is nil")
+	}
 	longServer.SetMessageHandler(hubServer.Notification())
 	hubServer.SetLongConnServer(longServer)
 	go hubServer.LongConnServer.Run()

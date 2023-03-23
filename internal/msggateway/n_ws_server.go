@@ -3,6 +3,7 @@ package msggateway
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
@@ -51,6 +52,7 @@ type WsServer struct {
 }
 
 func (ws *WsServer) SetMessageHandler(rpcClient *notification.Check) {
+	log.ZDebug(nil, "msggateway SetMessageHandler", "rpcClient", rpcClient)
 	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcClient)
 }
 
