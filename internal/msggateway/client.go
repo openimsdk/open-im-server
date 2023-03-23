@@ -37,7 +37,7 @@ type Client struct {
 	isCompress     bool
 	userID         string
 	isBackground   bool
-	connID         string
+	ctx            *UserConnContext
 	onlineAt       int64 // 上线时间戳（毫秒）
 	longConnServer LongConnServer
 	closed         bool
@@ -50,7 +50,7 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		platformID: utils.StringToInt(ctx.GetPlatformID()),
 		isCompress: isCompress,
 		userID:     ctx.GetUserID(),
-		connID:     ctx.GetConnID(),
+		ctx:        ctx,
 		onlineAt:   utils.GetCurrentTimestampByMill(),
 	}
 }
@@ -60,7 +60,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.platformID = utils.StringToInt(ctx.GetPlatformID())
 	c.isCompress = isCompress
 	c.userID = ctx.GetUserID()
-	c.connID = ctx.GetConnID()
+	c.ctx = ctx
 	c.onlineAt = utils.GetCurrentTimestampByMill()
 	c.longConnServer = longConnServer
 }
@@ -120,7 +120,7 @@ func (c *Client) handleMessage(message []byte) error {
 		return errors.New("exception conn userID not same to req userID")
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, ConnID, c.connID)
+	ctx = context.WithValue(ctx, ConnID, c.ctx.GetConnID())
 	ctx = context.WithValue(ctx, OperationID, binaryReq.OperationID)
 	ctx = context.WithValue(ctx, CommonUserID, binaryReq.SendID)
 	ctx = context.WithValue(ctx, PlatformID, c.platformID)

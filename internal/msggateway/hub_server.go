@@ -67,7 +67,7 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 				ps := new(msggateway.GetUsersOnlineStatusResp_SuccessDetail)
 				ps.Platform = constant.PlatformIDToName(client.platformID)
 				ps.Status = constant.OnlineStatus
-				ps.ConnID = client.connID
+				ps.ConnID = client.ctx.GetConnID()
 				ps.IsBackground = client.isBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
