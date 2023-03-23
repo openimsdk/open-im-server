@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"net/http"
@@ -42,10 +43,15 @@ type WsServer struct {
 	onlineUserConnNum               int64
 	handshakeTimeout                time.Duration
 	readBufferSize, WriteBufferSize int
+	hubServer                       *Server
 	validate                        *validator.Validate
 	Compressor
 	Encoder
 	MessageHandler
+}
+
+func (ws *WsServer) SetMessageHandler(rpcClient *notification.Check) {
+	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcClient)
 }
 
 func (ws *WsServer) UnRegister(c *Client) {
@@ -90,7 +96,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		clients:        newUserMap(),
 		Compressor:     NewGzipCompressor(),
 		Encoder:        NewGobEncoder(),
-		MessageHandler: NewGrpcHandler(v, nil),
 		//handler:  NewGrpcHandler(validate),
 	}, nil
 }

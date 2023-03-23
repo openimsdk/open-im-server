@@ -9,13 +9,15 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	msggateway.RegisterMsgGatewayServer(server, &Server{})
+	s.notification = notification.NewCheck(client)
+	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
 
@@ -24,11 +26,16 @@ func (s *Server) Start() error {
 }
 
 type Server struct {
+	notification   *notification.Check
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
 	pushTerminal   []int
 	//rpcServer      *RpcServer
+}
+
+func (s *Server) Notification() *notification.Check {
+	return s.notification
 }
 
 func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
