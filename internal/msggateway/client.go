@@ -9,6 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/golang/protobuf/proto"
 	"runtime/debug"
 	"sync"
 )
@@ -159,6 +160,7 @@ func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, e
 func (c *Client) close() {
 	c.w.Lock()
 	defer c.w.Unlock()
+	c.closed = true
 	c.conn.Close()
 	c.longConnServer.UnRegister(c)
 
@@ -173,7 +175,17 @@ func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
 	_ = c.writeMsg(mReply)
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
-	return nil
+	data, err := proto.Marshal(msgData)
+	if err != nil {
+		return err
+	}
+	resp := Resp{
+		ReqIdentifier: WSPushMsg,
+		OperationID:   mcontext.GetOperationID(ctx),
+		Data:          data,
+	}
+	return c.writeMsg(resp)
+
 }
 
 func (c *Client) KickOnlineMessage(ctx context.Context) error {

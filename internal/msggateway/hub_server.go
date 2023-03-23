@@ -31,7 +31,6 @@ type Server struct {
 	prometheusPort int
 	LongConnServer LongConnServer
 	pushTerminal   []int
-	//rpcServer      *RpcServer
 }
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
