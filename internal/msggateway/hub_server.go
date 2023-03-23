@@ -16,7 +16,7 @@ import (
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	s.notification = notification.NewCheck(client)
+	s.LongConnServer.SetMessageHandler(notification.NewCheck(client))
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
@@ -42,8 +42,8 @@ func (s *Server) Notification() *notification.Check {
 	return s.notification
 }
 
-func NewServer(rpcPort int) *Server {
-	return &Server{rpcPort: rpcPort, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
+func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
+	return &Server{rpcPort: rpcPort, LongConnServer: longConnServer, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
 }
 
 func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {

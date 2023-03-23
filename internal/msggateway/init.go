@@ -5,13 +5,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"sync"
 	"time"
 )
 
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
-	var wg sync.WaitGroup
-	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)
 	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
 	longServer, err := NewWsServer(
@@ -22,14 +19,8 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	hubServer := NewServer(rpcPort)
+	hubServer := NewServer(rpcPort, longServer)
 	go hubServer.Start()
-	if hubServer.Notification() == nil {
-		panic("notification is nil")
-	}
-	longServer.SetMessageHandler(hubServer.Notification())
-	hubServer.SetLongConnServer(longServer)
-	go hubServer.LongConnServer.Run()
-	wg.Wait()
+	hubServer.LongConnServer.Run()
 	return nil
 }

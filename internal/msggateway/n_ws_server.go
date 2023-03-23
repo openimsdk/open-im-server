@@ -21,6 +21,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s interface{}) error
+	SetMessageHandler(rpcClient *notification.Check)
 	UnRegister(c *Client)
 	Compressor
 	Encoder
