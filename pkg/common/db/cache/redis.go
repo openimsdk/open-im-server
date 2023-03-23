@@ -251,7 +251,7 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 		}
 	}
 	if len(failedMsgs) != 0 {
-		return len(failedMsgs), fmt.Errorf("set msg to cache failed, failed lists: %v, %s", failedMsgs, tracelog.GetOperationID(ctx))
+		return len(failedMsgs), fmt.Errorf("set msg to cache failed, failed lists: %v, %s", failedMsgs, userID)
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err
