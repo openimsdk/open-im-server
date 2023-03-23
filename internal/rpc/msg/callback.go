@@ -140,7 +140,7 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp 
 func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
-	if !config.Config.Callback.CallbackMsgModify.Enable || msg.MsgData.ContentType != constant.Text {
+	if !config.Config.Callback.CallbackMsgModify.Enable {
 		return callbackResp
 	}
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
