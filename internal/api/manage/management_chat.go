@@ -38,6 +38,7 @@ func SetOptions(options map[string]bool, value bool) {
 
 func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
+	options := make(map[string]bool, 5)
 	var err error
 	switch params.ContentType {
 	case constant.Text:
@@ -52,13 +53,20 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.File:
 		fallthrough
+	case constant.CustomNotTriggerConversation:
+		fallthrough
+	case constant.CustomOnlineOnly:
+		fallthrough
+	case constant.AtText:
+		fallthrough
 	case constant.AdvancedRevoke:
+		utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
+		utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 		newContent = params.Content["revokeMsgClientID"].(string)
 	default:
 	}
-	options := make(map[string]bool, 5)
 	if params.IsOnlineOnly {
 		SetOptions(options, false)
 	}
@@ -151,6 +159,8 @@ func ManagementSendMsg(c *gin.Context) {
 		data = CustomElem{}
 	case constant.CustomOnlineOnly:
 		data = CustomElem{}
+	case constant.AtText:
+		data = AtElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -463,9 +473,13 @@ type FileElem struct {
 	FileSize  int64  `mapstructure:"fileSize"`
 }
 type AtElem struct {
-	Text       string   `mapstructure:"text"`
-	AtUserList []string `mapstructure:"atUserList"`
-	IsAtSelf   bool     `mapstructure:"isAtSelf"`
+	Text        string   `mapstructure:"text"`
+	AtUserList  []string `mapstructure:"atUserList"`
+	AtUsersInfo []struct {
+		AtUserID      string `json:"atUserID,omitempty"`
+		GroupNickname string `json:"groupNickname,omitempty"`
+	} `json:"atUsersInfo,omitempty"`
+	IsAtSelf bool `mapstructure:"isAtSelf"`
 }
 type LocationElem struct {
 	Description string  `mapstructure:"description"`

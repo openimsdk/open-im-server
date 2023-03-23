@@ -58,6 +58,40 @@ func init() {
 	}
 }
 
+func GetUserToken(c *gin.Context) {
+	var (
+		req    apiStruct.GetUserTokenRequest
+		resp   apiStruct.GetUserTokenResponse
+		reqPb  pbAdmin.GetUserTokenReq
+		respPb *pbAdmin.GetUserTokenResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	reqPb.OperationID = req.OperationID
+	reqPb.UserID = req.UserID
+	reqPb.PlatformID = req.PlatFormID
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := pbAdmin.NewAdminCMSClient(etcdConn)
+	respPb, err := client.GetUserToken(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	resp.Token = respPb.Token
+	resp.ExpTime = respPb.ExpTime
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
+}
+
 // register
 func AdminLogin(c *gin.Context) {
 	var (

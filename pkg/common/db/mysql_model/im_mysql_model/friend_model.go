@@ -4,8 +4,6 @@ import (
 	"Open_IM/pkg/common/db"
 	"fmt"
 	"time"
-
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func InsertToFriend(toInsertFollow *db.Friend) error {

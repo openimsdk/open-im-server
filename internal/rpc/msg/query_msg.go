@@ -21,7 +21,7 @@ func (rpc *rpcChat) GetSuperGroupMsg(context context.Context, req *msg.GetSuperG
 		} else {
 			log.Debug(req.OperationID, "get message from redis is nil", failedSeqList)
 		}
-		msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(req.GroupID, failedSeqList, req.OperationID)
+		msgList, _, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(req.GroupID, failedSeqList, req.OperationID)
 		if err1 != nil {
 			promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
 			log.Error(req.OperationID, "GetSuperGroupMsg data error", req.String(), err.Error())

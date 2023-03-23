@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: openim/user:v2.3.4
+        image: openim/user:v2.3.8
         # imagePullPolicy: Always
         volumeMounts:
           - name: config
@@ -23,10 +23,16 @@ spec:
             readOnly: true
         env:
           - name: CONFIG_NAME
-            value: "/Open-IM-Server"         
+            value: "/Open-IM-Server"
+          - name: USUAL_CONFIG_NAME
+            value: "/Open-IM-Server"
       volumes:
         - name: config
-          configMap:
-            name: openim-config
+          projected:
+            sources:
+            - configMap:
+                name: openim-config
+            - configMap:
+                name: openim-usualconfig
   strategy: #更新策略
     type: RollingUpdate # 滚动更新

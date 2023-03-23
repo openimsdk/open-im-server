@@ -146,6 +146,7 @@ message GetGroupMembersInfoReq {
   repeated string memberList = 2;
   string OpUserID = 3;  //No verification permission
   string OperationID = 4;
+  bool noCache = 5;
 }
 
 message GetGroupMembersInfoResp {
@@ -199,6 +200,17 @@ message InviteUserToGroupResp {
   repeated  Id2Result Id2ResultList = 3; // 0 ok, -1 error
 }
 
+message InviteUserToGroupsReq {
+  string OperationID = 1;
+  repeated string groupIDList = 2;
+  string Reason = 3;
+  string invitedUserID = 4;
+  string OpUserID = 5; //group member or app manager
+}
+message InviteUserToGroupsResp {
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+}
 
 message GetGroupAllMemberReq {
   string GroupID = 1;
@@ -375,6 +387,27 @@ message GetGroupAbstractInfoResp{
   uint64 groupMemberListHash = 3;
 }
 
+message GroupIsExistReq {
+  repeated string groupIDList = 1;
+  string opUserID = 2;
+  string operationID = 3;
+}
+
+message GroupIsExistResp {
+  CommonResp CommonResp = 1;
+  map<string, bool> IsExistMap = 2;
+}
+
+message UserIsInGroupReq {
+  string groupID = 1;
+  repeated string userIDList = 2;
+  string operationID = 3;
+}
+
+message UserIsInGroupResp {
+  CommonResp CommonResp = 1;
+  map<string, bool> IsExistMap = 2;
+}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -391,6 +424,7 @@ service group{
   rpc kickGroupMember(KickGroupMemberReq) returns (KickGroupMemberResp);
   rpc getJoinedGroupList(GetJoinedGroupListReq) returns (GetJoinedGroupListResp);
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
+  rpc inviteUserToGroups(InviteUserToGroupsReq) returns (InviteUserToGroupsResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
@@ -408,6 +442,8 @@ service group{
   rpc GetSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
   rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
   rpc GetGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
+  rpc GroupIsExist(GroupIsExistReq) returns(GroupIsExistResp);
+  rpc UserIsInGroup(UserIsInGroupReq) returns(UserIsInGroupResp);
 }
 
 

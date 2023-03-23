@@ -29,6 +29,8 @@ func NewGinRouter() *gin.Engine {
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
 		adminRouterGroup.Use(middleware.JWTAuth())
+		adminRouterGroup.POST("/get_user_token", admin.GetUserToken)
+
 		adminRouterGroup.POST("/add_user_register_add_friend_id", admin.AddUserRegisterAddFriendIDList)
 		adminRouterGroup.POST("/reduce_user_register_reduce_friend_id", admin.ReduceUserRegisterAddFriendIDList)
 		adminRouterGroup.POST("/get_user_register_reduce_friend_id_list", admin.GetUserRegisterAddFriendIDList)

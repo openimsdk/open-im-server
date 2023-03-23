@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 	log.NewPrivateLog(constant.LogFileName)
 	logic.Init()
-	fmt.Println("start msg_transfer server ", "OpenIM version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start msg_transfer server ", ", OpenIM version: ", constant.CurrentVersion, "\n")
 	logic.Run(*prometheusPort)
 	wg.Wait()
 }

@@ -17,6 +17,17 @@ type AdminLoginResponse struct {
 	FaceURL  string `json:"faceURL"`
 }
 
+type GetUserTokenRequest struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+	PlatFormID  int32  `json:"platformID" binding:"required"`
+}
+
+type GetUserTokenResponse struct {
+	Token   string `json:"token"`
+	ExpTime int64  `json:"expTime"`
+}
+
 type AddUserRegisterAddFriendIDListRequest struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required"`

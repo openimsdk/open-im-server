@@ -16,6 +16,8 @@ var (
 	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
+const ConfName = "openIMConf"
+
 var Config config
 
 type callBackConfig struct {
@@ -157,6 +159,7 @@ type config struct {
 		EtcdAddr   []string `yaml:"etcdAddr"`
 		UserName   string   `yaml:"userName"`
 		Password   string   `yaml:"password"`
+		Secret     string   `yaml:"secret"`
 	}
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
@@ -245,11 +248,16 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToModify struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToTransfer"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
+			MsgToRedis  string `yaml:"msgToTransfer"`
+			MsgToMongo  string `yaml:"msgToMongo"`
+			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToPush   string `yaml:"msgToPush"`
+			MsgToModify string `yaml:"msgToModify"`
 		}
 	}
 	Secret                            string `yaml:"secret"`
@@ -279,6 +287,7 @@ type config struct {
 		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackAfterConsumeGroupMsg       callBackConfig `yaml:"callbackAfterConsumeGroupMsg"`
 		CallbackMsgModify                  callBackConfig `yaml:"callbackMsgModify"`
 		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
 		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
@@ -288,6 +297,8 @@ type config struct {
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
 		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
+		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -452,6 +463,12 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"blackDeleted"`
+		FriendInfoUpdated struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"friendInfoUpdated"`
+
 		ConversationOptUpdate struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
@@ -563,6 +580,7 @@ type usualConfig struct {
 	Etcd struct {
 		UserName string `yaml:"userName"`
 		Password string `yaml:"password"`
+		Secret   string `yaml:"secret"`
 	} `yaml:"etcd"`
 	Mysql struct {
 		DBUserName string `yaml:"dbMysqlUserName"`
@@ -585,7 +603,7 @@ type usualConfig struct {
 		Minio struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			SecretAccessKey string `yaml:"secretAccessKey"`
-			Endpoint        string `yaml:"endPoint"`
+			Endpoint        string `yaml:"endpoint"`
 		} `yaml:"minio"`
 	} `yaml:"credential"`
 
@@ -602,6 +620,7 @@ type usualConfig struct {
 
 	Push struct {
 		Getui struct {
+			PushUrl      string `yaml:"pushUrl"`
 			MasterSecret string `yaml:"masterSecret"`
 			AppKey       string `yaml:"appKey"`
 			Enable       bool   `yaml:"enable"`
@@ -635,7 +654,7 @@ func unmarshalConfig(config interface{}, configName string) {
 	} else {
 		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
 		if err != nil {
-			panic(err.Error())
+			panic(err.Error() + configName)
 		}
 		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())
@@ -646,12 +665,14 @@ func unmarshalConfig(config interface{}, configName string) {
 func init() {
 	unmarshalConfig(&Config, "config.yaml")
 	unmarshalConfig(&UsualConfig, "usualConfig.yaml")
-	fmt.Println(UsualConfig)
 	if Config.Etcd.UserName == "" {
 		Config.Etcd.UserName = UsualConfig.Etcd.UserName
 	}
 	if Config.Etcd.Password == "" {
 		Config.Etcd.Password = UsualConfig.Etcd.Password
+	}
+	if Config.Etcd.Secret == "" {
+		Config.Etcd.Secret = UsualConfig.Etcd.Secret
 	}
 
 	if Config.Mysql.DBUserName == "" {
@@ -698,7 +719,12 @@ func init() {
 
 	if Config.Push.Getui.MasterSecret == "" {
 		Config.Push.Getui.MasterSecret = UsualConfig.Push.Getui.MasterSecret
+	}
+	if Config.Push.Getui.AppKey == "" {
 		Config.Push.Getui.AppKey = UsualConfig.Push.Getui.AppKey
+	}
+	if Config.Push.Getui.PushUrl == "" {
+		Config.Push.Getui.PushUrl = UsualConfig.Push.Getui.PushUrl
 	}
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
@@ -714,5 +740,4 @@ func init() {
 	if Config.TokenPolicy.AccessSecret == "" {
 		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
 	}
-
 }

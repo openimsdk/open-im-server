@@ -55,6 +55,8 @@ message GetUsersOnlineStatusResp{
   message SuccessDetail{
     string platform = 1;
     string status = 2;
+    string connID = 3;
+    bool isBackground = 4;
   }
   message FailedDetail{
     string userID = 3;
@@ -89,7 +91,6 @@ message MultiTerminalLoginCheckResp{
     string  errMsg = 2;
 }
 
-
 service relay {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
   rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq) returns(GetUsersOnlineStatusResp);
@@ -97,5 +98,6 @@ service relay {
   rpc SuperGroupOnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
   rpc KickUserOffline(KickUserOfflineReq) returns(KickUserOfflineResp);
   rpc MultiTerminalLoginCheck(MultiTerminalLoginCheckReq) returns(MultiTerminalLoginCheckResp);
+  rpc SuperGroupBackgroundOnlinePush(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
 }
 

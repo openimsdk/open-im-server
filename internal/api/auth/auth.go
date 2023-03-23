@@ -199,7 +199,6 @@ func ForceLogout(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
-
 	req := &rpc.ForceLogoutReq{}
 	utils.CopyStructFields(req, &params)
 

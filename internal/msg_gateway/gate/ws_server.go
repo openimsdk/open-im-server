@@ -11,8 +11,11 @@ import (
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/gob"
+	"io/ioutil"
+	"strconv"
 	"strings"
 
 	go_redis "github.com/go-redis/redis/v8"
@@ -29,22 +32,26 @@ import (
 type UserConn struct {
 	*websocket.Conn
 	w            *sync.Mutex
-	platformID   int32
+	PlatformID   int32
 	PushedMaxSeq uint32
+	IsCompress   bool
+	userID       string
+	IsBackground bool
+	token        string
+	connID       string
 }
+
 type WServer struct {
 	wsAddr       string
 	wsMaxConnNum int
 	wsUpGrader   *websocket.Upgrader
-	wsConnToUser map[*UserConn]map[int]string
-	wsUserToConn map[string]map[int]*UserConn
+	wsUserToConn map[string]map[int][]*UserConn
 }
 
 func (ws *WServer) onInit(wsPort int) {
 	ws.wsAddr = ":" + utils.IntToString(wsPort)
 	ws.wsMaxConnNum = config.Config.LongConnSvr.WebsocketMaxConnNum
-	ws.wsConnToUser = make(map[*UserConn]map[int]string)
-	ws.wsUserToConn = make(map[string]map[int]*UserConn)
+	ws.wsUserToConn = make(map[string]map[int][]*UserConn)
 	ws.wsUpGrader = &websocket.Upgrader{
 		HandshakeTimeout: time.Duration(config.Config.LongConnSvr.WebsocketTimeOut) * time.Second,
 		ReadBufferSize:   config.Config.LongConnSvr.WebsocketMaxMsgLen,
@@ -69,15 +76,15 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		operationID = utils.OperationIDGenerator()
 	}
 	log.Debug(operationID, utils.GetSelfFuncName(), " args: ", query)
-	if ws.headerCheck(w, r, operationID) {
+	if isPass, compression := ws.headerCheck(w, r, operationID); isPass {
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], utils.Md5(conn.RemoteAddr().String() + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill())))}
 			userCount++
-			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
+			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
 			go ws.readMsg(newConn)
 		}
 	} else {
@@ -97,6 +104,30 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			ws.delUserConn(conn)
 			return
 		}
+		if messageType == websocket.CloseMessage {
+			log.NewWarn("", "WS receive error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", string(msg))
+			userCount--
+			ws.delUserConn(conn)
+			return
+		}
+		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
+		if conn.IsCompress {
+			buff := bytes.NewBuffer(msg)
+			reader, err := gzip.NewReader(buff)
+			if err != nil {
+				log.NewWarn("", "un gzip read failed")
+				continue
+			}
+			msg, err = ioutil.ReadAll(reader)
+			if err != nil {
+				log.NewWarn("", "ReadAll failed")
+				continue
+			}
+			err = reader.Close()
+			if err != nil {
+				log.NewWarn("", "reader close failed")
+			}
+		}
 		ws.msgParse(conn, msg)
 	}
 }
@@ -110,6 +141,17 @@ func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
 func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
+	if conn.IsCompress {
+		var buffer bytes.Buffer
+		gz := gzip.NewWriter(&buffer)
+		if _, err := gz.Write(msg); err != nil {
+			return utils.Wrap(err, "")
+		}
+		if err := gz.Close(); err != nil {
+			return utils.Wrap(err, "")
+		}
+		msg = buffer.Bytes()
+	}
 	conn.SetWriteDeadline(time.Now().Add(time.Duration(60) * time.Second))
 	return conn.WriteMessage(a, msg)
 }
@@ -151,6 +193,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 	defer rwLock.Unlock()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
@@ -158,8 +201,11 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
-			if oldConn, ok := oldConnMap[platformID]; ok {
+			if oldConns, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
+				for _, conn := range oldConns {
+					ws.sendKickMsg(conn, operationID)
+				}
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -182,15 +228,11 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error(), uid, platformID, m)
 					return
 				}
-				err = oldConn.Close()
+
 				delete(oldConnMap, platformID)
 				ws.wsUserToConn[uid] = oldConnMap
 				if len(oldConnMap) == 0 {
 					delete(ws.wsUserToConn, uid)
-				}
-				delete(ws.wsConnToUser, oldConn)
-				if err != nil {
-					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
 			} else {
 				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
@@ -206,6 +248,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
 	case constant.PCAndOther:
 		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
 			return
@@ -213,9 +256,11 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
-			if oldConn, ok := oldConnMap[platformID]; ok {
+			if oldConns, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				ws.sendKickMsg(oldConn)
+				for _, conn := range oldConns {
+					ws.sendKickMsg(conn, operationID)
+				}
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -238,15 +283,10 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error(), uid, platformID, m)
 					return
 				}
-				err = oldConn.Close()
 				delete(oldConnMap, platformID)
 				ws.wsUserToConn[uid] = oldConnMap
 				if len(oldConnMap) == 0 {
 					delete(ws.wsUserToConn, uid)
-				}
-				delete(ws.wsConnToUser, oldConn)
-				if err != nil {
-					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
 				callbackResp := callbackUserKickOff(operationID, uid, platformID)
 				if callbackResp.ErrCode != 0 {
@@ -264,11 +304,12 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 	case constant.WebAndOther:
 	}
 }
-func (ws *WServer) sendKickMsg(oldConn *UserConn) {
+func (ws *WServer) sendKickMsg(oldConn *UserConn, operationID string) {
 	mReply := Resp{
 		ReqIdentifier: constant.WSKickOnlineMsg,
 		ErrCode:       constant.ErrTokenInvalid.ErrCode,
 		ErrMsg:        constant.ErrTokenInvalid.ErrMsg,
+		OperationID:   operationID,
 	}
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
@@ -281,35 +322,41 @@ func (ws *WServer) sendKickMsg(oldConn *UserConn) {
 	if err != nil {
 		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), err.Error())
 	}
+	errClose := oldConn.Close()
+	if errClose != nil {
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "close old conn error", oldConn.RemoteAddr().String(), err.Error())
+
+	}
 }
 
-func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, operationID string) {
+func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, connID, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
-	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
+	callbackResp := callbackUserOnline(operationID, uid, platformID, token, false, connID)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
 	go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
-		oldConnMap[platformID] = conn
+		if conns, ok := oldConnMap[platformID]; ok {
+			conns = append(conns, conn)
+			oldConnMap[platformID] = conns
+		} else {
+			var conns []*UserConn
+			conns = append(conns, conn)
+			oldConnMap[platformID] = conns
+		}
 		ws.wsUserToConn[uid] = oldConnMap
 		log.Debug(operationID, "user not first come in, add conn ", uid, platformID, conn, oldConnMap)
 	} else {
-		i := make(map[int]*UserConn)
-		i[platformID] = conn
+		i := make(map[int][]*UserConn)
+		var conns []*UserConn
+		conns = append(conns, conn)
+		i[platformID] = conns
 		ws.wsUserToConn[uid] = i
 		log.Debug(operationID, "user first come in, new user, conn", uid, platformID, conn, ws.wsUserToConn[uid])
-	}
-	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
-		oldStringMap[platformID] = uid
-		ws.wsConnToUser[conn] = oldStringMap
-	} else {
-		i := make(map[int]string)
-		i[platformID] = uid
-		ws.wsConnToUser[conn] = i
 	}
 	count := 0
 	for _, v := range ws.wsUserToConn {
@@ -323,56 +370,67 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	operationID := utils.OperationIDGenerator()
-	var uid string
-	var platform int
-	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
-		for k, v := range oldStringMap {
-			platform = k
-			uid = v
-		}
-		if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
-			delete(oldConnMap, platform)
-			ws.wsUserToConn[uid] = oldConnMap
-			if len(oldConnMap) == 0 {
-				delete(ws.wsUserToConn, uid)
-			}
-			count := 0
-			for _, v := range ws.wsUserToConn {
-				count = count + len(v)
-			}
-			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
-		} else {
-			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
-		}
-		delete(ws.wsConnToUser, conn)
+	platform := int(conn.PlatformID)
 
+	if oldConnMap, ok := ws.wsUserToConn[conn.userID]; ok { // only recycle self conn
+		if oldconns, okMap := oldConnMap[platform]; okMap {
+
+			var a []*UserConn
+
+			for _, client := range oldconns {
+				if client != conn {
+					a = append(a, client)
+
+				}
+			}
+			if len(a) != 0 {
+				oldConnMap[platform] = a
+			} else {
+				delete(oldConnMap, platform)
+			}
+
+		}
+		ws.wsUserToConn[conn.userID] = oldConnMap
+		if len(oldConnMap) == 0 {
+			delete(ws.wsUserToConn, conn.userID)
+		}
+		count := 0
+		for _, v := range ws.wsUserToConn {
+			count = count + len(v)
+		}
+		log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", conn.userID, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 	}
+
 	err := conn.Close()
 	if err != nil {
-		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
+		log.Error(operationID, " close err", "", "uid", conn.userID, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, uid, platform)
+	if conn.PlatformID == 0 || conn.connID == "" {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), "PlatformID or connID is null", conn.PlatformID, conn.connID)
+	}
+	callbackResp := callbackUserOffline(operationID, conn.userID, int(conn.PlatformID), conn.connID)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
 	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
+
 }
 
-func (ws *WServer) getUserConn(uid string, platform int) *UserConn {
+//	func (ws *WServer) getUserConn(uid string, platform int) *UserConn {
+//		rwLock.RLock()
+//		defer rwLock.RUnlock()
+//		if connMap, ok := ws.wsUserToConn[uid]; ok {
+//			if conn, flag := connMap[platform]; flag {
+//				return conn
+//			}
+//		}
+//		return nil
+//	}
+func (ws *WServer) getUserAllCons(uid string) map[int][]*UserConn {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
 	if connMap, ok := ws.wsUserToConn[uid]; ok {
-		if conn, flag := connMap[platform]; flag {
-			return conn
-		}
-	}
-	return nil
-}
-func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
-	rwLock.RLock()
-	defer rwLock.RUnlock()
-	if connMap, ok := ws.wsUserToConn[uid]; ok {
-		newConnMap := make(map[int]*UserConn)
+		newConnMap := make(map[int][]*UserConn)
 		for k, v := range connMap {
 			newConnMap[k] = v
 		}
@@ -381,20 +439,20 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 	return nil
 }
 
-//func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
-//	rwLock.RLock()
-//	defer rwLock.RUnlock()
+//	func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
+//		rwLock.RLock()
+//		defer rwLock.RUnlock()
 //
-//	if stringMap, ok := ws.wsConnToUser[conn]; ok {
-//		for k, v := range stringMap {
-//			platform = k
-//			uid = v
+//		if stringMap, ok := ws.wsConnToUser[conn]; ok {
+//			for k, v := range stringMap {
+//				platform = k
+//				uid = v
+//			}
+//			return uid, platform
 //		}
-//		return uid, platform
+//		return "", 0
 //	}
-//	return "", 0
-//}
-func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) bool {
+func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
@@ -446,10 +504,16 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
 			http.Error(w, err.Error(), status)
-			return false
+			return false, false
 		} else {
-			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0])
-			return true
+			if r.Header.Get("compression") == "gzip" {
+				compression = true
+			}
+			if len(query["compression"]) != 0 && query["compression"][0] == "gzip" {
+				compression = true
+			}
+			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0], "compression", compression)
+			return true, compression
 		}
 	} else {
 		status = int(constant.ErrArgs.ErrCode)
@@ -458,6 +522,6 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 		errMsg := "args err, need token, sendID, platformID"
 		w.Header().Set("ws_err_msg", errMsg)
 		http.Error(w, errMsg, status)
-		return false
+		return false, false
 	}
 }

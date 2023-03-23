@@ -23,6 +23,18 @@ message AdminLoginResp {
     CommonResp commonResp = 4;
 }
 
+message GetUserTokenReq {
+  string operationID = 1;
+  string userID = 2;
+  int32 platformID = 3;
+}
+
+message GetUserTokenResp {
+  CommonResp commonResp = 1;
+  string token = 2;
+  int64 expTime = 3;
+}
+
 message AddUserRegisterAddFriendIDListReq {
     string operationID = 1;
     repeated string userIDList = 2;
@@ -62,7 +74,7 @@ message GetChatLogsReq {
     int32 contentType = 6;
     server_api_params.RequestPagination pagination = 7;
     string operationID = 8;
-
+    string opUserID = 9;
 }
 
 message ChatLog {
@@ -328,6 +340,7 @@ message GetUserIDByEmailAndPhoneNumberResp{
 
 service adminCMS {
     rpc AdminLogin(AdminLoginReq) returns(AdminLoginResp);
+
     rpc AddUserRegisterAddFriendIDList(AddUserRegisterAddFriendIDListReq) returns(AddUserRegisterAddFriendIDListResp);
     rpc ReduceUserRegisterAddFriendIDList(ReduceUserRegisterAddFriendIDListReq) returns(ReduceUserRegisterAddFriendIDListResp);
     rpc GetUserRegisterAddFriendIDList(GetUserRegisterAddFriendIDListReq) returns(GetUserRegisterAddFriendIDListResp);
@@ -357,4 +370,6 @@ service adminCMS {
     rpc GetUserFriends(GetUserFriendsReq) returns(GetUserFriendsResp);
 
     rpc GetUserIDByEmailAndPhoneNumber(GetUserIDByEmailAndPhoneNumberReq) returns(GetUserIDByEmailAndPhoneNumberResp);
+
+    rpc GetUserToken(GetUserTokenReq) returns(GetUserTokenResp);
 }

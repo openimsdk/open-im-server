@@ -15,6 +15,7 @@ import (
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -110,6 +111,8 @@ func main() {
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
+		//only for supergroup
+		groupRouterGroup.POST("/invite_user_to_groups", group.InviteUserToGroups)
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
 		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
@@ -162,6 +165,11 @@ func main() {
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
 		chatGroup.POST("/set_msg_min_seq", apiChat.SetMsgMinSeq)
+
+		chatGroup.POST("/set_message_reaction_extensions", apiChat.SetMessageReactionExtensions)
+		chatGroup.POST("/get_message_list_reaction_extensions", apiChat.GetMessageListReactionExtensions)
+		chatGroup.POST("/add_message_reaction_extensions", apiChat.AddMessageReactionExtensions)
+		chatGroup.POST("/delete_message_reaction_extensions", apiChat.DeleteMessageReactionExtensions)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
@@ -169,8 +177,10 @@ func main() {
 		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
 		conversationGroup.POST("/get_conversation", conversation.GetConversation)
 		conversationGroup.POST("/get_conversations", conversation.GetConversations)
+		//deprecated
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
+		//deprecated
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
@@ -222,7 +232,7 @@ func main() {
 		initGroup.POST("/set_client_config", clientInit.SetClientInitConfig)
 		initGroup.POST("/get_client_config", clientInit.GetClientInitConfig)
 	}
-
+	go getcdv3.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")
@@ -231,7 +241,7 @@ func main() {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
-	fmt.Println("start api server, address: ", address, "OpenIM version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
 	err := r.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())

@@ -25,6 +25,7 @@ import (
 	"time"
 
 	promePkg "Open_IM/pkg/common/prometheus"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 )
@@ -96,13 +97,36 @@ func isMessageHasReadEnabled(pb *pbChat.SendMsgReq) (bool, int32, string) {
 	return true, 0, ""
 }
 
+func userIsMuteAndIsAdminInGroup(groupID, userID string) (isMute bool, isAdmin bool, err error) {
+	groupMemberInfo, err := rocksCache.GetGroupMemberInfoFromCache(groupID, userID)
+	if err != nil {
+		return false, false, utils.Wrap(err, "")
+	}
+
+	if groupMemberInfo.MuteEndTime.Unix() >= time.Now().Unix() {
+		return true, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
+	}
+	return false, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
+}
+
+func groupIsMuted(groupID string) (bool, error) {
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(groupID)
+	if err != nil {
+		return false, utils.Wrap(err, "GetGroupInfoFromCache failed")
+	}
+	if groupInfo.Status == constant.GroupStatusMuted {
+		return true, nil
+	}
+	return false, nil
+}
+
 func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
 			return true, 0, "", nil
 		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin && data.MsgData.ContentType != constant.SignalingNotification {
 			return true, 0, "", nil
 		}
 		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
@@ -160,14 +184,35 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 			log.NewError(data.OperationID, errMsg)
 			return false, 201, errMsg, nil
 		}
-		if !token_verify.IsManagerUserID(data.MsgData.SendID) {
-			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-				return true, 0, "", userIDList
-			}
+		if token_verify.IsManagerUserID(data.MsgData.SendID) {
+			return true, 0, "", userIDList
+		}
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+			return true, 0, "", userIDList
+		} else {
 			if !utils.IsContain(data.MsgData.SendID, userIDList) {
 				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
 				return false, 202, "you are not in group", nil
 			}
+		}
+		isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+		if err != nil {
+			errMsg := data.OperationID + err.Error()
+			return false, 223, errMsg, nil
+		}
+		if isMute {
+			return false, 224, "you are muted", nil
+		}
+		if isAdmin {
+			return true, 0, "", userIDList
+		}
+		isMute, err = groupIsMuted(data.MsgData.GroupID)
+		if err != nil {
+			errMsg := data.OperationID + err.Error()
+			return false, 223, errMsg, nil
+		}
+		if isMute {
+			return false, 225, "group id muted", nil
 		}
 		return true, 0, "", userIDList
 	case constant.SuperGroupChatType:
@@ -213,14 +258,35 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				log.NewError(data.OperationID, errMsg)
 				return false, 201, errMsg, nil
 			}
-			if !token_verify.IsManagerUserID(data.MsgData.SendID) {
-				if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-					return true, 0, "", userIDList
-				}
+			if token_verify.IsManagerUserID(data.MsgData.SendID) {
+				return true, 0, "", userIDList
+			}
+			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+				return true, 0, "", userIDList
+			} else {
 				if !utils.IsContain(data.MsgData.SendID, userIDList) {
 					//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
 					return false, 202, "you are not in group", nil
 				}
+			}
+			isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+			if err != nil {
+				errMsg := data.OperationID + err.Error()
+				return false, 223, errMsg, nil
+			}
+			if isMute {
+				return false, 224, "you are muted", nil
+			}
+			if isAdmin {
+				return true, 0, "", userIDList
+			}
+			isMute, err = groupIsMuted(data.MsgData.GroupID)
+			if err != nil {
+				errMsg := data.OperationID + err.Error()
+				return false, 223, errMsg, nil
+			}
+			if isMute {
+				return false, 225, "group id muted", nil
 			}
 			return true, 0, "", userIDList
 		}
@@ -935,6 +1001,13 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
+	case constant.FriendInfoUpdatedNotification:
+		pushSwitch = config.Config.Notification.FriendInfoUpdated.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendInfoUpdated.OfflinePush.Title
+		desc = config.Config.Notification.FriendInfoUpdated.OfflinePush.Desc
+		ex = config.Config.Notification.FriendInfoUpdated.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendInfoUpdated.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendInfoUpdated.Conversation.UnreadCount
 	case constant.DeleteMessageNotification:
 		reliabilityLevel = constant.ReliableNotificationNoMsg
 	case constant.ConversationUnreadNotification, constant.SuperGroupUpdateNotification:

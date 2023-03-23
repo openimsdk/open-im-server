@@ -61,6 +61,21 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 				resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 				return resp, nil
 			}
+			if req.Conversation.ConversationType == constant.SuperGroupChatType {
+				if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
+					if err = db.DB.SetSuperGroupUserReceiveNotNotifyMessage(req.Conversation.GroupID, v); err != nil {
+						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+						resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+						return resp, nil
+					}
+				} else {
+					if err = db.DB.SetSuperGroupUserReceiveNotifyMessage(req.Conversation.GroupID, v); err != nil {
+						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+						resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+						return resp, nil
+					}
+				}
+			}
 		}
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt})
 	case constant.FieldGroupAtType:
@@ -78,6 +93,8 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	case constant.FieldUnread:
 		isSyncConversation = false
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": conversation.UpdateUnreadCountTime})
+	case constant.FieldBurnDuration:
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"burn_duration": conversation.BurnDuration})
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())
@@ -148,6 +165,10 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		return err
+	}
+	err = rocksCache.DelUserConversationIDListFromCache(conversation.UserID)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "DelConversationFromCache failed", err.Error(), conversation.OwnerUserID, conversation.ConversationID)
 	}
 	err = rocksCache.DelConversationFromCache(conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType))
 	if err != nil {

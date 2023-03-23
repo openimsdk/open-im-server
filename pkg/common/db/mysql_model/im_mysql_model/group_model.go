@@ -44,6 +44,12 @@ func GetGroupInfoByGroupID(groupID string) (*db.Group, error) {
 	return &groupInfo, err
 }
 
+func GetGroupInfoByGroupIDList(groupIDList []string) ([]*db.Group, error) {
+	var groupInfoList []*db.Group
+	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id in (?)", groupIDList).Find(&groupIDList).Error
+	return groupInfoList, err
+}
+
 func SetGroupInfo(groupInfo db.Group) error {
 	return db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupInfo.GroupID).Updates(&groupInfo).Error
 }

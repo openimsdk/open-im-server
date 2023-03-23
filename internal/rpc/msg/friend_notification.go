@@ -68,6 +68,8 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 		tips.DefaultTips = cn.BlackDeleted.DefaultTips.Tips + toUserNickname
 	case constant.UserInfoUpdatedNotification:
 		tips.DefaultTips = cn.UserInfoUpdated.DefaultTips.Tips
+	case constant.FriendInfoUpdatedNotification:
+		tips.DefaultTips = cn.FriendInfoUpdated.DefaultTips.Tips + toUserNickname
 	default:
 		log.Error(commID.OperationID, "contentType failed ", contentType)
 		return
@@ -158,8 +160,15 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 	friendNotification(req.CommID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
-func UserInfoUpdatedNotification(operationID, userID string, needNotifiedUserID string) {
-	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: userID}
-	commID := pbFriend.CommID{FromUserID: userID, ToUserID: needNotifiedUserID, OpUserID: userID, OperationID: operationID}
+//send to myself
+func UserInfoUpdatedNotification(operationID, opUserID string, changedUserID string) {
+	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
+	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: changedUserID, OpUserID: opUserID, OperationID: operationID}
 	friendNotification(&commID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
+}
+
+func FriendInfoUpdatedNotification(operationID, changedUserID string, needNotifiedUserID string, opUserID string) {
+	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
+	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: needNotifiedUserID, OpUserID: opUserID, OperationID: operationID}
+	friendNotification(&commID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
 }
