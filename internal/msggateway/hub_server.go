@@ -14,13 +14,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	msggateway.RegisterMsgGatewayServer(server, &Server{})
 	return nil
 }
 
 func (s *Server) Start() error {
-	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, Start)
+	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, s.InitServer)
 }
 
 type Server struct {
