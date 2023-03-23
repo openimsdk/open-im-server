@@ -20,20 +20,19 @@ func WithTriggerIDContext(ctx context.Context, triggerID string) context.Context
 func NewCtx(operationID string) context.Context {
 	c := context.Background()
 	ctx := context.WithValue(c, constant.OperationID, operationID)
-	SetOperationID(ctx, operationID)
-	return ctx
+	return SetOperationID(ctx, operationID)
 }
 
-func SetOperationID(ctx context.Context, operationID string) {
-	ctx = context.WithValue(ctx, constant.OperationID, operationID)
+func SetOperationID(ctx context.Context, operationID string) context.Context {
+	return context.WithValue(ctx, constant.OperationID, operationID)
 }
 
-func SetOpUserID(ctx context.Context, opUserID string) {
-	ctx = context.WithValue(ctx, constant.OpUserID, opUserID)
+func SetOpUserID(ctx context.Context, opUserID string) context.Context {
+	return context.WithValue(ctx, constant.OpUserID, opUserID)
 }
 
-func SetConnID(ctx context.Context, connID string) {
-	ctx = context.WithValue(ctx, constant.ConnID, connID)
+func SetConnID(ctx context.Context, connID string) context.Context {
+	return context.WithValue(ctx, constant.ConnID, connID)
 }
 
 func GetOperationID(ctx context.Context) string {

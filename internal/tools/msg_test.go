@@ -66,7 +66,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	mongoClient := mgo.GetDatabase().Collection(unRelationTb.MsgDocModel{}.TableName())
 
 	ctx := context.Background()
-	mcontext.SetOperationID(ctx, operationID)
+	ctx = mcontext.SetOperationID(ctx, operationID)
 	testUID1 := "test_del_id1"
 	_, err = mongoClient.DeleteOne(ctx, bson.M{"uid": testUID1 + ":" + strconv.Itoa(0)})
 	if err != nil {
