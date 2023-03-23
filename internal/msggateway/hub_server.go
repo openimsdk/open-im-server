@@ -34,12 +34,16 @@ type Server struct {
 	//rpcServer      *RpcServer
 }
 
+func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
+	s.LongConnServer = LongConnServer
+}
+
 func (s *Server) Notification() *notification.Check {
 	return s.notification
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
-	return &Server{rpcPort: rpcPort, LongConnServer: longConnServer, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
+func NewServer(rpcPort int) *Server {
+	return &Server{rpcPort: rpcPort, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
 }
 
 func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
