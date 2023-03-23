@@ -210,7 +210,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 						if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 							tempT.OnlinePush = true
 							promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
-							log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
+							log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v, "background status", userConn.IsBackground, userConn.userID)
 							temp.ResultCode = resultCode
 							if req.MsgData.ContentType == constant.SignalingNotification && userConn.IsBackground {
 								log.Info(req.OperationID, "recv signalingNotification backgroud", req.MsgData.String())
