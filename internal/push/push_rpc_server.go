@@ -9,7 +9,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"sync"
 )
 
@@ -23,7 +22,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	cacheModel := cache.NewCacheModel(rdb)
-	client.AddOption(grpc.WithTransportCredentials(insecure.NewCredentials()))
 	offlinePusher := NewOfflinePusher(cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
 	pusher := NewPusher(client, offlinePusher, database, localcache.NewGroupLocalCache(client), localcache.NewConversationLocalCache(client))
