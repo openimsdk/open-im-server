@@ -2,6 +2,8 @@ package group
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -12,7 +14,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"time"
 )
 
 func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
