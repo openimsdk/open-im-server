@@ -474,7 +474,7 @@ func (*DBUser) DB2PB(users []*relation.UserModel) (PBUsers []*sdk.UserInfo, err 
 func (pb *PBUser) Convert() (*relation.UserModel, error) {
 	dst := &relation.UserModel{}
 	utils.CopyStructFields(dst, pb)
-	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
+	dst.Birth = utils.UnixSecondToTime(pb.Birth)
 	dst.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
 	return dst, nil
 }
@@ -483,7 +483,7 @@ func (db *DBUser) Convert() (*sdk.UserInfo, error) {
 	dst := &sdk.UserInfo{}
 	utils.CopyStructFields(dst, db)
 	dst.CreateTime = db.CreateTime.Unix()
-	dst.Birthday = db.Birth.Unix()
+	dst.Birth = db.Birth.Unix()
 	return dst, nil
 }
 
