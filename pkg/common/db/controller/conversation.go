@@ -68,12 +68,16 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 			temp.OwnerUserID = v
 			cList = append(cList, temp)
 		}
-		err = conversationTx.Create(ctx, cList)
-		if err != nil {
-			return err
+		cache := c.cache.NewCache()
+		if len(cList) > 0 {
+			err = conversationTx.Create(ctx, cList)
+			if err != nil {
+				return err
+			}
+			cache = cache.DelConversationIDs(NotUserIDs)
 		}
 		// clear cache
-		return c.cache.DelConversationIDs(NotUserIDs).DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
+		return cache.DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
 	})
 }
 
