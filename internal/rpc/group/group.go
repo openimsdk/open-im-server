@@ -712,6 +712,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "SetGroupInfo", "userIDs", userIDs)
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) > 0 {
 		return resp, nil
@@ -725,7 +726,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	s.Notification.GroupInfoSetNotification(ctx, req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
 	if req.GroupInfoForSet.Notification != "" {
-		args := pbConversation.ModifyConversationFieldReq{
+		args := &pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
 				OwnerUserID:      mcontext.GetOpUserID(ctx),
 				ConversationID:   utils.GetConversationIDBySessionType(group.GroupID, constant.GroupChatType),
@@ -735,7 +736,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 			FieldType:  constant.FieldGroupAtType,
 			UserIDList: userIDs,
 		}
-		if err := s.ConversationChecker.ModifyConversationField(ctx, &args); err != nil {
+		if err := s.ConversationChecker.ModifyConversationField(ctx, args); err != nil {
 			log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
 		}
 	}
