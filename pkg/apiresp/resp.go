@@ -14,6 +14,9 @@ type ApiResponse struct {
 
 func isAllFieldsPrivate(v any) bool {
 	typeOf := reflect.TypeOf(v)
+	if typeOf == nil {
+		return false
+	}
 	if typeOf.Kind() == reflect.Ptr {
 		typeOf = typeOf.Elem()
 	}
@@ -30,7 +33,7 @@ func isAllFieldsPrivate(v any) bool {
 	return true
 }
 
-func apiSuccess(data any) *ApiResponse {
+func ApiSuccess(data any) *ApiResponse {
 	if isAllFieldsPrivate(data) {
 		return &ApiResponse{}
 	}
@@ -40,6 +43,9 @@ func apiSuccess(data any) *ApiResponse {
 }
 
 func ParseError(err error) *ApiResponse {
+	if err == nil {
+		return ApiSuccess(nil)
+	}
 	unwrap := errs.Unwrap(err)
 	if codeErr, ok := unwrap.(errs.CodeError); ok {
 		resp := ApiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: codeErr.Detail()}
