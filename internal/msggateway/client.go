@@ -71,6 +71,9 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.userID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer
+	c.isBackground = false
+	c.closed = false
+	c.closedErr = nil
 }
 func (c *Client) pongHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
