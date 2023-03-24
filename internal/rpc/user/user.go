@@ -154,7 +154,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 	}
 	resp.Total = int32(total)
 	resp.Users, err = (*convert.DBUser)(nil).DB2PB(usersDB)
-	return resp, nil
+	return resp, err
 }
 
 // ok
@@ -187,11 +187,6 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 			UserID:           user.UserID,
 			Nickname:         user.Nickname,
 			FaceURL:          user.FaceURL,
-			Gender:           user.Gender,
-			AreaCode:         user.AreaCode,
-			PhoneNumber:      user.PhoneNumber,
-			Birth:            time.UnixMilli(user.Birth),
-			Email:            user.Email,
 			Ex:               user.Ex,
 			CreateTime:       now,
 			AppMangerLevel:   user.AppMangerLevel,

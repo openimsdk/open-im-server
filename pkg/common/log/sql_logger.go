@@ -3,11 +3,12 @@ package log
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 	gormUtils "gorm.io/gorm/utils"
-	"time"
 )
 
 type SqlLogger struct {
@@ -42,7 +43,7 @@ func (SqlLogger) Error(ctx context.Context, msg string, args ...interface{}) {
 	ZError(ctx, msg, nil, args)
 }
 
-func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+func (l *SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 	if l.LogLevel <= gormLogger.Silent {
 		return
 	}
