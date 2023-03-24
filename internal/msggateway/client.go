@@ -18,6 +18,7 @@ import (
 var ErrConnClosed = errors.New("conn has closed")
 var ErrNotSupportMessageProtocol = errors.New("not support message protocol")
 var ErrClientClosed = errors.New("client actively close the connection")
+var ErrPanic = errors.New("panic error")
 
 const (
 	// MessageText is for UTF-8 encoded text messages like JSON.
@@ -71,6 +72,9 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.userID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer
+	c.isBackground = false
+	c.closed = false
+	c.closedErr = nil
 }
 func (c *Client) pongHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
@@ -79,6 +83,7 @@ func (c *Client) pongHandler(_ string) error {
 func (c *Client) readMessage() {
 	defer func() {
 		if r := recover(); r != nil {
+			c.closedErr = ErrPanic
 			fmt.Println("socket have panic err:", r, string(debug.Stack()))
 		}
 		c.close()
@@ -92,6 +97,7 @@ func (c *Client) readMessage() {
 			c.closedErr = returnErr
 			return
 		}
+		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
 		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
 			c.closedErr = ErrConnClosed
 			return
