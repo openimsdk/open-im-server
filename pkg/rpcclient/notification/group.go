@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -196,7 +197,7 @@ func (c *Check) groupNotification(ctx context.Context, contentType int32, m prot
 }
 
 // 创建群后调用
-func (c *Check) GroupCreatedNotification(ctx context.Context, groupID string, initMemberList []string) {
+func (c *Check) GroupCreatedNotification(ctx context.Context, groupID string, initMembers []string) {
 	GroupCreatedTips := sdkws.GroupCreatedTips{Group: &sdkws.GroupInfo{},
 		OpUser: &sdkws.GroupMemberFullInfo{}, GroupOwnerUser: &sdkws.GroupMemberFullInfo{}}
 	if err := c.setOpUserInfo(ctx, groupID, GroupCreatedTips.OpUser); err != nil {
@@ -210,7 +211,7 @@ func (c *Check) GroupCreatedNotification(ctx context.Context, groupID string, in
 	if err := c.setGroupOwnerInfo(ctx, groupID, GroupCreatedTips.GroupOwnerUser); err != nil {
 		return
 	}
-	for _, v := range initMemberList {
+	for _, v := range initMembers {
 		var groupMemberInfo sdkws.GroupMemberFullInfo
 		if err := c.setGroupMemberInfo(ctx, groupID, v, &groupMemberInfo); err != nil {
 			continue

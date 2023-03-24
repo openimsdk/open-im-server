@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -35,9 +36,15 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	if err := db.AutoMigrate(&tablerelation.FriendModel{}, &tablerelation.FriendRequestModel{}, &tablerelation.BlackModel{}); err != nil {
 		return err
 	}
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	blackDB := relation.NewBlackGorm(db)
+	friendDB := relation.NewFriendGorm(db)
 	pbfriend.RegisterFriendServer(server, &friendServer{
-		FriendDatabase: controller.NewFriendDatabase(relation.NewFriendGorm(db), relation.NewFriendRequestGorm(db), tx.NewGorm(db)),
-		BlackDatabase:  controller.NewBlackDatabase(relation.NewBlackGorm(db)),
+		FriendDatabase: controller.NewFriendDatabase(friendDB, relation.NewFriendRequestGorm(db), cache.NewFriendCacheRedis(rdb, friendDB, cache.GetDefaultOpt()), tx.NewGorm(db)),
+		BlackDatabase:  controller.NewBlackDatabase(blackDB, cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt())),
 		notification:   notification.NewCheck(client),
 		userCheck:      check.NewUserCheck(client),
 		RegisterCenter: client,

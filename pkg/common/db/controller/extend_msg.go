@@ -2,7 +2,10 @@ package controller
 
 import (
 	"context"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 )
 
 // for mongoDB
@@ -18,10 +21,12 @@ type ExtendMsgDatabase interface {
 
 type extendMsgDatabase struct {
 	database unRelationTb.ExtendMsgSetModelInterface
+	cache    cache.ExtendMsgSetCache
+	ctxTx    tx.CtxTx
 }
 
-func NewExtendMsgDatabase(extendMsgModel unRelationTb.ExtendMsgSetModelInterface) ExtendMsgDatabase {
-	return &extendMsgDatabase{database: extendMsgModel}
+func NewExtendMsgDatabase(extendMsgModel unRelationTb.ExtendMsgSetModelInterface, cache cache.ExtendMsgSetCache, ctxTx tx.CtxTx) ExtendMsgDatabase {
+	return &extendMsgDatabase{database: extendMsgModel, cache: cache, ctxTx: ctxTx}
 }
 
 func (e *extendMsgDatabase) CreateExtendMsgSet(ctx context.Context, set *unRelationTb.ExtendMsgSetModel) error {
@@ -41,12 +46,14 @@ func (e *extendMsgDatabase) InsertExtendMsg(ctx context.Context, sourceID string
 }
 
 func (e *extendMsgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
+	e.cache.DelExtendMsg(clientMsgID).ExecDel(ctx)
 	return e.database.InsertOrUpdateReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, reactionExtensionList)
 }
+
 func (e *extendMsgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
 	return e.database.DeleteReactionExtendMsgSet(ctx, sourceID, sessionType, clientMsgID, msgFirstModifyTime, reactionExtensionList)
 }
 
 func (e *extendMsgDatabase) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *unRelationTb.ExtendMsgModel, err error) {
-	return e.database.TakeExtendMsg(ctx, sourceID, sessionType, clientMsgID, maxMsgUpdateTime)
+	return e.cache.GetExtendMsg(ctx, sourceID, sessionType, clientMsgID, maxMsgUpdateTime)
 }

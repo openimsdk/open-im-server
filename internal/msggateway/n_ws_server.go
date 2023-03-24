@@ -2,7 +2,7 @@ package msggateway
 
 import (
 	"errors"
-	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
@@ -97,7 +97,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		clients:        newUserMap(),
 		Compressor:     NewGzipCompressor(),
 		Encoder:        NewGobEncoder(),
-		//handler:  NewGrpcHandler(validate),
 	}, nil
 }
 func (ws *WsServer) Run() error {
@@ -127,8 +126,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		ws.clients.Set(client.userID, client)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
-		fmt.Println("R在线用户数量:", ws.onlineUserNum)
-		fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+
 	} else {
 		if clientOK { //已经有同平台的连接存在
 			ws.clients.Set(client.userID, client)
@@ -136,11 +134,9 @@ func (ws *WsServer) registerClient(client *Client) {
 		} else {
 			ws.clients.Set(client.userID, client)
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
-			fmt.Println("R在线用户数量:", ws.onlineUserNum)
-			fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
 		}
 	}
-
+	log.ZInfo(client.ctx, "user online", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
@@ -153,8 +149,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
-	fmt.Println("R在线用户数量:", ws.onlineUserNum)
-	fmt.Println("R在线用户连接数量:", ws.onlineUserConnNum)
+	log.ZInfo(client.ctx, "user offline", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {

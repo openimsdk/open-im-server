@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/golang/protobuf/proto"
 	"runtime/debug"
 	"sync"
 )
@@ -37,7 +40,7 @@ type Client struct {
 	isCompress     bool
 	userID         string
 	isBackground   bool
-	connID         string
+	ctx            *UserConnContext
 	onlineAt       int64 // 上线时间戳（毫秒）
 	longConnServer LongConnServer
 	closed         bool
@@ -50,7 +53,7 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		platformID: utils.StringToInt(ctx.GetPlatformID()),
 		isCompress: isCompress,
 		userID:     ctx.GetUserID(),
-		connID:     ctx.GetConnID(),
+		ctx:        ctx,
 		onlineAt:   utils.GetCurrentTimestampByMill(),
 	}
 }
@@ -60,7 +63,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.platformID = utils.StringToInt(ctx.GetPlatformID())
 	c.isCompress = isCompress
 	c.userID = ctx.GetUserID()
-	c.connID = ctx.GetConnID()
+	c.ctx = ctx
 	c.onlineAt = utils.GetCurrentTimestampByMill()
 	c.longConnServer = longConnServer
 }
@@ -69,7 +72,7 @@ func (c *Client) readMessage() {
 		if r := recover(); r != nil {
 			fmt.Println("socket have panic err:", r, string(debug.Stack()))
 		}
-		//c.close()
+		c.close()
 	}()
 	//var returnErr error
 	for {
@@ -119,11 +122,7 @@ func (c *Client) handleMessage(message []byte) error {
 	if binaryReq.SendID != c.userID {
 		return errors.New("exception conn userID not same to req userID")
 	}
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, ConnID, c.connID)
-	ctx = context.WithValue(ctx, OperationID, binaryReq.OperationID)
-	ctx = context.WithValue(ctx, CommonUserID, binaryReq.SendID)
-	ctx = context.WithValue(ctx, PlatformID, c.platformID)
+	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
@@ -161,6 +160,7 @@ func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, e
 func (c *Client) close() {
 	c.w.Lock()
 	defer c.w.Unlock()
+	c.closed = true
 	c.conn.Close()
 	c.longConnServer.UnRegister(c)
 
@@ -175,7 +175,17 @@ func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
 	_ = c.writeMsg(mReply)
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
-	return nil
+	data, err := proto.Marshal(msgData)
+	if err != nil {
+		return err
+	}
+	resp := Resp{
+		ReqIdentifier: WSPushMsg,
+		OperationID:   mcontext.GetOperationID(ctx),
+		Data:          data,
+	}
+	return c.writeMsg(resp)
+
 }
 
 func (c *Client) KickOnlineMessage(ctx context.Context) error {

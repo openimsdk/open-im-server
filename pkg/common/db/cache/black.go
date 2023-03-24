@@ -2,10 +2,11 @@ package cache
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"time"
+
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
-	"time"
 )
 
 const (
@@ -16,21 +17,35 @@ const (
 // args fn will exec when no data in cache
 type BlackCache interface {
 	//get blackIDs from cache
-	GetBlackIDs(ctx context.Context, userID string, fn func(ctx context.Context, userID string) ([]string, error)) (blackIDs []string, err error)
+	metaCache
+	NewCache() BlackCache
+	GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error)
 	//del user's blackIDs cache, exec when a user's black list changed
-	DelBlackIDs(ctx context.Context, userID string) (err error)
+	DelBlackIDs(ctx context.Context, userID string) BlackCache
 }
 
 type BlackCacheRedis struct {
+	metaCache
 	expireTime time.Duration
 	rcClient   *rockscache.Client
-	black      *relation.BlackGorm
+	blackDB    relationTb.BlackModelInterface
 }
 
-func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB BlackCache, options rockscache.Options) *BlackCacheRedis {
+func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationTb.BlackModelInterface, options rockscache.Options) BlackCache {
+	rcClient := rockscache.NewClient(rdb, options)
 	return &BlackCacheRedis{
 		expireTime: blackExpireTime,
-		rcClient:   rockscache.NewClient(rdb, options),
+		rcClient:   rcClient,
+		metaCache:  NewMetaCacheRedis(rcClient),
+		blackDB:    blackDB,
+	}
+}
+
+func (b *BlackCacheRedis) NewCache() BlackCache {
+	return &BlackCacheRedis{
+		expireTime: b.expireTime,
+		rcClient:   b.rcClient,
+		blackDB:    b.blackDB,
 	}
 }
 
@@ -39,11 +54,13 @@ func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {
-	return GetCache(ctx, b.rcClient, b.getBlackIDsKey(userID), b.expireTime, func(ctx context.Context) ([]string, error) {
-		return b.black.FindBlackUserIDs(ctx, userID)
+	return getCache(ctx, b.rcClient, b.getBlackIDsKey(userID), b.expireTime, func(ctx context.Context) ([]string, error) {
+		return b.blackDB.FindBlackUserIDs(ctx, userID)
 	})
 }
 
-func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) (err error) {
-	return b.rcClient.TagAsDeleted(b.getBlackIDsKey(userID))
+func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) BlackCache {
+	cache := b.NewCache()
+	cache.AddKeys(userID)
+	return cache
 }

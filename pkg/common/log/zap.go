@@ -148,6 +148,8 @@ func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) [
 	opUserID := mcontext.GetOpUserID(ctx)
 	connID := mcontext.GetConnID(ctx)
 	triggerID := mcontext.GetTriggerID(ctx)
+	opUserPlatform := mcontext.GetOpUserPlatform(ctx)
+	remoteAddr := mcontext.GetRemoteAddr(ctx)
 	if opUserID != "" {
 		keysAndValues = append([]interface{}{constant.OpUserID, opUserID}, keysAndValues...)
 	}
@@ -159,6 +161,12 @@ func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) [
 	}
 	if triggerID != "" {
 		keysAndValues = append([]interface{}{constant.TriggerID, triggerID}, keysAndValues...)
+	}
+	if opUserPlatform != "" {
+		keysAndValues = append([]interface{}{constant.OpUserPlatform, opUserPlatform}, keysAndValues...)
+	}
+	if remoteAddr != "" {
+		keysAndValues = append([]interface{}{constant.RemoteAddr, remoteAddr}, keysAndValues...)
 	}
 	return keysAndValues
 }

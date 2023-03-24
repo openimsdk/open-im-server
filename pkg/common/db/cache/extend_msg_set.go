@@ -2,10 +2,11 @@ package cache
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/dtm-labs/rockscache"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/dtm-labs/rockscache"
+	"github.com/go-redis/redis/v8"
 )
 
 const (
@@ -13,44 +14,51 @@ const (
 	extendMsgCache    = "EXTEND_MSG_CACHE:"
 )
 
-type ExtendMsgSetCache struct {
-	expireTime time.Duration
-	rcClient   *rockscache.Client
+type ExtendMsgSetCache interface {
+	metaCache
+	NewCache() ExtendMsgSetCache
+	GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error)
+	DelExtendMsg(clientMsgID string) ExtendMsgSetCache
 }
 
-func (e *ExtendMsgSetCache) getKey(clientMsgID string) string {
+type ExtendMsgSetCacheRedis struct {
+	metaCache
+	expireTime     time.Duration
+	rcClient       *rockscache.Client
+	extendMsgSetDB unrelation.ExtendMsgSetModelInterface
+}
+
+func NewExtendMsgSetCacheRedis(rdb redis.UniversalClient, extendMsgSetDB unrelation.ExtendMsgSetModelInterface, options rockscache.Options) ExtendMsgSetCache {
+	rcClient := rockscache.NewClient(rdb, options)
+	return &ExtendMsgSetCacheRedis{
+		metaCache:      NewMetaCacheRedis(rcClient),
+		expireTime:     time.Second * 30 * 60,
+		extendMsgSetDB: extendMsgSetDB,
+		rcClient:       rcClient,
+	}
+}
+
+func (e *ExtendMsgSetCacheRedis) NewCache() ExtendMsgSetCache {
+	return &ExtendMsgSetCacheRedis{
+		metaCache:      e.metaCache,
+		expireTime:     e.expireTime,
+		extendMsgSetDB: e.extendMsgSetDB,
+		rcClient:       e.rcClient,
+	}
+}
+
+func (e *ExtendMsgSetCacheRedis) getKey(clientMsgID string) string {
 	return extendMsgCache + clientMsgID
 }
 
-func (e *ExtendMsgSetCache) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error) {
-	//getExtendMsg := func() (string, error) {
-	//	extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
-	//	if err != nil {
-	//		return "", utils.Wrap(err, "GetExtendMsgList failed")
-	//	}
-	//	bytes, err := json.Marshal(extendMsg)
-	//	if err != nil {
-	//		return "", utils.Wrap(err, "Marshal failed")
-	//	}
-	//	return string(bytes), nil
-	//}
-	//defer func() {
-	//	mcontext.SetCtxDebug(ctx, utils.GetFuncName(1), err, "sourceID", sourceID, "sessionType",
-	//		sessionType, "clientMsgID", clientMsgID, "firstModifyTime", firstModifyTime, "extendMsg", extendMsg)
-	//}()
-	//extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)
-	//if err != nil {
-	//	return nil, utils.Wrap(err, "Fetch failed")
-	//}
-	//extendMsg = &mongoDB.ExtendMsg{}
-	//err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
-	//return extendMsg, utils.Wrap(err, "Unmarshal failed")
-	return GetCache(ctx, e.rcClient, e.getKey(clientMsgID), e.expireTime, func(ctx context.Context) (*unrelation.ExtendMsgModel, error) {
-		panic("")
+func (e *ExtendMsgSetCacheRedis) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error) {
+	return getCache(ctx, e.rcClient, e.getKey(clientMsgID), e.expireTime, func(ctx context.Context) (*unrelation.ExtendMsgModel, error) {
+		return e.extendMsgSetDB.TakeExtendMsg(ctx, sourceID, sessionType, clientMsgID, firstModifyTime)
 	})
-
 }
 
-func (e *ExtendMsgSetCache) DelExtendMsg(ctx context.Context, clientMsgID string) (err error) {
-	return utils.Wrap(e.rcClient.TagAsDeleted(e.getKey(clientMsgID)), "DelExtendMsg err")
+func (e *ExtendMsgSetCacheRedis) DelExtendMsg(clientMsgID string) ExtendMsgSetCache {
+	new := e.NewCache()
+	new.AddKeys(e.getKey(clientMsgID))
+	return new
 }

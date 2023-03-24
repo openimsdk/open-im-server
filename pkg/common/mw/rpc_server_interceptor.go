@@ -79,6 +79,9 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get(constant.OpUserPlatform); len(opts) == 1 {
 		ctx = context.WithValue(ctx, constant.OpUserPlatform, opts[0])
 	}
+	if opts := md.Get(constant.ConnID); len(opts) == 1 {
+		ctx = context.WithValue(ctx, constant.ConnID, opts[0])
+	}
 	if opts := md.Get(constant.CheckKey); len(opts) != 1 || opts[0] == "" {
 		return nil, status.New(codes.InvalidArgument, "check key empty").Err()
 	} else {

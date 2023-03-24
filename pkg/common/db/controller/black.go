@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"errors"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -15,16 +17,18 @@ type BlackDatabase interface {
 	Delete(ctx context.Context, blacks []*relation.BlackModel) (err error)
 	// FindOwnerBlacks 获取黑名单列表
 	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error)
+	FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 	CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error)
 }
 
 type blackDatabase struct {
 	black relation.BlackModelInterface
+	cache cache.BlackCache
 }
 
-func NewBlackDatabase(black relation.BlackModelInterface) BlackDatabase {
-	return &blackDatabase{black}
+func NewBlackDatabase(black relation.BlackModelInterface, cache cache.BlackCache) BlackDatabase {
+	return &blackDatabase{black, cache}
 }
 
 // Create 增加黑名单
@@ -65,4 +69,8 @@ func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 		inUser2Blacks = true
 	}
 	return
+}
+
+func (b *blackDatabase) FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error) {
+	return b.cache.GetBlackIDs(ctx, ownerUserID)
 }

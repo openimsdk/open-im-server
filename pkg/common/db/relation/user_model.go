@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -57,4 +58,9 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32) (user
 func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
 	err = u.db(ctx).Pluck("user_id", &userIDs).Error
 	return userIDs, err
+}
+
+func (u *UserGorm) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
+	err = u.db(ctx).Model(&relation.UserModel{}).Where("user_id = ?", userID).Pluck("global_recv_msg_opt", &opt).Error
+	return opt, err
 }

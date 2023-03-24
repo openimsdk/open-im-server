@@ -72,6 +72,25 @@ func GetTriggerID(ctx context.Context) string {
 	}
 	return ""
 }
+func GetOpUserPlatform(ctx context.Context) string {
+	if ctx.Value(constant.OpUserPlatform) != "" {
+		s, ok := ctx.Value(constant.OpUserPlatform).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
+func GetRemoteAddr(ctx context.Context) string {
+	if ctx.Value(constant.RemoteAddr) != "" {
+		s, ok := ctx.Value(constant.RemoteAddr).(string)
+		if ok {
+			return s
+		}
+	}
+	return ""
+}
+
 func GetMustCtxInfo(ctx context.Context) (operationID, opUserID, platform, connID string, err error) {
 	operationID, ok := ctx.Value(constant.OperationID).(string)
 	if !ok {

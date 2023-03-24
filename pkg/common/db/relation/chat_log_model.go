@@ -2,6 +2,7 @@ package relation
 
 import (
 	"fmt"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -21,7 +22,7 @@ func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
 	return &ChatLogGorm{NewMetaDB(db, &relation.ChatLogModel{})}
 }
 
-func (c *ChatLogGorm) Create(msg pbMsg.MsgDataToMQ) error {
+func (c *ChatLogGorm) Create(msg *pbMsg.MsgDataToMQ) error {
 	chatLog := new(relation.ChatLogModel)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {

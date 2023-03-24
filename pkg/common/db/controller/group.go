@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
@@ -104,26 +105,26 @@ func (g *groupDatabase) GetGroupIDsByGroupType(ctx context.Context, groupType in
 	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
 }
 
-func (g *groupDatabase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
-	for _, userID := range userIDs {
-		if err := g.cache.DelJoinedGroupID(ctx, userID); err != nil {
-			return err
-		}
-		if err := g.cache.DelJoinedSuperGroupIDs(ctx, userID); err != nil {
-			return err
-		}
-	}
-	if err := g.cache.DelGroupMemberIDs(ctx, groupID); err != nil {
-		return err
-	}
-	if err := g.cache.DelGroupMemberNum(ctx, groupID); err != nil {
-		return err
-	}
-	if err := g.cache.DelGroupMembersHash(ctx, groupID); err != nil {
-		return err
-	}
-	return nil
-}
+// func (g *groupDatabase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
+// 	for _, userID := range userIDs {
+// 		if err := g.cache.DelJoinedGroupID(ctx, userID); err != nil {
+// 			return err
+// 		}
+// 		if err := g.cache.DelJoinedSuperGroupIDs(ctx, userID); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	if err := g.cache.DelGroupMemberIDs(ctx, groupID); err != nil {
+// 		return err
+// 	}
+// 	if err := g.cache.DelGroupMemberNum(ctx, groupID); err != nil {
+// 		return err
+// 	}
+// 	if err := g.cache.DelGroupMembersHash(ctx, groupID); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
 	return g.cache.GetGroupMemberIDs(ctx, groupID)
@@ -162,10 +163,7 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 		if err := g.groupDB.NewTx(tx).UpdateMap(ctx, groupID, data); err != nil {
 			return err
 		}
-		if err := g.cache.DelGroupInfo(ctx, groupID); err != nil {
-			return err
-		}
-		return nil
+		return g.cache.DelGroupsInfo(groupID).ExecDel(ctx)
 	})
 }
 
@@ -181,10 +179,7 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string) error 
 		if err != nil {
 			return err
 		}
-		if err := g.delGroupMemberCache(ctx, groupID, userIDs); err != nil {
-			return err
-		}
-		return nil
+		return g.cache.DelJoinedGroupID(userIDs...).DelGroupsInfo(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID).ExecDel(ctx)
 	})
 }
 
@@ -197,7 +192,7 @@ func (g *groupDatabase) TakeGroupOwner(ctx context.Context, groupID string) (*re
 }
 
 func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
-	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels) // todo cache group find
+	return g.cache.GetGroupMembersInfo(ctx, groupIDs[0], userIDs, roleLevels) // todo cache group find
 }
 
 func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
@@ -217,9 +212,7 @@ func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, groupID string,
 			if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
 				return err
 			}
-			if err := g.delGroupMemberCache(ctx, groupID, []string{userID}); err != nil {
-				return err
-			}
+			return g.cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID).ExecDel(ctx)
 		}
 		return nil
 	})
@@ -230,15 +223,12 @@ func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, u
 		if err := g.groupMemberDB.NewTx(tx).Delete(ctx, groupID, userIDs); err != nil {
 			return err
 		}
-		if err := g.delGroupMemberCache(ctx, groupID, userIDs); err != nil {
-			return err
-		}
-		return nil
+		return g.cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(userIDs...).ExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
-	return g.cache.GetGroupMemberHash1(ctx, groupIDs)
+	return g.cache.GetGroupMemberHashMap(ctx, groupIDs)
 }
 
 func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
@@ -261,10 +251,7 @@ func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, 
 		if rowsAffected != 1 {
 			return utils.Wrap(fmt.Errorf("newOwnerUserID %s rowsAffected = %d", newOwnerUserID, rowsAffected), "")
 		}
-		if err := g.delGroupMemberCache(ctx, groupID, []string{oldOwnerUserID, newOwnerUserID}); err != nil {
-			return err
-		}
-		return nil
+		return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).ExecDel(ctx)
 	})
 }
 
@@ -273,24 +260,20 @@ func (g *groupDatabase) UpdateGroupMember(ctx context.Context, groupID string, u
 		if err := g.groupMemberDB.NewTx(tx).Update(ctx, groupID, userID, data); err != nil {
 			return err
 		}
-		if err := g.cache.DelGroupMemberInfo(ctx, groupID, userID); err != nil {
-			return err
-		}
-		return nil
+		return g.cache.DelGroupMembersInfo(groupID, userID).ExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error {
 	return g.tx.Transaction(func(tx any) error {
+		var cache = g.cache.NewCache()
 		for _, item := range data {
 			if err := g.groupMemberDB.NewTx(tx).Update(ctx, item.GroupID, item.UserID, item.Map); err != nil {
 				return err
 			}
-			if err := g.cache.DelGroupMemberInfo(ctx, item.GroupID, item.UserID); err != nil {
-				return err
-			}
+			cache = cache.DelGroupMembersInfo(item.GroupID, item.UserID)
 		}
-		return nil
+		return cache.ExecDel(ctx)
 	})
 }
 
