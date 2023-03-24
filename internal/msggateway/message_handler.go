@@ -2,10 +2,10 @@ package msggateway
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 )
@@ -18,11 +18,16 @@ type Req struct {
 	MsgIncr       string `json:"msgIncr" validate:"required"`
 	Data          []byte `json:"data"`
 }
+
+func (r *Req) String() string {
+	return utils.StructToJsonString(r)
+}
+
 type Resp struct {
 	ReqIdentifier int32  `json:"reqIdentifier"`
 	MsgIncr       string `json:"msgIncr"`
 	OperationID   string `json:"operationID"`
-	ErrCode       int32  `json:"errCode"`
+	ErrCode       int    `json:"errCode"`
 	ErrMsg        string `json:"errMsg"`
 	Data          []byte `json:"data"`
 }
@@ -54,7 +59,6 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	if err := g.validate.Struct(req); err != nil {
 		return nil, err
 	}
-	log.ZDebug(context, "msggateway GetSeq", "notification", g.notification, "msg", g.notification.Msg)
 	resp, err := g.notification.Msg.GetMaxAndMinSeq(context, &req)
 	if err != nil {
 		return nil, err
@@ -148,3 +152,23 @@ func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data Req) ([]byt
 	}
 	return nil, req.IsBackground, nil
 }
+
+//func (g GrpcHandler) call[T any](ctx context.Context, data Req, m proto.Message, rpc func(ctx context.Context, req proto.Message)) ([]byte, error) {
+//	if err := proto.Unmarshal(data.Data, m); err != nil {
+//		return nil, err
+//	}
+//	if err := g.validate.Struct(m); err != nil {
+//		return nil, err
+//	}
+//	rpc(ctx, m)
+//	req := msg.SendMsgReq{MsgData: &msgData}
+//	resp, err := g.notification.Msg.SendMsg(context, &req)
+//	if err != nil {
+//		return nil, err
+//	}
+//	c, err := proto.Marshal(resp)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return c, nil
+//}

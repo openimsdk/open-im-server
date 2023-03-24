@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -13,6 +14,10 @@ import (
 	"runtime/debug"
 	"sync"
 )
+
+var ErrConnClosed = errors.New("conn has closed")
+var ErrNotSupportMessageProtocol = errors.New("not support message protocol")
+var ErrClientClosed = errors.New("client actively close the connection")
 
 const (
 	// MessageText is for UTF-8 encoded text messages like JSON.
@@ -33,6 +38,8 @@ const (
 	PongMessage = 10
 )
 
+type PongHandler func(string) error
+
 type Client struct {
 	w              *sync.Mutex
 	conn           LongConn
@@ -41,9 +48,9 @@ type Client struct {
 	userID         string
 	isBackground   bool
 	ctx            *UserConnContext
-	onlineAt       int64 // 上线时间戳（毫秒）
 	longConnServer LongConnServer
 	closed         bool
+	closedErr      error
 }
 
 func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
@@ -54,7 +61,6 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		isCompress: isCompress,
 		userID:     ctx.GetUserID(),
 		ctx:        ctx,
-		onlineAt:   utils.GetCurrentTimestampByMill(),
 	}
 }
 func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, longConnServer LongConnServer) {
@@ -64,8 +70,11 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress boo
 	c.isCompress = isCompress
 	c.userID = ctx.GetUserID()
 	c.ctx = ctx
-	c.onlineAt = utils.GetCurrentTimestampByMill()
 	c.longConnServer = longConnServer
+}
+func (c *Client) pongHandler(_ string) error {
+	c.conn.SetReadDeadline(pongWait)
+	return nil
 }
 func (c *Client) readMessage() {
 	defer func() {
@@ -74,31 +83,36 @@ func (c *Client) readMessage() {
 		}
 		c.close()
 	}()
-	//var returnErr error
+	c.conn.SetReadLimit(maxMessageSize)
+	_ = c.conn.SetReadDeadline(pongWait)
+	c.conn.SetPongHandler(c.pongHandler)
 	for {
 		messageType, message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
-			break
+			c.closedErr = returnErr
+			return
 		}
 		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
-			break
+			c.closedErr = ErrConnClosed
+			return
 		}
 		switch messageType {
-		case PingMessage:
-		case PongMessage:
-		case CloseMessage:
-			return
-		case MessageText:
 		case MessageBinary:
-			if len(message) == 0 {
-				continue
+			parseDataErr := c.handleMessage(message)
+			if parseDataErr != nil {
+				c.closedErr = parseDataErr
+				return
 			}
-			returnErr = c.handleMessage(message)
-			if returnErr != nil {
-				log.ZError(context.Background(), "WSGetNewestSeq", returnErr)
-				break
-			}
-
+		case MessageText:
+			c.closedErr = ErrNotSupportMessageProtocol
+			return
+		case PingMessage:
+			err := c.writePongMsg()
+			log.ZError(c.ctx, "writePongMsg", err)
+		case CloseMessage:
+			c.closedErr = ErrClientClosed
+			return
+		default:
 		}
 	}
 
@@ -120,7 +134,7 @@ func (c *Client) handleMessage(message []byte) error {
 		return utils.Wrap(err, "")
 	}
 	if binaryReq.SendID != c.userID {
-		return errors.New("exception conn userID not same to req userID")
+		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
 	var messageErr error
@@ -128,8 +142,6 @@ func (c *Client) handleMessage(message []byte) error {
 	switch binaryReq.ReqIdentifier {
 	case WSGetNewestSeq:
 		resp, messageErr = c.longConnServer.GetSeq(ctx, binaryReq)
-		log.ZError(ctx, "WSGetNewestSeq", messageErr, "resp", resp)
-
 	case WSSendMsg:
 		resp, messageErr = c.longConnServer.SendMessage(ctx, binaryReq)
 	case WSSendSignalMsg:
@@ -166,13 +178,16 @@ func (c *Client) close() {
 
 }
 func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
+	errResp := apiresp.ParseError(err)
 	mReply := Resp{
 		ReqIdentifier: binaryReq.ReqIdentifier,
 		MsgIncr:       binaryReq.MsgIncr,
 		OperationID:   binaryReq.OperationID,
+		ErrCode:       errResp.ErrCode,
+		ErrMsg:        errResp.ErrMsg,
 		Data:          resp,
 	}
-	_ = c.writeMsg(mReply)
+	_ = c.writeBinaryMsg(mReply)
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
 	data, err := proto.Marshal(msgData)
@@ -184,15 +199,14 @@ func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error 
 		OperationID:   mcontext.GetOperationID(ctx),
 		Data:          data,
 	}
-	return c.writeMsg(resp)
-
+	return c.writeBinaryMsg(resp)
 }
 
 func (c *Client) KickOnlineMessage(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) writeMsg(resp Resp) error {
+func (c *Client) writeBinaryMsg(resp Resp) error {
 	c.w.Lock()
 	defer c.w.Unlock()
 	if c.closed == true {
@@ -204,7 +218,7 @@ func (c *Client) writeMsg(resp Resp) error {
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	_ = c.conn.SetWriteTimeout(60)
+	_ = c.conn.SetWriteDeadline(writeWait)
 	if c.isCompress {
 		var compressErr error
 		resultBuf, compressErr = c.longConnServer.Compress(encodeBuf)
@@ -215,4 +229,15 @@ func (c *Client) writeMsg(resp Resp) error {
 	} else {
 		return c.conn.WriteMessage(MessageBinary, encodedBuf)
 	}
+}
+
+func (c *Client) writePongMsg() error {
+	c.w.Lock()
+	defer c.w.Unlock()
+	if c.closed == true {
+		return nil
+	}
+	_ = c.conn.SetWriteDeadline(writeWait)
+	return c.conn.WriteMessage(PongMessage, nil)
+
 }

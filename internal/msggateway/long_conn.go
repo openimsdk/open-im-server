@@ -13,31 +13,33 @@ type LongConn interface {
 	WriteMessage(messageType int, message []byte) error
 	//Read message from connection.
 	ReadMessage() (int, []byte, error)
-	//SetReadTimeout sets the read deadline on the underlying network connection,
+	// SetReadDeadline sets the read deadline on the underlying network connection,
 	//after a read has timed out, will return an error.
-	SetReadTimeout(timeout int) error
-	//SetWriteTimeout sets the write deadline when send message,when read has timed out,will return error.
-	SetWriteTimeout(timeout int) error
+	SetReadDeadline(timeout time.Duration) error
+	// SetWriteDeadline sets the write deadline when send message,when read has timed out,will return error.
+	SetWriteDeadline(timeout time.Duration) error
 	//Try to dial a connection,url must set auth args,header can control compress data
 	Dial(urlStr string, requestHeader http.Header) (*http.Response, error)
 	//Whether the connection of the current long connection is nil
 	IsNil() bool
 	//Set the connection of the current long connection to nil
 	SetConnNil()
+	// SetReadLimit sets the maximum size for a message read from the peer.bytes
+	SetReadLimit(limit int64)
+	SetPongHandler(handler PongHandler)
 	//Check the connection of the current and when it was sent are the same
 	//CheckSendConnDiffNow() bool
 	//
 	GenerateLongConn(w http.ResponseWriter, r *http.Request) error
 }
 type GWebSocket struct {
-	protocolType                    int
-	conn                            *websocket.Conn
-	handshakeTimeout                time.Duration
-	readBufferSize, WriteBufferSize int
+	protocolType     int
+	conn             *websocket.Conn
+	handshakeTimeout time.Duration
 }
 
-func newGWebSocket(protocolType int, handshakeTimeout time.Duration, readBufferSize int) *GWebSocket {
-	return &GWebSocket{protocolType: protocolType, handshakeTimeout: handshakeTimeout, readBufferSize: readBufferSize}
+func newGWebSocket(protocolType int, handshakeTimeout time.Duration) *GWebSocket {
+	return &GWebSocket{protocolType: protocolType, handshakeTimeout: handshakeTimeout}
 }
 
 func (d *GWebSocket) Close() error {
@@ -46,7 +48,6 @@ func (d *GWebSocket) Close() error {
 func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) error {
 	upgrader := &websocket.Upgrader{
 		HandshakeTimeout: d.handshakeTimeout,
-		ReadBufferSize:   d.readBufferSize,
 		CheckOrigin:      func(r *http.Request) bool { return true },
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -69,12 +70,12 @@ func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
 func (d *GWebSocket) ReadMessage() (int, []byte, error) {
 	return d.conn.ReadMessage()
 }
-func (d *GWebSocket) SetReadTimeout(timeout int) error {
-	return d.conn.SetReadDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+func (d *GWebSocket) SetReadDeadline(timeout time.Duration) error {
+	return d.conn.SetReadDeadline(time.Now().Add(timeout))
 }
 
-func (d *GWebSocket) SetWriteTimeout(timeout int) error {
-	return d.conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+func (d *GWebSocket) SetWriteDeadline(timeout time.Duration) error {
+	return d.conn.SetWriteDeadline(time.Now().Add(timeout))
 }
 
 func (d *GWebSocket) Dial(urlStr string, requestHeader http.Header) (*http.Response, error) {
@@ -95,6 +96,12 @@ func (d *GWebSocket) IsNil() bool {
 
 func (d *GWebSocket) SetConnNil() {
 	d.conn = nil
+}
+func (d *GWebSocket) SetReadLimit(limit int64) {
+	d.conn.SetReadLimit(limit)
+}
+func (d *GWebSocket) SetPongHandler(handler PongHandler) {
+	d.conn.SetPongHandler(handler)
 }
 
 //func (d *GWebSocket) CheckSendConnDiffNow() bool {
