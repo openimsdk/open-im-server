@@ -77,7 +77,7 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 			cache = cache.DelConversationIDs(NotUserIDs)
 		}
 		// clear cache
-		return cache.DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
+		return cache.DelUsersConversation(haveUserIDs, conversation.ConversationID).DelConversationIDs(NotUserIDs).ExecDel(ctx)
 	})
 }
 
