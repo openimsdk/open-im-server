@@ -31,8 +31,7 @@ message ModifyConversationFieldResp{
 }
 
 message SetConversationReq{
-  Conversation conversation = 1;
-  int32 notificationType = 2;
+  Conversation conversation = 1; 
 }
 
 message SetConversationResp{
@@ -42,7 +41,6 @@ message SetRecvMsgOptReq {
   string ownerUserID = 1;
   string conversationID = 2;
   int32 recvMsgOpt = 3;
-  int32 notificationType = 4;
 }
 
 message SetRecvMsgOptResp {
@@ -77,7 +75,6 @@ message GetAllConversationsResp{
 message BatchSetConversationsReq{
   repeated Conversation Conversations = 1;
   string ownerUserID = 2;
-  int32 notificationType = 3;
 }
 
 message BatchSetConversationsResp{

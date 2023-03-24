@@ -40,10 +40,12 @@ func (o *Conversation) GetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversations, o.client, c)
 }
 
+// deprecated
 func (o *Conversation) SetConversation(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.SetConversation, o.client, c)
 }
 
+// deprecated
 func (o *Conversation) BatchSetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.client, c)
 }
