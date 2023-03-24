@@ -48,7 +48,7 @@ func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationTb.FriendMo
 }
 
 func (c *FriendCacheRedis) NewCache() FriendCache {
-	return &FriendCacheRedis{rcClient: c.rcClient, metaCache: c.metaCache, friendDB: c.friendDB, expireTime: c.expireTime}
+	return &FriendCacheRedis{rcClient: c.rcClient, metaCache: NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDeleteKeys()...), friendDB: c.friendDB, expireTime: c.expireTime}
 }
 
 func (f *FriendCacheRedis) getFriendIDsKey(ownerUserID string) string {

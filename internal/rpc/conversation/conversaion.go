@@ -38,6 +38,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
+		notify:               notification.NewCheck(client),
 		groupChecker:         check.NewGroupChecker(client),
 		ConversationDatabase: controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})

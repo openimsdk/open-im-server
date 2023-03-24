@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 )
@@ -22,8 +24,8 @@ type metaCache interface {
 	GetPreDeleteKeys() []string
 }
 
-func NewMetaCacheRedis(rcClient *rockscache.Client) metaCache {
-	return &metaCacheRedis{rcClient: rcClient}
+func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
+	return &metaCacheRedis{rcClient: rcClient, keys: keys}
 }
 
 type metaCacheRedis struct {
@@ -33,6 +35,7 @@ type metaCacheRedis struct {
 
 func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 	if len(m.keys) > 0 {
+		log.ZDebug(ctx, "DelKey", "keys", m.keys)
 		return m.rcClient.TagAsDeletedBatch2(ctx, m.keys)
 	}
 	return nil
@@ -86,10 +89,9 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 }
 
 func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) ([]T, error)) ([]T, error) {
-	var tArrays []T
 	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 		values := make(map[int]string)
-		tArrays, err = fn(ctx)
+		tArrays, err := fn(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -109,6 +111,7 @@ func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys
 	if err != nil {
 		return nil, err
 	}
+	var tArrays []T
 	for _, v := range batchMap {
 		if v != "" {
 			var t T
