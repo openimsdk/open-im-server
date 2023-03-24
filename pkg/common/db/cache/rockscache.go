@@ -24,8 +24,8 @@ type metaCache interface {
 	GetPreDeleteKeys() []string
 }
 
-func NewMetaCacheRedis(rcClient *rockscache.Client) metaCache {
-	return &metaCacheRedis{rcClient: rcClient}
+func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
+	return &metaCacheRedis{rcClient: rcClient, keys: keys}
 }
 
 type metaCacheRedis struct {

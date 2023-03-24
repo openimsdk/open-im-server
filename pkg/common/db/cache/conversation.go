@@ -68,7 +68,7 @@ func NewNewConversationRedis(rdb redis.UniversalClient, conversationDB *relation
 }
 
 func (c *ConversationRedisCache) NewCache() ConversationCache {
-	return &ConversationRedisCache{rcClient: c.rcClient, metaCache: NewMetaCacheRedis(c.rcClient), conversationDB: c.conversationDB, expireTime: c.expireTime}
+	return &ConversationRedisCache{rcClient: c.rcClient, metaCache: NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDeleteKeys()...), conversationDB: c.conversationDB, expireTime: c.expireTime}
 }
 
 func (c *ConversationRedisCache) getConversationKey(ownerUserID, conversationID string) string {

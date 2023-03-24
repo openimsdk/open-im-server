@@ -46,7 +46,7 @@ func (b *BlackCacheRedis) NewCache() BlackCache {
 		expireTime: b.expireTime,
 		rcClient:   b.rcClient,
 		blackDB:    b.blackDB,
-		metaCache:  NewMetaCacheRedis(b.rcClient),
+		metaCache:  NewMetaCacheRedis(b.rcClient, b.metaCache.GetPreDeleteKeys()...),
 	}
 }
 
