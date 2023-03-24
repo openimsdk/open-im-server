@@ -6,7 +6,7 @@ import (
 )
 
 func GinError(c *gin.Context, err error) {
-	c.JSON(http.StatusOK, ApiError(err))
+	c.JSON(http.StatusOK, ParseError(err))
 }
 
 func GinSuccess(c *gin.Context, data any) {
