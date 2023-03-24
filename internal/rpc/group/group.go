@@ -49,6 +49,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase:       controller.InitGroupDatabase(db, rdb, mongo.GetDatabase()),
 		UserCheck:           check.NewUserCheck(client),
+		Notification:        notification.NewCheck(client),
 		ConversationChecker: check.NewConversationChecker(client),
 	})
 	return nil
