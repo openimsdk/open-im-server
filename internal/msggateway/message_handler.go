@@ -31,6 +31,11 @@ type Resp struct {
 	ErrMsg        string `json:"errMsg"`
 	Data          []byte `json:"data"`
 }
+
+func (r *Resp) String() string {
+	return utils.StructToJsonString(r)
+}
+
 type MessageHandler interface {
 	GetSeq(context context.Context, data Req) ([]byte, error)
 	SendMessage(context context.Context, data Req) ([]byte, error)
