@@ -712,9 +712,8 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "SetGroupInfo", "userIDs", userIDs)
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
-	if len(data) > 0 {
+	if len(data) == 0 {
 		return resp, nil
 	}
 	if err := s.GroupDatabase.UpdateGroup(ctx, group.GroupID, data); err != nil {
