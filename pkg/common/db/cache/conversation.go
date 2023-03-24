@@ -68,7 +68,7 @@ func NewNewConversationRedis(rdb redis.UniversalClient, conversationDB *relation
 }
 
 func (c *ConversationRedisCache) NewCache() ConversationCache {
-	return &ConversationRedisCache{rcClient: c.rcClient, metaCache: c.metaCache, conversationDB: c.conversationDB, expireTime: c.expireTime}
+	return &ConversationRedisCache{rcClient: c.rcClient, metaCache: NewMetaCacheRedis(c.rcClient), conversationDB: c.conversationDB, expireTime: c.expireTime}
 }
 
 func (c *ConversationRedisCache) getConversationKey(ownerUserID, conversationID string) string {
@@ -155,16 +155,6 @@ func (c *ConversationRedisCache) GetUserAllConversations(ctx context.Context, ow
 	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.GetConversationIndex, func(ctx context.Context) ([]*relationTb.ConversationModel, error) {
 		return c.conversationDB.FindUserIDAllConversations(ctx, ownerUserID)
 	})
-}
-
-func (c *ConversationRedisCache) DelUserConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ConversationCache {
-	var keys []string
-	for _, conversationID := range conversationIDs {
-		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
-	}
-	cache := c.NewCache()
-	cache.AddKeys(keys...)
-	return cache
 }
 
 func (c *ConversationRedisCache) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error) {
