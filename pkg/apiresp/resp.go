@@ -14,6 +14,9 @@ type ApiResponse struct {
 
 func isAllFieldsPrivate(v any) bool {
 	typeOf := reflect.TypeOf(v)
+	if typeOf == nil {
+		return false
+	}
 	if typeOf.Kind() == reflect.Ptr {
 		typeOf = typeOf.Elem()
 	}
