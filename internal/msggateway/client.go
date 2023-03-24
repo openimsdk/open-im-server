@@ -95,6 +95,7 @@ func (c *Client) readMessage() {
 			c.closedErr = returnErr
 			return
 		}
+		log.ZDebug(c.ctx, "readMessage", "messageType", messageType, "message", string(message))
 		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
 			c.closedErr = ErrConnClosed
 			return
