@@ -66,14 +66,14 @@ message UserInfo{
   string nickname = 2;
   string faceURL = 3;
   int32 gender = 4;
-  string phoneNumber = 5;
-  uint32 birth = 6;
-  string email = 7;
-  string ex = 8;
-  int64 createTime = 9;
-  int32 appMangerLevel = 10;
-  int32 globalRecvMsgOpt = 11;
-  int64 birthday = 13;
+  string areaCode = 5;
+  string phoneNumber = 6;
+  int64 birth = 7;
+  string email = 8;
+  string ex = 9;
+  int64 createTime = 10;
+  int32 appMangerLevel = 11;
+  int32 globalRecvMsgOpt = 12;
 }
 
 message FriendInfo{

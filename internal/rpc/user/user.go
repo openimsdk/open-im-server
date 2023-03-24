@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -159,12 +160,18 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 // ok
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
 	resp = &pbuser.UserRegisterResp{}
+	if len(req.Users) == 0 {
+		return nil, errs.ErrArgs.Wrap("users is empty")
+	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")
 	}
 	userIDs := make([]string, 0)
-	for _, v := range req.Users {
-		userIDs = append(userIDs, v.UserID)
+	for _, user := range req.Users {
+		if user.UserID == "" {
+			return nil, errs.ErrArgs.Wrap("userID is empty")
+		}
+		userIDs = append(userIDs, user.UserID)
 	}
 	exist, err := s.IsExist(ctx, userIDs)
 	if err != nil {
@@ -173,12 +180,25 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if exist {
 		return nil, errs.ErrRegisteredAlready.Wrap("userID registered already")
 	}
-	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
-	if err != nil {
-		return nil, err
+	now := time.Now()
+	users := make([]*tablerelation.UserModel, 0, len(req.Users))
+	for _, user := range req.Users {
+		users = append(users, &tablerelation.UserModel{
+			UserID:           user.UserID,
+			Nickname:         user.Nickname,
+			FaceURL:          user.FaceURL,
+			Gender:           user.Gender,
+			AreaCode:         user.AreaCode,
+			PhoneNumber:      user.PhoneNumber,
+			Birth:            time.UnixMilli(user.Birth),
+			Email:            user.Email,
+			Ex:               user.Ex,
+			CreateTime:       now,
+			AppMangerLevel:   user.AppMangerLevel,
+			GlobalRecvMsgOpt: user.GlobalRecvMsgOpt,
+		})
 	}
-	err = s.Create(ctx, users)
-	if err != nil {
+	if err := s.Create(ctx, users); err != nil {
 		return nil, err
 	}
 	return resp, nil
