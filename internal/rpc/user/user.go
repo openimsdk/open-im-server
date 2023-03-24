@@ -154,7 +154,7 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 	}
 	resp.Total = int32(total)
 	resp.Users, err = (*convert.DBUser)(nil).DB2PB(usersDB)
-	return resp, nil
+	return resp, err
 }
 
 // ok

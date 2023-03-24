@@ -110,12 +110,14 @@ func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys
 		return nil, err
 	}
 	for _, v := range batchMap {
-		var t T
-		err = json.Unmarshal([]byte(v), &t)
-		if err != nil {
-			return nil, utils.Wrap(err, "unmarshal failed")
+		if v != "" {
+			var t T
+			err = json.Unmarshal([]byte(v), &t)
+			if err != nil {
+				return nil, utils.Wrap(err, "unmarshal failed")
+			}
+			tArrays = append(tArrays, t)
 		}
-		tArrays = append(tArrays, t)
 	}
 	return tArrays, nil
 }
