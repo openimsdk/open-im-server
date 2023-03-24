@@ -7,6 +7,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
@@ -57,6 +58,7 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 			}
 		}
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
+		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
 		var cList []*relationTb.ConversationModel
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)

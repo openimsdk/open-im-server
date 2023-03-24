@@ -44,8 +44,10 @@ type ConversationCache interface {
 	DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache
 	// get one super group recv msg but do not notification userID list
 	GetSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) (userIDs []string, err error)
+	DelSuperGroupRecvMsgNotNotifyUserIDs(groupID string) ConversationCache
 	// get one super group recv msg but do not notification userID list hash
 	GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) (hash uint64, err error)
+	DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupID string) ConversationCache
 }
 
 func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationTb.ConversationModelInterface) ConversationCache {
@@ -193,7 +195,7 @@ func (c *ConversationRedisCache) DelUserRecvMsgOpt(ownerUserID, conversationID s
 	return cache
 }
 
-func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ConversationCache {
+func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDs(groupID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsKey(groupID))
 	return cache
@@ -212,6 +214,8 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx co
 	})
 }
 
-func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(ctx context.Context, groupID string) {
-	panic("implement me")
+func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupID string) ConversationCache {
+	cache := c.NewCache()
+	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsHashKey(groupID))
+	return cache
 }
