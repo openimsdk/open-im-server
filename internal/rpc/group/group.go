@@ -152,6 +152,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinTime = time.Now()
+		groupMember.MuteEndTime = time.Unix(0, 0)
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return err
 		}
@@ -313,6 +314,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			member.OperatorUserID = opUserID
 			member.InviterUserID = opUserID
 			member.JoinSource = constant.JoinByInvitation
+			member.JoinTime = time.Now()
+			member.MuteEndTime = time.Unix(0, 0)
 			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 				return nil, err
 			}
@@ -640,6 +643,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
 		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
+		groupMember.JoinTime = time.Now()
+		groupMember.MuteEndTime = time.Unix(0, 0)
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}
