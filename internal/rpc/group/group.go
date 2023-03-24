@@ -280,6 +280,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 						GroupID:       req.GroupID,
 						JoinSource:    constant.JoinByInvitation,
 						InviterUserID: opUserID,
+						ReqTime:       time.Now(),
+						HandledTime:   time.Unix(0, 0),
 					})
 				}
 				if err := s.GroupDatabase.CreateGroupRequest(ctx, requests); err != nil {
@@ -656,11 +658,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
-		UserID:     mcontext.GetOpUserID(ctx),
-		ReqMsg:     req.ReqMessage,
-		GroupID:    req.GroupID,
-		JoinSource: req.JoinSource,
-		ReqTime:    time.Now(),
+		UserID:      mcontext.GetOpUserID(ctx),
+		ReqMsg:      req.ReqMessage,
+		GroupID:     req.GroupID,
+		JoinSource:  req.JoinSource,
+		ReqTime:     time.Now(),
+		HandledTime: time.Unix(0, 0),
 	}
 	if err := s.GroupDatabase.CreateGroupRequest(ctx, []*relationTb.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
@@ -691,7 +694,6 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
-	resp := &pbGroup.SetGroupInfoResp{}
 	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
@@ -712,6 +714,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbGroup.SetGroupInfoResp{}
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) == 0 {
 		return resp, nil
