@@ -769,7 +769,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	oldOwner := memberMap[req.OldOwnerUserID]
 	if tokenverify.IsAppManagerUid(ctx) {
 		if oldOwner == nil {
-			oldOwner, err = s.GroupDatabase.TakeGroupOwner(ctx, req.OldOwnerUserID)
+			_, err = s.GroupDatabase.TakeGroupOwner(ctx, req.OldOwnerUserID)
 			if err != nil {
 				return nil, err
 			}

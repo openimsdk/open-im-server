@@ -10,7 +10,7 @@ import (
 func UpdateGroupInfoMap(group *sdkws.GroupInfoForSet) map[string]any {
 	m := make(map[string]any)
 	if group.GroupName != "" {
-		m["group_name"] = group.GroupName
+		m["name"] = group.GroupName
 	}
 	if group.Notification != "" {
 		m["Notification"] = group.Notification
