@@ -17,7 +17,7 @@ var errIndex = errors.New("err index")
 type metaCache interface {
 	ExecDel(ctx context.Context) error
 	// delete key rapid
-	DeleteKey(ctx context.Context, key string) error
+	DelKey(ctx context.Context, key string) error
 	AddKeys(keys ...string)
 	GetPreDeleteKeys() []string
 }
@@ -38,7 +38,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 	return nil
 }
 
-func (m *metaCacheRedis) DeleteKey(ctx context.Context, key string) error {
+func (m *metaCacheRedis) DelKey(ctx context.Context, key string) error {
 	return m.rcClient.TagAsDeleted2(ctx, key)
 }
 
@@ -110,12 +110,14 @@ func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys
 		return nil, err
 	}
 	for _, v := range batchMap {
-		var t T
-		err = json.Unmarshal([]byte(v), &t)
-		if err != nil {
-			return nil, utils.Wrap(err, "unmarshal failed")
+		if v != "" {
+			var t T
+			err = json.Unmarshal([]byte(v), &t)
+			if err != nil {
+				return nil, utils.Wrap(err, "unmarshal failed")
+			}
+			tArrays = append(tArrays, t)
 		}
-		tArrays = append(tArrays, t)
 	}
 	return tArrays, nil
 }

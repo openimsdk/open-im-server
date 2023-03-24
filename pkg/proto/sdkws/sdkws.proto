@@ -65,15 +65,10 @@ message UserInfo{
   string userID = 1;
   string nickname = 2;
   string faceURL = 3;
-  int32 gender = 4;
-  string phoneNumber = 5;
-  uint32 birth = 6;
-  string email = 7;
-  string ex = 8;
-  int64 createTime = 9;
-  int32 appMangerLevel = 10;
-  int32 globalRecvMsgOpt = 11;
-  int64 birthday = 13;
+  string ex = 4;
+  int64 createTime = 5;
+  int32 appMangerLevel = 6;
+  int32 globalRecvMsgOpt = 7;
 }
 
 message FriendInfo{

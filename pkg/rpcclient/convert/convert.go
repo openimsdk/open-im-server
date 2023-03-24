@@ -129,11 +129,9 @@ func (db *DBFriendRequest) DB2PB(ctx context.Context, friendRequests []*relation
 		pbFriendRequest.FromUserID = users[v.FromUserID].UserID
 		pbFriendRequest.FromNickname = users[v.FromUserID].Nickname
 		pbFriendRequest.FromFaceURL = users[v.FromUserID].FaceURL
-		pbFriendRequest.FromGender = users[v.FromUserID].Gender
 		pbFriendRequest.ToUserID = users[v.ToUserID].UserID
 		pbFriendRequest.ToNickname = users[v.ToUserID].Nickname
 		pbFriendRequest.ToFaceURL = users[v.ToUserID].FaceURL
-		pbFriendRequest.ToGender = users[v.ToUserID].Gender
 		pbFriendRequest.CreateTime = v.CreateTime.Unix()
 		pbFriendRequest.HandleTime = v.HandleTime.Unix()
 		pbFriendRequest.HandlerUserID = v.HandlerUserID
@@ -162,14 +160,12 @@ func (db *DBFriendRequest) Convert(ctx context.Context) (*sdk.FriendRequest, err
 	}
 	pbFriendRequest.FromNickname = user.Nickname
 	pbFriendRequest.FromFaceURL = user.FaceURL
-	pbFriendRequest.FromGender = user.Gender
 	user, err = db.userCheck.GetUserInfo(ctx, db.ToUserID)
 	if err != nil {
 		return nil, err
 	}
 	pbFriendRequest.ToNickname = user.Nickname
 	pbFriendRequest.ToFaceURL = user.FaceURL
-	pbFriendRequest.ToGender = user.Gender
 	pbFriendRequest.CreateTime = db.CreateTime.Unix()
 	pbFriendRequest.HandleTime = db.HandleTime.Unix()
 	return pbFriendRequest, nil
@@ -474,7 +470,6 @@ func (*DBUser) DB2PB(users []*relation.UserModel) (PBUsers []*sdk.UserInfo, err 
 func (pb *PBUser) Convert() (*relation.UserModel, error) {
 	dst := &relation.UserModel{}
 	utils.CopyStructFields(dst, pb)
-	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
 	dst.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
 	return dst, nil
 }
@@ -483,7 +478,6 @@ func (db *DBUser) Convert() (*sdk.UserInfo, error) {
 	dst := &sdk.UserInfo{}
 	utils.CopyStructFields(dst, db)
 	dst.CreateTime = db.CreateTime.Unix()
-	dst.Birthday = db.Birth.Unix()
 	return dst, nil
 }
 
