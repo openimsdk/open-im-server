@@ -2,6 +2,8 @@ package check
 
 import (
 	"context"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -10,7 +12,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
-	"strings"
 )
 
 func NewUserCheck(client discoveryregistry.SvcDiscoveryRegistry) *UserCheck {
@@ -78,7 +79,6 @@ func (u *UserCheck) GetPublicUserInfos(ctx context.Context, userIDs []string, co
 			UserID:   e.UserID,
 			Nickname: e.Nickname,
 			FaceURL:  e.FaceURL,
-			Gender:   e.Gender,
 			Ex:       e.Ex,
 		}
 	}), nil

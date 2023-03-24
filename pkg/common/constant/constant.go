@@ -168,11 +168,6 @@ const (
 	MinioDurationTimes = 3600
 	//Aws
 	AwsDurationTimes = 3600
-	// verificationCode used for
-	VerificationCodeForRegister       = 1
-	VerificationCodeForReset          = 2
-	VerificationCodeForRegisterSuffix = "_forRegister"
-	VerificationCodeForResetSuffix    = "_forReset"
 
 	//callbackCommand
 	CallbackBeforeSendSingleMsgCommand                   = "callbackBeforeSendSingleMsgCommand"
