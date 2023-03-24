@@ -143,6 +143,7 @@ func (c *Client) handleMessage(message []byte) error {
 		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
 	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
+	log.ZDebug(ctx, "gateway req message", "req", binaryReq.String())
 	var messageErr error
 	var resp []byte
 	switch binaryReq.ReqIdentifier {
@@ -161,7 +162,7 @@ func (c *Client) handleMessage(message []byte) error {
 	default:
 		return errors.New(fmt.Sprintf("ReqIdentifier failed,sendID:%d,msgIncr:%s,reqIdentifier:%s", binaryReq.SendID, binaryReq.MsgIncr, binaryReq.ReqIdentifier))
 	}
-	c.replyMessage(&binaryReq, messageErr, resp)
+	c.replyMessage(ctx, &binaryReq, messageErr, resp)
 	return nil
 
 }
@@ -183,7 +184,7 @@ func (c *Client) close() {
 	c.longConnServer.UnRegister(c)
 
 }
-func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
+func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, resp []byte) {
 	errResp := apiresp.ParseError(err)
 	mReply := Resp{
 		ReqIdentifier: binaryReq.ReqIdentifier,
@@ -193,7 +194,11 @@ func (c *Client) replyMessage(binaryReq *Req, err error, resp []byte) {
 		ErrMsg:        errResp.ErrMsg,
 		Data:          resp,
 	}
-	_ = c.writeBinaryMsg(mReply)
+	log.ZDebug(ctx, "gateway reply message", "resp", mReply.String())
+	err = c.writeBinaryMsg(mReply)
+	if err != nil {
+		log.ZWarn(ctx, "wireBinaryMsg replyMessage", err, "resp", mReply.String())
+	}
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
 	data, err := proto.Marshal(msgData)
