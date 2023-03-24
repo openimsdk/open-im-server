@@ -34,18 +34,17 @@ var bufferPool = sync.Pool{
 }
 
 type WsServer struct {
-	port                            int
-	wsMaxConnNum                    int64
-	registerChan                    chan *Client
-	unregisterChan                  chan *Client
-	clients                         *UserMap
-	clientPool                      sync.Pool
-	onlineUserNum                   int64
-	onlineUserConnNum               int64
-	handshakeTimeout                time.Duration
-	readBufferSize, WriteBufferSize int
-	hubServer                       *Server
-	validate                        *validator.Validate
+	port              int
+	wsMaxConnNum      int64
+	registerChan      chan *Client
+	unregisterChan    chan *Client
+	clients           *UserMap
+	clientPool        sync.Pool
+	onlineUserNum     int64
+	onlineUserConnNum int64
+	handshakeTimeout  time.Duration
+	hubServer         *Server
+	validate          *validator.Validate
 	Compressor
 	Encoder
 	MessageHandler
@@ -85,7 +84,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
 		handshakeTimeout: config.handshakeTimeout,
-		readBufferSize:   config.messageMaxMsgLength,
 		clientPool: sync.Pool{
 			New: func() interface{} {
 				return new(Client)
@@ -149,7 +147,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
-	log.ZInfo(client.ctx, "user offline", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
+	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -186,7 +184,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(context, err)
 		return
 	}
-	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout, ws.readBufferSize)
+	wsLongConn := newGWebSocket(WebSocket, ws.handshakeTimeout)
 	err = wsLongConn.GenerateLongConn(w, r)
 	if err != nil {
 		httpError(context, err)

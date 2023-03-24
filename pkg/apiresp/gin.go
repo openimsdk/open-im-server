@@ -10,7 +10,7 @@ func GinError(c *gin.Context, err error) {
 		GinSuccess(c, nil)
 		return
 	}
-	c.JSON(http.StatusOK, apiError(err))
+	c.JSON(http.StatusOK, ParseError(err))
 }
 
 func GinSuccess(c *gin.Context, data any) {

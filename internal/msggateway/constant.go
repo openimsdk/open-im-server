@@ -1,5 +1,7 @@
 package msggateway
 
+import "time"
+
 const (
 	WsUserID                = "sendID"
 	CommonUserID            = "userID"
@@ -24,4 +26,15 @@ const (
 	WsLogoutMsg           = 2003
 	WsSetBackgroundStatus = 2004
 	WSDataError           = 3001
+)
+
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 30 * time.Second
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 51200
 )

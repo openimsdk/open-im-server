@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-type apiResponse struct {
+type ApiResponse struct {
 	ErrCode int    `json:"errCode"`
 	ErrMsg  string `json:"errMsg"`
 	ErrDlt  string `json:"errDlt"`
@@ -30,23 +30,23 @@ func isAllFieldsPrivate(v any) bool {
 	return true
 }
 
-func apiSuccess(data any) *apiResponse {
+func apiSuccess(data any) *ApiResponse {
 	if isAllFieldsPrivate(data) {
-		return &apiResponse{}
+		return &ApiResponse{}
 	}
-	return &apiResponse{
+	return &ApiResponse{
 		Data: data,
 	}
 }
 
-func apiError(err error) *apiResponse {
+func ParseError(err error) *ApiResponse {
 	unwrap := errs.Unwrap(err)
 	if codeErr, ok := unwrap.(errs.CodeError); ok {
-		resp := apiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: codeErr.Detail()}
+		resp := ApiResponse{ErrCode: codeErr.Code(), ErrMsg: codeErr.Msg(), ErrDlt: codeErr.Detail()}
 		if resp.ErrDlt == "" {
 			resp.ErrDlt = err.Error()
 		}
 		return &resp
 	}
-	return &apiResponse{ErrCode: errs.ServerInternalError, ErrMsg: err.Error()}
+	return &ApiResponse{ErrCode: errs.ServerInternalError, ErrMsg: err.Error()}
 }
