@@ -688,6 +688,10 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err != nil {
 			return nil, err
 		}
+		err = s.GroupDatabase.DeleteGroupMember(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
+		if err != nil {
+			return nil, err
+		}
 		s.Notification.MemberQuitNotification(ctx, req)
 	}
 	return resp, nil
