@@ -175,7 +175,7 @@ func SliceToMapAny[E any, K comparable, V any](es []E, fn func(e E) (K, V)) map[
 
 // SliceToMap slice to map
 func SliceToMap[E any, K comparable](es []E, fn func(e E) K) map[K]E {
-	return SliceToMapOkAny[E, K, E](es, func(e E) (K, E, bool) {
+	return SliceToMapOkAny(es, func(e E) (K, E, bool) {
 		k := fn(e)
 		return k, e, true
 	})

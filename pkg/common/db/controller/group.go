@@ -13,7 +13,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
-	_ "github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -48,7 +47,7 @@ type GroupDatabase interface {
 	PageGroupRequestUser(ctx context.Context, userID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error)
 	// SuperGroupModelInterface
 	FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error)
-	FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error)
+	FindJoinSuperGroup(ctx context.Context, userID string) ([]string, error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
@@ -276,34 +275,54 @@ func (g *groupDatabase) PageGroupRequestUser(ctx context.Context, userID string,
 	return g.groupRequestDB.Page(ctx, userID, pageNumber, showNumber)
 }
 
-func (g *groupDatabase) FindSuperGroup(ctx context.Context, groupIDs []string) ([]*unRelationTb.SuperGroupModel, error) {
-	return g.mongoDB.FindSuperGroup(ctx, groupIDs)
+func (g *groupDatabase) FindSuperGroup(ctx context.Context, groupIDs []string) (models []*unRelationTb.SuperGroupModel, err error) {
+	return g.cache.GetSuperGroupMemberIDs(ctx, groupIDs...)
 }
 
-func (g *groupDatabase) FindJoinSuperGroup(ctx context.Context, userID string) (*unRelationTb.UserToSuperGroupModel, error) {
-	return g.mongoDB.GetSuperGroupByUserID(ctx, userID)
+func (g *groupDatabase) FindJoinSuperGroup(ctx context.Context, userID string) ([]string, error) {
+	return g.cache.GetJoinedSuperGroupIDs(ctx, userID)
 }
 
-func (g *groupDatabase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
+func (g *groupDatabase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		return g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList)
+		if err := g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDs); err != nil {
+			return err
+		}
+		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(initMemberIDs...).ExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) DeleteSuperGroup(ctx context.Context, groupID string) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		return g.mongoDB.DeleteSuperGroup(ctx, groupID)
+		if err := g.mongoDB.DeleteSuperGroup(ctx, groupID); err != nil {
+			return err
+		}
+		models, err := g.cache.GetSuperGroupMemberIDs(ctx, groupID)
+		if err != nil {
+			return err
+		}
+		cache := g.cache.DelSuperGroupMemberIDs(groupID)
+		if len(models) > 0 {
+			cache = cache.DelJoinedSuperGroupIDs(models[0].MemberIDs...)
+		}
+		return cache.ExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		return g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs)
+		if err := g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs); err != nil {
+			return err
+		}
+		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 	})
 }
 
 func (g *groupDatabase) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
 	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		return g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs)
+		if err := g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs); err != nil {
+			return err
+		}
+		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 	})
 }

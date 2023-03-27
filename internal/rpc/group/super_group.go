@@ -3,6 +3,8 @@ package group
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
@@ -10,46 +12,45 @@ import (
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"strings"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	resp := &pbGroup.GetJoinedSuperGroupListResp{}
-	joinSuperGroup, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
+	groupIDs, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if len(joinSuperGroup.GroupIDs) == 0 {
+	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	owners, err := s.GroupDatabase.FindGroupMember(ctx, joinSuperGroup.GroupIDs, nil, []int32{constant.GroupOwner})
+	owners, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
 	}
 	ownerMap := utils.SliceToMap(owners, func(e *relation.GroupMemberModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
+	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
 		return nil, errs.ErrData.Wrap(fmt.Sprintf("super group %s not owner", strings.Join(ids, ",")))
 	}
-	groups, err := s.GroupDatabase.FindGroup(ctx, joinSuperGroup.GroupIDs)
+	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	groupMap := utils.SliceToMap(groups, func(e *relation.GroupModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(joinSuperGroup.GroupIDs, utils.Keys(groupMap)); len(ids) > 0 {
+	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
 		return nil, errs.ErrData.Wrap(fmt.Sprintf("super group info %s not found", strings.Join(ids, ",")))
 	}
-	superGroupMembers, err := s.GroupDatabase.FindSuperGroup(ctx, joinSuperGroup.GroupIDs)
+	superGroupMembers, err := s.GroupDatabase.FindSuperGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
 	superGroupMemberMap := utils.SliceToMapAny(superGroupMembers, func(e *unrelation.SuperGroupModel) (string, []string) {
 		return e.GroupID, e.MemberIDs
 	})
-	resp.Groups = utils.Slice(joinSuperGroup.GroupIDs, func(groupID string) *sdkws.GroupInfo {
+	resp.Groups = utils.Slice(groupIDs, func(groupID string) *sdkws.GroupInfo {
 		return DbToPbGroupInfo(groupMap[groupID], ownerMap[groupID].UserID, uint32(len(superGroupMemberMap)))
 	})
 	return resp, nil

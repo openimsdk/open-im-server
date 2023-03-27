@@ -14,14 +14,15 @@ import (
 )
 
 const (
-	groupExpireTime      = time.Second * 60 * 60 * 12
-	groupInfoKey         = "GROUP_INFO:"
-	groupMemberIDsKey    = "GROUP_MEMBER_IDS:"
-	groupMembersHashKey  = "GROUP_MEMBERS_HASH:"
-	groupMemberInfoKey   = "GROUP_MEMBER_INFO:"
-	joinedSuperGroupsKey = "JOIN_SUPER_GROUPS:"
-	joinedGroupsKey      = "JOIN_GROUPS_KEY:"
-	groupMemberNumKey    = "GROUP_MEMBER_NUM_CACHE:"
+	groupExpireTime        = time.Second * 60 * 60 * 12
+	groupInfoKey           = "GROUP_INFO:"
+	groupMemberIDsKey      = "GROUP_MEMBER_IDS:"
+	groupMembersHashKey    = "GROUP_MEMBERS_HASH:"
+	groupMemberInfoKey     = "GROUP_MEMBER_INFO:"
+	joinedSuperGroupsKey   = "JOIN_SUPER_GROUPS:"
+	SuperGroupMemberIDsKey = "SUPER_GROUP_MEMBER_IDS:"
+	joinedGroupsKey        = "JOIN_GROUPS_KEY:"
+	groupMemberNumKey      = "GROUP_MEMBER_NUM_CACHE:"
 )
 
 type GroupCache interface {
@@ -29,8 +30,12 @@ type GroupCache interface {
 	NewCache() GroupCache
 	GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
 	GetGroupInfo(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
+	DelGroupsInfo(groupIDs ...string) GroupCache
+
 	GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error)
 	DelJoinedSuperGroupIDs(userIDs ...string) GroupCache
+	GetSuperGroupMemberIDs(ctx context.Context, groupIDs ...string) (models []*unrelationTb.SuperGroupModel, err error)
+	DelSuperGroupMemberIDs(groupIDs ...string) GroupCache
 
 	GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error)
 	GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error)
@@ -48,7 +53,6 @@ type GroupCache interface {
 
 	GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error)
 	DelGroupsMemberNum(groupID ...string) GroupCache
-	DelGroupsInfo(groupIDs ...string) GroupCache
 }
 
 type GroupCacheRedis struct {
@@ -83,6 +87,10 @@ func (g *GroupCacheRedis) getJoinedSuperGroupsIDKey(userID string) string {
 
 func (g *GroupCacheRedis) getJoinedGroupsKey(userID string) string {
 	return joinedGroupsKey + userID
+}
+
+func (g *GroupCacheRedis) getSuperGroupMemberIDsKey(groupID string) string {
+	return SuperGroupMemberIDsKey + groupID
 }
 
 func (g *GroupCacheRedis) getGroupMembersHashKey(groupID string) string {
@@ -148,6 +156,33 @@ func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) GroupCache {
 	return new
 }
 
+func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error) {
+	return getCache(ctx, g.rcClient, g.getJoinedSuperGroupsIDKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
+		userGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		return userGroup.GroupIDs, nil
+	})
+}
+
+func (g *GroupCacheRedis) GetSuperGroupMemberIDs(ctx context.Context, groupIDs ...string) (models []*unrelationTb.SuperGroupModel, err error) {
+	var keys []string
+	for _, group := range groupIDs {
+		keys = append(keys, g.getSuperGroupMemberIDsKey(group))
+	}
+	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, func(model *unrelationTb.SuperGroupModel, keys []string) (int, error) {
+		for i, key := range keys {
+			if g.getSuperGroupMemberIDsKey(model.GroupID) == key {
+				return i, nil
+			}
+		}
+		return 0, errIndex
+	}, func(ctx context.Context) ([]*unrelationTb.SuperGroupModel, error) {
+		return g.mongoDB.FindSuperGroup(ctx, groupIDs)
+	})
+}
+
 // userJoinSuperGroup
 func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(userIDs ...string) GroupCache {
 	new := g.NewCache()
@@ -159,14 +194,14 @@ func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(userIDs ...string) GroupCache {
 	return new
 }
 
-func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error) {
-	return getCache(ctx, g.rcClient, g.getJoinedSuperGroupsIDKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		userGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-		return userGroup.GroupIDs, nil
-	})
+func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache {
+	new := g.NewCache()
+	var keys []string
+	for _, groupID := range groupIDs {
+		keys = append(keys, g.getSuperGroupMemberIDsKey(groupID))
+	}
+	new.AddKeys(keys...)
+	return new
 }
 
 // groupMembersHash

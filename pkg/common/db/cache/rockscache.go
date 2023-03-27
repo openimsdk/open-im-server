@@ -124,3 +124,40 @@ func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys
 	}
 	return tArrays, nil
 }
+
+func batchGetCacheMap[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, originKeys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) (map[string]T, error)) (map[string]T, error) {
+	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
+		values := make(map[int]string)
+		tArrays, err := fn(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range tArrays {
+			index, err := keyIndexFn(v, keys)
+			if err != nil {
+				continue
+			}
+			bs, err := json.Marshal(v)
+			if err != nil {
+				return nil, utils.Wrap(err, "marshal failed")
+			}
+			values[index] = string(bs)
+		}
+		return values, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	tMap := make(map[string]T)
+	for i, v := range batchMap {
+		if v != "" {
+			var t T
+			err = json.Unmarshal([]byte(v), &t)
+			if err != nil {
+				return nil, utils.Wrap(err, "unmarshal failed")
+			}
+			tMap[keys[i]] = t
+		}
+	}
+	return tMap, nil
+}
