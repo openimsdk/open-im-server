@@ -547,7 +547,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	log.ZDebug(ctx, "groups return", "groups", groups, "ownerMap", ownerMap, "groupMemberNumMap", groupMemberNumMap)
+	log.ZDebug(ctx, "groups return", "groups", groups, "owners", owners, "ownerMap", ownerMap, "groupMemberNumMap", groupMemberNumMap)
 	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *sdkws.GroupInfo {
 		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
 	})
