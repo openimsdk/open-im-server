@@ -105,27 +105,6 @@ func (g *groupDatabase) GetGroupIDsByGroupType(ctx context.Context, groupType in
 	return g.groupDB.GetGroupIDsByGroupType(ctx, groupType)
 }
 
-// func (g *groupDatabase) delGroupMemberCache(ctx context.Context, groupID string, userIDs []string) error {
-// 	for _, userID := range userIDs {
-// 		if err := g.cache.DelJoinedGroupID(ctx, userID); err != nil {
-// 			return err
-// 		}
-// 		if err := g.cache.DelJoinedSuperGroupIDs(ctx, userID); err != nil {
-// 			return err
-// 		}
-// 	}
-// 	if err := g.cache.DelGroupMemberIDs(ctx, groupID); err != nil {
-// 		return err
-// 	}
-// 	if err := g.cache.DelGroupMemberNum(ctx, groupID); err != nil {
-// 		return err
-// 	}
-// 	if err := g.cache.DelGroupMembersHash(ctx, groupID); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error) {
 	return g.cache.GetGroupMemberIDs(ctx, groupID)
 }
@@ -142,7 +121,15 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 				return err
 			}
 		}
-		return nil
+		m := make(map[string]struct{})
+		var cache = g.cache.NewCache()
+		for _, groupMember := range groupMembers {
+			if _, ok := m[groupMember.GroupID]; !ok {
+				m[groupMember.GroupID] = struct{}{}
+				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelJoinedGroupID(groupMember.UserID).DelGroupsMemberNum(groupMember.GroupID)
+			}
+		}
+		return g.cache.ExecDel(ctx)
 	})
 }
 

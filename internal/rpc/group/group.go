@@ -645,7 +645,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.RoleLevel = constant.GroupOrdinaryUsers
 		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinSource = constant.JoinByInvitation
-		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
+		groupMember.InviterUserID = req.InviterUserID
 		groupMember.JoinTime = time.Now()
 		groupMember.MuteEndTime = time.Unix(0, 0)
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
