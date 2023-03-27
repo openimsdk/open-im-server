@@ -25,23 +25,23 @@ func (g *GroupMemberGorm) NewTx(tx any) relation.GroupMemberModelInterface {
 }
 
 func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*relation.GroupMemberModel) (err error) {
-	return utils.Wrap(g.DB.Create(&groupMemberList).Error, "")
+	return utils.Wrap(g.db(ctx).Create(&groupMemberList).Error, "")
 }
 
 func (g *GroupMemberGorm) Delete(ctx context.Context, groupID string, userIDs []string) (err error) {
-	return utils.Wrap(g.DB.Where("group_id = ? and user_id in (?)", groupID, userIDs).Delete(&relation.GroupMemberModel{}).Error, "")
+	return utils.Wrap(g.db(ctx).Where("group_id = ? and user_id in (?)", groupID, userIDs).Delete(&relation.GroupMemberModel{}).Error, "")
 }
 
 func (g *GroupMemberGorm) DeleteGroup(ctx context.Context, groupIDs []string) (err error) {
-	return utils.Wrap(g.DB.Where("group_id in (?)", groupIDs).Delete(&relation.GroupMemberModel{}).Error, "")
+	return utils.Wrap(g.db(ctx).Where("group_id in (?)", groupIDs).Delete(&relation.GroupMemberModel{}).Error, "")
 }
 
 func (g *GroupMemberGorm) Update(ctx context.Context, groupID string, userID string, data map[string]any) (err error) {
-	return utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(data).Error, "")
+	return utils.Wrap(g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Updates(data).Error, "")
 }
 
 func (g *GroupMemberGorm) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) (rowsAffected int64, err error) {
-	db := g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(map[string]any{
+	db := g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Updates(map[string]any{
 		"role_level": roleLevel,
 	})
 	return db.RowsAffected, utils.Wrap(db.Error, "")
@@ -63,16 +63,16 @@ func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs [
 
 func (g *GroupMemberGorm) Take(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMemberModel, err error) {
 	groupMember = &relation.GroupMemberModel{}
-	return groupMember, utils.Wrap(g.DB.Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
 }
 
 func (g *GroupMemberGorm) TakeOwner(ctx context.Context, groupID string) (groupMember *relation.GroupMemberModel, err error) {
 	groupMember = &relation.GroupMemberModel{}
-	return groupMember, utils.Wrap(g.DB.Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(g.db(ctx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
 }
 
 func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, groupList []*relation.GroupMemberModel, err error) {
-	db := g.DB
+	db := g.db(ctx)
 	ormutil.GormIn(&db, "group_id", groupIDs)
 	ormutil.GormIn(&db, "user_id", userIDs)
 	ormutil.GormIn(&db, "role_level", roleLevels)
@@ -80,7 +80,7 @@ func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, grou
 }
 
 func (g *GroupMemberGorm) MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error) {
-	return ormutil.MapCount(g.DB.Where("group_id in (?)", groupIDs), "group_id")
+	return ormutil.MapCount(g.db(ctx).Where("group_id in (?)", groupIDs), "group_id")
 }
 
 func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error) {
@@ -88,7 +88,7 @@ func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string)
 		GroupID string `gorm:"group_id"`
 		UserID  string `gorm:"user_id"`
 	}
-	if err := g.DB.Model(&relation.GroupMemberModel{}).Where("group_id in (?)", groupIDs).Find(&items).Error; err != nil {
+	if err := g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id in (?)", groupIDs).Find(&items).Error; err != nil {
 		return nil, utils.Wrap(err, "")
 	}
 	groupUsers = make(map[string][]string)
@@ -99,13 +99,13 @@ func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string)
 }
 
 func (g *GroupMemberGorm) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
-	return userIDs, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Pluck("user_id", &userIDs).Error, "")
+	return userIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Pluck("user_id", &userIDs).Error, "")
 }
 
 func (g *GroupMemberGorm) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return groupIDs, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("user_id = ?", userID).Pluck("group_id", &groupIDs).Error, "")
+	return groupIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("user_id = ?", userID).Pluck("group_id", &groupIDs).Error, "")
 }
 
 func (g *GroupMemberGorm) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
-	return count, utils.Wrap(g.DB.Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Count(&count).Error, "")
+	return count, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Count(&count).Error, "")
 }
