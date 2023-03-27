@@ -210,6 +210,17 @@ type config struct {
 			MasterSecret string `yaml:"masterSecret"`
 			ChannelID    string `yaml:"channelID"`
 			ChannelName  string `yaml:"channelName"`
+			Channel      struct {
+				HW struct {
+					Category string `yaml:"category"`
+				} `yaml:"HW"`
+				XM struct {
+					ChannelID string `yaml:"channelID"`
+				} `yaml:"XM"`
+				OPPO struct {
+					ChannelID string `yaml:"channelID"`
+				} `yaml:"OPPO"`
+			} `yaml:"channel"`
 		}
 		Fcm struct {
 			ServiceAccount string `yaml:"serviceAccount"`

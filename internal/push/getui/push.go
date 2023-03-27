@@ -117,18 +117,35 @@ type Notification struct {
 }
 
 type Options struct {
-	HW struct {
-		DefaultSound bool   `json:"/message/android/notification/default_sound"`
-		ChannelID    string `json:"/message/android/notification/channel_id"`
-		Sound        string `json:"/message/android/notification/sound"`
-		Importance   string `json:"/message/android/notification/importance"`
-	} `json:"HW"`
-	XM struct {
-		ChannelID string `json:"/extra.channel_id"`
-	} `json:"XM"`
-	VV struct {
-		Classification int `json:"/classification"`
-	} `json:"VV"`
+	HW *HW `json:"HW"`
+	XM *XM `json:"XM"`
+	VV *VV `json:"VV"`
+	OP *OP `json:"OP"`
+	HO *HO `json:"HO"`
+}
+
+type HW struct {
+	Category     string `json:"/message/android/category"`
+	DefaultSound bool   `json:"/message/android/notification/default_sound"`
+	ChannelID    string `json:"/message/android/notification/channel_id"`
+	Sound        string `json:"/message/android/notification/sound"`
+	Importance   string `json:"/message/android/notification/importance"`
+}
+
+type XM struct {
+	ChannelID string `json:"/extra.channel_id"`
+}
+
+type VV struct {
+	Classification int `json:"/classification"`
+}
+
+type OP struct {
+	ChannelID string `json:"/channel_id"`
+}
+
+type HO struct {
+	Importance string `json:"/android/notification/importance"`
 }
 
 type PushResp struct {
@@ -280,20 +297,11 @@ func (pushReq *PushReq) setPushChannel(title string, body string) {
 		ClickType: "startapp",
 	}
 	pushReq.PushChannel.Android.Ups.Options = Options{
-		HW: struct {
-			DefaultSound bool   `json:"/message/android/notification/default_sound"`
-			ChannelID    string `json:"/message/android/notification/channel_id"`
-			Sound        string `json:"/message/android/notification/sound"`
-			Importance   string `json:"/message/android/notification/importance"`
-		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
-		XM: struct {
-			ChannelID string `json:"/extra.channel_id"`
-		}{ChannelID: "high_system"},
-		VV: struct {
-			Classification int "json:\"/classification\""
-		}{
-			Classification: 1,
-		},
+		HW: &HW{Category: config.Config.Push.Getui.Channel.HW.Category, ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+		HO: &HO{Importance: "NORMAL"},
+		XM: &XM{ChannelID: config.Config.Push.Getui.Channel.XM.ChannelID},
+		OP: &OP{ChannelID: config.Config.Push.Getui.Channel.OPPO.ChannelID},
+		VV: &VV{Classification: 1},
 	}
 }
 

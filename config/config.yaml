@@ -236,6 +236,13 @@ push:
     enable: # true or false (bool)
     channelID: ""
     channelName: ""
+    channel:
+      HW:
+        category: 
+      XM:
+        channelID: 
+      OPPO:
+        channelID:  
   fcm:  #firebase cloud message 消息推送
     serviceAccount:   #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
