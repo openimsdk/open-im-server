@@ -48,7 +48,7 @@ func (g *GroupMemberGorm) UpdateRoleLevel(ctx context.Context, groupID string, u
 }
 
 func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*relation.GroupMemberModel, err error) {
-	db := g.DB
+	db := g.db(ctx)
 	if len(groupIDs) > 0 {
 		db = db.Where("group_id in (?)", groupIDs)
 	}

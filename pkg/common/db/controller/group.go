@@ -178,7 +178,10 @@ func (g *groupDatabase) TakeGroupOwner(ctx context.Context, groupID string) (*re
 }
 
 func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
-	return g.cache.GetGroupMembersInfo(ctx, groupIDs[0], userIDs, roleLevels) // todo cache group find
+	if roleLevels == nil {
+		return g.cache.GetGroupMembersInfo(ctx, groupIDs[0], userIDs, nil)
+	}
+	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
 func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
