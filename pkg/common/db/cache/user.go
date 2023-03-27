@@ -44,7 +44,7 @@ func NewUserCacheRedis(rdb redis.UniversalClient, userDB relationTb.UserModelInt
 
 func (u *UserCacheRedis) NewCache() UserCache {
 	return &UserCacheRedis{
-		metaCache:  NewMetaCacheRedis(u.rcClient, u.metaCache.GetPreDeleteKeys()...),
+		metaCache:  NewMetaCacheRedis(u.rcClient, u.metaCache.GetPreDelKeys()...),
 		userDB:     u.userDB,
 		expireTime: u.expireTime,
 		rcClient:   u.rcClient,

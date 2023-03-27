@@ -40,7 +40,7 @@ func NewExtendMsgSetCacheRedis(rdb redis.UniversalClient, extendMsgSetDB unrelat
 
 func (e *ExtendMsgSetCacheRedis) NewCache() ExtendMsgSetCache {
 	return &ExtendMsgSetCacheRedis{
-		metaCache:      NewMetaCacheRedis(e.rcClient, e.metaCache.GetPreDeleteKeys()...),
+		metaCache:      NewMetaCacheRedis(e.rcClient, e.metaCache.GetPreDelKeys()...),
 		expireTime:     e.expireTime,
 		extendMsgSetDB: e.extendMsgSetDB,
 		rcClient:       e.rcClient,

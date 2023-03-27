@@ -74,7 +74,7 @@ func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModel
 }
 
 func (g *GroupCacheRedis) NewCache() GroupCache {
-	return &GroupCacheRedis{rcClient: g.rcClient, expireTime: g.expireTime, groupDB: g.groupDB, groupMemberDB: g.groupMemberDB, groupRequestDB: g.groupRequestDB, mongoDB: g.mongoDB, metaCache: NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDeleteKeys()...)}
+	return &GroupCacheRedis{rcClient: g.rcClient, expireTime: g.expireTime, groupDB: g.groupDB, groupMemberDB: g.groupMemberDB, groupRequestDB: g.groupRequestDB, mongoDB: g.mongoDB, metaCache: NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...)}
 }
 
 func (g *GroupCacheRedis) getGroupInfoKey(groupID string) string {

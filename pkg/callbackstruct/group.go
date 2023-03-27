@@ -14,7 +14,7 @@ func (c CallbackCommand) GetCallbackCommand() string {
 type CallbackBeforeCreateGroupReq struct {
 	OperationID     string `json:"operationID"`
 	CallbackCommand `json:"callbackCommand"`
-	common.GroupInfo
+	*common.GroupInfo
 	InitMemberList []*apistruct.GroupAddMemberInfo `json:"initMemberList"`
 }
 

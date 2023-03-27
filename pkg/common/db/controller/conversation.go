@@ -75,10 +75,10 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 				return err
 			}
 			cache = cache.DelConversationIDs(NotUserIDs)
-			log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDeleteKeys(), "addr", &cache)
+			log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDelKeys(), "addr", &cache)
 		}
 		// clear cache
-		log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDeleteKeys(), "addr", &cache)
+		log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDelKeys(), "addr", &cache)
 		return cache.DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
 	})
 }

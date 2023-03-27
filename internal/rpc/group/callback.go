@@ -23,7 +23,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	cbReq := &callbackstruct.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
-		GroupInfo:       *req.GroupInfo,
+		GroupInfo:       req.GroupInfo,
 	}
 	cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
 		UserID:    req.OwnerUserID,

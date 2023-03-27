@@ -21,7 +21,8 @@ type metaCache interface {
 	// delete key rapid
 	DelKey(ctx context.Context, key string) error
 	AddKeys(keys ...string)
-	GetPreDeleteKeys() []string
+	ClearKeys()
+	GetPreDelKeys() []string
 }
 
 func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
@@ -49,7 +50,11 @@ func (m *metaCacheRedis) AddKeys(keys ...string) {
 	m.keys = append(m.keys, keys...)
 }
 
-func (m *metaCacheRedis) GetPreDeleteKeys() []string {
+func (m *metaCacheRedis) ClearKeys() {
+	m.keys = []string{}
+}
+
+func (m *metaCacheRedis) GetPreDelKeys() []string {
 	return m.keys
 }
 
