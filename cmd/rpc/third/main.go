@@ -1,14 +1,14 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/rpc/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 )
 
 func main() {
+	fmt.Println("#######################################")
 	rpcCmd := cmd.NewRpcCmd("third")
 	rpcCmd.AddPortFlag()
 	rpcCmd.AddPrometheusPortFlag()
@@ -16,7 +16,7 @@ func main() {
 		panic(err.Error())
 	}
 	name := config.Config.RpcRegisterName.OpenImThirdName
-	log.ZInfo(context.Background(), "StartRpc", "name", name)
+	fmt.Println("StartThirdRpc", "name:", name)
 	if err := rpcCmd.StartSvr(name, third.Start); err != nil {
 		panic(err.Error())
 	}
