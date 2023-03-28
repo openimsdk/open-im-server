@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
@@ -23,9 +22,7 @@ type Third struct {
 }
 
 func (o *Third) client() (third.ThirdClient, error) {
-	name := config.Config.RpcRegisterName.OpenImThirdName
-	log.ZInfo(context.Background(), "GetThirdClient", "name", name)
-	conn, err := o.c.GetConn(name)
+	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
 		return nil, err
 	}
