@@ -110,7 +110,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		authRouterGroupChildToken.POST("/force_logout", a.ForceLogout) //1
 	}
 	////Third service
-	thirdGroup := r.Group("/responseresponse")
+	thirdGroup := r.Group("/third")
 	{
 		t := NewThird(zk)
 		thirdGroup.Use(mw.GinParseToken(rdb))
