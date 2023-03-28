@@ -259,7 +259,7 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 		return &third.ConfirmPutResp{
 			Url: c.urlName(o.Name),
 		}, nil
-	} else if c.isNotFound(err) {
+	} else if !c.isNotFound(err) {
 		return nil, err
 	}
 	src := make([]obj.BucketObject, pack)
@@ -342,14 +342,14 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 		Name:       dst.Name,
 		CreateTime: time.Now(),
 	}
+	if err := c.hash.Create(ctx, []*relation.ObjectHashModel{h}); err != nil {
+		return nil, err
+	}
 	o := &relation.ObjectInfoModel{
 		Name:           put.Name,
 		Hash:           put.Hash,
 		ExpirationTime: put.ExpirationTime,
 		CreateTime:     time.Now(),
-	}
-	if err := c.hash.Create(ctx, []*relation.ObjectHashModel{h}); err != nil {
-		return nil, err
 	}
 	if err := c.info.SetObject(ctx, o); err != nil {
 		return nil, err

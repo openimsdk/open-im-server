@@ -2,13 +2,17 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 var _ context.Context // 解决goland编辑器bug
@@ -62,9 +66,19 @@ func (o *Third) GetURL(c *gin.Context) {
 		a2r.Call(third.ThirdClient.GetUrl, o.client, c)
 		return
 	}
+	operationID := c.Query("operationID")
+	if operationID == "" {
+		c.String(http.StatusBadRequest, "operationID is empty")
+		return
+	}
 	name := c.Query("name")
 	if name == "" {
 		c.String(http.StatusBadRequest, "name is empty")
+		return
+	}
+	expires, err := strconv.ParseInt(c.Query("expires"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, fmt.Sprintf("expires is invalid: %s", err.Error()))
 		return
 	}
 	client, err := o.client()
@@ -72,7 +86,8 @@ func (o *Third) GetURL(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	resp, err := client.GetUrl(c, &third.GetUrlReq{Name: name})
+	c.Set(constant.OperationID, operationID)
+	resp, err := client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())
