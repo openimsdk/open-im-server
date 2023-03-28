@@ -2,6 +2,9 @@ package startrpc
 
 import (
 	"fmt"
+	"net"
+	"strconv"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -14,13 +17,12 @@ import (
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net"
 )
 
 func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 	fmt.Println("start", rpcRegisterName, "rpc server, port: ", rpcPort, "prometheusPort:", prometheusPort, ", OpenIM version: ", config.Version)
 	log.NewPrivateLog(constant.LogFileName)
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Config.ListenIP, rpcPort))
+	listener, err := net.Listen("tcp", net.JoinHostPort(config.Config.ListenIP, strconv.Itoa(rpcPort)))
 	if err != nil {
 		return err
 	}

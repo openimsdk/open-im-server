@@ -11,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -47,8 +48,9 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
+	userDB := relation.NewUserGorm(db)
 	msgDatabase := controller.InitMsgDatabase(rdb, mongo.GetDatabase())
-	userDatabase := controller.NewUserDatabase(relation.NewUserGorm(db))
+	userDatabase := controller.NewUserDatabase(userDB, cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()), tx.NewGorm(db))
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase)
 	return msgTool, nil

@@ -12,7 +12,7 @@ func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, e
 		return 0, nil, errs.Wrap(err)
 	}
 	var es []*E
-	if err := db.Limit(int(showNumber)).Offset(int(pageNumber * showNumber)).Find(&es).Error; err != nil {
+	if err := db.Limit(int(showNumber)).Offset(int(pageNumber*showNumber) - 1).Find(&es).Error; err != nil {
 		return 0, nil, errs.Wrap(err)
 	}
 	return uint32(count), es, nil

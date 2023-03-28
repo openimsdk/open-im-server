@@ -202,7 +202,12 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	total, members, err := s.GroupDatabase.PageGroupMember(ctx, nil, []string{req.FromUserID}, nil, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	var pageNumber, showNumber int32
+	if req.Pagination != nil {
+		pageNumber = req.Pagination.PageNumber
+		showNumber = req.Pagination.ShowNumber
+	}
+	total, members, err := s.GroupDatabase.PageGroupMember(ctx, nil, []string{req.FromUserID}, nil, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}

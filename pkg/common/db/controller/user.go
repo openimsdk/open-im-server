@@ -2,7 +2,10 @@ package controller
 
 import (
 	"context"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
@@ -30,10 +33,12 @@ type UserDatabase interface {
 
 type userDatabase struct {
 	userDB relation.UserModelInterface
+	cache  cache.UserCache
+	tx     tx.Tx
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface) UserDatabase {
-	return &userDatabase{userDB: userDB}
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx) UserDatabase {
+	return &userDatabase{userDB: userDB, cache: cache, tx: tx}
 }
 
 func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel) (err error) {
@@ -53,7 +58,7 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 
 // 获取指定用户的信息 如有userID未找到 也返回错误
 func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	users, err = u.userDB.Find(ctx, userIDs)
+	users, err = u.cache.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return
 	}
@@ -65,7 +70,7 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 
 // 获取指定用户的信息 如有userID未找到 不返回错误
 func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
-	users, err = u.userDB.Find(ctx, userIDs)
+	users, err = u.cache.GetUsersInfo(ctx, userIDs)
 	return
 }
 
@@ -76,12 +81,25 @@ func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) 
 
 // 更新（非零值） 外部保证userID存在
 func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
-	return u.userDB.Update(ctx, user)
+	return u.tx.Transaction(func(tx any) error {
+		err = u.userDB.Update(ctx, user)
+		if err != nil {
+			return err
+		}
+		return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
+	})
 }
 
 // 更新（零值） 外部保证userID存在
 func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return u.userDB.UpdateByMap(ctx, userID, args)
+	return u.tx.Transaction(func(tx any) error {
+		err = u.userDB.UpdateByMap(ctx, userID, args)
+		if err != nil {
+			return err
+		}
+		return u.cache.DelUsersInfo(userID).ExecDel(ctx)
+	})
+
 }
 
 // 获取，如果没找到，不返回错误

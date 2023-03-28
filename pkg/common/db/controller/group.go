@@ -184,7 +184,17 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
-func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
+func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
+	if roleLevels == nil && pageNumber == 0 && showNumber == 0 {
+		for _, groupID := range groupIDs {
+			groupMembers, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
+			if err != nil {
+				return 0, nil, err
+			}
+			totalGroupMembers = append(totalGroupMembers, groupMembers...)
+		}
+
+	}
 	return g.groupMemberDB.SearchMember(ctx, "", groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
