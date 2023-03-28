@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -9,6 +10,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 var _ context.Context // 解决goland编辑器bug
@@ -67,12 +69,17 @@ func (o *Third) GetURL(c *gin.Context) {
 		c.String(http.StatusBadRequest, "name is empty")
 		return
 	}
+	expires, err := strconv.ParseInt(c.Query("expires"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, fmt.Sprintf("expires is invalid: %s", err.Error()))
+		return
+	}
 	client, err := o.client()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	resp, err := client.GetUrl(c, &third.GetUrlReq{Name: name})
+	resp, err := client.GetUrl(c, &third.GetUrlReq{Name: name, Expires: expires})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())
