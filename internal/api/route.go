@@ -140,7 +140,6 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/get_users_online_status", m.GetUsersOnlineStatus)
-		msgGroup.POST("/account_check", m.AccountCheck)
 		//msgGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
 		//msgGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
 		//msgGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
