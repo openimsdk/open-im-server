@@ -122,8 +122,8 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		thirdGroup.POST("/apply_put", t.ApplyPut)
 		thirdGroup.POST("/get_put", t.GetPut)
 		thirdGroup.POST("/confirm_put", t.ConfirmPut)
+		thirdGroup.POST("/get_url", t.GetURL)
 		thirdGroup.GET("/get_url", t.GetURL)
-		thirdGroup.GET("/object", t.GetURL)
 	}
 	////Message
 	msgGroup := r.Group("/msg")
