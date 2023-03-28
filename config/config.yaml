@@ -97,20 +97,20 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
 object:
   enable: minio
   apiURL: http://127.0.0.1:10002/api/third/object?name=
+  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
+    tempBucket: "openim"
+    dataBucket: "openim"
+    location: us-east-1
+    endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
+    accessKeyID: root
+    secretAccessKey: openIM123
+    isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false，如果是多硬盘部署，需要修改为true
   tencent:
     appID:
     region:
     bucket:
     secretID:
     secretKey:
-  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
-    tempBucket: "openIM"
-    dataBucket: "openIM"
-    location: us-east-1
-    endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
-    accessKeyID: root
-    secretAccessKey: openIM123
-    isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
     regionID:
     accessKeyID:
@@ -321,3 +321,4 @@ prometheus:
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # 端口数量和 script/path_info.cfg  msg_transfer_service_num保持一致
+

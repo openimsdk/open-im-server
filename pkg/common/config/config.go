@@ -73,8 +73,17 @@ type config struct {
 	}
 
 	Object struct {
-		Enable  string `yaml:"enable"`
-		ApiURL  string `yaml:"apiURL"`
+		Enable string `yaml:"enable"`
+		ApiURL string `yaml:"apiURL"`
+		Minio  struct {
+			TempBucket       string `yaml:"tempBucket"`
+			DataBucket       string `yaml:"dataBucket"`
+			Location         string `yaml:"location"`
+			Endpoint         string `yaml:"endpoint"`
+			AccessKeyID      string `yaml:"accessKeyID"`
+			SecretAccessKey  string `yaml:"secretAccessKey"`
+			IsDistributedMod bool   `yaml:"isDistributedMod"`
+		} `yaml:"minio"`
 		Tencent struct {
 			AppID     string `yaml:"appID"`
 			Region    string `yaml:"region"`
@@ -93,15 +102,6 @@ type config struct {
 			StsDurationSeconds int64  `yaml:"stsDurationSeconds"`
 			OssRoleArn         string `yaml:"OssRoleArn"`
 		}
-		Minio struct {
-			TempBucket       string `yaml:"tempBucket"`
-			DataBucket       string `yaml:"dataBucket"`
-			Location         string `yaml:"location"`
-			Endpoint         string `yaml:"endpoint"`
-			AccessKeyID      string `yaml:"accessKeyID"`
-			SecretAccessKey  string `yaml:"secretAccessKey"`
-			IsDistributedMod bool   `yaml:"isDistributedMod"`
-		} `yaml:"minio"`
 		Aws struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			AccessKeySecret string `yaml:"accessKeySecret"`
