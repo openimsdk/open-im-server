@@ -225,8 +225,9 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 					if err != nil {
 						return 0, nil, err
 					}
+					groupIDs = utils.Paginate(groupIDs, int(pageNumber), int(showNumber))
 					for _, groupID := range groupIDs {
-						groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, nil, pageNumber, showNumber)
+						groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
 						if err != nil {
 							return 0, nil, err
 						}
