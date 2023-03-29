@@ -52,7 +52,7 @@ type GroupCache interface {
 	GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	GetGroupMembersInfo(ctx context.Context, groupID string, userID []string) (groupMembers []*relationTb.GroupMemberModel, err error)
 	GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error)
-	GetGroupMembersPage(ctx context.Context, groupID string, userID []string, showNumber, pageNumber int32) (groupMembers []*relationTb.GroupMemberModel, err error)
+	GetGroupMembersPage(ctx context.Context, groupID string, userID []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error)
 
 	DelGroupMembersInfo(groupID string, userID ...string) GroupCache
 
@@ -306,17 +306,18 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	})
 }
 
-func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, userIDs []string, showNumber, pageNumber int32) (groupMembers []*relationTb.GroupMemberModel, err error) {
+func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, userIDs []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	if userIDs != nil {
 		userIDs = utils.BothExist(userIDs, groupMemberIDs)
 	} else {
 		userIDs = groupMemberIDs
 	}
-	return g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(userIDs, int(showNumber), int(showNumber)))
+	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(userIDs, int(showNumber), int(showNumber)))
+	return uint32(len(userIDs)), groupMembers, err
 }
 
 func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error) {

@@ -597,6 +597,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			RoleLevel:      constant.GroupOrdinaryUsers,
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
+			MuteEndTime:    time.Unix(0, 0),
 			InviterUserID:  groupRequest.InviterUserID,
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
@@ -862,7 +863,12 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	if err != nil {
 		return nil, err
 	}
-	total, requests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	var pageNumber, showNumber int32
+	if req.Pagination != nil {
+		pageNumber = req.Pagination.PageNumber
+		showNumber = req.Pagination.ShowNumber
+	}
+	total, requests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.UserID, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}
