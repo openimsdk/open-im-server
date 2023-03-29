@@ -122,10 +122,11 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	}
 	if hash, err := c.hash.Take(ctx, req.Hash, c.obj.Name()); err == nil {
 		o := relation.ObjectInfoModel{
-			Name:       req.Name,
-			Hash:       hash.Hash,
-			ValidTime:  expirationTime,
-			CreateTime: time.Now(),
+			Name:        req.Name,
+			Hash:        hash.Hash,
+			ValidTime:   expirationTime,
+			ContentType: req.ContentType,
+			CreateTime:  time.Now(),
 		}
 		if err := c.info.SetObject(ctx, &o); err != nil {
 			return nil, err
@@ -240,10 +241,11 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	}
 	if hash, err := c.hash.Take(ctx, put.Hash, c.obj.Name()); err == nil {
 		o := relation.ObjectInfoModel{
-			Name:       put.Name,
-			Hash:       hash.Hash,
-			ValidTime:  put.ValidTime,
-			CreateTime: time.Now(),
+			Name:        put.Name,
+			Hash:        hash.Hash,
+			ValidTime:   put.ValidTime,
+			ContentType: put.ContentType,
+			CreateTime:  time.Now(),
 		}
 		if err := c.info.SetObject(ctx, &o); err != nil {
 			return nil, err
