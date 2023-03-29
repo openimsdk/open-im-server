@@ -210,7 +210,6 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 				}
 				return
 			}
-
 			for _, groupID := range groupIDs {
 				groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
 				if err != nil {
