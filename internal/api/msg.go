@@ -233,7 +233,3 @@ func (m *Message) CheckMsgIsSendSuccess(c *gin.Context) {
 func (m *Message) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
 }
-
-func (m *Message) AccountCheck(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
-}

@@ -6,9 +6,11 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -36,6 +38,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	if err != nil {
 		return err
 	}
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
 	if err := db.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
@@ -46,8 +52,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	for k, v := range config.Config.Manager.AppManagerUid {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
 	}
+	userDB := relation.NewUserGorm(db)
+	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	u := &userServer{
-		UserDatabase:        controller.NewUserDatabase(relation.NewUserGorm(db)),
+		UserDatabase:        controller.NewUserDatabase(userDB, cache, tx.NewGorm(db)),
 		notification:        notification.NewCheck(client),
 		userCheck:           check.NewUserCheck(client),
 		friendCheck:         check.NewFriendChecker(client),

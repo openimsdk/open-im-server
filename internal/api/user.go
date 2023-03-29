@@ -2,9 +2,9 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/gin-gonic/gin"
@@ -25,11 +25,6 @@ func (u *User) client() (user.UserClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		log.NewInfo("client", conn, err)
-		conns, err := u.c.GetConns(config.Config.RpcRegisterName.OpenImUserName)
-		log.NewInfo("conns", conns, err)
-	}()
 	return user.NewUserClient(conn), nil
 }
 

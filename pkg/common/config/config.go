@@ -50,6 +50,7 @@ type POfflinePush struct {
 	Desc       string `yaml:"desc"`
 	Ext        string `yaml:"ext"`
 }
+
 type PDefaultTips struct {
 	Tips string `yaml:"tips"`
 }

@@ -20,9 +20,9 @@ type UserCache interface {
 	NewCache() UserCache
 	GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error)
 	GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationTb.UserModel, error)
-	DelUsersInfo(userIDs []string) UserCache
+	DelUsersInfo(userIDs ...string) UserCache
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
-	DelUsersGlobalRecvMsgOpt(userIDs []string) UserCache
+	DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache
 }
 
 type UserCacheRedis struct {
@@ -82,7 +82,7 @@ func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]
 	})
 }
 
-func (u *UserCacheRedis) DelUsersInfo(userIDs []string) UserCache {
+func (u *UserCacheRedis) DelUsersInfo(userIDs ...string) UserCache {
 	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, u.getUserInfoKey(userID))
@@ -98,7 +98,7 @@ func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID str
 	})
 }
 
-func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs []string) UserCache {
+func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache {
 	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, u.getUserGlobalRecvMsgOptKey(userID))
