@@ -553,7 +553,6 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
-	resp := &pbGroup.GroupApplicationResponseResp{}
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
@@ -617,7 +616,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			s.Notification.GroupApplicationRejectedNotification(ctx, req)
 		}
 	}
-	return resp, nil
+	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
