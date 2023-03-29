@@ -84,28 +84,48 @@ func (g *GroupMemberGorm) MapGroupMemberNum(ctx context.Context, groupIDs []stri
 }
 
 func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error) {
-	var items []struct {
-		GroupID string `gorm:"group_id"`
-		UserID  string `gorm:"user_id"`
-	}
-	if err := g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id in (?)", groupIDs).Find(&items).Error; err != nil {
+	var groupMembers []*relation.GroupMemberModel
+	if err := g.db(ctx).Select("group_id, user_id").Where("group_id in (?)", groupIDs).Find(&groupMembers).Error; err != nil {
 		return nil, utils.Wrap(err, "")
 	}
 	groupUsers = make(map[string][]string)
-	for _, item := range items {
-		groupUsers[item.GroupID] = append(groupUsers[item.GroupID], item.UserID)
+	for _, item := range groupMembers {
+		v, ok := groupUsers[item.GroupID]
+		if !ok {
+			groupUsers[item.GroupID] = []string{item.UserID}
+		} else {
+			groupUsers[item.GroupID] = append(v, item.UserID)
+		}
 	}
 	return groupUsers, nil
 }
 
 func (g *GroupMemberGorm) FindMemberUserID(ctx context.Context, groupID string) (userIDs []string, err error) {
-	return userIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Pluck("user_id", &userIDs).Error, "")
+	return userIDs, utils.Wrap(g.db(ctx).Where("group_id = ?", groupID).Pluck("user_id", &userIDs).Error, "")
 }
 
 func (g *GroupMemberGorm) FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return groupIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("user_id = ?", userID).Pluck("group_id", &groupIDs).Error, "")
+	return groupIDs, utils.Wrap(g.db(ctx).Where("user_id = ?", userID).Pluck("group_id", &groupIDs).Error, "")
 }
 
 func (g *GroupMemberGorm) TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error) {
-	return count, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("group_id = ?", groupID).Count(&count).Error, "")
+	return count, utils.Wrap(g.db(ctx).Where("group_id = ?", groupID).Count(&count).Error, "")
+}
+
+func (g *GroupMemberGorm) FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error) {
+	var groupMembers []*relation.GroupMemberModel
+	err := g.db(ctx).Select("group_id, user_id").Where("user_id IN (?)", userIDs).Find(&groupMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string][]string)
+	for _, groupMember := range groupMembers {
+		v, ok := result[groupMember.UserID]
+		if !ok {
+			result[groupMember.UserID] = []string{groupMember.GroupID}
+		} else {
+			result[groupMember.UserID] = append(v, groupMember.GroupID)
+		}
+	}
+	return result, nil
 }

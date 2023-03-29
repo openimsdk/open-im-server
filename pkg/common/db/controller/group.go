@@ -177,9 +177,16 @@ func (g *groupDatabase) TakeGroupOwner(ctx context.Context, groupID string) (*re
 	return g.groupMemberDB.TakeOwner(ctx, groupID) // todo cache group owner
 }
 
-func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
+func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (totalGroupMembers []*relationTb.GroupMemberModel, err error) {
 	if roleLevels == nil {
-		return g.cache.GetGroupMembersInfo(ctx, groupIDs[0], userIDs, nil)
+		for _, groupID := range groupIDs {
+			groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			totalGroupMembers = append(totalGroupMembers, groupMembers...)
+		}
+		return totalGroupMembers, nil
 	}
 	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
@@ -187,8 +194,25 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
 	if roleLevels == nil {
 		if pageNumber == 0 || showNumber == 0 {
+			if groupIDs == nil {
+				for _, userID := range userIDs {
+					groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
+					if err != nil {
+						return 0, nil, err
+					}
+					for _, groupID := range groupIDs {
+						groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
+						if err != nil {
+							return 0, nil, err
+						}
+						totalGroupMembers = append(totalGroupMembers, groupMembers...)
+					}
+				}
+				return
+			}
+
 			for _, groupID := range groupIDs {
-				groupMembers, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
+				groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
 				if err != nil {
 					return 0, nil, err
 				}
@@ -197,7 +221,7 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 			return uint32(len(totalGroupMembers)), totalGroupMembers, nil
 		} else {
 			for _, groupID := range groupIDs {
-				groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, pageNumber, showNumber)
+				groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, userIDs, pageNumber, showNumber)
 				if err != nil {
 					return 0, nil, err
 				}
@@ -205,7 +229,6 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 			}
 			return uint32(len(totalGroupMembers)), totalGroupMembers, nil
 		}
-
 	}
 	return g.groupMemberDB.SearchMember(ctx, "", groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
