@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
+	"net/http"
 	"net/url"
 	"time"
 )
@@ -85,8 +86,18 @@ func (m *minioImpl) DataBucket() string {
 	return m.dataBucket
 }
 
-func (m *minioImpl) GetURL(ctx context.Context, bucket string, name string, expires time.Duration) (string, error) {
-	u, err := m.client.PresignedGetObject(ctx, bucket, name, expires, nil)
+func (m *minioImpl) PresignedGetURL(ctx context.Context, bucket string, name string, expires time.Duration, opt *HeaderOption) (string, error) {
+	var reqParams url.Values
+	if opt != nil {
+		reqParams = make(url.Values)
+		if opt.ContentType != "" {
+			reqParams.Set("response-content-type", opt.ContentType)
+		}
+		if opt.Filename != "" {
+			reqParams.Set("response-content-disposition", "attachment;filename="+opt.Filename)
+		}
+	}
+	u, err := m.client.PresignedGetObject(ctx, bucket, name, expires, reqParams)
 	if err != nil {
 		return "", err
 	}
@@ -177,9 +188,9 @@ func (m *minioImpl) IsNotFound(err error) bool {
 	}
 	switch e := err.(type) {
 	case minio.ErrorResponse:
-		return e.StatusCode == 404 && e.Code == "NoSuchKey"
+		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	case *minio.ErrorResponse:
-		return e.StatusCode == 404 && e.Code == "NoSuchKey"
+		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
 	default:
 		return false
 	}

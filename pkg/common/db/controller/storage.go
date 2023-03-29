@@ -113,19 +113,19 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	if err := c.obj.CheckName(req.Name); err != nil {
 		return nil, err
 	}
-	if req.CleanTime != 0 && req.CleanTime <= time.Now().UnixMilli() {
-		return nil, errors.New("invalid CleanTime")
+	if req.ValidTime != 0 && req.ValidTime <= time.Now().UnixMilli() {
+		return nil, errors.New("invalid ValidTime")
 	}
 	var expirationTime *time.Time
-	if req.CleanTime != 0 {
-		expirationTime = utils.ToPtr(time.UnixMilli(req.CleanTime))
+	if req.ValidTime != 0 {
+		expirationTime = utils.ToPtr(time.UnixMilli(req.ValidTime))
 	}
 	if hash, err := c.hash.Take(ctx, req.Hash, c.obj.Name()); err == nil {
 		o := relation.ObjectInfoModel{
-			Name:           req.Name,
-			Hash:           hash.Hash,
-			ExpirationTime: expirationTime,
-			CreateTime:     time.Now(),
+			Name:       req.Name,
+			Hash:       hash.Hash,
+			ValidTime:  expirationTime,
+			CreateTime: time.Now(),
 		}
 		if err := c.info.SetObject(ctx, &o); err != nil {
 			return nil, err
@@ -139,13 +139,14 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	const effective = time.Hour * 24 * 2
 	req.FragmentSize, pack = c.getFragmentNum(req.FragmentSize, req.Size)
 	put := relation.ObjectPutModel{
-		PutID:          c.UUID(),
-		Hash:           req.Hash,
-		Name:           req.Name,
-		ObjectSize:     req.Size,
-		FragmentSize:   req.FragmentSize,
-		ExpirationTime: expirationTime,
-		EffectiveTime:  time.Now().Add(effective),
+		PutID:         c.UUID(),
+		Hash:          req.Hash,
+		Name:          req.Name,
+		ObjectSize:    req.Size,
+		ContentType:   req.ContentType,
+		FragmentSize:  req.FragmentSize,
+		ValidTime:     expirationTime,
+		EffectiveTime: time.Now().Add(effective),
 	}
 	put.Path = path.Join(tempPrefix, c.today(), req.Hash, put.PutID)
 	putURLs := make([]string, 0, pack)
@@ -197,9 +198,9 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 		}
 		fragments[i] = &third.GetPutFragment{Size: o.Size, Hash: o.Hash}
 	}
-	var cleanTime int64
-	if up.ExpirationTime != nil {
-		cleanTime = up.ExpirationTime.UnixMilli()
+	var validTime int64
+	if up.ValidTime != nil {
+		validTime = up.ValidTime.UnixMilli()
 	}
 	return &third.GetPutResp{
 		FragmentSize: up.FragmentSize,
@@ -207,7 +208,8 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 		Name:         up.Name,
 		Hash:         up.Hash,
 		Fragments:    fragments,
-		CleanTime:    cleanTime,
+		ContentType:  up.ContentType,
+		ValidTime:    validTime,
 	}, nil
 }
 
@@ -233,15 +235,15 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	if put.EffectiveTime.UnixMilli() < now {
 		return nil, errors.New("upload expired")
 	}
-	if put.ExpirationTime != nil && put.ExpirationTime.UnixMilli() < now {
+	if put.ValidTime != nil && put.ValidTime.UnixMilli() < now {
 		return nil, errors.New("object expired")
 	}
 	if hash, err := c.hash.Take(ctx, put.Hash, c.obj.Name()); err == nil {
 		o := relation.ObjectInfoModel{
-			Name:           put.Name,
-			Hash:           hash.Hash,
-			ExpirationTime: put.ExpirationTime,
-			CreateTime:     time.Now(),
+			Name:       put.Name,
+			Hash:       hash.Hash,
+			ValidTime:  put.ValidTime,
+			CreateTime: time.Now(),
 		}
 		if err := c.info.SetObject(ctx, &o); err != nil {
 			return nil, err
@@ -346,10 +348,11 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 		return nil, err
 	}
 	o := &relation.ObjectInfoModel{
-		Name:           put.Name,
-		Hash:           put.Hash,
-		ExpirationTime: put.ExpirationTime,
-		CreateTime:     time.Now(),
+		Name:        put.Name,
+		Hash:        put.Hash,
+		ContentType: put.ContentType,
+		ValidTime:   put.ValidTime,
+		CreateTime:  time.Now(),
 	}
 	if err := c.info.SetObject(ctx, o); err != nil {
 		return nil, err
@@ -367,14 +370,15 @@ func (c *s3Database) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.G
 	if err != nil {
 		return nil, err
 	}
-	if info.ExpirationTime != nil && info.ExpirationTime.Before(time.Now()) {
+	if info.ValidTime != nil && info.ValidTime.Before(time.Now()) {
 		return nil, errs.ErrRecordNotFound.Wrap("object expired")
 	}
 	hash, err := c.hash.Take(ctx, info.Hash, c.obj.Name())
 	if err != nil {
 		return nil, err
 	}
-	u, err := c.obj.GetURL(ctx, hash.Bucket, hash.Name, time.Duration(req.Expires)*time.Millisecond)
+	opt := obj.HeaderOption{Filename: info.Name, ContentType: info.ContentType}
+	u, err := c.obj.PresignedGetURL(ctx, hash.Bucket, hash.Name, time.Duration(req.Expires)*time.Millisecond, &opt)
 	if err != nil {
 		return nil, err
 	}

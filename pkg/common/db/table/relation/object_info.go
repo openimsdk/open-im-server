@@ -10,10 +10,11 @@ const (
 )
 
 type ObjectInfoModel struct {
-	Name           string     `gorm:"column:name;primary_key"`
-	Hash           string     `gorm:"column:hash"`
-	ExpirationTime *time.Time `gorm:"column:expiration_time"`
-	CreateTime     time.Time  `gorm:"column:create_time"`
+	Name        string     `gorm:"column:name;primary_key"`
+	Hash        string     `gorm:"column:hash"`
+	ContentType string     `gorm:"column:content_type"`
+	ValidTime   *time.Time `gorm:"column:valid_time"`
+	CreateTime  time.Time  `gorm:"column:create_time"`
 }
 
 func (ObjectInfoModel) TableName() string {

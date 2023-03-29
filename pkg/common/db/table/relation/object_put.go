@@ -10,16 +10,17 @@ const (
 )
 
 type ObjectPutModel struct {
-	PutID          string     `gorm:"column:put_id;primary_key"`
-	Hash           string     `gorm:"column:hash"`
-	Path           string     `gorm:"column:path"`
-	Name           string     `gorm:"column:name"`
-	ObjectSize     int64      `gorm:"column:object_size"`
-	FragmentSize   int64      `gorm:"column:fragment_size"`
-	Complete       bool       `gorm:"column:complete"`
-	ExpirationTime *time.Time `gorm:"column:expiration_time"`
-	EffectiveTime  time.Time  `gorm:"column:effective_time"`
-	CreateTime     time.Time  `gorm:"column:create_time"`
+	PutID         string     `gorm:"column:put_id;primary_key"`
+	Hash          string     `gorm:"column:hash"`
+	Path          string     `gorm:"column:path"`
+	Name          string     `gorm:"column:name"`
+	ContentType   string     `gorm:"column:content_type"`
+	ObjectSize    int64      `gorm:"column:object_size"`
+	FragmentSize  int64      `gorm:"column:fragment_size"`
+	Complete      bool       `gorm:"column:complete"`
+	ValidTime     *time.Time `gorm:"column:valid_time"`
+	EffectiveTime time.Time  `gorm:"column:effective_time"`
+	CreateTime    time.Time  `gorm:"column:create_time"`
 }
 
 func (ObjectPutModel) TableName() string {
