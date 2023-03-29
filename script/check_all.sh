@@ -15,6 +15,7 @@ service_port_name=(
   openImAuthPort
   openImPushPort
   openImConversationPort
+  openImThirdPort
 )
 for i in ${service_port_name[*]}; do
   list=$(cat $config_path | grep -w ${i} | awk -F '[:]' '{print $NF}')

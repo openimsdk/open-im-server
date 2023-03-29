@@ -43,4 +43,5 @@ type GroupMemberModelInterface interface {
 	FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error)
 	FindUserJoinedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
 	TakeGroupMemberNum(ctx context.Context, groupID string) (count int64, err error)
+	FindUsersJoinedGroupID(ctx context.Context, userIDs []string) (map[string][]string, error)
 }

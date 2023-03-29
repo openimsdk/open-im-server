@@ -256,16 +256,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
-	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{group.GroupID}, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) string {
-		return e.UserID
-	})
-	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
-		return nil, errs.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
-	}
 	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
 	if err != nil {
 		return nil, err
@@ -273,11 +263,14 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !tokenverify.IsAppManagerUid(ctx) {
 			opUserID := mcontext.GetOpUserID(ctx)
-			member, ok := memberMap[opUserID]
-			if !ok {
+			groupMembers, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, []string{opUserID}, nil)
+			if err != nil {
+				return nil, err
+			}
+			if len(groupMembers) <= 0 {
 				return nil, errs.ErrNoPermission.Wrap("not in group")
 			}
-			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
+			if !(groupMembers[0].RoleLevel == constant.GroupOwner || groupMembers[0].RoleLevel == constant.GroupAdmin) {
 				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
 					requests = append(requests, &relationTb.GroupRequestModel{
@@ -560,7 +553,6 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
-	resp := &pbGroup.GroupApplicationResponseResp{}
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
@@ -604,6 +596,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			RoleLevel:      constant.GroupOrdinaryUsers,
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
+			MuteEndTime:    time.Unix(0, 0),
 			InviterUserID:  groupRequest.InviterUserID,
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
@@ -623,7 +616,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			s.Notification.GroupApplicationRejectedNotification(ctx, req)
 		}
 	}
-	return resp, nil
+	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
@@ -869,7 +862,12 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	if err != nil {
 		return nil, err
 	}
-	total, requests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	var pageNumber, showNumber int32
+	if req.Pagination != nil {
+		pageNumber = req.Pagination.PageNumber
+		showNumber = req.Pagination.ShowNumber
+	}
+	total, requests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.UserID, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}

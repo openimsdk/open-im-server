@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"net"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -31,11 +33,13 @@ func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
 	}
+	var err error
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
-	zk, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
+	var client discoveryregistry.SvcDiscoveryRegistry
+	client, err = openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
 	if err != nil {
 		return err
 	}
@@ -43,11 +47,11 @@ func run(port int) error {
 	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {
 		return err
 	}
-	if err := zk.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
+	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
 		return err
 	}
 	log.NewPrivateLog(constant.LogFileName)
-	router := api.NewGinRouter(zk, rdb)
+	router := api.NewGinRouter(client, rdb)
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
