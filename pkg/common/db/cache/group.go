@@ -311,7 +311,11 @@ func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID strin
 	if err != nil {
 		return nil, err
 	}
-	userIDs = utils.BothExist(userIDs, groupMemberIDs)
+	if userIDs != nil {
+		userIDs = utils.BothExist(userIDs, groupMemberIDs)
+	} else {
+		userIDs = groupMemberIDs
+	}
 	return g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(userIDs, int(showNumber), int(showNumber)))
 }
 
