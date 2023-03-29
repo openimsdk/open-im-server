@@ -256,17 +256,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
-	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{group.GroupID}, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) string {
-		return e.UserID
-	})
-	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
-		log.ZDebug(ctx, "user in group", "ids", ids)
-		return nil, errs.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
-	}
 	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
 	if err != nil {
 		return nil, err
@@ -274,11 +263,14 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !tokenverify.IsAppManagerUid(ctx) {
 			opUserID := mcontext.GetOpUserID(ctx)
-			member, ok := memberMap[opUserID]
-			if !ok {
+			groupMembers, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, []string{opUserID}, nil)
+			if err != nil {
+				return nil, err
+			}
+			if len(groupMembers) <= 0 {
 				return nil, errs.ErrNoPermission.Wrap("not in group")
 			}
-			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
+			if !(groupMembers[0].RoleLevel == constant.GroupOwner || groupMembers[0].RoleLevel == constant.GroupAdmin) {
 				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
 					requests = append(requests, &relationTb.GroupRequestModel{

@@ -208,7 +208,8 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 						totalGroupMembers = append(totalGroupMembers, groupMembers...)
 					}
 				}
-				return
+
+				return uint32(len(totalGroupMembers)), totalGroupMembers, nil
 			}
 			for _, groupID := range groupIDs {
 				groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
@@ -234,7 +235,7 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 						totalGroupMembers = append(totalGroupMembers, groupMembers...)
 					}
 				}
-				return
+				return uint32(len(totalGroupMembers)), totalGroupMembers, nil
 			}
 			for _, groupID := range groupIDs {
 				groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, userIDs, pageNumber, showNumber)
