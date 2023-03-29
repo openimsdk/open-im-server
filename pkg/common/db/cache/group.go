@@ -50,6 +50,8 @@ type GroupCache interface {
 	GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)
 	GetGroupMembersInfo(ctx context.Context, groupID string, userID []string, roleLevel []int32) (groupMembers []*relationTb.GroupMemberModel, err error)
 	GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error)
+	GetGroupMembersPage(ctx context.Context, groupID string, showNumber, pageNumber int32) (groupMembers []*relationTb.GroupMemberModel, err error)
+
 	DelGroupMembersInfo(groupID string, userID ...string) GroupCache
 
 	GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error)
@@ -300,6 +302,14 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, g.GetGroupMemberIndex, func(ctx context.Context) ([]*relationTb.GroupMemberModel, error) {
 		return g.groupMemberDB.Find(ctx, []string{groupID}, userIDs, roleLevel)
 	})
+}
+
+func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, showNumber, pageNumber int32) (groupMembers []*relationTb.GroupMemberModel, err error) {
+	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	return g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(groupMemberIDs, int(showNumber), int(showNumber)), nil)
 }
 
 func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error) {

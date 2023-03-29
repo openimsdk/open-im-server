@@ -246,6 +246,24 @@ func Max[E Ordered](e ...E) E {
 	return v
 }
 
+func Paginate[E any](es []E, pageNumber int, showNumber int) []E {
+	if pageNumber <= 0 {
+		return []E{}
+	}
+	if showNumber <= 0 {
+		return []E{}
+	}
+	start := (pageNumber - 1) * showNumber
+	end := start + showNumber
+	if start >= len(es) {
+		return []E{}
+	}
+	if end > len(es) {
+		end = len(es)
+	}
+	return es[start:end]
+}
+
 // BothExistAny 获取切片中共同存在的元素(交集)
 func BothExistAny[E any, K comparable](es [][]E, fn func(e E) K) []E {
 	if len(es) == 0 {

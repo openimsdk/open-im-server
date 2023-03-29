@@ -185,13 +185,23 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 }
 
 func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
-	if roleLevels == nil && pageNumber == 0 && showNumber == 0 {
-		for _, groupID := range groupIDs {
-			groupMembers, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
-			if err != nil {
-				return 0, nil, err
+	if roleLevels == nil {
+		if pageNumber == 0 || showNumber == 0 {
+			for _, groupID := range groupIDs {
+				groupMembers, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
+				if err != nil {
+					return 0, nil, err
+				}
+				totalGroupMembers = append(totalGroupMembers, groupMembers...)
 			}
-			totalGroupMembers = append(totalGroupMembers, groupMembers...)
+		} else {
+			for _, groupID := range groupIDs {
+				groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, pageNumber, showNumber)
+				if err != nil {
+					return 0, nil, err
+				}
+				totalGroupMembers = append(totalGroupMembers, groupMembers...)
+			}
 		}
 
 	}
@@ -230,8 +240,16 @@ func (g *groupDatabase) MapGroupMemberUserID(ctx context.Context, groupIDs []str
 	return g.cache.GetGroupMemberHashMap(ctx, groupIDs)
 }
 
-func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
-	return g.groupMemberDB.MapGroupMemberNum(ctx, groupIDs)
+func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (m map[string]uint32, err error) {
+	m = make(map[string]uint32)
+	for _, groupID := range groupIDs {
+		num, err := g.cache.GetGroupMemberNum(ctx, groupID)
+		if err != nil {
+			return nil, err
+		}
+		m[groupID] = uint32(num)
+	}
+	return m, nil
 }
 
 func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error {
