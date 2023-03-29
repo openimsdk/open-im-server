@@ -31,6 +31,7 @@ type S3Database interface {
 	GetPut(ctx context.Context, req *third.GetPutReq) (*third.GetPutResp, error)
 	ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (*third.ConfirmPutResp, error)
 	GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.GetUrlResp, error)
+	GetHashInfo(ctx context.Context, req *third.GetHashInfoReq) (*third.GetHashInfoResp, error)
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
@@ -459,4 +460,16 @@ func (c *s3Database) clearNoCitation(ctx context.Context, engine string, limit i
 			return
 		}
 	}
+}
+
+func (c *s3Database) GetHashInfo(ctx context.Context, req *third.GetHashInfoReq) (*third.GetHashInfoResp, error) {
+	o, err := c.hash.Take(ctx, req.Hash, c.obj.Name())
+	if err != nil {
+		return nil, err
+	}
+	return &third.GetHashInfoResp{
+		Hash: o.Hash,
+		Size: o.Size,
+		Url:  c.urlName(o.Name),
+	}, nil
 }

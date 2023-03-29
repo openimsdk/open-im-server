@@ -58,6 +58,17 @@ message GetPutResp {
   repeated GetPutFragment fragments = 7;
 }
 
+message GetHashInfoReq {
+  string hash = 1;
+}
+
+message GetHashInfoResp {
+  string hash = 1;
+  int64 size = 2;
+  string url = 3;
+}
+
+
 message GetSignalInvitationInfoReq {
   string clientMsgID = 1;
 }
@@ -99,6 +110,7 @@ service third {
   rpc GetPut(GetPutReq) returns(GetPutResp);
   rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
   rpc GetUrl(GetUrlReq) returns(GetUrlResp);
+  rpc GetHashInfo(GetHashInfoReq) returns(GetHashInfoResp);
 
   rpc GetSignalInvitationInfo(GetSignalInvitationInfoReq) returns(GetSignalInvitationInfoResp);
   rpc GetSignalInvitationInfoStartApp(GetSignalInvitationInfoStartAppReq) returns(GetSignalInvitationInfoStartAppResp);

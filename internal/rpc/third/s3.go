@@ -28,6 +28,11 @@ func (t *thirdServer) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.
 	return t.s3dataBase.GetUrl(ctx, req)
 }
 
+func (t *thirdServer) GetHashInfo(ctx context.Context, req *third.GetHashInfoReq) (*third.GetHashInfoResp, error) {
+
+	return nil, nil
+}
+
 func (t *thirdServer) CleanObject(ctx context.Context, now time.Time) {
 	t.s3dataBase.CleanExpirationObject(ctx, now)
 }

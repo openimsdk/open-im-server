@@ -45,6 +45,10 @@ func (o *Third) ConfirmPut(c *gin.Context) {
 	a2r.Call(third.ThirdClient.ConfirmPut, o.client, c)
 }
 
+func (o *Third) GetHash(c *gin.Context) {
+	a2r.Call(third.ThirdClient.GetHashInfo, o.client, c)
+}
+
 func (o *Third) GetSignalInvitationInfo(c *gin.Context) {
 	a2r.Call(third.ThirdClient.GetSignalInvitationInfo, o.client, c)
 }
