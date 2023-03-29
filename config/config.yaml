@@ -96,7 +96,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
 
 object:
   enable: minio
-  apiURL: http://127.0.0.1:10002/api/third/object?name=
+  apiURL: http://127.0.0.1:10002/third/object?name=
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     tempBucket: "openim"
     dataBucket: "openim"
