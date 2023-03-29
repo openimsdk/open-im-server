@@ -19,6 +19,11 @@ type ApplyPutArgs struct {
 	MaxObjectSize int64
 }
 
+type HeaderOption struct {
+	ContentType string
+	Filename    string
+}
+
 type ObjectInfo struct {
 	Size int64
 	Hash string
@@ -37,9 +42,8 @@ type Interface interface {
 	TempBucket() string
 	// DataBucket 永久存储的桶名
 	DataBucket() string
-	// GetURL 通过桶名和对象名返回URL
-	//GetURL(bucket string, name string) string
-	GetURL(ctx context.Context, bucket string, name string, expires time.Duration) (string, error)
+	// PresignedGetURL 通过桶名和对象名返回URL
+	PresignedGetURL(ctx context.Context, bucket string, name string, expires time.Duration, opt *HeaderOption) (string, error)
 	// PresignedPutURL 申请上传,返回PUT的上传地址
 	PresignedPutURL(ctx context.Context, args *ApplyPutArgs) (string, error)
 	// GetObjectInfo 获取对象信息
