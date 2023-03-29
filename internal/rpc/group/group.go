@@ -1032,7 +1032,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		delete(duplicateMap, [...]string{member.GroupID, member.UserID})
 	}
 	if len(duplicateMap) > 0 {
-		return nil, errs.ErrArgs.Wrap("group not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
+		return nil, errs.ErrArgs.Wrap("user not found" + strings.Join(utils.Slice(utils.Keys(duplicateMap), func(e [2]string) string {
 			return fmt.Sprintf("[group: %s user: %s]", e[0], e[1])
 		}), ","))
 	}
@@ -1067,14 +1067,13 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			return nil, err
 		}
 	}
-	err = s.GroupDatabase.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbGroup.SetGroupMemberInfo) *relationTb.BatchUpdateGroupMember {
+	if err = s.GroupDatabase.UpdateGroupMembers(ctx, utils.Slice(req.Members, func(e *pbGroup.SetGroupMemberInfo) *relationTb.BatchUpdateGroupMember {
 		return &relationTb.BatchUpdateGroupMember{
 			GroupID: e.GroupID,
 			UserID:  e.UserID,
 			Map:     UpdateGroupMemberMap(e),
 		}
-	}))
-	if err != nil {
+	})); err != nil {
 		return nil, err
 	}
 	for _, member := range req.Members {
