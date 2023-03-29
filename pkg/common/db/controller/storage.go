@@ -473,6 +473,5 @@ func (c *s3Database) GetHashInfo(ctx context.Context, req *third.GetHashInfoReq)
 	return &third.GetHashInfoResp{
 		Hash: o.Hash,
 		Size: o.Size,
-		Url:  c.urlName(o.Name),
 	}, nil
 }

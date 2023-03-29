@@ -65,7 +65,6 @@ message GetHashInfoReq {
 message GetHashInfoResp {
   string hash = 1;
   int64 size = 2;
-  string url = 3;
 }
 
 
