@@ -81,13 +81,14 @@ func (o *Third) GetURL(c *gin.Context) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("expires is invalid: %s", err.Error()))
 		return
 	}
+	attachment, _ := strconv.ParseBool(c.Query("attachment"))
 	client, err := o.client()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Set(constant.OperationID, operationID)
-	resp, err := client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires})
+	resp, err := client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires, Attachment: attachment})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())
