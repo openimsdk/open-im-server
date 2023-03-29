@@ -30,6 +30,7 @@ message ConfirmPutResp {
 message GetUrlReq {
   string name = 1; // 文件名
   int64 expires = 2; // url有效时间
+  bool attachment = 3;// 是否是附件
 }
 
 message GetUrlResp {
@@ -58,7 +59,7 @@ message GetPutResp {
 }
 
 message GetSignalInvitationInfoReq {
-  string ClientMsgID = 1;
+  string clientMsgID = 1;
 }
 
 message GetSignalInvitationInfoResp {
@@ -76,8 +77,8 @@ message GetSignalInvitationInfoStartAppResp {
 }
 
 message FcmUpdateTokenReq {
-  int32 PlatformID = 1;
-  string FcmToken = 2;
+  int32 platformID = 1;
+  string fcmToken = 2;
   string account = 3;
   int64 expireTime = 4;
 }
@@ -87,7 +88,7 @@ message FcmUpdateTokenResp {
 
 message SetAppBadgeReq {
   string userID = 1;
-  int32 AppUnreadCount = 2;
+  int32 appUnreadCount = 2;
 }
 
 message SetAppBadgeResp {

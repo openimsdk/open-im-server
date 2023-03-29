@@ -379,7 +379,10 @@ func (c *s3Database) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.G
 	if err != nil {
 		return nil, err
 	}
-	opt := obj.HeaderOption{Filename: info.Name, ContentType: info.ContentType}
+	opt := obj.HeaderOption{ContentType: info.ContentType}
+	if req.Attachment {
+		opt.Filename = info.Name
+	}
 	u, err := c.obj.PresignedGetURL(ctx, hash.Bucket, hash.Name, time.Duration(req.Expires)*time.Millisecond, &opt)
 	if err != nil {
 		return nil, err
