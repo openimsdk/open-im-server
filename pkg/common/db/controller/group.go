@@ -219,6 +219,22 @@ func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, 
 			}
 			return uint32(len(totalGroupMembers)), totalGroupMembers, nil
 		} else {
+			if groupIDs == nil {
+				for _, userID := range userIDs {
+					groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
+					if err != nil {
+						return 0, nil, err
+					}
+					for _, groupID := range groupIDs {
+						groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, nil, pageNumber, showNumber)
+						if err != nil {
+							return 0, nil, err
+						}
+						totalGroupMembers = append(totalGroupMembers, groupMembers...)
+					}
+				}
+				return
+			}
 			for _, groupID := range groupIDs {
 				groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, userIDs, pageNumber, showNumber)
 				if err != nil {
