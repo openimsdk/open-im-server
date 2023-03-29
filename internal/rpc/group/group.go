@@ -264,6 +264,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return e.UserID
 	})
 	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
+		log.ZDebug(ctx, "user in group", "ids", ids)
 		return nil, errs.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
 	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
