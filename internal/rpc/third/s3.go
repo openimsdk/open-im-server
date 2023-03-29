@@ -29,8 +29,7 @@ func (t *thirdServer) GetUrl(ctx context.Context, req *third.GetUrlReq) (*third.
 }
 
 func (t *thirdServer) GetHashInfo(ctx context.Context, req *third.GetHashInfoReq) (*third.GetHashInfoResp, error) {
-
-	return nil, nil
+	return t.s3dataBase.GetHashInfo(ctx, req)
 }
 
 func (t *thirdServer) CleanObject(ctx context.Context, now time.Time) {

@@ -463,6 +463,9 @@ func (c *s3Database) clearNoCitation(ctx context.Context, engine string, limit i
 }
 
 func (c *s3Database) GetHashInfo(ctx context.Context, req *third.GetHashInfoReq) (*third.GetHashInfoResp, error) {
+	if err := c.CheckHash(req.Hash); err != nil {
+		return nil, err
+	}
 	o, err := c.hash.Take(ctx, req.Hash, c.obj.Name())
 	if err != nil {
 		return nil, err
