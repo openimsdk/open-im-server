@@ -48,6 +48,7 @@ message GetPutReq {
 message GetPutFragment{
   int64 size = 1;
   string hash = 2;
+  string url = 3;
 }
 
 message GetPutResp {
@@ -56,9 +57,16 @@ message GetPutResp {
   string hash = 3;
   int64 fragmentSize = 4;
   string contentType = 5;
-  int64 validTime = 6;
-  repeated GetPutFragment fragments = 7;
-  string putURLsHash = 8;
+  int64 validTime = 6; // 上传地址的有效时间
+//  repeated GetPutFragment fragments = 7;
+//  string putURLsHash = 8;
+//  string putID = 2;
+//  int64 fragmentSize = 3;
+//  int64 validTime = 4;// 上传地址的有效时间
+  string putURLsHash = 7;
+  repeated GetPutFragment fragments = 8;
+//  repeated string putURLs = 6;
+//  repeated GetPutFragment fragments = 7;
 }
 
 message GetHashInfoReq {

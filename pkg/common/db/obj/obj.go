@@ -2,6 +2,7 @@ package obj
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"time"
 )
@@ -27,6 +28,30 @@ type HeaderOption struct {
 type ObjectInfo struct {
 	Size int64
 	Hash string
+}
+
+type SizeReader interface {
+	io.ReadCloser
+	Size() int64
+}
+
+func NewSizeReader(r io.ReadCloser, size int64) SizeReader {
+	if r == nil {
+		return nil
+	}
+	return &sizeReader{
+		size:       size,
+		ReadCloser: r,
+	}
+}
+
+type sizeReader struct {
+	size int64
+	io.ReadCloser
+}
+
+func (r *sizeReader) Size() int64 {
+	return r.size
 }
 
 type Interface interface {
@@ -58,4 +83,8 @@ type Interface interface {
 	IsNotFound(err error) bool
 	// CheckName 检查名字是否可用
 	CheckName(name string) error
+	// PutObject 上传文件
+	PutObject(ctx context.Context, info *BucketObject, reader io.Reader, size int64) (*ObjectInfo, error)
+	// GetObject 下载文件
+	GetObject(ctx context.Context, info *BucketObject) (SizeReader, error)
 }

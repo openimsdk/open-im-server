@@ -9,6 +9,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -194,6 +195,29 @@ func (m *minioImpl) IsNotFound(err error) bool {
 	default:
 		return false
 	}
+}
+
+func (m *minioImpl) PutObject(ctx context.Context, info *BucketObject, reader io.Reader, size int64) (*ObjectInfo, error) {
+	update, err := m.client.PutObject(ctx, info.Bucket, info.Name, reader, size, minio.PutObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return &ObjectInfo{
+		Size: update.Size,
+		Hash: update.ETag,
+	}, nil
+}
+
+func (m *minioImpl) GetObject(ctx context.Context, info *BucketObject) (SizeReader, error) {
+	object, err := m.client.GetObject(ctx, info.Bucket, info.Name, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+	stat, err := object.Stat()
+	if err != nil {
+		return nil, err
+	}
+	return NewSizeReader(object, stat.Size), nil
 }
 
 func (m *minioImpl) CheckName(name string) error {
