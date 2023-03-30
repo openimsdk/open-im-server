@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -164,6 +165,12 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 		}
 		putURLs = append(putURLs, url)
 	}
+	urlsJsonData, err := json.Marshal(putURLs)
+	if err != nil {
+		return nil, err
+	}
+	t := md5.Sum(urlsJsonData)
+	put.PutURLsHash = hex.EncodeToString(t[:])
 	put.CreateTime = time.Now()
 	if err := c.put.Create(ctx, []*relation.ObjectPutModel{&put}); err != nil {
 		return nil, err
@@ -211,6 +218,7 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 		Name:         up.Name,
 		Hash:         up.Hash,
 		Fragments:    fragments,
+		PutURLsHash:  up.PutURLsHash,
 		ContentType:  up.ContentType,
 		ValidTime:    validTime,
 	}, nil

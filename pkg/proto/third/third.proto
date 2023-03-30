@@ -17,7 +17,8 @@ message ApplyPutResp {
   string putID = 2;
   int64 fragmentSize = 3;
   int64 validTime = 4;// 上传地址的有效时间
-  repeated string PutURLs = 5;
+  string putURLsHash = 5;
+  repeated string putURLs = 6;
 }
 
 message ConfirmPutReq {
@@ -57,6 +58,7 @@ message GetPutResp {
   string contentType = 5;
   int64 validTime = 6;
   repeated GetPutFragment fragments = 7;
+  string putURLsHash = 8;
 }
 
 message GetHashInfoReq {
