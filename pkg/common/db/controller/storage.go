@@ -172,6 +172,7 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 		PutID:        put.PutID,
 		FragmentSize: put.FragmentSize,
 		PutURLs:      putURLs,
+		ValidTime:    put.EffectiveTime.UnixMilli(),
 	}, nil
 }
 

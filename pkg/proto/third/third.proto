@@ -9,13 +9,14 @@ message ApplyPutReq {
   string hash = 3;
   string contentType = 4;
   int64 fragmentSize = 5;
-  int64 validTime = 6;
+  int64 validTime = 6; // 文件有效时间
 }
 
 message ApplyPutResp {
   string url = 1;
   string putID = 2;
   int64 fragmentSize = 3;
+  int64 validTime = 4;// 上传地址的有效时间
   repeated string PutURLs = 5;
 }
 
