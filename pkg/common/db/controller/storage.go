@@ -198,7 +198,7 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 	if up.Complete {
 		return nil, errors.New("up completed")
 	}
-	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.Name(), Name: path.Join(up.Path, urlsName)})
+	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)})
 	if err != nil {
 		return nil, err
 	}
