@@ -227,12 +227,12 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 		})
 		if err != nil {
 			if c.obj.IsNotFound(err) {
-				fragments[i] = &third.GetPutFragment{}
+				fragments[i] = &third.GetPutFragment{Url: urls[i]}
 				continue
 			}
 			return nil, err
 		}
-		fragments[i] = &third.GetPutFragment{Size: o.Size, Hash: o.Hash}
+		fragments[i] = &third.GetPutFragment{Size: o.Size, Hash: o.Hash, Url: urls[i]}
 	}
 	var validTime int64
 	if up.ValidTime != nil {
