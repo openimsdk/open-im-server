@@ -45,7 +45,7 @@ func NewMinioInterface() (Interface, error) {
 			Region:        conf.Location,
 			ObjectLocking: conf.IsDistributedMod,
 		}
-		if err := client.MakeBucket(ctx, conf.TempBucket, opt); err != nil {
+		if err := client.MakeBucket(ctx, bucket, opt); err != nil {
 			return nil, fmt.Errorf("minio make bucket %s %w", bucket, err)
 		}
 	}
