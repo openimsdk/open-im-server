@@ -76,6 +76,7 @@ message SendMsgResp {
   string serverMsgID = 4;
   string clientMsgID = 5;
   int64  sendTime = 6;
+  string  ex   = 7;
 }
 
 

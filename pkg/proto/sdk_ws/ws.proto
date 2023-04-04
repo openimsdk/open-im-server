@@ -241,6 +241,7 @@ message UserSendMsgResp {
   string serverMsgID = 1;
   string clientMsgID = 2;
   int64  sendTime = 3;
+  string  ex   = 4;
 }
 
 message MsgData {

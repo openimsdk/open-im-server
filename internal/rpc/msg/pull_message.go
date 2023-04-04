@@ -115,12 +115,12 @@ func (s MsgFormats) Len() int {
 	return len(s)
 }
 
-//Implement the sort.Interface interface comparison element method
+// Implement the sort.Interface interface comparison element method
 func (s MsgFormats) Less(i, j int) bool {
 	return s[i].SendTime < s[j].SendTime
 }
 
-//Implement the sort.Interface interface exchange element method
+// Implement the sort.Interface interface exchange element method
 func (s MsgFormats) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }

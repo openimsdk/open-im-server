@@ -269,6 +269,7 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 	mReplyData.ClientMsgID = pb.GetClientMsgID()
 	mReplyData.ServerMsgID = pb.GetServerMsgID()
 	mReplyData.SendTime = pb.GetSendTime()
+	mReplyData.Ex = pb.GetEx()
 	b, _ := proto.Marshal(&mReplyData)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
