@@ -8,6 +8,7 @@ out-test
 .idea
 
 
+
 deploy/open_im_demo
 deploy/open_im_api
 deploy/open_im_msg_gateway
