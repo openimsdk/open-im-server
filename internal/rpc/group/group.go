@@ -449,13 +449,13 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
 	resp := &pbGroup.GetGroupMembersInfoResp{}
-	if len(req.Members) == 0 {
-		return nil, errs.ErrArgs.Wrap("members empty")
+	if len(req.UserIDs) == 0 {
+		return nil, errs.ErrArgs.Wrap("userIDs empty")
 	}
 	if req.GroupID == "" {
 		return nil, errs.ErrArgs.Wrap("groupID empty")
 	}
-	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, req.Members, nil)
+	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, req.UserIDs, nil)
 	if err != nil {
 		return nil, err
 	}
