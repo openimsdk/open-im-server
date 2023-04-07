@@ -76,20 +76,20 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		operationID = utils.OperationIDGenerator()
 	}
 	log.Debug(operationID, utils.GetSelfFuncName(), " args: ", query)
-	if isPass, compression := ws.headerCheck(w, r, operationID); isPass {
-		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
-		if err != nil {
-			log.Error(operationID, "upgrade http conn err", err.Error(), query)
-			return
-		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], utils.Md5(conn.RemoteAddr().String() + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill())))}
-			userCount++
-			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
-			go ws.readMsg(newConn)
-		}
-	} else {
+	isPass, compression := ws.headerCheck(w, r, operationID)
+	if !isPass {
 		log.Error(operationID, "headerCheck failed ")
+		return
 	}
+	conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
+	if err != nil {
+		log.Error(operationID, "upgrade http conn err", err.Error(), query)
+		return
+	}
+	newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], utils.Md5(conn.RemoteAddr().String() + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill())))}
+	userCount++
+	ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
+	go ws.readMsg(newConn)
 }
 
 func (ws *WServer) readMsg(conn *UserConn) {
