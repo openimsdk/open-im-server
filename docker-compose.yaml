@@ -100,7 +100,7 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v2.3.6
+    image: openim/open_im_server:v3.0.0
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
