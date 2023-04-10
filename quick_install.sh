@@ -105,6 +105,7 @@ install_docker_compose() {
     export MINIO_ENDPOINT
     export USER
     export PASSWORD
+    export DATA_DIR
 
     edit_config
     edit_enterprise_config
