@@ -74,37 +74,37 @@ install_docker_compose() {
     git checkout errcode
     echo "git clone success"
     echo "Please enter the data directory, deault is $(pwd), press enter to use default"
-    read data_dir
-    is_empyt $data_dir
+    read DATA_DIR
+    is_empyt $DATA_DIR
     if [ $? -eq 1 ]; then 
-        data_dir="./"
+        DATA_DIR="./"
     fi 
 
     echo "Please enter the user, deault is root, press enter to use default"
-    read user
-    is_empyt $user
+    read USER
+    is_empyt $USER
     if [ $? -eq 1 ]; then 
-        user="root"
+        USER="root"
     fi 
 
     echo "Please enter the password, default is openIM123, press enter to use default"
-    read password
-    is_empyt $password
+    read PASSWORD
+    is_empyt $PASSWORD
      if [ $? -eq 1 ]; then 
-        password="openIM123"
+        PASSWORD="openIM123"
     fi 
 
     echo "Please enter the minio_endpoint, default will detect auto, press enter to use default:"
-    read minio_endpoint
-    is_empyt $minio_endpoint
+    read MINIO_ENDPOINT
+    is_empyt $MINIO_ENDPOINT
     if [ $? -eq 1 ]; then
         internet_ip=`curl ifconfig.me -s`
-        minio_endpoint="http://${internet_ip}:10005"
+        MINIO_ENDPOINT="http://${internet_ip}:10005"
     fi
 
-    export minio_endpoint
-    export user
-    export password
+    export MINIO_ENDPOINT
+    export USER
+    export PASSWORD
 
     edit_config
     edit_enterprise_config
