@@ -2,6 +2,8 @@ package check
 
 import (
 	"context"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -10,7 +12,6 @@ import (
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
-	"strings"
 )
 
 type GroupChecker struct {
@@ -73,7 +74,7 @@ func (g *GroupChecker) GetGroupMemberInfos(ctx context.Context, groupID string, 
 	}
 	resp, err := group.NewGroupClient(cc).GetGroupMembersInfo(ctx, &group.GetGroupMembersInfoReq{
 		GroupID: groupID,
-		Members: userIDs,
+		UserIDs: userIDs,
 	})
 	if err != nil {
 		return nil, err
