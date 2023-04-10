@@ -104,7 +104,7 @@ message GetGroupMemberListResp {
 
 message GetGroupMembersInfoReq {
   string groupID = 1;
-  repeated string members = 2;
+  repeated string userIDs = 2;
 }
 
 message GetGroupMembersInfoResp {
