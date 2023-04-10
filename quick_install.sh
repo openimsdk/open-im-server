@@ -79,7 +79,7 @@ install_docker_compose() {
     if [ $? -eq 1 ]; then 
         DATA_DIR="./"
     fi 
-
+    
     echo "Please enter the user, deault is root, press enter to use default"
     read USER
     is_empyt $USER
