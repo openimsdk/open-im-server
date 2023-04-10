@@ -5,7 +5,7 @@ echo "Please select an deploy option:"
 echo "1. docker-compose install"
 # echo "2. source code install"
 # echo "3. source code install with docker-compose dependence"
-echo "4. exit"
+echo "2. exit"
 
 clear_openimlog() {
     rm -rf ./logs/*
@@ -28,6 +28,7 @@ is_empyt() {
 }
 
 edit_config() {
+    echo "is edit config.yaml?"
     echo "1. vi edit config"
     echo "2. do not edit config"
     read choice
@@ -42,6 +43,7 @@ edit_config() {
 }
 
 edit_enterprise_config() {
+    echo "is edit enterprise config.yaml?"
     echo "1. vi edit enterprise config"
     echo "2. do not edit enterprise config"
     read choice
@@ -98,12 +100,12 @@ install_docker_compose() {
     if [ $? -eq 1 ]; then
         internet_ip=`curl ifconfig.me -s`
         minio_endpoint="http://${internet_ip}:10005"
-        
     fi
 
-    echo $minio_endpoint
-    echo $user
-    echo $password
+    export minio_endpoint
+    export user
+    export password
+
     edit_config
     edit_enterprise_config
 
