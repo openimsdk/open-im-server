@@ -12,12 +12,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/openKeeper"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func main() {
