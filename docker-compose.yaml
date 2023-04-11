@@ -100,12 +100,12 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v2.3.6
+    image: openim/open_im_server:v3.0.0
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-      - ./config/usualConfig.yaml:/Open-IM-Server/config/usualConfig.yaml
+      - ./config/notification.yaml:/Open-IM-Server/config/notification.yaml
       - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
       - ./script:/Open-IM-Server/script
     restart: always

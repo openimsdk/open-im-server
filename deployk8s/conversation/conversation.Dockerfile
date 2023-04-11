@@ -12,7 +12,7 @@ ADD ./open_im_conversation $WORKDIR/cmd/main
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/script && \
   chmod +x $WORKDIR/cmd/main
 
-VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script"]
+VOLUME ["/Open-IM-Server/config","/Open-IM-Server/script"]
 
 WORKDIR $CMDDIR
 CMD ./main

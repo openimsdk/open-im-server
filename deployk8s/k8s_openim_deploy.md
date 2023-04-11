@@ -1,4 +1,4 @@
-#### openIM k8s部署文档
+# openIM k8s部署文档
 ### 1. 修改配置文件
 在Open-IM-SERVER根目录下修改config/config.yaml配置文件, 请确保以下修改的所有地址必须保证k8s pod能够访问
 1. 修改ETCD配置为自己的ETCD ip地址, 最好和k8s本身使用的ETCD分开
