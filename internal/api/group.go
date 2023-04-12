@@ -73,6 +73,10 @@ func (o *Group) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.client, c)
 }
 
+func (o *Group) GetGroupMemberList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupMemberList, o.client, c)
+}
+
 func (o *Group) InviteUserToGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.InviteUserToGroup, o.client, c)
 }
