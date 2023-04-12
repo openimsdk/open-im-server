@@ -3,8 +3,6 @@
 echo "Welcome to the Open-IM-Server installation script."
 echo "Please select an deploy option:"
 echo "1. docker-compose install"
-# echo "2. source code install"
-# echo "3. source code install with docker-compose dependence"
 echo "2. exit"
 
 clear_openimlog() {
@@ -19,7 +17,7 @@ is_path() {
   fi
 }
 
-is_empyt() {
+is_empty() {
   if [ -z "$1" ]; then
     return 1
   else
@@ -51,6 +49,7 @@ edit_config() {
 }
 
 edit_enterprise_config() {
+  
     echo "Is edit enterprise config.yaml?"
     echo "1. vi edit enterprise config"
     echo "2. do not edit enterprise config"
@@ -68,7 +67,7 @@ edit_enterprise_config() {
 install_docker_compose() {
     echo "Please input the installation path, default is $(pwd)/Open-IM-Server, press enter to use default"
     read install_path 
-    is_empyt $install_path
+    is_empty $install_path
     if [ $? -eq 1 ]; then 
         install_path="."
     fi
@@ -78,7 +77,7 @@ install_docker_compose() {
     cd $install_path
     is_directory_exists "${install_path}/Open-IM-Server"
     if [ $? -eq 1 ]; then
-        echo "Error: Directory $install_path/Open-IM-Server exist, please ensure your path"
+        echo "WARNING: Directory $install_path/Open-IM-Server exist, please ensure your path"
         echo "1. delete the directory and install"
         echo "2. exit"
         read choice
@@ -92,54 +91,61 @@ install_docker_compose() {
         esac
     fi
     rm -rf ./Open-IM-Server
+    set -e
     git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive;
+    set +e
     cd ./Open-IM-Server
     git checkout errcode
     echo "======== git clone success ========"
     source .env
-    echo "Please input the components data directory, deault is ${DATA_DIR} press enter to use default"
+    if [ $DATA_DIR = "./" ]; then
+        DATA_DIR=$(pwd)/components
+    fi
+    echo "Please input the components data directory, deault is ${DATA_DIR}, press enter to use default"
     read NEW_DATA_DIR
-    is_empyt $NEW_DATA_DIR
+    is_empty $NEW_DATA_DIR
     if [ $? -eq 0 ]; then 
         DATA_DIR=$NEW_DATA_DIR
     fi 
     echo "Please input the user, deault is root, press enter to use default"
     read NEW_USER
-    is_empyt $NEW_USER
+    is_empty $NEW_USER
     if [ $? -eq 0 ]; then 
         USER=$NEW_USER
     fi 
 
     echo "Please input the password, default is openIM123, press enter to use default"
     read NEW_PASSWORD
-    is_empyt $NEW_PASSWORD
+    is_empty $NEW_PASSWORD
      if [ $? -eq 0 ]; then 
         PASSWORD=$NEW_PASSWORD
     fi 
 
-    echo "Please input the minio_endpoint, default will detect auto, press enter to use default:"
+    echo "Please input the minio_endpoint, default will detect auto, press enter to use default"
     read NEW_MINIO_ENDPOINT
-    is_empyt $NEW_MINIO_ENDPOINT
+    is_empty $NEW_MINIO_ENDPOINT
     if [ $? -eq 1 ]; then
         internet_ip=`curl ifconfig.me -s`
         MINIO_ENDPOINT="http://${internet_ip}:10005"
     else 
         MINIO_ENDPOINT=$NEW_MINIO_ENDPOINT  
     fi
-
+    set -e
     export MINIO_ENDPOINT
     export USER
     export PASSWORD
     export DATA_DIR
-    sed -i "s/^MINIO_ENDPOINT=.*/MINIO_ENDPOINT=$MINIO_ENDPOINT/" .env
-    sed -i "s/^USER=.*/USER=$USER/" .env
-    sed -i "s/^PASSWORD=.*/PASSWORD=$PASSWORD/" .env
-    sed -i "s/^DATA_DIR=.*/DATA_DIR=$DATA_DIR/" .env
 
+    cat <<EOF > .env
+USER=${USER}
+PASSWORD=${PASSWORD}
+MINIO_ENDPOINT=${MINIO_ENDPOINT}
+DATA_DIR=${DATA_DIR}
+EOF
 
     edit_config
     edit_enterprise_config
-
+    
     cd script;
     chmod +x *.sh;
     ./init_pwd.sh;

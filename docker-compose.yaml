@@ -171,9 +171,9 @@ services:
     - prometheus
     network_mode: "host" 
 
-  node-exporter:
-    image: quay.io/prometheus/node-exporter
-    container_name: node-exporter
-    restart: always
-    ports:
-      - "9100:9100"
+  # node-exporter:
+  #   image: quay.io/prometheus/node-exporter
+  #   container_name: node-exporter
+  #   restart: always
+  #   ports:
+  #     - "9100:9100"
