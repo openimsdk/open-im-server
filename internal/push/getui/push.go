@@ -112,7 +112,7 @@ type Notification struct {
 	Title       string `json:"title"`
 	Body        string `json:"body"`
 	ChannelID   string `json:"channel_id"`
-	ChannelName string `json:"Channel_name"`
+	ChannelName string `json:"channel_name"`
 	ClickType   string `json:"click_type"`
 }
 
