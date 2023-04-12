@@ -111,8 +111,8 @@ type Android struct {
 type Notification struct {
 	Title       string `json:"title"`
 	Body        string `json:"body"`
-	ChannelID   string `json:"channelID"`
-	ChannelName string `json:"ChannelName"`
+	ChannelID   string `json:"channel_id"`
+	ChannelName string `json:"Channel_name"`
 	ClickType   string `json:"click_type"`
 }
 
