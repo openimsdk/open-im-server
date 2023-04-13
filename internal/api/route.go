@@ -80,6 +80,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		groupRouterGroup.POST("/kick_group", g.KickGroupMember)    //1
 		// groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo) //1
+		groupRouterGroup.POST("/get_group_member_list", g.GetGroupMemberList)   //1
 		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)     //1
 		groupRouterGroup.POST("/get_joined_group_list", g.GetJoinedGroupList)
 		groupRouterGroup.POST("/dismiss_group", g.DismissGroup) //
