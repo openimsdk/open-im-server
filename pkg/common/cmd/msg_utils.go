@@ -1,157 +1,170 @@
 package cmd
 
 import (
-	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/tools"
 	"github.com/spf13/cobra"
 )
 
 type MsgUtilsCmd struct {
-	*RootCmd
-	userID string
-
-	superGroupID string
-
-	clearAll bool
-
-	fixAll bool
-}
-
-func NewMsgUtilsCmd() MsgUtilsCmd {
-	return MsgUtilsCmd{RootCmd: NewRootCmd("msgUtils")}
+	cobra.Command
+	msgTool *tools.MsgTool
 }
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {
 	m.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
 }
 
-func (m *MsgUtilsCmd) GetUserIDFlag() string {
-	return m.userID
+func (m *MsgUtilsCmd) getUserIDFlag(cmdLines *cobra.Command) string {
+	userID, _ := cmdLines.Flags().GetString("userID")
+	return userID
 }
 
 func (m *MsgUtilsCmd) AddFixAllFlag() {
-	m.Command.PersistentFlags().BoolP("fixAll", "c", false, "openIM fix all seqs")
+	m.Command.PersistentFlags().BoolP("fixAll", "f", false, "openIM fix all seqs")
 }
 
-func (m *MsgUtilsCmd) GetFixAllFlag() bool {
-	return m.fixAll
+func (m *MsgUtilsCmd) getFixAllFlag(cmdLines *cobra.Command) bool {
+	fixAll, _ := cmdLines.Flags().GetBool("fixAll")
+	return fixAll
+}
+
+func (m *MsgUtilsCmd) AddClearAllFlag() {
+	m.Command.PersistentFlags().BoolP("clearAll", "c", false, "openIM clear all seqs")
+}
+
+func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
+	clearAll, _ := cmdLines.Flags().GetBool("clearAll")
+	return clearAll
 }
 
 func (m *MsgUtilsCmd) AddSuperGroupIDFlag() {
-	m.Command.PersistentFlags().StringP("super-groupID", "u", "", "openIM superGroupID")
+	m.Command.PersistentFlags().StringP("superGroupID", "g", "", "openIM superGroupID")
 }
 
-func (m *MsgUtilsCmd) GetSuperGroupIDFlag() string {
-	return m.superGroupID
+func (m *MsgUtilsCmd) getSuperGroupIDFlag(cmdLines *cobra.Command) string {
+	superGroupID, _ := cmdLines.Flags().GetString("superGroupID")
+	return superGroupID
 }
 
-func (m *MsgUtilsCmd) AddClearAllFlag() bool {
-	return m.clearAll
+func (m *MsgUtilsCmd) AddBeginSeqFlag() {
+	m.Command.PersistentFlags().Int64P("beginSeq", "b", 0, "openIM beginSeq")
 }
 
-func (m *MsgUtilsCmd) GetClearAllFlag() bool {
-	return m.clearAll
+func (m *MsgUtilsCmd) getBeginSeqFlag(cmdLines *cobra.Command) int64 {
+	beginSeq, _ := cmdLines.Flags().GetInt64("beginSeq")
+	return beginSeq
+}
+
+func (m *MsgUtilsCmd) AddLimitFlag() {
+	m.Command.PersistentFlags().Int64P("limit", "l", 0, "openIM limit")
+}
+
+func (m *MsgUtilsCmd) getLimitFlag(cmdLines *cobra.Command) int64 {
+	limit, _ := cmdLines.Flags().GetInt64("limit")
+	return limit
+}
+
+func (m *MsgUtilsCmd) Execute() error {
+	return m.Command.Execute()
+}
+
+func NewMsgUtilsCmd(use, short string, args cobra.PositionalArgs) *MsgUtilsCmd {
+	return &MsgUtilsCmd{
+		Command: cobra.Command{
+			Use:   use,
+			Short: short,
+			Args:  args,
+		},
+	}
+}
+
+type GetCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewGetCmd() *GetCmd {
+	return &GetCmd{
+		NewMsgUtilsCmd("get [resource]", "get action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
+}
+
+type FixCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewFixCmd() *FixCmd {
+	return &FixCmd{
+		NewMsgUtilsCmd("fix [resource]", "fix action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
+}
+
+type ClearCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewClearCmd() *ClearCmd {
+	return &ClearCmd{
+		NewMsgUtilsCmd("clear [resource]", "clear action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
 }
 
 type SeqCmd struct {
-	Command *cobra.Command
+	*MsgUtilsCmd
 }
 
-func (SeqCmd) RunCommand(cmdLines *cobra.Command, args []string) error {
-	msgTool, err := tools.InitMsgTool()
-	if err != nil {
-		return err
+func NewSeqCmd() *SeqCmd {
+	seqCmd := &SeqCmd{
+		NewMsgUtilsCmd("seq", "seq", nil),
 	}
-	userID, _ := cmdLines.Flags().GetString("userID")
-	superGroupID, _ := cmdLines.Flags().GetString("superGroupID")
-	fixAll, _ := cmdLines.Flags().GetBool("fixAll")
-	ctx := context.Background()
-	switch {
-	case cmdLines.Parent() == GetCmd:
-		switch {
-		case userID != "":
-			msgTool.ShowUserSeqs(ctx, userID)
-		case superGroupID != "":
-			msgTool.ShowSuperGroupSeqs(ctx, superGroupID)
-		}
-	case cmdLines.Parent() == FixCmd:
-		switch {
-		case userID != "":
-			_, _, err = msgTool.GetAndFixUserSeqs(ctx, userID)
-		case superGroupID != "":
-			err = msgTool.FixGroupSeq(ctx, userID)
-		case fixAll:
-			err = msgTool.FixAllSeq(ctx)
-		}
-	}
-	return err
-}
-
-func NewSeqCmd() SeqCmd {
-	seqCmd := SeqCmd{&cobra.Command{
-		Use:   "seq",
-		Short: "seq operation",
-	}}
-	seqCmd.Command.Flags().BoolP("fixAll", "c", false, "openIM fix all seqs")
-	seqCmd.Command.RunE = seqCmd.RunCommand
 	return seqCmd
 }
 
-type MsgCmd struct {
-	Command *cobra.Command
+func (s *SeqCmd) GetSeqCmd() *cobra.Command {
+	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
+		_, err := tools.InitMsgTool()
+		if err != nil {
+			panic(err)
+		}
+		userID := s.getUserIDFlag(cmdLines)
+		superGroupID := s.getSuperGroupIDFlag(cmdLines)
+		// beginSeq := s.getBeginSeqFlag(cmdLines)
+		// limit := s.getLimitFlag(cmdLines)
+		if userID != "" {
+			// seq, err := msgTool.s(context.Background(), userID)
+			if err != nil {
+				panic(err)
+			}
+			// println(seq)
+		} else if superGroupID != "" {
+			// seq, err := msgTool.GetSuperGroupSeq(context.Background(), superGroupID)
+			if err != nil {
+				panic(err)
+			}
+			// println(seq)
+		}
+	}
+	return &s.Command
 }
 
-func NewMsgCmd() MsgCmd {
-	msgCmd := MsgCmd{&cobra.Command{
-		Use:   "msg",
-		Short: "msg operation",
-	}}
-	msgCmd.Command.RunE = msgCmd.RunCommand
-	msgCmd.Command.Flags().BoolP("clearAll", "c", false, "openIM clear all timeout msgs")
+func (s *SeqCmd) FixSeqCmd() *cobra.Command {
+	return &s.Command
+}
+
+type MsgCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewMsgCmd() *MsgCmd {
+	msgCmd := &MsgCmd{
+		NewMsgUtilsCmd("msg", "msg", nil),
+	}
 	return msgCmd
 }
 
-func (*MsgCmd) RunCommand(cmdLines *cobra.Command, args []string) error {
-	msgTool, err := tools.InitMsgTool()
-	if err != nil {
-		return err
-	}
-	userID, _ := cmdLines.Flags().GetString("userID")
-	superGroupID, _ := cmdLines.Flags().GetString("superGroupID")
-	clearAll, _ := cmdLines.Flags().GetBool("clearAll")
-	ctx := context.Background()
-	switch {
-	case cmdLines.Parent() == GetCmd:
-		switch {
-		case userID != "":
-			msgTool.ShowUserSeqs(ctx, userID)
-		case superGroupID != "":
-			msgTool.ShowSuperGroupSeqs(ctx, superGroupID)
-		}
-	case cmdLines.Parent() == ClearCmd:
-		switch {
-		case userID != "":
-			msgTool.ClearUsersMsg(ctx, []string{userID})
-		case superGroupID != "":
-			msgTool.ClearSuperGroupMsg(ctx, []string{superGroupID})
-		case clearAll:
-			msgTool.AllUserClearMsgAndFixSeq()
-		}
-	}
-	return nil
+func (m *MsgCmd) GetMsgCmd() *cobra.Command {
+	return &m.Command
 }
 
-var GetCmd = &cobra.Command{
-	Use:   "get",
-	Short: "get operation",
-}
-
-var FixCmd = &cobra.Command{
-	Use:   "fix",
-	Short: "fix seq operation",
-}
-
-var ClearCmd = &cobra.Command{
-	Use:   "clear",
-	Short: "clear operation",
+func (m *MsgCmd) ClearMsgCmd() *cobra.Command {
+	return &m.Command
 }
