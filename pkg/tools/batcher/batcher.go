@@ -1,7 +1,6 @@
 package batcher
 
 import (
-	"Open_IM/pkg/common/log"
 	"context"
 	"errors"
 	"hash/crc32"
@@ -11,6 +10,7 @@ import (
 
 var (
 	ErrorNotSetFunction = errors.New("not set do function")
+	ErrFull             = errors.New("full")
 )
 
 var (
@@ -114,7 +114,7 @@ func (b *Batcher) Add(key string, val interface{}) error {
 }
 
 func (b *Batcher) add(key string, val interface{}) (chan *msg, *msg) {
-	sharding := b.Sharding(key) % b.opts.worker
+	sharding := b.Sharding(key) % b.config.worker
 	ch := b.chans[sharding]
 	msg := &msg{key: key, val: val}
 	return ch, msg
@@ -128,11 +128,11 @@ func (b *Batcher) merge(idx int, ch <-chan *msg) {
 		count      int
 		closed     bool
 		lastTicker = true
-		interval   = b.opts.interval
-		vals       = make(map[string][]interface{}, b.opts.size)
+		interval   = b.config.interval
+		vals       = make(map[string][]interface{}, b.config.size)
 	)
 	if idx > 0 {
-		interval = time.Duration(int64(idx) * (int64(b.opts.interval) / int64(b.opts.worker)))
+		interval = time.Duration(int64(idx) * (int64(b.config.interval) / int64(b.config.worker)))
 	}
 	ticker := time.NewTicker(interval)
 	for {
@@ -144,21 +144,21 @@ func (b *Batcher) merge(idx int, ch <-chan *msg) {
 			}
 			count++
 			vals[msg.key] = append(vals[msg.key], msg.val)
-			if count >= b.opts.size {
+			if count >= b.config.size {
 				break
 			}
 			continue
 		case <-ticker.C:
 			if lastTicker {
 				ticker.Stop()
-				ticker = time.NewTicker(b.opts.interval)
+				ticker = time.NewTicker(b.config.interval)
 				lastTicker = false
 			}
 		}
 		if len(vals) > 0 {
 			ctx := context.Background()
 			b.Do(ctx, vals)
-			vals = make(map[string][]interface{}, b.opts.size)
+			vals = make(map[string][]interface{}, b.config.size)
 			count = 0
 		}
 		if closed {

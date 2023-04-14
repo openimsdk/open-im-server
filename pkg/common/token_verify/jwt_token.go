@@ -26,16 +26,16 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func BuildClaims(uid, platform string, ttl int64) Claims {
+func BuildClaims(uid, platform string, daysTTL int64) Claims {
 	now := time.Now()
 	before := now.Add(-time.Minute * 5)
 	return Claims{
 		UID:      uid,
 		Platform: platform,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
-			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
-			NotBefore: jwt.NewNumericDate(before),                                     //Begin Effective time
+			ExpiresAt: jwt.NewNumericDate(now.AddDate(0, 0, int(daysTTL))), //Expiration time
+			IssuedAt:  jwt.NewNumericDate(now),                             //Issuing time
+			NotBefore: jwt.NewNumericDate(before),                          //Begin Effective time
 		}}
 }
 
@@ -237,7 +237,7 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
 
-//Validation token, false means failure, true means successful verification
+// Validation token, false means failure, true means successful verification
 func VerifyToken(token, uid string) (bool, error) {
 	claims, err := ParseToken(token, "")
 	if err != nil {

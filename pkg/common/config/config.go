@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -648,28 +646,24 @@ func unmarshalConfig(config interface{}, configName string) {
 	} else if configName == "usualConfig.yaml" {
 		env = "USUAL_CONFIG_NAME"
 	}
+
 	cfgName := os.Getenv(env)
-	if len(cfgName) != 0 {
-		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", configName))
+	if len(cfgName) == 0 {
+		cfgName = "."
+	}
+
+	bytes, err := os.ReadFile(filepath.Join(cfgName, "config", configName))
+	if err != nil {
+		bytes, err = os.ReadFile(filepath.Join(Root, "config", configName))
 		if err != nil {
-			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", configName))
-			if err != nil {
-				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", configName))
-			}
-		} else {
-			Root = cfgName
-		}
-		if err = yaml.Unmarshal(bytes, config); err != nil {
-			panic(err.Error())
+			panic(err.Error() + " config: " + filepath.Join(cfgName, "config", configName))
 		}
 	} else {
-		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
-		if err != nil {
-			panic(err.Error() + configName)
-		}
-		if err = yaml.Unmarshal(bytes, config); err != nil {
-			panic(err.Error())
-		}
+		Root = cfgName
+	}
+
+	if err = yaml.Unmarshal(bytes, config); err != nil {
+		panic(err.Error())
 	}
 }
 

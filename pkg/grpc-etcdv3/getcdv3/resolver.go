@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
@@ -187,7 +188,7 @@ func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *g
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	if r.cli == nil {
-		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%s", target)
+		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%v", target)
 	}
 	r.cc = cc
 	log.Debug("", "Build..")
