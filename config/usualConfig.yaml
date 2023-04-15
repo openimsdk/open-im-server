@@ -9,7 +9,7 @@ mysql:
 
 mongo:
   dbUserName: root #mongo用户名
-  dbPassword: openIM123  #mongo密码
+  dbPassword: openIM123 #mongo密码
 
 redis:
   dbUserName:
@@ -37,7 +37,7 @@ messageverify:
 push:
   getui:
     pushUrl: "https://restapi.getui.com/v2/$appId"
-    masterSecret: ""  #需添加
-    appKey: ""  #需添加
-    enable: false  #true启动个推推送
+    masterSecret: "" #需添加
+    appKey: "" #需添加
+    enable: false #true启动个推推送
 

@@ -7,8 +7,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_SetTokenMapByUidPid(t *testing.T) {
@@ -26,14 +27,14 @@ func Test_GetTokenMapByUidPid(t *testing.T) {
 	fmt.Println(m)
 }
 
-//func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
-//	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
-//	assert.Nil(t, err)
-//	fmt.Println(m)
-//}
+//	func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
+//		m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
+//		assert.Nil(t, err)
+//		fmt.Println(m)
+//	}
 func Test_GetKeyTTL(t *testing.T) {
 	ctx := context.Background()
-	key := flag.String("key", "key", "key value")
+	key := flag.String("key1", "key1", "key value")
 	flag.Parse()
 	ttl, err := DB.RDB.TTL(ctx, *key).Result()
 	assert.Nil(t, err)
@@ -41,7 +42,7 @@ func Test_GetKeyTTL(t *testing.T) {
 }
 func Test_HGetAll(t *testing.T) {
 	ctx := context.Background()
-	key := flag.String("key", "key", "key value")
+	key := flag.String("key2", "key2", "key value")
 	flag.Parse()
 	ttl, err := DB.RDB.TTL(ctx, *key).Result()
 	assert.Nil(t, err)

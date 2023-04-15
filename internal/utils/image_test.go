@@ -2,11 +2,13 @@ package utils
 
 import (
 	"Open_IM/pkg/utils"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -16,13 +18,23 @@ var (
 )
 
 func Test_GenSmallImage(t *testing.T) {
-	println(Root)
-	err := utils.GenSmallImage(Root+"/docs/open-im-logo.png", Root+"/out-test/open-im-logo-test.png")
-	assert.Nil(t, err)
+	output := Root + "/out-test"
+	defer func() {
+		os.RemoveAll(output)
+	}()
 
-	err = utils.GenSmallImage(Root+"/docs/open-im-logo.png", "out-test/open-im-logo-test.png")
-	assert.Nil(t, err)
+	require.NoError(t, os.Mkdir(output, 0755))
 
-	err = utils.GenSmallImage(Root+"/docs/Architecture.jpg", "out-test/Architecture-test.jpg")
-	assert.Nil(t, err)
+	for _, tt := range []struct {
+		in  string
+		out string
+	}{
+		{in: Root + "/docs/open-im-logo.png", out: output + "/open-im-logo-test.png"},
+		{in: Root + "/docs/Architecture.jpg", out: output + "/Architecture-test.png"},
+	} {
+		t.Run(tt.in, func(t *testing.T) {
+			err := utils.GenSmallImage(tt.in, tt.out)
+			assert.NoError(t, err)
+		})
+	}
 }

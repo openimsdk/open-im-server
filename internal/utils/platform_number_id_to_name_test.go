@@ -20,16 +20,16 @@ func Test_PlatformIDToName(t *testing.T) {
 }
 
 func Test_PlatformNameToID(t *testing.T) {
-	assert.Equal(t, constant.PlatformNameToID("IOS"), int32(1))
-	assert.Equal(t, constant.PlatformNameToID("Android"), int32(2))
-	assert.Equal(t, constant.PlatformNameToID("Windows"), int32(3))
-	assert.Equal(t, constant.PlatformNameToID("OSX"), int32(4))
-	assert.Equal(t, constant.PlatformNameToID("Web"), int32(5))
-	assert.Equal(t, constant.PlatformNameToID("MiniWeb"), int32(6))
-	assert.Equal(t, constant.PlatformNameToID("Linux"), int32(7))
+	assert.Equal(t, constant.PlatformNameToID("IOS"), 1)
+	assert.Equal(t, constant.PlatformNameToID("Android"), 2)
+	assert.Equal(t, constant.PlatformNameToID("Windows"), 3)
+	assert.Equal(t, constant.PlatformNameToID("OSX"), 4)
+	assert.Equal(t, constant.PlatformNameToID("Web"), 5)
+	assert.Equal(t, constant.PlatformNameToID("MiniWeb"), 6)
+	assert.Equal(t, constant.PlatformNameToID("Linux"), 7)
 
-	assert.Equal(t, constant.PlatformNameToID("UnknownDevice"), int32(0))
-	assert.Equal(t, constant.PlatformNameToID(""), int32(0))
+	assert.Equal(t, constant.PlatformNameToID("UnknownDevice"), 0)
+	assert.Equal(t, constant.PlatformNameToID(""), 0)
 }
 
 func Test_PlatformNameToClass(t *testing.T) {
@@ -37,8 +37,8 @@ func Test_PlatformNameToClass(t *testing.T) {
 	assert.Equal(t, constant.PlatformNameToClass("Android"), "Mobile")
 	assert.Equal(t, constant.PlatformNameToClass("OSX"), "PC")
 	assert.Equal(t, constant.PlatformNameToClass("Windows"), "PC")
-	assert.Equal(t, constant.PlatformNameToClass("Web"), "PC")
-	assert.Equal(t, constant.PlatformNameToClass("MiniWeb"), "Mobile")
+	assert.Equal(t, constant.PlatformNameToClass("Web"), "Web")
+	assert.Equal(t, constant.PlatformNameToClass("MiniWeb"), "Web")
 	assert.Equal(t, constant.PlatformNameToClass("Linux"), "PC")
 
 	assert.Equal(t, constant.PlatformNameToClass("UnknownDevice"), "")

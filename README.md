@@ -1,9 +1,9 @@
-# Open-IM-Server 
+# Open-IM-Server
 ![avatar](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg)
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
 
-[![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/) ![CI](https://github.com/OpenIMSDK/Open-IM-Server/actions/workflows/main.yml/badge.svg)
 
 ## Open-IM-Server: Open source Instant Messaging Server
 
@@ -50,26 +50,26 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 
        ```
        #cd Open-IM-server
-       USER=root  
+       USER=root
        PASSWORD=openIM123    #Password with more than 8 digits, excluding special characters
        ENDPOINT=http://127.0.0.1:10005 #Replace 127.0.0.1 with Internet IP
-       DATA_DIR=./ 
+       DATA_DIR=./
        ```
 
     2. Deploy && Start
-    
+
        ```
        chmod +x install_im_server.sh;
        ./install_im_server.sh;
        ```
-    
+
     4. Check service
-    
+
        ```
        cd script;
        ./docker_check_service.sh./check_all.sh
        ```
-       
+
        ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
 
 #### Deploy using source code
@@ -78,7 +78,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 2. Clone
 
 ```shell
-git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive 
+git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
 cd cmd/Open-IM-SDK-Core
 git checkout main
 ```
@@ -139,7 +139,7 @@ all services build success
 - start_all.sh&&stop_all.sh
     - Total script, start all services and close all services
 
-## Authentication Clow Chart 
+## Authentication Clow Chart
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
 

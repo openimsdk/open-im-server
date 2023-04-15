@@ -809,7 +809,7 @@ func QuitGroup(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.QuitGroup(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "call quit group rpc server failed,err=%s", err.Error())
+		log.NewErrorf(req.OperationID, "call quit group rpc server failed,err=%s", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
