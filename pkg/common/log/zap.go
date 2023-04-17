@@ -58,6 +58,7 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 
 type ZapLogger struct {
 	zap       *zap.SugaredLogger
+	level     zapcore.Level
 	callerKey string
 	loggerKey string
 }
@@ -77,8 +78,8 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 	// if isStdout {
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
-	zl := &ZapLogger{}
-	opts, err := zl.cores(logLevel, isStdout, isJson, logLocation, rotateCount)
+	zl := &ZapLogger{level: logLevelMap[logLevel]}
+	opts, err := zl.cores(isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 	return zl, nil
 }
 
-func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
+func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewDevelopmentEncoderConfig()
 	c.EncodeTime = zapcore.RFC3339TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -110,7 +111,7 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 		c.EncodeLevel = l.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			s := "[" + caller.TrimmedPath() + "]"
-			enc.AppendString(_levelToColor[l.zap.Level()].Add(s))
+			enc.AppendString(_levelToColor[l.level].Add(s))
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
@@ -123,14 +124,14 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	var cores []zapcore.Core
 	if logLocation != "" && !isStdout {
 		cores = []zapcore.Core{
-			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(logLevelMap[logLevel])),
+			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(l.level)),
 		}
 	}
 	if logLocation == "" && !isStdout {
 		return nil, errors.New("log storage location is empty and not stdout")
 	}
 	if isStdout {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(logLevelMap[logLevel])))
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(l.level)))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
@@ -224,7 +225,7 @@ func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
-	dup.zap = l.zap.Named(_levelToColor[l.zap.Level()].Add(name))
+	dup.zap = l.zap.Named(_levelToColor[l.level].Add(name))
 	return &dup
 }
 
