@@ -103,8 +103,11 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	} else {
 		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-			// enc.AppendString("[" + l.traceId + "]")
+			enc.AppendString("[" + caller.Function + "]")
 			enc.AppendString("[" + caller.TrimmedPath() + "]")
+			enc.AppendString("[" + caller.String() + "]")
+			enc.AppendString("[" + caller.File + "]")
+			enc.AppendString("[" + caller.FullPath() + "]")
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
