@@ -31,8 +31,8 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool) error {
-	l, err := NewZapLogger(logLevel, isStdout, isJson)
+func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) error {
+	l, err := NewZapLogger(logLevel, isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ type ZapLogger struct {
 	zap *zap.SugaredLogger
 }
 
-func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) {
+func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
@@ -76,7 +76,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
 	zl := &ZapLogger{}
-	opts, err := zl.cores(logLevel, isStdout, isJson)
+	opts, err := zl.cores(logLevel, isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
 	}
@@ -88,11 +88,10 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 	return zl, nil
 }
 
-func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool) (zap.Option, error) {
+func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
-
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
@@ -106,17 +105,17 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool) (zap.Option,
 		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
 	fileEncoder.AddInt("PID", os.Getpid())
-	writer, err := l.getWriter()
+	writer, err := l.getWriter(logLocation, rotateCount)
 	if err != nil {
 		return nil, err
 	}
 	var cores []zapcore.Core
-	if config.Config.Log.StorageLocation != "" && !isStdout {
+	if logLocation != "" && !isStdout {
 		cores = []zapcore.Core{
 			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(logLevelMap[logLevel])),
 		}
 	}
-	if config.Config.Log.StorageLocation == "" && !isStdout {
+	if logLocation == "" && !isStdout {
 		return nil, errors.New("log storage location is empty and not stdout")
 	}
 	if isStdout {
@@ -127,9 +126,9 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool) (zap.Option,
 	}), nil
 }
 
-func (l *ZapLogger) getWriter() (zapcore.WriteSyncer, error) {
-	logf, err := rotatelogs.New(config.Config.Log.StorageLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
-		rotatelogs.WithRotationCount(config.Config.Log.RemainRotationCount),
+func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
+	logf, err := rotatelogs.New(logLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
+		rotatelogs.WithRotationCount(rorateCount),
 		rotatelogs.WithRotationTime(time.Duration(config.Config.Log.RotationTime)*time.Hour),
 	)
 	if err != nil {

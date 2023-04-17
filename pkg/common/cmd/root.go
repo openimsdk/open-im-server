@@ -26,7 +26,7 @@ func NewRootCmd(name string) (rootCmd *RootCmd) {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
 				return err
 			}
-			return log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson)
+			return log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount)
 		},
 	}
 	rootCmd.Command = c
