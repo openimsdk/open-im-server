@@ -2,21 +2,31 @@ package log
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"os"
-	"path/filepath"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 var (
-	pkgLogger Logger = &ZapLogger{}
-	sp               = string(filepath.Separator)
+	pkgLogger   Logger = &ZapLogger{}
+	sp                 = string(filepath.Separator)
+	logLevelMap        = map[int]zapcore.Level{
+		6: zapcore.DebugLevel,
+		5: zapcore.DebugLevel,
+		4: zapcore.InfoLevel,
+		3: zapcore.WarnLevel,
+		2: zapcore.ErrorLevel,
+		1: zapcore.FatalLevel,
+		0: zapcore.PanicLevel,
+	}
 )
 
 // InitFromConfig initializes a Zap-based logger
@@ -51,7 +61,7 @@ type ZapLogger struct {
 
 func NewZapLogger() (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel)),
+		Level:             zap.NewAtomicLevelAt(logLevelMap[config.Config.Log.RemainLogLevel]),
 		Encoding:          "json",
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
