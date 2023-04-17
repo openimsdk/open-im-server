@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -111,7 +112,9 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 		c.EncodeLevel = l.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			s := "[" + caller.TrimmedPath() + "]"
+			pid := fmt.Sprintf("["+"PID:"+"%d"+"]", os.Getpid())
 			enc.AppendString(_levelToColor[l.level].Add(s))
+			enc.AppendString(_levelToColor[l.level].Add(pid))
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
