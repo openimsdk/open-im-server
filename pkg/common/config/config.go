@@ -187,13 +187,13 @@ type config struct {
 		RotationTime          int      `yaml:"rotationTime"`
 		RemainRotationCount   uint     `yaml:"remainRotationCount"`
 		RemainLogLevel        int      `yaml:"remainLogLevel"`
-		Stderr                bool     `yaml:"stderr"`
+		IsStdout              bool     `yaml:"isStdout"`
 		WithStack             bool     `yaml:"withStack"`
 		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
 		ElasticSearchPassword string   `yaml:"elasticSearchPassword"`
-		isJson                bool     `yaml:"isJson"`
+		IsJson                bool     `yaml:"isJson"`
 	}
 	ModuleName struct {
 		LongConnSvrName string `yaml:"longConnSvrName"`

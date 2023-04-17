@@ -2,26 +2,36 @@ package log
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"os"
-	"path/filepath"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 var (
-	pkgLogger Logger = &ZapLogger{}
-	sp               = string(filepath.Separator)
+	pkgLogger   Logger = &ZapLogger{}
+	sp                 = string(filepath.Separator)
+	logLevelMap        = map[int]zapcore.Level{
+		6: zapcore.DebugLevel,
+		5: zapcore.DebugLevel,
+		4: zapcore.InfoLevel,
+		3: zapcore.WarnLevel,
+		2: zapcore.ErrorLevel,
+		1: zapcore.FatalLevel,
+		0: zapcore.PanicLevel,
+	}
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(name string) error {
-	l, err := NewZapLogger()
+func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool) error {
+	l, err := NewZapLogger(logLevel, isStdout, isJson)
 	if err != nil {
 		return err
 	}
@@ -49,19 +59,21 @@ type ZapLogger struct {
 	zap *zap.SugaredLogger
 }
 
-func NewZapLogger() (*ZapLogger, error) {
+func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel)),
-		Encoding:          "json",
+		Level:             zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	if config.Config.Log.Stderr {
-		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
+	if isJson {
+		zapConfig.Encoding = "json"
+	}
+	if isStdout {
+		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	}
 	zl := &ZapLogger{}
-	opts, err := zl.cores()
+	opts, err := zl.cores(logLevel, isStdout)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +85,7 @@ func NewZapLogger() (*ZapLogger, error) {
 	return zl, nil
 }
 
-func (l *ZapLogger) cores() (zap.Option, error) {
+func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -91,11 +103,11 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	var cores []zapcore.Core
 	if config.Config.Log.StorageLocation != "" {
 		cores = []zapcore.Core{
-			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))),
+			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(logLevelMap[logLevel])),
 		}
 	}
-	if config.Config.Log.Stderr {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))))
+	if isStdout {
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(logLevel))))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)

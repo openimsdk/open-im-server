@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -25,7 +26,7 @@ func NewRootCmd(name string) (rootCmd *RootCmd) {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
 				return err
 			}
-			return log.InitFromConfig(name)
+			return log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson)
 		},
 	}
 	rootCmd.Command = c

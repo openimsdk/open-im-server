@@ -19,7 +19,7 @@ mysql:
   dbMaxOpenConns: 100
   dbMaxIdleConns: 10
   dbMaxLifeTime: 5
-  logLevel: 4 #1=slient 2=error 3=warn 4=info
+  logLevel: 6 #1=slient 2=error 3=warn 4=info
   slowThreshold: 500
 
 mongo:
@@ -160,8 +160,9 @@ log:
   rotationTime: 24
   remainRotationCount: 2 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: -1
-  stderr: true
+  remainLogLevel: 6
+  isStdout: true
+  isJson: true
   withStack: false
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
