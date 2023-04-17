@@ -91,7 +91,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 }
 
 func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
-	c := zap.NewProductionEncoderConfig()
+	c := zap.NewDevelopmentEncoderConfig()
 	c.EncodeTime = zapcore.RFC3339TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.MessageKey = "msg"
