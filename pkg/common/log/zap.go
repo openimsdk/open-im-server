@@ -30,8 +30,8 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(name string, logLevel int) error {
-	l, err := NewZapLogger(logLevel)
+func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool) error {
+	l, err := NewZapLogger(logLevel, isStdout, isJson)
 	if err != nil {
 		return err
 	}
@@ -59,19 +59,21 @@ type ZapLogger struct {
 	zap *zap.SugaredLogger
 }
 
-func NewZapLogger(logLevel int) (*ZapLogger, error) {
+func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(logLevelMap[logLevel]),
-		Encoding:          "json",
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	if config.Config.Log.Stderr {
-		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stderr")
+	if isJson {
+		zapConfig.Encoding = "json"
+	}
+	if isStdout {
+		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	}
 	zl := &ZapLogger{}
-	opts, err := zl.cores()
+	opts, err := zl.cores(logLevel, isStdout)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +85,7 @@ func NewZapLogger(logLevel int) (*ZapLogger, error) {
 	return zl, nil
 }
 
-func (l *ZapLogger) cores() (zap.Option, error) {
+func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -101,11 +103,11 @@ func (l *ZapLogger) cores() (zap.Option, error) {
 	var cores []zapcore.Core
 	if config.Config.Log.StorageLocation != "" {
 		cores = []zapcore.Core{
-			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))),
+			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(zapcore.Level(logLevel))),
 		}
 	}
-	if config.Config.Log.Stderr {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(config.Config.Log.RemainLogLevel))))
+	if isStdout {
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(logLevel))))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)

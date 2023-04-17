@@ -160,8 +160,9 @@ log:
   rotationTime: 24
   remainRotationCount: 2 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: -1
-  stderr: true
+  remainLogLevel: 6
+  isStdout: true
+  isJson: true
   withStack: false
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
