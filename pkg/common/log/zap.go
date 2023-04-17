@@ -57,7 +57,9 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 }
 
 type ZapLogger struct {
-	zap *zap.SugaredLogger
+	zap       *zap.SugaredLogger
+	callerKey string
+	loggerKey string
 }
 
 func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
@@ -95,13 +97,17 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
-	c.CallerKey = "caller"
+	l.callerKey = "caller"
+	l.loggerKey = "logger"
+	c.CallerKey = l.callerKey
+	l.loggerKey = c.NameKey
+
 	var fileEncoder zapcore.Encoder
 	if isJson {
 		c.EncodeLevel = zapcore.CapitalLevelEncoder
 		fileEncoder = zapcore.NewJSONEncoder(c)
 	} else {
-		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		c.EncodeLevel = l.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString("[" + caller.TrimmedPath() + "]")
 		}
@@ -143,7 +149,8 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 
 func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	zapcore.CapitalColorLevelEncoder(level, enc)
-	enc.AppendString("caller")
+	enc.AppendString(l.callerKey)
+	enc.AppendString(l.loggerKey)
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
