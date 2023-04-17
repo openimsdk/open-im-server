@@ -64,8 +64,8 @@ type ZapLogger struct {
 
 func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:         zap.NewAtomicLevelAt(logLevelMap[logLevel]),
-		EncoderConfig: zap.NewProductionEncoderConfig(),
+		Level: zap.NewAtomicLevelAt(logLevelMap[logLevel]),
+		// EncoderConfig: zap.NewProductionEncoderConfig(),
 		// InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
@@ -109,7 +109,8 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	} else {
 		c.EncodeLevel = l.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString("[" + caller.TrimmedPath() + "]")
+			s := "[" + caller.TrimmedPath() + "]"
+			enc.AppendString(_levelToColor[l.zap.Level()].Add(s))
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
