@@ -205,7 +205,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 						RecvID:         v,
 						RecvPlatFormID: int32(platform),
 					}
-					if !userConn.IsBackground || req.MsgData.ContentType == constant.SuperGroupUpdateNotification || req.MsgData.ContentType == constant.SignalingNotification {
+					if !userConn.IsBackground || req.MsgData.ContentType == constant.SuperGroupUpdateNotification || req.MsgData.ContentType == constant.SignalingNotification || req.MsgData.ContentType == constant.ConversationUnreadNotification {
 						resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
 						if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 							tempT.OnlinePush = true
