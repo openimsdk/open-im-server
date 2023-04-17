@@ -67,16 +67,16 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	if isJson {
-		zapConfig.Encoding = "json"
-	} else {
-		zapConfig.Encoding = "console"
-	}
-	if isStdout {
-		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
-	}
+	// if isJson {
+	// 	zapConfig.Encoding = "json"
+	// } else {
+	// 	zapConfig.Encoding = "console"
+	// }
+	// if isStdout {
+	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
+	// }
 	zl := &ZapLogger{}
-	opts, err := zl.cores(logLevel, isStdout)
+	opts, err := zl.cores(logLevel, isStdout, isJson)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 	return zl, nil
 }
 
-func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
+func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -97,7 +97,12 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 	c.LevelKey = "level"
 	c.TimeKey = "time"
 	c.CallerKey = "caller"
-	fileEncoder := zapcore.NewJSONEncoder(c)
+	var fileEncoder zapcore.Encoder
+	if isJson {
+		fileEncoder = zapcore.NewJSONEncoder(c)
+	} else {
+		fileEncoder = zapcore.NewConsoleEncoder(c)
+	}
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter()
 	if err != nil {
