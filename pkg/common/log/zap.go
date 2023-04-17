@@ -92,15 +92,17 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool) (zap.Option,
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = zapcore.ISO8601TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
-	c.EncodeLevel = zapcore.CapitalLevelEncoder
+
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
 	c.CallerKey = "caller"
 	var fileEncoder zapcore.Encoder
 	if isJson {
+		c.EncodeLevel = zapcore.CapitalLevelEncoder
 		fileEncoder = zapcore.NewJSONEncoder(c)
 	} else {
+		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
 	fileEncoder.AddInt("PID", os.Getpid())
