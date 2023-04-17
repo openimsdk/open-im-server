@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -68,6 +69,8 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 	}
 	if isJson {
 		zapConfig.Encoding = "json"
+	} else {
+		zapConfig.Encoding = "console"
 	}
 	if isStdout {
 		zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
@@ -101,10 +104,13 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 		return nil, err
 	}
 	var cores []zapcore.Core
-	if config.Config.Log.StorageLocation != "" {
+	if config.Config.Log.StorageLocation != "" && !isStdout {
 		cores = []zapcore.Core{
 			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(logLevelMap[logLevel])),
 		}
+	}
+	if config.Config.Log.StorageLocation == "" && !isStdout {
+		return nil, errors.New("log storage location is empty and not stdout")
 	}
 	if isStdout {
 		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(logLevelMap[logLevel])))
