@@ -131,7 +131,7 @@ func customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayE
 	enc.AppendString("\x1b[32m")
 	enc.AppendString(caller.Function)
 	enc.AppendString(":")
-	enc.AppendInt(int64(caller.Line))
+	enc.AppendInt(caller.Line)
 	enc.AppendString("\x1b[0m")
 }
 
