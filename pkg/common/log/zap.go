@@ -150,7 +150,7 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	ls, ok := _levelToCapitalColorString[level]
 	if !ok {
-		ls = _levelToCapitalColorString[zapcore.ErrorLevel]
+		ls = _unknownLevelColor[zapcore.ErrorLevel]
 	}
 	for _, s := range ls {
 		enc.AppendString(s)
@@ -223,7 +223,7 @@ func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
-	dup.zap = l.zap.Named(name)
+	dup.zap = l.zap.Named(_levelToColor[l.zap.Level()].Add(name))
 	return &dup
 }
 

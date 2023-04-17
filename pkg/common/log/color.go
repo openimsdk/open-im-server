@@ -36,8 +36,8 @@ var (
 
 func init() {
 	for level, color := range _levelToColor {
-		_levelToLowercaseColorString[level] = append(_levelToLowercaseColorString[level], color.Add(level.String()), color.Add("caller"))
-		_levelToCapitalColorString[level] = append(_levelToCapitalColorString[level], color.Add(level.CapitalString()), color.Add("caller"))
+		_levelToLowercaseColorString[level] = append(_levelToLowercaseColorString[level], color.Add(level.String()))
+		_levelToCapitalColorString[level] = append(_levelToCapitalColorString[level], color.Add(level.CapitalString()))
 	}
 }
 
