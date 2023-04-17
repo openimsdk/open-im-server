@@ -102,6 +102,7 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 		fileEncoder = zapcore.NewJSONEncoder(c)
 	} else {
 		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
 	fileEncoder.AddInt("PID", os.Getpid())
@@ -124,6 +125,14 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
 	}), nil
+}
+
+func customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString("\x1b[32m")
+	enc.AppendString(caller.Function)
+	enc.AppendString(":")
+	enc.AppendInt(int64(caller.Line))
+	enc.AppendString("\x1b[0m")
 }
 
 func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
