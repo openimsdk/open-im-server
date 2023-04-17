@@ -103,7 +103,7 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 	var cores []zapcore.Core
 	if config.Config.Log.StorageLocation != "" {
 		cores = []zapcore.Core{
-			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(zapcore.Level(logLevel))),
+			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(logLevelMap[logLevel])),
 		}
 	}
 	if isStdout {
