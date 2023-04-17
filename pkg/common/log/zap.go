@@ -107,7 +107,7 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool) (zap.Option, error) {
 		}
 	}
 	if isStdout {
-		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(zapcore.Level(logLevel))))
+		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(logLevelMap[logLevel])))
 	}
 	return zap.WrapCore(func(c zapcore.Core) zapcore.Core {
 		return zapcore.NewTee(cores...)
