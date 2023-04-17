@@ -102,12 +102,12 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 		fileEncoder = zapcore.NewJSONEncoder(c)
 	} else {
 		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
-		fileEncoder = zapcore.NewConsoleEncoder(c)
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			// enc.AppendString("[" + l.traceId + "]")
 			enc.AppendString("[" + caller.TrimmedPath() + "]")
 		}
 		c.EncodeCaller = customCallerEncoder
+		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
 	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter(logLocation, rotateCount)
