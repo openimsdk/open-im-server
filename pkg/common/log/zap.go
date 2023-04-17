@@ -92,7 +92,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 
 func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
-	c.EncodeTime = zapcore.ISO8601TimeEncoder
+	c.EncodeTime = zapcore.RFC3339TimeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
@@ -148,9 +148,13 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 }
 
 func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	zapcore.CapitalColorLevelEncoder(level, enc)
-	enc.AppendString(l.callerKey)
-	enc.AppendString(l.loggerKey)
+	ls, ok := _levelToCapitalColorString[level]
+	if !ok {
+		ls = _levelToCapitalColorString[zapcore.ErrorLevel]
+	}
+	for _, s := range ls {
+		enc.AppendString(s)
+	}
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
