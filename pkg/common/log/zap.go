@@ -67,11 +67,11 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool) (*ZapLogger, error) 
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	// if isJson {
-	// 	zapConfig.Encoding = "json"
-	// } else {
-	// 	zapConfig.Encoding = "console"
-	// }
+	if isJson {
+		zapConfig.Encoding = "json"
+	} else {
+		zapConfig.Encoding = "console"
+	}
 	// if isStdout {
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
