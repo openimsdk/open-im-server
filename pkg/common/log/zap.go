@@ -30,8 +30,8 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(name string) error {
-	l, err := NewZapLogger()
+func InitFromConfig(name string, logLevel int) error {
+	l, err := NewZapLogger(logLevel)
 	if err != nil {
 		return err
 	}
@@ -59,9 +59,9 @@ type ZapLogger struct {
 	zap *zap.SugaredLogger
 }
 
-func NewZapLogger() (*ZapLogger, error) {
+func NewZapLogger(logLevel int) (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:             zap.NewAtomicLevelAt(logLevelMap[config.Config.Log.RemainLogLevel]),
+		Level:             zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		Encoding:          "json",
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
 		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
