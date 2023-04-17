@@ -103,11 +103,7 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	} else {
 		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString("[" + caller.Function + "]")
 			enc.AppendString("[" + caller.TrimmedPath() + "]")
-			enc.AppendString("[" + caller.String() + "]")
-			enc.AppendString("[" + caller.File + "]")
-			enc.AppendString("[" + caller.FullPath() + "]")
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
@@ -143,6 +139,11 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 		return nil, err
 	}
 	return zapcore.AddSync(logf), nil
+}
+
+func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+	zapcore.CapitalColorLevelEncoder(level, enc)
+	enc.AppendString("caller")
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
