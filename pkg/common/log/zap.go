@@ -62,9 +62,9 @@ type ZapLogger struct {
 
 func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
 	zapConfig := zap.Config{
-		Level:             zap.NewAtomicLevelAt(logLevelMap[logLevel]),
-		EncoderConfig:     zap.NewProductionEncoderConfig(),
-		InitialFields:     map[string]interface{}{"PID": os.Getegid()},
+		Level:         zap.NewAtomicLevelAt(logLevelMap[logLevel]),
+		EncoderConfig: zap.NewProductionEncoderConfig(),
+		// InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
 	if isJson {
@@ -103,9 +103,13 @@ func (l *ZapLogger) cores(logLevel int, isStdout bool, isJson bool, logLocation 
 	} else {
 		c.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
+		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+			// enc.AppendString("[" + l.traceId + "]")
+			enc.AppendString("[" + caller.TrimmedPath() + "]")
+		}
+		c.EncodeCaller = customCallerEncoder
 	}
 	fileEncoder.AddInt("PID", os.Getpid())
-	fileEncoder.AddString("operationID", "")
 	writer, err := l.getWriter(logLocation, rotateCount)
 	if err != nil {
 		return nil, err
