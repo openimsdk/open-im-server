@@ -632,6 +632,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
+	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+	if err == nil {
+		return nil, errs.ErrArgs.Wrap("already in group")
+	} else if !s.IsNotFound(err) {
+		return nil, err
+	}
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
