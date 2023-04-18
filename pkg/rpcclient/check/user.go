@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -31,14 +30,12 @@ func (u *UserCheck) getConn() (*grpc.ClientConn, error) {
 func (u *UserCheck) GetUsersInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error) {
 	cc, err := u.getConn()
 	if err != nil {
-		log.Error("", "call getConn err", err.Error())
 		return nil, err
 	}
 	resp, err := user.NewUserClient(cc).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
 	if err != nil {
-		log.Error("", "call GetDesignateUsers err", err.Error())
 		return nil, err
 	}
 	if complete {

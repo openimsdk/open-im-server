@@ -622,7 +622,10 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
-	if _, err := s.UserCheck.GetPublicUserInfo(ctx, mcontext.GetOpUserID(ctx)); err != nil {
+	log.ZInfo(ctx, "join group", "opUser", mcontext.GetOpUserID(ctx), "req", req)
+	user, err := s.UserCheck.GetPublicUserInfo(ctx, mcontext.GetOpUserID(ctx))
+	log.ZInfo(ctx, "join group", "error", err, "user", user)
+	if err != nil {
 		return nil, err
 	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
