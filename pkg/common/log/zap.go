@@ -95,14 +95,14 @@ func NewZapLogger(loggerName string, logLevel int, isStdout bool, isJson bool, l
 }
 
 func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
-	c := zap.NewDevelopmentEncoderConfig()
+	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = l.timeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
 	c.CallerKey = "caller"
-
+	c.NameKey = "logger"
 	var fileEncoder zapcore.Encoder
 	if isJson {
 		c.EncodeLevel = zapcore.CapitalLevelEncoder
