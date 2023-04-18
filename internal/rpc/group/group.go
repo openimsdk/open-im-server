@@ -632,6 +632,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
+	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+	if err == nil {
+		return nil, errs.ErrArgs.Wrap("already in group")
+	} else if !s.IsNotFound(err) {
+		return nil, err
+	}
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
@@ -684,9 +690,12 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		}
 		s.Notification.SuperGroupNotification(ctx, mcontext.GetOpUserID(ctx), mcontext.GetOpUserID(ctx))
 	} else {
-		_, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+		info, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
+		}
+		if info.RoleLevel == constant.GroupOwner {
+			return nil, errs.ErrNoPermission.Wrap("group owner can't quit")
 		}
 		err = s.GroupDatabase.DeleteGroupMember(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
 		if err != nil {
