@@ -136,11 +136,11 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 
 func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 	s := "[" + caller.TrimmedPath() + "]"
-	color, ok := _levelToColor[l.level]
-	if !ok {
-		color = _levelToColor[zapcore.ErrorLevel]
-	}
-	enc.AppendString(color.Add(s))
+	// color, ok := _levelToColor[l.level]
+	// if !ok {
+	// 	color = _levelToColor[zapcore.ErrorLevel]
+	// }
+	enc.AppendString(s)
 
 }
 
@@ -149,7 +149,6 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 	type appendTimeEncoder interface {
 		AppendTimeLayout(time.Time, string)
 	}
-
 	if enc, ok := enc.(appendTimeEncoder); ok {
 		enc.AppendTimeLayout(t, layout)
 		return
