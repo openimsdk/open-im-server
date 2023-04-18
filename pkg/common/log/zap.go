@@ -101,6 +101,7 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
+	c.CallerKey = "caller"
 
 	var fileEncoder zapcore.Encoder
 	if isJson {
