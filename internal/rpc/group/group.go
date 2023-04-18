@@ -634,7 +634,6 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)
-	log.ZInfo(ctx, "Test-Info", "error", err, "type", fmt.Sprintf("%T", err), "eq", s.IsNotFound(err))
 	if err == nil {
 		return nil, errs.ErrArgs.Wrap("already in group")
 	} else if !s.IsNotFound(err) {
