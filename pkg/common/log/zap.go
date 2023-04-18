@@ -33,11 +33,14 @@ var (
 
 // InitFromConfig initializes a Zap-based logger
 func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) error {
-	l, err := NewZapLogger(logLevel, isStdout, isJson, logLocation, rotateCount)
+	l, err := NewZapLogger(name, logLevel, isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return err
 	}
-	pkgLogger = l.WithCallDepth(2).WithName(name)
+	pkgLogger = l.WithCallDepth(2)
+	if isJson {
+		pkgLogger = pkgLogger.WithName(name)
+	}
 	return nil
 }
 
@@ -58,11 +61,12 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 }
 
 type ZapLogger struct {
-	zap   *zap.SugaredLogger
-	level zapcore.Level
+	zap        *zap.SugaredLogger
+	level      zapcore.Level
+	loggerName string
 }
 
-func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
+func NewZapLogger(loggerName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level: zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		// EncoderConfig: zap.NewProductionEncoderConfig(),
@@ -77,7 +81,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 	// if isStdout {
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
-	zl := &ZapLogger{level: logLevelMap[logLevel]}
+	zl := &ZapLogger{level: logLevelMap[logLevel], loggerName: loggerName}
 	opts, err := zl.cores(isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
@@ -92,31 +96,23 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 
 func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewDevelopmentEncoderConfig()
-	c.EncodeTime = zapcore.RFC3339TimeEncoder
+	c.EncodeTime = l.timeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
+	c.CallerKey = "caller"
 
 	var fileEncoder zapcore.Encoder
 	if isJson {
 		c.EncodeLevel = zapcore.CapitalLevelEncoder
 		fileEncoder = zapcore.NewJSONEncoder(c)
+		fileEncoder.AddInt("PID", os.Getpid())
 	} else {
-		c.EncodeLevel = l.CapitalColorLevelEncoder
-		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-			s := "[" + caller.TrimmedPath() + "]"
-			color, ok := _levelToColor[l.level]
-			if !ok {
-				color = _levelToColor[zapcore.ErrorLevel]
-			}
-			enc.AppendString(color.Add(s))
-
-		}
-		c.EncodeCaller = customCallerEncoder
+		c.EncodeLevel = l.capitalColorLevelEncoder
+		c.EncodeCaller = l.customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
-	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter(logLocation, rotateCount)
 	if err != nil {
 		return nil, err
@@ -138,6 +134,28 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	}), nil
 }
 
+func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	s := "[" + caller.TrimmedPath() + "]"
+	// color, ok := _levelToColor[l.level]
+	// if !ok {
+	// 	color = _levelToColor[zapcore.ErrorLevel]
+	// }
+	enc.AppendString(s)
+
+}
+
+func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	layout := "2006-01-02 15:04:05.000"
+	type appendTimeEncoder interface {
+		AppendTimeLayout(time.Time, string)
+	}
+	if enc, ok := enc.(appendTimeEncoder); ok {
+		enc.AppendTimeLayout(t, layout)
+		return
+	}
+	enc.AppendString(t.Format(layout))
+}
+
 func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
 	logf, err := rotatelogs.New(logLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
 		rotatelogs.WithRotationCount(rorateCount),
@@ -149,15 +167,18 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 	return zapcore.AddSync(logf), nil
 }
 
-func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+func (l *ZapLogger) capitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	s, ok := _levelToCapitalColorString[level]
 	if !ok {
 		s = _unknownLevelColor[zapcore.ErrorLevel]
 	}
 	pid := fmt.Sprintf("["+"PID:"+"%d"+"]", os.Getpid())
 	color := _levelToColor[level]
-	enc.AppendString(color.Add(pid))
 	enc.AppendString(s)
+	enc.AppendString(color.Add(pid))
+	if l.loggerName != "" {
+		enc.AppendString(color.Add(l.loggerName))
+	}
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
@@ -226,7 +247,7 @@ func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
-	dup.zap = l.zap.Named(_levelToColor[l.level].Add(name))
+	dup.zap = l.zap.Named(name)
 	return &dup
 }
 
