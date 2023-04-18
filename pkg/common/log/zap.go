@@ -92,7 +92,7 @@ func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, 
 
 func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewDevelopmentEncoderConfig()
-	c.EncodeTime = zapcore.RFC3339TimeEncoder
+	c.EncodeTime = l.timeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
@@ -102,21 +102,12 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	if isJson {
 		c.EncodeLevel = zapcore.CapitalLevelEncoder
 		fileEncoder = zapcore.NewJSONEncoder(c)
+		fileEncoder.AddInt("PID", os.Getpid())
 	} else {
-		c.EncodeLevel = l.CapitalColorLevelEncoder
-		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
-			s := "[" + caller.TrimmedPath() + "]"
-			color, ok := _levelToColor[l.level]
-			if !ok {
-				color = _levelToColor[zapcore.ErrorLevel]
-			}
-			enc.AppendString(color.Add(s))
-
-		}
-		c.EncodeCaller = customCallerEncoder
+		c.EncodeLevel = l.capitalColorLevelEncoder
+		c.EncodeCaller = l.customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
 	}
-	fileEncoder.AddInt("PID", os.Getpid())
 	writer, err := l.getWriter(logLocation, rotateCount)
 	if err != nil {
 		return nil, err
@@ -138,6 +129,29 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	}), nil
 }
 
+func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+	s := "[" + caller.TrimmedPath() + "]"
+	color, ok := _levelToColor[l.level]
+	if !ok {
+		color = _levelToColor[zapcore.ErrorLevel]
+	}
+	enc.AppendString(color.Add(s))
+
+}
+
+func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	layout := "2006-01-02 15:04:05.000"
+	type appendTimeEncoder interface {
+		AppendTimeLayout(time.Time, string)
+	}
+
+	if enc, ok := enc.(appendTimeEncoder); ok {
+		enc.AppendTimeLayout(t, layout)
+		return
+	}
+	enc.AppendString(t.Format(layout))
+}
+
 func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
 	logf, err := rotatelogs.New(logLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
 		rotatelogs.WithRotationCount(rorateCount),
@@ -149,15 +163,15 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 	return zapcore.AddSync(logf), nil
 }
 
-func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+func (l *ZapLogger) capitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	s, ok := _levelToCapitalColorString[level]
 	if !ok {
 		s = _unknownLevelColor[zapcore.ErrorLevel]
 	}
 	pid := fmt.Sprintf("["+"PID:"+"%d"+"]", os.Getpid())
 	color := _levelToColor[level]
-	enc.AppendString(color.Add(pid))
 	enc.AppendString(s)
+	enc.AppendString(color.Add(pid))
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
