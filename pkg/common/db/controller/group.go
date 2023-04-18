@@ -339,7 +339,15 @@ func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*relation
 }
 
 func (g *groupDatabase) CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error {
-	return g.groupRequestDB.Create(ctx, requests)
+	return g.tx.Transaction(func(tx any) error {
+		db := g.groupRequestDB.NewTx(tx)
+		for _, request := range requests {
+			if err := db.Delete(ctx, request.GroupID, request.UserID); err != nil {
+				return err
+			}
+		}
+		return db.Create(ctx, requests)
+	})
 }
 
 func (g *groupDatabase) TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error) {

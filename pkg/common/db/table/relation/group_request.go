@@ -30,6 +30,7 @@ func (GroupRequestModel) TableName() string {
 type GroupRequestModelInterface interface {
 	NewTx(tx any) GroupRequestModelInterface
 	Create(ctx context.Context, groupRequests []*GroupRequestModel) (err error)
+	Delete(ctx context.Context, groupID string, userID string) (err error)
 	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32) (err error)
 	Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequestModel, err error)
 	Page(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, groups []*GroupRequestModel, err error)
