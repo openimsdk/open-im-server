@@ -28,16 +28,16 @@ var (
 		zapcore.PanicLevel:  Red,
 		zapcore.FatalLevel:  Red,
 	}
-	_unknownLevelColor = make(map[zapcore.Level][]string, len(_levelToColor))
+	_unknownLevelColor = make(map[zapcore.Level]string, len(_levelToColor))
 
-	_levelToLowercaseColorString = make(map[zapcore.Level][]string, len(_levelToColor))
-	_levelToCapitalColorString   = make(map[zapcore.Level][]string, len(_levelToColor))
+	_levelToLowercaseColorString = make(map[zapcore.Level]string, len(_levelToColor))
+	_levelToCapitalColorString   = make(map[zapcore.Level]string, len(_levelToColor))
 )
 
 func init() {
 	for level, color := range _levelToColor {
-		_levelToLowercaseColorString[level] = append(_levelToLowercaseColorString[level], color.Add(level.String()))
-		_levelToCapitalColorString[level] = append(_levelToCapitalColorString[level], color.Add(level.CapitalString()))
+		_levelToLowercaseColorString[level] = color.Add(level.String())
+		_levelToCapitalColorString[level] = color.Add(level.CapitalString())
 	}
 }
 
