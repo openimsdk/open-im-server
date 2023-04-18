@@ -247,7 +247,7 @@ func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
-	dup.zap = l.zap.Named(_levelToColor[l.level].Add(name))
+	dup.zap = l.zap.Named(name)
 	return &dup
 }
 
