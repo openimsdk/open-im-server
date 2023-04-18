@@ -2,6 +2,9 @@ package msgtransfer
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -12,8 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"sync"
-	"time"
 )
 
 const ConsumerMsgs = 3
@@ -200,7 +201,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Cleanup(_ sarama.ConsumerGroupSess
 func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 	for {
 		if sess == nil {
-			log.NewWarn("", " sess == nil, waiting ")
+			log.ZWarn(context.Background(), "sess == nil, waiting", nil)
 			time.Sleep(100 * time.Millisecond)
 		} else {
 			break

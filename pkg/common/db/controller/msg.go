@@ -2,6 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -12,11 +15,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/gogo/protobuf/sortkeys"
-	"sync"
-	"time"
 
 	"context"
 	"errors"
+
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -617,7 +619,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 	}
 	//log.NewDebug(operationID, "ID:", sourceID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
-		log.NewWarn(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), "msgs too large:", len(msgs.Msg), "docID:", msgs.DocID)
+		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgs.Msg), "docID:", msgs.DocID)
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgs.IsFull() {
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgs.DocID)
@@ -657,7 +659,6 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, sourceID string, 
 			}
 		}
 	}
-	//log.NewDebug(operationID, sourceID, "continue to", delStruct)
 	//  继续递归 index+1
 	seq, err := db.deleteMsgRecursion(ctx, sourceID, index+1, delStruct, remainTime)
 	return seq, utils.Wrap(err, "deleteMsg failed")
