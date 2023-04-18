@@ -58,10 +58,8 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 }
 
 type ZapLogger struct {
-	zap       *zap.SugaredLogger
-	level     zapcore.Level
-	callerKey string
-	loggerKey string
+	zap   *zap.SugaredLogger
+	level zapcore.Level
 }
 
 func NewZapLogger(logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
@@ -99,10 +97,6 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	c.MessageKey = "msg"
 	c.LevelKey = "level"
 	c.TimeKey = "time"
-	l.callerKey = "caller"
-	l.loggerKey = "logger"
-	c.CallerKey = l.callerKey
-	l.loggerKey = c.NameKey
 
 	var fileEncoder zapcore.Encoder
 	if isJson {
@@ -112,13 +106,12 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 		c.EncodeLevel = l.CapitalColorLevelEncoder
 		customCallerEncoder := func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			s := "[" + caller.TrimmedPath() + "]"
-			pid := fmt.Sprintf("["+"PID:"+"%d"+"]", os.Getpid())
 			color, ok := _levelToColor[l.level]
 			if !ok {
 				color = _levelToColor[zapcore.ErrorLevel]
 			}
 			enc.AppendString(color.Add(s))
-			enc.AppendString(color.Add(pid))
+
 		}
 		c.EncodeCaller = customCallerEncoder
 		fileEncoder = zapcore.NewConsoleEncoder(c)
@@ -161,7 +154,9 @@ func (l *ZapLogger) CapitalColorLevelEncoder(level zapcore.Level, enc zapcore.Pr
 	if !ok {
 		s = _unknownLevelColor[zapcore.ErrorLevel]
 	}
-
+	pid := fmt.Sprintf("["+"PID:"+"%d"+"]", os.Getpid())
+	color := _levelToColor[level]
+	enc.AppendString(color.Add(pid))
 	enc.AppendString(s)
 }
 

@@ -20,7 +20,7 @@ const (
 
 var (
 	_levelToColor = map[zapcore.Level]Color{
-		zapcore.DebugLevel:  Magenta,
+		zapcore.DebugLevel:  White,
 		zapcore.InfoLevel:   Blue,
 		zapcore.WarnLevel:   Yellow,
 		zapcore.ErrorLevel:  Red,
