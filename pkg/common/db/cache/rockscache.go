@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"runtime/debug"
+	"strings"
 
 	"time"
 
@@ -78,6 +81,13 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 			return "", utils.Wrap(err, "")
 		}
 		write = true
+		var arr []string
+		arr = append(arr, "----------------------------------------")
+		arr = append(arr, time.Now().String())
+		arr = append(arr, fmt.Sprintf("key: <%s>    value: <%s>", key, string(bs)))
+		arr = append(arr, string(debug.Stack()))
+		arr = append(arr, "----------------------------------------")
+		fmt.Println(strings.Join(arr, "\n"))
 		return string(bs), nil
 	})
 	if err != nil {
