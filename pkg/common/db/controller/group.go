@@ -11,7 +11,6 @@ import (
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
@@ -123,16 +122,14 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 		}
 		m := make(map[string]struct{})
 		var cache = g.cache.NewCache()
-		log.ZDebug(ctx, "CreateGroup", "groupMembers", groupMembers)
 		for _, groupMember := range groupMembers {
 			if _, ok := m[groupMember.GroupID]; !ok {
-				log.ZDebug(ctx, "CreateGroup", "groupMember", groupMember)
 				m[groupMember.GroupID] = struct{}{}
-				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelJoinedGroupID(groupMember.UserID).DelGroupsMemberNum(groupMember.GroupID)
+				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelGroupsMemberNum(groupMember.GroupID)
 			}
+			cache.DelJoinedGroupID(groupMember.UserID)
 		}
-		log.ZDebug(ctx, "CreateGroup", "keys", cache.GetPreDelKeys())
-		return g.cache.ExecDel(ctx)
+		return cache.ExecDel(ctx)
 	})
 }
 
