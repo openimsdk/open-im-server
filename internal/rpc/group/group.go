@@ -546,7 +546,6 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
 		return e.GroupID
 	})
-	log.ZDebug(ctx, "groups return", "groups", groups, "owners", owners, "ownerMap", ownerMap, "groupMemberNumMap", groupMemberNumMap)
 	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *sdkws.GroupInfo {
 		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
 	})
@@ -621,7 +620,6 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (resp *pbGroup.JoinGroupResp, err error) {
-	resp = &pbGroup.JoinGroupResp{}
 	user, err := s.UserCheck.GetUserInfo(ctx, req.InviterUserID)
 	if err != nil {
 		return nil, err
@@ -639,6 +637,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
+	resp = &pbGroup.JoinGroupResp{}
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
