@@ -620,11 +620,9 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
 
-func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
-	resp := &pbGroup.JoinGroupResp{}
-	log.ZInfo(ctx, "join group", "opUser", mcontext.GetOpUserID(ctx), "req", req)
-	user, err := s.UserCheck.GetPublicUserInfo(ctx, mcontext.GetOpUserID(ctx))
-	log.ZInfo(ctx, "join group", "error", err, "user", user)
+func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (resp *pbGroup.JoinGroupResp, err error) {
+	resp = &pbGroup.JoinGroupResp{}
+	user, err := s.UserCheck.GetUserInfo(ctx, req.InviterUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -635,7 +633,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
-	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.InviterUserID)
+	log.ZInfo(ctx, "Test-Info", "error", err, "type", fmt.Sprintf("%T", err), "eq", s.IsNotFound(err))
 	if err == nil {
 		return nil, errs.ErrArgs.Wrap("already in group")
 	} else if !s.IsNotFound(err) {
@@ -644,10 +643,6 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
-		}
-		user, err := s.UserCheck.GetUserInfo(ctx, req.InviterUserID)
-		if err != nil {
-			return nil, err
 		}
 		groupMember := PbToDbGroupMember(user)
 		groupMember.GroupID = group.GroupID
@@ -663,11 +658,11 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, mcontext.GetOpUserID(ctx), mcontext.GetOperationID(ctx))
+		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID, mcontext.GetOperationID(ctx))
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
-		UserID:      mcontext.GetOpUserID(ctx),
+		UserID:      req.InviterUserID,
 		ReqMsg:      req.ReqMessage,
 		GroupID:     req.GroupID,
 		JoinSource:  req.JoinSource,
