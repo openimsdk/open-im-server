@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 )
@@ -107,10 +108,12 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		arr = append(arr, "first return")
 		return t, nil
 	}
+	if v == "" {
+		return t, errs.ErrRecordNotFound
+	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
 		arr = append(arr, "json.Unmarshal error "+err.Error())
-		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
 		return t, utils.Wrap(err, "")
 	}
 	arr = append(arr, "success")
