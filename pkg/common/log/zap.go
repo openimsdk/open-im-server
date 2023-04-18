@@ -176,7 +176,9 @@ func (l *ZapLogger) capitalColorLevelEncoder(level zapcore.Level, enc zapcore.Pr
 	color := _levelToColor[level]
 	enc.AppendString(s)
 	enc.AppendString(color.Add(pid))
-	enc.AppendString(color.Add(l.loggerName))
+	if l.loggerName != "" {
+		enc.AppendString(color.Add(l.loggerName))
+	}
 }
 
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
