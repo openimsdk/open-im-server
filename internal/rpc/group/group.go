@@ -553,11 +553,12 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
 	if !tokenverify.IsAppManagerUid(ctx) {
-		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
+		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -577,7 +578,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, errs.ErrArgs.Wrap("group request already processed")
 	}
 	var join bool
-	if _, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
+	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
+	if err == nil {
 		join = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
