@@ -157,54 +157,77 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 // 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 不是好友则建立双向好友关系  （4）修改申请记录 已同意
 func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return f.tx.Transaction(func(tx any) error {
-		_, err = f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
+		fr, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
-		friendRequest.HandlerUserID = friendRequest.FromUserID
+		_ = fr
+		//if fr.HandleResult != 0 {
+		//	return errs.ErrArgs.Wrap("the friend request has been processed")
+		//}
+		friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 		friendRequest.HandleResult = constant.FriendResponseAgree
 		friendRequest.HandleTime = time.Now()
 		err = f.friendRequest.NewTx(tx).Update(ctx, friendRequest)
 		if err != nil {
 			return err
 		}
-
-		ownerUserID := friendRequest.FromUserID
-		friendUserIDs := []string{friendRequest.ToUserID}
-		addSource := int32(constant.BecomeFriendByApply)
-		OperatorUserID := friendRequest.FromUserID
-		//先find 找出重复的 去掉重复的
-		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
+		exists, err := f.friend.NewTx(tx).FindUserState(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
-		for _, v := range friendUserIDs {
-			fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: OperatorUserID})
+		existsMap := utils.SliceSet(utils.Slice(exists, func(friend *relation.FriendModel) [2]string {
+			return [...]string{friend.OwnerUserID, friend.FriendUserID} // 自己 - 好友
+		}))
+		var adds []*relation.FriendModel
+		if _, ok := existsMap[[...]string{friendRequest.ToUserID, friendRequest.FromUserID}]; !ok { // 自己 - 好友
+			adds = append(adds, &relation.FriendModel{OwnerUserID: friendRequest.ToUserID, FriendUserID: friendRequest.FromUserID, AddSource: int32(constant.BecomeFriendByApply), OperatorUserID: friendRequest.FromUserID})
 		}
-		fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
-			return e.FriendUserID
-		})
-
-		err = f.friend.NewTx(tx).Create(ctx, fs11)
-		if err != nil {
-			return err
+		if _, ok := existsMap[[...]string{friendRequest.FromUserID, friendRequest.ToUserID}]; !ok { // 好友 - 自己
+			adds = append(adds, &relation.FriendModel{OwnerUserID: friendRequest.FromUserID, FriendUserID: friendRequest.ToUserID, AddSource: int32(constant.BecomeFriendByApply), OperatorUserID: friendRequest.FromUserID})
 		}
-
-		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
-		if err != nil {
-			return err
+		if len(adds) > 0 {
+			if err := f.friend.NewTx(tx).Create(ctx, adds); err != nil {
+				return err
+			}
 		}
-		for _, v := range friendUserIDs {
-			fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: OperatorUserID})
-		}
-		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
-			return e.OwnerUserID
-		})
-		err = f.friend.NewTx(tx).Create(ctx, fs22)
-		if err != nil {
-			return err
-		}
-		return f.cache.DelFriendIDs(ownerUserID, friendRequest.ToUserID).ExecDel(ctx)
+		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).ExecDel(ctx)
+		//ownerUserID := friendRequest.FromUserID
+		//friendUserIDs := []string{friendRequest.ToUserID}
+		//addSource := int32(constant.BecomeFriendByApply)
+		//OperatorUserID := friendRequest.FromUserID
+		////先find 找出重复的 去掉重复的
+		//fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
+		//if err != nil {
+		//	return err
+		//}
+		//for _, v := range friendUserIDs {
+		//	fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: OperatorUserID})
+		//}
+		//fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
+		//	return e.FriendUserID
+		//})
+		//
+		//err = f.friend.NewTx(tx).Create(ctx, fs11)
+		//if err != nil {
+		//	return err
+		//}
+		//
+		//fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
+		//if err != nil {
+		//	return err
+		//}
+		//for _, v := range friendUserIDs {
+		//	fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: OperatorUserID})
+		//}
+		//fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
+		//	return e.OwnerUserID
+		//})
+		//err = f.friend.NewTx(tx).Create(ctx, fs22)
+		//if err != nil {
+		//	return err
+		//}
+		//return f.cache.DelFriendIDs(ownerUserID, friendRequest.ToUserID).ExecDel(ctx)
 	})
 }
 

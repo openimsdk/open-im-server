@@ -20,7 +20,7 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.Ge
 		pageNumber = req.Pagination.PageNumber
 		showNumber = req.Pagination.ShowNumber
 	}
-	blacks, total, err := s.BlackDatabase.FindOwnerBlacks(ctx, req.UserID, pageNumber, showNumber)
+	blacks, total, err := s.blackDatabase.FindOwnerBlacks(ctx, req.UserID, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.Ge
 }
 
 func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*pbFriend.IsBlackResp, error) {
-	in1, in2, err := s.BlackDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
+	in1, in2, err := s.blackDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.BlackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
+	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
 	s.notification.BlackDeletedNotification(ctx, req)
@@ -64,7 +64,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 		return nil, err
 	}
 	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: mcontext.GetOpUserID(ctx), CreateTime: time.Now()}
-	if err := s.BlackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
+	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
 	s.notification.BlackAddedNotification(ctx, req)
