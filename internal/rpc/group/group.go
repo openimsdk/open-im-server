@@ -3,6 +3,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -27,7 +28,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -89,7 +89,7 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 }
 
 func (s *groupServer) IsNotFound(err error) bool {
-	return utils.Unwrap(err) == gorm.ErrRecordNotFound
+	return errs.ErrRecordNotFound.Is(specialerror.ErrCode(err))
 }
 
 func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
