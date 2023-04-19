@@ -127,7 +127,7 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 				m[groupMember.GroupID] = struct{}{}
 				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelGroupsMemberNum(groupMember.GroupID)
 			}
-			cache.DelJoinedGroupID(groupMember.UserID)
+			cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 		}
 		return cache.ExecDel(ctx)
 	})

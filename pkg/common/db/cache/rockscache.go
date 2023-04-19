@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/dtm-labs/rockscache"
 )
@@ -84,6 +85,9 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	}
 	if write {
 		return t, nil
+	}
+	if v == "" {
+		return t, errs.ErrRecordNotFound
 	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
