@@ -2,6 +2,7 @@ package friend
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -54,6 +55,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 
 // ok
 func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) (resp *pbfriend.ApplyToAddFriendResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.ApplyToAddFriendResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
