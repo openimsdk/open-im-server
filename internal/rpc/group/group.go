@@ -1045,14 +1045,54 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	})
 	if !tokenverify.IsAppManagerUid(ctx) {
 		opUserID := mcontext.GetOpUserID(ctx)
+		for _, member := range req.Members {
+			if member.RoleLevel != nil {
+				switch member.RoleLevel.Value {
+				case constant.GroupOrdinaryUsers, constant.GroupAdmin:
+				default:
+					return nil, errs.ErrArgs.Wrap("invalid role level")
+				}
+			}
+			if member.UserID == opUserID {
+				if member.RoleLevel != nil {
+					return nil, errs.ErrNoPermission.Wrap("can not change self role level")
+				}
+				continue
+			}
+			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
+			if !ok {
+				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+			}
+			dbMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
+			if !ok {
+				return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("user %s not in group %s", member.UserID, member.GroupID))
+			}
+			if opMember.RoleLevel == constant.GroupOrdinaryUsers {
+				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
+			}
+			switch opMember.RoleLevel {
+			case constant.GroupOrdinaryUsers:
+				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
+			case constant.GroupAdmin:
+				if dbMember.RoleLevel != constant.GroupOrdinaryUsers {
+					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
+				}
+			case constant.GroupOwner:
+				//if member.RoleLevel != nil && member.RoleLevel.Value == constant.GroupOwner {
+				//	return nil, errs.ErrNoPermission.Wrap("owner only one")
+				//}
+			}
+		}
+
 		for _, member := range members {
 			if member.UserID == opUserID {
 				continue
 			}
-			opMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
+			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
 			if !ok {
 				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
 			}
+
 			if member.RoleLevel >= opMember.RoleLevel {
 				return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("group %s : %s RoleLevel %d >= %s RoleLevel %d", member.GroupID, member.UserID, member.RoleLevel, opMember.UserID, opMember.RoleLevel))
 			}
