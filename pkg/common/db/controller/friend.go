@@ -141,9 +141,12 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 
 // 拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝
 func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	_, err = f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
+	fr, err := f.friendRequest.Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 	if err != nil {
 		return err
+	}
+	if fr.HandleResult != 0 {
+		return errs.ErrArgs.Wrap("the friend request has been processed")
 	}
 	friendRequest.HandleResult = constant.FriendResponseRefuse
 	friendRequest.HandleTime = time.Now()
@@ -154,17 +157,16 @@ func (f *friendDatabase) RefuseFriendRequest(ctx context.Context, friendRequest 
 	return nil
 }
 
-// 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 不是好友则建立双向好友关系  （4）修改申请记录 已同意
+// AgreeFriendRequest 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 建立双向好友关系（存在的忽略）
 func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return f.tx.Transaction(func(tx any) error {
 		fr, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
 		}
-		_ = fr
-		//if fr.HandleResult != 0 {
-		//	return errs.ErrArgs.Wrap("the friend request has been processed")
-		//}
+		if fr.HandleResult != 0 {
+			return errs.ErrArgs.Wrap("the friend request has been processed")
+		}
 		friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 		friendRequest.HandleResult = constant.FriendResponseAgree
 		friendRequest.HandleTime = time.Now()
@@ -192,42 +194,6 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 			}
 		}
 		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).ExecDel(ctx)
-		//ownerUserID := friendRequest.FromUserID
-		//friendUserIDs := []string{friendRequest.ToUserID}
-		//addSource := int32(constant.BecomeFriendByApply)
-		//OperatorUserID := friendRequest.FromUserID
-		////先find 找出重复的 去掉重复的
-		//fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
-		//if err != nil {
-		//	return err
-		//}
-		//for _, v := range friendUserIDs {
-		//	fs1 = append(fs1, &relation.FriendModel{OwnerUserID: ownerUserID, FriendUserID: v, AddSource: addSource, OperatorUserID: OperatorUserID})
-		//}
-		//fs11 := utils.DistinctAny(fs1, func(e *relation.FriendModel) string {
-		//	return e.FriendUserID
-		//})
-		//
-		//err = f.friend.NewTx(tx).Create(ctx, fs11)
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
-		//if err != nil {
-		//	return err
-		//}
-		//for _, v := range friendUserIDs {
-		//	fs2 = append(fs2, &relation.FriendModel{OwnerUserID: v, FriendUserID: ownerUserID, AddSource: addSource, OperatorUserID: OperatorUserID})
-		//}
-		//fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
-		//	return e.OwnerUserID
-		//})
-		//err = f.friend.NewTx(tx).Create(ctx, fs22)
-		//if err != nil {
-		//	return err
-		//}
-		//return f.cache.DelFriendIDs(ownerUserID, friendRequest.ToUserID).ExecDel(ctx)
 	})
 }
 
