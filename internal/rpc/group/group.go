@@ -1083,20 +1083,6 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 				//}
 			}
 		}
-
-		for _, member := range members {
-			if member.UserID == opUserID {
-				continue
-			}
-			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
-			if !ok {
-				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
-			}
-
-			if member.RoleLevel >= opMember.RoleLevel {
-				return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("group %s : %s RoleLevel %d >= %s RoleLevel %d", member.GroupID, member.UserID, member.RoleLevel, opMember.UserID, opMember.RoleLevel))
-			}
-		}
 	}
 	for _, member := range req.Members {
 		if member.RoleLevel == nil {
