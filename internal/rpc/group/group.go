@@ -763,7 +763,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
+		return nil, errs.ErrDismissedAlready.Wrap("")
 	}
 	if req.OldOwnerUserID == req.NewOwnerUserID {
 		return nil, errs.ErrArgs.Wrap("OldOwnerUserID == NewOwnerUserID")
@@ -776,24 +776,17 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	if ids := utils.Single([]string{req.OldOwnerUserID, req.NewOwnerUserID}, utils.Keys(memberMap)); len(ids) > 0 {
 		return nil, errs.ErrArgs.Wrap("user not in group " + strings.Join(ids, ","))
 	}
+	oldOwner := memberMap[req.OldOwnerUserID]
+	if oldOwner == nil {
+		return nil, errs.ErrArgs.Wrap("OldOwnerUserID not in group " + req.NewOwnerUserID)
+	}
 	newOwner := memberMap[req.NewOwnerUserID]
 	if newOwner == nil {
 		return nil, errs.ErrArgs.Wrap("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
-	oldOwner := memberMap[req.OldOwnerUserID]
-	if tokenverify.IsAppManagerUid(ctx) {
-		if oldOwner == nil {
-			_, err = s.GroupDatabase.TakeGroupOwner(ctx, req.OldOwnerUserID)
-			if err != nil {
-				return nil, err
-			}
-		}
-	} else {
-		if oldOwner == nil {
-			return nil, errs.ErrArgs.Wrap("OldOwnerUser not in group " + req.NewOwnerUserID)
-		}
-		if oldOwner.GroupID != mcontext.GetOpUserID(ctx) {
-			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s no permission transfer group owner", mcontext.GetOpUserID(ctx)))
+	if !tokenverify.IsAppManagerUid(ctx) {
+		if !(mcontext.GetOpUserID(ctx) == oldOwner.UserID && oldOwner.RoleLevel == constant.GroupOwner) {
+			return nil, errs.ErrNoPermission.Wrap("no permission transfer group owner")
 		}
 	}
 	if err := s.GroupDatabase.TransferGroupOwner(ctx, req.GroupID, req.OldOwnerUserID, req.NewOwnerUserID, newOwner.RoleLevel); err != nil {
