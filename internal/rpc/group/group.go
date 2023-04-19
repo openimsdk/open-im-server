@@ -89,7 +89,7 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 }
 
 func (s *groupServer) IsNotFound(err error) bool {
-	return errs.ErrRecordNotFound.Is(specialerror.ErrCode(err))
+	return errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err)))
 }
 
 func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
