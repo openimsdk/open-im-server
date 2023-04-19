@@ -108,10 +108,10 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 // ok
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.RespondFriendApplyReq) (resp *pbfriend.RespondFriendApplyResp, err error) {
 	resp = &pbfriend.RespondFriendApplyResp{}
-	if err := tokenverify.CheckAccessV3(ctx, req.ToUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := tablerelation.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := tablerelation.FriendRequestModel{FromUserID: req.ToUserID, ToUserID: req.FromUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
