@@ -85,6 +85,7 @@ func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbfriend.Apply
 
 // ok
 func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFriendReq) (resp *pbfriend.ImportFriendResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
@@ -107,6 +108,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 
 // ok
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.RespondFriendApplyReq) (resp *pbfriend.RespondFriendApplyResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.RespondFriendApplyResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
@@ -133,6 +135,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 
 // ok
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFriendReq) (resp *pbfriend.DeleteFriendResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.DeleteFriendResp{}
 	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
@@ -150,6 +153,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbfriend.DeleteFri
 
 // ok
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFriendRemarkReq) (resp *pbfriend.SetFriendRemarkResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.SetFriendRemarkResp{}
 	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
@@ -167,6 +171,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbfriend.SetFri
 
 // ok
 func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.GetDesignatedFriendsReq) (resp *pbfriend.GetDesignatedFriendsResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetDesignatedFriendsResp{}
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
@@ -183,6 +188,7 @@ func (s *friendServer) GetDesignatedFriends(ctx context.Context, req *pbfriend.G
 
 // ok 获取接收到的好友申请（即别人主动申请的）
 func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyToReq) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyToResp{}
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
@@ -202,6 +208,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbf
 
 // ok 获取主动发出去的好友申请列表
 func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *pbfriend.GetPaginationFriendsApplyFromReq) (resp *pbfriend.GetPaginationFriendsApplyFromResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyFromResp{}
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
@@ -221,6 +228,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 
 // ok
 func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) (resp *pbfriend.IsFriendResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.IsFriendResp{}
 	resp.InUser1Friends, resp.InUser2Friends, err = s.FriendDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
@@ -231,6 +239,7 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbfriend.IsFriendReq) 
 
 // ok
 func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.GetPaginationFriendsReq) (resp *pbfriend.GetPaginationFriendsResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -249,6 +258,7 @@ func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbfriend.G
 }
 
 func (s *friendServer) GetFriendIDs(ctx context.Context, req *pbfriend.GetFriendIDsReq) (resp *pbfriend.GetFriendIDsResp, err error) {
+	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
