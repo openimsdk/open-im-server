@@ -76,7 +76,17 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 
 // 插入多条 外部保证userID 不重复 且在db中不存在
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
-	return u.userDB.Create(ctx, users)
+	return u.tx.Transaction(func(tx any) error {
+		err = u.userDB.Create(ctx, users)
+		if err != nil {
+			return err
+		}
+		var userIDs []string
+		for _, user := range users {
+			userIDs = append(userIDs, user.UserID)
+		}
+		return u.cache.DelUsersInfo(userIDs...).ExecDel(ctx)
+	})
 }
 
 // 更新（非零值） 外部保证userID存在

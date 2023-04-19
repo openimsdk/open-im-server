@@ -120,6 +120,9 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 				return err
 			}
 		}
+		createGroupIDs := utils.DistinctAnyGetComparable(groups, func(group *relationTb.GroupModel) string {
+			return group.GroupID
+		})
 		m := make(map[string]struct{})
 		var cache = g.cache.NewCache()
 		for _, groupMember := range groupMembers {
@@ -127,8 +130,9 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 				m[groupMember.GroupID] = struct{}{}
 				cache = cache.DelGroupMemberIDs(groupMember.GroupID).DelGroupMembersHash(groupMember.GroupID).DelGroupsMemberNum(groupMember.GroupID)
 			}
-			cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
+			cache = cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 		}
+		cache = cache.DelGroupsInfo(createGroupIDs...)
 		return cache.ExecDel(ctx)
 	})
 }

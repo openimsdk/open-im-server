@@ -64,6 +64,20 @@ func DistinctAny[E any, K comparable](es []E, fn func(e E) K) []E {
 	return v
 }
 
+func DistinctAnyGetComparable[E any, K comparable](es []E, fn func(e E) K) []K {
+	v := make([]K, 0, len(es))
+	tmp := map[K]struct{}{}
+	for i := 0; i < len(es); i++ {
+		t := es[i]
+		k := fn(t)
+		if _, ok := tmp[k]; !ok {
+			tmp[k] = struct{}{}
+			v = append(v, k)
+		}
+	}
+	return v
+}
+
 // Distinct 去重
 func Distinct[T comparable](ts []T) []T {
 	return DistinctAny(ts, func(t T) T {
