@@ -168,10 +168,11 @@ func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUs
 			return err
 		}
 		if len(existConversations) > 0 {
-			log.ZDebug(ctx, "SetUserConversations", "existConversations", existConversations)
-			err = conversationTx.Update(ctx, conversations)
-			if err != nil {
-				return err
+			for _, conversation := range conversations {
+				err = conversationTx.Update(ctx, conversation)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		var existConversationIDs []string

@@ -33,8 +33,8 @@ func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string,
 	return utils.Wrap(c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args).Error, "")
 }
 
-func (c *ConversationGorm) Update(ctx context.Context, conversations []*relation.ConversationModel) (err error) {
-	return utils.Wrap(c.db(ctx).Updates(&conversations).Error, "")
+func (c *ConversationGorm) Update(ctx context.Context, conversation *relation.ConversationModel) (err error) {
+	return utils.Wrap(c.db(ctx).Updates(conversation).Error, "")
 }
 
 func (c *ConversationGorm) Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error) {

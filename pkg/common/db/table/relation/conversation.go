@@ -33,7 +33,7 @@ type ConversationModelInterface interface {
 	Create(ctx context.Context, conversations []*ConversationModel) (err error)
 	Delete(ctx context.Context, groupIDs []string) (err error)
 	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, conversations []*ConversationModel) (err error)
+	Update(ctx context.Context, conversation *ConversationModel) (err error)
 	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*ConversationModel, err error)
 	FindUserID(ctx context.Context, userIDs []string, conversationID string) ([]string, error)
 	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
