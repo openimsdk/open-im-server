@@ -110,6 +110,7 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 			if err != nil {
 				return err
 			}
+			log.ZDebug(ctx, "SyncPeerUserPrivateConversationTx", "rows", rows, "v", v)
 			if rows == 0 {
 				newConversation := *conversation
 				newConversation.OwnerUserID = v[0]
