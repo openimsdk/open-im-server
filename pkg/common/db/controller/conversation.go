@@ -47,7 +47,7 @@ type ConversationDataBase struct {
 func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
 	return c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
-		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDs, conversation.ConversationID)
+		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDs, []string{conversation.ConversationID})
 		if err != nil {
 			return err
 		}
@@ -102,9 +102,9 @@ func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversat
 
 func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
 	return c.tx.Transaction(func(tx any) error {
-		userIDList := []string{conversation.OwnerUserID, conversation.UserID}
+		userIDs := []string{conversation.OwnerUserID, conversation.UserID}
 		conversationTx := c.conversationDB.NewTx(tx)
-		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDList, conversation.ConversationID)
+		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDs, []string{conversation.ConversationID, utils.GetConversationIDBySessionType(conversation.UserID, constant.SingleChatType)})
 		if err != nil {
 			return err
 		}
@@ -115,7 +115,7 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 				return err
 			}
 		}
-		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDList)
+		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		var cList []*relationTb.ConversationModel
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)

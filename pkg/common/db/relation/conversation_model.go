@@ -47,8 +47,8 @@ func (c *ConversationGorm) Take(ctx context.Context, userID, conversationID stri
 	return cc, utils.Wrap(c.db(ctx).Where("conversation_id = ? And owner_user_id = ?", conversationID, userID).Take(cc).Error, "")
 }
 
-func (c *ConversationGorm) FindUserID(ctx context.Context, userIDList []string, conversationID string) (existUserID []string, err error) {
-	return existUserID, utils.Wrap(c.db(ctx).Where(" owner_user_id IN (?) and conversation_id=?", userIDList, conversationID).Pluck("owner_user_id", &existUserID).Error, "")
+func (c *ConversationGorm) FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) (existUserID []string, err error) {
+	return existUserID, utils.Wrap(c.db(ctx).Where(" owner_user_id IN (?) and conversation_id in (?)", userIDs, conversationIDs).Pluck("owner_user_id", &existUserID).Error, "")
 }
 
 func (c *ConversationGorm) FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error) {

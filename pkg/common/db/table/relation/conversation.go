@@ -35,7 +35,7 @@ type ConversationModelInterface interface {
 	UpdateByMap(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) (err error)
 	Update(ctx context.Context, conversation *ConversationModel) (err error)
 	Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*ConversationModel, err error)
-	FindUserID(ctx context.Context, userIDs []string, conversationID string) ([]string, error)
+	FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) ([]string, error)
 	FindUserIDAllConversationID(ctx context.Context, userID string) ([]string, error)
 	Take(ctx context.Context, userID, conversationID string) (conversation *ConversationModel, err error)
 	FindConversationID(ctx context.Context, userID string, conversationIDs []string) (existConversationID []string, err error)
