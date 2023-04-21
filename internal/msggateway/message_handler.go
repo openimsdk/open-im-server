@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
@@ -61,7 +62,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
 	}
-	if err := g.validate.Struct(req); err != nil {
+	if err := g.validate.Struct(&req); err != nil {
 		return nil, err
 	}
 	resp, err := g.notification.Msg.GetMaxAndMinSeq(context, &req)
@@ -100,7 +101,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byt
 	if err := proto.Unmarshal(data.Data, &signalReq); err != nil {
 		return nil, err
 	}
-	if err := g.validate.Struct(signalReq); err != nil {
+	if err := g.validate.Struct(&signalReq); err != nil {
 		return nil, err
 	}
 	//req := pbRtc.SignalMessageAssembleReq{SignalReq: &signalReq, OperationID: "111"}

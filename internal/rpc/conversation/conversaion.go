@@ -145,10 +145,6 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		c.notify.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
-	//haveUserID, err := c.ConversationDatabase.GetUserIDExistConversation(ctx, req.UserIDList, req.Conversation.ConversationID)
-	//if err != nil {
-	//	return nil, err
-	//}
 	filedMap := make(map[string]interface{})
 	switch req.FieldType {
 	case constant.FieldRecvMsgOpt:

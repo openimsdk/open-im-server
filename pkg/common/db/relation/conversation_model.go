@@ -29,12 +29,13 @@ func (c *ConversationGorm) Delete(ctx context.Context, groupIDs []string) (err e
 	return utils.Wrap(c.db(ctx).Where("group_id in (?)", groupIDs).Delete(&relation.ConversationModel{}).Error, "")
 }
 
-func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args).Error, "")
+func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (rows int64, err error) {
+	result := c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args)
+	return result.RowsAffected, utils.Wrap(result.Error, "")
 }
 
-func (c *ConversationGorm) Update(ctx context.Context, conversations []*relation.ConversationModel) (err error) {
-	return utils.Wrap(c.db(ctx).Updates(&conversations).Error, "")
+func (c *ConversationGorm) Update(ctx context.Context, conversation *relation.ConversationModel) (err error) {
+	return utils.Wrap(c.db(ctx).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).Updates(conversation).Error, "")
 }
 
 func (c *ConversationGorm) Find(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []*relation.ConversationModel, err error) {
@@ -47,8 +48,8 @@ func (c *ConversationGorm) Take(ctx context.Context, userID, conversationID stri
 	return cc, utils.Wrap(c.db(ctx).Where("conversation_id = ? And owner_user_id = ?", conversationID, userID).Take(cc).Error, "")
 }
 
-func (c *ConversationGorm) FindUserID(ctx context.Context, userIDList []string, conversationID string) (existUserID []string, err error) {
-	return existUserID, utils.Wrap(c.db(ctx).Where(" owner_user_id IN (?) and conversation_id=?", userIDList, conversationID).Pluck("owner_user_id", &existUserID).Error, "")
+func (c *ConversationGorm) FindUserID(ctx context.Context, userIDs []string, conversationIDs []string) (existUserID []string, err error) {
+	return existUserID, utils.Wrap(c.db(ctx).Where(" owner_user_id IN (?) and conversation_id in (?)", userIDs, conversationIDs).Pluck("owner_user_id", &existUserID).Error, "")
 }
 
 func (c *ConversationGorm) FindConversationID(ctx context.Context, userID string, conversationIDList []string) (existConversationID []string, err error) {
