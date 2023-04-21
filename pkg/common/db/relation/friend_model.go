@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
@@ -77,7 +78,7 @@ func (f *FriendGorm) FindOwnerFriends(ctx context.Context, ownerUserID string, p
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(f.db(ctx).Where("owner_user_id = ? ", ownerUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friends).Error, "")
+	err = utils.Wrap(f.db(ctx).Where("owner_user_id = ? ", ownerUserID).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Find(&friends).Error, "")
 	return
 }
 
@@ -87,7 +88,7 @@ func (f *FriendGorm) FindInWhoseFriends(ctx context.Context, friendUserID string
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(f.db(ctx).Where("friend_user_id = ? ", friendUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&friends).Error, "")
+	err = utils.Wrap(f.db(ctx).Where("friend_user_id = ? ", friendUserID).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Find(&friends).Error, "")
 	return
 }
 

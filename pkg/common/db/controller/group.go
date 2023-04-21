@@ -197,63 +197,63 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 }
 
 func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
-	//if len(roleLevels) == 0 {
-	//	if pageNumber == 0 || showNumber == 0 {
-	//		if len(groupIDs) == 0 {
-	//			for _, userID := range userIDs {
-	//				groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
-	//				if err != nil {
-	//					return 0, nil, err
-	//				}
-	//				for _, groupID := range groupIDs {
-	//					groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
-	//					if err != nil {
-	//						return 0, nil, err
-	//					}
-	//					totalGroupMembers = append(totalGroupMembers, groupMembers...)
-	//				}
-	//			}
-	//
-	//			return uint32(len(totalGroupMembers)), totalGroupMembers, nil
-	//		}
-	//		for _, groupID := range groupIDs {
-	//			groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
-	//			if err != nil {
-	//				return 0, nil, err
-	//			}
-	//			totalGroupMembers = append(totalGroupMembers, groupMembers...)
-	//		}
-	//		return uint32(len(totalGroupMembers)), totalGroupMembers, nil
-	//	} else {
-	//		if len(groupIDs) == 0 {
-	//			for _, userID := range userIDs {
-	//				groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
-	//				if err != nil {
-	//					return 0, nil, err
-	//				}
-	//				groupIDs = utils.Paginate(groupIDs, int(pageNumber), int(showNumber))
-	//				for _, groupID := range groupIDs {
-	//					groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
-	//					if err != nil {
-	//						return 0, nil, err
-	//					}
-	//					totalGroupMembers = append(totalGroupMembers, groupMembers...)
-	//				}
-	//			}
-	//			return uint32(len(groupIDs)), totalGroupMembers, nil
-	//		}
-	//		var totalAll uint32
-	//		for _, groupID := range groupIDs {
-	//			total, groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, userIDs, pageNumber, showNumber)
-	//			if err != nil {
-	//				return 0, nil, err
-	//			}
-	//			totalAll += total
-	//			totalGroupMembers = append(totalGroupMembers, groupMembers...)
-	//		}
-	//		return totalAll, totalGroupMembers, nil
-	//	}
-	//}
+	if len(roleLevels) == 0 {
+		if pageNumber == 0 || showNumber == 0 {
+			if len(groupIDs) == 0 {
+				for _, userID := range userIDs {
+					groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
+					if err != nil {
+						return 0, nil, err
+					}
+					for _, groupID := range groupIDs {
+						groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
+						if err != nil {
+							return 0, nil, err
+						}
+						totalGroupMembers = append(totalGroupMembers, groupMembers...)
+					}
+				}
+
+				return uint32(len(totalGroupMembers)), totalGroupMembers, nil
+			}
+			for _, groupID := range groupIDs {
+				groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
+				if err != nil {
+					return 0, nil, err
+				}
+				totalGroupMembers = append(totalGroupMembers, groupMembers...)
+			}
+			return uint32(len(totalGroupMembers)), totalGroupMembers, nil
+		} else {
+			if len(groupIDs) == 0 {
+				for _, userID := range userIDs {
+					groupIDs, err := g.cache.GetJoinedGroupIDs(ctx, userID)
+					if err != nil {
+						return 0, nil, err
+					}
+					groupIDs = utils.Paginate(groupIDs, int(pageNumber), int(showNumber))
+					for _, groupID := range groupIDs {
+						groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, []string{userID})
+						if err != nil {
+							return 0, nil, err
+						}
+						totalGroupMembers = append(totalGroupMembers, groupMembers...)
+					}
+				}
+				return uint32(len(groupIDs)), totalGroupMembers, nil
+			}
+			var totalAll uint32
+			for _, groupID := range groupIDs {
+				total, groupMembers, err := g.cache.GetGroupMembersPage(ctx, groupID, userIDs, pageNumber, showNumber)
+				if err != nil {
+					return 0, nil, err
+				}
+				totalAll += total
+				totalGroupMembers = append(totalGroupMembers, groupMembers...)
+			}
+			return totalAll, totalGroupMembers, nil
+		}
+	}
 	return g.groupMemberDB.SearchMember(ctx, "", groupIDs, userIDs, roleLevels, pageNumber, showNumber)
 }
 
