@@ -145,7 +145,7 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	const effective = time.Hour * 24 * 2
 	req.FragmentSize, fragmentNum = c.getFragmentNum(req.FragmentSize, req.Size)
 	put := relation.ObjectPutModel{
-		PutID:         c.UUID(),
+		PutID:         req.PutID,
 		Hash:          req.Hash,
 		Name:          req.Name,
 		ObjectSize:    req.Size,
@@ -153,6 +153,14 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 		FragmentSize:  req.FragmentSize,
 		ValidTime:     expirationTime,
 		EffectiveTime: time.Now().Add(effective),
+	}
+	if put.PutID == "" {
+		put.PutID = c.UUID()
+	}
+	if _, err := c.put.Take(ctx, put.PutID); err == nil {
+		return nil, errs.ErrDuplicateKey.Wrap(fmt.Sprintf("duplicate put id %s", put.PutID))
+	} else if !c.isNotFound(err) {
+		return nil, err
 	}
 	put.Path = path.Join(tempPrefix, c.today(), req.Hash, put.PutID)
 	putURLs := make([]string, 0, fragmentNum)
