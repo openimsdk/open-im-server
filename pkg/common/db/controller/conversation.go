@@ -116,6 +116,7 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 			}
 		}
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
+		log.ZDebug(ctx, "SyncPeerUserPrivateConversationTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
 		var cList []*relationTb.ConversationModel
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)
