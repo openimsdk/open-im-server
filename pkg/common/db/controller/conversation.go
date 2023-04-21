@@ -112,7 +112,7 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 			}
 			if rows == 0 {
 				newConversation := *conversation
-				newConversation.OwnerUserID = v[1]
+				newConversation.OwnerUserID = v[0]
 				newConversation.UserID = v[2]
 				newConversation.ConversationID = v[1]
 				newConversation.IsPrivateChat = conversation.IsPrivateChat
