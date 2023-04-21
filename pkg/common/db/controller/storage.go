@@ -274,14 +274,14 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 		}
 	}()
 	if put.Complete {
-		return nil, errors.New("put completed")
+		return nil, errs.ErrFileUploadedComplete.Wrap("put complete")
 	}
 	now := time.Now().UnixMilli()
 	if put.EffectiveTime.UnixMilli() < now {
-		return nil, errors.New("upload expired")
+		return nil, errs.ErrFileUploadedExpired.Wrap("put expired")
 	}
 	if put.ValidTime != nil && put.ValidTime.UnixMilli() < now {
-		return nil, errors.New("object expired")
+		return nil, errs.ErrFileUploadedExpired.Wrap("object expired")
 	}
 	if hash, err := c.hash.Take(ctx, put.Hash, c.obj.Name()); err == nil {
 		o := relation.ObjectInfoModel{

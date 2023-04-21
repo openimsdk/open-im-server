@@ -82,4 +82,8 @@ const (
 	ConnOverMaxNumLimit = 1601
 	ConnArgsErr         = 1602
 	ConnUpdateErr       = 1603
+
+	// S3错误码
+	FileUploadedCompleteError = 2001 // 文件已上传
+	FileUploadedExpiredError  = 2002 // 上传过期
 )

@@ -58,4 +58,7 @@ var (
 	ErrConnUpdateErr = NewCodeError(ConnArgsErr, "upgrade http conn err")
 
 	ErrConfig = NewCodeError(ConfigError, "ConfigError")
+
+	ErrFileUploadedComplete = NewCodeError(FileUploadedCompleteError, "FileUploadedComplete")
+	ErrFileUploadedExpired  = NewCodeError(FileUploadedExpiredError, "FileUploadedExpiredError")
 )
