@@ -50,7 +50,7 @@ func (u *UserGorm) Page(ctx context.Context, pageNumber, showNumber int32) (user
 	if err != nil {
 		return
 	}
-	err = utils.Wrap(u.db(ctx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Order("create_time DESC").Error, "")
+	err = utils.Wrap(u.db(ctx).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Find(&users).Order("create_time DESC").Error, "")
 	return
 }
 

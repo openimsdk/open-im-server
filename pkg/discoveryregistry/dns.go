@@ -34,7 +34,7 @@ func (d DnsDiscoveryRegistry) GetConns(serviceName string, opts ...grpc.DialOpti
 	for _, subset := range endpoints.Subsets {
 		for _, address := range subset.Addresses {
 			for _, port := range subset.Ports {
-				conn, err := grpc.Dial(net.JoinHostPort(address.IP, string(port.Port)), opts...)
+				conn, err := grpc.Dial(net.JoinHostPort(address.IP, string(port.Port)), append(d.opts, opts...)...)
 				if err != nil {
 					return nil, err
 				}
@@ -46,7 +46,7 @@ func (d DnsDiscoveryRegistry) GetConns(serviceName string, opts ...grpc.DialOpti
 }
 
 func (d DnsDiscoveryRegistry) GetConn(serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	return grpc.Dial(fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, d.namespace), opts...)
+	return grpc.Dial(fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, d.namespace), append(d.opts, opts...)...)
 }
 
 func (d *DnsDiscoveryRegistry) AddOption(opts ...grpc.DialOption) {
