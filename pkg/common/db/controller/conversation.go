@@ -106,12 +106,17 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 		conversationTx := c.conversationDB.NewTx(tx)
 		cache := c.cache.NewCache()
 		for _, v := range [][3]string{{conversation.OwnerUserID, conversation.ConversationID, conversation.UserID}, {conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType), conversation.OwnerUserID}} {
-			rows, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, v[1], map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+			haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{v[1]})
 			if err != nil {
 				return err
 			}
-			log.ZDebug(ctx, "SyncPeerUserPrivateConversationTx", "rows", rows, "v", v)
-			if rows == 0 {
+			if len(haveUserIDs) > 0 {
+				_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, v[1], map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+				if err != nil {
+					return err
+				}
+				cache = cache.DelUsersConversation(v[1], v[0])
+			} else {
 				newConversation := *conversation
 				newConversation.OwnerUserID = v[0]
 				newConversation.UserID = v[2]
@@ -121,8 +126,6 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 					return err
 				}
 				cache = cache.DelConversationIDs([]string{v[0]})
-			} else {
-				cache = cache.DelUsersConversation(v[1], v[0])
 			}
 		}
 		return c.cache.ExecDel(ctx)
