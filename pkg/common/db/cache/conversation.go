@@ -34,7 +34,7 @@ type ConversationCache interface {
 	// get one conversation from cache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
 	DelConvsersations(ownerUserID string, conversationIDs []string) ConversationCache
-	DelUsersConversation(ownerUserIDs []string, conversationID string) ConversationCache
+	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from cache
 	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
 	// get one user's all conversations from cache
@@ -169,7 +169,7 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx contex
 	})
 }
 
-func (c *ConversationRedisCache) DelUsersConversation(ownerUserIDs []string, conversationID string) ConversationCache {
+func (c *ConversationRedisCache) DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache {
 	var keys []string
 	for _, ownerUserID := range ownerUserIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))

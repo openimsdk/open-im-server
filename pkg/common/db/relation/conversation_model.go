@@ -29,8 +29,9 @@ func (c *ConversationGorm) Delete(ctx context.Context, groupIDs []string) (err e
 	return utils.Wrap(c.db(ctx).Where("group_id in (?)", groupIDs).Delete(&relation.ConversationModel{}).Error, "")
 }
 
-func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args).Error, "")
+func (c *ConversationGorm) UpdateByMap(ctx context.Context, userIDList []string, conversationID string, args map[string]interface{}) (rows int64, err error) {
+	result := c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args)
+	return result.RowsAffected, utils.Wrap(result.Error, "")
 }
 
 func (c *ConversationGorm) Update(ctx context.Context, conversation *relation.ConversationModel) (err error) {

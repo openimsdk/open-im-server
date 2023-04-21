@@ -51,44 +51,45 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 		if err != nil {
 			return err
 		}
+		cache := c.cache.NewCache()
 		if len(haveUserIDs) > 0 {
-			err = conversationTx.UpdateByMap(ctx, haveUserIDs, conversation.ConversationID, filedMap)
+			_, err = conversationTx.UpdateByMap(ctx, haveUserIDs, conversation.ConversationID, filedMap)
 			if err != nil {
 				return err
 			}
+			cache = cache.DelUsersConversation(conversation.ConversationID, haveUserIDs...)
 		}
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
-		var cList []*relationTb.ConversationModel
+		var conversations []*relationTb.ConversationModel
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)
 			if err := utils.CopyStructFields(temp, conversation); err != nil {
 				return err
 			}
 			temp.OwnerUserID = v
-			cList = append(cList, temp)
+			conversations = append(conversations, temp)
 		}
-		cache := c.cache.NewCache()
-		if len(cList) > 0 {
-			err = conversationTx.Create(ctx, cList)
+
+		if len(conversations) > 0 {
+			err = conversationTx.Create(ctx, conversations)
 			if err != nil {
 				return err
 			}
 			cache = cache.DelConversationIDs(NotUserIDs)
-			log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDelKeys(), "addr", &cache)
 		}
 		// clear cache
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDelKeys(), "addr", &cache)
-		return cache.DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
+		return cache.ExecDel(ctx)
 	})
 }
 
 func (c *ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error {
-	err := c.conversationDB.UpdateByMap(ctx, userIDs, conversationID, args)
+	_, err := c.conversationDB.UpdateByMap(ctx, userIDs, conversationID, args)
 	if err != nil {
 		return err
 	}
-	return c.cache.DelUsersConversation(userIDs, conversationID).ExecDel(ctx)
+	return c.cache.DelUsersConversation(conversationID, userIDs...).ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
@@ -102,46 +103,28 @@ func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversat
 
 func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
 	return c.tx.Transaction(func(tx any) error {
-		userIDs := []string{conversation.OwnerUserID, conversation.UserID}
 		conversationTx := c.conversationDB.NewTx(tx)
-		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDs, []string{conversation.ConversationID, utils.GetConversationIDBySessionType(conversation.UserID, constant.SingleChatType)})
-		if err != nil {
-			return err
-		}
-		filedMap := map[string]interface{}{"is_private_chat": conversation.IsPrivateChat}
-		if len(haveUserIDs) > 0 {
-			err = conversationTx.UpdateByMap(ctx, haveUserIDs, conversation.ConversationID, filedMap)
+		cache := c.cache.NewCache()
+		for _, v := range [][3]string{{conversation.OwnerUserID, conversation.ConversationID, conversation.UserID}, {conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType), conversation.OwnerUserID}} {
+			rows, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, v[1], map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
 			if err != nil {
 				return err
 			}
-		}
-		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
-		log.ZDebug(ctx, "SyncPeerUserPrivateConversationTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
-		var cList []*relationTb.ConversationModel
-		for _, v := range NotUserIDs {
-			temp := new(relationTb.ConversationModel)
-			if v == conversation.UserID {
-				temp.OwnerUserID = conversation.UserID
-				temp.ConversationID = utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType)
-				temp.ConversationType = constant.SingleChatType
-				temp.UserID = conversation.OwnerUserID
-				temp.IsPrivateChat = conversation.IsPrivateChat
-			} else {
-				if err := utils.CopyStructFields(temp, conversation); err != nil {
+			if rows == 0 {
+				newConversation := *conversation
+				newConversation.OwnerUserID = v[1]
+				newConversation.UserID = v[2]
+				newConversation.ConversationID = v[1]
+				newConversation.IsPrivateChat = conversation.IsPrivateChat
+				if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 					return err
 				}
-				temp.OwnerUserID = v
-			}
-			cList = append(cList, temp)
-		}
-		if len(NotUserIDs) > 0 {
-			err = c.conversationDB.Create(ctx, cList)
-			if err != nil {
-				return err
+				cache = cache.DelConversationIDs([]string{v[0]})
+			} else {
+				cache = cache.DelUsersConversation(v[1], v[0])
 			}
 		}
-		// clear cache
-		return c.cache.DelConversationIDs(NotUserIDs).DelUsersConversation(haveUserIDs, conversation.ConversationID).ExecDel(ctx)
+		return c.cache.ExecDel(ctx)
 	})
 }
 
