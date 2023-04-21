@@ -87,7 +87,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		return t, nil
 	}
 	if v == "" {
-		return t, errs.ErrRecordNotFound
+		return t, errs.ErrRecordNotFound.Wrap("cache is not found")
 	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {

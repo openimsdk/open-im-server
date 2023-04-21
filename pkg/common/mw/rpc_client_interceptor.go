@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -11,7 +13,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"strings"
 )
 
 func GrpcClient() grpc.DialOption {
@@ -29,10 +30,10 @@ func rpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	}
 	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
-		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
+		// log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
 	}
-	log.ZError(ctx, "rpc resp error", err)
+	// log.ZError(ctx, "rpc resp error", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())

@@ -66,9 +66,5 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 			}
 		}
 	}()
-	err = srv.Serve(listener)
-	if err != nil {
-		return utils.Wrap1(err)
-	}
-	return nil
+	return utils.Wrap1(srv.Serve(listener))
 }
