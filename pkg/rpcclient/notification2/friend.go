@@ -24,6 +24,12 @@ type FriendNotificationSender struct {
 	db controller.FriendDatabase
 }
 
+func Test_New() {
+	var c controller.UserDatabase
+	noti := NewFriendNotificationSender(client, WithDBFunc(c.FindWithError))
+	noti.BlackAddedNotification(ctx, pb)
+}
+
 type friendNotificationSenderOptions func(*FriendNotificationSender)
 
 func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)) friendNotificationSenderOptions {
