@@ -1,14 +1,18 @@
 groupCreated:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true //是否发送消息，不发消息，无声的触发同步， 发消息为触发会话
+  unreadCount: false // 只在isSendMsg为true的情况下有作用
   offlinePush:
-    switch: true
+    enable: false
     title: "create group title" # xx create the group
     desc: "create group desc"
     ext: "create group ext"
-  defaultTips:
-    tips: "create the group"  # xx create the group
+  
+
+
+    
+   
+    
+  
 
 groupInfoSet:
   conversation:
