@@ -5,30 +5,83 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
 type FriendNotificationSender struct {
 	*rpcclient.MsgClient
-	getUsersInfoMap func(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.UserInfo, error)
-	getFriendsInfo  func(ctx context.Context, ownerUserID, friendUserID string) (resp *sdkws.FriendInfo, err error)
-	getUsersInfo    func(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error)
+	// 找不到报错
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)
+	// db controller
+	db controller.FriendDatabase
 }
 
-func NewFriendNotificationSender(client discoveryregistry.SvcDiscoveryRegistry, getUsersInfoMap func(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.UserInfo, error)) *FriendNotificationSender {
-	return &FriendNotificationSender{
-		MsgClient:       rpcclient.NewMsgClient(client),
-		getUsersInfoMap: getUsersInfoMap,
+type friendNotificationSenderOptions func(*FriendNotificationSender)
+
+func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)) friendNotificationSenderOptions {
+	return func(s *FriendNotificationSender) {
+		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+			users, err := fn(ctx, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			for _, user := range users {
+				result = append(result, user)
+			}
+			return result, nil
+		}
+		s.getUsersInfo = f
 	}
 }
 
+func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error)) friendNotificationSenderOptions {
+	return func(s *FriendNotificationSender) {
+		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+			users, err := fn(ctx, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			for _, user := range users {
+				result = append(result, user)
+			}
+			return result, err
+		}
+		s.getUsersInfo = f
+	}
+}
+
+func NewFriendNotificationSender(client discoveryregistry.SvcDiscoveryRegistry, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
+	f := &FriendNotificationSender{
+		MsgClient: rpcclient.NewMsgClient(client),
+	}
+	for _, opt := range opts {
+		opt(f)
+	}
+	return f
+}
+
+func (c *FriendNotificationSender) getUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+	users, err := c.getUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]*sdkws.UserInfo)
+	for _, user := range users {
+		result[user.GetUserID()] = user.(*sdkws.UserInfo)
+	}
+	return result, nil
+}
+
 func (c *FriendNotificationSender) getFromToUserNickname(ctx context.Context, fromUserID, toUserID string) (string, string, error) {
-	users, err := c.getUsersInfoMap(ctx, []string{fromUserID, toUserID}, true)
+	users, err := c.getUsersInfoMap(ctx, []string{fromUserID, toUserID})
 	if err != nil {
 		return "", "", nil
 	}
@@ -80,7 +133,6 @@ func (c *FriendNotificationSender) friendNotification(ctx context.Context, fromU
 	default:
 		return
 	}
-
 	var n rpcclient.NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
@@ -119,20 +171,20 @@ func (c *FriendNotificationSender) FriendApplicationRefusedNotification(ctx cont
 
 func (c *FriendNotificationSender) FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) {
 	friendAddedTips := sdkws.FriendAddedTips{Friend: &sdkws.FriendInfo{}, OpUser: &sdkws.PublicUserInfo{}}
-	user, err := c.getUsersInfo(ctx, []string{opUserID}, true)
+	user, err := c.getUsersInfo(ctx, []string{opUserID})
 	if err != nil {
 		return
 	}
-	friendAddedTips.OpUser.UserID = user[0].UserID
-	friendAddedTips.OpUser.Ex = user[0].Ex
-	friendAddedTips.OpUser.Nickname = user[0].Nickname
-	friendAddedTips.OpUser.FaceURL = user[0].FaceURL
+	friendAddedTips.OpUser.UserID = user[0].GetUserID()
+	friendAddedTips.OpUser.Ex = user[0].GetEx()
+	friendAddedTips.OpUser.Nickname = user[0].GetNickname()
+	friendAddedTips.OpUser.FaceURL = user[0].GetFaceURL()
 
-	friend, err := c.getFriendsInfo(ctx, fromUserID, toUserID)
+	friends, err := c.db.FindFriendsWithError(ctx, fromUserID, []string{toUserID})
 	if err != nil {
 		return
 	}
-	friendAddedTips.Friend = friend
+	friendAddedTips.Friend, err = convert.FriendDB2Pb(ctx, friends[0], c.getUsersInfo)
 	c.friendNotification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &friendAddedTips)
 }
 

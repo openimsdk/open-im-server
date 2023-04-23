@@ -11,17 +11,6 @@ type MetaClient struct {
 	rpcRegisterName string
 }
 
-type NotificationMsg struct {
-	SendID         string
-	RecvID         string
-	Content        []byte //  sdkws.TipsComm
-	MsgFrom        int32
-	ContentType    int32
-	SessionType    int32
-	SenderNickname string
-	SenderFaceURL  string
-}
-
 func NewMetaClient(client discoveryregistry.SvcDiscoveryRegistry, rpcRegisterName string) *MetaClient {
 	return &MetaClient{
 		client:          client,
@@ -35,4 +24,22 @@ func (m *MetaClient) getConn() (*grpc.ClientConn, error) {
 
 func (m *MetaClient) getRpcRegisterName() string {
 	return m.rpcRegisterName
+}
+
+type NotificationMsg struct {
+	SendID         string
+	RecvID         string
+	Content        []byte
+	MsgFrom        int32
+	ContentType    int32
+	SessionType    int32
+	SenderNickname string
+	SenderFaceURL  string
+}
+
+type CommonUser interface {
+	GetNickname() string
+	GetFaceURL() string
+	GetUserID() string
+	GetEx() string
 }

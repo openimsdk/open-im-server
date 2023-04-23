@@ -19,6 +19,22 @@ type UserModel struct {
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }
 
+func (u *UserModel) GetNickname() string {
+	return UserModelTableName
+}
+
+func (u *UserModel) GetFaceURL() string {
+	return u.FaceURL
+}
+
+func (u *UserModel) GetUserID() string {
+	return u.UserID
+}
+
+func (u *UserModel) GetEx() string {
+	return u.Ex
+}
+
 func (UserModel) TableName() string {
 	return UserModelTableName
 }
