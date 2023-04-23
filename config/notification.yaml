@@ -7,7 +7,7 @@ groupCreated:
     desc: "create group desc"
     ext: "create group ext"
   
-
+# 加消息contentType，老的作为通知的 content统一json 结构体使用pb的
 
     
    
