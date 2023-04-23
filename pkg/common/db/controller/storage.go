@@ -204,7 +204,7 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 		return nil, err
 	}
 	if up.Complete {
-		return nil, errors.New("up completed")
+		return nil, errs.ErrFileUploadedComplete.Wrap("put completed")
 	}
 	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)})
 	if err != nil {
@@ -274,7 +274,7 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 		}
 	}()
 	if put.Complete {
-		return nil, errs.ErrFileUploadedComplete.Wrap("put complete")
+		return nil, errs.ErrFileUploadedComplete.Wrap("put completed")
 	}
 	now := time.Now().UnixMilli()
 	if put.EffectiveTime.UnixMilli() < now {
