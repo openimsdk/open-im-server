@@ -26,12 +26,3 @@ type MsgModel struct {
 	AttachedInfo     string                 `bson:"attachedInfo"`
 	Ex               string                 `bson:"ex"`
 }
-
-type ReadDiffusionMsgModel struct {
-	*MsgModel
-}
-
-type WriteDiffusionMsgModel struct {
-	*MsgModel
-	UserID string `bson:"user_id"`
-}

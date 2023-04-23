@@ -81,7 +81,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
 		return nil, err
 	}
-	if err := g.validate.Struct(msgData); err != nil {
+	if err := g.validate.Struct(&msgData); err != nil {
 		return nil, err
 	}
 	req := msg.SendMsgReq{MsgData: &msgData}
