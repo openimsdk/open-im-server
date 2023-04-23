@@ -157,8 +157,15 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	if put.PutID == "" {
 		put.PutID = c.UUID()
 	}
-	if _, err := c.put.Take(ctx, put.PutID); err == nil {
-		return nil, errs.ErrDuplicateKey.Wrap(fmt.Sprintf("duplicate put id %s", put.PutID))
+	if v, err := c.put.Take(ctx, put.PutID); err == nil {
+		now := time.Now().UnixMilli()
+		if v.EffectiveTime.UnixMilli() <= now {
+			if err := c.put.DelPut(ctx, []string{v.PutID}); err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, errs.ErrDuplicateKey.Wrap(fmt.Sprintf("duplicate put id %s", put.PutID))
+		}
 	} else if !c.isNotFound(err) {
 		return nil, err
 	}
@@ -202,9 +209,6 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 	up, err := c.put.Take(ctx, req.PutID)
 	if err != nil {
 		return nil, err
-	}
-	if up.Complete {
-		return nil, errs.ErrFileUploadedComplete.Wrap("put completed")
 	}
 	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)})
 	if err != nil {
@@ -273,9 +277,6 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 			}
 		}
 	}()
-	if put.Complete {
-		return nil, errs.ErrFileUploadedComplete.Wrap("put completed")
-	}
 	now := time.Now().UnixMilli()
 	if put.EffectiveTime.UnixMilli() < now {
 		return nil, errs.ErrFileUploadedExpired.Wrap("put expired")
@@ -403,8 +404,8 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	if err := c.info.SetObject(ctx, o); err != nil {
 		return nil, err
 	}
-	if err := c.put.SetCompleted(ctx, put.PutID); err != nil {
-		log.ZError(ctx, "SetCompleted", err, "PutID", put.PutID)
+	if err := c.put.DelPut(ctx, []string{put.PutID}); err != nil {
+		log.ZError(ctx, "DelPut", err, "PutID", put.PutID)
 	}
 	return &third.ConfirmPutResp{
 		Url: c.urlName(o.Name),
