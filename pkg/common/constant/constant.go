@@ -276,11 +276,6 @@ const TriggerID = "triggerID"
 const RemoteAddr = "remoteAddr"
 
 const (
-	UnreliableNotification    = 1
-	ReliableNotificationNoMsg = 2
-	ReliableNotificationMsg   = 3
-)
-const (
 	BecomeFriendByImport = 1 //管理员导入
 	BecomeFriendByApply  = 2 //申请添加
 )

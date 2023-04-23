@@ -9,10 +9,6 @@ groupCreated:
   
 # 加消息contentType，老的作为通知的 content统一json 结构体使用pb的
 
-    
-   
-    
-  
 
 groupInfoSet:
   conversation:
@@ -199,155 +195,113 @@ groupMemberInfoSet:
 
 
 #############################friend#################################
-
 friendApplicationAdded:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: false
     title: "Somebody applies to add you as a friend"
     desc: "Somebody applies to add you as a friend"
     ext: "Somebody applies to add you as a friend"
-  defaultTips:
-    tips: "I applies to add you as a friend"  #
 
 friendApplicationApproved:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "Someone applies to add your friend application"
     desc: "Someone applies to add your friend application"
     ext: "Someone applies to add your friend application"
-  defaultTips:
-    tips: "I applies to add your friend application"  #
-
 
 friendApplicationRejected:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "Someone rejected your friend application"
     desc: "Someone rejected your friend application"
     ext: "Someone rejected your friend application"
-  defaultTips:
-    tips: "I rejected your friend application"  #
 
 friendAdded:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "We have become friends"
     desc: "We have become friends"
     ext: "We have become friends"
-  defaultTips:
-    tips: "We have become friends"  #
-
-
 
 friendDeleted:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "deleted a friend"
     desc: "deleted a friend"
     ext: "deleted a friend"
-  defaultTips:
-    tips: "deleted a friend"  #
-
 
 friendRemarkSet:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "Your friend's profile has been changed"
     desc: "Your friend's profile has been changed"
     ext: "Your friend's profile has been changed"
-  defaultTips:
-    tips: "Your friend's profile has been changed"  #
 
 blackAdded:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "blocked a user"
     desc: "blocked a user"
     ext: "blocked a user"
-  defaultTips:
-    tips: "blocked a user"  #
 
 blackDeleted:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "Remove a blocked user"
     desc: "Remove a blocked user"
     ext: "Remove a blocked user"
-  defaultTips:
-    tips: "Remove a blocked user"
 
 friendInfoUpdated:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "friend info updated"
     desc: "friend info updated"
     ext: "friend info updated"
-  defaultTips:
-    tips: "friend info updated"
 
 #####################user#########################
 userInfoUpdated:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "Remove a blocked user"
     desc: "Remove a blocked user"
     ext: "Remove a blocked user"
-  defaultTips:
-    tips: "remove a blocked user"
 
 #####################conversation#########################
 conversationOptUpdate:
-  conversation:
-    reliabilityLevel: 1
-    unreadCount: false
-    offlinePush:
-      switch: true
-      title: "conversation opt update"
-      desc: "conversation opt update"
-      ext: "conversation opt update"
-    defaultTips:
-      tips: "conversation opt update"
+  isSendMsg: true
+  unreadCount: false 
+  offlinePush:
+    enable: true
+    title: "conversation opt update"
+    desc: "conversation opt update"
+    ext: "conversation opt update"
 
 conversationSetPrivate:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false 
   offlinePush:
-    switch: true
+    enable: true
     title: "burn after reading"
     desc: "burn after reading"
     ext: "burn after reading"
-  defaultTips:
-    openTips: "burn after reading was opened"
-    closeTips: "burn after reading was closed"
 

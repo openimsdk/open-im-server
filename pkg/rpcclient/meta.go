@@ -22,10 +22,6 @@ func (m *MetaClient) getConn() (*grpc.ClientConn, error) {
 	return m.client.GetConn(m.rpcRegisterName)
 }
 
-func (m *MetaClient) getRpcRegisterName() string {
-	return m.rpcRegisterName
-}
-
 type NotificationMsg struct {
 	SendID         string
 	RecvID         string

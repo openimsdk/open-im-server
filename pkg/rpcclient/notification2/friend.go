@@ -2,8 +2,8 @@ package notification2
 
 import (
 	"context"
+	"encoding/json"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -12,7 +12,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -96,56 +95,13 @@ func (c *FriendNotificationSender) getFromToUserNickname(ctx context.Context, fr
 
 func (c *FriendNotificationSender) friendNotification(ctx context.Context, fromUserID, toUserID string, contentType int32, m proto.Message) {
 	var err error
-	var tips sdkws.TipsComm
-	tips.Detail, err = proto.Marshal(m)
-	if err != nil {
-		return
-	}
-
-	marshaler := jsonpb.Marshaler{
-		OrigName:     true,
-		EnumsAsInts:  false,
-		EmitDefaults: false,
-	}
-
-	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-
-	fromUserNickname, toUserNickname, err := c.getFromToUserNickname(ctx, fromUserID, toUserID)
-	if err != nil {
-		return
-	}
-	cn := config.Config.Notification
-	switch contentType {
-	case constant.FriendApplicationNotification:
-		tips.DefaultTips = fromUserNickname + cn.FriendApplication.DefaultTips.Tips
-	case constant.FriendApplicationApprovedNotification:
-		tips.DefaultTips = fromUserNickname + cn.FriendApplicationApproved.DefaultTips.Tips
-	case constant.FriendApplicationRejectedNotification:
-		tips.DefaultTips = fromUserNickname + cn.FriendApplicationRejected.DefaultTips.Tips
-	case constant.FriendAddedNotification:
-		tips.DefaultTips = cn.FriendAdded.DefaultTips.Tips
-	case constant.FriendDeletedNotification:
-		tips.DefaultTips = cn.FriendDeleted.DefaultTips.Tips + toUserNickname
-	case constant.FriendRemarkSetNotification:
-		tips.DefaultTips = fromUserNickname + cn.FriendRemarkSet.DefaultTips.Tips
-	case constant.BlackAddedNotification:
-		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips
-	case constant.BlackDeletedNotification:
-		tips.DefaultTips = cn.BlackDeleted.DefaultTips.Tips + toUserNickname
-	case constant.UserInfoUpdatedNotification:
-		tips.DefaultTips = cn.UserInfoUpdated.DefaultTips.Tips
-	case constant.FriendInfoUpdatedNotification:
-		tips.DefaultTips = cn.FriendInfoUpdated.DefaultTips.Tips + toUserNickname
-	default:
-		return
-	}
 	var n rpcclient.NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
 	n.ContentType = contentType
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.Content, err = proto.Marshal(&tips)
+	n.Content, err = json.Marshal(m)
 	if err != nil {
 		return
 	}
@@ -153,8 +109,8 @@ func (c *FriendNotificationSender) friendNotification(ctx context.Context, fromU
 }
 
 func (u *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) {
-	selfInfoUpdatedTips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	u.friendNotification(ctx, opUserID, changedUserID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
+	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
+	u.friendNotification(ctx, opUserID, changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) {
@@ -190,7 +146,6 @@ func (c *FriendNotificationSender) FriendAddedNotification(ctx context.Context, 
 	friendAddedTips.OpUser.Ex = user[0].GetEx()
 	friendAddedTips.OpUser.Nickname = user[0].GetNickname()
 	friendAddedTips.OpUser.FaceURL = user[0].GetFaceURL()
-
 	friends, err := c.db.FindFriendsWithError(ctx, fromUserID, []string{toUserID})
 	if err != nil {
 		return
