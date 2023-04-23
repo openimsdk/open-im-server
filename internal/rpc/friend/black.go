@@ -12,7 +12,7 @@ import (
 )
 
 func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {
-	if err := s.userCheck.Access(ctx, req.UserID); err != nil {
+	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	var pageNumber, showNumber int32
@@ -45,13 +45,13 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*
 }
 
 func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
-	if err := s.userCheck.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
-	s.notification.BlackDeletedNotification(ctx, req)
+	s.notificationSender.BlackDeletedNotification(ctx, req)
 	return &pbFriend.RemoveBlackResp{}, nil
 }
 
@@ -59,7 +59,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	_, err := s.userCheck.GetUsersInfos(ctx, []string{req.OwnerUserID, req.BlackUserID}, true)
+	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +67,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := s.blackDatabase.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-	s.notification.BlackAddedNotification(ctx, req)
+	s.notificationSender.BlackAddedNotification(ctx, req)
 	return &pbFriend.AddBlackResp{}, nil
 }

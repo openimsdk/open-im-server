@@ -5,7 +5,6 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	utils "github.com/OpenIMSDK/open_utils"
 )
 
@@ -17,17 +16,59 @@ func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	return dbFriend
 }
 
-func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel, getUser func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)) (*sdkws.FriendInfo, error) {
+func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (*sdkws.FriendInfo, error) {
 	pbfriend := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
 	utils.CopyStructFields(pbfriend, friendDB)
-	users, err := getUser(ctx, []string{friendDB.FriendUserID})
+	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
 	if err != nil {
 		return nil, err
 	}
-	pbfriend.FriendUser.UserID = users[0].GetUserID()
-	pbfriend.FriendUser.Nickname = users[0].GetNickname()
-	pbfriend.FriendUser.FaceURL = users[0].GetFaceURL()
-	pbfriend.FriendUser.Ex = users[0].GetEx()
+	pbfriend.FriendUser.UserID = users[friendDB.FriendUserID].UserID
+	pbfriend.FriendUser.Nickname = users[friendDB.FriendUserID].Nickname
+	pbfriend.FriendUser.FaceURL = users[friendDB.FriendUserID].FaceURL
+	pbfriend.FriendUser.Ex = users[friendDB.FriendUserID].Ex
 	pbfriend.CreateTime = friendDB.CreateTime.Unix()
 	return pbfriend, nil
+}
+
+func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (friendsPb []*sdkws.FriendInfo, err error) {
+	var userID []string
+	for _, friendDB := range friendsDB {
+		userID = append(userID, friendDB.FriendUserID)
+	}
+	users, err := getUsers(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	for _, friend := range friendsDB {
+		friendPb := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
+		utils.CopyStructFields(friendPb, friend)
+		friendPb.FriendUser.UserID = users[friend.FriendUserID].UserID
+		friendPb.FriendUser.Nickname = users[friend.FriendUserID].Nickname
+		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
+		friendPb.FriendUser.Ex = users[friend.FriendUserID].Ex
+		friendPb.CreateTime = friend.CreateTime.Unix()
+		friendsPb = append(friendsPb, friendPb)
+	}
+	return friendsPb, nil
+}
+
+func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (PBFriendRequests []*sdkws.FriendRequest, err error) {
+	var userID []string
+	for _, friendRequest := range friendRequests {
+		userID = append(userID, friendRequest.FromUserID)
+	}
+	users, err := getUsers(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	for _, friendRequest := range friendRequests {
+		friendRequestPb := &sdkws.FriendRequest{}
+		utils.CopyStructFields(friendRequestPb, friendRequest)
+		friendRequestPb.FromFaceURL = users[friendRequest.FromUserID].FaceURL
+		friendRequestPb.FromNickname = users[friendRequest.FromUserID].Nickname
+		friendRequestPb.ToFaceURL = users[friendRequest.ToUserID].FaceURL
+		friendRequestPb.ToNickname = users[friendRequest.ToUserID].Nickname
+	}
+	return PBFriendRequests, nil
 }

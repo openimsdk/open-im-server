@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -16,8 +17,8 @@ type UserClient struct {
 	MetaClient
 }
 
-func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *GroupClient {
-	return &GroupClient{
+func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *UserClient {
+	return &UserClient{
 		MetaClient: MetaClient{
 			client:          client,
 			rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
@@ -25,7 +26,7 @@ func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *GroupClient {
 	}
 }
 
-func (u *UserClient) GetUsersInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.UserInfo, error) {
+func (u *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
 	cc, err := u.getConn()
 	if err != nil {
 		return nil, err
@@ -36,26 +37,24 @@ func (u *UserClient) GetUsersInfos(ctx context.Context, userIDs []string, comple
 	if err != nil {
 		return nil, err
 	}
-	if complete {
-		if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
-			return e.UserID
-		})); len(ids) > 0 {
-			return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
-		}
+	if ids := utils.Single(userIDs, utils.Slice(resp.UsersInfo, func(e *sdkws.UserInfo) string {
+		return e.UserID
+	})); len(ids) > 0 {
+		return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	return resp.UsersInfo, nil
 }
 
 func (u *UserClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
-	users, err := u.GetUsersInfos(ctx, []string{userID}, true)
+	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
 	}
 	return users[0], nil
 }
 
-func (u *UserClient) GetUsersInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.UserInfo, error) {
-	users, err := u.GetUsersInfos(ctx, userIDs, complete)
+func (u *UserClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +64,7 @@ func (u *UserClient) GetUsersInfoMap(ctx context.Context, userIDs []string, comp
 }
 
 func (u *UserClient) GetPublicUserInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.PublicUserInfo, error) {
-	users, err := u.GetUsersInfos(ctx, userIDs, complete)
+	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -109,4 +108,12 @@ func (u *UserClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string)
 		return 0, err
 	}
 	return resp.GlobalRecvMsgOpt, err
+}
+
+func (u *UserClient) Access(ctx context.Context, ownerUserID string) error {
+	_, err := u.GetUserInfo(ctx, ownerUserID)
+	if err != nil {
+		return err
+	}
+	return tokenverify.CheckAccessV3(ctx, ownerUserID)
 }
