@@ -1,13 +1,15 @@
 bin
 logs
 .devcontainer
+.vscode
 components
 logs
 out-test
 .github
 .idea
 
-
+tools/
+tmp/
 
 deploy/open_im_demo
 deploy/open_im_api
