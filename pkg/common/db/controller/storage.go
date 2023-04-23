@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -18,6 +17,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/google/uuid"
 	"io"
+	"net/url"
 	"path"
 	"strconv"
 	"time"
@@ -39,8 +39,9 @@ type S3Database interface {
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
-func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface) S3Database {
+func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface, url *url.URL) S3Database {
 	return &s3Database{
+		url:  url,
 		obj:  obj,
 		hash: hash,
 		info: info,
@@ -49,6 +50,7 @@ func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, in
 }
 
 type s3Database struct {
+	url  *url.URL
 	obj  obj.Interface
 	hash relation.ObjectHashModelInterface
 	info relation.ObjectInfoModelInterface
@@ -96,7 +98,23 @@ func (c *s3Database) CheckHash(hash string) error {
 }
 
 func (c *s3Database) urlName(name string) string {
-	return config.Config.Object.ApiURL + name
+	u := url.URL{
+		Scheme:      c.url.Scheme,
+		Opaque:      c.url.Opaque,
+		User:        c.url.User,
+		Host:        c.url.Host,
+		Path:        c.url.Path,
+		RawPath:     c.url.RawPath,
+		OmitHost:    c.url.OmitHost,
+		ForceQuery:  c.url.ForceQuery,
+		RawQuery:    c.url.RawQuery,
+		Fragment:    c.url.Fragment,
+		RawFragment: c.url.RawFragment,
+	}
+	v := make(url.Values, 1)
+	v.Set("name", name)
+	u.RawQuery = v.Encode()
+	return u.String()
 }
 
 func (c *s3Database) UUID() string {
@@ -157,8 +175,15 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	if put.PutID == "" {
 		put.PutID = c.UUID()
 	}
-	if _, err := c.put.Take(ctx, put.PutID); err == nil {
-		return nil, errs.ErrDuplicateKey.Wrap(fmt.Sprintf("duplicate put id %s", put.PutID))
+	if v, err := c.put.Take(ctx, put.PutID); err == nil {
+		now := time.Now().UnixMilli()
+		if v.EffectiveTime.UnixMilli() <= now {
+			if err := c.put.DelPut(ctx, []string{v.PutID}); err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, errs.ErrDuplicateKey.Wrap(fmt.Sprintf("duplicate put id %s", put.PutID))
+		}
 	} else if !c.isNotFound(err) {
 		return nil, err
 	}
@@ -202,9 +227,6 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 	up, err := c.put.Take(ctx, req.PutID)
 	if err != nil {
 		return nil, err
-	}
-	if up.Complete {
-		return nil, errors.New("up completed")
 	}
 	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)})
 	if err != nil {
@@ -273,9 +295,6 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 			}
 		}
 	}()
-	if put.Complete {
-		return nil, errs.ErrFileUploadedComplete.Wrap("put complete")
-	}
 	now := time.Now().UnixMilli()
 	if put.EffectiveTime.UnixMilli() < now {
 		return nil, errs.ErrFileUploadedExpired.Wrap("put expired")
@@ -403,8 +422,8 @@ func (c *s3Database) ConfirmPut(ctx context.Context, req *third.ConfirmPutReq) (
 	if err := c.info.SetObject(ctx, o); err != nil {
 		return nil, err
 	}
-	if err := c.put.SetCompleted(ctx, put.PutID); err != nil {
-		log.ZError(ctx, "SetCompleted", err, "PutID", put.PutID)
+	if err := c.put.DelPut(ctx, []string{put.PutID}); err != nil {
+		log.ZError(ctx, "DelPut", err, "PutID", put.PutID)
 	}
 	return &third.ConfirmPutResp{
 		Url: c.urlName(o.Name),

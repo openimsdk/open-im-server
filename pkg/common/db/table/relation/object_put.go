@@ -18,7 +18,6 @@ type ObjectPutModel struct {
 	ObjectSize    int64      `gorm:"column:object_size"`
 	FragmentSize  int64      `gorm:"column:fragment_size"`
 	PutURLsHash   string     `gorm:"column:put_urls_hash"`
-	Complete      bool       `gorm:"column:complete"`
 	ValidTime     *time.Time `gorm:"column:valid_time"`
 	EffectiveTime time.Time  `gorm:"column:effective_time"`
 	CreateTime    time.Time  `gorm:"column:create_time"`
