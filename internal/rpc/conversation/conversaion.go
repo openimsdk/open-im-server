@@ -12,16 +12,15 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
-	groupChecker *check.GroupChecker
+	// groupChecker *check.GroupChecker
 	controller.ConversationDatabase
-	notify *notification.Check
+	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -38,8 +37,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
-		notify:               notification.NewCheck(client),
-		groupChecker:         check.NewGroupChecker(client),
+		conversationNotificationSender: notification.NewConversationNotificationSender(client),
+		// groupChecker:         check.NewGroupChecker(client),
 		ConversationDatabase: controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
@@ -93,7 +92,7 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 	if err != nil {
 		return nil, err
 	}
-	c.notify.ConversationChangeNotification(ctx, req.OwnerUserID)
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
 	resp := &pbConversation.BatchSetConversationsResp{}
 	return resp, nil
 }
@@ -107,7 +106,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err != nil {
 		return nil, err
 	}
-	c.notify.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
 	resp := &pbConversation.SetConversationResp{}
 	return resp, nil
 }
@@ -142,7 +141,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		if err != nil {
 			return nil, err
 		}
-		c.notify.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
+		c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
 		return resp, nil
 	}
 	filedMap := make(map[string]interface{})
@@ -172,11 +171,11 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 
 	if isSyncConversation {
 		for _, v := range req.UserIDList {
-			c.notify.ConversationChangeNotification(ctx, v)
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
 		}
 	} else {
 		for _, v := range req.UserIDList {
-			c.notify.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
+			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
 		}
 	}
 	return resp, nil

@@ -1,59 +1,69 @@
-package notification
+package notification2
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (c *Check) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
-	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m apistruct.ReactionMessageModifierNotification
-	m.SourceID = req.SourceID
-	m.OpUserID = mcontext.GetOpUserID(ctx)
-	m.SessionType = req.SessionType
-	keyMap := make(map[string]*sdkws.KeyValue)
-	for _, valueResp := range resp.Result {
-		if valueResp.ErrCode == 0 {
-			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
-		}
-	}
-	if len(keyMap) == 0 {
-		return
-	}
-	m.SuccessReactionExtensions = keyMap
-	m.ClientMsgID = req.ClientMsgID
-	m.IsReact = resp.IsReact
-	m.IsExternalExtensions = req.IsExternalExtensions
-	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
+type ExtendMsgNotificationSender struct {
+	*rpcclient.MsgClient
 }
-func (c *Check) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
-	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m apistruct.ReactionMessageDeleteNotification
-	m.SourceID = req.SourceID
-	m.OpUserID = req.OpUserID
-	m.SessionType = req.SessionType
-	keyMap := make(map[string]*sdkws.KeyValue)
-	for _, valueResp := range resp.Result {
-		if valueResp.ErrCode == 0 {
-			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
-		}
-	}
-	if len(keyMap) == 0 {
-		return
-	}
-	m.SuccessReactionExtensions = keyMap
-	m.ClientMsgID = req.ClientMsgID
-	m.MsgFirstModifyTime = req.MsgFirstModifyTime
 
-	c.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory, isReactionFromCache)
+func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistry) *ExtendMsgNotificationSender {
+	return &ExtendMsgNotificationSender{rpcclient.NewMsgClient(client)}
 }
-func (c *Check) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) error {
+
+func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
+	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+	var content apistruct.ReactionMessageModifierNotification
+	content.SourceID = req.SourceID
+	content.OpUserID = mcontext.GetOpUserID(ctx)
+	content.SessionType = req.SessionType
+	keyMap := make(map[string]*sdkws.KeyValue)
+	for _, valueResp := range resp.Result {
+		if valueResp.ErrCode == 0 {
+			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
+		}
+	}
+	if len(keyMap) == 0 {
+		return
+	}
+	content.SuccessReactionExtensions = keyMap
+	content.ClientMsgID = req.ClientMsgID
+	content.IsReact = resp.IsReact
+	content.IsExternalExtensions = req.IsExternalExtensions
+	content.MsgFirstModifyTime = resp.MsgFirstModifyTime
+	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(content), isHistory, isReactionFromCache)
+}
+func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
+	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+	var content apistruct.ReactionMessageDeleteNotification
+	content.SourceID = req.SourceID
+	content.OpUserID = req.OpUserID
+	content.SessionType = req.SessionType
+	keyMap := make(map[string]*sdkws.KeyValue)
+	for _, valueResp := range resp.Result {
+		if valueResp.ErrCode == 0 {
+			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
+		}
+	}
+	if len(keyMap) == 0 {
+		return
+	}
+	content.SuccessReactionExtensions = keyMap
+	content.ClientMsgID = req.ClientMsgID
+	content.MsgFirstModifyTime = req.MsgFirstModifyTime
+	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(content), isHistory, isReactionFromCache)
+}
+func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) error {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
@@ -82,6 +92,6 @@ func (c *Check) messageReactionSender(ctx context.Context, sendID string, source
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	_, err := c.Msg.SendMsg(ctx, &pbData)
+	_, err := e.SendMsg(ctx, &pbData)
 	return err
 }

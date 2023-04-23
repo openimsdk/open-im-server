@@ -17,20 +17,18 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 type userServer struct {
 	controller.UserDatabase
-	notification        *notification.Check
-	userCheck           *check.UserCheck
-	conversationChecker *check.ConversationChecker
-	RegisterCenter      registry.SvcDiscoveryRegistry
-	friendCheck         *check.FriendChecker
+	notificationSender *notification.FriendNotificationSender
+	friendRpcClient    *rpcclient.FriendClient
+	RegisterCenter     registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -54,13 +52,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	userDB := relation.NewUserGorm(db)
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
+	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
 	u := &userServer{
-		UserDatabase:        controller.NewUserDatabase(userDB, cache, tx.NewGorm(db)),
-		notification:        notification.NewCheck(client),
-		userCheck:           check.NewUserCheck(client),
-		friendCheck:         check.NewFriendChecker(client),
-		conversationChecker: check.NewConversationChecker(client),
-		RegisterCenter:      client,
+		UserDatabase:       database,
+		RegisterCenter:     client,
+		friendRpcClient:    rpcclient.NewFriendClient(client),
+		notificationSender: notification.NewFriendNotificationSender(client, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
@@ -73,7 +70,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	if err != nil {
 		return nil, err
 	}
-	resp.UsersInfo, err = (*convert.DBUser)(nil).DB2PB(users)
+	resp.UsersInfo = convert.UsersDB2Pb(users)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +84,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	user, err := convert.NewPBUser(req.UserInfo).Convert()
+	user := convert.UserPb2DB(req.UserInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -95,16 +92,16 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	friends, err := s.friendCheck.GetFriendIDs(ctx, req.UserInfo.UserID)
+	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	go func() {
 		for _, v := range friends {
-			s.notification.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v, mcontext.GetOpUserID(ctx))
+			s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v, mcontext.GetOpUserID(ctx))
 		}
 	}()
-	s.notification.UserInfoUpdatedNotification(ctx, mcontext.GetOpUserID(ctx), req.UserInfo.UserID)
+	s.notificationSender.UserInfoUpdatedNotification(ctx, mcontext.GetOpUserID(ctx), req.UserInfo.UserID)
 	return resp, nil
 }
 
@@ -119,7 +116,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	s.notification.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
+	s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
 	return resp, nil
 }
 
@@ -155,14 +152,16 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 
 // ok
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
-	resp = &pbuser.GetPaginationUsersResp{}
-	usersDB, total, err := s.Page(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	var pageNumber, showNumber int32
+	if req.Pagination != nil {
+		pageNumber = req.Pagination.PageNumber
+		showNumber = req.Pagination.ShowNumber
+	}
+	users, total, err := s.Page(ctx, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}
-	resp.Total = int32(total)
-	resp.Users, err = (*convert.DBUser)(nil).DB2PB(usersDB)
-	return resp, err
+	return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 }
 
 // ok
@@ -208,13 +207,11 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 }
 
 func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.GetGlobalRecvMessageOptReq) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
-	resp = &pbuser.GetGlobalRecvMessageOptResp{}
 	user, err := s.FindWithError(ctx, []string{req.UserID})
 	if err != nil {
 		return nil, err
 	}
-	resp.GlobalRecvMsgOpt = user[0].GlobalRecvMsgOpt
-	return resp, nil
+	return &pbuser.GetGlobalRecvMessageOptResp{GlobalRecvMsgOpt: user[0].GlobalRecvMsgOpt}, nil
 }
 
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
@@ -222,6 +219,5 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbuser.GetAllUserIDResp{UserIDs: userIDs}
-	return resp, nil
+	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
 }

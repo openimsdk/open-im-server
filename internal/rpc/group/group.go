@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -48,19 +49,19 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupDatabase:       controller.InitGroupDatabase(db, rdb, mongo.GetDatabase()),
-		UserCheck:           check.NewUserCheck(client),
-		Notification:        notification.NewCheck(client),
-		ConversationChecker: check.NewConversationChecker(client),
+		GroupDatabase:         controller.InitGroupDatabase(db, rdb, mongo.GetDatabase()),
+		UserCheck:             check.NewUserCheck(client),
+		Notification:          notification.NewCheck(client),
+		conversationRpcClient: rpcclient.NewConversationClient(client),
 	})
 	return nil
 }
 
 type groupServer struct {
-	GroupDatabase       controller.GroupDatabase
-	UserCheck           *check.UserCheck
-	Notification        *notification.Check
-	ConversationChecker *check.ConversationChecker
+	GroupDatabase         controller.GroupDatabase
+	UserCheck             *check.UserCheck
+	Notification          *notification.Check
+	conversationRpcClient *rpcclient.ConversationClient
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
@@ -750,7 +751,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 			FieldType:  constant.FieldGroupAtType,
 			UserIDList: userIDs,
 		}
-		if err := s.ConversationChecker.ModifyConversationField(ctx, args); err != nil {
+		if err := s.conversationRpcClient.ModifyConversationField(ctx, args); err != nil {
 			log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
 		}
 	}

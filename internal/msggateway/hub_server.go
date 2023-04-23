@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
@@ -9,14 +10,14 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	s.LongConnServer.SetMessageHandler(notification.NewCheck(client))
+	s.LongConnServer.SetMessageHandler(rpcclient.NewMsgClient(client))
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
@@ -26,7 +27,6 @@ func (s *Server) Start() error {
 }
 
 type Server struct {
-	notification   *notification.Check
 	rpcPort        int
 	prometheusPort int
 	LongConnServer LongConnServer
@@ -35,10 +35,6 @@ type Server struct {
 
 func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
-}
-
-func (s *Server) Notification() *notification.Check {
-	return s.notification
 }
 
 func NewServer(rpcPort int, longConnServer LongConnServer) *Server {

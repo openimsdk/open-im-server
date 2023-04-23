@@ -2,6 +2,8 @@ package fcm
 
 import (
 	"context"
+	"path/filepath"
+
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
@@ -10,7 +12,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/api/option"
-	"path/filepath"
 )
 
 const SinglePushCountLimit = 400

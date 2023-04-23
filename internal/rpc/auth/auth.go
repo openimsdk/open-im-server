@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -12,14 +13,14 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbAuth "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 type authServer struct {
 	authDatabase   controller.AuthDatabase
-	userCheck      *check.UserCheck
+	userRpcClient  *rpcclient.UserClient
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
@@ -29,7 +30,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	pbAuth.RegisterAuthServer(server, &authServer{
-		userCheck:      check.NewUserCheck(client),
+		userRpcClient:  rpcclient.NewUserClient(client),
 		RegisterCenter: client,
 		authDatabase:   controller.NewAuthDatabase(cache.NewCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
 	})
@@ -38,7 +39,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
-	if _, err := s.userCheck.GetUserInfo(ctx, req.UserID); err != nil {
+	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))

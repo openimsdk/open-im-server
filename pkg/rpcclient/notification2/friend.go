@@ -26,6 +26,12 @@ type FriendNotificationSender struct {
 
 type friendNotificationSenderOptions func(*FriendNotificationSender)
 
+func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions {
+	return func(s *FriendNotificationSender) {
+		s.db = db
+	}
+}
+
 func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
 		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
@@ -146,6 +152,11 @@ func (c *FriendNotificationSender) friendNotification(ctx context.Context, fromU
 	c.Notification(ctx, &n)
 }
 
+func (u *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) {
+	selfInfoUpdatedTips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
+	u.friendNotification(ctx, opUserID, changedUserID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
+}
+
 func (c *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) {
 	FriendApplicationTips := sdkws.FriendApplicationTips{FromToUserID: &sdkws.FromToUserID{}}
 	FriendApplicationTips.FromToUserID.FromUserID = req.FromUserID
@@ -185,6 +196,9 @@ func (c *FriendNotificationSender) FriendAddedNotification(ctx context.Context, 
 		return
 	}
 	friendAddedTips.Friend, err = convert.FriendDB2Pb(ctx, friends[0], c.getUsersInfoMap)
+	if err != nil {
+		return
+	}
 	c.friendNotification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &friendAddedTips)
 }
 

@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -14,7 +15,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 )
@@ -24,12 +25,12 @@ type msgServer struct {
 	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase       controller.MsgDatabase
 	ExtendMsgDatabase controller.ExtendMsgDatabase
-	Group             *check.GroupChecker
-	User              *check.UserCheck
-	Conversation      *check.ConversationChecker
-	friend            *check.FriendChecker
+	// Group             *check.GroupChecker
+	User         *rpcclient.UserClient
+	Conversation *rpcclient.ConversationClient
+	friend       *rpcclient.FriendClient
 	*localcache.GroupLocalCache
-	black         *check.BlackChecker
+	black         *rpcclient.BlackClient
 	MessageLocker MessageLocker
 	Handlers      MessageInterceptorChain
 }
@@ -64,15 +65,15 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
 
 	s := &msgServer{
-		Conversation:      check.NewConversationChecker(client),
-		User:              check.NewUserCheck(client),
-		Group:             check.NewGroupChecker(client),
+		Conversation: rpcclient.NewConversationClient(client),
+		User:         rpcclient.NewUserClient(client),
+		// Group:             check.NewGroupChecker(client),
 		MsgDatabase:       msgDatabase,
 		ExtendMsgDatabase: extendMsgDatabase,
 		RegisterCenter:    client,
 		GroupLocalCache:   localcache.NewGroupLocalCache(client),
-		black:             check.NewBlackChecker(client),
-		friend:            check.NewFriendChecker(client),
+		black:             rpcclient.NewBlackClient(client),
+		friend:            rpcclient.NewFriendClient(client),
 		MessageLocker:     NewLockerMessage(cacheModel),
 	}
 	s.addInterceptorHandler(MessageHasReadEnabled, MessageModifyCallback)

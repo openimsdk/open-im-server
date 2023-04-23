@@ -5,7 +5,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
@@ -49,12 +49,12 @@ type MessageHandler interface {
 var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
-	notification *notification.Check
+	msgRpcClient *rpcclient.MsgClient
 	validate     *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, notification *notification.Check) *GrpcHandler {
-	return &GrpcHandler{notification: notification, validate: validate}
+func NewGrpcHandler(validate *validator.Validate, msgRpcClient *rpcclient.MsgClient) *GrpcHandler {
+	return &GrpcHandler{msgRpcClient: msgRpcClient, validate: validate}
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
@@ -65,7 +65,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	if err := g.validate.Struct(&req); err != nil {
 		return nil, err
 	}
-	resp, err := g.notification.Msg.GetMaxAndMinSeq(context, &req)
+	resp, err := g.msgRpcClient.GetMaxAndMinSeq(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 		return nil, err
 	}
 	req := msg.SendMsgReq{MsgData: &msgData}
-	resp, err := g.notification.Msg.SendMsg(context, &req)
+	resp, err := g.msgRpcClient.SendMsg(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byt
 	}
 	//req := pbRtc.SignalMessageAssembleReq{SignalReq: &signalReq, OperationID: "111"}
 	//todo rtc rpc call
-	resp, err := g.notification.Msg.SendMsg(context, nil)
+	resp, err := g.msgRpcClient.SendMsg(context, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]
 	if err := g.validate.Struct(data); err != nil {
 		return nil, err
 	}
-	resp, err := g.notification.Msg.PullMessageBySeqList(context, &req)
+	resp, err := g.msgRpcClient.PullMessageBySeqList(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]
 
 func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, error) {
 	//todo
-	resp, err := g.notification.Msg.PullMessageBySeqList(context, nil)
+	resp, err := g.msgRpcClient.PullMessageBySeqList(context, nil)
 	if err != nil {
 		return nil, err
 	}

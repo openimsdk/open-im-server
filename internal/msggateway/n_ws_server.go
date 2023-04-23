@@ -2,16 +2,17 @@ package msggateway
 
 import (
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/go-playground/validator/v10"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/go-playground/validator/v10"
 )
 
 type LongConnServer interface {
@@ -20,7 +21,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s interface{}) error
-	SetMessageHandler(rpcClient *notification.Check)
+	SetMessageHandler(msgRpcClient *rpcclient.MsgClient)
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -50,7 +51,7 @@ type WsServer struct {
 	MessageHandler
 }
 
-func (ws *WsServer) SetMessageHandler(rpcClient *notification.Check) {
+func (ws *WsServer) SetMessageHandler(rpcClient *rpcclient.MsgClient) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcClient)
 }
 
