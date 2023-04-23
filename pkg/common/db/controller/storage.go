@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -18,6 +17,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/google/uuid"
 	"io"
+	"net/url"
 	"path"
 	"strconv"
 	"time"
@@ -39,8 +39,9 @@ type S3Database interface {
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
-func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface) S3Database {
+func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface, url *url.URL) S3Database {
 	return &s3Database{
+		url:  url,
 		obj:  obj,
 		hash: hash,
 		info: info,
@@ -49,6 +50,7 @@ func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, in
 }
 
 type s3Database struct {
+	url  *url.URL
 	obj  obj.Interface
 	hash relation.ObjectHashModelInterface
 	info relation.ObjectInfoModelInterface
@@ -96,7 +98,23 @@ func (c *s3Database) CheckHash(hash string) error {
 }
 
 func (c *s3Database) urlName(name string) string {
-	return config.Config.Object.ApiURL + name
+	u := url.URL{
+		Scheme:      c.url.Scheme,
+		Opaque:      c.url.Opaque,
+		User:        c.url.User,
+		Host:        c.url.Host,
+		Path:        c.url.Path,
+		RawPath:     c.url.RawPath,
+		OmitHost:    c.url.OmitHost,
+		ForceQuery:  c.url.ForceQuery,
+		RawQuery:    c.url.RawQuery,
+		Fragment:    c.url.Fragment,
+		RawFragment: c.url.RawFragment,
+	}
+	v := make(url.Values, 1)
+	v.Set("name", name)
+	u.RawQuery = v.Encode()
+	return u.String()
 }
 
 func (c *s3Database) UUID() string {

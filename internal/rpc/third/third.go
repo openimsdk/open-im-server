@@ -2,6 +2,7 @@ package third
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
@@ -11,9 +12,14 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
 	"google.golang.org/grpc"
+	"net/url"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	u, err := url.Parse(config.Config.Object.ApiURL)
+	if err != nil {
+		return err
+	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
@@ -32,7 +38,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	third.RegisterThirdServer(server, &thirdServer{
 		thirdDatabase: controller.NewThirdDatabase(cache.NewCacheModel(rdb)),
 		userCheck:     check.NewUserCheck(client),
-		s3dataBase:    controller.NewS3Database(o, relation.NewObjectHash(db), relation.NewObjectInfo(db), relation.NewObjectPut(db)),
+		s3dataBase:    controller.NewS3Database(o, relation.NewObjectHash(db), relation.NewObjectInfo(db), relation.NewObjectPut(db), u),
 	})
 	return nil
 }
