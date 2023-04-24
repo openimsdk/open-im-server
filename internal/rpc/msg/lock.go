@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const GlOBLLOCK = "GLOBAL_LOCK"
+const GlobalLock = "GLOBAL_LOCK"
 
 type MessageLocker interface {
 	LockMessageTypeKey(clientMsgID, typeKey string) (err error)
@@ -33,7 +33,7 @@ func (l *LockerMessage) LockMessageTypeKey(clientMsgID, typeKey string) (err err
 }
 func (l *LockerMessage) LockGlobalMessage(clientMsgID string) (err error) {
 	for i := 0; i < 3; i++ {
-		err = db.DB.LockMessageTypeKey(clientMsgID, GlOBLLOCK)
+		err = db.DB.LockMessageTypeKey(clientMsgID, GlobalLock)
 		if err != nil {
 			time.Sleep(time.Millisecond * 100)
 			continue
@@ -48,5 +48,5 @@ func (l *LockerMessage) UnLockMessageTypeKey(clientMsgID string, typeKey string)
 	return db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 func (l *LockerMessage) UnLockGlobalMessage(clientMsgID string) error {
-	return db.DB.UnLockMessageTypeKey(clientMsgID, GlOBLLOCK)
+	return db.DB.UnLockMessageTypeKey(clientMsgID, GlobalLock)
 }
