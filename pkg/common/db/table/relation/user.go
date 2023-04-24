@@ -20,7 +20,7 @@ type UserModel struct {
 }
 
 func (u *UserModel) GetNickname() string {
-	return UserModelTableName
+	return u.Nickname
 }
 
 func (u *UserModel) GetFaceURL() string {
