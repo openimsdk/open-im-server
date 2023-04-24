@@ -25,7 +25,7 @@ func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.Ge
 		return nil, err
 	}
 	resp = &pbFriend.GetPaginationBlacksResp{}
-	resp.Blacks, err = (*convert.NewDBBlack(nil, s.RegisterCenter)).DB2PB(ctx, blacks)
+	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}

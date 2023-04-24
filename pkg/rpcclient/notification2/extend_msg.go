@@ -2,15 +2,17 @@ package notification2
 
 import (
 	"context"
+	"encoding/json"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/golang/protobuf/proto"
 )
 
 type ExtendMsgNotificationSender struct {
@@ -23,7 +25,7 @@ func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistr
 
 func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var content apistruct.ReactionMessageModifierNotification
+	var content sdkws.ReactionMessageModifierNotification
 	content.SourceID = req.SourceID
 	content.OpUserID = mcontext.GetOpUserID(ctx)
 	content.SessionType = req.SessionType
@@ -41,11 +43,11 @@ func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx conte
 	content.IsReact = resp.IsReact
 	content.IsExternalExtensions = req.IsExternalExtensions
 	content.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(content), isHistory, isReactionFromCache)
+	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, &content, isHistory, isReactionFromCache)
 }
 func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
 	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var content apistruct.ReactionMessageDeleteNotification
+	var content sdkws.ReactionMessageDeleteNotification
 	content.SourceID = req.SourceID
 	content.OpUserID = req.OpUserID
 	content.SessionType = req.SessionType
@@ -61,9 +63,9 @@ func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx contex
 	content.SuccessReactionExtensions = keyMap
 	content.ClientMsgID = req.ClientMsgID
 	content.MsgFirstModifyTime = req.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(content), isHistory, isReactionFromCache)
+	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, &content, isHistory, isReactionFromCache)
 }
-func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) error {
+func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, m proto.Message, isHistory bool, isReactionFromCache bool) error {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
@@ -74,6 +76,10 @@ func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context,
 		utils.SetSwitchFromOptions(options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
 	}
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		return errs.ErrData.Wrap(err.Error())
+	}
 	pbData := msg.SendMsgReq{
 		MsgData: &sdkws.MsgData{
 			SendID:      sendID,
@@ -81,7 +87,7 @@ func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context,
 			SessionType: sessionType,
 			MsgFrom:     constant.SysMsgType,
 			ContentType: contentType,
-			Content:     []byte(content),
+			Content:     bytes,
 			CreateTime:  utils.GetCurrentTimestampByMill(),
 			Options:     options,
 		},
@@ -92,6 +98,6 @@ func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context,
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	_, err := e.SendMsg(ctx, &pbData)
+	_, err = e.SendMsg(ctx, &pbData)
 	return err
 }

@@ -3,7 +3,7 @@ package msgtransfer
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -12,6 +12,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 
@@ -68,7 +69,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 		}
 		ctx = mcontext.SetOperationID(ctx, operationID)
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
-			notification := &apistruct.ReactionMessageModifierNotification{}
+			notification := &sdkws.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}
@@ -102,7 +103,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 				}
 			}
 		} else if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageDeleter {
-			notification := &apistruct.ReactionMessageDeleteNotification{}
+			notification := &sdkws.ReactionMessageDeleteNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}

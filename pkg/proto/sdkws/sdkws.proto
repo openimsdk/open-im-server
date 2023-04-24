@@ -57,8 +57,7 @@ message PublicUserInfo{
   string userID = 1;
   string nickname = 2;
   string faceURL = 3;
-  int32 gender = 4;
-  string ex = 5;
+  string ex = 4;
 }
 
 message UserInfo{
@@ -108,18 +107,16 @@ message FriendRequest{
   string fromUserID = 1;
   string fromNickname = 2;
   string fromFaceURL = 3;
-  int32 fromGender = 4;
-  string toUserID = 5;
-  string toNickname = 6;
-  string toFaceURL = 7;
-  int32 toGender = 8;
-  int32 handleResult = 9;
-  string reqMsg = 10;
-  int64 createTime = 11;
-  string handlerUserID = 12;
-  string handleMsg = 13;
-  int64 handleTime = 14;
-  string ex = 15;
+  string toUserID = 4;
+  string toNickname = 5;
+  string toFaceURL = 6;
+  int32 handleResult = 7;
+  string reqMsg = 8;
+  int64 createTime = 9;
+  string handlerUserID = 10;
+  string handleMsg = 11;
+  int64 handleTime = 12;
+  string ex = 13;
 }
 
 
@@ -623,3 +620,22 @@ message KeyValue {
   int64 latestUpdateTime = 3;
 }
 
+message ReactionMessageModifierNotification {
+  string sourceID = 1;
+  string opUserID = 2;
+  int32 sessionType = 3;
+  map <string, KeyValue>successReactionExtensions = 4;
+  string clientMsgID = 5;
+  bool isReact = 6;
+  bool isExternalExtensions = 7;
+  int64 msgFirstModifyTime = 8;
+}
+
+message ReactionMessageDeleteNotification {
+  string sourceID = 1;
+  string opUserID = 2;
+  int32 sessionType = 3;
+  map <string, KeyValue>successReactionExtensions = 4;
+  string clientMsgID = 5;
+  int64 msgFirstModifyTime = 6;
+}

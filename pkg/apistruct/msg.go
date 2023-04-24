@@ -112,26 +112,6 @@ type DeleteMessageReactionExtensionsResp struct {
 	Data []*msg.KeyValueResp
 }
 
-type ReactionMessageModifierNotification struct {
-	SourceID                  string                     `json:"sourceID"  binding:"required"`
-	OpUserID                  string                     `json:"opUserID"  binding:"required"`
-	SessionType               int32                      `json:"sessionType" binding:"required"`
-	SuccessReactionExtensions map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID               string                     `json:"clientMsgID" binding:"required"`
-	IsReact                   bool                       `json:"isReact"`
-	IsExternalExtensions      bool                       `json:"isExternalExtensions"`
-	MsgFirstModifyTime        int64                      `json:"msgFirstModifyTime"`
-}
-
-type ReactionMessageDeleteNotification struct {
-	SourceID                  string                     `json:"sourceID"  binding:"required"`
-	OpUserID                  string                     `json:"opUserID"  binding:"required"`
-	SessionType               int32                      `json:"sessionType" binding:"required"`
-	SuccessReactionExtensions map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID               string                     `json:"clientMsgID" binding:"required"`
-	MsgFirstModifyTime        int64                      `json:"msgFirstModifyTime"`
-}
-
 type PictureBaseInfo struct {
 	UUID   string `mapstructure:"uuid"`
 	Type   string `mapstructure:"type" `
