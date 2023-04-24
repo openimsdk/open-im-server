@@ -61,7 +61,7 @@ func run(port int) error {
 	log.ZInfo(context.Background(), "start server success", "address", address, "version", config.Version)
 	err = router.Run(address)
 	if err != nil {
-		log.Error("", "api run failed ", address, err.Error())
+		log.ZError(context.Background(), "api run failed ", err, "address", address)
 		return err
 	}
 	return nil
