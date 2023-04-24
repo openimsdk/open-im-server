@@ -1,5 +1,5 @@
 groupCreated:
-  isSendMsg: true //是否发送消息，不发消息，无声的触发同步， 发消息为触发会话
+  isSendMsg: true //是否发送消息，不发消息，无声的触发同步， 发消息为触发会话，打开了只发一条消息过去，存的时候只有一条消息，存一条
   unreadCount: false // 只在isSendMsg为true的情况下有作用
   offlinePush:
     enable: false
@@ -7,148 +7,115 @@ groupCreated:
     desc: "create group desc"
     ext: "create group ext"
   
-# 加消息contentType，老的作为通知的 content统一json 结构体使用pb的
+# 加消息contentType，老的作为通知的 content统一json 结构体使用pb的, 以通知展现，通知是发在线通知还是离线通知
 
 
 groupInfoSet:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupInfoSet title"
     desc: "groupInfoSet desc"
     ext: "groupInfoSet ext"
-  defaultTips:
-    tips: "modified the group profile"  # group info changed by xx
+
 
 joinGroupApplication:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "joinGroupApplication title"
     desc: "joinGroupApplication desc"
     ext: "joinGroupApplication ext"
-  defaultTips:
-    tips: "apply to join the group"  # group info changed by xx
 
 memberQuit:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "memberQuit title"
     desc: "memberQuit desc"
     ext: "memberQuit ext"
-  defaultTips:
-    tips: "quit group msg"  # group info changed by xx
-
+ 
 groupApplicationAccepted:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupApplicationAccepted title"
     desc: "groupApplicationAccepted desc"
     ext: "groupApplicationAccepted ext"
-  defaultTips:
-    tips: "was allowed to join the group"  # group info changed by xx
-
+ 
 groupApplicationRejected:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: " title"
     desc: " desc"
     ext: " ext"
-  defaultTips:
-    tips: "was rejected into the group"  # group info changed by xx
+
 
 groupOwnerTransferred:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupOwnerTransferred title"
     desc: "groupOwnerTransferred desc"
     ext: "groupOwnerTransferred ext"
-  defaultTips:
-    tips: "become a new group owner"  # group info changed by xx
 
 memberKicked:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "memberKicked title"
     desc: "memberKicked desc"
     ext: "memberKicked ext"
-  defaultTips:
-    tips: "was kicked out of the group"  # group info changed by xx
 
 memberInvited:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "memberInvited title"
     desc: "memberInvited desc"
     ext: "memberInvited ext"
-  defaultTips:
-    tips: "was invited into the group"  # group info changed by xx
 
 memberEnter:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "memberEnter title"
     desc: "memberEnter desc"
     ext: "memberEnter ext"
-  defaultTips:
-    tips: "entered the group"  # group info changed by xx
 
 groupDismissed:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupDismissed title"
     desc: "groupDismissed desc"
     ext: "groupDismissed ext"
-  defaultTips:
-    tips: "group dismissed"
-
 
 groupMuted:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupMuted title"
     desc: "groupMuted desc"
     ext: "groupMuted ext"
-  defaultTips:
-    tips: "group Muted"
 
 groupCancelMuted:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupCancelMuted title"
     desc: "groupCancelMuted desc"
     ext: "groupCancelMuted ext"
@@ -157,42 +124,31 @@ groupCancelMuted:
 
 
 groupMemberMuted:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupMemberMuted title"
     desc: "groupMemberMuted desc"
     ext: "groupMemberMuted ext"
-  defaultTips:
-    tips: "group Member Muted"
 
 groupMemberCancelMuted:
-  conversation:
-    reliabilityLevel: 3
-    unreadCount: true
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupMemberCancelMuted title"
     desc: "groupMemberCancelMuted desc"
     ext: "groupMemberCancelMuted ext"
-  defaultTips:
-    tips: "group Member Cancel Muted"
 
 groupMemberInfoSet:
-  conversation:
-    reliabilityLevel: 2
-    unreadCount: false
+  isSendMsg: true
+  unreadCount: false
   offlinePush:
-    switch: false
+    enable: false
     title: "groupMemberInfoSet title"
     desc: "groupMemberInfoSet desc"
     ext: "groupMemberInfoSet ext"
-  defaultTips:
-    tips: "group member info set"
-
-
 
 #############################friend#################################
 friendApplicationAdded:
