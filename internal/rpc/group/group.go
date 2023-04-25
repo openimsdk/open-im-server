@@ -3,6 +3,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -26,8 +27,6 @@ import (
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/check"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
@@ -48,19 +47,28 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	user := rpcclient.NewUserClient(client)
+	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupDatabase:         controller.InitGroupDatabase(db, rdb, mongo.GetDatabase()),
-		UserCheck:             check.NewUserCheck(client),
-		Notification:          notification.NewCheck(client),
+		GroupDatabase: database,
+		User:          user,
+		Notification: notification2.NewGroupNotificationSender(database, client, func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error) {
+			users, err := user.GetUsersInfo(ctx, userIDs)
+			if err != nil {
+				return nil, err
+			}
+			return utils.Slice(users, func(e *sdkws.UserInfo) rpcclient.CommonUser { return e }), nil
+		}),
 		conversationRpcClient: rpcclient.NewConversationClient(client),
 	})
 	return nil
 }
 
 type groupServer struct {
-	GroupDatabase         controller.GroupDatabase
-	UserCheck             *check.UserCheck
-	Notification          *notification.Check
+	GroupDatabase controller.GroupDatabase
+	User          *rpcclient.UserClient
+	//Notification          *notification.Check
+	Notification          *notification2.GroupNotificationSender
 	conversationRpcClient *rpcclient.ConversationClient
 }
 
@@ -81,7 +89,7 @@ func (s *groupServer) GetUsernameMap(ctx context.Context, userIDs []string, comp
 	if len(userIDs) == 0 {
 		return map[string]string{}, nil
 	}
-	users, err := s.UserCheck.GetPublicUserInfos(ctx, userIDs, complete)
+	users, err := s.User.GetPublicUserInfos(ctx, userIDs, complete)
 	if err != nil {
 		return nil, err
 	}
@@ -130,11 +138,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.Wrap("no group owner")
 	}
-	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
+	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID, mcontext.GetOpUserID(ctx))
 	if utils.Duplicate(userIDs) {
 		return nil, errs.ErrArgs.Wrap("group member repeated")
 	}
-	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, userIDs, true)
+	userMap, err := s.User.GetUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +202,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}()
 	} else {
-		s.Notification.GroupCreatedNotification(ctx, group.GroupID, userIDs)
+		s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
 	}
 	return resp, nil
 }
@@ -258,7 +266,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, errs.ErrDismissedAlready.Wrap()
 	}
-	userMap, err := s.UserCheck.GetUsersInfoMap(ctx, req.InvitedUserIDs, true)
+	userMap, err := s.User.GetUsersInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -497,7 +505,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	}
 	userIDs = utils.Distinct(userIDs)
 	groupIDs = utils.Distinct(groupIDs)
-	userMap, err := s.UserCheck.GetPublicUserInfoMap(ctx, userIDs, true)
+	userMap, err := s.User.GetPublicUserInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
 	}
@@ -586,7 +594,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	user, err := s.UserCheck.GetPublicUserInfo(ctx, req.FromUserID)
+	user, err := s.User.GetPublicUserInfo(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -624,7 +632,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (resp *pbGroup.JoinGroupResp, err error) {
-	user, err := s.UserCheck.GetUserInfo(ctx, req.InviterUserID)
+	user, err := s.User.GetUserInfo(ctx, req.InviterUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -660,7 +668,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID, mcontext.GetOperationID(ctx))
+		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID)
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
@@ -723,10 +731,10 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
-	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
-	if err != nil {
-		return nil, err
-	}
+	//userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
+	//if err != nil {
+	//	return nil, err
+	//}
 	resp := &pbGroup.SetGroupInfoResp{}
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) == 0 {
@@ -739,7 +747,12 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	s.Notification.GroupInfoSetNotification(ctx, req.GroupInfoForSet.GroupID, group.GroupName, group.Notification, group.Introduction, group.FaceURL, req.GroupInfoForSet.NeedVerification)
+	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{group.GroupID}, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	userIDs := utils.Slice(members, func(e *relationTb.GroupMemberModel) string { return e.GroupID })
+	s.Notification.GroupInfoSetNotification(ctx, group, members, req.GroupInfoForSet.NeedVerification.GetValuePtr())
 	if req.GroupInfoForSet.Notification != "" {
 		args := &pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
@@ -861,7 +874,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
 	resp := &pbGroup.GetUserReqApplicationListResp{}
-	user, err := s.UserCheck.GetPublicUserInfo(ctx, req.UserID)
+	user, err := s.User.GetPublicUserInfo(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
