@@ -57,13 +57,54 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 	}
 }
 
+func newSessionTypeConf() map[int32]int32 {
+	return map[int32]int32{
+		// group
+		constant.GroupCreatedNotification:                 constant.SuperGroupChatType,
+		constant.GroupInfoSetNotification:                 constant.SuperGroupChatType,
+		constant.JoinGroupApplicationNotification:         constant.SuperGroupChatType,
+		constant.MemberQuitNotification:                   constant.SingleChatType,
+		constant.GroupApplicationAcceptedNotification:     constant.SingleChatType,
+		constant.GroupApplicationRejectedNotification:     constant.SingleChatType,
+		constant.GroupOwnerTransferredNotification:        constant.SuperGroupChatType,
+		constant.MemberKickedNotification:                 constant.SuperGroupChatType,
+		constant.MemberInvitedNotification:                constant.SuperGroupChatType,
+		constant.MemberEnterNotification:                  constant.SuperGroupChatType,
+		constant.GroupDismissedNotification:               constant.SuperGroupChatType,
+		constant.GroupMutedNotification:                   constant.SuperGroupChatType,
+		constant.GroupCancelMutedNotification:             constant.SuperGroupChatType,
+		constant.GroupMemberMutedNotification:             constant.SuperGroupChatType,
+		constant.GroupMemberCancelMutedNotification:       constant.SuperGroupChatType,
+		constant.GroupMemberInfoSetNotification:           constant.SuperGroupChatType,
+		constant.GroupMemberSetToAdminNotification:        constant.SuperGroupChatType,
+		constant.GroupMemberSetToOrdinaryUserNotification: constant.SuperGroupChatType,
+		// user
+		constant.UserInfoUpdatedNotification: constant.SingleChatType,
+		// friend
+		constant.FriendApplicationNotification:         constant.SingleChatType,
+		constant.FriendApplicationApprovedNotification: constant.SingleChatType,
+		constant.FriendApplicationRejectedNotification: constant.SingleChatType,
+		constant.FriendAddedNotification:               constant.SingleChatType,
+		constant.FriendDeletedNotification:             constant.SingleChatType,
+		constant.FriendRemarkSetNotification:           constant.SingleChatType,
+		constant.BlackAddedNotification:                constant.SingleChatType,
+		constant.BlackDeletedNotification:              constant.SingleChatType,
+		constant.FriendInfoUpdatedNotification:         constant.SingleChatType,
+		// conversation
+		constant.ConversationChangeNotification:      constant.SingleChatType,
+		constant.ConversationUnreadNotification:      constant.SingleChatType,
+		constant.ConversationPrivateChatNotification: constant.SingleChatType,
+	}
+}
+
 type MsgClient struct {
 	*MetaClient
 	contentTypeConf map[int32]config.NotificationConf
+	sessionTypeConf map[int32]int32
 }
 
 func NewMsgClient(zk discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
-	return &MsgClient{MetaClient: NewMetaClient(zk, config.Config.RpcRegisterName.OpenImMsgName), contentTypeConf: newContentTypeConf()}
+	return &MsgClient{MetaClient: NewMetaClient(zk, config.Config.RpcRegisterName.OpenImMsgName), contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
 }
 
 func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
@@ -93,7 +134,7 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 	return resp, err
 }
 
-func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
 	content, err := json.Marshal(m)
 	if err != nil {
 		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "sessionType", sessionType, "m", m)
@@ -105,13 +146,13 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	var title, desc, ex string
 	msg.SendID = sendID
 	msg.RecvID = recvID
-	if sessionType == constant.SuperGroupChatType {
-		msg.GroupID = recvID
-	}
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
-	msg.SessionType = sessionType
+	msg.SessionType = c.sessionTypeConf[contentType]
+	if msg.SessionType == constant.SuperGroupChatType {
+		msg.GroupID = recvID
+	}
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	// msg.Options = make(map[string]bool, 7)
