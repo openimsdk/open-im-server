@@ -3,7 +3,6 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -25,7 +24,7 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx 
 		SendID:    sendID,
 		IsPrivate: isPrivateChat,
 	}
-	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationSetPrivate)
+	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, constant.SingleChatType, tips)
 }
 
 // 会话改变
@@ -33,7 +32,7 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 	tips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
 	}
-	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
+	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, constant.SingleChatType, tips)
 }
 
 // 会话未读数同步
@@ -43,5 +42,5 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ct
 		ConversationIDList:    []string{conversationID},
 		UpdateUnreadCountTime: updateUnreadCountTime,
 	}
-	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
+	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, constant.SingleChatType, tips)
 }

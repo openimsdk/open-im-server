@@ -2,8 +2,6 @@ package notification
 
 import (
 	"context"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -94,7 +92,7 @@ func (f *FriendNotificationSender) getFromToUserNickname(ctx context.Context, fr
 
 func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) error {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	return f.Notification(ctx, opUserID, changedUserID, constant.SingleChatType, constant.UserInfoUpdatedNotification, &tips, config.Config.Notification.UserInfoUpdated)
+	return f.Notification(ctx, opUserID, changedUserID, constant.SingleChatType, constant.UserInfoUpdatedNotification, &tips)
 }
 
 func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) error {
@@ -102,7 +100,7 @@ func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}}
-	return f.Notification(ctx, req.FromUserID, req.ToUserID, constant.SingleChatType, constant.FriendApplicationNotification, &tips, config.Config.Notification.FriendApplication)
+	return f.Notification(ctx, req.FromUserID, req.ToUserID, constant.SingleChatType, constant.FriendApplicationNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendApplicationAgreedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) error {
@@ -110,7 +108,7 @@ func (c *FriendNotificationSender) FriendApplicationAgreedNotification(ctx conte
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}, HandleMsg: req.HandleMsg}
-	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.SingleChatType, constant.FriendApplicationApprovedNotification, &tips, config.Config.Notification.FriendApplicationApproved)
+	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.SingleChatType, constant.FriendApplicationApprovedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendApplicationRefusedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) error {
@@ -118,7 +116,7 @@ func (c *FriendNotificationSender) FriendApplicationRefusedNotification(ctx cont
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}, HandleMsg: req.HandleMsg}
-	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.SingleChatType, constant.FriendApplicationRejectedNotification, &tips, config.Config.Notification.FriendApplicationRejected)
+	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.SingleChatType, constant.FriendApplicationRejectedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) error {
@@ -139,7 +137,7 @@ func (c *FriendNotificationSender) FriendAddedNotification(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	return c.Notification(ctx, fromUserID, toUserID, constant.SingleChatType, constant.FriendAddedNotification, &tips, config.Config.Notification.FriendAdded)
+	return c.Notification(ctx, fromUserID, toUserID, constant.SingleChatType, constant.FriendAddedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendDeletedNotification(ctx context.Context, req *pbFriend.DeleteFriendReq) error {
@@ -147,21 +145,21 @@ func (c *FriendNotificationSender) FriendDeletedNotification(ctx context.Context
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.FriendUserID,
 	}}
-	return c.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.SingleChatType, constant.FriendDeletedNotification, &tips, config.Config.Notification.FriendDeleted)
+	return c.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.SingleChatType, constant.FriendDeletedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Context, fromUserID, toUserID string) error {
 	tips := sdkws.FriendInfoChangedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = fromUserID
 	tips.FromToUserID.ToUserID = toUserID
-	return c.Notification(ctx, fromUserID, toUserID, constant.SingleChatType, constant.FriendRemarkSetNotification, &tips, config.Config.Notification.FriendRemarkSet)
+	return c.Notification(ctx, fromUserID, toUserID, constant.SingleChatType, constant.FriendRemarkSetNotification, &tips)
 }
 
 func (c *FriendNotificationSender) BlackAddedNotification(ctx context.Context, req *pbFriend.AddBlackReq) error {
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID
 	tips.FromToUserID.ToUserID = req.BlackUserID
-	return c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.SingleChatType, constant.BlackAddedNotification, &tips, config.Config.Notification.BlackAdded)
+	return c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.SingleChatType, constant.BlackAddedNotification, &tips)
 }
 
 func (c *FriendNotificationSender) BlackDeletedNotification(ctx context.Context, req *pbFriend.RemoveBlackReq) {
@@ -169,10 +167,10 @@ func (c *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.BlackUserID,
 	}}
-	c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.SingleChatType, constant.BlackDeletedNotification, &blackDeletedTips, config.Config.Notification.BlackDeleted)
+	c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.SingleChatType, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
 func (c *FriendNotificationSender) FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string, opUserID string) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	c.Notification(ctx, opUserID, needNotifiedUserID, constant.SingleChatType, constant.FriendInfoUpdatedNotification, &tips, config.Config.Notification.FriendInfoUpdated)
+	c.Notification(ctx, opUserID, needNotifiedUserID, constant.SingleChatType, constant.FriendInfoUpdatedNotification, &tips)
 }

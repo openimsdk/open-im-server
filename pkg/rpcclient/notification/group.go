@@ -3,7 +3,6 @@ package notification
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -354,7 +353,7 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	joinGroupApplicationTips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
 	for _, userID := range userIDs {
 		err := g.groupNotification(ctx, constant.JoinGroupApplicationNotification, joinGroupApplicationTips, mcontext.GetOpUserID(ctx), "", userID)
-		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, constant.SuperGroupChatType, joinGroupApplicationTips, config.Config.Notification.JoinGroupApplication)
+		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, constant.SuperGroupChatType, joinGroupApplicationTips)
 		if err != nil {
 			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
 		}
