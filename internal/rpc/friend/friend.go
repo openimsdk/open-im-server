@@ -3,6 +3,7 @@ package friend
 import (
 	"context"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
@@ -16,8 +17,7 @@ import (
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
-	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )

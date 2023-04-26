@@ -1,17 +1,18 @@
-package notification2
+package notification
 
 import (
 	"context"
 	"encoding/json"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
+
 	"github.com/golang/protobuf/proto"
 )
 

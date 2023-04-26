@@ -6,6 +6,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
@@ -18,8 +19,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/convert"
-	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )

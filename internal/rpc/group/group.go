@@ -3,12 +3,13 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -52,7 +53,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
 		User:          user,
-		Notification: notification2.NewGroupNotificationSender(database, client, func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error) {
+		Notification: notification.NewGroupNotificationSender(database, client, func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error) {
 			users, err := user.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -68,7 +69,7 @@ type groupServer struct {
 	GroupDatabase controller.GroupDatabase
 	User          *rpcclient.UserClient
 	//Notification          *notification.Check
-	Notification          *notification2.GroupNotificationSender
+	Notification          *notification.GroupNotificationSender
 	conversationRpcClient *rpcclient.ConversationClient
 }
 

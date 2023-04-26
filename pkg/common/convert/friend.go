@@ -5,7 +5,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	utils "github.com/OpenIMSDK/open_utils"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {

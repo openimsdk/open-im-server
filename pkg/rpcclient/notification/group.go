@@ -1,9 +1,11 @@
-package notification2
+package notification
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -17,7 +19,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/proto"
-	"time"
 )
 
 func NewGroupNotificationSender(db controller.GroupDatabase, sdr discoveryregistry.SvcDiscoveryRegistry, fn func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)) *GroupNotificationSender {

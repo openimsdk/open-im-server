@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
@@ -13,7 +14,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
@@ -52,9 +53,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 		return nil, err
 	}
 	if len(conversations) > 0 {
-		if err := utils.CopyStructFields(resp.Conversation, &conversations[0]); err != nil {
-			return nil, err
-		}
+		resp.Conversation = convert.ConversationDB2Pb(conversations[0])
 		return resp, nil
 	}
 	return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
@@ -66,9 +65,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 	if err != nil {
 		return nil, err
 	}
-	if err := utils.CopyStructFields(&resp.Conversations, conversations); err != nil {
-		return nil, err
-	}
+	resp.Conversations = convert.ConversationsDB2Pb(conversations)
 	return resp, nil
 }
 
@@ -78,24 +75,18 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbConver
 		return nil, err
 	}
 	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	if err := utils.CopyStructFields(&resp.Conversations, conversations); err != nil {
-		return nil, err
-	}
+	resp.Conversations = convert.ConversationsDB2Pb(conversations)
 	return resp, nil
 }
 
 func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbConversation.BatchSetConversationsReq) (*pbConversation.BatchSetConversationsResp, error) {
-	var conversations []*tableRelation.ConversationModel
-	if err := utils.CopyStructFields(&conversations, req.Conversations); err != nil {
-		return nil, err
-	}
+	conversations := convert.ConversationsPb2DB(req.Conversations)
 	err := c.ConversationDatabase.SetUserConversations(ctx, req.OwnerUserID, conversations)
 	if err != nil {
 		return nil, err
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
-	resp := &pbConversation.BatchSetConversationsResp{}
-	return resp, nil
+	return &pbConversation.BatchSetConversationsResp{}, nil
 }
 
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbConversation.SetConversationReq) (*pbConversation.SetConversationResp, error) {
@@ -116,6 +107,7 @@ func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversat
 	if err := c.ConversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
 		return nil, err
 	}
+	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
 	return &pbConversation.SetRecvMsgOptResp{}, nil
 }
 
@@ -187,7 +179,5 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbConversation.GetRecvMsgNotNotifyUserIDsResp{}
-	resp.UserIDs = userIDs
-	return resp, nil
+	return &pbConversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
 }
