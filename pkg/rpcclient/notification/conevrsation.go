@@ -19,29 +19,29 @@ func NewConversationNotificationSender(client discoveryregistry.SvcDiscoveryRegi
 }
 
 // SetPrivate调用
-func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) {
+func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) error {
 	tips := &sdkws.ConversationSetPrivateTips{
 		RecvID:    recvID,
 		SendID:    sendID,
 		IsPrivate: isPrivateChat,
 	}
-	c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationSetPrivate)
+	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationSetPrivate)
 }
 
 // 会话改变
-func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string) {
+func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string) error {
 	tips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
 	}
-	c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
+	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
 }
 
 // 会话未读数同步
-func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, updateUnreadCountTime int64) {
+func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, updateUnreadCountTime int64) error {
 	tips := &sdkws.ConversationUpdateTips{
 		UserID:                userID,
 		ConversationIDList:    []string{conversationID},
 		UpdateUnreadCountTime: updateUnreadCountTime,
 	}
-	c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
+	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, constant.SingleChatType, tips, config.Config.Notification.ConversationChanged)
 }
