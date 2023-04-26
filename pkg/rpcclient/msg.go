@@ -11,7 +11,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+
 	"github.com/golang/protobuf/proto"
+	// "google.golang.org/protobuf/proto"
 )
 
 func newContentTypeConf() map[int32]config.NotificationConf {
@@ -102,6 +104,9 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	var title, desc, ex string
 	msg.SendID = sendID
 	msg.RecvID = recvID
+	if sessionType == constant.SuperGroupChatType {
+		msg.GroupID = recvID
+	}
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
