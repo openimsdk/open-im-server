@@ -2,8 +2,8 @@ package notification
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -218,19 +218,21 @@ func (g *GroupNotificationSender) getFromToUserNickname(ctx context.Context, fro
 }
 
 func (g *GroupNotificationSender) groupNotification(ctx context.Context, contentType int32, m proto.Message, sendID, groupID, recvUserID string) (err error) {
-	content, err := json.Marshal(m)
-	if err != nil {
-		return err
-	}
-	notificationMsg := rpcclient.NotificationMsg{
-		SendID:      sendID,
-		RecvID:      recvUserID,
-		ContentType: contentType,
-		SessionType: constant.GroupChatType,
-		MsgFrom:     constant.SysMsgType,
-		Content:     content,
-	}
-	return g.msgClient.Notification(ctx, &notificationMsg)
+	//content, err := json.Marshal(m)
+	//if err != nil {
+	//	return err
+	//}
+	//notificationMsg := rpcclient.NotificationMsg{
+	//	SendID:      sendID,
+	//	RecvID:      recvUserID,
+	//	ContentType: contentType,
+	//	SessionType: constant.GroupChatType,
+	//	MsgFrom:     constant.SysMsgType,
+	//	Content:     content,
+	//}
+	//return g.msgClient.Notification(ctx, &notificationMsg)
+
+	return err
 }
 
 func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, userMap map[string]*sdkws.UserInfo) (err error) {
@@ -317,12 +319,6 @@ func (g *GroupNotificationSender) mergeGroupFull(ctx context.Context, groupID st
 }
 
 func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, needVerification *int32) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
 	if err != nil {
 		return err
@@ -331,8 +327,10 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 	if needVerification != nil {
 		groupInfoChangedTips.Group.NeedVerification = *needVerification
 	}
-	return g.groupNotification(ctx, constant.GroupInfoSetNotification, groupInfoChangedTips, mcontext.GetOpUserID(ctx), group.GroupID, "")
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, constant.SuperGroupChatType, groupInfoChangedTips)
 }
+
+// ####################################
 
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {
 	defer log.ZDebug(ctx, "return")
@@ -356,6 +354,7 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	joinGroupApplicationTips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
 	for _, userID := range userIDs {
 		err := g.groupNotification(ctx, constant.JoinGroupApplicationNotification, joinGroupApplicationTips, mcontext.GetOpUserID(ctx), "", userID)
+		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, constant.SuperGroupChatType, joinGroupApplicationTips, config.Config.Notification.JoinGroupApplication)
 		if err != nil {
 			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
 		}

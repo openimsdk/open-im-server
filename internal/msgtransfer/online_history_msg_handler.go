@@ -170,6 +170,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 					ctxMsg.ctx = kafka.GetContextWithMQHeader(consumerMessages[i].Headers)
 					ctxMsg.message = &msgFromMQ
 					log.ZDebug(ctx, "single msg come to distribution center", msgFromMQ.String(), string(consumerMessages[i].Key))
+					//aggregationMsgs[string(consumerMessages[i].Key)] = append(aggregationMsgs[string(consumerMessages[i].Key)], ctxMsg)
 					if oldM, ok := aggregationMsgs[string(consumerMessages[i].Key)]; ok {
 						oldM = append(oldM, ctxMsg)
 						aggregationMsgs[string(consumerMessages[i].Key)] = oldM
@@ -211,7 +212,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	cMsg := make([]*sarama.ConsumerMessage, 0, 1000)
-	t := time.NewTicker(time.Duration(100) * time.Millisecond)
+	t := time.NewTicker(time.Millisecond * 100)
 	go func() {
 		for {
 			select {

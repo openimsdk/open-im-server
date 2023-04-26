@@ -127,7 +127,6 @@ message SetMessageReactionExtensionsResp {
   repeated KeyValueResp result = 4;
 }
 
-
 message GetMessagesReactionExtensionsReq {
   string sourceID = 1;
   int32 sessionType = 2;
