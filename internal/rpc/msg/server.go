@@ -2,7 +2,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -25,14 +24,14 @@ type msgServer struct {
 	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase       controller.MsgDatabase
 	ExtendMsgDatabase controller.ExtendMsgDatabase
-	// Group             *check.GroupChecker
-	User         *rpcclient.UserClient
-	Conversation *rpcclient.ConversationClient
-	friend       *rpcclient.FriendClient
-	*localcache.GroupLocalCache
-	black         *rpcclient.BlackClient
-	MessageLocker MessageLocker
-	Handlers      MessageInterceptorChain
+	Group             *rpcclient.GroupClient
+	User              *rpcclient.UserClient
+	Conversation      *rpcclient.ConversationClient
+	friend            *rpcclient.FriendClient
+	black             *rpcclient.BlackClient
+	GroupLocalCache   *localcache.GroupLocalCache
+	MessageLocker     MessageLocker
+	Handlers          MessageInterceptorChain
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -65,9 +64,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
 
 	s := &msgServer{
-		Conversation: rpcclient.NewConversationClient(client),
-		User:         rpcclient.NewUserClient(client),
-		// Group:             check.NewGroupChecker(client),
+		Conversation:      rpcclient.NewConversationClient(client),
+		User:              rpcclient.NewUserClient(client),
+		Group:             rpcclient.NewGroupClient(client),
 		MsgDatabase:       msgDatabase,
 		ExtendMsgDatabase: extendMsgDatabase,
 		RegisterCenter:    client,

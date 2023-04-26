@@ -12,14 +12,15 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
-	// groupChecker *check.GroupChecker
-	controller.ConversationDatabase
+	group                          *rpcclient.GroupClient
+	ConversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
@@ -38,8 +39,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
-		// groupChecker:         check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
+		group:                          rpcclient.NewGroupClient(client),
+		ConversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
 }
@@ -102,7 +103,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
+	err := c.ConversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	var err error
 	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.groupChecker.GetGroupInfo(ctx, req.Conversation.GroupID)
+		groupInfo, err := c.group.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
 		}
