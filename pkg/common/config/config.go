@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
@@ -41,9 +42,10 @@ type CallBackConfig struct {
 }
 
 type NotificationConf struct {
-	IsSendMsg   bool         `yaml:"isSendMsg"`
-	UnreadCount bool         `yaml:"unreadCount"`
-	OfflinePush POfflinePush `yaml:"offlinePush"`
+	IsSendMsg        bool         `yaml:"isSendMsg"`
+	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 presistent
+	UnreadCount      bool         `yaml:"unreadCount"`
+	OfflinePush      POfflinePush `yaml:"offlinePush"`
 }
 
 type POfflinePush struct {
@@ -361,6 +363,12 @@ func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	if cfg.OfflinePush.Enable {
 		opts = utils.WithOptions(opts, utils.WithOfflinePush())
 	}
+	switch cfg.ReliabilityLevel {
+	case constant.UnreliableNotification:
+	case constant.ReliableNotificationNoMsg:
+		opts = utils.WithOptions(opts, utils.WithHistory(true), utils.WithPersistent())
+	}
+	opts = utils.WithOptions(opts, utils.WithSendMsg(cfg.IsSendMsg))
 	return opts
 }
 

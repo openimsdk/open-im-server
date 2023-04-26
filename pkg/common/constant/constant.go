@@ -143,6 +143,7 @@ const (
 	IsSenderNotificationPush   = "senderNotificationPush"
 	IsReactionFromCache        = "reactionFromCache"
 	IsNotification             = "isNotification"
+	IsSendMsg                  = "isSendMsg"
 
 	//GroupStatus
 	GroupOk              = 0
@@ -213,6 +214,12 @@ const (
 const (
 	WriteDiffusion = 0
 	ReadDiffusion  = 1
+)
+
+const (
+	UnreliableNotification    = 1
+	ReliableNotificationNoMsg = 2
+	ReliableNotificationMsg   = 3
 )
 
 const (

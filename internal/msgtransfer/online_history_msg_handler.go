@@ -26,7 +26,6 @@ type MsgChannelValue struct {
 	aggregationID string //maybe userID or super groupID
 	ctx           context.Context
 	ctxMsgList    []*ContextMsg
-	lastSeq       uint64
 }
 
 type TriggerChannelValue struct {
@@ -53,10 +52,6 @@ type OnlineHistoryRedisConsumerHandler struct {
 	singleMsgSuccessCountMutex sync.Mutex
 	singleMsgFailedCountMutex  sync.Mutex
 
-	//producerToPush   *kafka.Producer
-	//producerToModify *kafka.Producer
-	//producerToMongo  *kafka.Producer
-
 	msgDatabase controller.MsgDatabase
 }
 
@@ -69,9 +64,6 @@ func NewOnlineHistoryRedisConsumerHandler(database controller.MsgDatabase) *Onli
 		och.chArrays[i] = make(chan Cmd2Value, 50)
 		go och.Run(i)
 	}
-	//och.producerToPush = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
-	//och.producerToModify = kafka.NewKafkaProducer(config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.MsgToModify.Topic)
-	//och.producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
 	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
@@ -89,60 +81,93 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				ctxMsgList := msgChannelValue.ctxMsgList
 				ctx := msgChannelValue.ctx
 				storageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				storagePushMsgList := make([]*ContextMsg, 0, 80)
-				notStoragePushMsgList := make([]*ContextMsg, 0, 80)
+				notStorageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				storageNotificationList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				notStorageNotificationList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				modifyMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
 				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "aggregationID", msgChannelValue.aggregationID)
-				var modifyMsgList []*pbMsg.MsgDataToMQ
-				//ctx := mcontext.NewCtx("redis consumer")
-				//mcontext.SetOperationID(ctx, triggerID)
-				for _, v := range ctxMsgList {
-					log.ZDebug(ctx, "msg come to storage center", "message", v.message.String())
-					isHistory := utils.GetSwitchFromOptions(v.message.MsgData.Options, constant.IsHistory)
-					isSenderSync := utils.GetSwitchFromOptions(v.message.MsgData.Options, constant.IsSenderSync)
-					if isHistory {
-						storageMsgList = append(storageMsgList, v.message)
-						storagePushMsgList = append(storagePushMsgList, v)
-					} else {
-						if !(!isSenderSync && msgChannelValue.aggregationID == v.message.MsgData.SendID) {
-							notStoragePushMsgList = append(notStoragePushMsgList, v)
-						}
-					}
-					if v.message.MsgData.ContentType == constant.ReactionMessageModifier || v.message.MsgData.ContentType == constant.ReactionMessageDeleter {
-						modifyMsgList = append(modifyMsgList, v.message)
-					}
-				}
-				if len(modifyMsgList) > 0 {
-					och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.aggregationID, "", modifyMsgList)
-				}
-				log.ZDebug(ctx, "msg storage length", "storageMsgList", len(storageMsgList), "push length", len(notStoragePushMsgList))
-				if len(storageMsgList) > 0 {
-					lastSeq, err := och.msgDatabase.BatchInsertChat2Cache(ctx, msgChannelValue.aggregationID, storageMsgList)
-					if err != nil {
-						log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageMsgList)
-						och.singleMsgFailedCountMutex.Lock()
-						och.singleMsgFailedCount += uint64(len(storageMsgList))
-						och.singleMsgFailedCountMutex.Unlock()
-					} else {
-						och.singleMsgSuccessCountMutex.Lock()
-						och.singleMsgSuccessCount += uint64(len(storageMsgList))
-						och.singleMsgSuccessCountMutex.Unlock()
-						och.msgDatabase.MsgToMongoMQ(ctx, msgChannelValue.aggregationID, "", storageMsgList, lastSeq)
-						for _, v := range storagePushMsgList {
-							och.msgDatabase.MsgToPushMQ(v.ctx, msgChannelValue.aggregationID, v.message)
-						}
-						for _, v := range notStoragePushMsgList {
-							och.msgDatabase.MsgToPushMQ(v.ctx, msgChannelValue.aggregationID, v.message)
-						}
-					}
-				} else {
-					for _, v := range notStoragePushMsgList {
-						p, o, err := och.msgDatabase.MsgToPushMQ(v.ctx, msgChannelValue.aggregationID, v.message)
-						if err != nil {
-							log.ZError(v.ctx, "kafka send failed", err, "msg", v.message.String(), "pid", p, "offset", o)
-						}
-					}
+				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList = och.getPushStorageMsgList(msgChannelValue.aggregationID, ctxMsgList)
+				och.handleMsg(ctx, msgChannelValue.aggregationID, storageMsgList, notStorageMsgList)
+				och.handleNotification(ctx, msgChannelValue.aggregationID, storageNotificationList, notStorageNotificationList)
+				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.aggregationID, modifyMsgList); err != nil {
+					log.ZError(ctx, "msg to modify mq error", err, "aggregationID", msgChannelValue.aggregationID, "modifyMsgList", modifyMsgList)
 				}
 			}
+		}
+	}
+}
+
+// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
+func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(aggregationID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*pbMsg.MsgDataToMQ) {
+	isStorage := func(msg *pbMsg.MsgDataToMQ) bool {
+		options2 := utils.Options(msg.MsgData.Options)
+		if options2.IsHistory() {
+			return true
+		} else {
+			if !(!options2.IsSenderSync() && aggregationID == msg.MsgData.SendID) {
+				return false
+			}
+		}
+		return false
+	}
+	for _, v := range totalMsgs {
+		options := utils.Options(v.message.MsgData.Options)
+		if options.IsNotification() {
+			// 原通知
+			notificationMsg := proto.Clone(v.message).(*pbMsg.MsgDataToMQ)
+			if options.IsSendMsg() {
+				// 消息
+				v.message.MsgData.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false))
+				storageMsgList = append(storageMsgList, v.message)
+			}
+			if isStorage(notificationMsg) {
+				storageNotificatoinList = append(storageNotificatoinList, notificationMsg)
+			} else {
+				notStorageNotificationList = append(notStorageNotificationList, notificationMsg)
+			}
+		} else {
+			if isStorage(v.message) {
+				storageMsgList = append(storageMsgList, v.message)
+			} else {
+				notStorageMsgList = append(notStorageMsgList, v.message)
+			}
+		}
+		if v.message.MsgData.ContentType == constant.ReactionMessageModifier || v.message.MsgData.ContentType == constant.ReactionMessageDeleter {
+			modifyMsgList = append(modifyMsgList, v.message)
+		}
+	}
+	return
+}
+
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+	och.handle(ctx, aggregationID, storageList, notStorageList, och.msgDatabase.BatchInsertChat2Cache)
+}
+
+func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+	och.handle(ctx, aggregationID, storageList, notStorageList, och.msgDatabase.NotificationBatchInsertChat2Cache)
+}
+
+func (och *OnlineHistoryRedisConsumerHandler) handle(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ, cacheAndIncr func(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)) {
+	if len(storageList) > 0 {
+		lastSeq, err := cacheAndIncr(ctx, aggregationID, storageList)
+		if err != nil {
+			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageList)
+			och.singleMsgFailedCountMutex.Lock()
+			och.singleMsgFailedCount += uint64(len(storageList))
+			och.singleMsgFailedCountMutex.Unlock()
+		} else {
+			och.singleMsgSuccessCountMutex.Lock()
+			och.singleMsgSuccessCount += uint64(len(storageList))
+			och.singleMsgSuccessCountMutex.Unlock()
+			och.msgDatabase.MsgToMongoMQ(ctx, aggregationID, storageList, lastSeq)
+			for _, v := range storageList {
+				och.msgDatabase.MsgToPushMQ(ctx, aggregationID, v)
+			}
+		}
+	}
+	if len(notStorageList) > 0 {
+		for _, v := range notStorageList {
+			och.msgDatabase.MsgToPushMQ(ctx, aggregationID, v)
 		}
 	}
 }

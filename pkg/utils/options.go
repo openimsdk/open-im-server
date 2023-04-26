@@ -8,6 +8,7 @@ type OptionsOpt func(Options)
 func NewOptions(opts ...OptionsOpt) Options {
 	options := make(map[string]bool, 11)
 	options[constant.IsNotification] = false
+	options[constant.IsSendMsg] = false
 	options[constant.IsHistory] = false
 	options[constant.IsPersistent] = false
 	options[constant.IsOfflinePush] = false
@@ -31,15 +32,21 @@ func WithOptions(options Options, opts ...OptionsOpt) Options {
 	return options
 }
 
-func WithNotification() OptionsOpt {
+func WithNotification(b bool) OptionsOpt {
 	return func(options Options) {
-		options[constant.IsNotification] = true
+		options[constant.IsNotification] = b
 	}
 }
 
-func WithHistory() OptionsOpt {
+func WithSendMsg(b bool) OptionsOpt {
 	return func(options Options) {
-		options[constant.IsHistory] = true
+		options[constant.IsSendMsg] = b
+	}
+}
+
+func WithHistory(b bool) OptionsOpt {
+	return func(options Options) {
+		options[constant.IsHistory] = b
 	}
 }
 
@@ -109,42 +116,46 @@ func (o Options) IsNotification() bool {
 	return o.Is(constant.IsNotification)
 }
 
-func (o Options) IsHistory(options Options) bool {
+func (o Options) IsSendMsg() bool {
+	return o.Is(constant.IsSendMsg)
+}
+
+func (o Options) IsHistory() bool {
 	return o.Is(constant.IsHistory)
 }
 
-func (o Options) IsPersistent(options Options) bool {
+func (o Options) IsPersistent() bool {
 	return o.Is(constant.IsPersistent)
 }
 
-func (o Options) IsOfflinePush(options Options) bool {
+func (o Options) IsOfflinePush() bool {
 	return o.Is(constant.IsOfflinePush)
 }
 
-func (o Options) IsUnreadCount(options Options) bool {
+func (o Options) IsUnreadCount() bool {
 	return o.Is(constant.IsUnreadCount)
 }
 
-func (o Options) IsConversationUpdate(options Options) bool {
+func (o Options) IsConversationUpdate() bool {
 	return o.Is(constant.IsConversationUpdate)
 }
 
-func (o Options) IsSenderSync(options Options) bool {
+func (o Options) IsSenderSync() bool {
 	return o.Is(constant.IsSenderSync)
 }
 
-func (o Options) IsNotPrivate(options Options) bool {
+func (o Options) IsNotPrivate() bool {
 	return o.Is(constant.IsNotPrivate)
 }
 
-func (o Options) IsSenderConversationUpdate(options Options) bool {
+func (o Options) IsSenderConversationUpdate() bool {
 	return o.Is(constant.IsSenderConversationUpdate)
 }
 
-func (o Options) IsSenderNotificationPush(options Options) bool {
+func (o Options) IsSenderNotificationPush() bool {
 	return o.Is(constant.IsSenderNotificationPush)
 }
 
-func (o Options) IsReactionFromCache(options Options) bool {
+func (o Options) IsReactionFromCache() bool {
 	return o.Is(constant.IsReactionFromCache)
 }

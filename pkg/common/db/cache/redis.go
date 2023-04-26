@@ -213,11 +213,19 @@ func (c *cache) DeleteTokenByUidPid(ctx context.Context, userID string, platform
 	return utils.Wrap1(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
+func (c *cache) getMessageCacheKey(sourceID string, seq int64) string {
+	return messageCache + sourceID + "_" + strconv.Itoa(int(seq))
+}
+
+func (c *cache) allMessageCacheKey(sourceID string) string {
+	return messageCache + sourceID + "_*"
+}
+
 func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range seqs {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
-		key := messageCache + userID + "_" + strconv.Itoa(int(v))
+		key := c.getMessageCacheKey(userID, v)
 		if err := pipe.Get(ctx, key).Err(); err != nil && err != redis.Nil {
 			return nil, nil, err
 		}
@@ -243,7 +251,7 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 	pipe := c.rdb.Pipeline()
 	var failedMsgs []pbMsg.MsgDataToMQ
 	for _, msg := range msgList {
-		key := messageCache + userID + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+		key := c.getMessageCacheKey(userID, msg.MsgData.Seq)
 		s, err := utils.Pb2String(msg.MsgData)
 		if err != nil {
 			return 0, utils.Wrap1(err)
@@ -263,7 +271,7 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) error {
 	pipe := c.rdb.Pipeline()
 	for _, v := range msgList {
-		if err := pipe.Del(ctx, messageCache+userID+"_"+strconv.Itoa(int(v.MsgData.Seq))).Err(); err != nil {
+		if err := pipe.Del(ctx, c.getMessageCacheKey(userID, v.MsgData.Seq)).Err(); err != nil {
 			return utils.Wrap1(err)
 		}
 	}
@@ -272,8 +280,7 @@ func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgLi
 }
 
 func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
-	key := messageCache + userID + "_" + "*"
-	vals, err := c.rdb.Keys(ctx, key).Result()
+	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(userID)).Result()
 	if err == redis.Nil {
 		return nil
 	}
@@ -381,7 +388,7 @@ func (c *cache) DelUserSignalList(ctx context.Context, userID string) error {
 
 func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
 	for _, seq := range seqs {
-		key := messageCache + userID + "_" + strconv.Itoa(int(seq))
+		key := c.getMessageCacheKey(userID, seq)
 		result, err := c.rdb.Get(ctx, key).Result()
 		if err != nil {
 			if err == redis.Nil {
