@@ -322,11 +322,11 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	groupInfoChangedTips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
+	tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
 	if needVerification != nil {
-		groupInfoChangedTips.Group.NeedVerification = *needVerification
+		tips.Group.NeedVerification = *needVerification
 	}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, constant.SuperGroupChatType, groupInfoChangedTips)
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, tips)
 }
 
 // ####################################
@@ -350,10 +350,9 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	if err != nil {
 		return err
 	}
-	joinGroupApplicationTips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
+	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
 	for _, userID := range userIDs {
-		err := g.groupNotification(ctx, constant.JoinGroupApplicationNotification, joinGroupApplicationTips, mcontext.GetOpUserID(ctx), "", userID)
-		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, constant.SuperGroupChatType, joinGroupApplicationTips)
+		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, tips)
 		if err != nil {
 			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
 		}
@@ -382,14 +381,14 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, re
 	if err != nil {
 		return err
 	}
-	memberQuitTips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
+	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
 		GroupID:  group.GroupID,
 		UserID:   user.UserID,
 		Nickname: user.Nickname,
 		FaceURL:  user.FaceURL,
 	}}
 	for _, userID := range append(userIDs, opUserID) {
-		err := g.groupNotification(ctx, constant.MemberQuitNotification, memberQuitTips, mcontext.GetOpUserID(ctx), "", userID)
+		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
 		if err != nil {
 			return err
 		}

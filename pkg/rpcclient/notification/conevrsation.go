@@ -24,7 +24,7 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx 
 		SendID:    sendID,
 		IsPrivate: isPrivateChat,
 	}
-	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, constant.SingleChatType, tips)
+	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
 // 会话改变
@@ -32,7 +32,7 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 	tips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
 	}
-	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, constant.SingleChatType, tips)
+	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }
 
 // 会话未读数同步
@@ -42,5 +42,5 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ct
 		ConversationIDList:    []string{conversationID},
 		UpdateUnreadCountTime: updateUnreadCountTime,
 	}
-	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, constant.SingleChatType, tips)
+	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }
