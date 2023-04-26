@@ -2,7 +2,6 @@ package conversation
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -12,14 +11,15 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	notification "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification2"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
-	// groupChecker *check.GroupChecker
-	controller.ConversationDatabase
+	group                          *rpcclient.GroupClient
+	ConversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
@@ -38,8 +38,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
-		// groupChecker:         check.NewGroupChecker(client),
-		ConversationDatabase: controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
+		group:                          rpcclient.NewGroupClient(client),
+		ConversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
 }
@@ -102,7 +102,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
+	err := c.ConversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 
 func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversation.SetRecvMsgOptReq) (*pbConversation.SetRecvMsgOptResp, error) {
 	conversation := tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}
-	if err := c.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &conversation, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
+	if err := c.ConversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &conversation, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
 		return nil, err
 	}
 	return &pbConversation.SetRecvMsgOptResp{}, nil
@@ -124,7 +124,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	var err error
 	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.groupChecker.GetGroupInfo(ctx, req.Conversation.GroupID)
+		groupInfo, err := c.group.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
 		}
