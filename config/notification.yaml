@@ -244,14 +244,14 @@ userInfoUpdated:
     ext: "Remove a blocked user"
 
 #####################conversation#########################
-conversationOptUpdate:
+conversationChanged:
   isSendMsg: true
   unreadCount: false 
   offlinePush:
     enable: true
-    title: "conversation opt update"
-    desc: "conversation opt update"
-    ext: "conversation opt update"
+    title: "conversation changed"
+    desc: "conversation changed"
+    ext: "conversation changed"
 
 conversationSetPrivate:
   isSendMsg: true

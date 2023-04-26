@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
 	_ "embed"
 
@@ -348,8 +349,19 @@ type Notification struct {
 	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
 	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
 	//////////////////////conversation///////////////////////
-	ConversationOptUpdate  NotificationConf `yaml:"conversationOptUpdate"`
+	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
+}
+
+func GetOptionsByNotification(cfg NotificationConf) utils.Options {
+	opts := utils.NewOptions()
+	if cfg.UnreadCount {
+		opts = utils.WithOptions(opts, utils.WithUnreadCount())
+	}
+	if cfg.OfflinePush.Enable {
+		opts = utils.WithOptions(opts, utils.WithOfflinePush())
+	}
+	return opts
 }
 
 func (c *config) unmarshalConfig(config interface{}, configPath string) error {

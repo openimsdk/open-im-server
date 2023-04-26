@@ -2,6 +2,7 @@ package rpcclient
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -9,6 +10,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/golang/protobuf/proto"
 )
 
 type MsgClient struct {
@@ -46,26 +48,29 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 	return resp, err
 }
 
-func (c *MsgClient) Notification(ctx context.Context, notificationMsg *NotificationMsg) error {
-	var err error
+func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, cfg config.NotificationConf, opts ...utils.OptionsOpt) error {
+	content, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
 	var offlineInfo sdkws.OfflinePushInfo
 	var title, desc, ex string
-	var pushEnable, unReadCount bool
-	msg.SendID = notificationMsg.SendID
-	msg.RecvID = notificationMsg.RecvID
-	msg.Content = notificationMsg.Content
-	msg.MsgFrom = notificationMsg.MsgFrom
-	msg.ContentType = notificationMsg.ContentType
-	msg.SessionType = notificationMsg.SessionType
+	msg.SendID = sendID
+	msg.RecvID = recvID
+	msg.Content = content
+	msg.MsgFrom = constant.SysMsgType
+	msg.ContentType = contentType
+	msg.SessionType = sessionType
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
-	msg.ClientMsgID = utils.GetMsgID(notificationMsg.SendID)
-	msg.Options = make(map[string]bool, 7)
-	msg.SenderNickname = notificationMsg.SenderNickname
-	msg.SenderFaceURL = notificationMsg.SenderFaceURL
-	utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, unReadCount)
-	utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, pushEnable)
+	msg.ClientMsgID = utils.GetMsgID(sendID)
+	// msg.Options = make(map[string]bool, 7)
+	// todo notification get sender name and face url
+	// msg.SenderNickname, msg.SenderFaceURL, err = c.getFaceURLAndName(sendID)
+	options := config.GetOptionsByNotification(cfg)
+	options = utils.WithOptions(options, opts...)
+	msg.Options = options
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
 	offlineInfo.Ex = ex

@@ -21,7 +21,7 @@ import (
 
 type conversationServer struct {
 	group                          *rpcclient.GroupClient
-	ConversationDatabase           controller.ConversationDatabase
+	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
 
@@ -41,14 +41,14 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
 		group:                          rpcclient.NewGroupClient(client),
-		ConversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
 }
 
 func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
 	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
-	conversations, err := c.ConversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
+	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
 	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := c.ConversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
+	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbCon
 }
 
 func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
-	conversations, err := c.ConversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
+	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbConver
 
 func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbConversation.BatchSetConversationsReq) (*pbConversation.BatchSetConversationsResp, error) {
 	conversations := convert.ConversationsPb2DB(req.Conversations)
-	err := c.ConversationDatabase.SetUserConversations(ctx, req.OwnerUserID, conversations)
+	err := c.conversationDatabase.SetUserConversations(ctx, req.OwnerUserID, conversations)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.ConversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
+	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 }
 
 func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversation.SetRecvMsgOptReq) (*pbConversation.SetRecvMsgOptResp, error) {
-	if err := c.ConversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
+	if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
 		return nil, err
 	}
 	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
@@ -129,7 +129,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		return nil, err
 	}
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.ConversationDatabase.SyncPeerUserPrivateConversationTx(ctx, &conversation)
+		err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, &conversation)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	err = c.ConversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
+	err = c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 
 // 获取超级大群开启免打扰的用户ID
 func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
-	userIDs, err := c.ConversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
+	userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}

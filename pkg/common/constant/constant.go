@@ -44,7 +44,7 @@ const (
 	BlackDeletedNotification              = 1208 //remove_black
 	FriendInfoUpdatedNotification         = 1209
 
-	ConversationOptChangeNotification = 1300 // change conversation opt
+	ConversationChangeNotification = 1300 // change conversation opt
 
 	UserNotificationBegin       = 1301
 	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip              = 204
@@ -142,6 +142,7 @@ const (
 	IsSenderConversationUpdate = "senderConversationUpdate"
 	IsSenderNotificationPush   = "senderNotificationPush"
 	IsReactionFromCache        = "reactionFromCache"
+	IsNotification             = "isNotification"
 
 	//GroupStatus
 	GroupOk              = 0
