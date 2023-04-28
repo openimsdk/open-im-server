@@ -1,5 +1,4 @@
 # Open-IM-Server 
-![avatar](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg)
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
 
@@ -163,6 +162,8 @@ We appreciate your support and trust, as well as your patience and understanding
 We anticipate that this work will be completed soon, and we will do our utmost to minimize any impact on you. Once again, we express our heartfelt thanks and apologies to you.
 
 Thank you!
+
+![avatar](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg)
 
 ## License
 
