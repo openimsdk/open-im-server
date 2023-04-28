@@ -117,7 +117,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(aggregationI
 			notificationMsg := proto.Clone(v.message).(*pbMsg.MsgDataToMQ)
 			if options.IsSendMsg() {
 				// 消息
-				v.message.MsgData.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false))
+				v.message.MsgData.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false), utils.WithSendMsg(false))
 				storageMsgList = append(storageMsgList, v.message)
 			}
 			if isStorage(notificationMsg) {
