@@ -80,9 +80,9 @@ type MsgDatabase interface {
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
 
 	MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.MsgDataToMQ) error
-	MsgToModifyMQ(ctx context.Context, aggregationID string, messages []*pbMsg.MsgDataToMQ) error
+	MsgToModifyMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ) error
 	MsgToPushMQ(ctx context.Context, sourceID string, msg2mq *pbMsg.MsgDataToMQ) (int32, int64, error)
-	MsgToMongoMQ(ctx context.Context, aggregationID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error
+	MsgToMongoMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error
 }
 
 func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.Model) MsgDatabase {
@@ -189,9 +189,9 @@ func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *pbMsg.Ms
 	return err
 }
 
-func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, aggregationID string, messages []*pbMsg.MsgDataToMQ) error {
+func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, aggregationID, &pbMsg.MsgDataToModifyByMQ{AggregationID: aggregationID, Messages: messages})
+		_, _, err := db.producerToModify.SendMessage(ctx, sourceID, &pbMsg.MsgDataToModifyByMQ{SourceID: sourceID, Messages: messages})
 		return err
 	}
 	return nil
@@ -206,9 +206,9 @@ func (db *msgDatabase) MsgToPushMQ(ctx context.Context, key string, msg2mq *pbMs
 	return partition, offset, err
 }
 
-func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, aggregationID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error {
+func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, aggregationID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, Messages: messages})
+		_, _, err := db.producerToModify.SendMessage(ctx, sourceID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, SourceID: sourceID, Messages: messages})
 		return err
 	}
 	return nil
