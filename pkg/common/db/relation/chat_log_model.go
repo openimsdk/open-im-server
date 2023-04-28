@@ -9,8 +9,8 @@ import (
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/jinzhu/copier"
+	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 )
 

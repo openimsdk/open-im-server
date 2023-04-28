@@ -21,7 +21,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 type Pusher struct {

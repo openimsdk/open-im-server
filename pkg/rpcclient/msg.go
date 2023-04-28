@@ -13,7 +13,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
 
@@ -137,7 +137,7 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
 	content, err := json.Marshal(m)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "sessionType", sessionType, "m", m)
+		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
 		return err
 	}
 	var req msg.SendMsgReq

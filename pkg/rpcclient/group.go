@@ -128,3 +128,14 @@ func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.
 	})
 	return resp.Members[0], err
 }
+
+func (g *GroupClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
+	cc, err := g.getConn()
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
+		GroupID: groupID,
+	})
+	return resp.UserIDs, err
+}

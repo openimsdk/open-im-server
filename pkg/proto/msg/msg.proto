@@ -21,8 +21,7 @@ message PushMsgDataToMQ{
 
 message MsgDataToMongoByMQ{
   int64 lastSeq = 1;
-  string aggregationID = 2;
-  // repeated MsgDataToMQ messages = 3;
+  string sourceID = 2;
   repeated sdkws.MsgData msgData = 3;
   string triggerID = 4;
 }
@@ -189,7 +188,7 @@ message KeyValueResp {
 message MsgDataToModifyByMQ{
   repeated sdkws.MsgData messages = 1;
   string triggerID = 2;
-  string aggregationID = 3;
+  string sourceID = 3;
 }
 
 message DelMsgsReq{

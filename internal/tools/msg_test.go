@@ -2,14 +2,15 @@ package tools
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
-	"strconv"
+	"google.golang.org/protobuf/proto"
 
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"

@@ -40,3 +40,12 @@ func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context
 	}
 	return conversation.GetConversation().RecvMsgOpt, err
 }
+
+func (c *ConversationClient) CreateConversationsWithoutNotification(ctx context.Context, conversations []*pbConversation.Conversation) error {
+	cc, err := c.getConn()
+	if err != nil {
+		return err
+	}
+	_, err = conversation.NewConversationClient(cc).CreateConversationsWithoutNotification(ctx, &pbConversation.CreateConversationsWithoutNotificationReq{Conversations: conversations})
+	return err
+}

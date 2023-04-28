@@ -85,7 +85,7 @@ func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbC
 	if err != nil {
 		return nil, err
 	}
-	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
+	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
 	return &pbConversation.BatchSetConversationsResp{}, nil
 }
 
@@ -98,7 +98,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err != nil {
 		return nil, err
 	}
-	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
+	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
 	resp := &pbConversation.SetConversationResp{}
 	return resp, nil
 }
@@ -107,7 +107,7 @@ func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversat
 	if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
 		return nil, err
 	}
-	c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
+	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
 	return &pbConversation.SetRecvMsgOptResp{}, nil
 }
 
@@ -180,4 +180,14 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 		return nil, err
 	}
 	return &pbConversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+}
+
+// create conversation without notification for msg redis transfer
+func (c *conversationServer) CreateConversationsWithoutNotification(ctx context.Context, req *pbConversation.CreateConversationsWithoutNotificationReq) (*pbConversation.CreateConversationsWithoutNotificationResp, error) {
+	conversations := convert.ConversationsPb2DB(req.Conversations)
+	err := c.conversationDatabase.CreateConversation(ctx, conversations)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.CreateConversationsWithoutNotificationResp{}, nil
 }

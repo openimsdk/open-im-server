@@ -90,6 +90,12 @@ message GetRecvMsgNotNotifyUserIDsResp {
   repeated string userIDs = 1;
 }
 
+message CreateConversationsWithoutNotificationReq {
+  repeated Conversation conversations = 1;
+}
+
+message CreateConversationsWithoutNotificationResp {
+}
 
 service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
@@ -100,4 +106,5 @@ service conversation {
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
   rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
   rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
+  rpc CreateConversationsWithoutNotification(CreateConversationsWithoutNotificationReq) returns(CreateConversationsWithoutNotificationResp);
 }

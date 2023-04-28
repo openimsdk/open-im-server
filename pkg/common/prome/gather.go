@@ -59,6 +59,10 @@ var (
 	GrpcRequestFailedCounter  prometheus.Counter
 
 	SendMsgCounter prometheus.Counter
+
+	// conversation
+	ConversationCreateSuccessCounter prometheus.Counter
+	ConversationCreateFailedCounter  prometheus.Counter
 )
 
 func NewUserLoginCounter() {
@@ -422,5 +426,25 @@ func NewMsgOfflinePushFailedCounter() {
 	MsgOfflinePushFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "msg_offline_push_failed",
 		Help: "The number of msg failed offline pushed",
+	})
+}
+
+func NewConversationCreateSuccessCounter() {
+	if ConversationCreateSuccessCounter != nil {
+		return
+	}
+	ConversationCreateSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "conversation_push_success",
+		Help: "The number of conversation successful pushed",
+	})
+}
+
+func NewConversationCreateFailedCounter() {
+	if ConversationCreateFailedCounter != nil {
+		return
+	}
+	ConversationCreateFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "conversation_push_failed",
+		Help: "The number of conversation failed pushed",
 	})
 }

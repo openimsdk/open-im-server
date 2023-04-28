@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	log "github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -10,7 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
 	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	prome "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 )
@@ -66,7 +67,7 @@ func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
 	return mcontext.WithMustInfoCtx(values) // TODO
 }
 func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
-	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m.String())
+	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m)
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
 	kMsg.Key = sarama.StringEncoder(key)

@@ -2,6 +2,8 @@ package msgtransfer
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -35,6 +37,10 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
+	if err != nil {
+		return err
+	}
 	cacheModel := cache.NewCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
@@ -42,13 +48,20 @@ func StartTransfer(prometheusPort int) error {
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
+	conversationRpcClient := rpcclient.NewConversationClient(client)
 	notificationDatabase := controller.NewNotificationDatabase(msgDocModel, cacheModel) // todo
 
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, conversationRpcClient)
 	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, notificationDatabase)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
+func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
+	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase,
+	conversationRpcClient *rpcclient.ConversationClient) *MsgTransfer {
+	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient),
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase, extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase, notificationDatabase controller.NotificationDatabase) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase, notificationDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}

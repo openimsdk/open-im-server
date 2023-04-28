@@ -2,6 +2,8 @@ package msg
 
 import (
 	"context"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -9,8 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/golang/protobuf/proto"
-	"sync"
+	"google.golang.org/protobuf/proto"
 )
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
