@@ -34,7 +34,7 @@ type MsgDatabase interface {
 	// 刪除redis中消息缓存
 	DeleteMessageFromCache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) error
 	// incrSeq然后批量插入缓存
-	BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)
+	BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) (int64, error)
 	// incrSeq通知seq然后批量插入缓存
 	NotificationBatchInsertChat2Cache(ctx context.Context, sourceID string, msgs []*pbMsg.MsgDataToMQ) (int64, error)
 	// 删除消息 返回不存在的seqList
@@ -321,7 +321,7 @@ func (db *msgDatabase) NotificationBatchInsertChat2Cache(ctx context.Context, so
 	return 0, nil
 }
 
-func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error) {
+func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ, currentMaxSeq int64) (int64, error) {
 	//newTime := utils.GetCurrentTimestampByMill()
 	lenList := len(msgList)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
@@ -331,20 +331,6 @@ func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID strin
 		return 0, errors.New("too short as 0")
 	}
 	// judge sessionType to get seq
-	var currentMaxSeq int64
-	var err error
-	if msgList[0].MsgData.SessionType == constant.SuperGroupChatType {
-		currentMaxSeq, err = db.cache.GetGroupMaxSeq(ctx, sourceID)
-		//log.Debug(operationID, "constant.SuperGroupChatType  lastMaxSeq before add ", currentMaxSeq, "userID ", sourceID, err)
-	} else {
-		currentMaxSeq, err = db.cache.GetUserMaxSeq(ctx, sourceID)
-		//log.Debug(operationID, "constant.SingleChatType  lastMaxSeq before add ", currentMaxSeq, "userID ", sourceID, err)
-	}
-	if err != nil && err != redis.Nil {
-		prome.Inc(prome.SeqGetFailedCounter)
-		return 0, utils.Wrap(err, "")
-	}
-	prome.Inc(prome.SeqGetSuccessCounter)
 	lastMaxSeq := currentMaxSeq
 	for _, m := range msgList {
 		currentMaxSeq++

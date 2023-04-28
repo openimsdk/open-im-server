@@ -19,7 +19,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
 	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 type PersistentConsumerHandler struct {

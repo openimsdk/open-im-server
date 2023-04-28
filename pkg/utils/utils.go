@@ -3,10 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
-	"github.com/jinzhu/copier"
-	"github.com/pkg/errors"
 	"hash/crc32"
 	"math/rand"
 	"reflect"
@@ -14,6 +10,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 // copy a by b  b->a
@@ -22,19 +23,19 @@ func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error
 }
 
 func Wrap1(err error) error {
-	return errors.Wrap(err, "==> " + printCallerNameAndLine())
+	return errors.Wrap(err, "==> "+printCallerNameAndLine())
 }
 
 func Wrap2[T any](a T, err error) (T, error) {
 	if err != nil {
-		return a, errors.Wrap(err, "==> " + printCallerNameAndLine())
+		return a, errors.Wrap(err, "==> "+printCallerNameAndLine())
 	}
 	return a, nil
 }
 
 func Wrap3[T any, V any](a T, b V, err error) (T, V, error) {
 	if err != nil {
-		return a, b, errors.Wrap(err, "==> " + printCallerNameAndLine())
+		return a, b, errors.Wrap(err, "==> "+printCallerNameAndLine())
 	}
 	return a, b, nil
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
@@ -17,8 +18,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
+	"google.golang.org/protobuf/proto"
 )
 
 var _ context.Context // 解决goland编辑器bug

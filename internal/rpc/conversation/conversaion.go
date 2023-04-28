@@ -181,3 +181,13 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 	}
 	return &pbConversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
 }
+
+// create conversation without notification for msg redis transfer
+func (c *conversationServer) CreateConversationsWithoutNotification(ctx context.Context, req *pbConversation.CreateConversationsWithoutNotificationReq) (*pbConversation.CreateConversationsWithoutNotificationResp, error) {
+	conversations := convert.ConversationsPb2DB(req.Conversations)
+	err := c.conversationDatabase.CreateConversation(ctx, conversations)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.CreateConversationsWithoutNotificationResp{}, nil
+}
