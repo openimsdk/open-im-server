@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"strconv"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/gogo/protobuf/jsonpb"
@@ -57,8 +57,8 @@ type Model interface {
 	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error
 	GetMessagesBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessageToCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) (int, error)
-	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) error
+	SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error)
+	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error
 	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
 	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
@@ -136,11 +136,11 @@ func (c *cache) GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 }
 
 func (c *cache) SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error {
-	return utils.Wrap1(c.rdb.Set(ctx, userIncrSeq+userID, maxSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, userIncrSeq+userID, maxSeq, 0).Err())
 }
 
 func (c *cache) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
-	return utils.Wrap1(c.rdb.Set(ctx, userMinSeq+userID, minSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, userMinSeq+userID, minSeq, 0).Err())
 }
 
 func (c *cache) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
@@ -149,7 +149,7 @@ func (c *cache) GetUserMinSeq(ctx context.Context, userID string) (int64, error)
 
 func (c *cache) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	return utils.Wrap1(c.rdb.Set(ctx, key, minSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
 func (c *cache) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
@@ -168,29 +168,29 @@ func (c *cache) GetGroupMinSeq(ctx context.Context, groupID string) (int64, erro
 func (c *cache) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
 	key := groupMaxSeq + groupID
 	seq, err := c.rdb.Incr(ctx, key).Uint64()
-	return int64(seq), utils.Wrap1(err)
+	return int64(seq), errs.Wrap(err)
 }
 
 func (c *cache) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
 	key := groupMaxSeq + groupID
-	return utils.Wrap1(c.rdb.Set(ctx, key, maxSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, key, maxSeq, 0).Err())
 }
 
 func (c *cache) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
 	key := groupMinSeq + groupID
-	return utils.Wrap1(c.rdb.Set(ctx, key, minSeq, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
 func (c *cache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	return utils.Wrap1(c.rdb.HSet(ctx, key, token, flag).Err())
+	return errs.Wrap(c.rdb.HSet(ctx, key, token, flag).Err())
 }
 
 func (c *cache) GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error) {
 	key := uidPidToken + userID + ":" + platformID
 	m, err := c.rdb.HGetAll(ctx, key).Result()
 	if err != nil {
-		return nil, utils.Wrap1(err)
+		return nil, errs.Wrap(err)
 	}
 	mm := make(map[string]int)
 	for k, v := range m {
@@ -205,12 +205,12 @@ func (c *cache) SetTokenMapByUidPid(ctx context.Context, userID string, platform
 	for k, v := range m {
 		mm[k] = v
 	}
-	return utils.Wrap1(c.rdb.HSet(ctx, key, mm).Err())
+	return errs.Wrap(c.rdb.HSet(ctx, key, mm).Err())
 }
 
 func (c *cache) DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error {
 	key := uidPidToken + userID + ":" + platform
-	return utils.Wrap1(c.rdb.HDel(ctx, key, fields...).Err())
+	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
 func (c *cache) getMessageCacheKey(sourceID string, seq int64) string {
@@ -247,18 +247,18 @@ func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int6
 	return seqMsgs, failedSeqs, err
 }
 
-func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) (int, error) {
+func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error) {
 	pipe := c.rdb.Pipeline()
-	var failedMsgs []pbMsg.MsgDataToMQ
+	var failedMsgs []sdkws.MsgData
 	for _, msg := range msgList {
-		key := c.getMessageCacheKey(userID, msg.MsgData.Seq)
-		s, err := utils.Pb2String(msg.MsgData)
+		key := c.getMessageCacheKey(userID, msg.Seq)
+		s, err := utils.Pb2String(msg)
 		if err != nil {
-			return 0, utils.Wrap1(err)
+			return 0, errs.Wrap(err)
 		}
 		err = pipe.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
 		if err != nil {
-			return 0, utils.Wrap1(err)
+			return 0, errs.Wrap(err)
 		}
 	}
 	if len(failedMsgs) != 0 {
@@ -268,15 +268,15 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 	return 0, err
 }
 
-func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*pbMsg.MsgDataToMQ) error {
+func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error {
 	pipe := c.rdb.Pipeline()
 	for _, v := range msgList {
-		if err := pipe.Del(ctx, c.getMessageCacheKey(userID, v.MsgData.Seq)).Err(); err != nil {
-			return utils.Wrap1(err)
+		if err := pipe.Del(ctx, c.getMessageCacheKey(userID, v.Seq)).Err(); err != nil {
+			return errs.Wrap(err)
 		}
 	}
 	_, err := pipe.Exec(ctx)
-	return utils.Wrap1(err)
+	return errs.Wrap(err)
 }
 
 func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
@@ -285,22 +285,22 @@ func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 		return nil
 	}
 	if err != nil {
-		return utils.Wrap1(err)
+		return errs.Wrap(err)
 	}
 	pipe := c.rdb.Pipeline()
 	for _, v := range vals {
 		if err := pipe.Del(ctx, v).Err(); err != nil {
-			return utils.Wrap1(err)
+			return errs.Wrap(err)
 		}
 	}
 	_, err = pipe.Exec(ctx)
-	return utils.Wrap1(err)
+	return errs.Wrap(err)
 }
 
 func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
 	req := &sdkws.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
-		return false, utils.Wrap1(err)
+		return false, errs.Wrap(err)
 	}
 	var inviteeUserIDs []string
 	var isInviteSignal bool
@@ -315,7 +315,7 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 			return false, nil
 		}
 	case *sdkws.SignalReq_HungUp, *sdkws.SignalReq_Cancel, *sdkws.SignalReq_Reject, *sdkws.SignalReq_Accept:
-		return false, utils.Wrap1(errors.New("signalInfo do not need offlinePush"))
+		return false, errs.Wrap(errors.New("signalInfo do not need offlinePush"))
 	default:
 		return false, nil
 	}
@@ -324,26 +324,26 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 		for _, userID := range inviteeUserIDs {
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
-				return false, utils.Wrap1(err)
+				return false, errs.Wrap(err)
 			}
 			keys := signalListCache + userID
 			err = pipe.LPush(ctx, keys, msg.ClientMsgID).Err()
 			if err != nil {
-				return false, utils.Wrap1(err)
+				return false, errs.Wrap(err)
 			}
 			err = pipe.Expire(ctx, keys, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return false, utils.Wrap1(err)
+				return false, errs.Wrap(err)
 			}
 			key := signalCache + msg.ClientMsgID
 			err = pipe.Set(ctx, key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return false, utils.Wrap1(err)
+				return false, errs.Wrap(err)
 			}
 		}
 		_, err := pipe.Exec(ctx)
 		if err != nil {
-			return false, utils.Wrap1(err)
+			return false, errs.Wrap(err)
 		}
 	}
 	return true, nil
@@ -352,11 +352,11 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (signalInviteReq *sdkws.SignalInviteReq, err error) {
 	bytes, err := c.rdb.Get(ctx, signalCache+clientMsgID).Bytes()
 	if err != nil {
-		return nil, utils.Wrap1(err)
+		return nil, errs.Wrap(err)
 	}
 	signalReq := &sdkws.SignalReq{}
 	if err = proto.Unmarshal(bytes, signalReq); err != nil {
-		return nil, utils.Wrap1(err)
+		return nil, errs.Wrap(err)
 	}
 	signalInviteReq = &sdkws.SignalInviteReq{}
 	switch req := signalReq.Payload.(type) {
@@ -373,17 +373,17 @@ func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, client
 func (c *cache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
 	key, err := c.rdb.LPop(ctx, signalListCache+userID).Result()
 	if err != nil {
-		return nil, utils.Wrap1(err)
+		return nil, errs.Wrap(err)
 	}
 	invitationInfo, err = c.GetSignalInvitationInfoByClientMsgID(ctx, key)
 	if err != nil {
 		return nil, err
 	}
-	return invitationInfo, utils.Wrap1(c.DelUserSignalList(ctx, userID))
+	return invitationInfo, errs.Wrap(c.DelUserSignalList(ctx, userID))
 }
 
 func (c *cache) DelUserSignalList(ctx context.Context, userID string) error {
-	return utils.Wrap1(c.rdb.Del(ctx, signalListCache+userID).Err())
+	return errs.Wrap(c.rdb.Del(ctx, signalListCache+userID).Err())
 }
 
 func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
@@ -394,7 +394,7 @@ func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64
 			if err == redis.Nil {
 				continue
 			}
-			return utils.Wrap1(err)
+			return errs.Wrap(err)
 		}
 		var msg sdkws.MsgData
 		if err := jsonpb.UnmarshalString(result, &msg); err != nil {
@@ -403,17 +403,17 @@ func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64
 		msg.Status = constant.MsgDeleted
 		s, err := utils.Pb2String(&msg)
 		if err != nil {
-			return utils.Wrap1(err)
+			return errs.Wrap(err)
 		}
 		if err := c.rdb.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
-			return utils.Wrap1(err)
+			return errs.Wrap(err)
 		}
 	}
 	return nil
 }
 
 func (c *cache) SetGetuiToken(ctx context.Context, token string, expireTime int64) error {
-	return utils.Wrap1(c.rdb.Set(ctx, getuiToken, token, time.Duration(expireTime)*time.Second).Err())
+	return errs.Wrap(c.rdb.Set(ctx, getuiToken, token, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *cache) GetGetuiToken(ctx context.Context) (string, error) {
@@ -421,7 +421,7 @@ func (c *cache) GetGetuiToken(ctx context.Context) (string, error) {
 }
 
 func (c *cache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
-	return utils.Wrap1(c.rdb.Set(ctx, getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err())
+	return errs.Wrap(c.rdb.Set(ctx, getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *cache) GetGetuiTaskID(ctx context.Context) (string, error) {
@@ -429,16 +429,16 @@ func (c *cache) GetGetuiTaskID(ctx context.Context) (string, error) {
 }
 
 func (c *cache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
-	return utils.Wrap1(c.rdb.Set(ctx, sendMsgFailedFlag+id, status, time.Hour*24).Err())
+	return errs.Wrap(c.rdb.Set(ctx, sendMsgFailedFlag+id, status, time.Hour*24).Err())
 }
 
 func (c *cache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
 	result, err := c.rdb.Get(ctx, sendMsgFailedFlag+id).Int()
-	return int32(result), utils.Wrap1(err)
+	return int32(result), errs.Wrap(err)
 }
 
 func (c *cache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	return utils.Wrap1(c.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
+	return errs.Wrap(c.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *cache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
@@ -446,16 +446,16 @@ func (c *cache) GetFcmToken(ctx context.Context, account string, platformID int)
 }
 
 func (c *cache) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	return utils.Wrap1(c.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
+	return errs.Wrap(c.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
 }
 
 func (c *cache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
 	seq, err := c.rdb.Incr(ctx, userBadgeUnreadCountSum+userID).Result()
-	return int(seq), utils.Wrap1(err)
+	return int(seq), errs.Wrap(err)
 }
 
 func (c *cache) SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error {
-	return utils.Wrap1(c.rdb.Set(ctx, userBadgeUnreadCountSum+userID, value, 0).Err())
+	return errs.Wrap(c.rdb.Set(ctx, userBadgeUnreadCountSum+userID, value, 0).Err())
 }
 
 func (c *cache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
@@ -464,12 +464,12 @@ func (c *cache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (
 
 func (c *cache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
-	return utils.Wrap1(c.rdb.SetNX(ctx, key, 1, time.Minute).Err())
+	return errs.Wrap(c.rdb.SetNX(ctx, key, 1, time.Minute).Err())
 }
 
 func (c *cache) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
-	return utils.Wrap1(c.rdb.Del(ctx, key).Err())
+	return errs.Wrap(c.rdb.Del(ctx, key).Err())
 }
 
 func (c *cache) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
@@ -495,7 +495,7 @@ func (c *cache) JudgeMessageReactionExist(ctx context.Context, clientMsgID strin
 }
 
 func (c *cache) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
-	return utils.Wrap1(c.rdb.HSet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
+	return errs.Wrap(c.rdb.HSet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
 }
 
 func (c *cache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
@@ -511,5 +511,5 @@ func (c *cache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID st
 }
 
 func (c *cache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
-	return utils.Wrap1(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
+	return errs.Wrap(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
 }

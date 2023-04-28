@@ -2,6 +2,7 @@ package msgtransfer
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"sync"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
@@ -38,7 +38,7 @@ type Cmd2Value struct {
 	Value interface{}
 }
 type ContextMsg struct {
-	message *pbMsg.MsgDataToMQ
+	message *sdkws.MsgData
 	ctx     context.Context
 }
 
@@ -80,11 +80,11 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				msgChannelValue := cmd.Value.(MsgChannelValue)
 				ctxMsgList := msgChannelValue.ctxMsgList
 				ctx := msgChannelValue.ctx
-				storageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				notStorageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				storageNotificationList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				notStorageNotificationList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				modifyMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				storageMsgList := make([]*sdkws.MsgData, 0, 80)
+				notStorageMsgList := make([]*sdkws.MsgData, 0, 80)
+				storageNotificationList := make([]*sdkws.MsgData, 0, 80)
+				notStorageNotificationList := make([]*sdkws.MsgData, 0, 80)
+				modifyMsgList := make([]*sdkws.MsgData, 0, 80)
 				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "aggregationID", msgChannelValue.aggregationID)
 				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList = och.getPushStorageMsgList(msgChannelValue.aggregationID, ctxMsgList)
 				och.handleMsg(ctx, msgChannelValue.aggregationID, storageMsgList, notStorageMsgList)
@@ -98,26 +98,26 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 }
 
 // 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
-func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(aggregationID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*pbMsg.MsgDataToMQ) {
-	isStorage := func(msg *pbMsg.MsgDataToMQ) bool {
-		options2 := utils.Options(msg.MsgData.Options)
+func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(aggregationID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
+	isStorage := func(msg *sdkws.MsgData) bool {
+		options2 := utils.Options(msg.Options)
 		if options2.IsHistory() {
 			return true
 		} else {
-			if !(!options2.IsSenderSync() && aggregationID == msg.MsgData.SendID) {
+			if !(!options2.IsSenderSync() && aggregationID == msg.SendID) {
 				return false
 			}
 		}
 		return false
 	}
 	for _, v := range totalMsgs {
-		options := utils.Options(v.message.MsgData.Options)
+		options := utils.Options(v.message.Options)
 		if options.IsNotification() {
 			// 原通知
-			notificationMsg := proto.Clone(v.message).(*pbMsg.MsgDataToMQ)
+			notificationMsg := proto.Clone(v.message).(*sdkws.MsgData)
 			if options.IsSendMsg() {
 				// 消息
-				v.message.MsgData.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+				v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotification(false), utils.WithSendMsg(false))
 				storageMsgList = append(storageMsgList, v.message)
 			}
 			if isStorage(notificationMsg) {
@@ -132,22 +132,22 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(aggregationI
 				notStorageMsgList = append(notStorageMsgList, v.message)
 			}
 		}
-		if v.message.MsgData.ContentType == constant.ReactionMessageModifier || v.message.MsgData.ContentType == constant.ReactionMessageDeleter {
+		if v.message.ContentType == constant.ReactionMessageModifier || v.message.ContentType == constant.ReactionMessageDeleter {
 			modifyMsgList = append(modifyMsgList, v.message)
 		}
 	}
 	return
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, aggregationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.handle(ctx, aggregationID, storageList, notStorageList, och.msgDatabase.BatchInsertChat2Cache)
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, aggregationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.handle(ctx, aggregationID, storageList, notStorageList, och.msgDatabase.NotificationBatchInsertChat2Cache)
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handle(ctx context.Context, aggregationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ, cacheAndIncr func(ctx context.Context, sourceID string, msgList []*pbMsg.MsgDataToMQ) (int64, error)) {
+func (och *OnlineHistoryRedisConsumerHandler) handle(ctx context.Context, aggregationID string, storageList, notStorageList []*sdkws.MsgData, cacheAndIncr func(ctx context.Context, sourceID string, msgList []*sdkws.MsgData) (int64, error)) {
 	if len(storageList) > 0 {
 		lastSeq, err := cacheAndIncr(ctx, aggregationID, storageList)
 		if err != nil {
@@ -186,7 +186,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				log.ZDebug(ctx, "batch messages come to distribution center", "length", len(consumerMessages))
 				for i := 0; i < len(consumerMessages); i++ {
 					ctxMsg := &ContextMsg{}
-					msgFromMQ := pbMsg.MsgDataToMQ{}
+					var msgFromMQ sdkws.MsgData
 					err := proto.Unmarshal(consumerMessages[i].Value, &msgFromMQ)
 					if err != nil {
 						log.ZError(ctx, "msg_transfer Unmarshal msg err", err, string(consumerMessages[i].Value))

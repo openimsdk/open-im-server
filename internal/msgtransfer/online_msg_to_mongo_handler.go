@@ -2,6 +2,9 @@ package msgtransfer
 
 import (
 	"context"
+	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -10,8 +13,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -19,14 +20,16 @@ import (
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kfk.MConsumerGroup
 	msgDatabase          controller.MsgDatabase
+	notificationDatabase controller.NotificationDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(database controller.MsgDatabase) *OnlineHistoryMongoConsumerHandler {
+func NewOnlineHistoryMongoConsumerHandler(database controller.MsgDatabase, notificationDatabase controller.NotificationDatabase) *OnlineHistoryMongoConsumerHandler {
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToMongo.Topic},
 			config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
-		msgDatabase: database,
+		msgDatabase:          database,
+		notificationDatabase: notificationDatabase,
 	}
 	return mc
 }
@@ -41,30 +44,53 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 		return
 	}
 	log.Info(operationID, "BatchInsertChat2DB userID: ", msgFromMQ.AggregationID, "msgFromMQ.LastSeq: ", msgFromMQ.LastSeq)
-	err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.AggregationID, msgFromMQ.Messages, msgFromMQ.LastSeq)
-	if err != nil {
-		log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.Messages, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+	if len(msgFromMQ.MsgData) == 0 {
+		log.ZError(ctx, "msgFromMQ.MsgData is empty", errors.New("msgFromMQ.MsgData is empty"), "cMsg", cMsg)
+		return
 	}
-	err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.AggregationID, msgFromMQ.Messages)
-	if err != nil {
-		log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.Messages, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
-	}
-	for _, v := range msgFromMQ.Messages {
-		if v.MsgData.ContentType == constant.DeleteMessageNotification {
-			tips := sdkws.TipsComm{}
-			DeleteMessageTips := sdkws.DeleteMessageTips{}
-			err := proto.Unmarshal(v.MsgData.Content, &tips)
-			if err != nil {
-				log.NewError(operationID, "tips unmarshal err:", err.Error(), v.String())
-				continue
+	isNotification := msgFromMQ.MsgData[0].Options[constant.IsNotification]
+	if isNotification {
+		err = mc.notificationDatabase.BatchInsertChat2DB(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
+		if err != nil {
+			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+		}
+		err = mc.notificationDatabase.DeleteMessageFromCache(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData)
+		if err != nil {
+			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+		}
+		for _, v := range msgFromMQ.MsgData {
+			if v.ContentType == constant.DeleteMessageNotification {
+				deleteMessageTips := sdkws.DeleteMessageTips{}
+				err := proto.Unmarshal(v.Content, &deleteMessageTips)
+				if err != nil {
+					log.NewError(operationID, "tips unmarshal err:", err.Error(), v.String())
+					continue
+				}
+				if totalUnExistSeqs, err := mc.notificationDatabase.DelMsgBySeqs(ctx, deleteMessageTips.UserID, deleteMessageTips.Seqs); err != nil {
+					log.NewError(operationID, utils.GetSelfFuncName(), "DelMsgBySeqs args: ", deleteMessageTips.UserID, deleteMessageTips.Seqs, "error:", err.Error(), "totalUnExistSeqs: ", totalUnExistSeqs)
+				}
 			}
-			err = proto.Unmarshal(tips.Detail, &DeleteMessageTips)
-			if err != nil {
-				log.NewError(operationID, "deleteMessageTips unmarshal err:", err.Error(), v.String())
-				continue
-			}
-			if totalUnExistSeqs, err := mc.msgDatabase.DelMsgBySeqs(ctx, DeleteMessageTips.UserID, DeleteMessageTips.Seqs); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), "DelMsgBySeqs args: ", DeleteMessageTips.UserID, DeleteMessageTips.Seqs, "error:", err.Error(), "totalUnExistSeqs: ", totalUnExistSeqs)
+		}
+	} else {
+		err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
+		if err != nil {
+			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+		}
+		err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData)
+		if err != nil {
+			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+		}
+		for _, v := range msgFromMQ.MsgData {
+			if v.ContentType == constant.DeleteMessageNotification {
+				deleteMessageTips := sdkws.DeleteMessageTips{}
+				err := proto.Unmarshal(v.Content, &deleteMessageTips)
+				if err != nil {
+					log.NewError(operationID, "tips unmarshal err:", err.Error(), v.String())
+					continue
+				}
+				if totalUnExistSeqs, err := mc.msgDatabase.DelMsgBySeqs(ctx, deleteMessageTips.UserID, deleteMessageTips.Seqs); err != nil {
+					log.NewError(operationID, utils.GetSelfFuncName(), "DelMsgBySeqs args: ", deleteMessageTips.UserID, deleteMessageTips.Seqs, "error:", err.Error(), "totalUnExistSeqs: ", totalUnExistSeqs)
+				}
 			}
 		}
 	}

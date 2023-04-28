@@ -2,8 +2,6 @@ package msgtransfer
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -44,15 +42,16 @@ func StartTransfer(prometheusPort int) error {
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
+	notificationDatabase := controller.NewNotificationDatabase(msgDocModel, cacheModel) // todo
 
-	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase)
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, notificationDatabase)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
-func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase, extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase) *MsgTransfer {
+func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase, extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase, notificationDatabase controller.NotificationDatabase) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase, notificationDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 }
 
 func (m *MsgTransfer) initPrometheus() {
@@ -67,8 +66,6 @@ func (m *MsgTransfer) initPrometheus() {
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	var wg sync.WaitGroup
-	wg.Add(4)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if config.Config.ChatPersistenceMysql {
 		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
@@ -82,6 +79,5 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	wg.Wait()
 	return nil
 }
