@@ -274,7 +274,6 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	if err != nil {
 		return false, err
 	}
-	return true, nil
 	switch singleOpt {
 	case constant.ReceiveMessage:
 		return true, nil
@@ -311,30 +310,29 @@ func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
 	return &msg.SendMsgReq{MsgData: &msgData}
 }
 
-func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, groupPB *msg.SendMsgReq, wg *sync.WaitGroup) error {
-	msgToMQGroup := msg.MsgDataToMQ{MsgData: groupPB.MsgData}
+func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, req *msg.SendMsgReq, wg *sync.WaitGroup) error {
 	tempOptions := make(map[string]bool, 1)
-	for k, v := range groupPB.MsgData.Options {
+	for k, v := range req.MsgData.Options {
 		tempOptions[k] = v
 	}
 	for _, v := range list {
-		groupPB.MsgData.RecvID = v
+		req.MsgData.RecvID = v
 		options := make(map[string]bool, 1)
 		for k, v := range tempOptions {
 			options[k] = v
 		}
-		groupPB.MsgData.Options = options
-		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, groupPB.MsgData.GroupID)
-		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, groupPB)
+		req.MsgData.Options = options
+		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, req.MsgData.GroupID)
+		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, req)
 		if err != nil {
 			wg.Done()
 			return err
 		}
 		if isSend {
-			if v == "" || groupPB.MsgData.SendID == "" {
+			if v == "" || req.MsgData.SendID == "" {
 				return errs.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
 			}
-			err := m.MsgDatabase.MsgToMQ(ctx, v, &msgToMQGroup)
+			err := m.MsgDatabase.MsgToMQ(ctx, v, req.MsgData)
 			if err != nil {
 				wg.Done()
 				return err

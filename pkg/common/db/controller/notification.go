@@ -198,11 +198,11 @@ func (db *notificationDatabase) MsgToModifyMQ(ctx context.Context, aggregationID
 	return nil
 }
 
-func (db *notificationDatabase) MsgToPushMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) (int32, int64, error) {
-	mqPushMsg := pbMsg.PushMsgDataToMQ{MsgData: msg2mq, SourceID: key}
-	partition, offset, err := db.producerToPush.SendMessage(ctx, key, &mqPushMsg)
+func (db *notificationDatabase) MsgToPushMQ(ctx context.Context, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error) {
+	mqPushMsg := pbMsg.PushMsgDataToMQ{MsgData: msg2mq, ConversationID: conversationID}
+	partition, offset, err := db.producerToPush.SendMessage(ctx, conversationID, &mqPushMsg)
 	if err != nil {
-		log.ZError(ctx, "MsgToPushMQ", err, "key", key, "msg2mq", msg2mq)
+		log.ZError(ctx, "MsgToPushMQ", err, "conversationID", conversationID, "msg2mq", msg2mq)
 	}
 	return partition, offset, err
 }

@@ -5,9 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/go-redis/redis"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -16,11 +13,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
+	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -103,7 +100,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 }
 
 // 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
-func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(sourceID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(sourceID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
 	isStorage := func(msg *sdkws.MsgData) bool {
 		options2 := utils.Options(msg.Options)
 		if options2.IsHistory() {
@@ -120,10 +117,10 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(sourceID str
 		options := utils.Options(v.message.Options)
 		if options.IsNotification() {
 			// 原通知
-			notificationMsg := proto.Clone(v.message).(*pbMsg.MsgDataToMQ)
+			notificationMsg := proto.Clone(v.message).(*sdkws.MsgData)
 			if options.IsSendMsg() {
 				// 消息
-				v.message.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+				v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotification(false), utils.WithSendMsg(false))
 				storageMsgList = append(storageMsgList, v.message)
 			}
 			if isStorage(notificationMsg) {
@@ -145,7 +142,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(sourceID str
 	return
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, conversationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, err := och.msgDatabase.NotificationBatchInsertChat2Cache(ctx, conversationID, storageList)
@@ -159,22 +156,22 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, conversationID string, msgs []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) {
 	for _, v := range msgs {
 		och.msgDatabase.MsgToPushMQ(ctx, conversationID, v)
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*pbMsg.MsgDataToMQ) {
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		var currentMaxSeq int64
 		var err error
-		if storageList[0].MsgData.SessionType == constant.SuperGroupChatType {
+		if storageList[0].SessionType == constant.SuperGroupChatType {
 			currentMaxSeq, err = och.msgDatabase.GetGroupMaxSeq(ctx, conversationID)
 			if err == redis.Nil {
 				log.ZInfo(ctx, "group chat first create conversation", "conversationID", conversationID)
-				if err := och.GroupChatFirstCreateConversation(ctx, storageList[0].MsgData); err != nil {
+				if err := och.GroupChatFirstCreateConversation(ctx, storageList[0]); err != nil {
 					log.ZError(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 				}
 			}
@@ -182,7 +179,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, con
 			currentMaxSeq, err = och.msgDatabase.GetUserMaxSeq(ctx, conversationID)
 			if err == redis.Nil {
 				log.ZInfo(ctx, "single chat first create conversation", "conversationID", conversationID)
-				if err := och.SingleChatFirstCreateConversation(ctx, storageList[0].MsgData); err != nil {
+				if err := och.SingleChatFirstCreateConversation(ctx, storageList[0]); err != nil {
 					log.ZError(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 				}
 			}

@@ -21,8 +21,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
-	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.GroupID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.GroupID, req.MsgData)
 	if err != nil {
 		return nil, err
 	}
@@ -32,27 +31,26 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 	}
 
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
-	resp.SendTime = msgToMQSingle.MsgData.SendTime
-	resp.ServerMsgID = msgToMQSingle.MsgData.ServerMsgID
-	resp.ClientMsgID = msgToMQSingle.MsgData.ClientMsgID
+	resp.SendTime = req.MsgData.SendTime
+	resp.ServerMsgID = req.MsgData.ServerMsgID
+	resp.ClientMsgID = req.MsgData.ClientMsgID
 	return resp, nil
 }
 func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
-	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
-	err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.RecvID, &msgToMQSingle)
+	err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, req.MsgData)
 	if err != nil {
 		return nil, err
 	}
-	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgDatabase.MsgToMQ(ctx, msgToMQSingle.MsgData.SendID, &msgToMQSingle)
+	if req.MsgData.SendID != req.MsgData.RecvID { //Filter messages sent to yourself
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, req.MsgData)
 		if err != nil {
 			return nil, err
 		}
 	}
 	resp = &msg.SendMsgResp{
-		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
-		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
-		SendTime:    msgToMQSingle.MsgData.SendTime,
+		ServerMsgID: req.MsgData.ServerMsgID,
+		ClientMsgID: req.MsgData.ClientMsgID,
+		SendTime:    req.MsgData.SendTime,
 	}
 	return resp, nil
 }
@@ -67,15 +65,14 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil {
 		return nil, err
 	}
-	msgToMQSingle := msg.MsgDataToMQ{MsgData: req.MsgData}
 	if isSend {
-		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, &msgToMQSingle)
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, req.MsgData)
 		if err != nil {
 			return nil, errs.ErrInternalServer.Wrap("insert to mq")
 		}
 	}
-	if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, &msgToMQSingle)
+	if req.MsgData.SendID != req.MsgData.RecvID { //Filter messages sent to yourself
+		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, req.MsgData)
 		if err != nil {
 			return nil, errs.ErrInternalServer.Wrap("insert to mq")
 		}
@@ -86,9 +83,9 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	}
 	promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 	resp = &msg.SendMsgResp{
-		ServerMsgID: msgToMQSingle.MsgData.ServerMsgID,
-		ClientMsgID: msgToMQSingle.MsgData.ClientMsgID,
-		SendTime:    msgToMQSingle.MsgData.SendTime,
+		ServerMsgID: req.MsgData.ServerMsgID,
+		ClientMsgID: req.MsgData.ClientMsgID,
+		SendTime:    req.MsgData.SendTime,
 	}
 	return resp, nil
 }

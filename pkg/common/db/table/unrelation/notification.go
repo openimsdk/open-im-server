@@ -84,7 +84,7 @@ func (m NotificationDocModel) superGroupIndexGen(groupID string, seqSuffix int64
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
 
-func (m NotificationDocModel) GetDocIDSeqsMap(sourceID string, seqs []int64) map[string][]int64 {
+func (m NotificationDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
 	for i := 0; i < len(seqs); i++ {
 		docID := m.GetDocID(conversationID, seqs[i])

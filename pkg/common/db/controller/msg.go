@@ -34,7 +34,7 @@ type MsgDatabase interface {
 	// 刪除redis中消息缓存
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) error
 	// incrSeq然后批量插入缓存
-	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int64, error)
+	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData, currentMaxSeq int64) (int64, error)
 	// incrSeq通知seq然后批量插入缓存
 	NotificationBatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int64, error)
 	// 删除消息 返回不存在的seqList
@@ -190,7 +190,7 @@ func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.Ms
 	return err
 }
 
-func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ) error {
+func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData) error {
 	if len(messages) > 0 {
 		_, _, err := db.producerToModify.SendMessage(ctx, conversationID, &pbMsg.MsgDataToModifyByMQ{AggregationID: conversationID, Messages: messages})
 		return err
@@ -207,9 +207,9 @@ func (db *msgDatabase) MsgToPushMQ(ctx context.Context, conversationID string, m
 	return partition, offset, err
 }
 
-func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, sourceID string, messages []*pbMsg.MsgDataToMQ, lastSeq int64) error {
+func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, sourceID string, messages []*sdkws.MsgData, lastSeq int64) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, sourceID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, SourceID: sourceID, Messages: messages})
+		_, _, err := db.producerToModify.SendMessage(ctx, sourceID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: sourceID, MsgData: messages})
 		return err
 	}
 	return nil
