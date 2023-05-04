@@ -66,9 +66,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 }
 
 type groupServer struct {
-	GroupDatabase controller.GroupDatabase
-	User          *rpcclient.UserClient
-	//Notification          *notification.Check
+	GroupDatabase         controller.GroupDatabase
+	User                  *rpcclient.UserClient
 	Notification          *notification.GroupNotificationSender
 	conversationRpcClient *rpcclient.ConversationClient
 }
@@ -308,8 +307,12 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			}
 		}
 	}
+
 	if group.GroupType == constant.SuperGroup {
 		if err := s.GroupDatabase.CreateSuperGroupMember(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
+			return nil, err
+		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
 			return nil, err
 		}
 		for _, userID := range req.InvitedUserIDs {
@@ -334,6 +337,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			groupMembers = append(groupMembers, member)
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, groupMembers); err != nil {
+			return nil, err
+		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
@@ -667,6 +673,9 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			return nil, err
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
+			return nil, err
+		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID)
