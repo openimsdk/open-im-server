@@ -22,17 +22,18 @@ import (
 
 type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
-	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase       controller.MsgDatabase
-	ExtendMsgDatabase controller.ExtendMsgDatabase
-	Group             *rpcclient.GroupClient
-	User              *rpcclient.UserClient
-	Conversation      *rpcclient.ConversationClient
-	friend            *rpcclient.FriendClient
-	black             *rpcclient.BlackClient
-	GroupLocalCache   *localcache.GroupLocalCache
-	MessageLocker     MessageLocker
-	Handlers          MessageInterceptorChain
+	RegisterCenter       discoveryregistry.SvcDiscoveryRegistry
+	MsgDatabase          controller.MsgDatabase
+	notificationDatabase controller.NotificationDatabase
+	ExtendMsgDatabase    controller.ExtendMsgDatabase
+	Group                *rpcclient.GroupClient
+	User                 *rpcclient.UserClient
+	Conversation         *rpcclient.ConversationClient
+	friend               *rpcclient.FriendClient
+	black                *rpcclient.BlackClient
+	GroupLocalCache      *localcache.GroupLocalCache
+	MessageLocker        MessageLocker
+	Handlers             MessageInterceptorChain
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -161,14 +162,31 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp := &sdkws.PullMessageBySeqsResp{}
 	for _, seq := range req.SeqRanges {
-		msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
-		if err != nil {
-			return nil, err
+		if !seq.IsNotification {
+			msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
+			if err != nil {
+				return nil, err
+			}
+			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
+				ConversationID: seq.ConversationID,
+				Msgs:           msgs,
+			})
+		} else {
+			var seqs []int64
+			for i := seq.Begin; i <= seq.End; i++ {
+				seqs = append(seqs, i)
+			}
+			msgs, err := m.notificationDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
+			if err != nil {
+				return nil, err
+			}
+			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
+				ConversationID: seq.ConversationID,
+				Msgs:           msgs,
+				IsNotification: true,
+			})
 		}
-		resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
-			ConversationID: seq.ConversationID,
-			Msgs:           msgs,
-		})
+
 	}
 	return resp, nil
 }
