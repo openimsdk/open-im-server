@@ -32,7 +32,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbAuth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  rpcclient.NewUserClient(client),
 		RegisterCenter: client,
-		authDatabase:   controller.NewAuthDatabase(cache.NewCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
 	})
 	return nil
 }

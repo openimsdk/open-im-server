@@ -37,7 +37,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	third.RegisterThirdServer(server, &thirdServer{
-		thirdDatabase: controller.NewThirdDatabase(cache.NewCacheModel(rdb)),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb)),
 		userRpcClient: rpcclient.NewUserClient(client),
 		s3dataBase:    controller.NewS3Database(o, relation.NewObjectHash(db), relation.NewObjectInfo(db), relation.NewObjectPut(db), u),
 	})

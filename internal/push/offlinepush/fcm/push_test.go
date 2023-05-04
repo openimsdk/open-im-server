@@ -9,7 +9,7 @@ import (
 )
 
 func Test_Push(t *testing.T) {
-	var redis cache.Model
+	var redis cache.MsgModel
 	offlinePusher := NewClient(redis)
 	err := offlinePusher.Push(context.Background(), []string{"userID1"}, "test", "test", &offlinepush.Opts{})
 	assert.Nil(t, err)

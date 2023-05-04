@@ -17,14 +17,14 @@ const (
 	friendKey           = "FRIEND_INFO:"
 )
 
-// args fn will exec when no data in cache
+// args fn will exec when no data in msgCache
 type FriendCache interface {
 	metaCache
 	NewCache() FriendCache
 	GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error)
 	// call when friendID List changed
 	DelFriendIDs(ownerUserID ...string) FriendCache
-	// get single friendInfo from cache
+	// get single friendInfo from msgCache
 	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error)
 	// del friend when friend info changed
 	DelFriend(ownerUserID, friendUserID string) FriendCache

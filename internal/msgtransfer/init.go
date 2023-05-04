@@ -2,8 +2,6 @@ package msgtransfer
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -43,25 +41,28 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	cacheModel := cache.NewCacheModel(rdb)
+	msgModel := cache.NewMsgCacheModel(rdb)
+	notificationModel := cache.NewNotificationCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
+	notificationDocModel := unrelation.NewNotificationMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
 	extendMsgCache := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
-	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase := controller.NewMsgDatabase(msgDocModel, msgModel)
+	notificationDatabase := controller.NewNotificationDatabase(notificationDocModel, notificationModel)
 	conversationRpcClient := rpcclient.NewConversationClient(client)
 
-	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, conversationRpcClient)
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, notificationDatabase, conversationRpcClient)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
-	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase,
+	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase, notificationDatabase controller.MsgDatabase,
 	conversationRpcClient *rpcclient.ConversationClient) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase, notificationDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 }
 
 func (m *MsgTransfer) initPrometheus() {
@@ -76,8 +77,8 @@ func (m *MsgTransfer) initPrometheus() {
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	var wg sync.WaitGroup
-	wg.Add(4)
+	//var wg sync.WaitGroup
+	//wg.Add(4)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if config.Config.ChatPersistenceMysql {
 		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
@@ -91,6 +92,6 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	wg.Wait()
+	//wg.Wait()
 	return nil
 }

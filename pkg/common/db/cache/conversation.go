@@ -24,22 +24,22 @@ const (
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
 
-// arg fn will exec when no data in cache
+// arg fn will exec when no data in msgCache
 type ConversationCache interface {
 	metaCache
 	NewCache() ConversationCache
-	// get user's conversationIDs from cache
+	// get user's conversationIDs from msgCache
 	GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error)
 	DelConversationIDs(userIDs []string) ConversationCache
-	// get one conversation from cache
+	// get one conversation from msgCache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
 	DelConvsersations(ownerUserID string, conversationIDs []string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
-	// get one conversation from cache
+	// get one conversation from msgCache
 	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
-	// get one user's all conversations from cache
+	// get one user's all conversations from msgCache
 	GetUserAllConversations(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
-	// get user conversation recv msg from cache
+	// get user conversation recv msg from msgCache
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
 	DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache
 	// get one super group recv msg but do not notification userID list

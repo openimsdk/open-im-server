@@ -64,7 +64,7 @@ func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
 	for _, recordHeader := range header {
 		values = append(values, string(recordHeader.Value))
 	}
-	return mcontext.WithMustInfoCtx(values)
+	return mcontext.WithMustInfoCtx(values) // TODO
 }
 func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
 	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m)

@@ -15,10 +15,10 @@ type MessageLocker interface {
 	UnLockGlobalMessage(ctx context.Context, clientMsgID string) (err error)
 }
 type LockerMessage struct {
-	cache cache.Model
+	cache cache.MsgModel
 }
 
-func NewLockerMessage(cache cache.Model) *LockerMessage {
+func NewLockerMessage(cache cache.MsgModel) *LockerMessage {
 	return &LockerMessage{cache: cache}
 }
 func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typeKey string) (err error) {

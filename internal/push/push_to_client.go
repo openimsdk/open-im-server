@@ -44,7 +44,7 @@ func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offl
 	}
 }
 
-func NewOfflinePusher(cache cache.Model) offlinepush.OfflinePusher {
+func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	var offlinePusher offlinepush.OfflinePusher
 	if config.Config.Push.Getui.Enable {
 		offlinePusher = getui.NewClient(cache)

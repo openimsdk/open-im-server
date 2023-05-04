@@ -5,6 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/go-redis/redis"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -18,8 +21,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/Shopify/sarama"
-	"github.com/go-redis/redis/v8"
-	"google.golang.org/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 )
 
 const ConsumerMsgs = 3
@@ -43,7 +45,7 @@ type Cmd2Value struct {
 	Value interface{}
 }
 type ContextMsg struct {
-	message *pbMsg.MsgDataToMQ
+	message *sdkws.MsgData
 	ctx     context.Context
 }
 
@@ -101,9 +103,9 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 }
 
 // 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
-func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversationID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*pbMsg.MsgDataToMQ) {
-	isStorage := func(msg *pbMsg.MsgDataToMQ) bool {
-		options2 := utils.Options(msg.MsgData.Options)
+func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(sourceID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*pbMsg.MsgDataToMQ) {
+	isStorage := func(msg *sdkws.MsgData) bool {
+		options2 := utils.Options(msg.Options)
 		if options2.IsHistory() {
 			return true
 		} else {
@@ -115,13 +117,13 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversation
 		return false
 	}
 	for _, v := range totalMsgs {
-		options := utils.Options(v.message.MsgData.Options)
+		options := utils.Options(v.message.Options)
 		if options.IsNotification() {
 			// 原通知
 			notificationMsg := proto.Clone(v.message).(*pbMsg.MsgDataToMQ)
 			if options.IsSendMsg() {
 				// 消息
-				v.message.MsgData.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+				v.message.Options = utils.WithOptions(utils.Options(v.message.MsgData.Options), utils.WithNotification(false), utils.WithSendMsg(false))
 				storageMsgList = append(storageMsgList, v.message)
 			}
 			if isStorage(notificationMsg) {
@@ -136,7 +138,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversation
 				notStorageMsgList = append(notStorageMsgList, v.message)
 			}
 		}
-		if v.message.MsgData.ContentType == constant.ReactionMessageModifier || v.message.MsgData.ContentType == constant.ReactionMessageDeleter {
+		if v.message.ContentType == constant.ReactionMessageModifier || v.message.ContentType == constant.ReactionMessageDeleter {
 			modifyMsgList = append(modifyMsgList, v.message)
 		}
 	}
@@ -251,7 +253,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				log.ZDebug(ctx, "batch messages come to distribution center", "length", len(consumerMessages))
 				for i := 0; i < len(consumerMessages); i++ {
 					ctxMsg := &ContextMsg{}
-					msgFromMQ := pbMsg.MsgDataToMQ{}
+					var msgFromMQ sdkws.MsgData
 					err := proto.Unmarshal(consumerMessages[i].Value, &msgFromMQ)
 					if err != nil {
 						log.ZError(ctx, "msg_transfer Unmarshal msg err", err, string(consumerMessages[i].Value))

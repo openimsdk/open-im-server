@@ -14,10 +14,10 @@ type ThirdDatabase interface {
 }
 
 type thirdDatabase struct {
-	cache cache.Model
+	cache cache.MsgModel
 }
 
-func NewThirdDatabase(cache cache.Model) ThirdDatabase {
+func NewThirdDatabase(cache cache.MsgModel) ThirdDatabase {
 	return &thirdDatabase{cache: cache}
 }
 

@@ -63,7 +63,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	if err != nil {
 		return
 	}
-	cacheModel := cache.NewCacheModel(rdb)
+	cacheModel := cache.NewMsgCacheModel(rdb)
 	mongoClient := mgo.GetDatabase().Collection(unRelationTb.MsgDocModel{}.TableName())
 
 	ctx := context.Background()
