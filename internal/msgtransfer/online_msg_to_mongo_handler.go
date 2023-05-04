@@ -40,14 +40,14 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 		log.Error("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
 		return
 	}
-	log.Info(operationID, "BatchInsertChat2DB userID: ", msgFromMQ.SourceID, "msgFromMQ.LastSeq: ", msgFromMQ.LastSeq)
-	err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.SourceID, msgFromMQ.Messages, msgFromMQ.LastSeq)
+	log.Info(operationID, "BatchInsertChat2DB userID: ", msgFromMQ.ConversationID, "msgFromMQ.LastSeq: ", msgFromMQ.LastSeq)
+	err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.Messages, msgFromMQ.LastSeq)
 	if err != nil {
-		log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.Messages, msgFromMQ.SourceID, msgFromMQ.TriggerID)
+		log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.Messages, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 	}
-	err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.SourceID, msgFromMQ.Messages)
+	err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.ConversationID, msgFromMQ.Messages)
 	if err != nil {
-		log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.Messages, msgFromMQ.SourceID, msgFromMQ.TriggerID)
+		log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.Messages, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 	}
 	for _, v := range msgFromMQ.Messages {
 		if v.MsgData.ContentType == constant.DeleteMessageNotification {

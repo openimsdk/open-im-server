@@ -167,7 +167,7 @@ func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, grou
 	return minSeqCache, nil
 }
 
-func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, sourceID string, maxSeqCache, maxSeqMongo int64, diffusionType int) error {
+func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, conversationID string, maxSeqCache, maxSeqMongo int64, diffusionType int) error {
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
 		return errSeq
 	}

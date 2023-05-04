@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
@@ -105,22 +104,22 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 	return c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
 		cache := c.cache.NewCache()
-		for _, v := range [][3]string{{conversation.OwnerUserID, conversation.ConversationID, conversation.UserID}, {conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType), conversation.OwnerUserID}} {
-			haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{v[1]})
+		for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
+			haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
 			if err != nil {
 				return err
 			}
 			if len(haveUserIDs) > 0 {
-				_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, v[1], map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+				_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
 				if err != nil {
 					return err
 				}
-				cache = cache.DelUsersConversation(v[1], v[0])
+				cache = cache.DelUsersConversation(conversation.ConversationID, v[0])
 			} else {
 				newConversation := *conversation
 				newConversation.OwnerUserID = v[0]
-				newConversation.UserID = v[2]
-				newConversation.ConversationID = v[1]
+				newConversation.UserID = v[1]
+				newConversation.ConversationID = conversation.ConversationID
 				newConversation.IsPrivateChat = conversation.IsPrivateChat
 				if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 					return err

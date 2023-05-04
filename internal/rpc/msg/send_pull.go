@@ -175,7 +175,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 			var atUserID []string
 			conversation := pbConversation.Conversation{
 				OwnerUserID:      req.MsgData.SendID,
-				ConversationID:   utils.GetConversationIDBySessionType(req.MsgData.GroupID, constant.GroupChatType),
+				ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, req.MsgData.GroupID),
 				ConversationType: constant.GroupChatType,
 				GroupID:          req.MsgData.GroupID,
 			}

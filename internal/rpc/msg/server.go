@@ -159,20 +159,16 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 }
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	resp := &sdkws.PullMessageBySeqsResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
-	if err != nil {
-		return nil, err
-	}
-	resp.List = msgs
-	for groupID, list := range req.GroupSeqs {
-		msgs, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, groupID, list.Seqs)
+	resp := &sdkws.PullMessageBySeqsResp{}
+	for _, seq := range req.SeqRanges {
+		msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
 		if err != nil {
 			return nil, err
 		}
-		resp.GroupMsgDataList[groupID] = &sdkws.MsgDataList{
-			MsgDataList: msgs,
-		}
+		resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
+			ConversationID: seq.ConversationID,
+			Msgs:           msgs,
+		})
 	}
 	return resp, nil
 }

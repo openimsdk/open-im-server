@@ -758,7 +758,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		args := &pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
 				OwnerUserID:      mcontext.GetOpUserID(ctx),
-				ConversationID:   utils.GetConversationIDBySessionType(group.GroupID, constant.GroupChatType),
+				ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
 				ConversationType: constant.SuperGroupChatType,
 				GroupID:          group.GroupID,
 			},

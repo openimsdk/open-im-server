@@ -2,10 +2,11 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"strconv"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (
@@ -30,10 +31,10 @@ type MsgDocModelInterface interface {
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetNewestMsg(ctx context.Context, sourceID string) (*MsgInfoModel, error)
-	GetOldestMsg(ctx context.Context, sourceID string) (*MsgInfoModel, error)
+	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
+	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
-	GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*MsgDocModel, error)
+	GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*MsgDocModel, error)
 	UpdateOneDoc(ctx context.Context, msg *MsgDocModel) error
 }
 
@@ -59,9 +60,9 @@ func (m *MsgDocModel) IsFull() bool {
 	return false
 }
 
-func (m MsgDocModel) GetDocID(sourceID string, seq int64) string {
+func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := seq / singleGocMsgNum
-	return m.indexGen(sourceID, seqSuffix)
+	return m.indexGen(conversationID, seqSuffix)
 }
 
 func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
@@ -83,10 +84,10 @@ func (m MsgDocModel) superGroupIndexGen(groupID string, seqSuffix int64) string 
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
 
-func (m MsgDocModel) GetDocIDSeqsMap(sourceID string, seqs []int64) map[string][]int64 {
+func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
 	for i := 0; i < len(seqs); i++ {
-		docID := m.GetDocID(sourceID, seqs[i])
+		docID := m.GetDocID(conversationID, seqs[i])
 		if value, ok := t[docID]; !ok {
 			var temp []int64
 			t[docID] = append(temp, seqs[i])
@@ -108,8 +109,8 @@ func (m MsgDocModel) getMsgIndex(seq uint32) int {
 	return int(index)
 }
 
-func (m MsgDocModel) indexGen(sourceID string, seqSuffix int64) string {
-	return sourceID + ":" + strconv.FormatInt(seqSuffix, 10)
+func (m MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
+	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
 
 func (MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {

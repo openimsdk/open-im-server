@@ -23,10 +23,10 @@ func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistr
 	return &ExtendMsgNotificationSender{rpcclient.NewMsgClient(client)}
 }
 
-func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
+func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, conversationID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var content sdkws.ReactionMessageModifierNotification
-	content.SourceID = req.SourceID
+	content.ConversationID = req.ConversationID
 	content.OpUserID = mcontext.GetOpUserID(ctx)
 	content.SessionType = req.SessionType
 	keyMap := make(map[string]*sdkws.KeyValue)
@@ -43,12 +43,12 @@ func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx conte
 	content.IsReact = resp.IsReact
 	content.IsExternalExtensions = req.IsExternalExtensions
 	content.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageModifier, &content, isHistory, isReactionFromCache)
+	e.messageReactionSender(ctx, sendID, conversationID, sessionType, constant.ReactionMessageModifier, &content, isHistory, isReactionFromCache)
 }
-func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx context.Context, sendID string, sourceID string, sessionType int32,
+func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx context.Context, sendID string, conversationID string, sessionType int32,
 	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var content sdkws.ReactionMessageDeleteNotification
-	content.SourceID = req.SourceID
+	content.ConversationID = req.ConversationID
 	content.OpUserID = req.OpUserID
 	content.SessionType = req.SessionType
 	keyMap := make(map[string]*sdkws.KeyValue)
@@ -63,9 +63,9 @@ func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx contex
 	content.SuccessReactionExtensions = keyMap
 	content.ClientMsgID = req.ClientMsgID
 	content.MsgFirstModifyTime = req.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, &content, isHistory, isReactionFromCache)
+	e.messageReactionSender(ctx, sendID, conversationID, sessionType, constant.ReactionMessageDeleter, &content, isHistory, isReactionFromCache)
 }
-func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, sourceID string, sessionType, contentType int32, m proto.Message, isHistory bool, isReactionFromCache bool) error {
+func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, conversationID string, sessionType, contentType int32, m proto.Message, isHistory bool, isReactionFromCache bool) error {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
@@ -94,9 +94,9 @@ func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context,
 	}
 	switch sessionType {
 	case constant.SingleChatType, constant.NotificationChatType:
-		pbData.MsgData.RecvID = sourceID
+		pbData.MsgData.RecvID = conversationID
 	case constant.GroupChatType, constant.SuperGroupChatType:
-		pbData.MsgData.GroupID = sourceID
+		pbData.MsgData.GroupID = conversationID
 	}
 	_, err = e.SendMsg(ctx, &pbData)
 	return err

@@ -69,7 +69,7 @@ type CallbackMsgModifyCommandResp struct {
 type CallbackBeforeSetMessageReactionExtReq struct {
 	OperationID           string `json:"operationID"`
 	CallbackCommand       `json:"callbackCommand"`
-	SourceID              string                     `json:"sourceID"`
+	ConversationID        string                     `json:"conversationID"`
 	OpUserID              string                     `json:"opUserID"`
 	SessionType           int32                      `json:"sessionType"`
 	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList"`
@@ -86,7 +86,7 @@ type CallbackBeforeSetMessageReactionExtResp struct {
 type CallbackDeleteMessageReactionExtReq struct {
 	CallbackCommand       `json:"callbackCommand"`
 	OperationID           string            `json:"operationID"`
-	SourceID              string            `json:"sourceID"`
+	ConversationID        string            `json:"conversationID"`
 	OpUserID              string            `json:"opUserID"`
 	SessionType           int32             `json:"sessionType"`
 	ReactionExtensionList []*sdkws.KeyValue `json:"reactionExtensionList"`
@@ -103,7 +103,7 @@ type CallbackDeleteMessageReactionExtResp struct {
 type CallbackGetMessageListReactionExtReq struct {
 	OperationID     string `json:"operationID"`
 	CallbackCommand `json:"callbackCommand"`
-	SourceID        string   `json:"sourceID"`
+	ConversationID  string   `json:"conversationID"`
 	OpUserID        string   `json:"opUserID"`
 	SessionType     int32    `json:"sessionType"`
 	TypeKeyList     []string `json:"typeKeyList"`
@@ -118,7 +118,7 @@ type CallbackGetMessageListReactionExtResp struct {
 type CallbackAddMessageReactionExtReq struct {
 	OperationID           string `json:"operationID"`
 	CallbackCommand       `json:"callbackCommand"`
-	SourceID              string                     `json:"sourceID"`
+	ConversationID        string                     `json:"conversationID"`
 	OpUserID              string                     `json:"opUserID"`
 	SessionType           int32                      `json:"sessionType"`
 	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList"`

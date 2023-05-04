@@ -2,16 +2,17 @@ package msg
 
 import (
 	"context"
+	"math/rand"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"math/rand"
-	"strconv"
-	"sync"
-	"time"
 )
 
 var (
@@ -252,7 +253,7 @@ func GetMsgID(sendID string) string {
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, sourceID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
 	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err
@@ -268,11 +269,11 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
 		return true, nil
 	}
-	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
+	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
 	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
-	//if err != nil {
-	//	return false, err
-	//}
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 	switch singleOpt {
 	case constant.ReceiveMessage:
@@ -323,7 +324,8 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 			options[k] = v
 		}
 		groupPB.MsgData.Options = options
-		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
+		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, groupPB.MsgData.GroupID)
+		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, groupPB)
 		if err != nil {
 			wg.Done()
 			return err

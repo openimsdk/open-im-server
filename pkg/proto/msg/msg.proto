@@ -16,12 +16,12 @@ message MsgDataToDB {
 
 message PushMsgDataToMQ{
   sdkws.MsgData msgData = 1;
-  string sourceID = 2;
+  string conversationID = 2;
 }
 
 message MsgDataToMongoByMQ{
  int64 lastSeq = 1;
- string sourceID = 2;
+ string conversationID = 2;
  repeated MsgDataToMQ messages = 3;
  string triggerID = 4;
 }
@@ -99,7 +99,7 @@ message GetWriteDiffMsgResp{
 }
 
 message ModifyMessageReactionExtensionsReq {
-  string sourceID = 1;
+  string conversationID = 1;
   int32 sessionType = 2;
   map <string, sdkws.KeyValue>reactionExtensions = 3;
   string clientMsgID = 4;
@@ -110,7 +110,7 @@ message ModifyMessageReactionExtensionsReq {
   int64 msgFirstModifyTime = 9;
 }
 message SetMessageReactionExtensionsReq {
-  string sourceID = 1;
+  string conversationID = 1;
   int32 sessionType = 2;
   map <string, sdkws.KeyValue>reactionExtensions = 3;
   string clientMsgID = 4;
@@ -128,7 +128,7 @@ message SetMessageReactionExtensionsResp {
 }
 
 message GetMessagesReactionExtensionsReq {
-  string sourceID = 1;
+  string conversationID = 1;
   int32 sessionType = 2;
   message MessageReactionKey {
     string clientMsgID = 1;
@@ -155,7 +155,7 @@ message ModifyMessageReactionExtensionsResp {
 message DeleteMessagesReactionExtensionsReq {
   string operationID = 1;
   string opUserID = 2;
-  string sourceID = 3;
+  string conversationID = 3;
   int32 sessionType = 4;
   string clientMsgID = 5;
   bool isExternalExtensions = 6;
@@ -188,7 +188,7 @@ message KeyValueResp {
 message MsgDataToModifyByMQ{
  repeated MsgDataToMQ messages = 1;
  string triggerID = 2;
- string sourceID = 3;
+ string conversationID = 3;
 }
 
 message DelMsgsReq{

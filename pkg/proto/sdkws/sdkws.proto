@@ -123,25 +123,27 @@ message FriendRequest{
 ///////////////////////////////////base end/////////////////////////////////////
 message PullMessageBySeqsReq{
   string userID = 1;
-  repeated int64 seqs = 3;
-  map <string, seqs>groupSeqs = 4;
+  repeated SeqRange seqRanges = 2;
 }
 
-message seqs {
-  repeated int64 seqs = 1;
+message SeqRange {
+  string conversationID = 1;
+  int64 begin = 2;
+  int64 end = 3;
+  bool isNotification = 4;
+  int64 num = 5;
 }
 
 
-message MsgDataList {
-  repeated MsgData msgDataList = 1;
+message PullMsgs {
+  repeated MsgData Msgs = 1;
+  bool isNotification = 2;
+  string conversationID = 3;
 }
 
 message PullMessageBySeqsResp {
-  repeated MsgData list = 1;
-  map<string, MsgDataList> groupMsgDataList = 2;
+  repeated PullMsgs msgs = 1;
 }
-
-
 
 message GetMaxAndMinSeqReq {
   repeated string groupIDs = 1;
@@ -412,6 +414,10 @@ message ConversationSetPrivateTips{
 }
 
 ////////////////////message///////////////////////
+message seqs {
+  repeated int64 seqs = 1;
+}
+
 message DeleteMessageTips{
   string opUserID = 1;
   string userID = 2;
@@ -598,7 +604,7 @@ message SetAppBackgroundStatusResp {
 }
 
 message ExtendMsgSet {
-  string sourceID = 1;
+  string conversationID = 1;
   int32 sessionType = 2;
   map <string, ExtendMsg>extendMsgs = 3;
   int64 MaxMsgUpdateTime = 4;
@@ -621,7 +627,7 @@ message KeyValue {
 }
 
 message ReactionMessageModifierNotification {
-  string sourceID = 1;
+  string conversationID = 1;
   string opUserID = 2;
   int32 sessionType = 3;
   map <string, KeyValue>successReactionExtensions = 4;
@@ -632,7 +638,7 @@ message ReactionMessageModifierNotification {
 }
 
 message ReactionMessageDeleteNotification {
-  string sourceID = 1;
+  string conversationID = 1;
   string opUserID = 2;
   int32 sessionType = 3;
   map <string, KeyValue>successReactionExtensions = 4;

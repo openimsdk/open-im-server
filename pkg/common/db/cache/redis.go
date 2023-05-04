@@ -29,7 +29,7 @@ const (
 	messageCache            = "MESSAGE_CACHE:"
 	signalCache             = "SIGNAL_CACHE:"
 	signalListCache         = "SIGNAL_LIST_CACHE:"
-	FcmToken                = "FCM_TOKEN:"
+	fcmToken                = "FCM_TOKEN:"
 	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq             = "GROUP_MAX_SEQ:"
 	groupMinSeq             = "GROUP_MIN_SEQ:"
@@ -37,6 +37,10 @@ const (
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
 	uidPidToken             = "UID_PID_TOKEN_STATUS:"
+	userNotificationSeq     = "USER_NOTIFICATION_SEQ:"
+	userMinNotificationSeq  = "USER_MIN_NOTIFICATION_SEQ:"
+	groupNotificationSeq    = "GROUP_NOTIFICATION_SEQ:"
+	groupMinNotificationSeq = "GROUP_MIN_NOTIFICATION_SEQ:"
 )
 
 type Model interface {
@@ -85,6 +89,20 @@ type Model interface {
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
+	// notificatio
+
+	// 	IncrUserNotificationSeq(ctx context.Context, userID string) (int64, error)
+	// 	GetUserNotificationMaxSeq(ctx context.Context, userID string) (int64, error)
+	// 	SetUserNotificationMaxSeq(ctx context.Context, userID string, maxSeq int64) error
+	// 	SetUserNotificationMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+	// 	GetUserNotificationMinSeq(ctx context.Context, userID string) (int64, error)
+	// 	SetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
+	// 	GetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
+	// 	GetGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
+	// 	GetGroupNotificationMinSeq(ctx context.Context, groupID string) (int64, error)
+	// 	IncrGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
+	// 	SetGroupNotificationMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
+	// 	SetGroupNotificationMinSeq(ctx context.Context, groupID string, minSeq int64) error
 }
 
 func NewCacheModel(client redis.UniversalClient) Model {
@@ -213,12 +231,12 @@ func (c *cache) DeleteTokenByUidPid(ctx context.Context, userID string, platform
 	return utils.Wrap1(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (c *cache) getMessageCacheKey(sourceID string, seq int64) string {
-	return messageCache + sourceID + "_" + strconv.Itoa(int(seq))
+func (c *cache) getMessageCacheKey(conversationID string, seq int64) string {
+	return messageCache + conversationID + "_" + strconv.Itoa(int(seq))
 }
 
-func (c *cache) allMessageCacheKey(sourceID string) string {
-	return messageCache + sourceID + "_*"
+func (c *cache) allMessageCacheKey(conversationID string) string {
+	return messageCache + conversationID + "_*"
 }
 
 func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
@@ -438,15 +456,15 @@ func (c *cache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) 
 }
 
 func (c *cache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	return utils.Wrap1(c.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
+	return utils.Wrap1(c.rdb.Set(ctx, fcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *cache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Result())
+	return utils.Wrap2(c.rdb.Get(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Result())
 }
 
 func (c *cache) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	return utils.Wrap1(c.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
+	return utils.Wrap1(c.rdb.Del(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Err())
 }
 
 func (c *cache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
