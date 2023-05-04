@@ -70,6 +70,7 @@ type groupServer struct {
 	User                  *rpcclient.UserClient
 	Notification          *notification.GroupNotificationSender
 	conversationRpcClient *rpcclient.ConversationClient
+	msgRpcClient          *rpcclient.MsgClient
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
@@ -462,6 +463,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		s.Notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
 	}
+	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -721,7 +725,26 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		}
 		s.Notification.MemberQuitNotification(ctx, req)
 	}
+	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
+		return nil, err
+	}
 	return resp, nil
+}
+
+func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
+	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	resp, err := s.msgRpcClient.GetMaxAndMinSeq(ctx, &sdkws.GetMaxAndMinSeqReq{
+		ConversationIDs: []string{},
+		UserID:          mcontext.GetOpUserID(ctx),
+	})
+	if err != nil {
+		return err
+	}
+	seq, ok := resp.MaxAndMinSeqs[conevrsationID]
+	if !ok {
+		return errs.ErrInternalServer.Wrap("get max seq error")
+	}
+	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, seq.MaxSeq)
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
