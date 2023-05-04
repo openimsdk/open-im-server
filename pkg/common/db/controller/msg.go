@@ -85,7 +85,7 @@ type MsgDatabase interface {
 	MsgToMongoMQ(ctx context.Context, aggregationID string, messages []*sdkws.MsgData, lastSeq int64) error
 }
 
-func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.Model) MsgDatabase {
+func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) MsgDatabase {
 	return &msgDatabase{
 		msgDocDatabase:   msgDocModel,
 		cache:            cacheModel,
@@ -97,7 +97,7 @@ func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel ca
 }
 
 func InitMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) MsgDatabase {
-	cacheModel := cache.NewCacheModel(rdb)
+	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
 	msgDatabase := NewMsgDatabase(msgDocModel, cacheModel)
 	return msgDatabase
@@ -106,7 +106,7 @@ func InitMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) MsgDat
 type msgDatabase struct {
 	msgDocDatabase    unRelationTb.MsgDocModelInterface
 	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
-	cache             cache.Model
+	cache             cache.MsgModel
 	producer          *kafka.Producer
 	producerToMongo   *kafka.Producer
 	producerToModify  *kafka.Producer

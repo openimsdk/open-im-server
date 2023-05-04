@@ -14,13 +14,13 @@ const (
 	blackExpireTime = time.Second * 60 * 60 * 12
 )
 
-// args fn will exec when no data in cache
+// args fn will exec when no data in msgCache
 type BlackCache interface {
-	//get blackIDs from cache
+	//get blackIDs from msgCache
 	metaCache
 	NewCache() BlackCache
 	GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error)
-	//del user's blackIDs cache, exec when a user's black list changed
+	//del user's blackIDs msgCache, exec when a user's black list changed
 	DelBlackIDs(ctx context.Context, userID string) BlackCache
 }
 

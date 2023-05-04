@@ -21,25 +21,24 @@ import (
 )
 
 const (
-	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken        = "DEVICE_TOKEN"
-	userMinSeq              = "REDIS_USER_MIN_SEQ:"
-	getuiToken              = "GETUI_TOKEN"
-	getuiTaskID             = "GETUI_TASK_ID"
-	messageCache            = "MESSAGE_CACHE:"
-	signalCache             = "SIGNAL_CACHE:"
-	signalListCache         = "SIGNAL_LIST_CACHE:"
-	FcmToken                = "FCM_TOKEN:"
-	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq             = "GROUP_MAX_SEQ:"
-	groupMinSeq             = "GROUP_MIN_SEQ:"
-	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
-	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
-	exTypeKeyLocker         = "EX_LOCK:"
-	uidPidToken             = "UID_PID_TOKEN_STATUS:"
+	NotificationUserIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
+	NotificationUserMinSeq              = "REDIS_USER_MIN_SEQ:"
+	NotificationGetuiToken              = "GETUI_TOKEN"
+	NotificationGetuiTaskID             = "GETUI_TASK_ID"
+	NotificationMessageCache            = "MESSAGE_CACHE:"
+	NotificationSignalCache             = "SIGNAL_CACHE:"
+	NotificationSignalListCache         = "SIGNAL_LIST_CACHE:"
+	NotificationFcmToken                = "FCM_TOKEN:"
+	NotificationGroupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
+	NotificationGroupMaxSeq             = "GROUP_MAX_SEQ:"
+	NotificationGroupMinSeq             = "GROUP_MIN_SEQ:"
+	NotificationSendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
+	NotificationUserBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
+	NotificationExTypeKeyLocker         = "EX_LOCK:"
+	NotificationUidPidToken             = "UID_PID_TOKEN_STATUS:"
 )
 
-type Model interface {
+type NotificationModel interface {
 	IncrUserSeq(ctx context.Context, userID string) (int64, error)
 	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
 	SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error
@@ -87,16 +86,16 @@ type Model interface {
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 }
 
-func NewCacheModel(client redis.UniversalClient) Model {
-	return &cache{rdb: client}
+func NewNotificationCacheModel(client redis.UniversalClient) NotificationModel {
+	return &notificationCache{rdb: client}
 }
 
-type cache struct {
+type notificationCache struct {
 	rdb redis.UniversalClient
 }
 
 // 兼容老版本调用
-func (c *cache) DelKeys() {
+func (c *notificationCache) DelKeys() {
 	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE:", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE:", "JOINED_GROUP_LIST_CACHE:",
 		"GROUP_MEMBER_INFO_CACHE:", "GROUP_ALL_MEMBER_INFO_CACHE:", "ALL_FRIEND_INFO_CACHE:"} {
 		fName := utils.GetSelfFuncName()
@@ -127,67 +126,67 @@ func (c *cache) DelKeys() {
 	}
 }
 
-func (c *cache) IncrUserSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userIncrSeq+userID).Int64())
+func (c *notificationCache) IncrUserSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationUserIncrSeq+userID).Int64())
 }
 
-func (c *cache) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userIncrSeq+userID).Int64())
+func (c *notificationCache) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationUserIncrSeq+userID).Int64())
 }
 
-func (c *cache) SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error {
-	return errs.Wrap(c.rdb.Set(ctx, userIncrSeq+userID, maxSeq, 0).Err())
+func (c *notificationCache) SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationUserIncrSeq+userID, maxSeq, 0).Err())
 }
 
-func (c *cache) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
-	return errs.Wrap(c.rdb.Set(ctx, userMinSeq+userID, minSeq, 0).Err())
+func (c *notificationCache) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationUserMinSeq+userID, minSeq, 0).Err())
 }
 
-func (c *cache) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userMinSeq+userID).Int64())
+func (c *notificationCache) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationUserMinSeq+userID).Int64())
 }
 
-func (c *cache) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
-	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
+func (c *notificationCache) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
+	key := NotificationGroupUserMinSeq + "g:" + groupID + "u:" + userID
 	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
-func (c *cache) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
-	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
+func (c *notificationCache) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
+	key := NotificationGroupUserMinSeq + "g:" + groupID + "u:" + userID
 	return utils.Wrap2(c.rdb.Get(ctx, key).Int64())
 }
 
-func (c *cache) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, groupMaxSeq+groupID).Int64())
+func (c *notificationCache) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationGroupMaxSeq+groupID).Int64())
 }
 
-func (c *cache) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, groupMinSeq+groupID).Int64())
+func (c *notificationCache) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationGroupMinSeq+groupID).Int64())
 }
 
-func (c *cache) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
-	key := groupMaxSeq + groupID
+func (c *notificationCache) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
+	key := NotificationGroupMaxSeq + groupID
 	seq, err := c.rdb.Incr(ctx, key).Uint64()
 	return int64(seq), errs.Wrap(err)
 }
 
-func (c *cache) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
-	key := groupMaxSeq + groupID
+func (c *notificationCache) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
+	key := NotificationGroupMaxSeq + groupID
 	return errs.Wrap(c.rdb.Set(ctx, key, maxSeq, 0).Err())
 }
 
-func (c *cache) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
-	key := groupMinSeq + groupID
+func (c *notificationCache) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
+	key := NotificationGroupMinSeq + groupID
 	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
 }
 
-func (c *cache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
-	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+func (c *notificationCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
+	key := NotificationUidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	return errs.Wrap(c.rdb.HSet(ctx, key, token, flag).Err())
 }
 
-func (c *cache) GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error) {
-	key := uidPidToken + userID + ":" + platformID
+func (c *notificationCache) GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error) {
+	key := NotificationUidPidToken + userID + ":" + platformID
 	m, err := c.rdb.HGetAll(ctx, key).Result()
 	if err != nil {
 		return nil, errs.Wrap(err)
@@ -199,8 +198,8 @@ func (c *cache) GetTokensWithoutError(ctx context.Context, userID, platformID st
 	return mm, nil
 }
 
-func (c *cache) SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error {
-	key := uidPidToken + userID + ":" + platform
+func (c *notificationCache) SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error {
+	key := NotificationUidPidToken + userID + ":" + platform
 	mm := make(map[string]interface{})
 	for k, v := range m {
 		mm[k] = v
@@ -208,20 +207,20 @@ func (c *cache) SetTokenMapByUidPid(ctx context.Context, userID string, platform
 	return errs.Wrap(c.rdb.HSet(ctx, key, mm).Err())
 }
 
-func (c *cache) DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error {
-	key := uidPidToken + userID + ":" + platform
+func (c *notificationCache) DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error {
+	key := NotificationUidPidToken + userID + ":" + platform
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (c *cache) getMessageCacheKey(sourceID string, seq int64) string {
-	return messageCache + sourceID + "_" + strconv.Itoa(int(seq))
+func (c *notificationCache) getMessageCacheKey(sourceID string, seq int64) string {
+	return NotificationMessageCache + sourceID + "_" + strconv.Itoa(int(seq))
 }
 
-func (c *cache) allMessageCacheKey(sourceID string) string {
-	return messageCache + sourceID + "_*"
+func (c *notificationCache) allMessageCacheKey(sourceID string) string {
+	return NotificationMessageCache + sourceID + "_*"
 }
 
-func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
+func (c *notificationCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range seqs {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
@@ -247,7 +246,7 @@ func (c *cache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int6
 	return seqMsgs, failedSeqs, err
 }
 
-func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error) {
+func (c *notificationCache) SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error) {
 	pipe := c.rdb.Pipeline()
 	var failedMsgs []sdkws.MsgData
 	for _, msg := range msgList {
@@ -262,13 +261,13 @@ func (c *cache) SetMessageToCache(ctx context.Context, userID string, msgList []
 		}
 	}
 	if len(failedMsgs) != 0 {
-		return len(failedMsgs), fmt.Errorf("set msg to cache failed, failed lists: %v, %s", failedMsgs, userID)
+		return len(failedMsgs), fmt.Errorf("set msg to notificationCache failed, failed lists: %v, %s", failedMsgs, userID)
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err
 }
 
-func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error {
+func (c *notificationCache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error {
 	pipe := c.rdb.Pipeline()
 	for _, v := range msgList {
 		if err := pipe.Del(ctx, c.getMessageCacheKey(userID, v.Seq)).Err(); err != nil {
@@ -279,7 +278,7 @@ func (c *cache) DeleteMessageFromCache(ctx context.Context, userID string, msgLi
 	return errs.Wrap(err)
 }
 
-func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
+func (c *notificationCache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(userID)).Result()
 	if err == redis.Nil {
 		return nil
@@ -297,7 +296,7 @@ func (c *cache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
 	return errs.Wrap(err)
 }
 
-func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
+func (c *notificationCache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
 	req := &sdkws.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return false, errs.Wrap(err)
@@ -326,7 +325,7 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 			if err != nil {
 				return false, errs.Wrap(err)
 			}
-			keys := signalListCache + userID
+			keys := NotificationSignalListCache + userID
 			err = pipe.LPush(ctx, keys, msg.ClientMsgID).Err()
 			if err != nil {
 				return false, errs.Wrap(err)
@@ -335,7 +334,7 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 			if err != nil {
 				return false, errs.Wrap(err)
 			}
-			key := signalCache + msg.ClientMsgID
+			key := NotificationSignalCache + msg.ClientMsgID
 			err = pipe.Set(ctx, key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
 				return false, errs.Wrap(err)
@@ -349,8 +348,8 @@ func (c *cache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, push
 	return true, nil
 }
 
-func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (signalInviteReq *sdkws.SignalInviteReq, err error) {
-	bytes, err := c.rdb.Get(ctx, signalCache+clientMsgID).Bytes()
+func (c *notificationCache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (signalInviteReq *sdkws.SignalInviteReq, err error) {
+	bytes, err := c.rdb.Get(ctx, NotificationSignalCache+clientMsgID).Bytes()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -370,8 +369,8 @@ func (c *cache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, client
 	return signalInviteReq, nil
 }
 
-func (c *cache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
-	key, err := c.rdb.LPop(ctx, signalListCache+userID).Result()
+func (c *notificationCache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
+	key, err := c.rdb.LPop(ctx, NotificationSignalListCache+userID).Result()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
@@ -382,11 +381,11 @@ func (c *cache) GetAvailableSignalInvitationInfo(ctx context.Context, userID str
 	return invitationInfo, errs.Wrap(c.DelUserSignalList(ctx, userID))
 }
 
-func (c *cache) DelUserSignalList(ctx context.Context, userID string) error {
-	return errs.Wrap(c.rdb.Del(ctx, signalListCache+userID).Err())
+func (c *notificationCache) DelUserSignalList(ctx context.Context, userID string) error {
+	return errs.Wrap(c.rdb.Del(ctx, NotificationSignalListCache+userID).Err())
 }
 
-func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
+func (c *notificationCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
 	for _, seq := range seqs {
 		key := c.getMessageCacheKey(userID, seq)
 		result, err := c.rdb.Get(ctx, key).Result()
@@ -412,67 +411,67 @@ func (c *cache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64
 	return nil
 }
 
-func (c *cache) SetGetuiToken(ctx context.Context, token string, expireTime int64) error {
-	return errs.Wrap(c.rdb.Set(ctx, getuiToken, token, time.Duration(expireTime)*time.Second).Err())
+func (c *notificationCache) SetGetuiToken(ctx context.Context, token string, expireTime int64) error {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationGetuiToken, token, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (c *cache) GetGetuiToken(ctx context.Context) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, getuiToken).Result())
+func (c *notificationCache) GetGetuiToken(ctx context.Context) (string, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationGetuiToken).Result())
 }
 
-func (c *cache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
-	return errs.Wrap(c.rdb.Set(ctx, getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err())
+func (c *notificationCache) SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationGetuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (c *cache) GetGetuiTaskID(ctx context.Context) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, getuiTaskID).Result())
+func (c *notificationCache) GetGetuiTaskID(ctx context.Context) (string, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationGetuiTaskID).Result())
 }
 
-func (c *cache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
-	return errs.Wrap(c.rdb.Set(ctx, sendMsgFailedFlag+id, status, time.Hour*24).Err())
+func (c *notificationCache) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationSendMsgFailedFlag+id, status, time.Hour*24).Err())
 }
 
-func (c *cache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
-	result, err := c.rdb.Get(ctx, sendMsgFailedFlag+id).Int()
+func (c *notificationCache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
+	result, err := c.rdb.Get(ctx, NotificationSendMsgFailedFlag+id).Int()
 	return int32(result), errs.Wrap(err)
 }
 
-func (c *cache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	return errs.Wrap(c.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
+func (c *notificationCache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationFcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
-func (c *cache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Result())
+func (c *notificationCache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationFcmToken+account+":"+strconv.Itoa(platformID)).Result())
 }
 
-func (c *cache) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	return errs.Wrap(c.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
+func (c *notificationCache) DelFcmToken(ctx context.Context, account string, platformID int) error {
+	return errs.Wrap(c.rdb.Del(ctx, NotificationFcmToken+account+":"+strconv.Itoa(platformID)).Err())
 }
 
-func (c *cache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
-	seq, err := c.rdb.Incr(ctx, userBadgeUnreadCountSum+userID).Result()
+func (c *notificationCache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
+	seq, err := c.rdb.Incr(ctx, NotificationUserBadgeUnreadCountSum+userID).Result()
 	return int(seq), errs.Wrap(err)
 }
 
-func (c *cache) SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error {
-	return errs.Wrap(c.rdb.Set(ctx, userBadgeUnreadCountSum+userID, value, 0).Err())
+func (c *notificationCache) SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error {
+	return errs.Wrap(c.rdb.Set(ctx, NotificationUserBadgeUnreadCountSum+userID, value, 0).Err())
 }
 
-func (c *cache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userBadgeUnreadCountSum+userID).Int())
+func (c *notificationCache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, NotificationUserBadgeUnreadCountSum+userID).Int())
 }
 
-func (c *cache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
-	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+func (c *notificationCache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
+	key := NotificationExTypeKeyLocker + clientMsgID + "_" + TypeKey
 	return errs.Wrap(c.rdb.SetNX(ctx, key, 1, time.Minute).Err())
 }
 
-func (c *cache) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
-	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+func (c *notificationCache) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
+	key := NotificationExTypeKeyLocker + clientMsgID + "_" + TypeKey
 	return errs.Wrap(c.rdb.Del(ctx, key).Err())
 }
 
-func (c *cache) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
+func (c *notificationCache) getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
 	switch sessionType {
 	case constant.SingleChatType:
 		return "EX_SINGLE_" + clientMsgID
@@ -486,7 +485,7 @@ func (c *cache) getMessageReactionExPrefix(clientMsgID string, sessionType int32
 	return ""
 }
 
-func (c *cache) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
+func (c *notificationCache) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
 	n, err := c.rdb.Exists(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result()
 	if err != nil {
 		return false, utils.Wrap(err, "")
@@ -494,22 +493,22 @@ func (c *cache) JudgeMessageReactionExist(ctx context.Context, clientMsgID strin
 	return n > 0, nil
 }
 
-func (c *cache) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
+func (c *notificationCache) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
 	return errs.Wrap(c.rdb.HSet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
 }
 
-func (c *cache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+func (c *notificationCache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
 	return utils.Wrap2(c.rdb.Expire(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), expiration).Result())
 }
 
-func (c *cache) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
+func (c *notificationCache) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
 	return utils.Wrap2(c.rdb.HGet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey).Result())
 }
 
-func (c *cache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
+func (c *notificationCache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
 	return utils.Wrap2(c.rdb.HGetAll(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType)).Result())
 }
 
-func (c *cache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
+func (c *notificationCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
 	return errs.Wrap(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
 }

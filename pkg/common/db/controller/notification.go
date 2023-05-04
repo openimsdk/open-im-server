@@ -85,7 +85,7 @@ type NotificationDatabase interface {
 	MsgToMongoMQ(ctx context.Context, aggregationID string, messages []*sdkws.MsgData, lastSeq int64) error
 }
 
-func NewNotificationDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.Model) NotificationDatabase {
+func NewNotificationDatabase(msgDocModel unRelationTb.NotificationDocModelInterface, cacheModel cache.NotificationModel) NotificationDatabase {
 	return &notificationDatabase{
 		msgDocDatabase:   msgDocModel,
 		cache:            cacheModel,
@@ -97,22 +97,23 @@ func NewNotificationDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cach
 }
 
 func InitNotificationDatabase(rdb redis.UniversalClient, database *mongo.Database) MsgDatabase {
-	cacheModel := cache.NewCacheModel(rdb)
+	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
 	msgDatabase := NewMsgDatabase(msgDocModel, cacheModel)
 	return msgDatabase
 }
 
 type notificationDatabase struct {
-	msgDocDatabase    unRelationTb.MsgDocModelInterface
+	msgDocDatabase    unRelationTb.NotificationDocModelInterface
 	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
-	cache             cache.Model
+	cache             cache.NotificationModel
 	producer          *kafka.Producer
 	producerToMongo   *kafka.Producer
 	producerToModify  *kafka.Producer
 	producerToPush    *kafka.Producer
 	// model
-	msg               unRelationTb.MsgDocModel
+	//msg               unRelationTb.MsgDocModel
+	msg               unRelationTb.NotificationDocModel
 	extendMsgSetModel unRelationTb.ExtendMsgSetModel
 }
 
@@ -231,30 +232,30 @@ func (db *notificationDatabase) GetGroupMinSeq(ctx context.Context, groupID stri
 
 func (db *notificationDatabase) BatchInsertChat2DB(ctx context.Context, sourceID string, msgList []*sdkws.MsgData, currentMaxSeq int64) error {
 	//newTime := utils.GetCurrentTimestampByMill()
-	if int64(len(msgList)) > db.msg.GetSingleGocMsgNum() {
+	if int64(len(msgList)) > db.msg.GetsingleGocNotificationNum() {
 		return errors.New("too large")
 	}
 	var remain int64
-	blk0 := db.msg.GetSingleGocMsgNum() - 1
+	blk0 := db.msg.GetsingleGocNotificationNum() - 1
 	//currentMaxSeq 4998
-	if currentMaxSeq < db.msg.GetSingleGocMsgNum() {
+	if currentMaxSeq < db.msg.GetsingleGocNotificationNum() {
 		remain = blk0 - currentMaxSeq //1
 	} else {
 		excludeBlk0 := currentMaxSeq - blk0 //=1
 		//(5000-1)%5000 == 4999
-		remain = (db.msg.GetSingleGocMsgNum() - (excludeBlk0 % db.msg.GetSingleGocMsgNum())) % db.msg.GetSingleGocMsgNum()
+		remain = (db.msg.GetsingleGocNotificationNum() - (excludeBlk0 % db.msg.GetsingleGocNotificationNum())) % db.msg.GetsingleGocNotificationNum()
 	}
 	//remain=1
 	var insertCounter int64
-	msgsToMongo := make([]unRelationTb.MsgInfoModel, 0)
-	msgsToMongoNext := make([]unRelationTb.MsgInfoModel, 0)
+	msgsToMongo := make([]unRelationTb.NotificationInfoModel, 0)
+	msgsToMongoNext := make([]unRelationTb.NotificationInfoModel, 0)
 	docID := ""
 	docIDNext := ""
 	var err error
 	for _, m := range msgList {
 		//log.Debug(operationID, "msg node ", m.String(), m.MsgData.ClientMsgID)
 		currentMaxSeq++
-		sMsg := unRelationTb.MsgInfoModel{}
+		sMsg := unRelationTb.NotificationInfoModel{}
 		sMsg.SendTime = m.SendTime
 		m.Seq = currentMaxSeq
 		if sMsg.Msg, err = proto.Marshal(m); err != nil {
@@ -279,7 +280,7 @@ func (db *notificationDatabase) BatchInsertChat2DB(ctx context.Context, sourceID
 		err = db.msgDocDatabase.PushMsgsToDoc(ctx, docID, msgsToMongo)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
-				doc := &unRelationTb.MsgDocModel{}
+				doc := &unRelationTb.NotificationDocModel{}
 				doc.DocID = docID
 				doc.Msg = msgsToMongo
 				if err = db.msgDocDatabase.Create(ctx, doc); err != nil {
@@ -298,7 +299,7 @@ func (db *notificationDatabase) BatchInsertChat2DB(ctx context.Context, sourceID
 		}
 	}
 	if docIDNext != "" {
-		nextDoc := &unRelationTb.MsgDocModel{}
+		nextDoc := &unRelationTb.NotificationDocModel{}
 		nextDoc.DocID = docIDNext
 		nextDoc.Msg = msgsToMongoNext
 		//log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext, "userID: ", userID)
@@ -324,7 +325,7 @@ func (db *notificationDatabase) NotificationBatchInsertChat2Cache(ctx context.Co
 func (db *notificationDatabase) BatchInsertChat2Cache(ctx context.Context, sourceID string, msgList []*sdkws.MsgData) (int64, error) {
 	//newTime := utils.GetCurrentTimestampByMill()
 	lenList := len(msgList)
-	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
+	if int64(lenList) > db.msg.GetsingleGocNotificationNum() {
 		return 0, errors.New("too large")
 	}
 	if lenList < 1 {
@@ -454,7 +455,7 @@ func (db *notificationDatabase) GetOldestMsg(ctx context.Context, sourceID strin
 	return db.unmarshalMsg(msgInfo)
 }
 
-func (db *notificationDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *sdkws.MsgData, err error) {
+func (db *notificationDatabase) unmarshalMsg(msgInfo *unRelationTb.NotificationInfoModel) (msgPb *sdkws.MsgData, err error) {
 	msgPb = &sdkws.MsgData{}
 	err = proto.Unmarshal(msgInfo.Msg, msgPb)
 	if err != nil {
@@ -628,7 +629,7 @@ func (db *notificationDatabase) deleteMsgRecursion(ctx context.Context, sourceID
 		return delStruct.getSetMinSeq() + 1, nil
 	}
 	//log.NewDebug(operationID, "ID:", sourceID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
-	if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
+	if int64(len(msgs.Msg)) > db.msg.GetsingleGocNotificationNum() {
 		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgs.Msg), "docID:", msgs.DocID)
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgs.IsFull() {
