@@ -56,9 +56,9 @@ func (m *NotificationMongoDriver) FindOneByDocID(ctx context.Context, docID stri
 	return doc, err
 }
 
-func (m *NotificationMongoDriver) GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*table.NotificationDocModel, error) {
+func (m *NotificationMongoDriver) GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*table.NotificationDocModel, error) {
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: fmt.Sprintf("^%s:", sourceID)}}, findOpts)
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -73,9 +73,9 @@ func (m *NotificationMongoDriver) GetMsgsByIndex(ctx context.Context, sourceID s
 	return nil, ErrMsgListNotExist
 }
 
-func (m *NotificationMongoDriver) GetNewestMsg(ctx context.Context, sourceID string) (*table.NotificationInfoModel, error) {
+func (m *NotificationMongoDriver) GetNewestMsg(ctx context.Context, conversationID string) (*table.NotificationInfoModel, error) {
 	var msgDocs []table.NotificationDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": -1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": -1}))
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -92,9 +92,9 @@ func (m *NotificationMongoDriver) GetNewestMsg(ctx context.Context, sourceID str
 	return nil, ErrMsgNotFound
 }
 
-func (m *NotificationMongoDriver) GetOldestMsg(ctx context.Context, sourceID string) (*table.NotificationInfoModel, error) {
+func (m *NotificationMongoDriver) GetOldestMsg(ctx context.Context, conversationID string) (*table.NotificationInfoModel, error) {
 	var msgDocs []table.NotificationDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", sourceID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": 1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": 1}))
 	if err != nil {
 		return nil, err
 	}

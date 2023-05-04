@@ -81,9 +81,9 @@ type MsgDatabase interface {
 	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
 
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
-	MsgToModifyMQ(ctx context.Context, aggregationID string, messages []*sdkws.MsgData) error
-	MsgToPushMQ(ctx context.Context, sourceID string, msg2mq *sdkws.MsgData) (int32, int64, error)
-	MsgToMongoMQ(ctx context.Context, aggregationID string, messages []*sdkws.MsgData, lastSeq int64) error
+	MsgToModifyMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData) error
+	MsgToPushMQ(ctx context.Context, conversationID string, msg2mq *sdkws.MsgData) (int32, int64, error)
+	MsgToMongoMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData, lastSeq int64) error
 }
 
 func NewMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) MsgDatabase {
@@ -192,7 +192,7 @@ func (db *msgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.Ms
 
 func (db *msgDatabase) MsgToModifyMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, conversationID, &pbMsg.MsgDataToModifyByMQ{AggregationID: conversationID, Messages: messages})
+		_, _, err := db.producerToModify.SendMessage(ctx, conversationID, &pbMsg.MsgDataToModifyByMQ{ConversationID: conversationID, Messages: messages})
 		return err
 	}
 	return nil
@@ -207,9 +207,9 @@ func (db *msgDatabase) MsgToPushMQ(ctx context.Context, conversationID string, m
 	return partition, offset, err
 }
 
-func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, sourceID string, messages []*sdkws.MsgData, lastSeq int64) error {
+func (db *msgDatabase) MsgToMongoMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData, lastSeq int64) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, sourceID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: sourceID, MsgData: messages})
+		_, _, err := db.producerToModify.SendMessage(ctx, conversationID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, ConversationID: conversationID, MsgData: messages})
 		return err
 	}
 	return nil
@@ -318,7 +318,7 @@ func (db *msgDatabase) DeleteMessageFromCache(ctx context.Context, userID string
 	return db.cache.DeleteMessageFromCache(ctx, userID, msgs)
 }
 
-func (db *msgDatabase) NotificationBatchInsertChat2Cache(ctx context.Context, sourceID string, msgs []*sdkws.MsgData) (int64, error) {
+func (db *msgDatabase) NotificationBatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int64, error) {
 	return 0, nil
 }
 
@@ -336,7 +336,7 @@ func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID
 	for _, m := range msgList {
 		currentMaxSeq++
 		m.Seq = currentMaxSeq
-		//log.Debug(operationID, "cache msg node ", m.String(), m.MsgData.ClientMsgID, "userID: ", sourceID, "seq: ", currentMaxSeq)
+		//log.Debug(operationID, "cache msg node ", m.String(), m.MsgData.ClientMsgID, "userID: ", conversationID, "seq: ", currentMaxSeq)
 	}
 	//log.Debug(operationID, "SetMessageToCache ", conversationID, len(msgList))
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgList)
@@ -346,7 +346,7 @@ func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID
 	} else {
 		prome.Inc(prome.MsgInsertRedisSuccessCounter)
 	}
-	//log.Debug(operationID, "batch to redis  cost time ", mongo2.getCurrentTimestampByMill()-newTime, sourceID, len(msgList))
+	//log.Debug(operationID, "batch to redis  cost time ", mongo2.getCurrentTimestampByMill()-newTime, conversationID, len(msgList))
 	if msgList[0].SessionType == constant.SuperGroupChatType {
 		err = db.cache.SetGroupMaxSeq(ctx, conversationID, currentMaxSeq)
 	} else {

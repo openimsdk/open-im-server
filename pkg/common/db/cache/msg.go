@@ -232,12 +232,12 @@ func (c *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platf
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (c *msgCache) getMessageCacheKey(sourceID string, seq int64) string {
-	return messageCache + sourceID + "_" + strconv.Itoa(int(seq))
+func (c *msgCache) getMessageCacheKey(conversationID string, seq int64) string {
+	return messageCache + conversationID + "_" + strconv.Itoa(int(seq))
 }
 
-func (c *msgCache) allMessageCacheKey(sourceID string) string {
-	return messageCache + sourceID + "_*"
+func (c *msgCache) allMessageCacheKey(conversationID string) string {
+	return messageCache + conversationID + "_*"
 }
 
 func (c *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {

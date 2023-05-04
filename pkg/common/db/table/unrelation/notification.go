@@ -31,10 +31,10 @@ type NotificationDocModelInterface interface {
 	Create(ctx context.Context, model *NotificationDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*NotificationDocModel, error)
-	GetNewestMsg(ctx context.Context, sourceID string) (*NotificationInfoModel, error)
-	GetOldestMsg(ctx context.Context, sourceID string) (*NotificationInfoModel, error)
+	GetNewestMsg(ctx context.Context, conversationID string) (*NotificationInfoModel, error)
+	GetOldestMsg(ctx context.Context, conversationID string) (*NotificationInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
-	GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*NotificationDocModel, error)
+	GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*NotificationDocModel, error)
 	UpdateOneDoc(ctx context.Context, msg *NotificationDocModel) error
 }
 
@@ -60,9 +60,9 @@ func (m *NotificationDocModel) IsFull() bool {
 	return false
 }
 
-func (m NotificationDocModel) GetDocID(sourceID string, seq int64) string {
+func (m NotificationDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := seq / singleGocNotificationNum
-	return m.indexGen(sourceID, seqSuffix)
+	return m.indexGen(conversationID, seqSuffix)
 }
 
 func (m NotificationDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
@@ -109,8 +109,8 @@ func (m NotificationDocModel) getMsgIndex(seq uint32) int {
 	return int(index)
 }
 
-func (m NotificationDocModel) indexGen(sourceID string, seqSuffix int64) string {
-	return sourceID + ":" + strconv.FormatInt(seqSuffix, 10)
+func (m NotificationDocModel) indexGen(conversationID string, seqSuffix int64) string {
+	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
 
 func (NotificationDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {

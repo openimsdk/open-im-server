@@ -44,20 +44,20 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 		log.Error("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
 		return
 	}
-	log.Info(operationID, "BatchInsertChat2DB userID: ", msgFromMQ.AggregationID, "msgFromMQ.LastSeq: ", msgFromMQ.LastSeq)
+	log.Info(operationID, "BatchInsertChat2DB userID: ", msgFromMQ.ConversationID, "msgFromMQ.LastSeq: ", msgFromMQ.LastSeq)
 	if len(msgFromMQ.MsgData) == 0 {
 		log.ZError(ctx, "msgFromMQ.MsgData is empty", errors.New("msgFromMQ.MsgData is empty"), "cMsg", cMsg)
 		return
 	}
 	isNotification := msgFromMQ.MsgData[0].Options[constant.IsNotification]
 	if isNotification {
-		err = mc.notificationDatabase.BatchInsertChat2DB(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
+		err = mc.notificationDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 		if err != nil {
-			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 		}
-		err = mc.notificationDatabase.DeleteMessageFromCache(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData)
+		err = mc.notificationDatabase.DeleteMessageFromCache(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData)
 		if err != nil {
-			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 		}
 		for _, v := range msgFromMQ.MsgData {
 			if v.ContentType == constant.DeleteMessageNotification {
@@ -73,13 +73,13 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 			}
 		}
 	} else {
-		err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
+		err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 		if err != nil {
-			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+			log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.MsgData, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 		}
-		err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.AggregationID, msgFromMQ.MsgData)
+		err = mc.msgDatabase.DeleteMessageFromCache(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData)
 		if err != nil {
-			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.AggregationID, msgFromMQ.TriggerID)
+			log.NewError(operationID, "remove cache msg from redis err", err.Error(), msgFromMQ.MsgData, msgFromMQ.ConversationID, msgFromMQ.TriggerID)
 		}
 		for _, v := range msgFromMQ.MsgData {
 			if v.ContentType == constant.DeleteMessageNotification {
