@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
@@ -27,6 +28,7 @@ type ConversationDatabase interface {
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
 	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
+	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -189,4 +191,28 @@ func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUs
 
 func (c *ConversationDataBase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
 	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
+}
+
+func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
+	conversationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	return c.tx.Transaction(func(tx any) error {
+		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{groupID})
+		if err != nil {
+			return err
+		}
+		notExistUserIDs := utils.DifferenceString(userIDs, existConversationUserIDs)
+
+		var conversations []*relationTb.ConversationModel
+		for _, v := range notExistUserIDs {
+			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
+			conversations = append(conversations, &conversation)
+		}
+		err = c.conversationDB.Create(ctx, conversations)
+		if err != nil {
+			return err
+		}
+		_, err = c.conversationDB.UpdateByMap(ctx, userIDs, conversationID, map[string]interface{}{"max_seq": 0})
+		return err
+	})
+
 }

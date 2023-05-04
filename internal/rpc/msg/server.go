@@ -98,6 +98,7 @@ func (m *msgServer) initPrometheus() {
 	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
 	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
+
 func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
 	resp = &msg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)

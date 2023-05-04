@@ -23,6 +23,8 @@ type ConversationModel struct {
 	UpdateUnreadCountTime int64  `gorm:"column:update_unread_count_time" json:"updateUnreadCountTime"`
 	AttachedInfo          string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
 	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+	MaxSeq                int64  `gorm:"column:max_seq" json:"maxSeq"`
+	MinSeq                int64  `gorm:"column:min_seq" json:"minSeq"`
 }
 
 func (ConversationModel) TableName() string {

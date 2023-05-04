@@ -183,11 +183,34 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 }
 
 // create conversation without notification for msg redis transfer
-func (c *conversationServer) CreateConversationsWithoutNotification(ctx context.Context, req *pbConversation.CreateConversationsWithoutNotificationReq) (*pbConversation.CreateConversationsWithoutNotificationResp, error) {
-	conversations := convert.ConversationsPb2DB(req.Conversations)
-	err := c.conversationDatabase.CreateConversation(ctx, conversations)
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbConversation.CreateSingleChatConversationsReq) (*pbConversation.CreateSingleChatConversationsResp, error) {
+	var conversation tableRelation.ConversationModel
+	conversation.ConversationID = utils.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
+	conversation.ConversationType = constant.SingleChatType
+	conversation2 := conversation
+	conversation2.OwnerUserID = req.RecvID
+	conversation2.UserID = req.SendID
+	conversation.OwnerUserID = req.SendID
+	conversation.UserID = req.RecvID
+	err := c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation, &conversation2})
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.CreateConversationsWithoutNotificationResp{}, nil
+	return &pbConversation.CreateSingleChatConversationsResp{}, nil
+}
+
+func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbConversation.CreateGroupChatConversationsReq) (*pbConversation.CreateGroupChatConversationsResp, error) {
+	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.CreateGroupChatConversationsResp{}, nil
+}
+
+func (c *conversationServer) DelGroupChatConversations(ctx context.Context, req *pbConversation.DelGroupChatConversationsReq) (*pbConversation.DelGroupChatConversationsResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID,
+		utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupID), map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
+		return nil, err
+	}
+	return &pbConversation.DelGroupChatConversationsResp{}, nil
 }

@@ -90,11 +90,29 @@ message GetRecvMsgNotNotifyUserIDsResp {
   repeated string userIDs = 1;
 }
 
-message CreateConversationsWithoutNotificationReq {
-  repeated Conversation conversations = 1;
+message CreateSingleChatConversationsReq {
+  string recvID = 1;
+  string sendID = 2;
 }
 
-message CreateConversationsWithoutNotificationResp {
+message CreateSingleChatConversationsResp {
+}
+
+message CreateGroupChatConversationsReq {
+  repeated string userIDs = 1;
+  string groupID = 2;
+}
+
+message CreateGroupChatConversationsResp {
+}
+
+message DelGroupChatConversationsReq {
+  string groupID = 1;
+  repeated string ownerUserID = 2;
+  int64 maxSeq = 3;
+}
+
+message DelGroupChatConversationsResp {
 }
 
 service conversation {
@@ -106,5 +124,7 @@ service conversation {
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
   rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
   rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
-  rpc CreateConversationsWithoutNotification(CreateConversationsWithoutNotificationReq) returns(CreateConversationsWithoutNotificationResp);
+  rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
+  rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);
+  rpc DelGroupChatConversations(DelGroupChatConversationsReq) returns(DelGroupChatConversationsResp);
 }
