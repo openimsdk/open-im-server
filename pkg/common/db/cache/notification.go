@@ -21,21 +21,21 @@ import (
 )
 
 const (
-	NotificationUserIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
-	NotificationUserMinSeq              = "REDIS_USER_MIN_SEQ:"
-	NotificationGetuiToken              = "GETUI_TOKEN"
-	NotificationGetuiTaskID             = "GETUI_TASK_ID"
-	NotificationMessageCache            = "MESSAGE_CACHE:"
-	NotificationSignalCache             = "SIGNAL_CACHE:"
-	NotificationSignalListCache         = "SIGNAL_LIST_CACHE:"
-	NotificationFcmToken                = "FCM_TOKEN:"
-	NotificationGroupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
-	NotificationGroupMaxSeq             = "GROUP_MAX_SEQ:"
-	NotificationGroupMinSeq             = "GROUP_MIN_SEQ:"
-	NotificationSendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
-	NotificationUserBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
-	NotificationExTypeKeyLocker         = "EX_LOCK:"
-	NotificationUidPidToken             = "UID_PID_TOKEN_STATUS:"
+	NotificationUserIncrSeq             = "NOTIFICATION_REDIS_USER_INCR_SEQ:" // user incr seq
+	NotificationUserMinSeq              = "NOTIFICATION_REDIS_USER_MIN_SEQ:"
+	NotificationGetuiToken              = "NOTIFICATION_GETUI_TOKEN"
+	NotificationGetuiTaskID             = "NOTIFICATION_GETUI_TASK_ID"
+	NotificationMessageCache            = "NOTIFICATION_MESSAGE_CACHE:"
+	NotificationSignalCache             = "NOTIFICATION_SIGNAL_CACHE:"
+	NotificationSignalListCache         = "NOTIFICATION_SIGNAL_LIST_CACHE:"
+	NotificationFcmToken                = "NOTIFICATION_FCM_TOKEN:"
+	NotificationGroupUserMinSeq         = "NOTIFICATION_GROUP_USER_MIN_SEQ:"
+	NotificationGroupMaxSeq             = "NOTIFICATION_GROUP_MAX_SEQ:"
+	NotificationGroupMinSeq             = "NOTIFICATION_GROUP_MIN_SEQ:"
+	NotificationSendMsgFailedFlag       = "NOTIFICATION_SEND_MSG_FAILED_FLAG:"
+	NotificationUserBadgeUnreadCountSum = "NOTIFICATION_USER_BADGE_UNREAD_COUNT_SUM:"
+	NotificationExTypeKeyLocker         = "NOTIFICATION_EX_LOCK:"
+	NotificationUidPidToken             = "NOTIFICATION_UID_PID_TOKEN_STATUS:"
 )
 
 type NotificationModel interface {
