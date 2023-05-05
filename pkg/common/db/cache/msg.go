@@ -22,48 +22,43 @@ import (
 )
 
 const (
-	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken        = "DEVICE_TOKEN"
-	userMinSeq              = "REDIS_USER_MIN_SEQ:"
-	getuiToken              = "GETUI_TOKEN"
-	getuiTaskID             = "GETUI_TASK_ID"
-	messageCache            = "MESSAGE_CACHE:"
-	signalCache             = "SIGNAL_CACHE:"
-	signalListCache         = "SIGNAL_LIST_CACHE:"
-	fcmToken                = "FCM_TOKEN:"
-	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq             = "GROUP_MAX_SEQ:"
-	groupMinSeq             = "GROUP_MIN_SEQ:"
+	maxSeq                 = "MAX_SEQ:"
+	minSeq                 = "MIN_SEQ:"
+	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
+
+	appleDeviceToken = "DEVICE_TOKEN"
+	getuiToken       = "GETUI_TOKEN"
+	getuiTaskID      = "GETUI_TASK_ID"
+	messageCache     = "MESSAGE_CACHE:"
+	signalCache      = "SIGNAL_CACHE:"
+	signalListCache  = "SIGNAL_LIST_CACHE:"
+	fcmToken         = "FCM_TOKEN:"
+
 	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
 	uidPidToken             = "UID_PID_TOKEN_STATUS:"
-	userNotificationSeq     = "USER_NOTIFICATION_SEQ:"
-	userMinNotificationSeq  = "USER_MIN_NOTIFICATION_SEQ:"
-	groupNotificationSeq    = "GROUP_NOTIFICATION_SEQ:"
-	groupMinNotificationSeq = "GROUP_MIN_NOTIFICATION_SEQ:"
 )
 
 type MsgModel interface {
-	IncrUserSeq(ctx context.Context, userID string) (int64, error)
-	GetUserMaxSeq(ctx context.Context, userID string) (int64, error)
-	SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error
-	SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
-	GetUserMinSeq(ctx context.Context, userID string) (int64, error)
-	SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
-	GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
-	GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
-	GetGroupMinSeq(ctx context.Context, groupID string) (int64, error)
-	IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error)
-	SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
-	SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error
+	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
+	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
+	SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
+	GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
+	GetMinSeq(ctx context.Context, conversationID string) (int64, error)
+	GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
+	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
+	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
+	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
+
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
 	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
 	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
 	DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error
-	GetMessagesBySeq(ctx context.Context, userID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error)
-	DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error
+	GetMessagesBySeq(ctx context.Context, conversationID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
+	SetMessageToCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int, error)
+	DeleteMessageFromCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) error
 	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
 	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
@@ -90,20 +85,6 @@ type MsgModel interface {
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
-	// notificatio
-
-	// 	IncrUserNotificationSeq(ctx context.Context, userID string) (int64, error)
-	// 	GetUserNotificationMaxSeq(ctx context.Context, userID string) (int64, error)
-	// 	SetUserNotificationMaxSeq(ctx context.Context, userID string, maxSeq int64) error
-	// 	SetUserNotificationMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
-	// 	GetUserNotificationMinSeq(ctx context.Context, userID string) (int64, error)
-	// 	SetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
-	// 	GetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
-	// 	GetGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
-	// 	GetGroupNotificationMinSeq(ctx context.Context, groupID string) (int64, error)
-	// 	IncrGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
-	// 	SetGroupNotificationMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
-	// 	SetGroupNotificationMinSeq(ctx context.Context, groupID string, minSeq int64) error
 }
 
 func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
@@ -146,58 +127,91 @@ func (c *msgCache) DelKeys() {
 	}
 }
 
-func (c *msgCache) IncrUserSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userIncrSeq+userID).Int64())
+func (c *msgCache) getMaxSeqKey(conversationID string) string {
+	return maxSeq + conversationID
 }
 
-func (c *msgCache) GetUserMaxSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userIncrSeq+userID).Int64())
+func (c *msgCache) getMinSeqKey(conversationID string) string {
+	return minSeq + conversationID
 }
 
-func (c *msgCache) SetUserMaxSeq(ctx context.Context, userID string, maxSeq int64) error {
-	return errs.Wrap(c.rdb.Set(ctx, userIncrSeq+userID, maxSeq, 0).Err())
+func (c *msgCache) setSeq(ctx context.Context, conversationID string, seq int64, getkey func(conversationID string) string) error {
+	return utils.Wrap1(c.rdb.Set(ctx, getkey(conversationID), seq, 0).Err())
 }
 
-func (c *msgCache) SetUserMinSeq(ctx context.Context, userID string, minSeq int64) (err error) {
-	return errs.Wrap(c.rdb.Set(ctx, userMinSeq+userID, minSeq, 0).Err())
+func (c *msgCache) getSeq(ctx context.Context, conversationID string, getkey func(conversationID string) string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, getkey(conversationID)).Int64())
 }
 
-func (c *msgCache) GetUserMinSeq(ctx context.Context, userID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, userMinSeq+userID).Int64())
+func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
+	pipe := c.rdb.Pipeline()
+	for _, v := range items {
+		if err := pipe.Get(ctx, getkey(v)).Err(); err != nil && err != redis.Nil {
+			return nil, err
+		}
+	}
+	result, err := pipe.Exec(ctx)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	m = make(map[string]int64, len(items))
+	for i, v := range result {
+		if v.Err() != nil && err != redis.Nil {
+			return nil, errs.Wrap(v.Err())
+		}
+		m[items[i]] = utils.StringToInt64(v.String())
+	}
+	return m, nil
 }
 
-func (c *msgCache) SetGroupUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error) {
-	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
+func (c *msgCache) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
+	return c.setSeq(ctx, conversationID, maxSeq, c.getMaxSeqKey)
 }
 
-func (c *msgCache) GetGroupUserMinSeq(ctx context.Context, groupID, userID string) (int64, error) {
-	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	return utils.Wrap2(c.rdb.Get(ctx, key).Int64())
+func (c *msgCache) GetMaxSeqs(ctx context.Context, conversationIDs []string) (m map[string]int64, err error) {
+	return c.getSeqs(ctx, conversationIDs, c.getMaxSeqKey)
 }
 
-func (c *msgCache) GetGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, groupMaxSeq+groupID).Int64())
+func (c *msgCache) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
+	return c.getSeq(ctx, conversationID, c.getMaxSeqKey)
+}
+func (c *msgCache) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
+	return c.setSeq(ctx, conversationID, minSeq, c.getMinSeqKey)
+}
+func (c *msgCache) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
+	return c.getSeqs(ctx, conversationIDs, c.getMinSeqKey)
+}
+func (c *msgCache) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
+	return c.getSeq(ctx, conversationID, c.getMinSeqKey)
 }
 
-func (c *msgCache) GetGroupMinSeq(ctx context.Context, groupID string) (int64, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, groupMinSeq+groupID).Int64())
+func (c *msgCache) getConversationUserMinSeqKey(conversationID, userID string) string {
+	return conversationUserMinSeq + "g:" + conversationID + "u:" + userID
 }
 
-func (c *msgCache) IncrGroupMaxSeq(ctx context.Context, groupID string) (int64, error) {
-	key := groupMaxSeq + groupID
-	seq, err := c.rdb.Incr(ctx, key).Uint64()
-	return int64(seq), errs.Wrap(err)
+func (c *msgCache) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, c.getConversationUserMinSeqKey(conversationID, userID)).Int64())
 }
 
-func (c *msgCache) SetGroupMaxSeq(ctx context.Context, groupID string, maxSeq int64) error {
-	key := groupMaxSeq + groupID
-	return errs.Wrap(c.rdb.Set(ctx, key, maxSeq, 0).Err())
+func (c *msgCache) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (m map[string]int64, err error) {
+	return c.getSeqs(ctx, userIDs, func(userID string) string {
+		return c.getConversationUserMinSeqKey(conversationID, userID)
+	})
+}
+func (c *msgCache) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
+	return utils.Wrap1(c.rdb.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err())
 }
 
-func (c *msgCache) SetGroupMinSeq(ctx context.Context, groupID string, minSeq int64) error {
-	key := groupMinSeq + groupID
-	return errs.Wrap(c.rdb.Set(ctx, key, minSeq, 0).Err())
+func (c *msgCache) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
+	pipe := c.rdb.Pipeline()
+	for userID, minSeq := range seqs {
+		err = pipe.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+	}
+	_, err = pipe.Exec(ctx)
+	return err
 }
 
 func (c *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
@@ -266,11 +280,11 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []i
 	return seqMsgs, failedSeqs, err
 }
 
-func (c *msgCache) SetMessageToCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) (int, error) {
+func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
 	pipe := c.rdb.Pipeline()
 	var failedMsgs []sdkws.MsgData
-	for _, msg := range msgList {
-		key := c.getMessageCacheKey(userID, msg.Seq)
+	for _, msg := range msgs {
+		key := c.getMessageCacheKey(conversationID, msg.Seq)
 		s, err := utils.Pb2String(msg)
 		if err != nil {
 			return 0, errs.Wrap(err)
@@ -281,7 +295,7 @@ func (c *msgCache) SetMessageToCache(ctx context.Context, userID string, msgList
 		}
 	}
 	if len(failedMsgs) != 0 {
-		return len(failedMsgs), fmt.Errorf("set msg to msgCache failed, failed lists: %v, %s", failedMsgs, userID)
+		return len(failedMsgs), fmt.Errorf("set msg to msgCache failed, failed lists: %v, %s", failedMsgs, conversationID)
 	}
 	_, err := pipe.Exec(ctx)
 	return 0, err

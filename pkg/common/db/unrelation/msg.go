@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -134,24 +135,31 @@ func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocMode
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, begin, end int64) ([]*sdkws.MsgData, error) {
-	// uid = getSeqUid(uid, seq)
-	// seqIndex := getMsgIndex(seq)
-	// m.msg.GetSeqDocIDList()
-	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msg": bson.M{"$slice": []int{seqIndex, 1}}})
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, seqs []int64, err error) {
+	beginIndex := m.msg.GetMsgIndex(beginSeq)
+	num := endSeq - beginSeq + 1
+	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msg": bson.M{"$slice": []int64{beginIndex, num}}})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var msgInfos []table.MsgInfoModel
 	if err := result.Decode(&msgInfos); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(msgInfos) < 1 {
-		return nil, errs.ErrRecordNotFound.Wrap("mongo GetMsgBySeqIndex failed, len is 0")
+		return nil, nil, errs.ErrRecordNotFound.Wrap("mongo GetMsgBySeqIndex failed, len is 0")
 	}
-	var msg sdkws.MsgData
-	if err := proto.Unmarshal(msgInfos[0].Msg, &msg); err != nil {
-		return nil, err
+	for _, v := range msgInfos {
+		var msg sdkws.MsgData
+		if err := proto.Unmarshal(v.Msg, &msg); err != nil {
+			return nil, nil, err
+		}
+		if msg.Seq >= beginSeq && msg.Seq <= endSeq {
+			msgs = append(msgs, &msg)
+			seqs = append(seqs, msg.Seq)
+		} else {
+			log.ZWarn(ctx, "this msg is at wrong position", nil, "msg", &msg)
+		}
 	}
-	return msg, nil
+	return msgs, seqs, nil
 }

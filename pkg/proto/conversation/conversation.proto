@@ -115,6 +115,14 @@ message DelGroupChatConversationsReq {
 message DelGroupChatConversationsResp {
 }
 
+message GetConversationIDsReq {
+  string userID = 1;
+}
+
+message GetConversationIDsResp {
+  repeated string conversationIDs = 1;
+}
+
 service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
   rpc GetConversation(GetConversationReq)returns(GetConversationResp);
@@ -127,4 +135,5 @@ service conversation {
   rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
   rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);
   rpc DelGroupChatConversations(DelGroupChatConversationsReq) returns(DelGroupChatConversationsResp);
+  rpc GetConversationIDs(GetConversationIDsReq) returns(GetConversationIDsResp);
 }

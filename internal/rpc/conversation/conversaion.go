@@ -214,3 +214,11 @@ func (c *conversationServer) DelGroupChatConversations(ctx context.Context, req 
 	}
 	return &pbConversation.DelGroupChatConversationsResp{}, nil
 }
+
+func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConversation.GetConversationIDsReq) (*pbConversation.GetConversationIDsResp, error) {
+	conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
+}

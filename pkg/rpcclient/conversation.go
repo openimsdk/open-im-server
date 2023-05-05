@@ -67,3 +67,12 @@ func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, owne
 	_, err = conversation.NewConversationClient(cc).DelGroupChatConversations(ctx, &pbConversation.DelGroupChatConversationsReq{OwnerUserID: ownerUserIDs, GroupID: groupID, MaxSeq: maxSeq})
 	return err
 }
+
+func (c *ConversationClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+	cc, err := c.getConn()
+	if err != nil {
+		return nil, err
+	}
+	resp, err := conversation.NewConversationClient(cc).GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
+	return resp.ConversationIDs, err
+}

@@ -31,7 +31,7 @@ type MsgDocModelInterface interface {
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetMsgBySeqIndexIn1Doc(ctx context.Context, conversationID string, begin, end int64) ([]*sdkws.MsgData, error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) ([]*sdkws.MsgData, []int64, error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
@@ -76,14 +76,14 @@ func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
 	return seqUserIDs
 }
 
-func (m MsgDocModel) getSeqSuperGroupID(groupID string, seq int64) string {
-	seqSuffix := seq / singleGocMsgNum
-	return m.superGroupIndexGen(groupID, seqSuffix)
-}
+// func (m MsgDocModel) getSeqSuperGroupID(groupID string, seq int64) string {
+// 	seqSuffix := seq / singleGocMsgNum
+// 	return m.superGroupIndexGen(groupID, seqSuffix)
+// }
 
-func (m MsgDocModel) superGroupIndexGen(groupID string, seqSuffix int64) string {
-	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
-}
+// func (m MsgDocModel) superGroupIndexGen(groupID string, seqSuffix int64) string {
+// 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+// }
 
 func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
@@ -99,7 +99,14 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 	return t
 }
 
-func (m MsgDocModel) getMsgIndex(seq int64) int64 {
+func (m MsgDocModel) GetSeqsBeginEnd(seqs []int64) (int64, int64) {
+	if len(seqs) == 0 {
+		return 0, 0
+	}
+	return seqs[0], seqs[len(seqs)-1]
+}
+
+func (m MsgDocModel) GetMsgIndex(seq int64) int64 {
 	seqSuffix := seq / singleGocMsgNum
 	var index int64
 	if seqSuffix == 0 {

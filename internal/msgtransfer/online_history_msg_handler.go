@@ -163,11 +163,9 @@ func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, c
 func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
-		var currentMaxSeq int64
-		var err error
-		if storageList[0].SessionType == constant.SuperGroupChatType {
-			currentMaxSeq, err = och.msgDatabase.GetGroupMaxSeq(ctx, conversationID)
-			if err == redis.Nil {
+		currentMaxSeq, err := och.msgDatabase.GetMaxSeq(ctx, conversationID)
+		if err == redis.Nil {
+			if storageList[0].SessionType == constant.SuperGroupChatType {
 				log.ZInfo(ctx, "group chat first create conversation", "conversationID", conversationID)
 				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)
 				if err != nil {
@@ -177,11 +175,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, con
 						log.ZError(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 					}
 				}
-			}
-		} else {
-			currentMaxSeq, err = och.msgDatabase.GetUserMaxSeq(ctx, conversationID)
-			if err == redis.Nil {
-				log.ZInfo(ctx, "single chat first create conversation", "conversationID", conversationID)
+			} else {
 				if err := och.conversationRpcClient.SingleChatFirstCreateConversation(ctx, storageList[0].RecvID, storageList[0].SendID); err != nil {
 					log.ZError(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 				}

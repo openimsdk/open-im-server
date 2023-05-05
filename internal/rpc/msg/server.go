@@ -9,6 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -16,6 +17,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
@@ -126,15 +128,23 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	conversationIDs, err := m.Conversation.GetConversationIDs(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	seqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
+	if err != nil {
+		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs)
+	}
 	resp := new(sdkws.GetMaxSeqResp)
-
+	resp.MaxSeqs = seqs
 	return resp, nil
 }
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp := &sdkws.PullMessageBySeqsResp{}
 	for _, seq := range req.SeqRanges {
-		if !seq.IsNotification {
+		if !utils.IsNotification(seq.ConversationID) {
 			msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
 			if err != nil {
 				return nil, err
@@ -158,7 +168,6 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 				IsNotification: true,
 			})
 		}
-
 	}
 	return resp, nil
 }

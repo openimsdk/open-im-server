@@ -29,6 +29,7 @@ type ConversationDatabase interface {
 	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
+	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -215,4 +216,8 @@ func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, 
 		return err
 	})
 
+}
+
+func (c *ConversationDataBase) GetConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	return c.cache.GetUserConversationIDs(ctx, userID)
 }

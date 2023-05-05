@@ -101,16 +101,21 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	}
 	switch sessionType {
 	case constant.SingleChatType:
-		return "single_" + strings.Join(ids, "_")
+		return "si_" + strings.Join(ids, "_") // single chat
 	case constant.GroupChatType:
-		return "group_" + ids[0]
+		return "g_" + ids[0] // group chat
 	case constant.SuperGroupChatType:
-		return "super_group_" + ids[0]
+		return "sg_" + ids[0] // super group chat
 	case constant.NotificationChatType:
-		return "notification_" + ids[0]
+		return "sn_" + ids[0] // server notification chat
 	}
 	return ""
 }
+
+func IsNotification(conversationID string) bool {
+	return strings.HasPrefix(conversationID, "n_")
+}
+
 func int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
@@ -150,9 +155,5 @@ func IsDuplicateStringSlice(arr []string) bool {
 		}
 		t[s] = struct{}{}
 	}
-	return false
-}
-
-func IsDuplicateID(args ...interface{}) bool {
 	return false
 }

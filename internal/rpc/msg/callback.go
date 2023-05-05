@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -113,7 +114,6 @@ func CallbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	utils.NotNilReplace(&msg.MsgData.Status, resp.Status)
 	utils.NotNilReplace(&msg.MsgData.Options, resp.Options)
 	utils.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
-	utils.NotNilReplace(&msg.MsgData.MsgDataList, resp.MsgDataList)
 	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
 	return nil

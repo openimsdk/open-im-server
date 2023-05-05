@@ -78,14 +78,14 @@ func (c *MsgTool) AllUserClearMsgAndFixSeq() {
 
 func (c *MsgTool) ClearUsersMsg(ctx context.Context, userIDs []string) {
 	for _, userID := range userIDs {
-		if err := c.msgDatabase.DeleteUserMsgsAndSetMinSeq(ctx, userID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, userID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
 			log.ZError(ctx, "DeleteUserMsgsAndSetMinSeq failed", err, "userID", userID, "DBRetainChatRecords", config.Config.Mongo.DBRetainChatRecords)
 		}
 		maxSeqCache, maxSeqMongo, err := c.GetAndFixUserSeqs(ctx, userID)
 		if err != nil {
 			continue
 		}
-		c.CheckMaxSeqWithMongo(ctx, userID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion)
+		c.CheckMaxSeqWithMongo(ctx, userID, maxSeqCache, maxSeqMongo)
 	}
 }
 
@@ -96,7 +96,7 @@ func (c *MsgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDs []string
 			log.ZError(ctx, "ClearSuperGroupMsg failed", err, "groupID", groupID)
 			continue
 		}
-		if err := c.msgDatabase.DeleteUserSuperGroupMsgsAndSetMinSeq(ctx, groupID, userIDs, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, groupID, userIDs, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
 			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "groupID", groupID, "userID", userIDs, "DBRetainChatRecords", config.Config.Mongo.DBRetainChatRecords)
 		}
 		if err := c.fixGroupSeq(ctx, groupID, userIDs); err != nil {
@@ -167,7 +167,7 @@ func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, grou
 	return minSeqCache, nil
 }
 
-func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, conversationID string, maxSeqCache, maxSeqMongo int64, diffusionType int) error {
+func (c *MsgTool) CheckMaxSeqWithMongo(ctx context.Context, conversationID string, maxSeqCache, maxSeqMongo int64) error {
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
 		return errSeq
 	}
