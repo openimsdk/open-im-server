@@ -186,7 +186,7 @@ message MsgData {
   string attachedInfo = 21;
   string  ex = 22;
 }
-message PushMessage{
+message PushMessages{
   repeated MsgData msgs = 1;
 }
 message OfflinePushInfo{
