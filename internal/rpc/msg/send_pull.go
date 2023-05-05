@@ -36,6 +36,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 	resp.ClientMsgID = req.MsgData.ClientMsgID
 	return resp, nil
 }
+
 func (m *msgServer) sendMsgNotification(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, err error) {
 	err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, req.MsgData)
 	if err != nil {

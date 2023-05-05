@@ -130,8 +130,7 @@ message SeqRange {
   string conversationID = 1;
   int64 begin = 2;
   int64 end = 3;
-  bool isNotification = 4;
-  int64 num = 5;
+  int64 num = 4;
 }
 
 
@@ -145,16 +144,12 @@ message PullMessageBySeqsResp {
   repeated PullMsgs msgs = 1;
 }
 
-message GetMaxAndMinSeqReq {
-  repeated string conversationIDs = 1;
-  string userID = 2;
+message GetMaxSeqReq {
+  string userID = 1;
 }
-message MaxAndMinSeq{
-  int64 maxSeq = 1;
-  int64 minSeq = 2;
-}
-message GetMaxAndMinSeqResp {
-  map<string, MaxAndMinSeq> MaxAndMinSeqs = 1;
+
+message GetMaxSeqResp {
+  map<string, int64> maxSeqs = 1;
 }
 
 message UserSendMsgResp {

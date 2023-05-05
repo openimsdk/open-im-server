@@ -201,7 +201,7 @@ message DelMsgsResp{
 
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
-  rpc GetMaxAndMinSeq(sdkws.GetMaxAndMinSeqReq) returns(sdkws.GetMaxAndMinSeqResp);
+  rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
   //拉取历史消息（包括用户的，以及指定群组的）
   rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
   //发送消息

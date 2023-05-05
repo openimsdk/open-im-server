@@ -116,7 +116,7 @@ func (m *Message) client() (msg.MsgClient, error) {
 }
 
 func (m *Message) GetSeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMaxAndMinSeq, m.client, c)
+	a2r.Call(msg.MsgClient.GetMaxSeq, m.client, c)
 }
 
 func (m *Message) PullMsgBySeqs(c *gin.Context) {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -131,4 +132,26 @@ func (m *MsgMongoDriver) Delete(ctx context.Context, docIDs []string) error {
 func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocModel) error {
 	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"uid": msg.DocID}, bson.M{"$set": bson.M{"msg": msg.Msg}})
 	return err
+}
+
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, begin, end int64) ([]*sdkws.MsgData, error) {
+	// uid = getSeqUid(uid, seq)
+	// seqIndex := getMsgIndex(seq)
+	// m.msg.GetSeqDocIDList()
+	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msg": bson.M{"$slice": []int{seqIndex, 1}}})
+	if err != nil {
+		return nil, err
+	}
+	var msgInfos []table.MsgInfoModel
+	if err := result.Decode(&msgInfos); err != nil {
+		return nil, err
+	}
+	if len(msgInfos) < 1 {
+		return nil, errs.ErrRecordNotFound.Wrap("mongo GetMsgBySeqIndex failed, len is 0")
+	}
+	var msg sdkws.MsgData
+	if err := proto.Unmarshal(msgInfos[0].Msg, &msg); err != nil {
+		return nil, err
+	}
+	return msg, nil
 }

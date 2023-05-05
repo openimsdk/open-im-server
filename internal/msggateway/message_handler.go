@@ -58,14 +58,14 @@ func NewGrpcHandler(validate *validator.Validate, msgRpcClient *rpcclient.MsgCli
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
-	req := sdkws.GetMaxAndMinSeqReq{}
+	req := sdkws.GetMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
 	}
 	if err := g.validate.Struct(&req); err != nil {
 		return nil, err
 	}
-	resp, err := g.msgRpcClient.GetMaxAndMinSeq(context, &req)
+	resp, err := g.msgRpcClient.GetMaxSeq(context, &req)
 	if err != nil {
 		return nil, err
 	}

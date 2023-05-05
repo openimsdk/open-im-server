@@ -16,7 +16,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 )
 
@@ -123,28 +122,12 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 	}
 }
 
-func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
+func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	resp := new(sdkws.GetMaxSeqResp)
 
-	m2 := make(map[string]*sdkws.MaxAndMinSeq)
-	resp := new(sdkws.GetMaxAndMinSeqResp)
-	for _, conversationID := range req.ConversationIDs {
-		maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, conversationID)
-		if err != nil && errs.Unwrap(err) != redis.Nil {
-			return nil, err
-		}
-		minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, conversationID)
-		if err != nil && errs.Unwrap(err) != redis.Nil {
-			return nil, err
-		}
-		m2[conversationID] = &sdkws.MaxAndMinSeq{
-			MaxSeq: maxSeq,
-			MinSeq: minSeq,
-		}
-	}
-	resp.MaxAndMinSeqs = m2
 	return resp, nil
 }
 

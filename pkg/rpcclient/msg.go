@@ -116,12 +116,12 @@ func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.Send
 	return resp, err
 }
 
-func (m *MsgClient) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMinSeqReq) (*sdkws.GetMaxAndMinSeqResp, error) {
+func (m *MsgClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	cc, err := m.getConn()
 	if err != nil {
 		return nil, err
 	}
-	resp, err := msg.NewMsgClient(cc).GetMaxAndMinSeq(ctx, req)
+	resp, err := msg.NewMsgClient(cc).GetMaxSeq(ctx, req)
 	return resp, err
 }
 

@@ -733,18 +733,17 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 
 func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	resp, err := s.msgRpcClient.GetMaxAndMinSeq(ctx, &sdkws.GetMaxAndMinSeqReq{
-		ConversationIDs: []string{},
-		UserID:          mcontext.GetOpUserID(ctx),
+	resp, err := s.msgRpcClient.GetMaxSeq(ctx, &sdkws.GetMaxSeqReq{
+		UserID: mcontext.GetOpUserID(ctx),
 	})
 	if err != nil {
 		return err
 	}
-	seq, ok := resp.MaxAndMinSeqs[conevrsationID]
+	maxSeq, ok := resp.MaxSeqs[conevrsationID]
 	if !ok {
 		return errs.ErrInternalServer.Wrap("get max seq error")
 	}
-	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, seq.MaxSeq)
+	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, maxSeq)
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
@@ -764,10 +763,6 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
-	//userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
-	//if err != nil {
-	//	return nil, err
-	//}
 	resp := &pbGroup.SetGroupInfoResp{}
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) == 0 {

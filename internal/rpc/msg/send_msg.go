@@ -145,7 +145,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			}
 
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				resp, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
+				resp, err := m.MsgDatabase.GetMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
 				if err != nil {
 					return nil, err
 				}

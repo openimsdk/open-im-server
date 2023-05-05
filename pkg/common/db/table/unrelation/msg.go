@@ -17,8 +17,8 @@ const (
 )
 
 type MsgDocModel struct {
-	DocID string         `bson:"uid"`
-	Msg   []MsgInfoModel `bson:"msg"`
+	DocID string         `bson:"doc_id"`
+	Msg   []MsgInfoModel `bson:"msgs"`
 }
 
 type MsgInfoModel struct {
@@ -31,6 +31,7 @@ type MsgDocModelInterface interface {
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, conversationID string, begin, end int64) ([]*sdkws.MsgData, error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
@@ -98,15 +99,15 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 	return t
 }
 
-func (m MsgDocModel) getMsgIndex(seq uint32) int {
+func (m MsgDocModel) getMsgIndex(seq int64) int64 {
 	seqSuffix := seq / singleGocMsgNum
-	var index uint32
+	var index int64
 	if seqSuffix == 0 {
 		index = (seq - seqSuffix*singleGocMsgNum) - 1
 	} else {
 		index = seq - seqSuffix*singleGocMsgNum
 	}
-	return int(index)
+	return index
 }
 
 func (m MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
