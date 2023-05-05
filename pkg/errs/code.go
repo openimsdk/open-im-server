@@ -84,6 +84,6 @@ const (
 	ConnUpdateErr       = 1603
 
 	// S3错误码
-	FileUploadedCompleteError = 2001 // 文件已上传
-	FileUploadedExpiredError  = 2002 // 上传过期
+	FileUploadedCompleteError = 1701 // 文件已上传
+	FileUploadedExpiredError  = 1702 // 上传过期
 )
