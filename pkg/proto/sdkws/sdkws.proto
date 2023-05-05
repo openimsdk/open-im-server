@@ -185,7 +185,9 @@ message MsgData {
   repeated string atUserIDList = 20;
   string attachedInfo = 21;
   string  ex = 22;
-
+}
+message PushMessage{
+  repeated MsgData msgs = 1;
 }
 message OfflinePushInfo{
   string title = 1;
