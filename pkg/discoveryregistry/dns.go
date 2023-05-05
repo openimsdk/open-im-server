@@ -15,14 +15,23 @@ import (
 type DnsDiscoveryRegistry struct {
 	opts      []grpc.DialOption
 	namespace string
+	config    *rest.Config
 }
 
-func (d DnsDiscoveryRegistry) GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
+func NewDnsDiscoveryRegistry(namespace string, opts []grpc.DialOption) (*DnsDiscoveryRegistry, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
-	clientset, err := kubernetes.NewForConfig(config)
+	return &DnsDiscoveryRegistry{
+		config:    config,
+		namespace: namespace,
+		opts:      opts,
+	}, nil
+}
+
+func (d DnsDiscoveryRegistry) GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
+	clientset, err := kubernetes.NewForConfig(d.config)
 	if err != nil {
 		return nil, err
 	}

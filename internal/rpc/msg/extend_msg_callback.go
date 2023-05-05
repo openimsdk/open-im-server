@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -17,7 +18,7 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 	req := &cbapi.CallbackBeforeSetMessageReactionExtReq{
 		OperationID:           mcontext.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackBeforeSetMessageReactionExtensionCommand,
-		SourceID:              setReq.SourceID,
+		ConversationID:        setReq.ConversationID,
 		OpUserID:              mcontext.GetOpUserID(ctx),
 		SessionType:           setReq.SessionType,
 		ReactionExtensionList: setReq.ReactionExtensions,
@@ -41,7 +42,7 @@ func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionE
 	req := &cbapi.CallbackDeleteMessageReactionExtReq{
 		OperationID:           setReq.OperationID,
 		CallbackCommand:       constant.CallbackBeforeDeleteMessageReactionExtensionsCommand,
-		SourceID:              setReq.SourceID,
+		ConversationID:        setReq.ConversationID,
 		OpUserID:              setReq.OpUserID,
 		SessionType:           setReq.SessionType,
 		ReactionExtensionList: setReq.ReactionExtensions,
@@ -60,7 +61,7 @@ func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 	req := &cbapi.CallbackGetMessageListReactionExtReq{
 		OperationID:     mcontext.GetOperationID(ctx),
 		CallbackCommand: constant.CallbackGetMessageListReactionExtensionsCommand,
-		SourceID:        getReq.SourceID,
+		ConversationID:  getReq.ConversationID,
 		OpUserID:        mcontext.GetOperationID(ctx),
 		SessionType:     getReq.SessionType,
 		TypeKeyList:     getReq.TypeKeys,
@@ -73,7 +74,7 @@ func CallbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.Modif
 	req := &cbapi.CallbackAddMessageReactionExtReq{
 		OperationID:           mcontext.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackAddMessageListReactionExtensionsCommand,
-		SourceID:              setReq.SourceID,
+		ConversationID:        setReq.ConversationID,
 		OpUserID:              mcontext.GetOperationID(ctx),
 		SessionType:           setReq.SessionType,
 		ReactionExtensionList: setReq.ReactionExtensions,

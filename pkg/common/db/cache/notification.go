@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -212,12 +213,12 @@ func (c *notificationCache) DeleteTokenByUidPid(ctx context.Context, userID stri
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (c *notificationCache) getMessageCacheKey(sourceID string, seq int64) string {
-	return NotificationMessageCache + sourceID + "_" + strconv.Itoa(int(seq))
+func (c *notificationCache) getMessageCacheKey(conversationID string, seq int64) string {
+	return NotificationMessageCache + conversationID + "_" + strconv.Itoa(int(seq))
 }
 
-func (c *notificationCache) allMessageCacheKey(sourceID string) string {
-	return NotificationMessageCache + sourceID + "_*"
+func (c *notificationCache) allMessageCacheKey(conversationID string) string {
+	return NotificationMessageCache + conversationID + "_*"
 }
 
 func (c *notificationCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {

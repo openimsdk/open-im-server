@@ -8,9 +8,12 @@ package utils
 
 import (
 	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"math/rand"
+	"sort"
 	"strconv"
+	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func IntToString(i int) string {
@@ -90,16 +93,21 @@ func GetMsgID(sendID string) string {
 	t := int64ToString(GetCurrentTimestampByNano())
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
 }
-func GetConversationIDBySessionType(sourceID string, sessionType int) string {
+
+func GetConversationIDBySessionType(sessionType int, ids ...string) string {
+	sort.Strings(ids)
+	if len(ids) > 2 || len(ids) < 1 {
+		return ""
+	}
 	switch sessionType {
 	case constant.SingleChatType:
-		return "single_" + sourceID
+		return "single_" + strings.Join(ids, "_")
 	case constant.GroupChatType:
-		return "group_" + sourceID
+		return "group_" + ids[0]
 	case constant.SuperGroupChatType:
-		return "super_group_" + sourceID
+		return "super_group_" + ids[0]
 	case constant.NotificationChatType:
-		return "notification_" + sourceID
+		return "notification_" + ids[0]
 	}
 	return ""
 }

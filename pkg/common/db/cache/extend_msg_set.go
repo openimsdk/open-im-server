@@ -17,7 +17,7 @@ const (
 type ExtendMsgSetCache interface {
 	metaCache
 	NewCache() ExtendMsgSetCache
-	GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error)
+	GetExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error)
 	DelExtendMsg(clientMsgID string) ExtendMsgSetCache
 }
 
@@ -51,9 +51,9 @@ func (e *ExtendMsgSetCacheRedis) getKey(clientMsgID string) string {
 	return extendMsgCache + clientMsgID
 }
 
-func (e *ExtendMsgSetCacheRedis) GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error) {
+func (e *ExtendMsgSetCacheRedis) GetExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *unrelation.ExtendMsgModel, err error) {
 	return getCache(ctx, e.rcClient, e.getKey(clientMsgID), e.expireTime, func(ctx context.Context) (*unrelation.ExtendMsgModel, error) {
-		return e.extendMsgSetDB.TakeExtendMsg(ctx, sourceID, sessionType, clientMsgID, firstModifyTime)
+		return e.extendMsgSetDB.TakeExtendMsg(ctx, conversationID, sessionType, clientMsgID, firstModifyTime)
 	})
 }
 

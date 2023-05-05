@@ -62,15 +62,15 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 		return
 	}
 	log.Debug(msgFromMQ.TriggerID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
-	for _, msgDataToMQ := range msgFromMQ.Messages {
-		isReactionFromCache := utils.GetSwitchFromOptions(msgDataToMQ.MsgData.Options, constant.IsReactionFromCache)
+	for _, msg := range msgFromMQ.Messages {
+		isReactionFromCache := utils.GetSwitchFromOptions(msg.Options, constant.IsReactionFromCache)
 		if !isReactionFromCache {
 			continue
 		}
 		ctx = mcontext.SetOperationID(ctx, operationID)
-		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
+		if msg.ContentType == constant.ReactionMessageModifier {
 			notification := &sdkws.ReactionMessageModifierNotification{}
-			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
+			if err := json.Unmarshal(msg.Content, notification); err != nil {
 				continue
 			}
 			if notification.IsExternalExtensions {
@@ -93,21 +93,21 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 					}
 				}
 
-				if err := mmc.extendMsgDatabase.InsertExtendMsg(ctx, notification.SourceID, notification.SessionType, &extendMsg); err != nil {
-					log.NewError(operationID, "MsgFirstModify InsertExtendMsg failed", notification.SourceID, notification.SessionType, extendMsg, err.Error())
+				if err := mmc.extendMsgDatabase.InsertExtendMsg(ctx, notification.ConversationID, notification.SessionType, &extendMsg); err != nil {
+					log.NewError(operationID, "MsgFirstModify InsertExtendMsg failed", notification.ConversationID, notification.SessionType, extendMsg, err.Error())
 					continue
 				}
 			} else {
-				if err := mmc.extendMsgDatabase.InsertOrUpdateReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, mmc.extendSetMsgModel.Pb2Model(notification.SuccessReactionExtensions)); err != nil {
+				if err := mmc.extendMsgDatabase.InsertOrUpdateReactionExtendMsgSet(ctx, notification.ConversationID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, mmc.extendSetMsgModel.Pb2Model(notification.SuccessReactionExtensions)); err != nil {
 					log.NewError(operationID, "InsertOrUpdateReactionExtendMsgSet failed")
 				}
 			}
-		} else if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageDeleter {
+		} else if msg.ContentType == constant.ReactionMessageDeleter {
 			notification := &sdkws.ReactionMessageDeleteNotification{}
-			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
+			if err := json.Unmarshal(msg.Content, notification); err != nil {
 				continue
 			}
-			if err := mmc.extendMsgDatabase.DeleteReactionExtendMsgSet(ctx, notification.SourceID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, mmc.extendSetMsgModel.Pb2Model(notification.SuccessReactionExtensions)); err != nil {
+			if err := mmc.extendMsgDatabase.DeleteReactionExtendMsgSet(ctx, notification.ConversationID, notification.SessionType, notification.ClientMsgID, notification.MsgFirstModifyTime, mmc.extendSetMsgModel.Pb2Model(notification.SuccessReactionExtensions)); err != nil {
 				log.NewError(operationID, "InsertOrUpdateReactionExtendMsgSet failed")
 			}
 		}

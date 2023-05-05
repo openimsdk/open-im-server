@@ -35,8 +35,8 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		return
 	}
 	pbData := &pbPush.PushMsgReq{
-		MsgData:  msgFromMQ.MsgData,
-		SourceID: msgFromMQ.SourceID,
+		MsgData:        msgFromMQ.MsgData,
+		ConversationID: msgFromMQ.ConversationID,
 	}
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := utils.GetCurrentTimestampBySecond()
@@ -46,9 +46,9 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		err = c.pusher.MsgToSuperGroupUser(ctx, pbData.SourceID, pbData.MsgData)
+		err = c.pusher.MsgToSuperGroupUser(ctx, pbData.ConversationID, pbData.MsgData)
 	default:
-		err = c.pusher.MsgToUser(ctx, pbData.SourceID, pbData.MsgData)
+		err = c.pusher.MsgToUser(ctx, pbData.ConversationID, pbData.MsgData)
 	}
 	if err != nil {
 		log.ZError(ctx, "push failed", err, "msg", pbData.String())

@@ -196,8 +196,8 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	return wsResults, nil
 }
 
-func (p *Pusher) offlinePushMsg(ctx context.Context, sourceID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
-	title, content, opts, err := p.getOfflinePushInfos(sourceID, msg)
+func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
+	title, content, opts, err := p.getOfflinePushInfos(conversationID, msg)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts,
 	return opts, nil
 }
 
-func (p *Pusher) getOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
+func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
 	if p.offlinePusher == nil {
 		err = errors.New("no offlinePusher is configured")
 		return
@@ -263,7 +263,7 @@ func (p *Pusher) getOfflinePushInfos(sourceID string, msg *sdkws.MsgData) (title
 		case constant.AtText:
 			a := AtContent{}
 			_ = utils.JsonStringToStruct(string(msg.Content), &a)
-			if utils.IsContain(sourceID, a.AtUserList) {
+			if utils.IsContain(conversationID, a.AtUserList) {
 				title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
 			} else {
 				title = constant.ContentType2PushContent[constant.GroupMsg]

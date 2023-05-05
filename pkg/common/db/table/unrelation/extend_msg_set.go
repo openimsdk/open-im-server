@@ -2,9 +2,10 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"strconv"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 )
 
 type ExtendMsgSetModel struct {
-	SourceID         string                    `bson:"source_id" json:"sourceID"`
+	ConversationID   string                    `bson:"source_id" json:"conversationID"`
 	SessionType      int32                     `bson:"session_type" json:"sessionType"`
 	ExtendMsgs       map[string]ExtendMsgModel `bson:"extend_msgs" json:"extendMsgs"`
 	ExtendMsgNum     int32                     `bson:"extend_msg_num" json:"extendMsgNum"`
@@ -38,12 +39,12 @@ type ExtendMsgModel struct {
 
 type ExtendMsgSetModelInterface interface {
 	CreateExtendMsgSet(ctx context.Context, set *ExtendMsgSetModel) error
-	GetAllExtendMsgSet(ctx context.Context, sourceID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSetModel, err error)
-	GetExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, maxMsgUpdateTime int64) (*ExtendMsgSetModel, error)
-	InsertExtendMsg(ctx context.Context, sourceID string, sessionType int32, msg *ExtendMsgModel) error
-	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
-	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
-	TakeExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *ExtendMsgModel, err error)
+	GetAllExtendMsgSet(ctx context.Context, conversationID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSetModel, err error)
+	GetExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, maxMsgUpdateTime int64) (*ExtendMsgSetModel, error)
+	InsertExtendMsg(ctx context.Context, conversationID string, sessionType int32, msg *ExtendMsgModel) error
+	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
+	DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
+	TakeExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *ExtendMsgModel, err error)
 }
 
 func (ExtendMsgSetModel) TableName() string {
@@ -54,12 +55,12 @@ func (ExtendMsgSetModel) GetExtendMsgMaxNum() int32 {
 	return ExtendMsgMaxNum
 }
 
-func (ExtendMsgSetModel) GetSourceID(ID string, index int32) string {
+func (ExtendMsgSetModel) GetConversationID(ID string, index int32) string {
 	return ID + ":" + strconv.Itoa(int(index))
 }
 
-func (e *ExtendMsgSetModel) SplitSourceIDAndGetIndex() int32 {
-	l := strings.Split(e.SourceID, ":")
+func (e *ExtendMsgSetModel) SplitConversationIDAndGetIndex() int32 {
+	l := strings.Split(e.ConversationID, ":")
 	index, _ := strconv.Atoi(l[len(l)-1])
 	return int32(index)
 }

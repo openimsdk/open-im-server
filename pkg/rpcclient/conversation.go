@@ -41,11 +41,29 @@ func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 
-func (c *ConversationClient) CreateConversationsWithoutNotification(ctx context.Context, conversations []*pbConversation.Conversation) error {
+func (c *ConversationClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
 	cc, err := c.getConn()
 	if err != nil {
 		return err
 	}
-	_, err = conversation.NewConversationClient(cc).CreateConversationsWithoutNotification(ctx, &pbConversation.CreateConversationsWithoutNotificationReq{Conversations: conversations})
+	_, err = conversation.NewConversationClient(cc).CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+	return err
+}
+
+func (c *ConversationClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
+	cc, err := c.getConn()
+	if err != nil {
+		return err
+	}
+	_, err = conversation.NewConversationClient(cc).CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
+	return err
+}
+
+func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, ownerUserIDs []string, groupID string, maxSeq int64) error {
+	cc, err := c.getConn()
+	if err != nil {
+		return err
+	}
+	_, err = conversation.NewConversationClient(cc).DelGroupChatConversations(ctx, &pbConversation.DelGroupChatConversationsReq{OwnerUserID: ownerUserIDs, GroupID: groupID, MaxSeq: maxSeq})
 	return err
 }

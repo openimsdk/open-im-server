@@ -5,7 +5,7 @@ option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push";
 
 message PushMsgReq {
   sdkws.MsgData msgData = 1;
-  string sourceID = 2;
+  string conversationID = 2;
 }
 
 message PushMsgResp{

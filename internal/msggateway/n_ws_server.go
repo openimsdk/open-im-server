@@ -110,7 +110,8 @@ func (ws *WsServer) Run() error {
 			}
 		}
 	}()
-	http.HandleFunc("/", ws.wsHandler)                              //Get request from client to handle by wsHandler
+	http.HandleFunc("/", ws.wsHandler)
+	// http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {})
 	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
 }
 

@@ -66,11 +66,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 }
 
 type groupServer struct {
-	GroupDatabase controller.GroupDatabase
-	User          *rpcclient.UserClient
-	//Notification          *notification.Check
+	GroupDatabase         controller.GroupDatabase
+	User                  *rpcclient.UserClient
 	Notification          *notification.GroupNotificationSender
 	conversationRpcClient *rpcclient.ConversationClient
+	msgRpcClient          *rpcclient.MsgClient
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
@@ -308,8 +308,12 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			}
 		}
 	}
+
 	if group.GroupType == constant.SuperGroup {
 		if err := s.GroupDatabase.CreateSuperGroupMember(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
+			return nil, err
+		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
 			return nil, err
 		}
 		for _, userID := range req.InvitedUserIDs {
@@ -334,6 +338,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			groupMembers = append(groupMembers, member)
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, groupMembers); err != nil {
+			return nil, err
+		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, req.InvitedUserIDs); err != nil {
 			return nil, err
 		}
 		s.Notification.MemberInvitedNotification(ctx, req.GroupID, req.Reason, req.InvitedUserIDs)
@@ -455,6 +462,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			return nil, err
 		}
 		s.Notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
+	}
+	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
@@ -669,6 +679,9 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
+			return nil, err
+		}
 		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID)
 		return resp, nil
 	}
@@ -712,7 +725,26 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		}
 		s.Notification.MemberQuitNotification(ctx, req)
 	}
+	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
+		return nil, err
+	}
 	return resp, nil
+}
+
+func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
+	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	resp, err := s.msgRpcClient.GetMaxAndMinSeq(ctx, &sdkws.GetMaxAndMinSeqReq{
+		ConversationIDs: []string{},
+		UserID:          mcontext.GetOpUserID(ctx),
+	})
+	if err != nil {
+		return err
+	}
+	seq, ok := resp.MaxAndMinSeqs[conevrsationID]
+	if !ok {
+		return errs.ErrInternalServer.Wrap("get max seq error")
+	}
+	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, seq.MaxSeq)
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
@@ -758,7 +790,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		args := &pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
 				OwnerUserID:      mcontext.GetOpUserID(ctx),
-				ConversationID:   utils.GetConversationIDBySessionType(group.GroupID, constant.GroupChatType),
+				ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
 				ConversationType: constant.SuperGroupChatType,
 				GroupID:          group.GroupID,
 			},

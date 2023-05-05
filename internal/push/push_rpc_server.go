@@ -2,6 +2,8 @@ package push
 
 import (
 	"context"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -9,7 +11,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"google.golang.org/grpc"
-	"sync"
 )
 
 type pushServer struct {
@@ -46,9 +47,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 func (r *pushServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (resp *pbPush.PushMsgResp, err error) {
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		err = r.pusher.MsgToSuperGroupUser(ctx, pbData.SourceID, pbData.MsgData)
+		err = r.pusher.MsgToSuperGroupUser(ctx, pbData.ConversationID, pbData.MsgData)
 	default:
-		err = r.pusher.MsgToUser(ctx, pbData.SourceID, pbData.MsgData)
+		err = r.pusher.MsgToUser(ctx, pbData.ConversationID, pbData.MsgData)
 	}
 	if err != nil {
 		return nil, err

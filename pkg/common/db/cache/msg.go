@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -20,23 +21,28 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-//const (
-//	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
-//	userMinSeq              = "REDIS_USER_MIN_SEQ:"
-//	getuiToken              = "GETUI_TOKEN"
-//	getuiTaskID             = "GETUI_TASK_ID"
-//	messageCache            = "MESSAGE_CACHE:"
-//	signalCache             = "SIGNAL_CACHE:"
-//	signalListCache         = "SIGNAL_LIST_CACHE:"
-//	FcmToken                = "FCM_TOKEN:"
-//	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
-//	groupMaxSeq             = "GROUP_MAX_SEQ:"
-//	groupMinSeq             = "GROUP_MIN_SEQ:"
-//	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
-//	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
-//	exTypeKeyLocker         = "EX_LOCK:"
-//	uidPidToken             = "UID_PID_TOKEN_STATUS:"
-//)
+const (
+	userIncrSeq             = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken        = "DEVICE_TOKEN"
+	userMinSeq              = "REDIS_USER_MIN_SEQ:"
+	getuiToken              = "GETUI_TOKEN"
+	getuiTaskID             = "GETUI_TASK_ID"
+	messageCache            = "MESSAGE_CACHE:"
+	signalCache             = "SIGNAL_CACHE:"
+	signalListCache         = "SIGNAL_LIST_CACHE:"
+	fcmToken                = "FCM_TOKEN:"
+	groupUserMinSeq         = "GROUP_USER_MIN_SEQ:"
+	groupMaxSeq             = "GROUP_MAX_SEQ:"
+	groupMinSeq             = "GROUP_MIN_SEQ:"
+	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
+	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
+	exTypeKeyLocker         = "EX_LOCK:"
+	uidPidToken             = "UID_PID_TOKEN_STATUS:"
+	userNotificationSeq     = "USER_NOTIFICATION_SEQ:"
+	userMinNotificationSeq  = "USER_MIN_NOTIFICATION_SEQ:"
+	groupNotificationSeq    = "GROUP_NOTIFICATION_SEQ:"
+	groupMinNotificationSeq = "GROUP_MIN_NOTIFICATION_SEQ:"
+)
 
 type MsgModel interface {
 	IncrUserSeq(ctx context.Context, userID string) (int64, error)
@@ -84,6 +90,20 @@ type MsgModel interface {
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
+	// notificatio
+
+	// 	IncrUserNotificationSeq(ctx context.Context, userID string) (int64, error)
+	// 	GetUserNotificationMaxSeq(ctx context.Context, userID string) (int64, error)
+	// 	SetUserNotificationMaxSeq(ctx context.Context, userID string, maxSeq int64) error
+	// 	SetUserNotificationMinSeq(ctx context.Context, userID string, minSeq int64) (err error)
+	// 	GetUserNotificationMinSeq(ctx context.Context, userID string) (int64, error)
+	// 	SetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string, minSeq int64) (err error)
+	// 	GetGroupNotificationUserMinSeq(ctx context.Context, groupID, userID string) (int64, error)
+	// 	GetGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
+	// 	GetGroupNotificationMinSeq(ctx context.Context, groupID string) (int64, error)
+	// 	IncrGroupNotificationMaxSeq(ctx context.Context, groupID string) (int64, error)
+	// 	SetGroupNotificationMaxSeq(ctx context.Context, groupID string, maxSeq int64) error
+	// 	SetGroupNotificationMinSeq(ctx context.Context, groupID string, minSeq int64) error
 }
 
 func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
@@ -212,12 +232,12 @@ func (c *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platf
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
-func (c *msgCache) getMessageCacheKey(sourceID string, seq int64) string {
-	return messageCache + sourceID + "_" + strconv.Itoa(int(seq))
+func (c *msgCache) getMessageCacheKey(conversationID string, seq int64) string {
+	return messageCache + conversationID + "_" + strconv.Itoa(int(seq))
 }
 
-func (c *msgCache) allMessageCacheKey(sourceID string) string {
-	return messageCache + sourceID + "_*"
+func (c *msgCache) allMessageCacheKey(conversationID string) string {
+	return messageCache + conversationID + "_*"
 }
 
 func (c *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
@@ -437,15 +457,15 @@ func (c *msgCache) GetSendMsgStatus(ctx context.Context, id string) (int32, erro
 }
 
 func (c *msgCache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	return errs.Wrap(c.rdb.Set(ctx, FcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
+	return errs.Wrap(c.rdb.Set(ctx, fcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *msgCache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Result())
+	return utils.Wrap2(c.rdb.Get(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Result())
 }
 
 func (c *msgCache) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	return errs.Wrap(c.rdb.Del(ctx, FcmToken+account+":"+strconv.Itoa(platformID)).Err())
+	return errs.Wrap(c.rdb.Del(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Err())
 }
 
 func (c *msgCache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {

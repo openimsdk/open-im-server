@@ -22,17 +22,18 @@ import (
 
 type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
-	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase       controller.MsgDatabase
-	ExtendMsgDatabase controller.ExtendMsgDatabase
-	Group             *rpcclient.GroupClient
-	User              *rpcclient.UserClient
-	Conversation      *rpcclient.ConversationClient
-	friend            *rpcclient.FriendClient
-	black             *rpcclient.BlackClient
-	GroupLocalCache   *localcache.GroupLocalCache
-	MessageLocker     MessageLocker
-	Handlers          MessageInterceptorChain
+	RegisterCenter       discoveryregistry.SvcDiscoveryRegistry
+	MsgDatabase          controller.MsgDatabase
+	notificationDatabase controller.NotificationDatabase
+	ExtendMsgDatabase    controller.ExtendMsgDatabase
+	Group                *rpcclient.GroupClient
+	User                 *rpcclient.UserClient
+	Conversation         *rpcclient.ConversationClient
+	friend               *rpcclient.FriendClient
+	black                *rpcclient.BlackClient
+	GroupLocalCache      *localcache.GroupLocalCache
+	MessageLocker        MessageLocker
+	Handlers             MessageInterceptorChain
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -97,6 +98,7 @@ func (m *msgServer) initPrometheus() {
 	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
 	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
+
 func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
 	resp = &msg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)
@@ -127,52 +129,53 @@ func (m *msgServer) GetMaxAndMinSeq(ctx context.Context, req *sdkws.GetMaxAndMin
 	}
 
 	m2 := make(map[string]*sdkws.MaxAndMinSeq)
-	maxSeq, err := m.MsgDatabase.GetUserMaxSeq(ctx, req.UserID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return nil, err
-	}
-	minSeq, err := m.MsgDatabase.GetUserMinSeq(ctx, req.UserID)
-	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return nil, err
-	}
 	resp := new(sdkws.GetMaxAndMinSeqResp)
-	resp.MaxSeq = maxSeq
-	resp.MinSeq = minSeq
-
-	for _, groupID := range req.GroupIDs {
-		maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, groupID)
+	for _, conversationID := range req.ConversationIDs {
+		maxSeq, err := m.MsgDatabase.GetGroupMaxSeq(ctx, conversationID)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return nil, err
 		}
-		minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, groupID)
+		minSeq, err := m.MsgDatabase.GetGroupMinSeq(ctx, conversationID)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return nil, err
 		}
-		m2[groupID] = &sdkws.MaxAndMinSeq{
+		m2[conversationID] = &sdkws.MaxAndMinSeq{
 			MaxSeq: maxSeq,
 			MinSeq: minSeq,
 		}
 	}
-
-	resp.GroupMaxAndMinSeq = m2
+	resp.MaxAndMinSeqs = m2
 	return resp, nil
 }
 
 func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	resp := &sdkws.PullMessageBySeqsResp{GroupMsgDataList: make(map[string]*sdkws.MsgDataList)}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.Seqs)
-	if err != nil {
-		return nil, err
-	}
-	resp.List = msgs
-	for groupID, list := range req.GroupSeqs {
-		msgs, err := m.MsgDatabase.GetSuperGroupMsgBySeqs(ctx, groupID, list.Seqs)
-		if err != nil {
-			return nil, err
+	resp := &sdkws.PullMessageBySeqsResp{}
+	for _, seq := range req.SeqRanges {
+		if !seq.IsNotification {
+			msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
+			if err != nil {
+				return nil, err
+			}
+			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
+				ConversationID: seq.ConversationID,
+				Msgs:           msgs,
+			})
+		} else {
+			var seqs []int64
+			for i := seq.Begin; i <= seq.End; i++ {
+				seqs = append(seqs, i)
+			}
+			msgs, err := m.notificationDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
+			if err != nil {
+				return nil, err
+			}
+			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
+				ConversationID: seq.ConversationID,
+				Msgs:           msgs,
+				IsNotification: true,
+			})
 		}
-		resp.GroupMsgDataList[groupID] = &sdkws.MsgDataList{
-			MsgDataList: msgs,
-		}
+
 	}
 	return resp, nil
 }

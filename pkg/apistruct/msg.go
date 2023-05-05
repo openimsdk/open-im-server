@@ -51,7 +51,7 @@ type SetMsgMinSeqResp struct {
 
 type ModifyMessageReactionExtensionsReq struct {
 	OperationID           string                     `json:"operationID" binding:"required"`
-	SourceID              string                     `json:"sourceID"  binding:"required"`
+	conversationID        string                     `json:"conversationID"  binding:"required"`
 	SessionType           int32                      `json:"sessionType" binding:"required"`
 	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
 	ClientMsgID           string                     `json:"clientMsgID" binding:"required"`
@@ -72,7 +72,7 @@ type ModifyMessageReactionExtensionsResp struct {
 
 //type OperateMessageListReactionExtensionsReq struct {
 //	OperationID            string                                                        `json:"operationID" binding:"required"`
-//	SourceID               string                                                        `json:"sourceID"  binding:"required"`
+//	conversationID               string                                                        `json:"conversationID"  binding:"required"`
 //	SessionType            string                                                        `json:"sessionType" binding:"required"`
 //	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
 //}
@@ -100,7 +100,7 @@ type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 
 type DeleteMessageReactionExtensionsReq struct {
 	OperationID           string            `json:"operationID" binding:"required"`
-	SourceID              string            `json:"sourceID" binding:"required"`
+	conversationID        string            `json:"conversationID" binding:"required"`
 	SessionType           int32             `json:"sessionType" binding:"required"`
 	ClientMsgID           string            `json:"clientMsgID" binding:"required"`
 	IsExternalExtensions  bool              `json:"isExternalExtensions"`

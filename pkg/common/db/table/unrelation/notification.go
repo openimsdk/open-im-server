@@ -2,10 +2,11 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"strconv"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (
@@ -30,10 +31,10 @@ type NotificationDocModelInterface interface {
 	Create(ctx context.Context, model *NotificationDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*NotificationDocModel, error)
-	GetNewestMsg(ctx context.Context, sourceID string) (*NotificationInfoModel, error)
-	GetOldestMsg(ctx context.Context, sourceID string) (*NotificationInfoModel, error)
+	GetNewestMsg(ctx context.Context, conversationID string) (*NotificationInfoModel, error)
+	GetOldestMsg(ctx context.Context, conversationID string) (*NotificationInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
-	GetMsgsByIndex(ctx context.Context, sourceID string, index int64) (*NotificationDocModel, error)
+	GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*NotificationDocModel, error)
 	UpdateOneDoc(ctx context.Context, msg *NotificationDocModel) error
 }
 
@@ -59,9 +60,9 @@ func (m *NotificationDocModel) IsFull() bool {
 	return false
 }
 
-func (m NotificationDocModel) GetDocID(sourceID string, seq int64) string {
+func (m NotificationDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := seq / singleGocNotificationNum
-	return m.indexGen(sourceID, seqSuffix)
+	return m.indexGen(conversationID, seqSuffix)
 }
 
 func (m NotificationDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
@@ -83,10 +84,10 @@ func (m NotificationDocModel) superGroupIndexGen(groupID string, seqSuffix int64
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
 
-func (m NotificationDocModel) GetDocIDSeqsMap(sourceID string, seqs []int64) map[string][]int64 {
+func (m NotificationDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
 	for i := 0; i < len(seqs); i++ {
-		docID := m.GetDocID(sourceID, seqs[i])
+		docID := m.GetDocID(conversationID, seqs[i])
 		if value, ok := t[docID]; !ok {
 			var temp []int64
 			t[docID] = append(temp, seqs[i])
@@ -108,8 +109,8 @@ func (m NotificationDocModel) getMsgIndex(seq uint32) int {
 	return int(index)
 }
 
-func (m NotificationDocModel) indexGen(sourceID string, seqSuffix int64) string {
-	return sourceID + ":" + strconv.FormatInt(seqSuffix, 10)
+func (m NotificationDocModel) indexGen(conversationID string, seqSuffix int64) string {
+	return conversationID + ":" + strconv.FormatInt(seqSuffix, 10)
 }
 
 func (NotificationDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {
