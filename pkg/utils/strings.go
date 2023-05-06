@@ -112,6 +112,24 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	return ""
 }
 
+func GetNotificationConversationIDBySessionType(sessionType int, ids ...string) string {
+	sort.Strings(ids)
+	if len(ids) > 2 || len(ids) < 1 {
+		return ""
+	}
+	switch sessionType {
+	case constant.SingleChatType:
+		return "n_" + strings.Join(ids, "_") // single chat
+	case constant.GroupChatType:
+		return "n_" + ids[0] // group chat
+	case constant.SuperGroupChatType:
+		return "n_" + ids[0] // super group chat
+	case constant.NotificationChatType:
+		return "n_" + ids[0] // server notification chat
+	}
+	return ""
+}
+
 func IsNotification(conversationID string) bool {
 	return strings.HasPrefix(conversationID, "n_")
 }

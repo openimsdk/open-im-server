@@ -96,7 +96,7 @@ func (c *MsgTool) ClearSuperGroupMsg(ctx context.Context, superGroupIDs []string
 			log.ZError(ctx, "ClearSuperGroupMsg failed", err, "groupID", groupID)
 			continue
 		}
-		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, groupID, userIDs, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
+		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, groupID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
 			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "groupID", groupID, "userID", userIDs, "DBRetainChatRecords", config.Config.Mongo.DBRetainChatRecords)
 		}
 		if err := c.fixGroupSeq(ctx, groupID, userIDs); err != nil {
@@ -114,7 +114,7 @@ func (c *MsgTool) FixGroupSeq(ctx context.Context, groupID string) error {
 }
 
 func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []string) error {
-	_, maxSeqMongo, maxSeqCache, err := c.msgDatabase.GetSuperGroupMinMaxSeqInMongoAndCache(ctx, groupID)
+	_, maxSeqMongo, _, maxSeqCache, err := c.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, groupID)
 	if err != nil {
 		if err == unrelation.ErrMsgNotFound {
 			return nil
@@ -126,14 +126,14 @@ func (c *MsgTool) fixGroupSeq(ctx context.Context, groupID string, userIDs []str
 			continue
 		}
 	}
-	if err := c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo, constant.WriteDiffusion); err != nil {
+	if err := c.CheckMaxSeqWithMongo(ctx, groupID, maxSeqCache, maxSeqMongo); err != nil {
 		log.ZWarn(ctx, "cache max seq and mongo max seq is diff > 10", err, "groupID", groupID, "maxSeqCache", maxSeqCache, "maxSeqMongo", maxSeqMongo, "constant.WriteDiffusion", constant.WriteDiffusion)
 	}
 	return nil
 }
 
 func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqCache, maxSeqMongo int64, err error) {
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgDatabase.GetUserMinMaxSeqInMongoAndCache(ctx, userID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := c.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, userID)
 	if err != nil {
 		if err != unrelation.ErrMsgNotFound {
 			log.ZError(ctx, "GetUserMinMaxSeqInMongoAndCache failed", err, "userID", userID)
@@ -142,7 +142,7 @@ func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqC
 	}
 	log.ZDebug(ctx, "userID", userID, "minSeqMongo", minSeqMongo, "maxSeqMongo", maxSeqMongo, "minSeqCache", minSeqCache, "maxSeqCache", maxSeqCache)
 	if minSeqCache > maxSeqCache {
-		if err := c.msgDatabase.SetUserMinSeq(ctx, userID, maxSeqCache); err != nil {
+		if err := c.msgDatabase.SetMinSeq(ctx, userID, maxSeqCache); err != nil {
 			log.ZError(ctx, "SetUserMinSeq failed", err, "userID", userID, "minSeqCache", minSeqCache, "maxSeqCache", maxSeqCache)
 		} else {
 			log.ZInfo(ctx, "SetUserMinSeq success", "userID", userID, "minSeqCache", minSeqCache, "maxSeqCache", maxSeqCache)
@@ -152,13 +152,13 @@ func (c *MsgTool) GetAndFixUserSeqs(ctx context.Context, userID string) (maxSeqC
 }
 
 func (c *MsgTool) GetAndFixGroupUserSeq(ctx context.Context, userID string, groupID string, maxSeqCache int64) (minSeqCache int64, err error) {
-	minSeqCache, err = c.msgDatabase.GetGroupUserMinSeq(ctx, groupID, userID)
+	minSeqCache, err = c.msgDatabase.GetMinSeq(ctx, groupID)
 	if err != nil {
 		log.ZError(ctx, "GetGroupUserMinSeq failed", err, "groupID", groupID, "userID", userID)
 		return 0, err
 	}
 	if minSeqCache > maxSeqCache {
-		if err := c.msgDatabase.SetGroupUserMinSeq(ctx, groupID, userID, maxSeqCache); err != nil {
+		if err := c.msgDatabase.SetConversationUserMinSeq(ctx, groupID, userID, maxSeqCache); err != nil {
 			log.ZError(ctx, "SetGroupUserMinSeq failed", err, "groupID", groupID, "userID", userID, "minSeqCache", minSeqCache, "maxSeqCache", maxSeqCache)
 		} else {
 			log.ZInfo(ctx, "SetGroupUserMinSeq success", "groupID", groupID, "userID", userID, "minSeqCache", minSeqCache, "maxSeqCache", maxSeqCache)
@@ -192,16 +192,16 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		return err
 	}
 	for _, userID := range userIDs {
-		userCurrentMinSeq, err := c.msgDatabase.GetUserMinSeq(ctx, userID)
+		userCurrentMinSeq, err := c.msgDatabase.GetMinSeq(ctx, userID)
 		if err != nil && err != redis.Nil {
 			continue
 		}
-		userCurrentMaxSeq, err := c.msgDatabase.GetUserMaxSeq(ctx, userID)
+		userCurrentMaxSeq, err := c.msgDatabase.GetMaxSeq(ctx, userID)
 		if err != nil && err != redis.Nil {
 			continue
 		}
 		if userCurrentMinSeq > userCurrentMaxSeq {
-			if err = c.msgDatabase.SetUserMinSeq(ctx, userID, userCurrentMaxSeq); err != nil {
+			if err = c.msgDatabase.SetMinSeq(ctx, userID, userCurrentMaxSeq); err != nil {
 				fmt.Println("SetUserMinSeq failed", userID, userCurrentMaxSeq)
 			}
 			fmt.Println("fix", userID, userCurrentMaxSeq)
@@ -213,7 +213,7 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		return err
 	}
 	for _, groupID := range groupIDs {
-		maxSeq, err := c.msgDatabase.GetGroupMaxSeq(ctx, groupID)
+		maxSeq, err := c.msgDatabase.GetMaxSeq(ctx, groupID)
 		if err != nil {
 			fmt.Println("GetGroupMaxSeq failed", groupID)
 			continue
@@ -224,13 +224,13 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 			continue
 		}
 		for _, userID := range userIDs {
-			userMinSeq, err := c.msgDatabase.GetGroupUserMinSeq(ctx, groupID, userID)
+			userMinSeq, err := c.msgDatabase.GetMinSeq(ctx, groupID)
 			if err != nil && err != redis.Nil {
 				fmt.Println("GetGroupUserMinSeq failed", groupID, userID)
 				continue
 			}
 			if userMinSeq > maxSeq {
-				if err = c.msgDatabase.SetGroupUserMinSeq(ctx, groupID, userID, maxSeq); err != nil {
+				if err = c.msgDatabase.SetMinSeq(ctx, groupID, maxSeq); err != nil {
 					fmt.Println("SetGroupUserMinSeq failed", err.Error(), groupID, userID, maxSeq)
 				}
 				fmt.Println("fix", groupID, userID, maxSeq, userMinSeq)

@@ -20,7 +20,7 @@ func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroup
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, req.GroupID, []string{req.UserID}, 0); err != nil {
+	if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, req.GroupID, 0); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -31,7 +31,7 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.Cl
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.CleanUpUserMsg(ctx, req.UserID); err != nil {
+	if err := m.MsgDatabase.CleanUpConversationMsgs(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	return resp, nil

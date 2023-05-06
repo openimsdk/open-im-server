@@ -75,8 +75,10 @@ type MsgDatabase interface {
 	SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error
 	GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMinSeq(ctx context.Context, conversationID string) (int64, error)
-	GetUserMinSeq(ctx context.Context, conversationIDs []string) (map[string]int64, error)
-	SetUserMinSeq(ctx context.Context, seqs map[string]int64) (err error)
+	GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
+	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
+	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
+	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
@@ -312,7 +314,6 @@ func (db *msgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID
 	if lenList < 1 {
 		return 0, errors.New("too short as 0")
 	}
-	// judge sessionType to get seq
 	lastMaxSeq := currentMaxSeq
 	for _, m := range msgs {
 		currentMaxSeq++
@@ -581,7 +582,7 @@ func (db *msgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Context, c
 	if minSeq == 0 {
 		return nil
 	}
-	return db.cache.SetUserMinSeq(ctx, map[string]int64{conversationID: minSeq})
+	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
 }
 
 // this is struct for recursion
@@ -604,9 +605,9 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, conversationID st
 	if err != nil || msgs.DocID == "" {
 		if err != nil {
 			if err == unrelation.ErrMsgListNotExist {
-				log.NewDebug(mcontext.GetOperationID(ctx), utils.GetSelfFuncName(), "ID:", conversationID, "index:", index, err.Error())
+				log.ZDebug(ctx, "deleteMsgRecursion ErrMsgListNotExist", "conversationID", conversationID, "index:", index)
 			} else {
-				//log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
+				log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
 			}
 		}
 		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
@@ -616,7 +617,7 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, conversationID st
 		}
 		return delStruct.getSetMinSeq() + 1, nil
 	}
-	//log.NewDebug(operationID, "ID:", conversationID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
+	log.ZDebug(ctx, "conversationID", conversationID, "index:", index, "docID", msgs.DocID, "len", len(msgs.Msg))
 	if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
 		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgs.Msg), "docID:", msgs.DocID)
 	}
@@ -625,17 +626,17 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, conversationID st
 		lastMsgPb := &sdkws.MsgData{}
 		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
 		if err != nil {
-			//log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+			log.ZError(ctx, "proto.Unmarshal failed", err, "index", len(msgs.Msg)-1, "docID", msgs.DocID)
 			return 0, utils.Wrap(err, "proto.Unmarshal failed")
 		}
 		delStruct.minSeq = lastMsgPb.Seq
 	} else {
 		var hasMarkDelFlag bool
-		for _, msg := range msgs.Msg {
+		for i, msg := range msgs.Msg {
 			msgPb := &sdkws.MsgData{}
 			err = proto.Unmarshal(msg.Msg, msgPb)
 			if err != nil {
-				//log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+				log.ZError(ctx, "proto.Unmarshal failed", err, "index", i, "docID", msgs.DocID)
 				return 0, utils.Wrap(err, "proto.Unmarshal failed")
 			}
 			if utils.GetCurrentTimestampByMill() > msg.SendTime+(remainTime*1000) {
@@ -666,16 +667,16 @@ func (db *msgDatabase) deleteMsgRecursion(ctx context.Context, conversationID st
 func (db *msgDatabase) GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error) {
 	minSeqMongo, maxSeqMongo, err = db.GetMinMaxSeqMongo(ctx, conversationID)
 	if err != nil {
-		return 0, 0, 0, 0, err
+		return
 	}
 	// from cache
-	minSeqCache, err = db.cache.GetUserMinSeq(ctx, conversationID)
+	minSeqCache, err = db.cache.GetMinSeq(ctx, conversationID)
 	if err != nil {
-		return 0, 0, 0, 0, err
+		return
 	}
-	maxSeqCache, err = db.cache.GetUserMaxSeq(ctx, conversationID)
+	maxSeqCache, err = db.cache.GetMaxSeq(ctx, conversationID)
 	if err != nil {
-		return 0, 0, 0, 0, err
+		return
 	}
 	return
 }
@@ -683,20 +684,20 @@ func (db *msgDatabase) GetConversationMinMaxSeqInMongoAndCache(ctx context.Conte
 func (db *msgDatabase) GetMinMaxSeqMongo(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo int64, err error) {
 	oldestMsgMongo, err := db.msgDocDatabase.GetOldestMsg(ctx, conversationID)
 	if err != nil {
-		return 0, 0, err
+		return
 	}
 	msgPb, err := db.unmarshalMsg(oldestMsgMongo)
 	if err != nil {
-		return 0, 0, err
+		return
 	}
 	minSeqMongo = msgPb.Seq
 	newestMsgMongo, err := db.msgDocDatabase.GetNewestMsg(ctx, conversationID)
 	if err != nil {
-		return 0, 0, err
+		return
 	}
 	msgPb, err = db.unmarshalMsg(newestMsgMongo)
 	if err != nil {
-		return 0, 0, err
+		return
 	}
 	maxSeqMongo = msgPb.Seq
 	return
@@ -720,9 +721,15 @@ func (db *msgDatabase) GetMinSeqs(ctx context.Context, conversationIDs []string)
 func (db *msgDatabase) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
 	return db.cache.GetMinSeq(ctx, conversationID)
 }
-func (db *msgDatabase) GetUserMinSeq(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
-	return db.cache.GetUserMinSeq(ctx, conversationIDs)
+func (db *msgDatabase) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
+	return db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
 }
-func (db *msgDatabase) SetUserMinSeq(ctx context.Context, seqs map[string]int64) (err error) {
-	return db.cache.SetUserMinSeq(ctx, seqs)
+func (db *msgDatabase) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error) {
+	return db.cache.GetConversationUserMinSeqs(ctx, conversationID, userIDs)
+}
+func (db *msgDatabase) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
+	return db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, minSeq)
+}
+func (db *msgDatabase) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
+	return db.cache.SetConversationUserMinSeqs(ctx, conversationID, seqs)
 }
