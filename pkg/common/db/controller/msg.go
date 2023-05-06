@@ -467,7 +467,7 @@ func (db *msgDatabase) getMsgBySeqsRange(ctx context.Context, conversationID str
 	for int64(len(seqMsg)) != num {
 		for docID, value := range m {
 			beginSeq, endSeq := db.msg.GetSeqsBeginEnd(value)
-			msgs, seqs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
+			msgs, _, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
 			if err != nil {
 				log.ZError(ctx, "GetMsgBySeqIndexIn1Doc error", err, "docID", docID, "beginSeq", beginSeq, "endSeq", endSeq)
 				continue

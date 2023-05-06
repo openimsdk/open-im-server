@@ -9,11 +9,7 @@ package utils
 import (
 	"encoding/json"
 	"math/rand"
-	"sort"
 	"strconv"
-	"strings"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func IntToString(i int) string {
@@ -92,46 +88,6 @@ func JsonStringToStruct(s string, args interface{}) error {
 func GetMsgID(sendID string) string {
 	t := int64ToString(GetCurrentTimestampByNano())
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
-}
-
-func GetConversationIDBySessionType(sessionType int, ids ...string) string {
-	sort.Strings(ids)
-	if len(ids) > 2 || len(ids) < 1 {
-		return ""
-	}
-	switch sessionType {
-	case constant.SingleChatType:
-		return "si_" + strings.Join(ids, "_") // single chat
-	case constant.GroupChatType:
-		return "g_" + ids[0] // group chat
-	case constant.SuperGroupChatType:
-		return "sg_" + ids[0] // super group chat
-	case constant.NotificationChatType:
-		return "sn_" + ids[0] // server notification chat
-	}
-	return ""
-}
-
-func GetNotificationConversationIDBySessionType(sessionType int, ids ...string) string {
-	sort.Strings(ids)
-	if len(ids) > 2 || len(ids) < 1 {
-		return ""
-	}
-	switch sessionType {
-	case constant.SingleChatType:
-		return "n_" + strings.Join(ids, "_") // single chat
-	case constant.GroupChatType:
-		return "n_" + ids[0] // group chat
-	case constant.SuperGroupChatType:
-		return "n_" + ids[0] // super group chat
-	case constant.NotificationChatType:
-		return "n_" + ids[0] // server notification chat
-	}
-	return ""
-}
-
-func IsNotification(conversationID string) bool {
-	return strings.HasPrefix(conversationID, "n_")
 }
 
 func int64ToString(i int64) string {
