@@ -182,6 +182,7 @@ message MsgData {
 }
 message PushMessages{
   map<string, PullMsgs> msgs = 1; 
+  map<string, PullMsgs> notificationMsgs = 2; 
 }
 message OfflinePushInfo{
   string title = 1;
