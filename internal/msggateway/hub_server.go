@@ -125,7 +125,6 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 
 func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOfflineReq) (*msggateway.KickUserOfflineResp, error) {
 	for _, v := range req.KickUserIDList {
-
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
 				err := client.KickOnlineMessage(ctx)
