@@ -104,6 +104,7 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 			log.Error(mcontext.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
 		}
 	}
+	utils.GetConversationIDBySessionType()
 	return &pbData
 }
 
