@@ -181,7 +181,7 @@ message MsgData {
   string  ex = 22;
 }
 message PushMessages{
-  repeated MsgData msgs = 1;
+  map<string, PullMsgs> msgs = 1; 
 }
 message OfflinePushInfo{
   string title = 1;
