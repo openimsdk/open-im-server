@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -178,6 +179,9 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	for _, user := range req.Users {
 		if user.UserID == "" {
 			return nil, errs.ErrArgs.Wrap("userID is empty")
+		}
+		if strings.Contains(user.UserID, ":") {
+			return nil, errs.ErrArgs.Wrap("userID contains ':' is invalid userID")
 		}
 		userIDs = append(userIDs, user.UserID)
 	}

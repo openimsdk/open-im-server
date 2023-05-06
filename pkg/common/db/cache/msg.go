@@ -270,15 +270,15 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 		} else {
 			msg := sdkws.MsgData{}
 			err = jsonpb.UnmarshalString(v.String(), &msg)
-			if err != nil {
-				failedSeqs = append(failedSeqs, seqs[i])
-			} else {
+			if err == nil {
 				if msg.Status != constant.MsgDeleted {
 					seqMsgs = append(seqMsgs, &msg)
-				} else {
-					failedSeqs = append(failedSeqs, seqs[i])
+					continue
 				}
+			} else {
+				log.ZWarn(ctx, "UnmarshalString failed", err, "conversationID", conversationID, "seq", seqs[i])
 			}
+			failedSeqs = append(failedSeqs, seqs[i])
 		}
 	}
 	return seqMsgs, failedSeqs, err

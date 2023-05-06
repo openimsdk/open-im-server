@@ -148,6 +148,7 @@ message GetMaxSeqReq {
 
 message GetMaxSeqResp {
   map<string, int64> maxSeqs = 1;
+  map<string, int64> minSeqs = 2;
 }
 
 message UserSendMsgResp {

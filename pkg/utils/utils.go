@@ -238,3 +238,17 @@ func GetNotificationConversationIDBySessionType(sessionType int, ids ...string) 
 func IsNotification(conversationID string) bool {
 	return strings.HasPrefix(conversationID, "n_")
 }
+
+type MsgBySeq []*sdkws.MsgData
+
+func (s MsgBySeq) Len() int {
+	return len(s)
+}
+
+func (s MsgBySeq) Less(i, j int) bool {
+	return s[i].Seq < s[j].Seq
+}
+
+func (s MsgBySeq) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}

@@ -76,14 +76,12 @@ func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
 	return seqUserIDs
 }
 
-// func (m MsgDocModel) getSeqSuperGroupID(groupID string, seq int64) string {
-// 	seqSuffix := seq / singleGocMsgNum
-// 	return m.superGroupIndexGen(groupID, seqSuffix)
-// }
-
-// func (m MsgDocModel) superGroupIndexGen(groupID string, seqSuffix int64) string {
-// 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
-// }
+func (m MsgDocModel) ToNextDoc(docID string) string {
+	l := strings.Split(docID, ":")
+	index, _ := strconv.Atoi(l[len(l)-1])
+	index++
+	return strings.Split(docID, ":")[0] + ":" + strconv.Itoa(index)
+}
 
 func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
 	t := make(map[string][]int64)
