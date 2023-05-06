@@ -133,15 +133,13 @@ message SeqRange {
   int64 num = 4;
 }
 
-
 message PullMsgs {
   repeated MsgData Msgs = 1;
-  bool isNotification = 2;
-  string conversationID = 3;
 }
 
 message PullMessageBySeqsResp {
-  repeated PullMsgs msgs = 1;
+   map<string, PullMsgs> msgs = 1; 
+   map<string, PullMsgs> notificationMsgs = 2; 
 }
 
 message GetMaxSeqReq {
