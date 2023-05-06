@@ -171,16 +171,29 @@ func GetHashCode(s string) uint32 {
 }
 
 func GetConversationIDByMsg(msg *sdkws.MsgData) string {
+	options := Options(msg.Options)
 	switch msg.SessionType {
 	case constant.SingleChatType:
 		l := []string{msg.SendID, msg.RecvID}
 		sort.Strings(l)
+		if options.IsNotification() {
+			return "n_" + strings.Join(l, "_")
+		}
 		return "si_" + strings.Join(l, "_") // single chat
 	case constant.GroupChatType:
+		if options.IsNotification() {
+			return "n_" + msg.GroupID // group chat
+		}
 		return "g_" + msg.GroupID // group chat
 	case constant.SuperGroupChatType:
+		if options.IsNotification() {
+			return "n_" + msg.GroupID // super group chat
+		}
 		return "sg_" + msg.GroupID // super group chat
 	case constant.NotificationChatType:
+		if options.IsNotification() {
+			return "n_" + msg.SendID + "_" + msg.RecvID // super group chat
+		}
 		return "sn_" + msg.SendID + "_" + msg.RecvID // server notification chat
 	}
 	return ""
