@@ -149,24 +149,18 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			if err != nil {
 				return nil, err
 			}
-			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
-				ConversationID: seq.ConversationID,
-				Msgs:           msgs,
-			})
+			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs}
 		} else {
 			var seqs []int64
 			for i := seq.Begin; i <= seq.End; i++ {
 				seqs = append(seqs, i)
 			}
-			msgs, err := m.notificationDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
+			notificationMsgs, err := m.notificationDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
 			if err != nil {
 				return nil, err
 			}
-			resp.Msgs = append(resp.Msgs, &sdkws.PullMsgs{
-				ConversationID: seq.ConversationID,
-				Msgs:           msgs,
-				IsNotification: true,
-			})
+			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs}
+
 		}
 	}
 	return resp, nil
