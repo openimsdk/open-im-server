@@ -254,11 +254,11 @@ func (c *msgCache) allMessageCacheKey(conversationID string) string {
 	return messageCache + conversationID + "_*"
 }
 
-func (c *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
+func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range seqs {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
-		key := c.getMessageCacheKey(userID, v)
+		key := c.getMessageCacheKey(conversationID, v)
 		if err := pipe.Get(ctx, key).Err(); err != nil && err != redis.Nil {
 			return nil, nil, err
 		}
@@ -273,7 +273,11 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, userID string, seqs []i
 			if err != nil {
 				failedSeqs = append(failedSeqs, seqs[i])
 			} else {
-				seqMsgs = append(seqMsgs, &msg)
+				if msg.Status != constant.MsgDeleted {
+					seqMsgs = append(seqMsgs, &msg)
+				} else {
+					failedSeqs = append(failedSeqs, seqs[i])
+				}
 			}
 		}
 	}
