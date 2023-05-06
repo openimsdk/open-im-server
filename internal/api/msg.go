@@ -217,7 +217,7 @@ func (m *Message) SendMessage(c *gin.Context) {
 		Status: int32(status),
 	})
 	if err != nil {
-		log.NewError(mcontext.GetOperationID(c), "SetSendMsgStatus failed")
+		log.ZError(c, "SetSendMsgStatus failed", err)
 	}
 	apiresp.GinSuccess(c, respPb)
 }
