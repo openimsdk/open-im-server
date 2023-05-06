@@ -2,6 +2,10 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -54,4 +58,16 @@ func (u *User) AccountCheck(c *gin.Context) {
 
 func (u *User) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.client, c)
+}
+func (u *User) GetUsersOnlineStatus(c *gin.Context) {
+	params := apistruct.ManagementSendMsgReq{}
+	if err := c.BindJSON(&params); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if !tokenverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
+
 }

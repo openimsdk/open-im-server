@@ -202,7 +202,9 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 	}
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
-	data, err := proto.Marshal(msgData)
+	var msg sdkws.PushMessages
+	msg.Msgs = append(msg.Msgs, msgData)
+	data, err := proto.Marshal(&msg)
 	if err != nil {
 		return err
 	}
