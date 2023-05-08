@@ -444,8 +444,8 @@ func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seq
 	return seqMsgs, unExistSeqs, nil
 }
 
-func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversationID string, allSeqs []int64, begin, end, num int64) (seqMsgs []*sdkws.MsgData, err error) {
-	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end, "num", num)
+func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {
+	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
 	m := db.msg.GetDocIDSeqsMap(conversationID, allSeqs)
 	var totalNotExistSeqs []int64
 	// mongo index
@@ -460,21 +460,25 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 	}
 	log.ZDebug(ctx, "getMsgBySeqsRange", "totalNotExistSeqs", totalNotExistSeqs)
 	// find by next doc
+	var missedSeqs []int64
 	if len(totalNotExistSeqs) > 0 {
 		m = db.msg.GetDocIDSeqsMap(conversationID, totalNotExistSeqs)
 		for docID, seqs := range m {
 			docID = db.msg.ToNextDoc(docID)
 			msgs, _, unExistSeqs, err := db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
 			if err != nil {
+				missedSeqs = append(missedSeqs, seqs...)
 				log.ZError(ctx, "get message from mongo exception", err, "docID", docID, "seqs", seqs)
 				continue
 			}
+			missedSeqs = append(missedSeqs, unExistSeqs...)
 			seqMsgs = append(seqMsgs, msgs...)
 			if len(unExistSeqs) > 0 {
 				log.ZWarn(ctx, "some seqs lost in mongo", err, "docID", docID, "seqs", seqs, "unExistSeqs", unExistSeqs)
 			}
 		}
 	}
+	seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs(missedSeqs)...)
 	var delSeqs []int64
 	for _, msg := range seqMsgs {
 		if msg.Status == constant.MsgDeleted {
@@ -515,7 +519,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
 	if len(failedSeqs) > 0 {
-		mongoMsgs, err := db.getMsgBySeqsRange(ctx, conversationID, failedSeqs, begin, end, num-int64(len(successMsgs)))
+		mongoMsgs, err := db.getMsgBySeqsRange(ctx, conversationID, failedSeqs, begin, end)
 		if err != nil {
 			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
 			return nil, err

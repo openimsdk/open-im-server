@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
@@ -24,7 +26,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
-	log.Info("load config: ", config.Config)
+	log.ZInfo(context.Background(), "load config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
