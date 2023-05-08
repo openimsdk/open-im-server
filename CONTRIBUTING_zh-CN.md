@@ -7,12 +7,12 @@
 ## 📇标题
 
 - [我们期望你做什么](#我们期望你做什么)
-- [行为准则](#Code-of-Conduct)
-- [上手IM](#Getting-Started)
-- [风格和规范](#Style-and-Specification)
+- [行为准则](#行为准则)
+- [上手IM](#上手IM)
+- [风格和规范](#风格和规范)
 - [Engage to help anything](#Engage-to-help-anything)
-- [发布版本](#Release-version)
-- [联系我们](#Contact-Us)
+- [发布版本](#发布版本)
+- [联系我们](#联系我们)
 
 ## 我们期望你做什么
 
@@ -26,7 +26,7 @@ If you are familiar with [Makefile](./Makefile) , you can easily see the clever 
 
 The [Makefile](./Makefile) is for every developer, even if you don't know how to use the Makefile tool, don't worry, we provide two great commands to get you up to speed with the Makefile architecture, `make help` and `make help-all`, it can reduce problems of the developing environment.
 
-## Code of ConductCode of Conduct
+## 行为准则
 
 #### Code and doc contribution
 
@@ -71,7 +71,7 @@ In order to contribute a feature to Open-IM-Server you'll need to go through the
 
 But keep in mind that there is no guarantee of it being accepted and so it is usually best to get agreement on the idea/design before time is spent coding it. However, sometimes seeing the exact code change can help focus discussions, so the choice is up to you.
 
-## Getting Started
+## 上手IM
 
 To propose PR for the Open-IM-Server item, we assume you have registered a GitHub ID. Then you could finish the preparation in the following steps:
 
@@ -162,7 +162,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
 
    It is recommended to review your changes before filing a pull request. Check if your code doesn't conflict with the main branch and no redundant code is included.
 
-## Style and Specification
+## 风格和规范
 
 We divide the problem into security and general problems:
 
@@ -318,7 +318,7 @@ We choose GitHub as the primary place for Open-IM-Server to collaborate. So the 
 
 In a word, **ANY HELP IS CONTRIBUTION.**
 
-## Release version
+## 发布版本
 
 Releases of Open-IM-Server are done using [Release Please](https://github.com/googleapis/release-please) and [GoReleaser](https://goreleaser.com/). The workflow looks like this:
 
@@ -345,7 +345,7 @@ Such a commit can get produced as follows:
 ❯ git commit --allow-empty -m "chore: release 0.0.3" -m "Release-As: 0.0.3
 ````
 
-## Contact Us
+## 联系我们
 
 We value close connections with our users, developers, and contributors here at Open-IM-Server. With a large community and maintainer team, we're always here to help and support you. Whether you're looking to join our community or have any questions or suggestions, we welcome you to get in touch with us.
 
