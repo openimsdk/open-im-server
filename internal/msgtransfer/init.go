@@ -2,6 +2,7 @@ package msgtransfer
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -81,8 +82,7 @@ func (m *MsgTransfer) initPrometheus() {
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
-	//var wg sync.WaitGroup
-	//wg.Add(4)
+	var wg sync.WaitGroup
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if config.Config.ChatPersistenceMysql {
 		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
@@ -96,6 +96,6 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	//wg.Wait()
+	wg.Wait()
 	return nil
 }
