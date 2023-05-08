@@ -18,7 +18,7 @@ func NewBlackClient(zk discoveryRegistry.SvcDiscoveryRegistry) *BlackClient {
 
 // possibleBlackUserID是否被userID拉黑，也就是是否在userID的黑名单中
 func (b *BlackClient) IsBlocked(ctx context.Context, possibleBlackUserID, userID string) (bool, error) {
-	cc, err := b.getConn()
+	cc, err := b.getConn(ctx)
 	if err != nil {
 		return false, err
 	}

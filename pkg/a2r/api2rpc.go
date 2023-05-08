@@ -2,6 +2,7 @@ package a2r
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -11,7 +12,7 @@ import (
 
 func Call[A, B, C any](
 	rpc func(client C, ctx context.Context, req *A, options ...grpc.CallOption) (*B, error),
-	client func() (C, error),
+	client func(ctx context.Context) (C, error),
 	c *gin.Context,
 ) {
 	var req A
@@ -27,7 +28,7 @@ func Call[A, B, C any](
 			return
 		}
 	}
-	cli, err := client()
+	cli, err := client(c)
 	if err != nil {
 		log.ZError(c, "get conn error", err, "req", req)
 		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败

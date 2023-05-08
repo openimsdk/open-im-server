@@ -27,7 +27,7 @@ func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *UserClient {
 }
 
 func (u *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
-	cc, err := u.getConn()
+	cc, err := u.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (u *UserClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string,
 }
 
 func (u *UserClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-	cc, err := u.getConn()
+	cc, err := u.getConn(ctx)
 	if err != nil {
 		return 0, err
 	}

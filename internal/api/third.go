@@ -2,6 +2,10 @@ package api
 
 import (
 	"context"
+	"math/rand"
+	"net/http"
+	"strconv"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -10,9 +14,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/gin-gonic/gin"
-	"math/rand"
-	"net/http"
-	"strconv"
 )
 
 var _ context.Context // 解决goland编辑器bug
@@ -25,8 +26,8 @@ type Third struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Third) client() (third.ThirdClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImThirdName)
+func (o *Third) client(ctx context.Context) (third.ThirdClient, error) {
+	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (o *Third) GetURL(c *gin.Context) {
 		expires = 3600 * 1000
 	}
 	attachment, _ := strconv.ParseBool(c.Query("attachment"))
-	client, err := o.client()
+	client, err := o.client(c)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return

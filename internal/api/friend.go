@@ -21,8 +21,8 @@ type Friend struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Friend) client() (friend.FriendClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImFriendName)
+func (o *Friend) client(ctx context.Context) (friend.FriendClient, error) {
+	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return nil, err
 	}

@@ -35,8 +35,6 @@ type NotificationDatabase interface {
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) error
 	// incrSeq然后批量插入缓存
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int64, error)
-	// incrSeq通知seq然后批量插入缓存
-	NotificationBatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int64, error)
 	// 删除消息 返回不存在的seqList
 	DelMsgBySeqs(ctx context.Context, userID string, seqs []int64) (totalUnExistSeqs []int64, err error)
 	// 获取群ID或者UserID最新一条在mongo里面的消息
@@ -96,10 +94,10 @@ func NewNotificationDatabase(msgDocModel unRelationTb.NotificationDocModelInterf
 	}
 }
 
-func InitNotificationDatabase(rdb redis.UniversalClient, database *mongo.Database) MsgDatabase {
+func InitNotificationDatabase(rdb redis.UniversalClient, database *mongo.Database) CommonMsgDatabase {
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	msgDatabase := NewMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel)
 	return msgDatabase
 }
 
@@ -316,10 +314,6 @@ func (db *notificationDatabase) BatchInsertChat2DB(ctx context.Context, conversa
 
 func (db *notificationDatabase) DeleteMessageFromCache(ctx context.Context, userID string, msgs []*sdkws.MsgData) error {
 	return db.cache.DeleteMessageFromCache(ctx, userID, msgs)
-}
-
-func (db *notificationDatabase) NotificationBatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int64, error) {
-	return 0, nil
 }
 
 func (db *notificationDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int64, error) {

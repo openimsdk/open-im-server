@@ -59,7 +59,7 @@ type MsgModel interface {
 	GetMessagesBySeq(ctx context.Context, conversationID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
 	SetMessageToCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int, error)
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) error
-	CleanUpOneUserAllMsg(ctx context.Context, userID string) error
+	CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error
 	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
 	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error)
@@ -316,8 +316,8 @@ func (c *msgCache) DeleteMessageFromCache(ctx context.Context, userID string, ms
 	return errs.Wrap(err)
 }
 
-func (c *msgCache) CleanUpOneUserAllMsg(ctx context.Context, userID string) error {
-	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(userID)).Result()
+func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
+	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(conversationID)).Result()
 	if err == redis.Nil {
 		return nil
 	}

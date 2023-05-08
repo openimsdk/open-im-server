@@ -2,11 +2,12 @@ package localcache
 
 import (
 	"context"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
-	"sync"
 )
 
 type GroupLocalCacheInterface interface {
@@ -34,7 +35,7 @@ func NewGroupLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *GroupLoc
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	conn, err := g.client.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+	conn, err := g.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}

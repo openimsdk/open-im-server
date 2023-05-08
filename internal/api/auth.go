@@ -20,8 +20,8 @@ type Auth struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Auth) client() (auth.AuthClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImAuthName)
+func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
+	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImAuthName)
 	if err != nil {
 		return nil, err
 	}

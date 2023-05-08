@@ -203,7 +203,13 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 }
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
 	var msg sdkws.PushMessages
-	msg.Msgs = append(msg.Msgs, msgData)
+	conversationID := utils.GetConversationIDByMsg(msgData)
+	m := map[string]*sdkws.PullMsgs{conversationID: {Msgs: []*sdkws.MsgData{msgData}}}
+	if utils.IsNotification(conversationID) {
+		msg.NotificationMsgs = m
+	} else {
+		msg.Msgs = m
+	}
 	data, err := proto.Marshal(&msg)
 	if err != nil {
 		return err

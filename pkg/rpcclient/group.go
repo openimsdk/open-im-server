@@ -27,7 +27,7 @@ func NewGroupClient(client discoveryregistry.SvcDiscoveryRegistry) *GroupClient 
 }
 
 func (g *GroupClient) GetGroupInfos(ctx context.Context, groupIDs []string, complete bool) ([]*sdkws.GroupInfo, error) {
-	cc, err := g.getConn()
+	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (g *GroupClient) GetGroupInfoMap(ctx context.Context, groupIDs []string, co
 }
 
 func (g *GroupClient) GetGroupMemberInfos(ctx context.Context, groupID string, userIDs []string, complete bool) ([]*sdkws.GroupMemberFullInfo, error) {
-	cc, err := g.getConn()
+	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (g *GroupClient) GetGroupMemberInfoMap(ctx context.Context, groupID string,
 }
 
 func (g *GroupClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string) ([]*sdkws.GroupMemberFullInfo, error) {
-	cc, err := g.getConn()
+	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (g *GroupClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string)
 }
 
 func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.GroupMemberFullInfo, error) {
-	cc, err := g.getConn()
+	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.
 }
 
 func (g *GroupClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
-	cc, err := g.getConn()
+	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

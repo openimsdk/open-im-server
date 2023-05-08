@@ -24,7 +24,7 @@ import (
 type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
 	RegisterCenter       discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase          controller.MsgDatabase
+	MsgDatabase          controller.CommonMsgDatabase
 	notificationDatabase controller.NotificationDatabase
 	ExtendMsgDatabase    controller.ExtendMsgDatabase
 	Group                *rpcclient.GroupClient
@@ -64,7 +64,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
 	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
-	msgDatabase := controller.NewMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 
 	s := &msgServer{
 		Conversation:      rpcclient.NewConversationClient(client),

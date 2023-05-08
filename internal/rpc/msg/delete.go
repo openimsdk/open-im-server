@@ -31,8 +31,10 @@ func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.Cl
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.CleanUpConversationMsgs(ctx, req.UserID); err != nil {
+	conversationIDs, err := m.Conversation.GetConversationIDs(ctx, req.UserID)
+	if err != nil {
 		return nil, err
 	}
+	m.MsgDatabase.CleanUpUserConversationsMsgs(ctx, req.UserID, conversationIDs)
 	return resp, nil
 }

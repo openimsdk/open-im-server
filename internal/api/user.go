@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -24,8 +25,8 @@ type User struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (u *User) client() (user.UserClient, error) {
-	conn, err := u.c.GetConn(config.Config.RpcRegisterName.OpenImUserName)
+func (u *User) client(ctx context.Context) (user.UserClient, error) {
+	conn, err := u.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		return nil, err
 	}

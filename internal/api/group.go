@@ -21,8 +21,8 @@ type Group struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Group) client() (group.GroupClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImGroupName)
+func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
+	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		return nil, err
 	}

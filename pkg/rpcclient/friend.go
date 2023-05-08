@@ -18,7 +18,7 @@ func NewFriendClient(zk discoveryRegistry.SvcDiscoveryRegistry) *FriendClient {
 }
 
 func (f *FriendClient) GetFriendsInfo(ctx context.Context, ownerUserID, friendUserID string) (resp *sdkws.FriendInfo, err error) {
-	cc, err := f.getConn()
+	cc, err := f.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (f *FriendClient) GetFriendsInfo(ctx context.Context, ownerUserID, friendUs
 
 // possibleFriendUserID是否在userID的好友中
 func (f *FriendClient) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
-	cc, err := f.getConn()
+	cc, err := f.getConn(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -45,7 +45,7 @@ func (f *FriendClient) IsFriend(ctx context.Context, possibleFriendUserID, userI
 }
 
 func (f *FriendClient) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
-	cc, err := f.getConn()
+	cc, err := f.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

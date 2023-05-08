@@ -20,11 +20,11 @@ import (
 
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kfk.MConsumerGroup
-	msgDatabase          controller.MsgDatabase
+	msgDatabase          controller.CommonMsgDatabase
 	notificationDatabase controller.NotificationDatabase
 }
 
-func NewOnlineHistoryMongoConsumerHandler(database controller.MsgDatabase, notificationDatabase controller.NotificationDatabase) *OnlineHistoryMongoConsumerHandler {
+func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase, notificationDatabase controller.NotificationDatabase) *OnlineHistoryMongoConsumerHandler {
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToMongo.Topic},

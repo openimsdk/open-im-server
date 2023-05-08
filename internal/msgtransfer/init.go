@@ -2,6 +2,7 @@ package msgtransfer
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -38,7 +39,9 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, config.Config.Zookeeper.UserName, config.Config.Zookeeper.Password)
+	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
+			config.Config.Zookeeper.Password), openKeeper.WithRoundRobin(), openKeeper.WithTimeout(10))
 	if err != nil {
 		return err
 	}
@@ -50,7 +53,7 @@ func StartTransfer(prometheusPort int) error {
 	extendMsgCache := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
-	msgDatabase := controller.NewMsgDatabase(msgDocModel, msgModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
 	notificationDatabase := controller.NewNotificationDatabase(notificationDocModel, notificationModel)
 	conversationRpcClient := rpcclient.NewConversationClient(client)
 
@@ -60,7 +63,7 @@ func StartTransfer(prometheusPort int) error {
 }
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
-	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.MsgDatabase, notificationDatabase controller.NotificationDatabase,
+	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.CommonMsgDatabase, notificationDatabase controller.NotificationDatabase,
 	conversationRpcClient *rpcclient.ConversationClient) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase, notificationDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}

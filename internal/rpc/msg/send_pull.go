@@ -136,7 +136,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 	for i := 0; i < len(memberUserIDList)/split; i++ {
 		wg.Add(1)
 		tmp := valueCopy(req)
-		go func() {
+		go func(i int) {
 			err := m.sendMsgToGroupOptimization(ctx, memberUserIDList[i*split:(i+1)*split], tmp, &wg)
 			if err != nil {
 				mutex.Lock()
@@ -144,7 +144,7 @@ func (m *msgServer) sendMsgGroupChat(ctx context.Context, req *msg.SendMsgReq) (
 				mutex.Unlock()
 			}
 
-		}()
+		}(i)
 	}
 	if remain > 0 {
 		wg.Add(1)

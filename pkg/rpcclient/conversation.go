@@ -18,7 +18,7 @@ func NewConversationClient(zk discoveryRegistry.SvcDiscoveryRegistry) *Conversat
 }
 
 func (c *ConversationClient) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) error {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func (c *ConversationClient) ModifyConversationField(ctx context.Context, req *p
 }
 
 func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -42,7 +42,7 @@ func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context
 }
 
 func (c *ConversationClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (c *ConversationClient) SingleChatFirstCreateConversation(ctx context.Conte
 }
 
 func (c *ConversationClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (c *ConversationClient) GroupChatFirstCreateConversation(ctx context.Contex
 }
 
 func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, ownerUserIDs []string, groupID string, maxSeq int64) error {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, owne
 }
 
 func (c *ConversationClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	cc, err := c.getConn()
+	cc, err := c.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

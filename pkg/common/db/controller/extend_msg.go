@@ -46,7 +46,6 @@ func (e *extendMsgDatabase) InsertExtendMsg(ctx context.Context, conversationID 
 }
 
 func (e *extendMsgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
-	e.cache.DelExtendMsg(clientMsgID).ExecDel(ctx)
 	return e.database.InsertOrUpdateReactionExtendMsgSet(ctx, conversationID, sessionType, clientMsgID, msgFirstModifyTime, reactionExtensionList)
 }
 

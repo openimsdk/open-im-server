@@ -74,8 +74,8 @@ func (m *MetaClient) getFaceURLAndName(userID string) (faceURL, nickname string,
 	return users[0].GetFaceURL(), users[0].GetNickname(), nil
 }
 
-func (m *MetaClient) getConn() (*grpc.ClientConn, error) {
-	return m.client.GetConn(m.rpcRegisterName)
+func (m *MetaClient) getConn(ctx context.Context) (*grpc.ClientConn, error) {
+	return m.client.GetConn(ctx, m.rpcRegisterName)
 }
 
 type CommonUser interface {

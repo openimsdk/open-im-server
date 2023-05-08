@@ -108,7 +108,7 @@ func NewMsgClient(zk discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
 }
 
 func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
-	cc, err := m.getConn()
+	cc, err := m.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.Send
 }
 
 func (m *MsgClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	cc, err := m.getConn()
+	cc, err := m.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (m *MsgClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 }
 
 func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	cc, err := m.getConn()
+	cc, err := m.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

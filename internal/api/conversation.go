@@ -20,8 +20,8 @@ type Conversation struct {
 	c discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Conversation) client() (conversation.ConversationClient, error) {
-	conn, err := o.c.GetConn(config.Config.RpcRegisterName.OpenImConversationName)
+func (o *Conversation) client(ctx context.Context) (conversation.ConversationClient, error) {
+	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
 		return nil, err
 	}

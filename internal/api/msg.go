@@ -107,8 +107,8 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 	return &pbData
 }
 
-func (m *Message) client() (msg.MsgClient, error) {
-	conn, err := m.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
+func (m *Message) client(ctx context.Context) (msg.MsgClient, error) {
+	conn, err := m.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +199,7 @@ func (m *Message) SendMessage(c *gin.Context) {
 		return
 	}
 	pbReq := m.newUserSendMsgReq(c, &params)
-	conn, err := m.c.GetConn(config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := m.c.GetConn(c, config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		apiresp.GinError(c, errs.ErrInternalServer)
 		return

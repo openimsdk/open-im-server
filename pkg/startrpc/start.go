@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -28,7 +29,9 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	}
 	defer listener.Close()
 	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, rpcRegisterName)
-	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, 10, "", "")
+	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
+			config.Config.Zookeeper.Password), openKeeper.WithRoundRobin(), openKeeper.WithTimeout(10))
 	if err != nil {
 		return utils.Wrap1(err)
 	}
