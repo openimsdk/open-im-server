@@ -1,9 +1,9 @@
 groupCreated:
-  isSendMsg: true //是否发送消息，false不发消息为无声的触发同步。true发消息需要触发会话，rpc notification直接发两次，一次消息一次通知, options字段isNotification是否为通知
-  reliabilityLevel: 1 // 1为online才发送 2为必达
-  unreadCount: false // 只在isSendMsg为true的情况下有作用
+  isSendMsg: true #是否发送消息，false不发消息为无声的触发同步。true发消息需要触发会话，rpc notification直接发两次，一次消息一次通知, options字段isNotification是否为通知
+  reliabilityLevel: 1 # 1为online才发送 2为必达
+  unreadCount: false # 只在isSendMsg为true的情况下有作用
   offlinePush:
-    enable: false // 开启该开关
+    enable: false # 开启该开关
     title: "create group title" # xx create the group
     desc: "create group desc"
     ext: "create group ext"
