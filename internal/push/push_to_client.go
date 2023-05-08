@@ -177,7 +177,7 @@ func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *s
 }
 
 func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	conns, err := p.client.GetConns(config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := p.client.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
 		return nil, err

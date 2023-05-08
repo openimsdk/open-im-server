@@ -83,6 +83,7 @@ func (m *MsgTransfer) initPrometheus() {
 
 func (m *MsgTransfer) Start(prometheusPort int) error {
 	var wg sync.WaitGroup
+	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if config.Config.ChatPersistenceMysql {
 		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
