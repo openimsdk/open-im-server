@@ -17,6 +17,7 @@ func UsersDB2Pb(users []*relationTb.UserModel) (result []*sdkws.UserInfo) {
 		userPb.CreateTime = user.CreateTime.Unix()
 		userPb.AppMangerLevel = user.AppMangerLevel
 		userPb.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
+		result = append(result, &userPb)
 	}
 	return result
 }
