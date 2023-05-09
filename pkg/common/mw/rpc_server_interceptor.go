@@ -29,7 +29,7 @@ func rpcString(v interface{}) string {
 	return fmt.Sprintf("%+v", v)
 }
 
-func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
@@ -144,5 +144,5 @@ func rpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 }
 
 func GrpcServer() grpc.ServerOption {
-	return grpc.UnaryInterceptor(rpcServerInterceptor)
+	return grpc.UnaryInterceptor(RpcServerInterceptor)
 }

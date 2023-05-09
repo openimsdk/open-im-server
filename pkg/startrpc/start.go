@@ -40,16 +40,18 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	if err != nil {
 		return err
 	}
-	options = append(options, mw.GrpcServer()) // ctx 中间件
+	// ctx 中间件
 	if config.Config.Prometheus.Enable {
 		prome.NewGrpcRequestCounter()
 		prome.NewGrpcRequestFailedCounter()
 		prome.NewGrpcRequestSuccessCounter()
-		unaryInterceptor := mw.InterceptChain(grpcPrometheus.UnaryServerInterceptor, grpcPrometheus.UnaryServerInterceptor)
+		unaryInterceptor := mw.InterceptChain(grpcPrometheus.UnaryServerInterceptor, mw.RpcServerInterceptor)
 		options = append(options, []grpc.ServerOption{
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(unaryInterceptor),
 		}...)
+	} else {
+		options = append(options, mw.GrpcServer())
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()

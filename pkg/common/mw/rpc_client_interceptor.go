@@ -16,10 +16,10 @@ import (
 )
 
 func GrpcClient() grpc.DialOption {
-	return grpc.WithUnaryInterceptor(rpcClientInterceptor)
+	return grpc.WithUnaryInterceptor(RpcClientInterceptor)
 }
 
-func rpcClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
+func RpcClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
