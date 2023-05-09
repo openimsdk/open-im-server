@@ -2,11 +2,9 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 
@@ -28,8 +26,6 @@ func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "get conn success", "conn", conn, "config", config.Config.RpcRegisterName.OpenImGroupName)
-	fmt.Println("conn", conn)
 	return group.NewGroupClient(conn), nil
 }
 
