@@ -3,11 +3,12 @@ package mw
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"math"
 	"runtime"
 	"runtime/debug"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"

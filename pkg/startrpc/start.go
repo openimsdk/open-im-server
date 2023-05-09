@@ -28,7 +28,6 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 		return err
 	}
 	defer listener.Close()
-	fmt.Println(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema, rpcRegisterName)
 	zkClient, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
 			config.Config.Zookeeper.Password), openKeeper.WithRoundRobin(), openKeeper.WithTimeout(10))
@@ -46,10 +45,10 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 		prome.NewGrpcRequestCounter()
 		prome.NewGrpcRequestFailedCounter()
 		prome.NewGrpcRequestSuccessCounter()
+		unaryInterceptor := mw.InterceptChain(grpcPrometheus.UnaryServerInterceptor, grpcPrometheus.UnaryServerInterceptor)
 		options = append(options, []grpc.ServerOption{
-			//grpc.UnaryInterceptor(prome.UnaryServerInterceptorPrometheus),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+			grpc.UnaryInterceptor(unaryInterceptor),
 		}...)
 	}
 	srv := grpc.NewServer(options...)
