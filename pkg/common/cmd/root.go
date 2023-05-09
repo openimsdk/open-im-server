@@ -52,7 +52,7 @@ func (r *RootCmd) GetPortFlag() int {
 }
 
 func (r *RootCmd) AddPrometheusPortFlag() {
-	r.Command.Flags().String(constant.FlagPrometheusPort, "", "server prometheus listen port")
+	r.Command.Flags().IntP(constant.FlagPrometheusPort, "pp", 0, "server prometheus listen port")
 }
 
 func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
