@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/openKeeper v0.9.9-0.20230426053850-80d254440004
+	github.com/OpenIMSDK/openKeeper v0.9.9-0.20230509114426-eb05252b1e67
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
