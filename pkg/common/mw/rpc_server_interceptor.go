@@ -96,6 +96,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		log.ZInfo(ctx, "rpc server resp", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
 	}
+	log.ZError(ctx, "rpc server resp", err, "funcName", funcName)
 	unwrap := errs.Unwrap(err)
 	codeErr := specialerror.ErrCode(unwrap)
 	if codeErr == nil {
