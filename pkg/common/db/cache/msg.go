@@ -147,7 +147,7 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 	pipe := c.rdb.Pipeline()
 	for _, v := range items {
 		if err := pipe.Get(ctx, getkey(v)).Err(); err != nil && err != redis.Nil {
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
 	}
 	result, err := pipe.Exec(ctx)
