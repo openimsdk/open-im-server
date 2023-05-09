@@ -1,6 +1,6 @@
 #  Contributing to Open-IM-Server
 
-怎么样,你想要为Open-IM-Server做出贡献?好耶!
+怎么样,你想要为Open-IM-Server做出贡献吗?好耶!
 首先,感谢你考虑为我们的项目做出贡献!我们十分感激你的时间和精力,我们重视任何形式的贡献,无论是报告错误、对新功能有所建议,或提交PR。
 本文档提供指导和最佳的实践教程,帮助您有效地做出贡献。
 
@@ -16,15 +16,15 @@
 
 ## 我们期望你做什么
 
-We hope that anyone can join Open-IM-Server , even if you are a student, writer, translator
+我们希望任何人都可以加入Open-IM-Server,即使您是一名学生、作家或翻译。 
 
-Please meet the minimum version of the Go language published in [go.mod](./go.mod). If you want to manage the Go language version, we provide tools to install [gvm](https://github.com/moovweb/gvm) in our [Makefile](./Makefile)
+请满足 [go.mod](./go.mod) 中发布的Go语言的最低版本要求。如果您想管理Go语言版本,我们在 [Makefile](./Makefile) 中提供安装 [gvm](https://github.com/moovweb/gvm) 的工具。
 
-You'd better use Linux OR WSL as the development environment, Linux with [Makefile](./Makefile) can help you quickly build and test Open-IM-Server project.
+最好使用Linux OR WSL作为开发环境，Linux配合 [Makefile](./Makefile) 可以帮助您快速构建和测试Open-IM-Server项目。  
 
-If you are familiar with [Makefile](./Makefile) , you can easily see the clever design of the Open-IM-Server Makefile. Storing the necessary tools such as golangci in the `/tools` directory can avoid some tool version issues.
+如果您熟悉 [Makefile](./Makefile) , 您可以轻松看到Open-IM-Server Makefile的巧妙设计。将必要的工具(如golangci)存储在`/tools`目录中可以避免一些工具的版本问题。 
 
-The [Makefile](./Makefile) is for every developer, even if you don't know how to use the Makefile tool, don't worry, we provide two great commands to get you up to speed with the Makefile architecture, `make help` and `make help-all`, it can reduce problems of the developing environment.
+[Makefile](./Makefile) 适用于每个开发者，即使您不知道如何使用Makefile工具,不要担心,我们提供了两个很棒的命令来让您熟悉Makefile架构:`make help`和`make help-all`, 它可以减少开发环境的问题。 
 
 ## 行为准则
 
