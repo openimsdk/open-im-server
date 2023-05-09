@@ -27,7 +27,7 @@ func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.ZDebug(ctx, "get conn", o.c.GetClientLocalConns())
+	log.ZDebug(ctx, "get conn", "local", o.c.GetClientLocalConns())
 	return group.NewGroupClient(conn), nil
 }
 
