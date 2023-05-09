@@ -29,7 +29,6 @@ func main() {
 	}
 }
 
-// run
 func run(port int) error {
 	if port == 0 {
 		port = config.Config.Api.GinPort[0]
