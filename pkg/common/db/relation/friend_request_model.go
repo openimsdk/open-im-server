@@ -69,6 +69,6 @@ func (f *FriendRequestGorm) FindFromUserID(ctx context.Context, fromUserID strin
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(f.db(ctx).Where("from_user_id = ? ", fromUserID).Limit(int(showNumber)).Offset(int(pageNumber*showNumber-1)).Find(&friendRequests).Error, "")
+	err = utils.Wrap(f.db(ctx).Where("from_user_id = ? ", fromUserID).Limit(int(showNumber)).Offset(int(pageNumber-1)*int(showNumber)).Find(&friendRequests).Error, "")
 	return
 }
