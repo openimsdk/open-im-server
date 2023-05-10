@@ -34,7 +34,7 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	defer zkClient.Close()
+	defer zkClient.CloseZK()
 	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
 	if err != nil {

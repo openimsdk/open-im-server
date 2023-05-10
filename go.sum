@@ -393,6 +393,8 @@ github.com/OpenIMSDK/openKeeper v0.9.9-0.20230426053850-80d254440004 h1:+1t9eKPK
 github.com/OpenIMSDK/openKeeper v0.9.9-0.20230426053850-80d254440004/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
 github.com/OpenIMSDK/openKeeper v0.9.9-0.20230509114426-eb05252b1e67 h1:I6QLciX4LlavBMNyeqkp90DJV+uKcwke7NZ9OKMIjV8=
 github.com/OpenIMSDK/openKeeper v0.9.9-0.20230509114426-eb05252b1e67/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
+github.com/OpenIMSDK/openKeeper v0.9.9-0.20230510034455-23b10ebc00a8 h1:iHdOqsumPO6Pu2YINN/DDbuHlP/adTqqBSULCGSS714=
+github.com/OpenIMSDK/openKeeper v0.9.9-0.20230510034455-23b10ebc00a8/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
 github.com/OpenIMSDK/open_utils v1.0.8 h1:IopxWgJwEF5ZAPsRuiZZOfcxNOQOCt/p8VDENcHN9r4=
 github.com/OpenIMSDK/open_utils v1.0.8/go.mod h1:FLoaQblWUVKQgqt2LrNzfSZLT6D3DICBn1kcOMDLUOI=
 github.com/Shopify/sarama v1.29.0 h1:ARid8o8oieau9XrHI55f/L3EoRAhm9px6sonbD7yuUE=
