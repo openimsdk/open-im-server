@@ -10,7 +10,7 @@
 - [行为准则](#行为准则)
 - [上手IM](#上手IM)
 - [风格和规范](#风格和规范)
-- [Engage to help anything](#Engage-to-help-anything)
+- [参与任何形式的帮助](#参与任何形式的帮助)
 - [发布版本](#发布版本)
 - [联系我们](#联系我们)
 
@@ -28,65 +28,62 @@
 
 ## 行为准则
 
-#### Code and doc contribution
+#### 代码与文档贡献
 
-Every action to make project Open-IM-Server better is encouraged. On GitHub, every improvement for Open-IM-Server could be via a [PR](https://github.com/Open-IM-Server/pulls) (short for pull request).
+我们鼓励每一件让Open-IM-Server更好的行动。在Github上，每一个对Open-IM-Server的改进都可以通过 [PR](https://github.com/Open-IM-Server/pulls) 来改进。
 
-+ If you find a typo, try to fix it!
-+ If you find a bug, try to fix it!
-+ If you find some redundant codes, try to remove them!
-+ If you find some test cases missing, try to add them!
-+ If you could enhance a feature, please **DO NOT** hesitate!
-+ If you find code implicit, try to add comments to make it clear!
-+ If you find code ugly, try to refactor that!
-+ If you can help to improve documents, it could not be better!
-+ If you find document incorrect, just do it and fix that!
++ 如果发现一个错误,尝试修复它!
++ 如果发现一个bug,尝试修复它!
++ 如果发现一些冗余的代码,尝试删除它们!
++ 如果发现缺少一些测试用例,尝试添加它们! 
++ 如果可以增强一个功能,请不要犹豫!
++ 如果发现代码隐晦,尝试添加注释使其清晰!
++ 如果发现丑陋的代码,尝试重构它!
++ 如果可以帮助改进文档,那就更好不过了! 
++ 如果发现文档不正确,请修复它!
 + ...
 
-#### Where should I start?
+#### 我应该从哪里开始
 
-+ If you are new to the project, don't know how to contribute Open-IM-Server, please check out the [good first issue](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aopen+label%3A"good+first+issue"+sort%3Aupdated-desc) label.
-+ You should be good at filtering the Open-IM-Server issue tags and finding the ones you like, such as [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) for big initiatives, features for [feature](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Afeature) proposals, and [bug](https://github.com/{github/issues?q=is%3Aissue+label%3Abug+) fixes.
-+ If you are looking for something to work on, check out our [open issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
-+ If you have an idea for a new feature, please [open an issue](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose), and we can discuss it.
++ 如果您刚开始接触该项目,不知道如何为Open-IM-Server做出贡献,请查看 [good first issue](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aopen+label%3A"good+first+issue"+sort%3Aupdated-desc) 标签.
++ 您应该对过滤Open-IM-Server问题标签很熟练,找到您喜欢的标签,例如 [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) 用于大型计划与功能的 [feature](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Afeature) 提案, 以及 [bug](https://github.com/{github/issues?q=is%3Aissue+label%3Abug+) 修复。
++ 如果您正在寻找可以工作的内容,请查看我们的 [open issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
++ 如果您有一个新的功能想法,请 [开启一个 issue](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose), 我们可以讨论它
 
-#### Design documents
+#### 设计文档
 
-For any substantial design, there should be a well-crafted design document. This document is not just a simple record, but also a detailed description and manifestation, which can help team members better understand the design thinking and grasp the design direction. In the process of writing the design document, we can choose to use tools such as `Google Docs` or `Notion`, and even mark RFC in [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) or [discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions) for better collaboration. Of course, after completing the design document, we should also add it to our [Shared Drive](https://drive.google.com/drive/) and notify the appropriate working group to let everyone know of its existence. Only by doing so can we maximize the effectiveness of the design document and provide strong support for the smooth progress of the project.
+对于任何重大设计,都应该有一份精心制作的设计文档。这份文档不仅仅是一份简单的记录,也是一份详细的描述和阐释,它可以帮助团队成员更好地理解设计思路和掌握设计方向。在编写设计文档的过程中,我们可以选择使用诸如 `Google Docs` 或者 `Notion`, 甚至可以在 [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) 或 [discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions) 标记RFC以进行更好的协作。当然,完成设计文档后,我们还应将其添加到我们的 [Shared Drive](https://drive.google.com/drive/) 中并通知相应的工作组,让所有人都知道它的存在。只有这样,我们才能最大限度地发挥设计文档的效果,为项目的顺利进展提供强有力的支持。
 
-Anybody can access the shared Drive for reading. To get access to comment. Once you've done that, head to the [shared Drive](https://drive.google.com/) and behold all the docs.
+任何人都可以访问共享驱动器进行读取。要获得评论权限,请完成注册。完成注册后,前往[shared Drive](https://drive.google.com/) 查看所有文档。
 
-In addition to that, we'd love to invite you to [join our Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) where you can play with your imagination, tell us what you're working on, and get a quick response.
+除此之外,我们也热切邀请您 [加入我们的 Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 在那里您可以发挥想象力,告诉我们您正在做什么,并快速得到回复。
 
-When documenting a new design, we recommend a 2-step approach:
+在记录新的设计时,我们建议采取两步方法:
+1. 使用简短的RFC模板概述您的想法，并尽早获得反馈。 
+2. 一旦您获得足够的反馈和共识,您可以使用更长的设计文档模板更详细地指定和讨论您的设计。
 
-1. Use the short-form RFC template to outline your ideas and get early feedback.
-2. Once you have received sufficient feedback and consensus, you may use the longer-form design doc template to specify and discuss your design in more details.
+为了向Open-IM-Server贡献功能,您需要遵循以下步骤:
 
-In order to contribute a feature to Open-IM-Server you'll need to go through the following steps:
++  与适当的 [工作组](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 在Slack频道上讨论您的想法。
++ 一旦普遍认为该功能是有用的,请在GitHub上创建议题来跟踪讨论。该议题应包括该功能试图解决的需求和使用案例的信息。
++ 在议题中包括拟议设计和实现的技术细节的讨论。
 
-+ Discuss your idea with the appropriate [working groups](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) on the working group's Slack channel.
-+ Once there is general agreement that the feature is useful, create a GitHub issue to track the discussion. The issue should include information about the requirements and use cases that it is trying to address.
-+ Include a discussion of the proposed design and technical details of the implementation in the issue.
-
-But keep in mind that there is no guarantee of it being accepted and so it is usually best to get agreement on the idea/design before time is spent coding it. However, sometimes seeing the exact code change can help focus discussions, so the choice is up to you.
+但请记住,提交PR并不能保证它被接受,所以通常最好在花时间编码之前就与我们达成对该想法/设计的认同。然而,有时看到确切的代码变更对我们的集体讨论有帮助,所以选择权在您。 
 
 ## 上手IM
 
-To propose PR for the Open-IM-Server item, we assume you have registered a GitHub ID. Then you could finish the preparation in the following steps:
+为了向Open-IM-Server提出Pull Request,我们假设您已注册GitHub ID。然后您可以按以下步骤完成准备工作:
+1. Fork该仓库(Open-IM-Server) 
+2. **CLONE**您自己的仓库到本地主分支。使用 `git clone https://github.com/<your-username>/Open-IM-Server.git`将仓库克隆到本地机器。然后您可以创建新分支来完成您希望进行的更改。
 
-1. Fork the repository(Open-IM-Server)
-
-2. **CLONE** your own repository to master locally. Use `git clone https://github.com/<your-username>/Open-IM-Server.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
-
-3. **Set Remote** upstream to be `https://github.com/OpenIMSDK/Open-IM-Server.git` using the following two commands:
+3. **Set Remote** 上游为 `https://github.com/OpenIMSDK/Open-IM-Server.git` 使用以下两个命令:
 
    ```bash
    ❯ git remote add upstream https://github.com/OpenIMSDK/Open-IM-Server.git
    ❯ git remote set-url --push upstream no-pushing
    ```
 
-   With this remote setting, you can check your git remote configuration like this:
+   通过这样的远程设置，您可以这样检查您的git远程配置
 
    ```bash
    ❯ git remote -v
@@ -96,9 +93,9 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    upstream   no-pushing (push)
    ```
 
-   Adding this, we can easily synchronize local branches with upstream branches.
+   添加此内容后,我们可以轻松地将本地分支与上游分支同步。
 
-4. Create a new branch for your changes (use a descriptive name, such as `fix-bug-123` or `add-new-feature`).
+4. 为您的更改创建新分支(使用描述性名称,如`fix-bug-123`或`add-new-feature`)。
 
    ```bash
    ❯ cd Open-IM-Server
@@ -106,15 +103,15 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    ❯ git checkout upstream/main
    ```
 
-   Create a new branch: 
+   创建新分支:
 
    ```bash
    ❯ git checkout -b <new-branch>
    ```
 
-   Make any change on the `new-branch` then use [Makefile](./Makefile) build and test your codes.
-
-5. **Commit your changes** to your local branch, lint before committing and commit with sign-off
+   在`new-branch`上进行任何更改,然后使用[Makefile](./Makefile)构建和测试您的代码。
+   
+5. **Commit your changes** 到本地分支,提交之前进行Lint,并签名提交
 
    ```bash
    ❯ git rebase upstream/main
@@ -123,7 +120,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    ❯ git commit -a -s -m "message for your changes" # -s adds a Signed-off-by trailer
    ```
 
-6. **Push your branch**  to your forked repository, it is recommended to have only one commit for a PR.
+6. **Push your branch**  推送到您的Fork仓库,只提交一个PR。
 
    ```bash
    # sync up with upstream
@@ -139,9 +136,9 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    ❯ git push # push to the remote repository, if it's a first time push, run git push --set-upstream origin <new-branch>
    ```
 
-   You can also use `git commit -s --amend && git push -f` to update modifications on the previous commit.
+  您也可以使用 `git commit -s --amend && git push -f` 更新前一次提交中的修改。
 
-   If you have developed multiple features in the same branch, you should create PR separately by rebasing to the main branch between each push:
+  如果您在同一分支中开发了多个功能，则应在每次推送之间对主分支进行rebase，并单独创建PR
 
    ```bash
    # create new branch, for example git checkout -b feature/infra
@@ -158,122 +155,120 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    # then create pull request, and merge
    ```
 
-7. **Open a pull request** to `OpenIMSDK/Open-IM-Server:main`
+7. **Open a pull request** 到 `OpenIMSDK/Open-IM-Server:main`
 
-   It is recommended to review your changes before filing a pull request. Check if your code doesn't conflict with the main branch and no redundant code is included.
+  建议在提交拉取请求之前检查您的更改。检查您的代码是否与主分支冲突,并且未包含重复的代码。
 
 ## 风格和规范
 
-We divide the problem into security and general problems:
+我们将问题划分为安全问题和一般问题:
 
-#### Reporting security issues
+#### 报告安全问题
 
-Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of Open-IM-Server, please do not discuss it in public and even do not open a public issue.
+安全问题一向被我们严肃对待。按照我们的惯例原则,我们不赞成任何人散布安全问题。如果您发现Open-IM-Server的安全问题,请不要在公开场合讨论,甚至不要公开问题。
+如果遇到安全问题,我们鼓励您发送私人电子邮件到winxu81@gmail.com报告此问题。
 
-Instead we encourage you to send us a private email to winxu81@gmail.com to report this.
+#### 报告一般问题
 
-#### Reporting general issues
+老实说,我们认为Open-IM-Server的每一个用户都是非常善良的贡献者。体验Open-IM-Server之后,您可能会对该项目有一些反馈。那么请通过 [NEW ISSUE](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose)开启问题。
 
-To be honest, we regard every user of Open-IM-Serveras a very kind contributor. After experiencing Open-IM-Server, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose).
+由于我们以分布式的方式协作Open-IM-Server项目,我们非常感激**写得好**,**详细**,**明确**的问题报告。为了使交流更加高效,我们希望每个人都能在搜索列表中搜索您的问题是否已存在。如果您找到现有问题,请在现有问题的评论下添加您的详细信息,而不是打开一个全新的问题。
 
-Since we collaborate project Open-IM-Server in a distributed way, we appreciate **WELL-WRITTEN**, **DETAILED**, **EXPLICIT** issue reports. To make the communication more efficient, we wish everyone could search if your issue is an existing one in the searching list. If you find it existing, please add your details in comments under the existing issue instead of opening a brand new one.
+为了使问题详情尽可能标准化,我们为问题报告者设置了 [ISSUE模板](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/ISSUE_TEMPLATE)。您可以在那里找到三种问题模板:问题、bug报告和功能请求。请**确保**遵循说明填写模板中的字段。
 
-To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/ISSUE_TEMPLATE) for issue reporters. You can find three kinds of issue templates there: question, bug report and feature request. Please **BE SURE** to follow the instructions to fill fields in template.
+**您可以在许多情况下打开问题:**
++ bug报告 
++ 功能请求 
++ Open-IM-Server性能问题 
++ 功能建议 
++ 功能设计 
++ 需要帮助
++ 文档不完整 
++ 测试改进 
++ 关于Open-IM-Server项目的任何问题
++ 等等 
 
-**There are a lot of cases when you could open an issue:**
+另外,在提交关于Open-IM-Server的新问题时,请记住从您的帖子中删除敏感数据。敏感数据可以是密码、密钥、网络位置、私人商业数据等。
 
-+ bug report
-+ feature request
-+ Open-IM-Server performance issues 
-+ feature proposal
-+ feature design
-+ help wanted
-+ doc incomplete
-+ test improvement
-+ any questions on Open-IM-Server project 
-+ and so on 
+#### 提交规则
 
-Also, we must be reminded when submitting a new question about Open-IM-Server, please remember to remove the sensitive data from your post. Sensitive data could be password, secret key, network locations, private business data and so on.
+实际上在Open-IM-Server中,我们在提交时遵循两条规则:
 
-#### Commit Rules
+**🥇 提交消息:**
 
-Actually in Open-IM-Server, we take two rules serious when committing:
+提交消息可以帮助评论者更好地理解提交的PR的目的。它还可以帮助加快代码审查过程。我们鼓励贡献者使用**明确**的提交消息而不是模糊的消息。一般来说,我们提倡以下提交消息类型:
 
-**🥇 Commit Message:**
+我们使用 [语义提交](https://www.conventionalcommits.org/en/v1.0.0/) 使得更易于理解提交做了什么以及生成漂亮的更新日志。请为您的提交使用以下前缀:
 
-Commit message could help reviewers better understand what the purpose of submitted PR is. It could help accelerate the code review procedure as well. We encourage contributors to use **EXPLICIT** commit message rather than ambiguous message. In general, we advocate the following commit message type:
++ `docs: xxxx`. 例如,"docs:添加存储安装文档"。
++ `feature: xxxx`.例如,"feature:使结果以排序顺序显示"。 
++ `bugfix: xxxx`. 例如,"bugfix:修复输入空参数时的panic"。
++ `style: xxxx`. 例如,"style:格式化Constants.java的代码样式"。
++ `refactor: xxxx.` 例如,"refactor:简化以使代码更易读"。 
++ `test: xxx`. 例如,"test:为func InsertIntoArray添加单元测试用例"。
++ `chore: xxx.` 例如,"chore:集成travis-ci"。这是维护更改的类型。
++ 其他可读且明确的表达方式。
 
-We use [Semantic Commits](https://www.conventionalcommits.org/en/v1.0.0/) to make it easier to understand what a commit does and to build pretty changelogs. Please use the following prefixes for your commits:
-
-+ `docs: xxxx`. For example, "docs: add docs about storage installation".
-+ `feature: xxxx`.For example, "feature: make result show in sorted order".
-+ `bugfix: xxxx`. For example, "bugfix: fix panic when input nil parameter".
-+ `style: xxxx`. For example, "style: format the code style of Constants.java".
-+ `refactor: xxxx.` For example, "refactor: simplify to make codes more readable".
-+ `test: xxx`. For example, "test: add unit test case for func InsertIntoArray".
-+ `chore: xxx.` For example, "chore: integrate travis-ci". It's the type of mantainance change.
-+ other readable and explicit expression ways.
-
-On the other side, we discourage contributors from committing message like the following ways:
+另一方面,我们不鼓励贡献者以以下方式提交消息:
 
 + ~~fix bug~~
 + ~~update~~
 + ~~add doc~~
 
-**🥈 Commit Content:**
+**🥈 提交内容:**
 
-Commit content represents all content changes included in one commit. We had better include things in one single commit which could support reviewer's complete review without any other commits' help.
+提交内容表示一个提交中包含的所有内容更改。我们最好在一个单独的提交中包含能够支持评论者完整审查，而无需任何其他提交帮助的内容。
 
-In another word, contents in one single commit can pass the CI to avoid code mess. In brief, there are two minor rules for us to keep in mind:
+换句话说,一个单独提交中的内容可以通过CI以避免代码混乱。简而言之,我们要记住的两个小规则是:
 
-1. avoid very large change in a commit.
-2. complete and reviewable for each commit.
-3. words are written in lowercase English, not uppercase English or other languages such as Chinese.
+1. 避免在一次提交中进行非常大的更改。 
+2. 每次提交都要完整且可审查。 
+3. 字词使用小写英语,而不是大写英语或其他语言(如中文)。
+无论提交消息还是提交内容如何,我们都更加重视代码审查。
 
-No matter what the commit message, or commit content is, we do take more emphasis on code review.
-
-An example for this could be:
+举个例子:
 
 ```bash
 ❯ git commit -a -s -m "docs: add a new section to the README"
 ```
 
-#### PR Description
+#### PR描述
 
-PR is the only way to make change to Open-IM-Server project files. To help reviewers better get your purpose, PR description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
+PR是对Open-IM-Server项目文件进行更改的唯一方式。为了帮助评论者更好地了解您的目的,PR描述不应过于详细。我们鼓励贡献者遵循 [PR模板](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/PULL_REQUEST_TEMPLATE.md) 来拉取请求。
 
-You can find some very formal PR in [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) issues and learn about them.
+您可以在 [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) 问题中找到一些非常正式的PR,并了解它们。
 
-**📖 Opening PRs:**
+**📖 打开PR:**
 
-+ As long as you are working on your PR, please mark it as a draft
-+ Please make sure that your PR is up-to-date with the latest changes in `main`
-+ Mention the issue that your PR is addressing (Fix: #{ID_1}, #{ID_2})
-+ Make sure that your PR passes all checks
++ 只要您正在处理PR,请将其标记为草稿。 
++ 请确保您的PR与`main`的最新更改同步。 
++  mention您的PR要解决的问题(Fix:#{ID_1},#{ID_2})。
++ 确保您的PR通过所有检查。
 
-**🈴 Reviewing PRs:**
+**🈴 审阅PR:**
 
-+ Be respectful and constructive 
-+ Assign yourself to the PR 
-+ Check if all checks are passing
-+ Suggest changes instead of simply commenting on found issues
-+ If you are unsure about something, ask the author
-+ If you are not sure if the changes work, try them out
-+ Reach out to other reviewers if you are unsure about something
-+ If you are happy with the changes, approve the PR
-+ Merge the PR once it has all approvals and the checks are passing
++ 报错尊重、建设性的原则 
++ 要尊重和建设性的
++ 将自己分配给 PR
++ 检查所有检查是否通过
++ 提出更改建议而不仅仅评论发现的问题。
++ 如果您对某些事情不确定,请向作者提问
++ 如果您不确定更改是否有效,请尝试更改
++ 如果您对某些事情不确定,请联系其他审阅人员
++ 如果您对更改感到满意,请批准 PR
++ 合并PR一次都有批准并通过检查
 
-**⚠️ DCO check:**
+**⚠️ DCO检测:**
 
-We have a DCO check that runs on every pull request to ensure code quality and maintainability. This check verifies that the commit has been signed off, indicating that you have read and agreed to the provisions of the Developer Certificate of Origin. If you have not yet signed off on the commit, you can use the following command to sign off on the last commit you made:
+我们在每个拉取请求上运行DCO检查以确保代码质量和可维护性。此检查验证提交已签名,表示您已阅读并同意开发者证书原则的规定。如果您尚未对提交进行签名,可以使用以下命令对您最后进行的提交进行签名:
 
 ```bash
 ❯ git commit --amend --signoff
 ```
 
-Please note that signing off on a commit is a commitment that you have read and agreed to the provisions of the Developer Certificate of Origin. If you have not yet read this document, we strongly recommend that you take some time to read it carefully. If you have any questions about the content of this document, or if you need further assistance, please contact an administrator or relevant personnel.
+请注意,在提交上签名是一个承诺,即您已经阅读并同意开发者证书原则的规定。如果您还没有阅读这份文件,我们强烈建议您花些时间仔细阅读。如果您对本文件的内容或需要进一步帮助有任何疑问,请联系管理员或相关人员。
 
-You can also automate signing off your commits by adding the following to your `.zshrc` or `.bashrc`:
+您也可以通过将以下内容添加到 `.zshrc` 或 `.bashrc` 中来自动签名您的提交:
 
 ```go
 git() {
@@ -287,59 +282,59 @@ git() {
 ```
 
 
-#### Docs Contribution
+#### 文档贡献
+Open-IM-Server的文档包括:
++ [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md):此文件包含有关入门Open-IM-Server的基本信息和说明。
++ [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md):此文件包含有关为Open-IM-Server代码库做出贡献的指南,例如如何提交问题、拉取请求和代码审查。
++ [DEVELOPGUIDE.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/DEVELOPGUIDE.md):此文件提供了有关开发Open-IM-Server的更深入指南,包括有关项目架构、编码约定和测试实践的信息。
++ [官方文档](https://doc.rentsoft.cn/):这是Open-IM-Server的官方文档,其中包括对所有功能、配置选项和故障排除提示的全面信息。
 
-The documentation for Open-IM-Server includes:
 
-+ [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md): This file includes the basic information and instructions for getting started with Open-IM-Server.
-+ [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to Open-IM-Server's codebase, such as how to submit issues, pull requests, and code reviews.
-+ [DEVELOPGUIDE.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/DEVELOPGUIDE.md): This file provides a more in-depth guide to developing Open-IM-Server, including information on the project's architecture, coding conventions, and testing practices.
-+ [Official Documentation](https://doc.rentsoft.cn/): This is the official documentation for Open-IM-Server, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
+请遵守以下规则以更好地格式化文档,这将极大地提高阅读体验。
 
-Please obey the following rules to better format the docs, which would greatly improve the reading experience.
+1. 请不要在英文文档中使用中文标点,反之亦然。
+2. 请在适当的地方使用大写字母,例如句子/标题的第一个字母等。
+3. 请为每个Markdown代码块指定语言,除非没有关联的语言。
+4. 请在中文和英语单词之间插入空格。 
+5.请为技术术语使用正确的大小写,例如使用 `HTTP` 而不是http， `MySQL` 而不是mysql, `Kubernetes` i而不是kubernetes等
+6. 请在提交PR之前检查文档中是否有任何拼写错误。
 
-1. Please do not use Chinese punctuations in English docs, and vice versa.
-2. Please use upper case letters where applicable, like the first letter of sentences / headings, etc.
-3. Please specify a language for each Markdown code blocks, unless there's no associated languages.
-4. Please insert a whitespace between Chinese and English words.
-5. Please use the correct case for technical terms, such as using `HTTP` instead of http, `MySQL` rather than mysql, `Kubernetes` instead of kubernetes, etc.
-6. Please check if there's any typos in the docs before submitting PRs.
+## 参与任何形式的帮助
 
-## Engage to help anything
+我们选择GitHub作为Open-IM-Server主要的协作场所。因此,Open-IM-Server的最新更新总是在这里。虽然通过PR是明确的帮助方式,但我们仍然呼吁任何其他方式的帮助。
 
-We choose GitHub as the primary place for Open-IM-Server to collaborate. So the latest updates of Open-IM-Server are always here. Although contributions via PR is an explicit way to help, we still call for any other ways.
++ 尽可能回复他人的 [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)。 
++ 帮助解决其他用户的问题；
++ 帮助审核他人的 [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc) 设计; 
++ 讨论Open-IM-Server，讨论通常会使问题变得清晰; 
++ 在Github之外宣传 [Open-IM-Server](google.com/search?q=Open-IM-Server) 技术 ;
++ 在Open-IM-Server上写博客等等。
 
-+ reply to other's [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) if you could;
-+ help solve other user's problems;
-+ help review other's [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc) design; 
-+ discuss about Open-IM-Server to make things clearer;
-+ advocate [Open-IM-Server](google.com/search?q=Open-IM-Server) technology beyond GitHub;
-+ write blogs on Open-IM-Server and so on.
-
-In a word, **ANY HELP IS CONTRIBUTION.**
+简而言之,**任何帮助都是贡献。**   
 
 ## 发布版本
 
-Releases of Open-IM-Server are done using [Release Please](https://github.com/googleapis/release-please) and [GoReleaser](https://goreleaser.com/). The workflow looks like this:
+Open-IM-Server的版本发布使用 [Release Please](https://github.com/googleapis/release-please) 和 [GoReleaser](https://goreleaser.com/)完成。工作流程如下:
 
-🎯 A PR is merged to the `main` branch:
+🎯 PR合并到`main`分支:
 
-+ Release please is triggered, creates or updates a new release PR
-+ This is done with every merge to main, the current release PR is updated every time
++ Release please被触发,创建或更新新的版本PR 
++ 每次合并到主分支时,都会执行此操作,当前的发行版PR每次都会更新
 
-🎯 Merging the 'release please' PR to `main`:
+🎯 合并'velease please' PR到`main`:
 
-+ Release please is triggered, creates a new release and updates the changelog based on the commit messages
-+ GoReleaser is triggered, builds the binaries and attaches them to the release
-+ Containers are created and pushed to the container registry
++ Release please被触发,根据提交消息创建新版本和更新更改日志 
++ 触发GoReleaser,构建二进制文件和将其附加到版本 
++ 创建容器并推送到容器注册表
 
-With the next relevant merge, a new release PR will be created and the process starts again
+下一次相关合并,将创建新的发行版PR,然后过程重新开始。
 
-**👀 Manually setting the version:**
+**👀手动设置版本号：**
 
-If you want to manually set the version, you can create a PR with an empty commit message that contains the version number in the commit message. For example:
+如果您想手动设置版本号,可以创建一个包含版本号的空提交消息的PR。举个例子: 
 
-Such a commit can get produced as follows: 
+
+这样的PR可以按照如下方式产生
 
 ````bash
 ❯ git commit --allow-empty -m "chore: release 0.0.3" -m "Release-As: 0.0.3
@@ -347,15 +342,15 @@ Such a commit can get produced as follows:
 
 ## 联系我们
 
-We value close connections with our users, developers, and contributors here at Open-IM-Server. With a large community and maintainer team, we're always here to help and support you. Whether you're looking to join our community or have any questions or suggestions, we welcome you to get in touch with us.
+我们非常重视与用户,开发者和贡献者的紧密联系。拥有庞大的社区和维护团队,我们随时准备提供帮助和支持。无论您是想加入我们的社区,还是有任何疑问或建议,我们欢迎您与我们取得联系。
 
-Our most recommended way to get in touch is through [Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg). Even if you're in China, Slack is usually not blocked by firewalls, making it an easy way to connect with us. Our Slack community is the ideal place to discuss and share ideas and suggestions with other users and developers of Open-IM-Server. You can ask technical questions, seek help, or share your experiences with other users of Open-IM-Server.
+我们最推荐的方式是通过 [Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg)。即使您在中国,Slack通常也不会被防火墙封锁,这使其成为与我们联系的简便方式。我们的Slack社区是与其他Open-IM-Server用户和开发者讨论和共享想法和建议的理想场所。您可以提出技术问题,寻求帮助,或与其他Open-IM-Server用户分享您的体验。
 
-In addition to Slack, we also offer the following ways to get in touch:
+除了Slack,我们还提供以下联系方式:
 
-+ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/slack-%40OpenIMSDKCore-informational?logo=slack&style=flat-square"></a>:  We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) team channel.
-+ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=4closetool3@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: Get in touch with us on [Gmail](winxu81@gmail.com). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
-+ <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a>: Read our [blog](https://doc.rentsoft.cn/). Our blog is a great place to stay up-to-date with Open-IM-Server projects and trends. On the blog, we share our latest developments, tech trends, and other interesting information.
-+ <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a>: Add [Wechat](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) and indicate that you are a user or developer of Open-IM-Server. We will process your request as soon as possible.
++ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/slack-%40OpenIMSDKCore-informational?logo=slack&style=flat-square"></a>:   我们还有Slack频道供您沟通和讨论。要加入,请访问https://slack.com/并加入我们的 [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 团队频道。
++ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=4closetool3@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: 通过 [Gmail](winxu81@gmail.com)与我们联系。如果您有任何需要解决的问题或问题,或者对我们的开源项目有任何建议和反馈,请随时通过电子邮件与我们联系。 
++ <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a>: 阅读我们的 [blog](https://doc.rentsoft.cn/)。 我们的博客是跟上Open-IM-Server项目和趋势的理想场所。在博客上,我们分享最新进展,技术趋势和其他有趣的信息。
++ <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a>: 添加 [微信](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) 并表明您是Open-IM-Server的用户或开发者。我们将尽快处理您的请求。
 
-Whether you're looking to join our community or have any questions or suggestions, we welcome you to get in touch with us.
+无论您是想加入我们的社区,还是有任何疑问或建议, 我们都欢迎您与我们的接触交流。
