@@ -27,7 +27,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 - Supports multiple protocols
 
 ## Community
-- 中文官网访问这里：[Open-IM中文开发文档](https://doc.rentsoft.cn/)
+- Visit the Chinese official website here: [Open-IM中文开发文档](https://doc.rentsoft.cn/)
 
 ## Quick start
 
