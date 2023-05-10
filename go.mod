@@ -43,6 +43,7 @@ require (
 require github.com/google/uuid v1.3.0
 
 require (
+	github.com/OpenIMSDK/openKeeper v0.0.8
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
 	k8s.io/apimachinery v0.27.1
@@ -57,7 +58,6 @@ require (
 	cloud.google.com/go/iam v0.13.0 // indirect
 	cloud.google.com/go/longrunning v0.4.1 // indirect
 	cloud.google.com/go/storage v1.28.1 // indirect
-	github.com/OpenIMSDK/openKeeper v0.9.9-0.20230510034455-23b10ebc00a8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

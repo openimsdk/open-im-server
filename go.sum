@@ -379,10 +379,8 @@ firebase.google.com/go v3.13.0+incompatible/go.mod h1:xlah6XbEyW6tbfSklcfe5FHJIw
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/OpenIMSDK/openKeeper v0.9.9-0.20230509114426-eb05252b1e67 h1:I6QLciX4LlavBMNyeqkp90DJV+uKcwke7NZ9OKMIjV8=
-github.com/OpenIMSDK/openKeeper v0.9.9-0.20230509114426-eb05252b1e67/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
-github.com/OpenIMSDK/openKeeper v0.9.9-0.20230510034455-23b10ebc00a8 h1:iHdOqsumPO6Pu2YINN/DDbuHlP/adTqqBSULCGSS714=
-github.com/OpenIMSDK/openKeeper v0.9.9-0.20230510034455-23b10ebc00a8/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
+github.com/OpenIMSDK/openKeeper v0.0.8 h1:HUL8ZPsrIA4fJ86TZ+cBbsRnUA1ZFgGs0YiXRpiuM+E=
+github.com/OpenIMSDK/openKeeper v0.0.8/go.mod h1:HwHgo+p3E+aAeiLOSyDwVB2zFJtu+QvnFNlfNjFG9vA=
 github.com/OpenIMSDK/open_utils v1.0.8 h1:IopxWgJwEF5ZAPsRuiZZOfcxNOQOCt/p8VDENcHN9r4=
 github.com/OpenIMSDK/open_utils v1.0.8/go.mod h1:FLoaQblWUVKQgqt2LrNzfSZLT6D3DICBn1kcOMDLUOI=
 github.com/Shopify/sarama v1.29.0 h1:ARid8o8oieau9XrHI55f/L3EoRAhm9px6sonbD7yuUE=
