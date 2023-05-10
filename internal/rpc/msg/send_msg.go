@@ -271,7 +271,9 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	}
 	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
 	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
-	if err != nil {
+	if errs.ErrRecordNotFound.Is(err) {
+		return false, nil
+	} else if err != nil {
 		return false, err
 	}
 	switch singleOpt {
@@ -289,7 +291,6 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
 		return true, nil
 	}
-
 	return true, nil
 }
 
@@ -310,7 +311,8 @@ func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
 	return &msg.SendMsgReq{MsgData: &msgData}
 }
 
-func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, req *msg.SendMsgReq, wg *sync.WaitGroup) error {
+func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, req *msg.SendMsgReq, wg *sync.WaitGroup) (err error) {
+	defer wg.Done()
 	tempOptions := make(map[string]bool, 1)
 	for k, v := range req.MsgData.Options {
 		tempOptions[k] = v
@@ -324,8 +326,7 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 		req.MsgData.Options = options
 		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, req.MsgData.GroupID)
 		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, req)
-		if err != nil {
-			wg.Done()
+		if err != nil && (!errs.ErrRecordNotFound.Is(err)) {
 			return err
 		}
 		if isSend {
@@ -334,11 +335,9 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 			}
 			err := m.MsgDatabase.MsgToMQ(ctx, v, req.MsgData)
 			if err != nil {
-				wg.Done()
 				return err
 			}
 		}
 	}
-	wg.Done()
 	return nil
 }
