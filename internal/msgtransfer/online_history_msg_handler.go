@@ -116,12 +116,14 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversation
 	}
 	for _, v := range totalMsgs {
 		options := utils.Options(v.message.Options)
-		if options.IsNotification() {
+		if !options.IsNotNotification() {
 			// 原通知
 			notificationMsg := proto.Clone(v.message).(*sdkws.MsgData)
 			if options.IsSendMsg() {
 				// 消息
-				v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+				if v.message.Options != nil {
+					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+				}
 				storageMsgList = append(storageMsgList, v.message)
 			}
 			if isStorage(notificationMsg) {

@@ -112,7 +112,7 @@ func (o Options) Is(notification string) bool {
 	return false
 }
 
-func (o Options) IsNotification() bool {
+func (o Options) IsNotNotification() bool {
 	return o.Is(constant.IsNotification)
 }
 
