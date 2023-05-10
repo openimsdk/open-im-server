@@ -91,6 +91,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				ctx := msgChannelValue.ctx
 				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "conversationID", msgChannelValue.conversationID)
 				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(msgChannelValue.conversationID, ctxMsgList)
+				log.ZDebug(ctx, "msg lens", "storageMsgList", len(storageMsgList), "notStorageMsgList", len(notStorageMsgList),
+					"storageNotificationList", len(storageNotificationList), "notStorageNotificationList", len(notStorageNotificationList), "modifyMsgList", len(modifyMsgList))
 				och.handleMsg(ctx, msgChannelValue.conversationID, storageMsgList, notStorageMsgList)
 				och.handleNotification(ctx, msgChannelValue.conversationID, storageNotificationList, notStorageNotificationList)
 				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.conversationID, modifyMsgList); err != nil {
