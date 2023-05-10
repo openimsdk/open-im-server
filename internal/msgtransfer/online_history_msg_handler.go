@@ -286,7 +286,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					rwLock.Unlock()
 					split := 1000
 					ctx := mcontext.NewCtx(utils.OperationIDGenerator())
-					ctx = mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
+					ctx = mcontext.WithTriggerIDContext(ctx, utils.OperationIDGenerator())
 					log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
 						//log.Debug()
