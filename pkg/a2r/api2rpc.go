@@ -29,12 +29,14 @@ func Call[A, B, C any](
 			return
 		}
 	}
+	log.ZDebug(c, "before get grpc conn")
 	cli, err := client(c)
 	if err != nil {
 		log.ZError(c, "get conn error", err, "req", req)
 		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
 		return
 	}
+	log.ZDebug(c, "before call rpc")
 	data, err := rpc(cli, c, &req)
 	if err != nil {
 		log.ZError(c, "rpc call error", err, "req", req)
