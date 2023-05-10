@@ -67,9 +67,10 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
 		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
 	}
-	groupRouterGroup := r.Group("/group")
 	g := NewGroup(zk)
+	groupRouterGroup := r.Group("/group")
 	{
+
 		groupRouterGroup.Use(mw.GinParseToken(rdb))
 		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
