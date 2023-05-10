@@ -1,4 +1,4 @@
-#  Contributing to Open-IM-Server
+#  参与Open-IM-Server的建设
 
 怎么样,你想要为Open-IM-Server做出贡献吗?好耶!
 首先,感谢你考虑为我们的项目做出贡献!我们十分感激你的时间和精力,我们重视任何形式的贡献,无论是报告错误、对新功能有所建议,或提交PR。
