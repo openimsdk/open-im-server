@@ -30,7 +30,7 @@ func NewMsgMongoDriver(database *mongo.Database) table.MsgDocModelInterface {
 }
 
 func (m *MsgMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []table.MsgInfoModel) error {
-	return m.MsgCollection.FindOneAndUpdate(ctx, bson.M{"doc_id": docID}, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgsToMongo}}}).Err()
+	return m.MsgCollection.FindOneAndUpdate(ctx, bson.M{"doc_id": docID}, bson.M{"$push": bson.M{"msgs": bson.M{"$each": msgsToMongo}}}).Err()
 }
 
 func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) error {
@@ -44,7 +44,7 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Context, doc
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	_, err = m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msg.%d.msg", seqIndex): bytes}})
+	_, err = m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}})
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
@@ -88,7 +88,7 @@ func (m *MsgMongoDriver) GetNewestMsg(ctx context.Context, conversationID string
 		if len(msgDocs[0].Msg) > 0 {
 			return &msgDocs[0].Msg[len(msgDocs[0].Msg)-1], nil
 		}
-		return nil, errors.New("len(msgDocs[0].Msg) < 0")
+		return nil, errs.ErrRecordNotFound.Wrap("len(msgDocs[0].Msgs) < 0")
 	}
 	return nil, ErrMsgNotFound
 }
@@ -130,14 +130,14 @@ func (m *MsgMongoDriver) Delete(ctx context.Context, docIDs []string) error {
 }
 
 func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocModel) error {
-	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": msg.DocID}, bson.M{"$set": bson.M{"msg": msg.Msg}})
+	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": msg.DocID}, bson.M{"$set": bson.M{"msgs": msg.Msg}})
 	return err
 }
 
 func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, seqs []int64, err error) {
 	beginIndex := m.msg.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
-	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msg": bson.M{"$slice": []int64{beginIndex, num}}})
+	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msgs": bson.M{"$slice": []int64{beginIndex, num}}})
 	if err != nil {
 		return nil, nil, err
 	}
