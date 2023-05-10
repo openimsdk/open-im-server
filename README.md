@@ -7,16 +7,13 @@
 
 ## What is Open-IM-Server
 
+> **Note**
 > English | [中文](./README_zh.md)
 
 Open source Instant Messaging Server
-
 Instant messaging server. Backend in pure Golang, wire transport protocol is JSON over websocket.
-
 Everything is a message in Open-IM-Server, so you can extend custom messages easily, there is no need to modify the server code.
-
 Using microservice architectures, Open-IM-Server can be deployed using clusters.
-
 By deployment of the Open-IM-Server on the customer's server, developers can integrate instant messaging and real-time network capabilities into their own applications free of charge and quickly, and ensure the security and privacy of business data.
 
 ## Features
@@ -155,6 +152,9 @@ all services build success
 ## Contributing
 
 Contributions to this project are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+## Who are using Open-IM-Server
+The [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page includes the user list of the project. You can leave a [📝comment]() to let us know your use case.
 
 ## ⚠️ Announcement
 
