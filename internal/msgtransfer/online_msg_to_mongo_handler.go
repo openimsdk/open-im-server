@@ -103,6 +103,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) ConsumeClaim(sess sarama.ConsumerGr
 	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
 		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	for msg := range claim.Messages() {
+		log.ZDebug(context.Background(), "mongo consumer recv msg", "msg", msg, "key", msg.Key)
 		ctx := mc.historyConsumerGroup.GetContextFromMsg(msg)
 		if len(msg.Value) != 0 {
 			mc.handleChatWs2Mongo(ctx, msg, string(msg.Key), sess)
