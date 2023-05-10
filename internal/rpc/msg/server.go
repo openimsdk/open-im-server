@@ -132,19 +132,14 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
-		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs)
-		return nil, err
-	}
-	minSeqs, err := m.MsgDatabase.GetMinSeqs(ctx, conversationIDs)
-	if err != nil {
-		log.ZWarn(ctx, "GetMinSeqs error", err, "conversationIDs", conversationIDs)
+		log.ZWarn(ctx, "GetMaxSeqs error", err, "conversationIDs", conversationIDs, "maxSeqs", maxSeqs)
 		return nil, err
 	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs
-	resp.MinSeqs = minSeqs
 	return resp, nil
 }
 
