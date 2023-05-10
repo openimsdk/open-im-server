@@ -4,7 +4,12 @@
 
 [![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 
-## Open-IM-Server: Open source Instant Messaging Server
+
+## What is Open-IM-Server
+
+> English | [中文](./README_zh.md)
+
+Open source Instant Messaging Server
 
 Instant messaging server. Backend in pure Golang, wire transport protocol is JSON over websocket.
 
