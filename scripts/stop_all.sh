@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#fixme This script is to stop the service
+#fixme This scripts is to stop the service
 
 source ./style_info.cfg
 source ./path_info.cfg

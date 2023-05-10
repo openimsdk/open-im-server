@@ -12,7 +12,7 @@ ADD ./open_im_sdk_server $WORKDIR/main
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \
   chmod +x $WORKDIR/main
 
-VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script","/Open-IM-Server/db/sdk"]
+VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/scripts","/Open-IM-Server/db/sdk"]
 
 WORKDIR $CMDDIR
 CMD ./main
