@@ -2,6 +2,7 @@ package mcontext
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
@@ -109,8 +110,20 @@ func GetMustCtxInfo(ctx context.Context) (operationID, opUserID, platform, connI
 	}
 	connID, _ = ctx.Value(constant.ConnID).(string)
 	return
-
 }
+
+func GetCtxInfos(ctx context.Context) (operationID, opUserID, platform, connID string, err error) {
+	operationID, ok := ctx.Value(constant.OperationID).(string)
+	if !ok {
+		err = errs.ErrArgs.Wrap("ctx missing operationID")
+		return
+	}
+	opUserID, _ = ctx.Value(constant.OpUserID).(string)
+	platform, _ = ctx.Value(constant.OpUserPlatform).(string)
+	connID, _ = ctx.Value(constant.ConnID).(string)
+	return
+}
+
 func WithMustInfoCtx(values []string) context.Context {
 	ctx := context.Background()
 	for i, v := range values {

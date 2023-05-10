@@ -51,7 +51,7 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	return &p
 }
 func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) {
-	operationID, opUserID, platform, connID, err := mcontext.GetMustCtxInfo(ctx)
+	operationID, opUserID, platform, connID, err := mcontext.GetCtxInfos(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
 	return mcontext.WithMustInfoCtx(values) // TODO
 }
 func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
-	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m)
+	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m, "topic", p.topic)
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
 	kMsg.Key = sarama.StringEncoder(key)

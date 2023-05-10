@@ -62,18 +62,13 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil {
 		return nil, err
 	}
+	conversationID := utils.GetConversationIDByMsg(req.MsgData)
 	isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, req.MsgData.SendID, constant.SingleChatType, req)
 	if err != nil {
 		return nil, err
 	}
 	if isSend {
-		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.RecvID, req.MsgData)
-		if err != nil {
-			return nil, errs.ErrInternalServer.Wrap("insert to mq")
-		}
-	}
-	if req.MsgData.SendID != req.MsgData.RecvID { //Filter messages sent to yourself
-		err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.SendID, req.MsgData)
+		err = m.MsgDatabase.MsgToMQ(ctx, conversationID, req.MsgData)
 		if err != nil {
 			return nil, errs.ErrInternalServer.Wrap("insert to mq")
 		}

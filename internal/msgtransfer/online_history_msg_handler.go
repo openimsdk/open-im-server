@@ -2,13 +2,12 @@ package msgtransfer
 
 import (
 	"context"
-	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -159,7 +158,6 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 }
 
 func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) {
-	fmt.Printf("toPushTopic Stack:\n%s\n", debug.Stack())
 	for _, v := range msgs {
 		och.msgDatabase.MsgToPushMQ(ctx, conversationID, v)
 	}
@@ -168,7 +166,6 @@ func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, c
 func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
-
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageList)
@@ -288,7 +285,8 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					cMsg = make([]*sarama.ConsumerMessage, 0, 1000)
 					rwLock.Unlock()
 					split := 1000
-					ctx := mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
+					ctx := mcontext.NewCtx(utils.OperationIDGenerator())
+					ctx = mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
 					log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
 						//log.Debug()
