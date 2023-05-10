@@ -4,7 +4,7 @@ source ./path_info.cfg
 # images version
 version=v2.3.8
 git pull
-cd ../script/; ./build_all_service.sh
+cd ../scripts/; ./build_all_service.sh
 cd ../deploy_k8s/
 
 for i in  ${service[*]}
@@ -27,4 +27,3 @@ do
 	echo "push ${image} success "
 	cd ..
 done
-

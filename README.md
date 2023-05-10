@@ -95,7 +95,7 @@ git checkout main
 1. Set executable permissions
 
 ```shell
-cd ../../script/
+cd ../../scripts/
 chmod +x *.sh
 ```
 
