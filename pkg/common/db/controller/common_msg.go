@@ -133,7 +133,7 @@ func (db *commonMsgDatabase) MsgToPushMQ(ctx context.Context, conversationID str
 
 func (db *commonMsgDatabase) MsgToMongoMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData, lastSeq int64) error {
 	if len(messages) > 0 {
-		_, _, err := db.producerToModify.SendMessage(ctx, conversationID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, ConversationID: conversationID, MsgData: messages})
+		_, _, err := db.producerToMongo.SendMessage(ctx, conversationID, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, ConversationID: conversationID, MsgData: messages})
 		return err
 	}
 	return nil
