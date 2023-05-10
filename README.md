@@ -154,7 +154,7 @@ all services build success
 Contributions to this project are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## Who are using Open-IM-Server
-The [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page includes the user list of the project. You can leave a [📝comment]() to let us know your use case.
+The [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page includes the user list of the project. You can leave a [📝comment](https://github.com/OpenIMSDK/Open-IM-Server/issues/379) to let us know your use case.
 
 ## ⚠️ Announcement
 
