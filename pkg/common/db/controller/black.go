@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -53,22 +52,16 @@ func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 		if errors.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
 		}
-		inUser1Blacks = false
-	} else {
-		inUser1Blacks = true
 	}
-
-	inUser2Blacks = true
+	inUser1Blacks = err == nil
 	_, err = b.black.Take(ctx, userID2, userID1)
 	if err != nil {
 		if utils.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
 		}
-		inUser2Blacks = false
-	} else {
-		inUser2Blacks = true
 	}
-	return
+	inUser2Blacks = err == nil
+	return inUser1Blacks, inUser2Blacks, nil
 }
 
 func (b *blackDatabase) FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error) {
