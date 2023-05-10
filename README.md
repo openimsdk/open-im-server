@@ -1,8 +1,18 @@
 # Open-IM-Server 
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
+<p align="center">
+<b>Open source Instant Messaging Server</b>
+</p>
 
-[![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+
+<p align=center>
+<a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
+<a href="https://github.com/search?q=user%3Akubesphere+user%3Akubesphere-sigs+label%3A%22good+first+issue%22+state%3Aopen&type=Issues&ref=advsearch&l=&l="><img src="https://img.shields.io/github/issues/badges/shields/good%20first%20issue" alt="good first"></a>
+<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-600%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
+<a href="https://www.youtube.com/channel/UCyTdUQUYjf7XLjxECx63Hpw"><img src="https://img.shields.io/youtube/channel/subscribers/UCyTdUQUYjf7XLjxECx63Hpw?style=social"></a>
+<a href="https://img.shields.io/badge/license-Apache--2.0-green"><img src="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"></a>
+<a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
+</p>
 
 
 ## What is Open-IM-Server
@@ -10,7 +20,6 @@
 > **Note**
 > English | [中文](./README_zh.md)
 
-Open source Instant Messaging Server
 Instant messaging server. Backend in pure Golang, wire transport protocol is JSON over websocket.
 Everything is a message in Open-IM-Server, so you can extend custom messages easily, there is no need to modify the server code.
 Using microservice architectures, Open-IM-Server can be deployed using clusters.
