@@ -36,7 +36,7 @@ func (e *ExtendMsgSetMongoDriver) GetAllExtendMsgSet(ctx context.Context, ID str
 			findOpts.SetProjection(bson.M{"extend_msgs": 0})
 		}
 	}
-	cursor, err := e.ExtendMsgSetCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: regex}}, findOpts)
+	cursor, err := e.ExtendMsgSetCollection.Find(ctx, bson.M{"doc_id": primitive.Regex{Pattern: regex}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}

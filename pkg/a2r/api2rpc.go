@@ -15,6 +15,7 @@ func Call[A, B, C any](
 	client func(ctx context.Context) (C, error),
 	c *gin.Context,
 ) {
+	log.ZDebug(c, "before bind")
 	var req A
 	if err := c.BindJSON(&req); err != nil {
 		log.ZWarn(c, "gin bind json error", err, "req", req)

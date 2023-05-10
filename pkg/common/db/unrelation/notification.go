@@ -28,7 +28,7 @@ func NewNotificationMongoDriver(database *mongo.Database) table.NotificationDocM
 }
 
 func (m *NotificationMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []table.NotificationInfoModel) error {
-	filter := bson.M{"uid": docID}
+	filter := bson.M{"doc_id": docID}
 	return m.MsgCollection.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgsToMongo}}}).Err()
 }
 
@@ -43,7 +43,7 @@ func (m *NotificationMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Con
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	_, err = m.MsgCollection.UpdateOne(ctx, bson.M{"uid": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msg.%d.msg", seqIndex): bytes}})
+	_, err = m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msg.%d.msg", seqIndex): bytes}})
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
@@ -52,13 +52,13 @@ func (m *NotificationMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Con
 
 func (m *NotificationMongoDriver) FindOneByDocID(ctx context.Context, docID string) (*table.NotificationDocModel, error) {
 	doc := &table.NotificationDocModel{}
-	err := m.MsgCollection.FindOne(ctx, bson.M{"uid": docID}).Decode(doc)
+	err := m.MsgCollection.FindOne(ctx, bson.M{"doc_id": docID}).Decode(doc)
 	return doc, err
 }
 
 func (m *NotificationMongoDriver) GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*table.NotificationDocModel, error) {
-	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}, findOpts)
+	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": 1})
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -75,7 +75,7 @@ func (m *NotificationMongoDriver) GetMsgsByIndex(ctx context.Context, conversati
 
 func (m *NotificationMongoDriver) GetNewestMsg(ctx context.Context, conversationID string) (*table.NotificationInfoModel, error) {
 	var msgDocs []table.NotificationDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": -1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"doc_id": -1}))
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -94,7 +94,7 @@ func (m *NotificationMongoDriver) GetNewestMsg(ctx context.Context, conversation
 
 func (m *NotificationMongoDriver) GetOldestMsg(ctx context.Context, conversationID string) (*table.NotificationInfoModel, error) {
 	var msgDocs []table.NotificationDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"uid": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"uid": 1}))
+	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"doc_id": 1}))
 	if err != nil {
 		return nil, err
 	}
@@ -124,11 +124,11 @@ func (m *NotificationMongoDriver) Delete(ctx context.Context, docIDs []string) e
 	if docIDs == nil {
 		return nil
 	}
-	_, err := m.MsgCollection.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": docIDs}})
+	_, err := m.MsgCollection.DeleteMany(ctx, bson.M{"doc_id": bson.M{"$in": docIDs}})
 	return err
 }
 
 func (m *NotificationMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.NotificationDocModel) error {
-	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"uid": msg.DocID}, bson.M{"$set": bson.M{"msg": msg.Msg}})
+	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": msg.DocID}, bson.M{"$set": bson.M{"msg": msg.Msg}})
 	return err
 }

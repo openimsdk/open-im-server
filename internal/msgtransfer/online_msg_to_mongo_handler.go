@@ -104,7 +104,6 @@ func (mc *OnlineHistoryMongoConsumerHandler) ConsumeClaim(sess sarama.ConsumerGr
 	for msg := range claim.Messages() {
 		ctx := mc.historyConsumerGroup.GetContextFromMsg(msg)
 		if len(msg.Value) != 0 {
-			log.ZDebug(ctx, "mongo consumer recv new msg", "conversationID", msg.Key, "offset", msg.Offset)
 			mc.handleChatWs2Mongo(ctx, msg, string(msg.Key), sess)
 		} else {
 			log.ZError(ctx, "mongo msg get from kafka but is nil", nil, "conversationID", msg.Key)

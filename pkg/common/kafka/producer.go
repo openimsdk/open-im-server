@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -93,7 +92,6 @@ func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message)
 	for i, header := range header {
 		arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
 	}
-	log.ZInfo(ctx, "producer.kafka.GetContextWithMQHeader", "len", len(header), "header", strings.Join(arr, ", "))
 	kMsg.Headers = header
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key ", kMsg.Key, "key length", kMsg.Value.Length())

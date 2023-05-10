@@ -43,7 +43,7 @@ require (
 require github.com/google/uuid v1.3.0
 
 require (
-	github.com/OpenIMSDK/openKeeper v0.0.8
+	github.com/OpenIMSDK/openKeeper v0.0.9
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
 	k8s.io/apimachinery v0.27.1
