@@ -100,14 +100,14 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 func (OnlineHistoryMongoConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (OnlineHistoryMongoConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (mc *OnlineHistoryMongoConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
-	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
+	log.ZDebug(context.Background(), "online new session msg come", "highWaterMarkOffset",
+		claim.HighWaterMarkOffset(), "topic", claim.Topic(), "partition", claim.Partition())
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		ctx := mc.historyConsumerGroup.GetContextFromMsg(msg)
 		if len(msg.Value) != 0 {
-			ctx := mc.historyConsumerGroup.GetContextFromMsg(msg)
 			mc.handleChatWs2Mongo(ctx, msg, string(msg.Key), sess)
 		} else {
-			log.Error("", "mongo msg get from kafka but is nil", msg.Key)
+			log.ZError(ctx, "mongo msg get from kafka but is nil", nil, "key", msg.Key)
 		}
 		sess.MarkMessage(msg, "")
 	}
