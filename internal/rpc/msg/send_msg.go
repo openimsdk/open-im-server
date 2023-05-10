@@ -272,7 +272,7 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
 	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
 	if errs.ErrRecordNotFound.Is(err) {
-		return false, nil
+		return true, nil
 	} else if err != nil {
 		return false, err
 	}
@@ -326,7 +326,7 @@ func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []strin
 		req.MsgData.Options = options
 		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, req.MsgData.GroupID)
 		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, req)
-		if err != nil && (!errs.ErrRecordNotFound.Is(err)) {
+		if err != nil {
 			return err
 		}
 		if isSend {

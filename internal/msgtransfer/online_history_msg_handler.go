@@ -2,6 +2,7 @@ package msgtransfer
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"sync"
 	"time"
 
@@ -164,7 +165,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, con
 	if len(storageList) > 0 {
 
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
-		if err != nil && err != redis.Nil {
+		if err != nil && errs.Unwrap(err) != redis.Nil {
 			log.ZError(ctx, "batch data insert to redis err", err, "storageMsgList", storageList)
 			och.singleMsgFailedCountMutex.Lock()
 			och.singleMsgFailedCount += uint64(len(storageList))

@@ -126,8 +126,9 @@ func (db *commonMsgDatabase) MsgToPushMQ(ctx context.Context, conversationID str
 	partition, offset, err := db.producerToPush.SendMessage(ctx, conversationID, &pbMsg.PushMsgDataToMQ{MsgData: msg2mq, ConversationID: conversationID})
 	if err != nil {
 		log.ZError(ctx, "MsgToPushMQ", err, "key", conversationID, "msg2mq", msg2mq)
+		return 0, 0, err
 	}
-	return partition, offset, err
+	return partition, offset, nil
 }
 
 func (db *commonMsgDatabase) MsgToMongoMQ(ctx context.Context, conversationID string, messages []*sdkws.MsgData, lastSeq int64) error {
@@ -218,7 +219,7 @@ func (db *commonMsgDatabase) DeleteMessageFromCache(ctx context.Context, convers
 
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
 	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
-	if err != nil && err != redis.Nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		prome.Inc(prome.SeqGetFailedCounter)
 		return 0, false, err
 	}
@@ -230,7 +231,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	if lenList < 1 {
 		return 0, false, errors.New("too short as 0")
 	}
-	if err == redis.Nil {
+	if errs.Unwrap(err) == redis.Nil {
 		isNew = true
 	}
 	lastMaxSeq := currentMaxSeq
