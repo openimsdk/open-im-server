@@ -45,7 +45,7 @@ func StartTransfer(prometheusPort int) error {
 	}
 	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 		openKeeper.WithFreq(time.Hour), openKeeper.WithRoundRobin(), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
-			config.Config.Zookeeper.Password), openKeeper.WithRoundRobin(), openKeeper.WithTimeout(10), openKeeper.WithOptions(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())),
+			config.Config.Zookeeper.Password), openKeeper.WithTimeout(10), openKeeper.WithOptions(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())),
 	)
 	if err != nil {
 		return err
