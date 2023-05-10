@@ -2,10 +2,9 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"gorm.io/gorm"
 )
 
@@ -49,14 +48,14 @@ func (b *blackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string,
 func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error) {
 	_, err = b.black.Take(ctx, userID1, userID2)
 	if err != nil {
-		if errors.Unwrap(err) != gorm.ErrRecordNotFound {
+		if errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
 		}
 	}
 	inUser1Blacks = err == nil
 	_, err = b.black.Take(ctx, userID2, userID1)
 	if err != nil {
-		if utils.Unwrap(err) != gorm.ErrRecordNotFound {
+		if errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return
 		}
 	}
