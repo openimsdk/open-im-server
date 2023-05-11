@@ -11,6 +11,7 @@ import (
 
 type ConversationLocalCacheInterface interface {
 	GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
+	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 }
 
 type ConversationLocalCache struct {
@@ -39,4 +40,19 @@ func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context,
 		return nil, err
 	}
 	return resp.UserIDs, nil
+}
+
+func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID string) ([]string, error) {
+	conn, err := g.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+	if err != nil {
+		return nil, err
+	}
+	client := conversation.NewConversationClient(conn)
+	resp, err := client.GetConversationIDs(ctx, &conversation.GetConversationIDsReq{
+		UserID: userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.ConversationIDs, nil
 }

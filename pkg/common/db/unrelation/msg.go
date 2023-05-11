@@ -144,7 +144,6 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 		bson.M{
 			"$project": bson.M{
 				"msgs": bson.M{
-					// "$slice": []interface{}{"$msgs", beginIndex, num},
 					"$slice": bson.A{"$msgs", beginIndex, num},
 				},
 			},
@@ -154,16 +153,23 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	if err != nil {
 		return nil, nil, errs.Wrap(err)
 	}
-	log.ZDebug(ctx, "info", "beginIndex", beginIndex, "num", num)
-	var msgInfos []*table.MsgInfoModel
-	if err := cursor.All(ctx, &msgInfos); err != nil {
-		return nil, nil, err
+	defer cursor.Close(ctx)
+	var doc table.MsgDocModel
+	i := 0
+	for cursor.Next(ctx) {
+		err := cursor.Decode(&doc)
+		if err != nil {
+			return nil, nil, err
+		}
+		if i == 0 {
+			break
+		}
 	}
-	if len(msgInfos) < 1 {
+	if len(doc.Msg) < 1 {
 		return nil, nil, errs.ErrRecordNotFound.Wrap("mongo GetMsgBySeqIndex failed, len is 0")
 	}
-	log.ZDebug(ctx, "msgInfos", "num", len(msgInfos))
-	for _, v := range msgInfos {
+	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg))
+	for _, v := range doc.Msg {
 		var msg sdkws.MsgData
 		if err := proto.Unmarshal(v.Msg, &msg); err != nil {
 			return nil, nil, err

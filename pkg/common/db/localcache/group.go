@@ -46,7 +46,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.GroupAbstractInfos) < 0 {
+	if len(resp.GroupAbstractInfos) < 1 {
 		return nil, errs.ErrGroupIDNotFound
 	}
 	localHashInfo, ok := g.cache[groupID]
