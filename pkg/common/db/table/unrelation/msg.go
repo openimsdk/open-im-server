@@ -101,7 +101,7 @@ func (m MsgDocModel) GetSeqsBeginEnd(seqs []int64) (int64, int64) {
 	if len(seqs) == 0 {
 		return 0, 0
 	}
-	return seqs[0], seqs[len(seqs)-1]
+	return seqs[len(seqs)-1], seqs[0]
 }
 
 func (m MsgDocModel) GetMsgIndex(seq int64) int64 {
