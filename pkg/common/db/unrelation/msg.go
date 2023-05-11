@@ -155,7 +155,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	}
 	log.ZDebug(ctx, "info", "beginIndex", beginIndex, "num", num)
 	var msgInfos []*table.MsgInfoModel
-	if err := cursor.All(ctx, &msgInfos); err != nil {
+	if err := cursor.Decode(&msgInfos); err != nil {
 		return nil, nil, err
 	}
 	if len(msgInfos) < 1 {
