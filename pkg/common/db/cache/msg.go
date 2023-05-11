@@ -158,13 +158,11 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 	m = make(map[string]int64, len(items))
 	for i, v := range result {
 		seq := v.(*redis.StringCmd)
-		log.ZDebug(ctx, "getSeqs", "v", v.String())
 		if seq.Err() != nil && seq.Err() != redis.Nil {
 			return nil, errs.Wrap(v.Err())
 		}
 		m[items[i]] = utils.StringToInt64(seq.Val())
 	}
-	log.ZDebug(ctx, "getSeqs", "m", m)
 	return m, nil
 }
 
@@ -269,11 +267,13 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 	}
 	result, err := pipe.Exec(ctx)
 	for i, v := range result {
-		if v.Err() != nil {
+		cmd := v.(*redis.StringCmd)
+		if cmd.Err() != nil {
+			log.ZWarn(ctx, "get msg from cache failed", cmd.Err(), "cmd", cmd.Val())
 			failedSeqs = append(failedSeqs, seqs[i])
 		} else {
 			msg := sdkws.MsgData{}
-			err = jsonpb.UnmarshalString(v.String(), &msg)
+			err = jsonpb.UnmarshalString(cmd.Val(), &msg)
 			if err == nil {
 				if msg.Status != constant.MsgDeleted {
 					seqMsgs = append(seqMsgs, &msg)
