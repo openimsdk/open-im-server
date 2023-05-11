@@ -422,6 +422,7 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 
 func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, unExistSeqs []int64, err error) {
 	beginSeq, endSeq := db.msg.GetSeqsBeginEnd(seqs)
+	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq)
 	msgs, _, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
 	if err != nil {
 		return nil, nil, err
@@ -451,11 +452,12 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 	var totalNotExistSeqs []int64
 	// mongo index
 	for docID, seqs := range m {
+		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
 		msgs, notExistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
-		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs, "unExistSeqs", notExistSeqs, "msgs", msgs)
+		log.ZDebug(ctx, "getMsgBySeqsRange", "unExistSeqs", notExistSeqs, "msgs", len(msgs))
 		seqMsgs = append(seqMsgs, msgs...)
 		totalNotExistSeqs = append(totalNotExistSeqs, notExistSeqs...)
 	}
