@@ -137,13 +137,13 @@ func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocMode
 func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, seqs []int64, err error) {
 	beginIndex := m.msg.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
+	log.ZDebug(ctx, "beginIndex", beginIndex, "num", num)
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{"doc_id": docID},
 		},
 		bson.M{
 			"$project": bson.M{
-				"doc_id": 1,
 				"msgs": bson.M{
 					"$slice": []interface{}{"$msgs", beginIndex, num},
 				},
