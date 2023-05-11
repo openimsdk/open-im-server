@@ -19,7 +19,9 @@ message Conversation{
   string ex = 14;
   int64  updateUnreadCountTime = 15;
   int32 burnDuration = 16;
-
+  int64 minSeq = 17;
+  int64 maxSeq = 18;
+  int64 isReadSeq = 19;
 }
 message ModifyConversationFieldReq{
   Conversation conversation = 1;
