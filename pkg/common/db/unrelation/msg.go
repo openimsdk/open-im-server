@@ -154,11 +154,6 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	if err != nil {
 		return nil, nil, errs.Wrap(err)
 	}
-
-	// result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msgs": bson.M{"$slice": []int64{beginIndex, num}}})
-	// if err != nil {
-	// 	return nil, nil, err
-	// }
 	var msgInfos []table.MsgInfoModel
 	if err := cursor.All(ctx, &msgInfos); err != nil {
 		return nil, nil, err
@@ -166,12 +161,14 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	if len(msgInfos) < 1 {
 		return nil, nil, errs.ErrRecordNotFound.Wrap("mongo GetMsgBySeqIndex failed, len is 0")
 	}
+	log.ZDebug(ctx, "msgInfos", "num", len(msgInfos))
 	for _, v := range msgInfos {
 		var msg sdkws.MsgData
 		if err := proto.Unmarshal(v.Msg, &msg); err != nil {
 			return nil, nil, err
 		}
 		if msg.Seq >= beginSeq && msg.Seq <= endSeq {
+			log.ZDebug(ctx, "find msg", "msg", &msg)
 			msgs = append(msgs, &msg)
 			seqs = append(seqs, msg.Seq)
 		} else {

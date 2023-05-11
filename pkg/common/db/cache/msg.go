@@ -268,7 +268,6 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 	for i, v := range result {
 		cmd := v.(*redis.StringCmd)
 		if cmd.Err() != nil {
-			log.ZWarn(ctx, "get msg from cache failed", cmd.Err(), "cmd", cmd.Val())
 			failedSeqs = append(failedSeqs, seqs[i])
 		} else {
 			msg := sdkws.MsgData{}
