@@ -16,7 +16,6 @@
 # Build management helpers.  These functions help to set, save and load the
 #
 
-
 ## copyright.help: Show copyright help
 .PHONY: go.help
 go.help: script/make-rules/golang.mk
