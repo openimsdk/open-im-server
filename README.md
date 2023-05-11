@@ -84,7 +84,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 
 #### Deploy using source code
 
-1. Go 1.17 or above。
+1. Go 1.17 or above.
 2. Clone
 
 ```shell
@@ -157,9 +157,19 @@ all services build success
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
 
+## To start developing OpenIM
+The [community repository](https://github.com/OpenIMSDK/community) hosts all information about building Kubernetes from source, how to contribute code and documentation, who to contact about what, etc.
+
+
 ## Contributing
 
 Contributions to this project are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+## Community Meetings
+We want anyone to get involved in our community, we offer gifts and rewards, and we welcome you to join us every Thursday night.
+
+We take notes of each [biweekly meeting](https://github.com/OpenIMSDK/Open-IM-Server/issues/381) in [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting), and our minutes are written in [Google Docs](docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
+
 
 ## Who are using Open-IM-Server
 The [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page includes the user list of the project. You can leave a [📝comment](https://github.com/OpenIMSDK/Open-IM-Server/issues/379) to let us know your use case.
