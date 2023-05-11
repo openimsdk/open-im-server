@@ -48,7 +48,7 @@ Every action to make project Open-IM-Server better is encouraged. On GitHub, eve
 #### Where should I start?
 
 + If you are new to the project, don't know how to contribute Open-IM-Server, please check out the [good first issue](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aopen+label%3A"good+first+issue"+sort%3Aupdated-desc) label.
-+ You should be good at filtering the Open-IM-Server issue tags and finding the ones you like, such as [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) for big initiatives, features for [feature](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Afeature) proposals, and [bug](https://github.com/{github/issues?q=is%3Aissue+label%3Abug+) fixes.
++ You should be good at filtering the Open-IM-Server issue tags and finding the ones you like, such as [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) for big initiatives, features for [feature](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Afeature) proposals, and [bug](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Abug+) fixes.
 + If you are looking for something to work on, check out our [open issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 + If you have an idea for a new feature, please [open an issue](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose), and we can discuss it.
 
