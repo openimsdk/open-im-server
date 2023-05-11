@@ -144,7 +144,8 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 		bson.M{
 			"$project": bson.M{
 				"msgs": bson.M{
-					"$slice": []interface{}{"$msgs", beginIndex, num},
+					// "$slice": []interface{}{"$msgs", beginIndex, num},
+					"$slice": bson.A{"$msgs", beginIndex, num},
 				},
 			},
 		},
@@ -155,7 +156,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	}
 	log.ZDebug(ctx, "info", "beginIndex", beginIndex, "num", num)
 	var msgInfos []*table.MsgInfoModel
-	if err := cursor.Decode(&msgInfos); err != nil {
+	if err := cursor.All(ctx, &msgInfos); err != nil {
 		return nil, nil, err
 	}
 	if len(msgInfos) < 1 {
