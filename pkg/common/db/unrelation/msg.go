@@ -137,7 +137,6 @@ func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocMode
 func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, seqs []int64, err error) {
 	beginIndex := m.msg.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
-	log.ZDebug(ctx, "info", "beginIndex", beginIndex, "num", num)
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{"doc_id": docID},
@@ -154,7 +153,8 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	if err != nil {
 		return nil, nil, errs.Wrap(err)
 	}
-	var msgInfos []table.MsgInfoModel
+	log.ZDebug(ctx, "info", "beginIndex", beginIndex, "num", num)
+	var msgInfos []*table.MsgInfoModel
 	if err := cursor.All(ctx, &msgInfos); err != nil {
 		return nil, nil, err
 	}
