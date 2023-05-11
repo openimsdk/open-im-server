@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -21,7 +22,9 @@ type Auth struct {
 }
 
 func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
+	log.ZDebug(ctx, "before get grpc conn from zk registry")
 	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImAuthName)
+	log.ZDebug(ctx, "after get grpc conn from zk registry")
 	if err != nil {
 		return nil, err
 	}
