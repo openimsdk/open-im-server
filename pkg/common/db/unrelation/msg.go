@@ -137,12 +137,31 @@ func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocMode
 func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, seqs []int64, err error) {
 	beginIndex := m.msg.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
-	result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msgs": bson.M{"$slice": []int64{beginIndex, num}}})
-	if err != nil {
-		return nil, nil, err
+
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{"doc_id": docID},
+		},
+		bson.M{
+			"$project": bson.M{
+				"doc_id": 1,
+				"msgs": bson.M{
+					"$slice": []interface{}{"$msgs", beginIndex, num},
+				},
+			},
+		},
 	}
+	cursor, err := m.MsgCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, nil, errs.Wrap(err)
+	}
+
+	// result, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": docID, "msgs": bson.M{"$slice": []int64{beginIndex, num}}})
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
 	var msgInfos []table.MsgInfoModel
-	if err := result.Decode(&msgInfos); err != nil {
+	if err := cursor.All(ctx, &msgInfos); err != nil {
 		return nil, nil, err
 	}
 	if len(msgInfos) < 1 {

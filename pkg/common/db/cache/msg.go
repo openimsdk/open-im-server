@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -290,7 +289,7 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 
 func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error) {
 	pipe := c.rdb.Pipeline()
-	var failedMsgs []sdkws.MsgData
+	var failedMsgs []*sdkws.MsgData
 	for _, msg := range msgs {
 		key := c.getMessageCacheKey(conversationID, msg.Seq)
 		s, err := utils.Pb2String(msg)
@@ -299,14 +298,12 @@ func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string,
 		}
 		err = pipe.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
 		if err != nil {
-			return 0, errs.Wrap(err)
+			failedMsgs = append(failedMsgs, msg)
+			log.ZWarn(ctx, "set msg 2 cache failed", err, "msg", failedMsgs)
 		}
 	}
-	if len(failedMsgs) != 0 {
-		return len(failedMsgs), fmt.Errorf("set msg to msgCache failed, failed lists: %v, %s", failedMsgs, conversationID)
-	}
 	_, err := pipe.Exec(ctx)
-	return 0, err
+	return len(failedMsgs), err
 }
 
 func (c *msgCache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error {
