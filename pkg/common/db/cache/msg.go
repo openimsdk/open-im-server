@@ -157,11 +157,12 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 	}
 	m = make(map[string]int64, len(items))
 	for i, v := range result {
+		seq := v.(*redis.IntCmd)
 		log.ZDebug(ctx, "getSeqs", "v", v.String())
-		if v.Err() != nil && err != redis.Nil {
+		if seq.Err() != nil && seq.Err() != redis.Nil {
 			return nil, errs.Wrap(v.Err())
 		}
-		m[items[i]] = utils.StringToInt64(v.String())
+		m[items[i]] = seq.Val()
 	}
 	log.ZDebug(ctx, "getSeqs", "m", m)
 	return m, nil
