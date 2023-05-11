@@ -23,13 +23,13 @@ VERSION_PACKAGE=github.com/OpenIMSDK/Open-IM-Server/pkg/version
 # ==============================================================================
 # Includes
 
-include scripts/make-rules/common.mk	# make sure include common.mk at the first include line
-include scripts/make-rules/golang.mk
-include scripts/make-rules/image.mk
-include scripts/make-rules/copyright.mk
-include scripts/make-rules/gen.mk
-include scripts/make-rules/dependencies.mk
-include scripts/make-rules/tools.mk
+include script/make-rules/common.mk	# make sure include common.mk at the first include line
+include script/make-rules/golang.mk
+include script/make-rules/image.mk
+include script/make-rules/copyright.mk
+include script/make-rules/gen.mk
+include script/make-rules/dependencies.mk
+include script/make-rules/tools.mk
 
 # ==============================================================================
 # Usage
