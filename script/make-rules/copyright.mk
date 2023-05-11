@@ -17,7 +17,7 @@
 # Makefile helper functions for copyright
 #
 
-LICENSE_TEMPLATE ?= $(ROOT_DIR)/scripts/LICENSE_TEMPLATE
+LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATE
 
 # TODO: GOBIN -> TOOLS_DIR
 # Questions about go mod instead of go path: https://github.com/kubernetes/kubernetes/issues/117181
@@ -55,5 +55,5 @@ copyright.add: tools.verify.addlicense
 
 ## copyright.help: Show copyright help
 .PHONY: copyright.help
-copyright.help: scripts/make-rules/copyright.mk
+copyright.help: script/make-rules/copyright.mk
 	$(call smallhelp)

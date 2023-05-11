@@ -132,9 +132,9 @@ install.github-release:
 ## install.gvm: Install gvm, gvm is a Go version manager, built on top of the official go tool.
 .PHONY: install.gvm
 install.gvm:
-	@echo "===========> Installing gvm,The default installation path is ~/.gvm/scripts/gvm"
+	@echo "===========> Installing gvm,The default installation path is ~/.gvm/script/gvm"
 	@bash < <(curl -s -S -L https://raw.gitee.com/moovweb/gvm/master/binscripts/gvm-installer)
-	@$(shell source /root/.gvm/scripts/gvm)
+	@$(shell source /root/.gvm/script/gvm)
 
 ## install.golines: Install golines, used to format long lines
 .PHONY: install.golines
@@ -164,7 +164,7 @@ install.protoc-gen-go:
 ## install.cfssl: Install cfssl, used to generate certificates
 .PHONY: install.cfssl
 install.cfssl:
-	@$(ROOT_DIR)/scripts/install/install.sh iam::install::install_cfssl
+	@$(ROOT_DIR)/script/install/install.sh iam::install::install_cfssl
 
 ## install.depth: Install depth, used to check dependency tree
 .PHONY: install.depth
@@ -198,5 +198,5 @@ install.codegen:
 
 ## tools.help: Display help information about the tools package
 .PHONY: tools.help
-tools.help: scripts/make-rules/tools.mk
+tools.help: script/make-rules/tools.mk
 	$(call smallhelp)

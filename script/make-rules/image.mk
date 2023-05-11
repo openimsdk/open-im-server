@@ -16,6 +16,12 @@
 # Makefile helper functions for docker image
 # TODO: For the time being only used for compilation, it can be arm or amd, please do not delete it, it can be extended with new functions
 # ==============================================================================
-# Path: scripts/make-rules/image.mk
+# Path: script/make-rules/image.mk
 # docker registry: registry.example.com/namespace/image:tag as: registry.hub.docker.com/cubxxw/<image-name>:<tag>
 #
+
+
+## image.help: Print help for image targets
+.PHONY: image.help
+image.help: script/make-rules/image.mk
+	$(call smallhelp)
