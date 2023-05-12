@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -12,7 +13,11 @@ import (
 	"github.com/dtm-labs/rockscache"
 )
 
-const scanCount = 3000
+const (
+	scanCount     = 3000
+	retryTimes    = 5
+	retryInterval = time.Second * 1
+)
 
 var errIndex = errors.New("err index")
 
@@ -30,14 +35,26 @@ func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
 }
 
 type metaCacheRedis struct {
-	rcClient *rockscache.Client
-	keys     []string
+	rcClient      *rockscache.Client
+	keys          []string
+	maxRetryTimes int
 }
 
 func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 	if len(m.keys) > 0 {
-		log.ZDebug(ctx, "DelKey", "keys", m.keys)
-		return m.rcClient.TagAsDeletedBatch2(ctx, m.keys)
+		log.ZDebug(ctx, "delete cache", "keys", m.keys)
+		retryTimes := 0
+		for {
+			if err := m.rcClient.TagAsDeletedBatch2(ctx, m.keys); err != nil {
+				if retryTimes >= m.maxRetryTimes {
+					err = errs.ErrInternalServer.Wrap(fmt.Sprintf("delete cache error %v, retry times %d", err, retryTimes))
+					log.ZWarn(ctx, "delete cache failed", err, "keys", m.keys)
+				}
+				retryTimes++
+			} else {
+				break
+			}
+		}
 	}
 	return nil
 }

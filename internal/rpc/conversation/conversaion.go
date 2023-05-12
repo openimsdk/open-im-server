@@ -13,6 +13,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -20,9 +21,10 @@ import (
 )
 
 type conversationServer struct {
-	group                          *rpcclient.GroupClient
+	groupRpcClient                 *rpcclient.GroupClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
+	msgRpcClient                   rpcclient.MsgClient
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -40,7 +42,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationDB := relation.NewConversationGorm(db)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
-		group:                          rpcclient.NewGroupClient(client),
+		groupRpcClient:                 rpcclient.NewGroupClient(client),
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
@@ -116,7 +118,7 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	var err error
 	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.group.GetGroupInfo(ctx, req.Conversation.GroupID)
+		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -221,4 +223,23 @@ func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConv
 		return nil, err
 	}
 	return &pbConversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
+}
+
+func (c *conversationServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *pbConversation.GetConversationsHasReadAndMaxSeqReq) (*pbConversation.GetConversationsHasReadAndMaxSeqResp, error) {
+	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	maxSeqs, err := c.msgRpcClient.GetMaxSeq(ctx, &sdkws.GetMaxSeqReq{UserID: req.UserID})
+	if err != nil {
+		return nil, err
+	}
+	resp := &pbConversation.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*pbConversation.Seqs)}
+	for _, v := range conversations {
+		resp.Seqs[v.ConversationID] = &pbConversation.Seqs{
+			HasReadSeq: v.HasReadSeq,
+			MaxSeq:     maxSeqs.MaxSeqs[v.ConversationID],
+		}
+	}
+	return resp, nil
 }

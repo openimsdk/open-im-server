@@ -57,3 +57,7 @@ func (o *Conversation) SetRecvMsgOpt(c *gin.Context) {
 func (o *Conversation) ModifyConversationField(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.ModifyConversationField, o.client, c)
 }
+
+func (o *Conversation) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.GetConversationsHasReadAndMaxSeq, o.client, c)
+}

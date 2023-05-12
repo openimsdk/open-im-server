@@ -25,7 +25,7 @@ type ConversationModel struct {
 	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 	MaxSeq                int64  `gorm:"column:max_seq" json:"maxSeq"`
 	MinSeq                int64  `gorm:"column:min_seq" json:"minSeq"`
-	IsReadSeq             int64  `gorm:"column:is_read_seq" json:"isReadSeq"`
+	HasReadSeq            int64  `gorm:"column:is_read_seq" json:"hasReadSeq"`
 }
 
 func (ConversationModel) TableName() string {
