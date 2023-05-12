@@ -249,10 +249,10 @@ const (
 	FieldAttachedInfo  = 3
 	FieldIsPrivateChat = 4
 	FieldGroupAtType   = 5
-	FieldIsNotInGroup  = 6
 	FieldEx            = 7
 	FieldUnread        = 8
 	FieldBurnDuration  = 9
+	FieldHasReadSeq    = 10
 )
 
 const (

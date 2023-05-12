@@ -15,7 +15,7 @@ import (
 
 const (
 	scanCount     = 3000
-	retryTimes    = 5
+	maxRetryTimes = 5
 	retryInterval = time.Second * 1
 )
 
@@ -31,13 +31,14 @@ type metaCache interface {
 }
 
 func NewMetaCacheRedis(rcClient *rockscache.Client, keys ...string) metaCache {
-	return &metaCacheRedis{rcClient: rcClient, keys: keys}
+	return &metaCacheRedis{rcClient: rcClient, keys: keys, maxRetryTimes: maxRetryTimes, retryInterval: retryInterval}
 }
 
 type metaCacheRedis struct {
 	rcClient      *rockscache.Client
 	keys          []string
 	maxRetryTimes int
+	retryInterval time.Duration
 }
 
 func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
@@ -47,8 +48,9 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 		for {
 			if err := m.rcClient.TagAsDeletedBatch2(ctx, m.keys); err != nil {
 				if retryTimes >= m.maxRetryTimes {
-					err = errs.ErrInternalServer.Wrap(fmt.Sprintf("delete cache error %v, retry times %d", err, retryTimes))
+					err = errs.ErrInternalServer.Wrap(fmt.Sprintf("delete cache error: %v, keys: %v, retry times %d, please check redis server", err, m.keys, retryTimes))
 					log.ZWarn(ctx, "delete cache failed", err, "keys", m.keys)
+					return err
 				}
 				retryTimes++
 			} else {

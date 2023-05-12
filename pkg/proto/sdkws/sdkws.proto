@@ -394,17 +394,21 @@ message UserInfoUpdatedTips{
 
 //////////////////////conversation/////////////////////
 message ConversationUpdateTips{
-  string UserID = 1;
+  string userID = 1;
   repeated string conversationIDList = 2;
-  int64 updateUnreadCountTime = 3;
-
-
 }
 
 message ConversationSetPrivateTips{
   string recvID = 1;
   string sendID = 2;
   bool isPrivate = 3;
+}
+
+message ConversationHasReadTips {
+  string userID = 1;
+  string conversationID = 2;
+  int64 hasReadSeq = 3;
+  int64 unreadCountTime = 4;
 }
 
 ////////////////////message///////////////////////

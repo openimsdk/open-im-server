@@ -54,11 +54,11 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 	if err != nil {
 		return nil, err
 	}
-	if len(conversations) > 0 {
-		resp.Conversation = convert.ConversationDB2Pb(conversations[0])
-		return resp, nil
+	if len(conversations) < 1 {
+		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
 	}
-	return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
+	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
+	return resp, nil
 }
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
@@ -126,12 +126,9 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 			return nil, err
 		}
 	}
-	var conversation tableRelation.ConversationModel
-	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
-		return nil, err
-	}
+	conversation := convert.ConversationPb2DB(req.Conversation)
 	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, &conversation)
+		err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, []*tableRelation.ConversationModel{conversation})
 		if err != nil {
 			return nil, err
 		}
@@ -144,8 +141,6 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		filedMap["recv_msg_opt"] = req.Conversation.RecvMsgOpt
 	case constant.FieldGroupAtType:
 		filedMap["group_at_type"] = req.Conversation.GroupAtType
-	case constant.FieldIsNotInGroup:
-		filedMap["is_not_in_group"] = req.Conversation.IsNotInGroup
 	case constant.FieldIsPinned:
 		filedMap["is_pinned"] = req.Conversation.IsPinned
 	case constant.FieldEx:
@@ -155,10 +150,11 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	case constant.FieldUnread:
 		isSyncConversation = false
 		filedMap["update_unread_count_time"] = req.Conversation.UpdateUnreadCountTime
+		filedMap["has_read_seq"] = req.Conversation.HasReadSeq
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
-	err = c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, &conversation, filedMap)
+	err = c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, conversation, filedMap)
 	if err != nil {
 		return nil, err
 	}
@@ -169,10 +165,85 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		}
 	} else {
 		for _, v := range req.UserIDList {
-			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime)
+			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime, req.Conversation.HasReadSeq)
 		}
 	}
 	return resp, nil
+}
+
+func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
+	isSyncConversation := true
+	if req.Conversation.ConversationType == constant.GroupChatType {
+		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			return nil, err
+		}
+	}
+	var conversation tableRelation.ConversationModel
+	conversation.ConversationID = req.Conversation.ConversationID
+	conversation.ConversationType = req.Conversation.ConversationType
+	conversation.UserID = req.Conversation.UserID
+	conversation.GroupID = req.Conversation.GroupID
+	m := make(map[string]interface{})
+	if req.Conversation.RecvMsgOpt != nil {
+		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+	}
+	if req.Conversation.DraftTextTime != nil {
+		m["draft_text_time"] = req.Conversation.DraftTextTime.Value
+	}
+	if req.Conversation.UnreadCount != nil {
+		m["unread_count"] = req.Conversation.UnreadCount.Value
+	}
+	if req.Conversation.AttachedInfo != nil {
+		m["attached_info"] = req.Conversation.AttachedInfo.Value
+	}
+	if req.Conversation.Ex != nil {
+		m["ex"] = req.Conversation.Ex.Value
+	}
+	if req.Conversation.IsPinned != nil {
+		m["is_pinned"] = req.Conversation.IsPinned.Value
+	}
+	if req.Conversation.IsPrivateChat != nil {
+		var conversations []*tableRelation.ConversationModel
+		for _, ownerUserID := range req.UserIDs {
+			conversation2 := conversation
+			conversation.OwnerUserID = ownerUserID
+			conversation.IsPrivateChat = req.Conversation.IsPrivateChat.Value
+			conversations = append(conversations, &conversation2)
+		}
+		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
+			return nil, err
+		}
+		for _, ownerUserID := range req.UserIDs {
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, ownerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
+		}
+	}
+	if req.Conversation.BurnDuration != nil {
+		m["burn_duration"] = req.Conversation.BurnDuration.Value
+	}
+	if req.Conversation.HasReadSeq != nil && req.Conversation.UpdateUnreadCountTime != nil {
+		isSyncConversation = false
+		m["has_read_seq"] = req.Conversation.HasReadSeq.Value
+		m["update_unread_count_time"] = req.Conversation.UpdateUnreadCountTime.Value
+	}
+	err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m)
+	if err != nil {
+		return nil, err
+	}
+
+	if isSyncConversation {
+		for _, v := range req.UserIDs {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
+		}
+	} else {
+		for _, v := range req.UserIDs {
+			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime.Value, req.Conversation.HasReadSeq.Value)
+		}
+	}
+	return &pbConversation.SetConversationsResp{}, nil
 }
 
 // 获取超级大群开启免打扰的用户ID

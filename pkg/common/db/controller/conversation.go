@@ -17,7 +17,7 @@ type ConversationDatabase interface {
 	//CreateConversation 创建一批新的会话
 	CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error
 	//SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
-	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error
+	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation []*relationTb.ConversationModel) error
 	//FindConversations 根据会话ID获取某个用户的多个会话
 	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
 	//FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
@@ -95,39 +95,39 @@ func (c *ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context,
 }
 
 func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
-	return c.tx.Transaction(func(tx any) error {
-		if err := c.conversationDB.NewTx(tx).Create(ctx, conversations); err != nil {
-			return err
-		}
-		return nil
-	})
+	if err := c.conversationDB.Create(ctx, conversations); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversation *relationTb.ConversationModel) error {
+func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationTb.ConversationModel) error {
 	return c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
 		cache := c.cache.NewCache()
-		for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
-			haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
-			if err != nil {
-				return err
-			}
-			if len(haveUserIDs) > 0 {
-				_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+		for _, conversation := range conversations {
+			for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
+				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
 				if err != nil {
 					return err
 				}
-				cache = cache.DelUsersConversation(conversation.ConversationID, v[0])
-			} else {
-				newConversation := *conversation
-				newConversation.OwnerUserID = v[0]
-				newConversation.UserID = v[1]
-				newConversation.ConversationID = conversation.ConversationID
-				newConversation.IsPrivateChat = conversation.IsPrivateChat
-				if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
-					return err
+				if len(haveUserIDs) > 0 {
+					_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+					if err != nil {
+						return err
+					}
+					cache = cache.DelUsersConversation(conversation.ConversationID, v[0])
+				} else {
+					newConversation := *conversation
+					newConversation.OwnerUserID = v[0]
+					newConversation.UserID = v[1]
+					newConversation.ConversationID = conversation.ConversationID
+					newConversation.IsPrivateChat = conversation.IsPrivateChat
+					if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
+						return err
+					}
+					cache = cache.DelConversationIDs([]string{v[0]})
 				}
-				cache = cache.DelConversationIDs([]string{v[0]})
 			}
 		}
 		return c.cache.ExecDel(ctx)

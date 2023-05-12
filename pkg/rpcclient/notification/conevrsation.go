@@ -36,11 +36,12 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 }
 
 // 会话未读数同步
-func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, updateUnreadCountTime int64) error {
-	tips := &sdkws.ConversationUpdateTips{
-		UserID:                userID,
-		ConversationIDList:    []string{conversationID},
-		UpdateUnreadCountTime: updateUnreadCountTime,
+func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, unreadCountTime, hasReadSeq int64) error {
+	tips := &sdkws.ConversationHasReadTips{
+		UserID:          userID,
+		ConversationID:  conversationID,
+		HasReadSeq:      hasReadSeq,
+		UnreadCountTime: unreadCountTime,
 	}
 	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }
