@@ -239,6 +239,15 @@ func IsNotification(conversationID string) bool {
 	return strings.HasPrefix(conversationID, "n_")
 }
 
+func GetNotificationConvetstionID(conversationID string) string {
+	l := strings.Split(conversationID, "_")
+	if len(l) > 2 {
+		l[0] = "n"
+		return strings.Join(l, "_")
+	}
+	return ""
+}
+
 type MsgBySeq []*sdkws.MsgData
 
 func (s MsgBySeq) Len() int {
