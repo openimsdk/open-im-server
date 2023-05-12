@@ -61,3 +61,7 @@ func (o *Conversation) ModifyConversationField(c *gin.Context) {
 func (o *Conversation) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversationsHasReadAndMaxSeq, o.client, c)
 }
+
+func (o *Conversation) SetConversations(c *gin.Context) {
+	a2r.Call(conversation.ConversationClient.SetConversations, o.client, c)
+}

@@ -164,6 +164,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 		conversationGroup.POST("/get_conversations_has_read_and_max_seq", c.GetConversationsHasReadAndMaxSeq)
+		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
 	return r
 }
