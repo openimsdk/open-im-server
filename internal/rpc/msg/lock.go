@@ -2,11 +2,12 @@ package msg
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 )
 
-const GlOBLLOCK = "GLOBAL_LOCK"
+const GlOBALLOCK = "GLOBAL_LOCK"
 
 type MessageLocker interface {
 	LockMessageTypeKey(ctx context.Context, clientMsgID, typeKey string) (err error)
@@ -36,7 +37,7 @@ func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typ
 }
 func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID string) (err error) {
 	for i := 0; i < 3; i++ {
-		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, GlOBLLOCK)
+		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
 		if err != nil {
 			time.Sleep(time.Millisecond * 100)
 			continue
@@ -51,5 +52,5 @@ func (l *LockerMessage) UnLockMessageTypeKey(ctx context.Context, clientMsgID st
 	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)
 }
 func (l *LockerMessage) UnLockGlobalMessage(ctx context.Context, clientMsgID string) error {
-	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, GlOBLLOCK)
+	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
 }
