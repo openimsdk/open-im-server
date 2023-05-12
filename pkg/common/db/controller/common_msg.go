@@ -346,38 +346,12 @@ func (db *commonMsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (m
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, err error) {
-	var hasSeqs []int64
-	singleCount := 0
-	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
-	for docID, value := range m {
-		doc, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
-		if err != nil {
-			log.ZError(ctx, "get message from mongo exception", err, "docID", docID)
-			continue
-		}
-		singleCount = 0
-		for i := 0; i < len(doc.Msg); i++ {
-			msgPb, err := db.unmarshalMsg(&doc.Msg[i])
-			if err != nil {
-				log.ZError(ctx, "unmarshal message exception", err, "docID", docID, "msg", &doc.Msg[i])
-				return nil, err
-			}
-			if utils.Contain(msgPb.Seq, value...) {
-				seqMsgs = append(seqMsgs, msgPb)
-				hasSeqs = append(hasSeqs, msgPb.Seq)
-				singleCount++
-				if singleCount == len(value) {
-					break
-				}
-			}
-		}
+	seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
+	if err != nil {
+		return nil, err
 	}
-	if len(hasSeqs) != len(seqs) {
-		var diff []int64
-		var exceptionMsg []*sdkws.MsgData
-		diff = utils.Difference(hasSeqs, seqs)
-		exceptionMsg = db.msg.GenExceptionSuperGroupMessageBySeqs(diff, conversationID)
-		seqMsgs = append(seqMsgs, exceptionMsg...)
+	for _, unexistSeq := range unexistSeqs {
+		seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
 	}
 	return seqMsgs, nil
 }

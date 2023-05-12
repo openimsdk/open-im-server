@@ -23,18 +23,17 @@ import (
 
 type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
-	RegisterCenter       discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase          controller.CommonMsgDatabase
-	notificationDatabase controller.NotificationDatabase
-	ExtendMsgDatabase    controller.ExtendMsgDatabase
-	Group                *rpcclient.GroupClient
-	User                 *rpcclient.UserClient
-	Conversation         *rpcclient.ConversationClient
-	friend               *rpcclient.FriendClient
-	black                *rpcclient.BlackClient
-	GroupLocalCache      *localcache.GroupLocalCache
-	MessageLocker        MessageLocker
-	Handlers             MessageInterceptorChain
+	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
+	MsgDatabase       controller.CommonMsgDatabase
+	ExtendMsgDatabase controller.ExtendMsgDatabase
+	Group             *rpcclient.GroupClient
+	User              *rpcclient.UserClient
+	Conversation      *rpcclient.ConversationClient
+	friend            *rpcclient.FriendClient
+	black             *rpcclient.BlackClient
+	GroupLocalCache   *localcache.GroupLocalCache
+	MessageLocker     MessageLocker
+	Handlers          MessageInterceptorChain
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -159,7 +158,7 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			for i := seq.Begin; i <= seq.End; i++ {
 				seqs = append(seqs, i)
 			}
-			notificationMsgs, err := m.notificationDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
+			notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
 			if err != nil {
 				return nil, err
 			}

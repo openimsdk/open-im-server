@@ -51,27 +51,24 @@ func StartTransfer(prometheusPort int) error {
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	msgModel := cache.NewMsgCacheModel(rdb)
-	notificationModel := cache.NewNotificationCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
-	notificationDocModel := unrelation.NewNotificationMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
 	extendMsgCache := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
-	notificationDatabase := controller.NewNotificationDatabase(notificationDocModel, notificationModel)
 	conversationRpcClient := rpcclient.NewConversationClient(client)
 
-	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, notificationDatabase, conversationRpcClient)
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, conversationRpcClient)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
-	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.CommonMsgDatabase, notificationDatabase controller.NotificationDatabase,
+	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationClient) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase, notificationDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 }
 
 func (m *MsgTransfer) initPrometheus() {

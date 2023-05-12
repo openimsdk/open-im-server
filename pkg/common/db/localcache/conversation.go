@@ -17,12 +17,14 @@ type ConversationLocalCacheInterface interface {
 type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	SuperGroupRecvMsgNotNotifyUserIDs map[string][]string
+	ConversationIDs                   map[string][]string
 	client                            discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewConversationLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *ConversationLocalCache {
 	return &ConversationLocalCache{
 		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string][]string, 0),
+		ConversationIDs:                   make(map[string][]string, 0),
 		client:                            client,
 	}
 }
