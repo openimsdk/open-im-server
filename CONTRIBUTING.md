@@ -16,22 +16,19 @@ This document provides guidelines and best practices to help you contribute effe
 - [Release version](#Release-version)
 - [Contact Us](#Contact-Us)
 
-
 ## What we expect of you
 
 We hope that anyone can join Open-IM-Server , even if you are a student, writer, translator
 
 Please meet the minimum version of the Go language published in [go.mod](./go.mod). If you want to manage the Go language version, we provide tools to install [gvm](https://github.com/moovweb/gvm) in our [Makefile](./Makefile)
 
-You'd better use Linux as the development environment, Linux with [Makefile](./Makefile) can help you quickly build and test Open-IM-Server project.
+You'd better use Linux OR WSL as the development environment, Linux with [Makefile](./Makefile) can help you quickly build and test Open-IM-Server project.
 
 If you are familiar with [Makefile](./Makefile) , you can easily see the clever design of the Open-IM-Server Makefile. Storing the necessary tools such as golangci in the `/tools` directory can avoid some tool version issues.
 
 The [Makefile](./Makefile) is for every developer, even if you don't know how to use the Makefile tool, don't worry, we provide two great commands to get you up to speed with the Makefile architecture, `make help` and `make help-all`, it can reduce problems of the developing environment.
 
-
-
-## Code of Conduct
+## Code of ConductCode of Conduct
 
 #### Code and doc contribution
 
@@ -57,35 +54,30 @@ Every action to make project Open-IM-Server better is encouraged. On GitHub, eve
 
 #### Design documents
 
-For any substantial design, there should be a well-crafted design document. This document is not just a simple record, but also a detailed description and manifestation, which can help team members better understand the design thinking and grasp the design direction. In the process of writing the design document, we can choose to use tools such as `Google Docs` or `Notion`, and even mark **RFC** in [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) or [discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions) for better collaboration. Of course, after completing the design document, we should also add it to our [Shared Drive](https://drive.google.com/drive/) and notify the appropriate working group to let everyone know of its existence. Only by doing so can we maximize the effectiveness of the design document and provide strong support for the smooth progress of the project.
+For any substantial design, there should be a well-crafted design document. This document is not just a simple record, but also a detailed description and manifestation, which can help team members better understand the design thinking and grasp the design direction. In the process of writing the design document, we can choose to use tools such as `Google Docs` or `Notion`, and even mark RFC in [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) or [discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions) for better collaboration. Of course, after completing the design document, we should also add it to our [Shared Drive](https://drive.google.com/drive/) and notify the appropriate working group to let everyone know of its existence. Only by doing so can we maximize the effectiveness of the design document and provide strong support for the smooth progress of the project.
 
 Anybody can access the shared Drive for reading. To get access to comment. Once you've done that, head to the [shared Drive](https://drive.google.com/) and behold all the docs.
 
-In addition to that, we'd love to invite you to [Join Our Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) where you can play with your imagination, tell us what you're working on, and get a quick response.
+In addition to that, we'd love to invite you to [join our Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) where you can play with your imagination, tell us what you're working on, and get a quick response.
 
 When documenting a new design, we recommend a 2-step approach:
 
-1. Use the short-form **RFC** template to outline your ideas and get early feedback.
-2. Once you have received sufficient feedback and consensus, you may use the **longer-form design doc template** to specify and discuss your design in more details.
+1. Use the short-form RFC template to outline your ideas and get early feedback.
+2. Once you have received sufficient feedback and consensus, you may use the longer-form design doc template to specify and discuss your design in more details.
 
-**In order to contribute a feature to Open-IM-Server you'll need to go through the following steps:**
+In order to contribute a feature to Open-IM-Server you'll need to go through the following steps:
 
 + Discuss your idea with the appropriate [working groups](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) on the working group's Slack channel.
 + Once there is general agreement that the feature is useful, create a GitHub issue to track the discussion. The issue should include information about the requirements and use cases that it is trying to address.
 + Include a discussion of the proposed design and technical details of the implementation in the issue.
 
-But keep in mind that there is no guarantee of it being accepted and so it is usually best to get agreement on the **idea/design** before time is spent coding it. However, sometimes seeing the exact code change can help focus discussions, so the choice is up to you.
-
-
+But keep in mind that there is no guarantee of it being accepted and so it is usually best to get agreement on the idea/design before time is spent coding it. However, sometimes seeing the exact code change can help focus discussions, so the choice is up to you.
 
 ## Getting Started
 
-> **Note**
->
-> A simple example allows you to quickly contribute your first **PR** to Open-IM-Server.
-> To propose PR for the Open-IM-Server item, we assume you have registered a GitHub ID. Then you could finish the preparation in the following steps:
+To propose PR for the Open-IM-Server item, we assume you have registered a GitHub ID. Then you could finish the preparation in the following steps:
 
-1. **Fork** the repository(Open-IM-Server)
+1. Fork the repository(Open-IM-Server)
 
 2. **CLONE** your own repository to master locally. Use `git clone https://github.com/<your-username>/Open-IM-Server.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
 
@@ -96,9 +88,9 @@ But keep in mind that there is no guarantee of it being accepted and so it is us
    ❯ git remote set-url --push upstream no-pushing
    ```
 
-   With this remote setting, you can check your **git remote configuration** like this:
+   With this remote setting, you can check your git remote configuration like this:
 
-   ```go
+   ```bash
    ❯ git remote -v
    origin     https://github.com/<your-username>/Open-IM-Server.git (fetch)
    origin     https://github.com/<your-username>/Open-IM-Server.git (push)
@@ -122,23 +114,29 @@ But keep in mind that there is no guarantee of it being accepted and so it is us
    ❯ git checkout -b <new-branch>
    ```
 
-   Make any change on the `new-branch` then use [Makefile](./Makefile) **build** and **test** your codes.
+   Make any change on the `new-branch` then use [Makefile](./Makefile) build and test your codes.
 
 5. **Commit your changes** to your local branch, lint before committing and commit with sign-off
 
    ```bash
    ❯ git rebase upstream/main
-   ❯ make lint	  # golangci-lint run -c .golangci.yml
+   ❯ make link	  # golangci-lint run -c .golangci.yml
    ❯ git add -A  # add changes to staging
-   ❯ git commit -a -s -m "fix: message for your changes" # -s adds a Signed-off-by trailer
+   ❯ git commit -a -s -m "message for your changes" # -s adds a Signed-off-by trailer
    ```
 
-6. **Push your branch** to your forked repository, it is recommended to have only one commit for a **PR**.
+6. **Push your branch**  to your forked repository, it is recommended to have only one commit for a PR.
 
    ```bash
    # sync up with upstream
-   ❯ git fetch upstream
+   ❯ git fetch upstream main
    ❯ git rebase upstream/main
+   ❯ 
+   ❯ git rebase -i	<commit-id> # rebase with interactive mode to squash your commits into a single one
+   ❯ git push # push to the remote repository, if it's a first time push, run git push --set-upstream origin <new-branch># sync up with upstream
+   ❯ git fetch upstream main
+   git rebase upstream/main
+   
    ❯ git rebase -i	<commit-id> # rebase with interactive mode to squash your commits into a single one
    ❯ git push # push to the remote repository, if it's a first time push, run git push --set-upstream origin <new-branch>
    ```
@@ -166,8 +164,6 @@ But keep in mind that there is no guarantee of it being accepted and so it is us
 
    It is recommended to review your changes before filing a pull request. Check if your code doesn't conflict with the main branch and no redundant code is included.
 
-
-
 ## Style and Specification
 
 We divide the problem into security and general problems:
@@ -176,7 +172,7 @@ We divide the problem into security and general problems:
 
 Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of Open-IM-Server, please do not discuss it in public and even do not open a public issue.
 
-Instead we encourage you to send us a private email to 4closetool3@gmail.com to report this.
+Instead we encourage you to send us a private email to winxu81@gmail.com to report this.
 
 #### Reporting general issues
 
@@ -200,9 +196,6 @@ To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](
 + and so on 
 
 Also, we must be reminded when submitting a new question about Open-IM-Server, please remember to remove the sensitive data from your post. Sensitive data could be password, secret key, network locations, private business data and so on.
-
-> **Note**
-> We have requirements for **Commits**,  **PR**,  **Docs**, and good standards help us collaborate better and understand what you're doing.
 
 #### Commit Rules
 
@@ -244,58 +237,47 @@ No matter what the commit message, or commit content is, we do take more emphasi
 An example for this could be:
 
 ```bash
-❯ git commit -a -s -m "docs: add a new section to the readme"
+❯ git commit -a -s -m "docs: add a new section to the README"
 ```
 
 #### PR Description
 
-PR is the only way to make change to Open-IM-Server project files. To help reviewers better get your purpose, **PR** description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
+PR is the only way to make change to Open-IM-Server project files. To help reviewers better get your purpose, PR description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
 
 You can find some very formal PR in [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) issues and learn about them.
 
 **📖 Opening PRs:**
 
-+ As long as you are working on your **PR**, please mark it as a draft.
-+ Please make sure that your **PR** is up-to-date with the latest changes in `main`
-+ Mention the issue that your **PR** is addressing.  For example, `Fixes: #{ID_1}, #{ID_2}`
-+ Make sure that your **PR** passes all checks.
++ As long as you are working on your PR, please mark it as a draft
++ Please make sure that your PR is up-to-date with the latest changes in `main`
++ Mention the issue that your PR is addressing (Fix: #{ID_1}, #{ID_2})
++ Make sure that your PR passes all checks
 
 **🈴 Reviewing PRs:**
 
-+ Be respectful and constructive. 
-+ Assign yourself to the **PR**.
-+ Check if all checks are passing.
-+ Suggest changes instead of simply commenting on found issues.
-+ If you are unsure about something, ask the author.
-+ If you are not sure if the changes work, try them out.
-+ Reach out to other reviewers if you are unsure about something.
-+ If you are happy with the changes, approve the **PR**.
-+ Merge the **PR** once it has all approvals and the checks are passing.
++ Be respectful and constructive 
++ Assign yourself to the PR 
++ Check if all checks are passing
++ Suggest changes instead of simply commenting on found issues
++ If you are unsure about something, ask the author
++ If you are not sure if the changes work, try them out
++ Reach out to other reviewers if you are unsure about something
++ If you are happy with the changes, approve the PR
++ Merge the PR once it has all approvals and the checks are passing
 
 **⚠️ DCO check:**
 
-We have a [DCO check](https://github.com/apps/dco) which runs on every **PR** to verify that the commit has been signed off.
-
-Once [installed](https://github.com/apps/dco#usage), this integration will set the [status](https://developer.github.com/v3/repos/statuses/) to `failed` if commits in a **Pull Request** do not contain a valid `Signed-off-by` line.
-
-To sign off the last commit you made, you can use:
+We have a DCO check that runs on every pull request to ensure code quality and maintainability. This check verifies that the commit has been signed off, indicating that you have read and agreed to the provisions of the Developer Certificate of Origin. If you have not yet signed off on the commit, you can use the following command to sign off on the last commit you made:
 
 ```bash
 ❯ git commit --amend --signoff
 ```
 
-Contributors *sign-off*  that they adhere to these requirements by adding a `Signed-off-by` line to commit messages.
-
-Git even has a `-s` command line option to append this automatically to your commit message:
-
-```bash
-❯ git commit -s -m "docs: this is my commit message"
-```
+Please note that signing off on a commit is a commitment that you have read and agreed to the provisions of the Developer Certificate of Origin. If you have not yet read this document, we strongly recommend that you take some time to read it carefully. If you have any questions about the content of this document, or if you need further assistance, please contact an administrator or relevant personnel.
 
 You can also automate signing off your commits by adding the following to your `.zshrc` or `.bashrc`:
 
-```bash
-❯ cat ~/.bashrc || cat ~/.zshrc
+```go
 git() {
   if [ $# -gt 0 ] && [[ "$1" == "commit" ]] ; then
      shift
@@ -307,38 +289,16 @@ git() {
 ```
 
 
-#### CI actions
-
-We host CI on [GitHub Actions](https://github.com/OpenIMSDK/Open-IM-Server/actions), we will make sure PR pass tests before we can merge it.
-
-These two kind of tests: `lint` and `unit test`
-
-`lint` tests if your code matches our code conventions, please consult [golangci-lint](https://golangci-lint.run/) and [lint config](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.golangci.yml)
-
-> **Note**
->
-> You can use the [Makefile](./Makefile)  to run Lint with the command `make lint`.
-
-
-`unit test` runs all the test in code, and the code coverage should not less than 60 percent, record us in [codeclimate](https://codeclimate.com/github/OpenIMSDK/Open-IM-Server) Open-IM-Server the unit test coverage data.
-
-
-> **Note**
->
-> We use the [Makefile](./Makefile) utility, `make tese` to run the unit tests, and the `make cover` utility to check the unit test coverage.
-
-Try your best to keep every function has been tested, it keeps the function behaves as intended.
-
 #### Docs Contribution
 
-**The documentation for Open-IM-Server includes:**
+The documentation for Open-IM-Server includes:
 
 + [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md): This file includes the basic information and instructions for getting started with Open-IM-Server.
 + [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to Open-IM-Server's codebase, such as how to submit issues, pull requests, and code reviews.
 + [DEVELOPGUIDE.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/DEVELOPGUIDE.md): This file provides a more in-depth guide to developing Open-IM-Server, including information on the project's architecture, coding conventions, and testing practices.
-+ [Official Documentation](https://doc.rentsoft.cn): This is the official documentation for Open-IM-Server, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
++ [Official Documentation](https://doc.rentsoft.cn/): This is the official documentation for Open-IM-Server, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
 
-**Please obey the following rules to better format the docs, which would greatly improve the reading experience.**
+Please obey the following rules to better format the docs, which would greatly improve the reading experience.
 
 1. Please do not use Chinese punctuations in English docs, and vice versa.
 2. Please use upper case letters where applicable, like the first letter of sentences / headings, etc.
@@ -347,18 +307,9 @@ Try your best to keep every function has been tested, it keeps the function beha
 5. Please use the correct case for technical terms, such as using `HTTP` instead of http, `MySQL` rather than mysql, `Kubernetes` instead of kubernetes, etc.
 6. Please check if there's any typos in the docs before submitting PRs.
 
-**Markfile Lint:**
-We integrated in the CICD actions [markdownlint](https://github.com/markdownlint/markdownlint), it detects Markfile specification. 
-
-> **Note**
-> We recommend reading [markdownlint rules](https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md), This document contains  a description of all rules, what they are checking for,  as well as an examples of documents that break the rule and corrected versions of the examples.
-
-
-
-
 ## Engage to help anything
 
-We choose GitHub as the primary place for Open-IM-Server to collaborate. So the latest updates of Open-IM-Server are always here. Although contributions via **PR** is an explicit way to help, we still call for any other ways.
+We choose GitHub as the primary place for Open-IM-Server to collaborate. So the latest updates of Open-IM-Server are always here. Although contributions via PR is an explicit way to help, we still call for any other ways.
 
 + reply to other's [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) if you could;
 + help solve other user's problems;
@@ -369,18 +320,16 @@ We choose GitHub as the primary place for Open-IM-Server to collaborate. So the 
 
 In a word, **ANY HELP IS CONTRIBUTION.**
 
-
-
 ## Release version
 
 Releases of Open-IM-Server are done using [Release Please](https://github.com/googleapis/release-please) and [GoReleaser](https://goreleaser.com/). The workflow looks like this:
 
-🎯 **A PR is merged to the `main` branch:**
+🎯 A PR is merged to the `main` branch:
 
 + Release please is triggered, creates or updates a new release PR
 + This is done with every merge to main, the current release PR is updated every time
 
-🎯 **Merging the 'release please' PR to `main`:**
+🎯 Merging the 'release please' PR to `main`:
 
 + Release please is triggered, creates a new release and updates the changelog based on the commit messages
 + GoReleaser is triggered, builds the binaries and attaches them to the release
@@ -388,7 +337,7 @@ Releases of Open-IM-Server are done using [Release Please](https://github.com/go
 
 With the next relevant merge, a new release PR will be created and the process starts again
 
-👀 **Manually setting the version:**
+**👀 Manually setting the version:**
 
 If you want to manually set the version, you can create a PR with an empty commit message that contains the version number in the commit message. For example:
 
@@ -406,7 +355,7 @@ Our most recommended way to get in touch is through [Slack](https://join.slack.c
 
 In addition to Slack, we also offer the following ways to get in touch:
 
-+ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/Slack-OpenIM%2B-blueviolet?logo=slack&amp;logoColor=white"></a>:  We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) team channel.
++ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/slack-%40OpenIMSDKCore-informational?logo=slack&style=flat-square"></a>:  We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) team channel.
 + <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=4closetool3@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: Get in touch with us on [Gmail](winxu81@gmail.com). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
 + <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a>: Read our [blog](https://doc.rentsoft.cn/). Our blog is a great place to stay up-to-date with Open-IM-Server projects and trends. On the blog, we share our latest developments, tech trends, and other interesting information.
 + <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a>: Add [Wechat](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) and indicate that you are a user or developer of Open-IM-Server. We will process your request as soon as possible.
