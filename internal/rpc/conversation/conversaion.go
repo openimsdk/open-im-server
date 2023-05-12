@@ -113,6 +113,7 @@ func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversat
 	return &pbConversation.SetRecvMsgOptResp{}, nil
 }
 
+// deprecated
 func (c *conversationServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
 	resp := &pbConversation.ModifyConversationFieldResp{}
 	var err error
