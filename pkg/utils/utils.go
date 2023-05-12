@@ -248,6 +248,10 @@ func GetNotificationConvetstionID(conversationID string) string {
 	return ""
 }
 
+func GetSelfNotificationConversationID(userID string) []string {
+	return []string{"n_" + userID + "_" + userID, "si_" + userID + "_" + userID}
+}
+
 type MsgBySeq []*sdkws.MsgData
 
 func (s MsgBySeq) Len() int {
