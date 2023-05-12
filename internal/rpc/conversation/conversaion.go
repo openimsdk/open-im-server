@@ -10,6 +10,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tableRelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
@@ -219,6 +220,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 			return nil, err
 		}
 		for _, ownerUserID := range req.UserIDs {
+			log.ZDebug(ctx, "set private", "sendID", ownerUserID, "recvID", req.Conversation.UserID)
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, ownerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
 		}
 	}
