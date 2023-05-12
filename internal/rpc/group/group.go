@@ -11,6 +11,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
@@ -151,12 +152,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return nil, err
 	}
 	var groupMembers []*relationTb.GroupMemberModel
-	group := PbToDBGroupInfo(req.GroupInfo)
+	group := convert.Pb2DBGroupInfo(req.GroupInfo)
 	if err := s.GenGroupID(ctx, &group.GroupID); err != nil {
 		return nil, err
 	}
 	joinGroup := func(userID string, roleLevel int32) error {
-		groupMember := PbToDbGroupMember(userMap[userID])
+		groupMember := convert.Pb2DbGroupMember(userMap[userID])
 		groupMember.Nickname = ""
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = roleLevel
@@ -194,7 +195,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return nil, err
 	}
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &sdkws.GroupInfo{}}
-	resp.GroupInfo = DbToPbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
+	resp.GroupInfo = convert.Db2PbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
@@ -247,7 +248,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
 	}), func(group *relationTb.GroupModel) *sdkws.GroupInfo {
-		return DbToPbGroupInfo(group, ownerMap[group.GroupID].UserID, groupMemberNum[group.GroupID])
+		return convert.Db2PbGroupInfo(group, ownerMap[group.GroupID].UserID, groupMemberNum[group.GroupID])
 	})
 	return resp, nil
 }
@@ -323,7 +324,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		opUserID := mcontext.GetOpUserID(ctx)
 		var groupMembers []*relationTb.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
-			member := PbToDbGroupMember(userMap[userID])
+			member := convert.Pb2DbGroupMember(userMap[userID])
 			member.Nickname = ""
 			member.GroupID = req.GroupID
 			member.RoleLevel = constant.GroupOrdinaryUsers
@@ -371,7 +372,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }
@@ -394,7 +395,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }
@@ -491,7 +492,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }
@@ -542,7 +543,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	resp.GroupRequests = utils.Slice(groupRequests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
-		return DbToPbGroupRequest(e, userMap[e.UserID], DbToPbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNumMap[e.GroupID])))
+		return convert.Db2PbGroupRequest(e, userMap[e.UserID], convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNumMap[e.GroupID])))
 	})
 	return resp, nil
 }
@@ -568,7 +569,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		return e.GroupID
 	})
 	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *sdkws.GroupInfo {
-		return DbToPbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
+		return convert.Db2PbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
 	})
 	return resp, nil
 }
@@ -665,7 +666,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
 		}
-		groupMember := PbToDbGroupMember(user)
+		groupMember := convert.Pb2DbGroupMember(user)
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = constant.GroupOrdinaryUsers
 		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
@@ -873,7 +874,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 	}
 	resp.Groups = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.CMSGroup {
 		member := ownerMemberMap[group.GroupID]
-		return DbToPbCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID]))
+		return convert.Db2PbCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID]))
 	})
 	return resp, nil
 }
@@ -895,7 +896,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }
@@ -947,7 +948,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 		return nil, err
 	}
 	resp.GroupRequests = utils.Slice(requests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
-		return DbToPbGroupRequest(e, user, DbToPbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+		return convert.Db2PbGroupRequest(e, user, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
 	})
 	return resp, nil
 }
@@ -1176,7 +1177,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 	}
 	resp.GroupAbstractInfos = utils.Slice(groups, func(group *relationTb.GroupModel) *pbGroup.GroupAbstractInfo {
 		users := groupUserMap[group.GroupID]
-		return DbToPbGroupAbstractInfo(group.GroupID, users.MemberNum, users.Hash)
+		return convert.Db2PbGroupAbstractInfo(group.GroupID, users.MemberNum, users.Hash)
 	})
 	return resp, nil
 }
@@ -1200,7 +1201,7 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }
@@ -1233,7 +1234,7 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return DbToPbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMembersCMSResp(e)
 	})
 	return resp, nil
 }

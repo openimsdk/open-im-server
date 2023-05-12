@@ -49,14 +49,13 @@ edit_config() {
 }
 
 edit_enterprise_config() {
-  
     echo "Is edit enterprise config.yaml?"
     echo "1. vi edit enterprise config"
     echo "2. do not edit enterprise config"
     read choice
     case $choice in
     1)
-      vi docker-compose_cfg/config.yaml
+      vi ./.docker-compose_cfg/config.yaml
     ;;
     2)
       echo "Do not edit enterprise config"    
