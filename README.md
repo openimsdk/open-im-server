@@ -190,4 +190,4 @@ Thank you!
 
 ## License
 
-Open-IM-Server is under the Apache 2.0 license. See the [LICENSE](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) file for details
+Open-IM-Server is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details
