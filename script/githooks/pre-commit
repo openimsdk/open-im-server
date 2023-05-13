@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+# Copyright © 2023 OpenIMSDK.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+YELLOW="\e[93m"
+GREEN="\e[32m"
+RED="\e[31m"
+ENDCOLOR="\e[0m"
+
+printMessage() {
+   printf "${YELLOW}OpenIM : $1${ENDCOLOR}\n"
+}
+
+printSuccess() {
+   printf "${GREEN}OpenIM : $1${ENDCOLOR}\n"
+}
+
+printError() {
+   printf "${RED}OpenIM : $1${ENDCOLOR}\n"
+}
+
+printMessage "Running local OpenIM pre-commit hook."
+
+#flutter format .
+##https://gist.github.com/benmccallum/28e4f216d9d72f5965133e6c43aaff6e
+limit=$(( 1 * 2**20 )) # 1MB
+
+function file_too_large(){
+	filename=$0
+	filesize=$(( $1 / 2**20 ))
+
+	cat <<HEREDOC
+
+	File $filename is $filesize MB, which is larger than github's maximum
+        file size (1 MB). We will not be able to push this file to GitHub.
+	Commit aborted
+HEREDOC
+
+}
+
+empty_tree=$( git hash-object -t tree /dev/null )
+if git rev-parse --verify HEAD > /dev/null 2>&1
+then
+	against=HEAD
+else
+	against=empty_tree
+fi
+
+for file in $( git diff-index --cached --name-only $against ); do
+	file_size=$( ls -la $file | awk '{ print $5 }')
+	if [ "$file_size" -gt  "$limit" ]; then
+		file_too_large $filename $file_size
+		exit 1;
+	fi
+done
