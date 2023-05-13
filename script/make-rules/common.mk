@@ -32,7 +32,7 @@ endef
 # Here are some examples of builds
 define MAKEFILE_EXAMPLE
 # make build BINS=imctl                                          Only a single imctl binary is built.
-# make -j $(nproc) all                                           Run tidy gen add-copyright format lint cover build concurrently.
+# make -j (nproc) all                                            Run tidy gen add-copyright format lint cover build concurrently.
 # make gen                                                       Generate all necessary files.
 # make linux.arm64                                               imctl is compiled on arm64 platform.
 # make verify-copyright                                          Verify the license headers for all files.
