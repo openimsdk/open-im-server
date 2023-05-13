@@ -342,7 +342,7 @@ These two kind of tests: `lint` and `unit test`
 > You can use the [Makefile](./Makefile)  to run Lint with the command `make lint`.
 
 
-`unit test` runs all the test in code, and the code coverage should not less than 60 percent, record us in [codeclimate](https://codeclimate.com/github/OpenIMSDK/Open-IM-Server) OpenIM the unit test coverage data.
+`unit test` runs all the test in code, and the code coverage should not less than 60 percent, record us in [codeclimate](https://codeclimate.com/github.com/OpenIMSDK/Open-IM-Server) OpenIM the unit test coverage data.
 
 
 > **Note**
@@ -385,7 +385,7 @@ We choose GitHub as the primary place for OpenIM to collaborate. So the latest u
 + help solve other user's problems;
 + help review other's [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc) design; 
 + discuss about OpenIM to make things clearer;
-+ advocate [OpenIM](google.com/search?q=OpenIM) technology beyond GitHub;
++ advocate [OpenIM](https://google.com/search?q=OpenIM) technology beyond GitHub;
 + write blogs on OpenIM and so on.
 
 In a word, **ANY HELP IS CONTRIBUTION.**

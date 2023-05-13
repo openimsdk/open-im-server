@@ -1,0 +1,45 @@
+name: links when pr
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - '.lycheeignore'
+
+jobs:
+  linkChecker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Run Install
+        working-directory: docs         
+        run: npm install
+      - name: Run build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build # will run `yarn build` command in `docs` directory
+          dir: docs
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.5.0
+        with:
+          fail: true
+            # For parameter description, see https://github.com/lycheeverse/lychee#commandline-parameters
+            # -E, --exclude-all-private    Exclude all private IPs from checking.
+            # -i, --insecure               Proceed for server connections considered insecure (invalid TLS)
+            # -n, --no-progress            Do not show progress bar.
+            # -t, --timeout <timeout>      Website timeout in seconds from connect to response finished [default:20]
+            # --max-concurrency <max-concurrency>    Maximum number of concurrent network requests [default: 128]
+            # -a --accept <accept>                      Comma-separated list of accepted status codes for valid links
+
+            # docs/.vitepress/dist the site directory to check
+            # ./*.md all markdown files in the root directory
+          args: -E -i -n -t 45 --max-concurrency 64 -a 429,401 -- 'docs/.vitepress/dist' '*.md'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

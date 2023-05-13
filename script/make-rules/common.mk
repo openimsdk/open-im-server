@@ -70,6 +70,7 @@ endif
 GIT_COMMIT:=$(shell git rev-parse HEAD)
 
 # Minimum test coverage
+# can u use make cover COVERAGE=90
 ifeq ($(origin COVERAGE),undefined)
 COVERAGE := 60
 endif
