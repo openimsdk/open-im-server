@@ -16,6 +16,70 @@
 # Makefile helper functions for common tasks
 #
 
+SHELL := /bin/bash
+GO:=go
+DIRS=$(shell ls)
+DEBUG ?= 0
+GIT_TAG := $(shell git describe --exact-match --tags --abbrev=0  2> /dev/null || echo untagged)
+GIT_COMMIT ?= $(shell git rev-parse --short HEAD || echo "0.0.0")
+BUILD_DATE ?=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')	# Blank error: date '+%FT %T %z':"buildDate":"2023-03-31T 20:05:43 +0800"
+
+# include the common makefile
+COMMON_SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+
+# ROOT_DIR: root directory of the code base
+ifeq ($(origin ROOT_DIR),undefined)
+ROOT_DIR := $(abspath $(shell cd $(COMMON_SELF_DIR)/../.. && pwd -P))
+endif
+
+# OUTPUT_DIR: The directory where the build output is stored.
+ifeq ($(origin OUTPUT_DIR),undefined)
+OUTPUT_DIR := $(ROOT_DIR)/_output
+$(shell mkdir -p $(OUTPUT_DIR))
+endif
+
+# BIN_DIR: Directory where executable files are stored.
+ifeq ($(origin BIN_DIR),undefined)
+BIN_DIR := $(OUTPUT_DIR)/bin
+$(shell mkdir -p $(BIN_DIR))
+endif
+
+# TOOLS_DIR: The directory where tools are stored for build and testing.
+ifeq ($(origin TOOLS_DIR),undefined)
+TOOLS_DIR := $(ROOT_DIR)/tools
+$(shell mkdir -p $(TOOLS_DIR))
+endif
+
+# TMP_DIR: directory where temporary files are stored.
+ifeq ($(origin TMP_DIR),undefined)
+TMP_DIR := $(ROOT_DIR)/tmp
+$(shell mkdir -p $(TMP_DIR))
+endif
+
+ifeq ($(origin VERSION), undefined)
+VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')
+endif
+
+# Check if the tree is dirty. default to dirty(maybe u should commit?)
+GIT_TREE_STATE:="dirty"
+ifeq (, $(shell git status --porcelain 2>/dev/null))
+	GIT_TREE_STATE="clean"
+endif
+GIT_COMMIT:=$(shell git rev-parse HEAD)
+
+# Minimum test coverage
+ifeq ($(origin COVERAGE),undefined)
+COVERAGE := 60
+endif
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
 
 
