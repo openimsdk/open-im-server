@@ -119,6 +119,9 @@ ifndef V
 MAKEFLAGS += --no-print-directory
 endif
 
+# Copy githook scripts when execute makefile
+COPY_GITHOOK:=$(shell cp -f githooks/* .git/hooks/)
+
 # COMMA: Concatenate multiple strings to form a list of strings
 COMMA := ,
 # SPACE: Used to separate strings
