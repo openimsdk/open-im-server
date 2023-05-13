@@ -17,7 +17,7 @@
 # Makefile helper functions for copyright
 #
 
-LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATE
+LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATES
 
 # TODO: GOBIN -> TOOLS_DIR
 # Questions about go mod instead of go path: https://github.com/kubernetes/kubernetes/issues/117181
@@ -32,7 +32,7 @@ copyright.verify: tools.verify.addlicense
 .PHONY: copyright.add
 copyright.add: tools.verify.addlicense
 	@echo "===========> Adding $(LICENSE_TEMPLATE) the boilerplate headers for all files"
-	@$(GOBIN)/addlicense -y $(shell date +"%Y") -v -c "Alibaba Group Holding Ltd." -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
+	@$(GOBIN)/addlicense -y $(shell date +"%Y") -v -c "OpenIM." -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
 	@echo "===========> End the copyright is added..."
 
 # Addlicense Flags:
