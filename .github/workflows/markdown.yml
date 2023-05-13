@@ -1,0 +1,25 @@
+name: Markdown-related check
+
+on:
+  pull_request:
+    branches: "*"
+
+jobs:
+  markdown-related-check:
+    name: markdown-related check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Markdown Link Check
+      uses: docker://dragonflyoss/linter:v0.2.7
+      with:
+        # validate all links in markdown files excluding vendor folder
+        args: bash -c "code=0;for mdFile in $(find ./ -name '*.md' | grep -v vendor | grep -v .github); do markdown-link-check -q --config .github/workflows/.mlc_config.json $mdFile; if [ $? -ne 0 ]; then code=1; fi;done; echo $code; exit $code"
+
+    - name:  Markdown Lint
+      uses: docker://dragonflyoss/linter:v0.2.7
+      with:
+        # lint all markdown files excluding vendor folder
+        args: bash -c "find ./ -name '*.md' | grep -v vendor | grep -v .github | xargs mdl -r ~MD010,~MD013,~MD022,~MD024,~MD026,~MD029,~MD033,~MD036"
