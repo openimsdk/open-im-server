@@ -18,7 +18,7 @@
 #
 
 # sealer build use BUILD_TOOLS
-BUILD_TOOLS ?= golangci-lint goimports addlicense deepcopy-gen conversion-gen ginkgo go-junit-report
+BUILD_TOOLS ?= golangci-lint goimports addlicense deepcopy-gen conversion-gen ginkgo go-junit-report go-gitlint
 # Code analysis tools
 ANALYSIS_TOOLS = golangci-lint goimports golines go-callvis kube-score
 # Code generation tools
@@ -90,6 +90,11 @@ install.conversion-gen:
 install.ginkgo:
 	@$(GO) install github.com/onsi/ginkgo/ginkgo@v1.16.2
 
+## Install go-gitlint: Install go-gitlint, used to check git commit message
+.PHONY: install.go-gitlint
+install.go-gitlint:
+	@$(GO) install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
+
 ## install.go-junit-report: Install go-junit-report, used to convert go test output to junit xml
 .PHONY: install.go-junit-report
 install.go-junit-report:
@@ -108,11 +113,6 @@ install.kube-score:
 .PHONY: install.kubeconform
 install.kubeconform:
 	@$(GO) install github.com/yannh/kubeconform/cmd/kubeconform@latest
-
-## Install go-gitlint: Install go-gitlint, used to check git commit message
-.PHONY: install.go-gitlint
-install.go-gitlint:
-	@$(GO) install github.com/marmotedu/go-gitlint/cmd/go-gitlint@latest
 
 ## install.gsemver: Install gsemver, used to generate semver
 .PHONY: install.gsemver
