@@ -15,11 +15,16 @@
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
 
+</p>
+
+<p align="center">
+    <a href="./README.md"><b>English</b></a> •
+    <a href="./README_zh.md"><b>中文</b></a>
+</p>
+
+</p>
 
 ## What is Open-IM-Server
-
-> **Note** 🔍 
-> English | [中文](./README_zh.md)
 
 Instant messaging server. Backend in pure Golang, wire transport protocol is JSON over websocket.
 Everything is a message in Open-IM-Server, so you can extend custom messages easily, there is no need to modify the server code.
