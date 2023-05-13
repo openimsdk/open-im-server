@@ -81,7 +81,50 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+# The OS must be linux when building docker images
+PLATFORMS ?= linux_amd64 linux_arm64
+# The OS can be linux/windows/darwin when building binaries
+# PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
 
+
+# set a specific PLATFORM, defaults to the host platform
+ifeq ($(origin PLATFORM), undefined)
+	ifeq ($(origin GOARCH), undefined)
+		GOARCH := $(shell go env GOARCH)
+	endif
+	ifeq ($(origin GOARCH), undefined)
+		GOARCH := $(shell go env GOARCH)
+	endif
+	PLATFORM := $(GOOS)_$(GOARCH)
+	# Use linux as the default OS when building images
+	IMAGE_PLAT := linux_$(GOARCH)
+else
+	# such as: PLATFORM = linux_amd64
+	GOOS := $(word 1, $(subst _, ,$(PLATFORM)))
+	GOARCH := $(word 2, $(subst _, ,$(PLATFORM)))
+	IMAGE_PLAT := $(PLATFORM)
+endif
+
+# Linux command settings
+# TODO: Whether you need to join utils?
+FIND := find . ! -path './utils/*' ! -path './vendor/*'
+XARGS := xargs -r
+
+# Linux command settings-CODE DIRS Copyright
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/deploy $(ROOT_DIR)/deploy_k8s $(ROOT_DIR)/docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/script $(ROOT_DIR)/test
+FINDS := find $(CODE_DIRS)
+
+# Makefile settings: Select different behaviors by determining whether V option is set
+ifndef V
+MAKEFLAGS += --no-print-directory
+endif
+
+# COMMA: Concatenate multiple strings to form a list of strings
+COMMA := ,
+# SPACE: Used to separate strings
+SPACE :=
+# SPACE: Replace multiple consecutive Spaces with a single space
+SPACE +=
 
 # ==============================================================================
 # Makefile helper functions for common tasks
