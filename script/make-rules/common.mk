@@ -120,7 +120,7 @@ MAKEFLAGS += --no-print-directory
 endif
 
 # Copy githook scripts when execute makefile
-COPY_GITHOOK:=$(shell cp -f script/githooks/* .git/hooks/; chmod +x .git/hooks/commit-msg')
+COPY_GITHOOK:=$(shell cp -f script/githooks/* .git/hooks/; chmod +x .git/hooks/*)
 
 # COMMA: Concatenate multiple strings to form a list of strings
 COMMA := ,
