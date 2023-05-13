@@ -43,6 +43,10 @@ deploy/open_im_rpc_msg
 deploy/open_im_rpc_auth
 deploy/Open-IM-SDK-Core
 
+# files used by the developer
+.idea.md
+.todo.md
+.note.md
 
 # ==============================================================================
 # Created by https://www.toptal.com/developers/gitignore/api/go,git,vim,tags,test,emacs,backup,jetbrains
