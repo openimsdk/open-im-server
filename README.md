@@ -1,6 +1,6 @@
 <h1 align="center" style="border-bottom: none">
     <b>
-        <a href="doc.rentsoft.cn/">Open IM Server</a><br>
+        <a href="https://doc.rentsoft.cn/">Open IM Server</a><br>
     </b>
     ⭐️  Open source Instant Messaging Server  ⭐️ <br>
 </h1>
@@ -174,7 +174,7 @@ Contributions to this project are welcome! Please see [CONTRIBUTING.md](./CONTRI
 ## Community Meetings
 We want anyone to get involved in our community, we offer gifts and rewards, and we welcome you to join us every Thursday night.
 
-We take notes of each [biweekly meeting](https://github.com/OpenIMSDK/Open-IM-Server/issues/381) in [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting), and our minutes are written in [Google Docs](docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
+We take notes of each [biweekly meeting](https://github.com/OpenIMSDK/Open-IM-Server/issues/381) in [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting), and our minutes are written in [Google Docs](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 
 
 ## Who are using Open-IM-Server
