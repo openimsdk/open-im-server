@@ -402,14 +402,18 @@ func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seq
 	}
 	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "len(msgs)", len(msgs))
 	seqMsgs = append(seqMsgs, msgs...)
-	for i, seq := range seqs {
-		for _, msg := range msgs {
-			if seq == msg.Seq {
-				break
+	if len(msgs) == 0 {
+		unExistSeqs = seqs
+	} else {
+		for _, seq := range seqs {
+			for i, msg := range msgs {
+				if seq == msg.Seq {
+					break
+				}
+				if i == len(msgs)-1 {
+					unExistSeqs = append(unExistSeqs, seq)
+				}
 			}
-		}
-		if i == len(seqs)-1 {
-			unExistSeqs = append(unExistSeqs, seq)
 		}
 	}
 	msgs, _, unExistSeqs, err = db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, unExistSeqs)
