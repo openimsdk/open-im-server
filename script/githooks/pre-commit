@@ -36,7 +36,8 @@ printMessage "Running local OpenIM pre-commit hook."
 
 #flutter format .
 ##https://gist.github.com/benmccallum/28e4f216d9d72f5965133e6c43aaff6e
-limit=$(( 1 * 2**20 )) # 1MB
+# TODO! GIT_FILE_SIZE_LIMIT=42000000 git commit -m "This commit is allowed file sizes up to 42MB"
+limit=$(( 2 * 2**20 )) # 2MB
 
 function file_too_large(){
 	filename=$0
