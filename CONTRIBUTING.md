@@ -35,7 +35,7 @@ The [Makefile](./Makefile) is for every developer, even if you don't know how to
 
 #### Code and doc contribution
 
-Every action to make project OpenIM better is encouraged. On GitHub, every improvement for OpenIM could be via a [PR](https://github.com/OpenIM/pulls) (short for pull request).
+Every action to make project OpenIM better is encouraged. On GitHub, every improvement for OpenIM could be via a [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls) (short for pull request).
 
 + If you find a typo, try to fix it!
 + If you find a bug, try to fix it!
@@ -206,7 +206,7 @@ To be honest, we regard every user of OpenIMas a very kind contributor. After ex
 
 Since we collaborate project OpenIM in a distributed way, we appreciate **WELL-WRITTEN**, **DETAILED**, **EXPLICIT** issue reports. To make the communication more efficient, we wish everyone could search if your issue is an existing one in the searching list. If you find it existing, please add your details in comments under the existing issue instead of opening a brand new one.
 
-To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/ISSUE_TEMPLATE) for issue reporters. You can find three kinds of issue templates there: question, bug report and feature request. Please **BE SURE** to follow the instructions to fill fields in template.
+To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](https://github.com/OpenIMSDK/.github/tree/main/.github/ISSUE_TEMPLATE) for issue reporters. You can find three kinds of issue templates there: question, bug report and feature request. Please **BE SURE** to follow the instructions to fill fields in template.
 
 **There are a lot of cases when you could open an issue:**
 
@@ -271,7 +271,7 @@ An example for this could be:
 
 #### PR Description
 
-PR is the only way to make change to OpenIM project files. To help reviewers better get your purpose, **PR** description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
+PR is the only way to make change to OpenIM project files. To help reviewers better get your purpose, **PR** description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/.github/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
 
 You can find some very formal PR in [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) issues and learn about them.
 
@@ -356,8 +356,8 @@ Try your best to keep every function has been tested, it keeps the function beha
 **The documentation for OpenIM includes:**
 
 + [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md): This file includes the basic information and instructions for getting started with OpenIM.
++ [README_zh.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README_zh.md): This file includes the basic information and instructions for getting started with OpenIM in Chinese.
 + [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to OpenIM's codebase, such as how to submit issues, pull requests, and code reviews.
-+ [DEVELOPGUIDE.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/DEVELOPGUIDE.md): This file provides a more in-depth guide to developing OpenIM, including information on the project's architecture, coding conventions, and testing practices.
 + [Official Documentation](https://doc.rentsoft.cn): This is the official documentation for OpenIM, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
 
 **Please obey the following rules to better format the docs, which would greatly improve the reading experience.**
@@ -428,9 +428,9 @@ Our most recommended way to get in touch is through [Slack](https://join.slack.c
 
 In addition to Slack, we also offer the following ways to get in touch:
 
-+ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/Slack-OpenIM%2B-blueviolet?logo=slack&amp;logoColor=white"></a>:  We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) team channel.
-+ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: Get in touch with us on [Gmail](https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
-+ <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a>: Read our [blog](https://doc.rentsoft.cn/). Our blog is a great place to stay up-to-date with Open-IM-Server projects and trends. On the blog, we share our latest developments, tech trends, and other interesting information.
-+ <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a>: Add [Wechat](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) and indicate that you are a user or developer of Open-IM-Server. We will process your request as soon as possible.
++ <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg" target="_blank"><img src="https://img.shields.io/badge/Slack-OpenIM%2B-blueviolet?logo=slack&amp;logoColor=white"></a> We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) team channel.
++ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a> Get in touch with us on [Gmail](https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
++ <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a> Read our [blog](https://doc.rentsoft.cn/). Our blog is a great place to stay up-to-date with Open-IM-Server projects and trends. On the blog, we share our latest developments, tech trends, and other interesting information.
++ <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a> Add [Wechat](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) and indicate that you are a user or developer of Open-IM-Server. We will process your request as soon as possible.
 
 Whether you're looking to join our community or have any questions or suggestions, we welcome you to get in touch with us.
