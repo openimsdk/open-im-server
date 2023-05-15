@@ -1,6 +1,8 @@
 package getui
 
 import (
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -9,15 +11,15 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
-	"sync"
 
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 var (
@@ -51,6 +53,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
 		if err == redis.Nil {
+			log.ZInfo(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
 				return err
