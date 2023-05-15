@@ -134,7 +134,6 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	for _, conversationID := range conversationIDs {
 		conversationIDs = append(conversationIDs, utils.GetNotificationConvetstionID(conversationID))
 	}
-	conversationIDs = append(conversationIDs, utils.GetSelfNotificationConversationID(req.UserID)...)
 	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
@@ -154,7 +153,8 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 		if !utils.IsNotification(seq.ConversationID) {
 			msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, seq.ConversationID, seq.Begin, seq.End, seq.Num)
 			if err != nil {
-				return nil, err
+				log.ZWarn(ctx, "GetMsgBySeqsRange error", err, "conversationID", seq.ConversationID, "seq", seq)
+				continue
 			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs}
 		} else {
@@ -164,7 +164,8 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			}
 			notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, seq.ConversationID, seqs)
 			if err != nil {
-				return nil, err
+				log.ZWarn(ctx, "GetMsgBySeqs error", err, "conversationID", seq.ConversationID, "seq", seq)
+				continue
 			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs}
 
