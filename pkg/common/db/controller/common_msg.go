@@ -396,23 +396,23 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 
 func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, unExistSeqs []int64, err error) {
 	beginSeq, endSeq := db.msg.GetSeqsBeginEnd(seqs)
-	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq)
-	msgs, _, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, seq := range seqs {
-		for i, msg := range msgs {
+	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "len(msgs)", len(msgs))
+	seqMsgs = append(seqMsgs, msgs...)
+	for i, seq := range seqs {
+		for _, msg := range msgs {
 			if seq == msg.Seq {
-				seqMsgs = append(seqMsgs, msg)
-				continue
-			}
-			if i == len(msgs)-1 {
-				unExistSeqs = append(unExistSeqs, seq)
+				break
 			}
 		}
+		if i == len(seqs)-1 {
+			unExistSeqs = append(unExistSeqs, seq)
+		}
 	}
-	msgs, _, unExistSeqs, err = db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
+	msgs, _, unExistSeqs, err = db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, unExistSeqs)
 	if err != nil {
 		return nil, nil, err
 	}
