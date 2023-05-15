@@ -53,7 +53,7 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUse
 	return friendsPb, nil
 }
 
-func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (PBFriendRequests []*sdkws.FriendRequest, err error) {
+func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
 	userIDMap := make(map[string]struct{})
 	for _, friendRequest := range friendRequests {
 		userIDMap[friendRequest.ToUserID] = struct{}{}
@@ -63,13 +63,25 @@ func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRe
 	if err != nil {
 		return nil, err
 	}
+	res := make([]*sdkws.FriendRequest, 0, len(friendRequests))
 	for _, friendRequest := range friendRequests {
-		friendRequestPb := &sdkws.FriendRequest{}
-		utils.CopyStructFields(friendRequestPb, friendRequest)
-		friendRequestPb.FromFaceURL = users[friendRequest.FromUserID].FaceURL
-		friendRequestPb.FromNickname = users[friendRequest.FromUserID].Nickname
-		friendRequestPb.ToFaceURL = users[friendRequest.ToUserID].FaceURL
-		friendRequestPb.ToNickname = users[friendRequest.ToUserID].Nickname
+		toUser := users[friendRequest.ToUserID]
+		fromUser := users[friendRequest.FromUserID]
+		res = append(res, &sdkws.FriendRequest{
+			FromUserID:    friendRequest.FromUserID,
+			FromNickname:  fromUser.Nickname,
+			FromFaceURL:   fromUser.FaceURL,
+			ToUserID:      friendRequest.ToUserID,
+			ToNickname:    toUser.Nickname,
+			ToFaceURL:     toUser.FaceURL,
+			HandleResult:  friendRequest.HandleResult,
+			ReqMsg:        friendRequest.ReqMsg,
+			CreateTime:    friendRequest.CreateTime.UnixMilli(),
+			HandlerUserID: friendRequest.HandlerUserID,
+			HandleMsg:     friendRequest.HandleMsg,
+			HandleTime:    friendRequest.HandleTime.UnixMilli(),
+			Ex:            friendRequest.Ex,
+		})
 	}
-	return PBFriendRequests, nil
+	return res, nil
 }
