@@ -503,7 +503,6 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	defer log.ZInfo(ctx, "GetGroupApplicationList.return")
 	resp := &pbGroup.GetGroupApplicationListResp{}
 	groupIDs, err := s.GroupDatabase.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
@@ -513,7 +512,6 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		return resp, nil
 	}
 	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, req.Pagination.PageNumber, req.Pagination.ShowNumber)
-	//total, groupRequests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.FromUserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
