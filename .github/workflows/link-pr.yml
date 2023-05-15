@@ -30,9 +30,7 @@ jobs:
             # -a --accept <accept>                      Comma-separated list of accepted status codes for valid links
             # docs/.vitepress/dist the site directory to check
             # ./*.md all markdown files in the root directory
-            # docs/.vitepress/dist the site directory to check
-            # ./*.md all markdown files in the root directory
-          args: --verbose  -E -i --no-progress --exclude-path './CHANGELOG' './**/*.md'
+          args: --verbose  -E -i --no-progress --exclude-path './CHANGELOG' './**/*.md' './vendor'
         env:
           GITHUB_TOKEN: ${{secrets.GH_PAT}}
 

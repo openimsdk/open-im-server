@@ -198,7 +198,7 @@ We divide the problem into security and general problems:
 
 Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of OpenIM, please do not discuss it in public and even do not open a public issue.
 
-Instead we encourage you to send us a private email to [📮winxu81@gmail.com](https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com) to report this.
+Instead we encourage you to send us a private email to 📮[winxu81@gmail.com](https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=winxu81@gmail.com) to report this.
 
 #### Reporting general issues
 
