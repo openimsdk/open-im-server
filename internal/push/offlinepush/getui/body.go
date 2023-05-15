@@ -2,6 +2,7 @@ package getui
 
 import (
 	"fmt"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
@@ -14,7 +15,7 @@ type Resp struct {
 func (r *Resp) parseError() (err error) {
 	switch r.Code {
 	case tokenExpireCode:
-		err = TokenExpireError
+		err = ErrTokenExpire
 	case 0:
 		err = nil
 	default:

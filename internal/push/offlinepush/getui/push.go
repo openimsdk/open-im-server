@@ -1,28 +1,31 @@
 package getui
 
 import (
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
 	"github.com/go-redis/redis/v8"
-	"sync"
 
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 var (
-	TokenExpireError = errors.New("token expire")
-	UserIDEmptyError = errors.New("userIDs is empty")
+	ErrTokenExpire = errors.New("token expire")
+	ErrUserIDEmpty = errors.New("userIDs is empty")
 )
 
 const (
@@ -50,7 +53,8 @@ func NewClient(cache cache.MsgModel) *Client {
 func (g *Client) Push(ctx context.Context, userIDs []string, title, content string, opts *offlinepush.Opts) error {
 	token, err := g.cache.GetGetuiToken(ctx)
 	if err != nil {
-		if err == redis.Nil {
+		if errs.Unwrap(err) == redis.Nil {
+			log.ZInfo(ctx, "getui token not exist in redis")
 			token, err = g.getTokenAndSave2Redis(ctx)
 			if err != nil {
 				return err
@@ -83,10 +87,10 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 	} else if len(userIDs) == 1 {
 		err = g.singlePush(ctx, token, userIDs[0], pushReq)
 	} else {
-		return UserIDEmptyError
+		return ErrUserIDEmpty
 	}
 	switch err {
-	case TokenExpireError:
+	case ErrTokenExpire:
 		token, err = g.getTokenAndSave2Redis(ctx)
 	}
 	return err
