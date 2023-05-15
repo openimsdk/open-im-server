@@ -203,7 +203,7 @@ func (g *groupDatabase) PageGetJoinGroup(ctx context.Context, userID string, pag
 }
 
 func (g *groupDatabase) PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
-	return g.groupMemberDB.SearchMember(ctx, groupID, nil, nil, nil, pageNumber, showNumber)
+	return g.groupMemberDB.SearchMember(ctx, "", []string{groupID}, nil, nil, pageNumber, showNumber)
 }
 
 //func (g *groupDatabase) PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
