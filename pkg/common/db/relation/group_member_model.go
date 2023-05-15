@@ -129,3 +129,7 @@ func (g *GroupMemberGorm) FindUsersJoinedGroupID(ctx context.Context, userIDs []
 	}
 	return result, nil
 }
+
+func (g *GroupMemberGorm) FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
+	return groupIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("user_id = ? and (role_level = ? or role_level = ?)", userID, constant.GroupOwner, constant.GroupAdmin).Pluck("group_id", &groupIDs).Error, "")
+}

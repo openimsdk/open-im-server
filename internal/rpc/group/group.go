@@ -504,7 +504,15 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	resp := &pbGroup.GetGroupApplicationListResp{}
-	total, groupRequests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.FromUserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	groupIDs, err := s.GroupDatabase.FindUserManagedGroupID(ctx, req.FromUserID)
+	if err != nil {
+		return nil, err
+	}
+	if len(groupIDs) == 0 {
+		return resp, nil
+	}
+	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	//total, groupRequests, err := s.GroupDatabase.PageGroupRequestUser(ctx, req.FromUserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -512,16 +520,12 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if len(groupRequests) == 0 {
 		return resp, nil
 	}
-	var (
-		userIDs  []string
-		groupIDs []string
-	)
+	var userIDs []string
+
 	for _, gr := range groupRequests {
 		userIDs = append(userIDs, gr.UserID)
-		groupIDs = append(groupIDs, gr.GroupID)
 	}
 	userIDs = utils.Distinct(userIDs)
-	groupIDs = utils.Distinct(groupIDs)
 	userMap, err := s.User.GetPublicUserInfoMap(ctx, userIDs, true)
 	if err != nil {
 		return nil, err
@@ -548,7 +552,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		return e.GroupID
 	})
 	resp.GroupRequests = utils.Slice(groupRequests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
-		return convert.Db2PbGroupRequest(e, userMap[e.UserID], convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNumMap[e.GroupID])))
+		return convert.Db2PbGroupRequest(e, userMap[e.UserID], convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID]))
 	})
 	return resp, nil
 }

@@ -32,6 +32,8 @@ type GroupDatabase interface {
 	TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error)
 	FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error)
 	FindGroupMemberUserID(ctx context.Context, groupID string) ([]string, error)
+	FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error)
+	PageGroupRequest(ctx context.Context, groupIDs []string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error)
 	//PageGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error)
 	PageGetJoinGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error)
 	PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error)
@@ -182,6 +184,14 @@ func (g *groupDatabase) TakeGroupMember(ctx context.Context, groupID string, use
 
 func (g *groupDatabase) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
 	return g.groupMemberDB.TakeOwner(ctx, groupID) // todo cache group owner
+}
+
+func (g *groupDatabase) FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
+	return g.groupMemberDB.FindUserManagedGroupID(ctx, userID)
+}
+
+func (g *groupDatabase) PageGroupRequest(ctx context.Context, groupIDs []string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupRequestModel, error) {
+	return g.groupRequestDB.PageGroup(ctx, groupIDs, pageNumber, showNumber)
 }
 
 func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (totalGroupMembers []*relationTb.GroupMemberModel, err error) {

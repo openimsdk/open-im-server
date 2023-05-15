@@ -34,4 +34,5 @@ type GroupRequestModelInterface interface {
 	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32) (err error)
 	Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequestModel, err error)
 	Page(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, groups []*GroupRequestModel, err error)
+	PageGroup(ctx context.Context, groupIDs []string, pageNumber, showNumber int32) (total uint32, groups []*GroupRequestModel, err error)
 }
