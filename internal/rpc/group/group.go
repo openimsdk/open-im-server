@@ -140,7 +140,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.Wrap("no group owner")
 	}
-	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID, mcontext.GetOpUserID(ctx))
+	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
+	if opUserID := mcontext.GetOpUserID(ctx); !utils.Contain(opUserID, userIDs...) {
+		userIDs = append(userIDs, opUserID)
+	}
 	if utils.Duplicate(userIDs) {
 		return nil, errs.ErrArgs.Wrap("group member repeated")
 	}
