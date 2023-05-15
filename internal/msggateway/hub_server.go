@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -90,6 +91,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 		if !ok {
 			continue
 		}
+		log.ZDebug(ctx, "SuperGroupOnlineBatchPushOneMsg", "clients", clients)
 		for _, client := range clients {
 			if client != nil {
 				temp := &msggateway.SingleMsgToUserPlatform{
