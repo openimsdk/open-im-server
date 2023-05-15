@@ -31,7 +31,7 @@ type MsgDocModelInterface interface {
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) ([]*sdkws.MsgData, []int64, error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) ([]*sdkws.MsgData, error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
