@@ -1,4 +1,4 @@
-name: links when pr
+name: Github Rebot for Link check error
 
 on:
   pull_request:
@@ -7,6 +7,8 @@ on:
       - '**.md'
       - 'docs/**'
       - '.lycheeignore'
+  push:
+    branches: [ main ]
 
 jobs:
   linkChecker:
@@ -14,22 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-      - name: Run Install
-        working-directory: docs         
-        run: npm install
-      - name: Run build
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build # will run `yarn build` command in `docs` directory
-          dir: docs
       - name: Link Checker
-        uses: lycheeverse/lychee-action@v1.5.0
+        id: lychee
+        uses: lycheeverse/lychee-action@v1.7.0
         with:
-          fail: true
             # For parameter description, see https://github.com/lycheeverse/lychee#commandline-parameters
             # Actions Link address -> https://github.com/lycheeverse/lychee-action
             # -E, --exclude-all-private    Exclude all private IPs from checking.
@@ -38,9 +28,18 @@ jobs:
             # -t, --timeout <timeout>      Website timeout in seconds from connect to response finished [default:20]
             # --max-concurrency <max-concurrency>    Maximum number of concurrent network requests [default: 128]
             # -a --accept <accept>                      Comma-separated list of accepted status codes for valid links
-
             # docs/.vitepress/dist the site directory to check
             # ./*.md all markdown files in the root directory
-          args: -E -i -n -t 45 --max-concurrency 64 -a 429,401 -- 'docs/.vitepress/dist' '*.md'
+            # docs/.vitepress/dist the site directory to check
+            # ./*.md all markdown files in the root directory
+          args: --verbose  -E -i --no-progress --exclude-path './CHANGELOG' './**/*.md'
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GH_PAT}}
+
+      - name: Create Issue From File
+        if: env.lychee_exit_code != 0
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: Link Checker Report
+          content-filepath: ./lychee/out.md
+          labels: report, automated issue,kind/documentation
