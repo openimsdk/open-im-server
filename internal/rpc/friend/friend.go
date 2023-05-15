@@ -222,6 +222,8 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
+	log.ZInfo(ctx, "test log out")
+	log.ZInfo(ctx, "GetPaginationFriendsApplyFrom.xxx", "total", total, "friendRequests", len(friendRequests), "userRpcClient", s.userRpcClient == nil)
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
