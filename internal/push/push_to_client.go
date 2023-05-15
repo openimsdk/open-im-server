@@ -58,9 +58,8 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	return offlinePusher
 }
 
-func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgData) error {
-	var userIDs = []string{userID}
-	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userID", userID, "msg", msg.String())
+func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
+	log.ZDebug(ctx, "Get msg from msg_transfer And push msg", "userIDs", userIDs, "msg", msg.String())
 	// callback
 	if err := callbackOnlinePush(ctx, userIDs, msg); err != nil && err != errs.ErrCallbackContinue {
 		return err
@@ -71,36 +70,38 @@ func (p *Pusher) MsgToUser(ctx context.Context, userID string, msg *sdkws.MsgDat
 		return err
 	}
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
-	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userID)
+	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userIDs)
 	p.successCount++
-	if isOfflinePush && userID != msg.SendID {
-		// save invitation info for offline push
-		for _, v := range wsResults {
-			if v.OnlinePush {
-				return nil
+	for _, userID := range userIDs {
+		if isOfflinePush && userID != msg.SendID {
+			// save invitation info for offline push
+			for _, v := range wsResults {
+				if v.OnlinePush {
+					return nil
+				}
 			}
-		}
-		if msg.ContentType == constant.SignalingNotification {
-			isSend, err := p.database.HandleSignalInvite(ctx, msg, userID)
+			if msg.ContentType == constant.SignalingNotification {
+				isSend, err := p.database.HandleSignalInvite(ctx, msg, userID)
+				if err != nil {
+					return err
+				}
+				if !isSend {
+					return nil
+				}
+			}
+			if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
+				return err
+			}
+			err = p.offlinePushMsg(ctx, userID, msg, userIDs)
 			if err != nil {
 				return err
 			}
-			if !isSend {
-				return nil
-			}
-		}
-		if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
-			return err
-		}
-		err = p.offlinePushMsg(ctx, userID, msg, userIDs)
-		if err != nil {
-			return err
 		}
 	}
 	return nil
 }
 
-func (p *Pusher) MsgToSuperGroupUser(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
+func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	operationID := mcontext.GetOperationID(ctx)
 	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
 	var pushToUserIDs []string

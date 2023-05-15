@@ -46,9 +46,9 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	var err error
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		err = c.pusher.MsgToSuperGroupUser(ctx, pbData.ConversationID, pbData.MsgData)
+		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		err = c.pusher.MsgToUser(ctx, pbData.ConversationID, pbData.MsgData)
+		err = c.pusher.Push2User(ctx, []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}, pbData.MsgData)
 	}
 	if err != nil {
 		log.ZError(ctx, "push failed", err, "msg", pbData.String())

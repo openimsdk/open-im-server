@@ -47,9 +47,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 func (r *pushServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (resp *pbPush.PushMsgResp, err error) {
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
-		err = r.pusher.MsgToSuperGroupUser(ctx, pbData.ConversationID, pbData.MsgData)
+		err = r.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		err = r.pusher.MsgToUser(ctx, pbData.ConversationID, pbData.MsgData)
+		err = r.pusher.Push2User(ctx, []string{pbData.MsgData.RecvID, pbData.MsgData.SendID}, pbData.MsgData)
 	}
 	if err != nil {
 		return nil, err
