@@ -188,6 +188,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		if err != nil {
 			continue
 		}
+		log.ZDebug(ctx, "push result", "reply", reply)
 		if reply != nil && reply.SinglePushResult != nil {
 			wsResults = append(wsResults, reply.SinglePushResult...)
 		}

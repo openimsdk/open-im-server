@@ -63,7 +63,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 		return nil, err
 	}
 	conversationID := utils.GetConversationIDByMsg(req.MsgData)
-	isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, req.MsgData.SendID, constant.SingleChatType, req)
+	isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, conversationID, constant.SingleChatType, req)
 	if err != nil {
 		return nil, err
 	}
