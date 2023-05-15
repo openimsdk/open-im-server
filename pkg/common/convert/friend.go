@@ -54,11 +54,12 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUse
 }
 
 func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (PBFriendRequests []*sdkws.FriendRequest, err error) {
-	var userID []string
+	userIDMap := make(map[string]struct{})
 	for _, friendRequest := range friendRequests {
-		userID = append(userID, friendRequest.FromUserID)
+		userIDMap[friendRequest.ToUserID] = struct{}{}
+		userIDMap[friendRequest.FromUserID] = struct{}{}
 	}
-	users, err := getUsers(ctx, userID)
+	users, err := getUsers(ctx, utils.Keys(userIDMap))
 	if err != nil {
 		return nil, err
 	}
