@@ -14,6 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# ==============================================================================
+# This is a pre-commit hook that ensures attempts to commit files that are
+# are larger than $limit to your _local_ repo fail, with a helpful error message.
+
+# You can override the default limit of 2MB by supplying the environment variable:
+# GIT_FILE_SIZE_LIMIT=50000000 git commit -m "test: this commit is allowed file sizes up to 50MB"
+#
+# ==============================================================================
+
 
 YELLOW="\e[93m"
 GREEN="\e[32m"
@@ -34,9 +43,9 @@ printError() {
 
 printMessage "Running local OpenIM pre-commit hook."
 
-#flutter format .
-##https://gist.github.com/benmccallum/28e4f216d9d72f5965133e6c43aaff6e
-# TODO! GIT_FILE_SIZE_LIMIT=42000000 git commit -m "This commit is allowed file sizes up to 42MB"
+# flutter format .
+# https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694
+# TODO! GIT_FILE_SIZE_LIMIT=50000000 git commit -m "test: this commit is allowed file sizes up to 50MB"
 limit=$(( 2 * 2**20 )) # 2MB
 
 function file_too_large(){
@@ -46,7 +55,7 @@ function file_too_large(){
 	cat <<HEREDOC
 
 	File $filename is $filesize MB, which is larger than github's maximum
-        file size (1 MB). We will not be able to push this file to GitHub.
+        file size (2 MB). We will not be able to push this file to GitHub.
 	Commit aborted
 HEREDOC
 

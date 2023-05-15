@@ -20,7 +20,6 @@
 LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATES
 
 # TODO: GOBIN -> TOOLS_DIR
-# Questions about go mod instead of go path: https://github.com/kubernetes/kubernetes/issues/117181
 ## copyright.verify: Validate boilerplate headers for assign files
 .PHONY: copyright.verify
 copyright.verify: tools.verify.addlicense
