@@ -33,7 +33,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	defer func() {
 		if r := recover(); r != nil {
 			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
-			fmt.Println("stack info:", string(debug.Stack()))
+			fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
 			pc, file, line, ok := runtime.Caller(4)
 			if !ok {
 				panic("get runtime.Caller failed")
