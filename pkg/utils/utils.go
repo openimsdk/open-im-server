@@ -175,6 +175,38 @@ func MsgIsNotification(msg *sdkws.MsgData) bool {
 	return !options.IsNotNotification()
 }
 
+func GetNotificationConversationID(msg *sdkws.MsgData) string {
+	switch msg.SessionType {
+	case constant.SingleChatType:
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		return "n_" + strings.Join(l, "_")
+	case constant.GroupChatType:
+		return "n_" + msg.GroupID
+	case constant.SuperGroupChatType:
+		return "n_" + msg.GroupID
+	case constant.NotificationChatType:
+		return "n_" + msg.SendID + "_" + msg.RecvID
+	}
+	return ""
+}
+
+func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
+	switch msg.SessionType {
+	case constant.SingleChatType:
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		return "si_" + strings.Join(l, "_")
+	case constant.GroupChatType:
+		return "g_" + msg.GroupID
+	case constant.SuperGroupChatType:
+		return "sg_" + msg.GroupID
+	case constant.NotificationChatType:
+		return "sn_" + msg.SendID + "_" + msg.RecvID
+	}
+	return ""
+}
+
 func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 	options := Options(msg.Options)
 	switch msg.SessionType {
