@@ -111,7 +111,11 @@ go.build.%:
 	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)
-	@CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go
+	@if [ "$(COMMAND)" == "rpc" ] || [ "$(COMMAND)" == "Open-IM-SDK-Core" ]; then \
+		echo "===========> Compilation is not yet supported $(COMMAND)"; \
+	else \
+		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+	fi
 
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch
@@ -138,7 +142,7 @@ go.lint: tools.verify.golangci-lint
 ## go.test: Run unit test
 .PHONY: go.test
 go.test:
-	@$(GO) test $(GO_BUILD_FLAGS) ./...
+	@$(GO) test ./...
 
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report

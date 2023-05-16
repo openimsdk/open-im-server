@@ -151,5 +151,5 @@ image.manifest.push.multiarch.%:
 
 ## image.help: Print help for image targets
 .PHONY: image.help
-image.help: scripts/make-rules/image.mk
+image.help: script/make-rules/image.mk
 	$(call smallhelp)
