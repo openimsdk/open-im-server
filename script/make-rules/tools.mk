@@ -17,7 +17,7 @@
 # Why download to the tools directory, thinking we might often switch Go versions using gvm.
 #
 
-# sealer build use BUILD_TOOLS
+# openim build use BUILD_TOOLS
 BUILD_TOOLS ?= golangci-lint goimports addlicense deepcopy-gen conversion-gen ginkgo go-junit-report go-gitlint
 # Code analysis tools
 ANALYSIS_TOOLS = golangci-lint goimports golines go-callvis kube-score
@@ -25,12 +25,14 @@ ANALYSIS_TOOLS = golangci-lint goimports golines go-callvis kube-score
 GENERATION_TOOLS = deepcopy-gen conversion-gen protoc-gen-go cfssl rts codegen
 # Testing tools
 TEST_TOOLS = ginkgo go-junit-report gotests
+# cos tools
+COS_TOOLS = coscli coscmd
 # Version control tools
 VERSION_CONTROL_TOOLS = addlicense go-gitlint git-chglog github-release gsemver
 # Utility tools
 UTILITY_TOOLS = go-mod-outdated mockgen gothanks richgo kubeconform
 # All tools
-ALL_TOOLS ?= $(ANALYSIS_TOOLS) $(GENERATION_TOOLS) $(TEST_TOOLS) $(VERSION_CONTROL_TOOLS) $(UTILITY_TOOLS)
+ALL_TOOLS ?= $(ANALYSIS_TOOLS) $(GENERATION_TOOLS) $(TEST_TOOLS) $(VERSION_CONTROL_TOOLS) $(UTILITY_TOOLS) $(COS_TOOLS)
 
 ## tools.install: Install a must tools
 .PHONY: tools.install
@@ -69,7 +71,6 @@ install.golangci-lint:
 install.goimports:
 	@$(GO) install golang.org/x/tools/cmd/goimports@latest
 
-# Actions path: https://github.com/sealerio/sealer/tree/main/.github/workflows/go.yml#L37-L50
 ## install.addlicense: Install addlicense, used to add license header to source files
 .PHONY: install.addlicense
 install.addlicense:
@@ -128,6 +129,17 @@ install.git-chglog:
 .PHONY: install.github-release
 install.github-release:
 	@$(GO) install github.com/github-release/github-release@latest
+
+## install.coscli: Install coscli, used to upload files to cos
+.PHONY: install.coscli
+install.coscli:
+	@wget -q https://github.com/tencentyun/coscli/releases/download/v0.10.2-beta/coscli-linux -O ${HOME}/bin/coscli
+	@chmod +x ${HOME}/bin/coscli
+
+## install.coscmd: Install coscmd, used to upload files to cos
+.PHONY: install.coscmd
+install.coscmd:
+	@if which pip &>/dev/null; then pip install coscmd; else pip3 install coscmd; fi
 
 ## install.gvm: Install gvm, gvm is a Go version manager, built on top of the official go tool.
 .PHONY: install.gvm
