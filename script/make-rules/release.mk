@@ -14,6 +14,7 @@
 
 # ==============================================================================
 # Makefile helper functions for release
+# Versions are used after merging
 #
 
 ## release: release the project
