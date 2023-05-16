@@ -46,3 +46,7 @@ func (g *GroupRequestGorm) Take(ctx context.Context, groupID string, userID stri
 func (g *GroupRequestGorm) Page(ctx context.Context, userID string, pageNumber, showNumber int32) (total uint32, groups []*relation.GroupRequestModel, err error) {
 	return ormutil.GormSearch[relation.GroupRequestModel](g.DB.WithContext(ctx).Where("user_id = ?", userID), nil, "", pageNumber, showNumber)
 }
+
+func (g *GroupRequestGorm) PageGroup(ctx context.Context, groupIDs []string, pageNumber, showNumber int32) (total uint32, groups []*relation.GroupRequestModel, err error) {
+	return ormutil.GormPage[relation.GroupRequestModel](g.DB.WithContext(ctx).Where("group_id in ?", groupIDs), pageNumber, showNumber)
+}
