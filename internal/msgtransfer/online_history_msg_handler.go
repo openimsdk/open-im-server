@@ -90,11 +90,11 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				ctxMsgList := msgChannelValue.ctxMsgList
 				ctx := msgChannelValue.ctx
 				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "conversationID", msgChannelValue.conversationID)
-				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(msgChannelValue.conversationID, ctxMsgList)
+				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(ctxMsgList)
 				log.ZDebug(ctx, "msg lens", "storageMsgList", len(storageMsgList), "notStorageMsgList", len(notStorageMsgList),
 					"storageNotificationList", len(storageNotificationList), "notStorageNotificationList", len(notStorageNotificationList), "modifyMsgList", len(modifyMsgList))
-				och.handleMsg(ctx, msgChannelValue.conversationID, storageMsgList, notStorageMsgList)
-				och.handleNotification(ctx, msgChannelValue.conversationID, storageNotificationList, notStorageNotificationList)
+				och.handleMsg(ctx, storageMsgList, notStorageMsgList)
+				och.handleNotification(ctx, storageNotificationList, notStorageNotificationList)
 				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.conversationID, modifyMsgList); err != nil {
 					log.ZError(ctx, "msg to modify mq error", err, "conversationID", msgChannelValue.conversationID, "modifyMsgList", modifyMsgList)
 				}
@@ -104,7 +104,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 }
 
 // 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
-func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversationID string, totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
+func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(totalMsgs []*ContextMsg) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
 	isStorage := func(msg *sdkws.MsgData) bool {
 		options2 := utils.Options(msg.Options)
 		if options2.IsHistory() {
@@ -124,7 +124,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversation
 			if options.IsSendMsg() {
 				// 消息
 				if v.message.Options != nil {
-					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotification(false), utils.WithSendMsg(false))
+					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotNotification(true), utils.WithSendMsg(false))
 				}
 				storageMsgList = append(storageMsgList, v.message)
 			}
@@ -147,7 +147,8 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(conversation
 	return
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
+func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, storageList, notStorageList []*sdkws.MsgData) {
+	conversationID := utils.GetConversationIDByMsg(storageList[0])
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, _, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
@@ -155,7 +156,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 			log.ZError(ctx, "notification batch insert to redis error", err, "conversationID", conversationID, "storageList", storageList)
 			return
 		}
-		log.ZDebug(ctx, "success to next topic")
+		log.ZDebug(ctx, "success to next topic", "conversationID", conversationID)
 		och.msgDatabase.MsgToMongoMQ(ctx, conversationID, storageList, lastSeq)
 		och.toPushTopic(ctx, conversationID, storageList)
 	}
@@ -167,7 +168,8 @@ func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, c
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, storageList, notStorageList []*sdkws.MsgData) {
+	conversationID := utils.GetConversationIDByMsg(storageList[0])
 	och.toPushTopic(ctx, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)

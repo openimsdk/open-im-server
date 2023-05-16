@@ -357,7 +357,6 @@ type Notification struct {
 
 func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	opts := utils.NewOptions()
-	opts = utils.WithOptions(opts, utils.WithNotification(true))
 	if cfg.UnreadCount {
 		opts = utils.WithOptions(opts, utils.WithUnreadCount())
 	}

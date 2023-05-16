@@ -170,6 +170,11 @@ func GetHashCode(s string) uint32 {
 	return crc32.ChecksumIEEE([]byte(s))
 }
 
+func MsgIsNotification(msg *sdkws.MsgData) bool {
+	options := Options(msg.Options)
+	return !options.IsNotNotification()
+}
+
 func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 	options := Options(msg.Options)
 	switch msg.SessionType {

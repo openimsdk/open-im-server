@@ -142,7 +142,7 @@ const (
 	IsSenderConversationUpdate = "senderConversationUpdate"
 	IsSenderNotificationPush   = "senderNotificationPush"
 	IsReactionFromCache        = "reactionFromCache"
-	IsNotification             = "isNotification"
+	IsNotNotification          = "isNotification"
 	IsSendMsg                  = "isSendMsg"
 
 	//GroupStatus
