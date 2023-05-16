@@ -30,10 +30,10 @@ type ConversationCache interface {
 	NewCache() ConversationCache
 	// get user's conversationIDs from msgCache
 	GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error)
-	DelConversationIDs(userIDs []string) ConversationCache
+	DelConversationIDs(userIDs ...string) ConversationCache
 	// get one conversation from msgCache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
-	DelConvsersations(ownerUserID string, conversationIDs []string) ConversationCache
+	DelConvsersations(ownerUserID string, conversationIDs ...string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from msgCache
 	GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
@@ -97,7 +97,7 @@ func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, own
 	})
 }
 
-func (c *ConversationRedisCache) DelConversationIDs(userIDs []string) ConversationCache {
+func (c *ConversationRedisCache) DelConversationIDs(userIDs ...string) ConversationCache {
 	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, c.getConversationIDsKey(userID))
@@ -113,7 +113,7 @@ func (c *ConversationRedisCache) GetConversation(ctx context.Context, ownerUserI
 	})
 }
 
-func (c *ConversationRedisCache) DelConvsersations(ownerUserID string, convsersationIDs []string) ConversationCache {
+func (c *ConversationRedisCache) DelConvsersations(ownerUserID string, convsersationIDs ...string) ConversationCache {
 	var keys []string
 	for _, conversationID := range convsersationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))

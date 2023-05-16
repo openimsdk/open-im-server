@@ -55,19 +55,15 @@ func NewFriendDatabase(friend relation.FriendModelInterface, friendRequest relat
 
 // ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
 func (f *friendDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Friends bool, inUser2Friends bool, err error) {
-	friends, err := f.friend.FindUserState(ctx, userID1, userID2)
+	userID1FriendIDs, err := f.cache.GetFriendIDs(ctx, userID1)
 	if err != nil {
-		return false, false, err
+		return
 	}
-	for _, v := range friends {
-		if v.OwnerUserID == userID1 && v.FriendUserID == userID2 {
-			inUser1Friends = true
-		}
-		if v.OwnerUserID == userID2 && v.FriendUserID == userID1 {
-			inUser2Friends = true
-		}
+	userID2FriendIDs, err := f.cache.GetFriendIDs(ctx, userID2)
+	if err != nil {
+		return
 	}
-	return
+	return utils.IsContain(userID2, userID1FriendIDs), utils.IsContain(userID1, userID2FriendIDs), nil
 }
 
 // 增加或者更新好友申请 如果之前有记录则更新，没有记录则新增
@@ -100,7 +96,8 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 
 // (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
 func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, addSource int32) (err error) {
-	return f.tx.Transaction(func(tx any) error {
+	cache := f.cache.NewCache()
+	if err := f.tx.Transaction(func(tx any) error {
 		//先find 找出重复的 去掉重复的
 		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
@@ -135,8 +132,12 @@ func (f *friendDatabase) BecomeFriends(ctx context.Context, ownerUserID string, 
 			return err
 		}
 		newFriendIDs = append(newFriendIDs, ownerUserID)
-		return f.cache.DelFriendIDs(newFriendIDs...).ExecDel(ctx)
-	})
+		cache = cache.DelFriendIDs(newFriendIDs...)
+		return nil
+	}); err != nil {
+		return nil
+	}
+	return cache.ExecDel(ctx)
 }
 
 // 拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝
@@ -199,24 +200,18 @@ func (f *friendDatabase) AgreeFriendRequest(ctx context.Context, friendRequest *
 
 // 删除好友  外部判断是否好友关系
 func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
-	return f.tx.Transaction(func(tx any) error {
-		if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
-			return err
-		}
-		return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
-	})
-
+	if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
+		return err
+	}
+	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
 }
 
 // 更新好友备注 零值也支持
 func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
-	return f.tx.Transaction(func(tx any) error {
-		err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark)
-		if err != nil {
-			return err
-		}
-		return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
-	})
+	if err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark); err != nil {
+		return err
+	}
+	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
 }
 
 // 获取ownerUserID的好友列表 无结果不返回错误

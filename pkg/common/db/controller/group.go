@@ -113,7 +113,8 @@ func (g *groupDatabase) FindGroupMemberUserID(ctx context.Context, groupID strin
 }
 
 func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error {
-	return g.tx.Transaction(func(tx any) error {
+	var cache = g.cache.NewCache()
+	if err := g.tx.Transaction(func(tx any) error {
 		if len(groups) > 0 {
 			if err := g.groupDB.NewTx(tx).Create(ctx, groups); err != nil {
 				return err
@@ -128,7 +129,7 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 			return group.GroupID
 		})
 		m := make(map[string]struct{})
-		var cache = g.cache.NewCache()
+
 		for _, groupMember := range groupMembers {
 			if _, ok := m[groupMember.GroupID]; !ok {
 				m[groupMember.GroupID] = struct{}{}
@@ -137,8 +138,11 @@ func (g *groupDatabase) CreateGroup(ctx context.Context, groups []*relationTb.Gr
 			cache = cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 		}
 		cache = cache.DelGroupsInfo(createGroupIDs...)
-		return cache.ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (g *groupDatabase) TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
@@ -154,16 +158,15 @@ func (g *groupDatabase) SearchGroup(ctx context.Context, keyword string, pageNum
 }
 
 func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
-	return g.tx.Transaction(func(tx any) error {
-		if err := g.groupDB.NewTx(tx).UpdateMap(ctx, groupID, data); err != nil {
-			return err
-		}
-		return g.cache.DelGroupsInfo(groupID).ExecDel(ctx)
-	})
+	if err := g.groupDB.UpdateMap(ctx, groupID, data); err != nil {
+		return err
+	}
+	return g.cache.DelGroupsInfo(groupID).ExecDel(ctx)
 }
 
 func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string) error {
-	return g.tx.Transaction(func(tx any) error {
+	cache := g.cache.NewCache()
+	if err := g.tx.Transaction(func(tx any) error {
 		if err := g.groupDB.NewTx(tx).UpdateStatus(ctx, groupID, constant.GroupStatusDismissed); err != nil {
 			return err
 		}
@@ -174,8 +177,12 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string) error 
 		if err != nil {
 			return err
 		}
-		return g.cache.DelJoinedGroupID(userIDs...).DelGroupsInfo(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID).ExecDel(ctx)
-	})
+		cache = cache.DelJoinedGroupID(userIDs...).DelGroupsInfo(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (g *groupDatabase) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error) {
@@ -236,7 +243,8 @@ func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, g
 }
 
 func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relationTb.GroupMemberModel) error {
-	return g.tx.Transaction(func(tx any) error {
+	cache := g.cache.NewCache()
+	if err := g.tx.Transaction(func(tx any) error {
 		if err := g.groupRequestDB.NewTx(tx).UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
 			return err
 		}
@@ -244,19 +252,20 @@ func (g *groupDatabase) HandlerGroupRequest(ctx context.Context, groupID string,
 			if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
 				return err
 			}
-			return g.cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID).ExecDel(ctx)
+			cache = cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID)
 		}
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.tx.Transaction(func(tx any) error {
-		if err := g.groupMemberDB.NewTx(tx).Delete(ctx, groupID, userIDs); err != nil {
-			return err
-		}
-		return g.cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(userIDs...).DelGroupMembersInfo(groupID, userIDs...).ExecDel(ctx)
-	})
+	if err := g.groupMemberDB.Delete(ctx, groupID, userIDs); err != nil {
+		return err
+	}
+	return g.cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(userIDs...).DelGroupMembersInfo(groupID, userIDs...).ExecDel(ctx)
 }
 
 func (g *groupDatabase) MapGroupMemberUserID(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
@@ -276,7 +285,7 @@ func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string
 }
 
 func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error {
-	return g.tx.Transaction(func(tx any) error {
+	if err := g.tx.Transaction(func(tx any) error {
 		rowsAffected, err := g.groupMemberDB.NewTx(tx).UpdateRoleLevel(ctx, groupID, oldOwnerUserID, roleLevel)
 		if err != nil {
 			return err
@@ -291,30 +300,34 @@ func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, 
 		if rowsAffected != 1 {
 			return utils.Wrap(fmt.Errorf("newOwnerUserID %s rowsAffected = %d", newOwnerUserID, rowsAffected), "")
 		}
-		return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).ExecDel(ctx)
 }
 
 func (g *groupDatabase) UpdateGroupMember(ctx context.Context, groupID string, userID string, data map[string]any) error {
-	return g.tx.Transaction(func(tx any) error {
-		if err := g.groupMemberDB.NewTx(tx).Update(ctx, groupID, userID, data); err != nil {
-			return err
-		}
-		return g.cache.DelGroupMembersInfo(groupID, userID).ExecDel(ctx)
-	})
+	if err := g.groupMemberDB.Update(ctx, groupID, userID, data); err != nil {
+		return err
+	}
+	return g.cache.DelGroupMembersInfo(groupID, userID).ExecDel(ctx)
 }
 
 func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error {
-	return g.tx.Transaction(func(tx any) error {
-		var cache = g.cache.NewCache()
+	var cache = g.cache.NewCache()
+	if err := g.tx.Transaction(func(tx any) error {
 		for _, item := range data {
 			if err := g.groupMemberDB.NewTx(tx).Update(ctx, item.GroupID, item.UserID, item.Map); err != nil {
 				return err
 			}
 			cache = cache.DelGroupMembersInfo(item.GroupID, item.UserID)
 		}
-		return cache.ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (g *groupDatabase) CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error {
@@ -346,16 +359,15 @@ func (g *groupDatabase) FindJoinSuperGroup(ctx context.Context, userID string) (
 }
 
 func (g *groupDatabase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDs []string) error {
-	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDs); err != nil {
-			return err
-		}
-		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(initMemberIDs...).ExecDel(ctx)
-	})
+	if err := g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDs); err != nil {
+		return err
+	}
+	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(initMemberIDs...).ExecDel(ctx)
 }
 
 func (g *groupDatabase) DeleteSuperGroup(ctx context.Context, groupID string) error {
-	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
+	cache := g.cache.NewCache()
+	if err := g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
 		if err := g.mongoDB.DeleteSuperGroup(ctx, groupID); err != nil {
 			return err
 		}
@@ -363,28 +375,27 @@ func (g *groupDatabase) DeleteSuperGroup(ctx context.Context, groupID string) er
 		if err != nil {
 			return err
 		}
-		cache := g.cache.DelSuperGroupMemberIDs(groupID)
+		cache = cache.DelSuperGroupMemberIDs(groupID)
 		if len(models) > 0 {
 			cache = cache.DelJoinedSuperGroupIDs(models[0].MemberIDs...)
 		}
-		return cache.ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (g *groupDatabase) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs); err != nil {
-			return err
-		}
-		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
-	})
+	if err := g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs); err != nil {
+		return err
+	}
+	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 }
 
 func (g *groupDatabase) CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
-	return g.ctxTx.Transaction(ctx, func(ctx context.Context) error {
-		if err := g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs); err != nil {
-			return err
-		}
-		return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
-	})
+	if err := g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs); err != nil {
+		return err
+	}
+	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 }
