@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Copyright © 2023 OpenIMSDK.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +15,8 @@
 # limitations under the License.
 
 # ==============================================================================
-# Build management helpers.  These functions help to set, save and load the
-#
+# Makefile helper functions for release
+# 
+# Build a OpenIM release.  This will build the binaries, create the Docker
+# images and other build artifacts.
 
-
-
-
-## copyright.help: Show copyright help
-.PHONY: go.help
-go.help: script/make-rules/golang.mk
-	$(call smallhelp)

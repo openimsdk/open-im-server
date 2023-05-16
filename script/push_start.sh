@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #Include shell font styles and some basic information
 source ./style_info.cfg
 source ./path_info.cfg
