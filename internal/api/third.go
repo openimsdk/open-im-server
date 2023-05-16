@@ -16,8 +16,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewThird(c discoveryregistry.SvcDiscoveryRegistry) *Third {
 	return &Third{c: c}
 }

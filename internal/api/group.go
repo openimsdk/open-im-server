@@ -12,8 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewGroup(c discoveryregistry.SvcDiscoveryRegistry) *Group {
 	return &Group{c: c}
 }
