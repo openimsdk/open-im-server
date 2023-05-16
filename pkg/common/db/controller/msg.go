@@ -313,15 +313,22 @@ func (db *commonMsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (m
 	return msgPb, nil
 }
 
-func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, err error) {
-	seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
-	if err != nil {
-		return nil, err
+func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
+	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
+	var totalUnExistSeqs []int64
+	for docID, seqs := range m {
+		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
+		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
+		if err != nil {
+			return nil, err
+		}
+		totalMsgs = append(totalMsgs, seqMsgs...)
+		totalUnExistSeqs = append(totalUnExistSeqs, unexistSeqs...)
 	}
-	for _, unexistSeq := range unexistSeqs {
-		seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
+	for _, unexistSeq := range totalUnExistSeqs {
+		totalMsgs = append(totalMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
 	}
-	return seqMsgs, nil
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*sdkws.MsgData, err error) {

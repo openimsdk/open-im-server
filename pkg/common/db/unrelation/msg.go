@@ -197,7 +197,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 			break
 		}
 	}
-	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg))
+	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
 	for _, v := range doc.Msg {
 		var msg sdkws.MsgData
 		if err := proto.Unmarshal(v.Msg, &msg); err != nil {
