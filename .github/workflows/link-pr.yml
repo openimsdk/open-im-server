@@ -38,6 +38,6 @@ jobs:
         if: env.lychee_exit_code != 0
         uses: peter-evans/create-issue-from-file@v4
         with:
-          title: Link Checker Report
+          title: Bug reports for links in OpenIM docs
           content-filepath: ./lychee/out.md
           labels: kind/documentation, triage/unresolved, report
