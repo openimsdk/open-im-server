@@ -87,6 +87,8 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # The OS can be linux/windows/darwin when building binaries
 # PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
 
+# only support linux
+GOOS=linux
 
 # set a specific PLATFORM, defaults to the host platform
 ifeq ($(origin PLATFORM), undefined)

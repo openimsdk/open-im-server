@@ -88,6 +88,11 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # BIN_DIR=/root/workspaces/OpenIM/_output/bin
 # ==============================================================================
 
+## go.build: Build binaries
+.PHONY: go.build
+go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS)))
+	@echo "===========> Building binary $(BINS) $(VERSION) for $(PLATFORM)"
+
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:
@@ -106,12 +111,7 @@ go.build.%:
 	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)
-	@CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_PACKAGE)/cmd/$(COMMAND)
-
-## go.build: Build binaries
-.PHONY: go.build
-go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS)))
-	@echo "===========> Building binary $(BINS) $(VERSION) for $(PLATFORM)"
+	@CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go
 
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch

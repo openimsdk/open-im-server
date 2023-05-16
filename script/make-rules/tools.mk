@@ -17,7 +17,7 @@
 # Why download to the tools directory, thinking we might often switch Go versions using gvm.
 #
 
-# sealer build use BUILD_TOOLS
+# openim build use BUILD_TOOLS
 BUILD_TOOLS ?= golangci-lint goimports addlicense deepcopy-gen conversion-gen ginkgo go-junit-report go-gitlint
 # Code analysis tools
 ANALYSIS_TOOLS = golangci-lint goimports golines go-callvis kube-score
@@ -71,7 +71,6 @@ install.golangci-lint:
 install.goimports:
 	@$(GO) install golang.org/x/tools/cmd/goimports@latest
 
-# Actions path: https://github.com/sealerio/sealer/tree/main/.github/workflows/go.yml#L37-L50
 ## install.addlicense: Install addlicense, used to add license header to source files
 .PHONY: install.addlicense
 install.addlicense:
