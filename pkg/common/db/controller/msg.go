@@ -317,7 +317,7 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID st
 	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
 	var totalUnExistSeqs []int64
 	for docID, seqs := range m {
-		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
+		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
 		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
 		if err != nil {
 			return nil, err
@@ -347,8 +347,8 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 	}
 	if len(reFetchSeqs) > 0 {
 		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-		for docID, seq := range m {
-			msgs, _, err := db.findMsgBySeq(ctx, docID, seq)
+		for docID, seqs := range m {
+			msgs, _, err := db.findMsgBySeq(ctx, docID, seqs)
 			if err != nil {
 				return nil, err
 			}
@@ -458,7 +458,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	var seqs []int64
 	for i := end; i > end-num; i-- {
 		if i >= begin {
-			seqs = append(seqs, i)
+			seqs = append([]int64{i}, seqs...)
 		} else {
 			break
 		}
