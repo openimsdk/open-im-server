@@ -20,11 +20,10 @@
 # docker registry: registry.example.com/namespace/image:tag as: registry.hub.docker.com/cubxxw/<image-name>:<tag>
 #
 
-
 DOCKER := docker
-DOCKER_SUPPORTED_API_VERSION ?= 1.32
+DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40
 
-REGISTRY_PREFIX ?= marmotedu
+REGISTRY_PREFIX ?= cubxxw
 BASE_IMAGE = centos:centos8
 
 EXTRA_ARGS ?= --no-cache
@@ -43,10 +42,15 @@ IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/docker/*)
 # Determine images names by stripping out the dir names
 IMAGES ?= $(filter-out tools,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 
-ifeq (${IMAGES},)
-  $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
-endif
+# ifeq (${IMAGES},)
+#   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
+# endif
 
+# ==============================================================================
+# Image targets
+# ==============================================================================
+
+## image.verify: Verify docker version
 .PHONY: image.verify
 image.verify:
 	$(eval API_VERSION := $(shell $(DOCKER) version | grep -E 'API version: {1,6}[0-9]' | head -n1 | awk '{print $$3} END { if (NR==0) print 0}' ))
@@ -57,6 +61,7 @@ image.verify:
 		exit 1; \
 	fi
 
+## image.daemon.verify: Verify docker daemon experimental features
 .PHONY: image.daemon.verify
 image.daemon.verify:
 	$(eval PASS := $(shell $(DOCKER) version | grep -q -E 'Experimental: {1,5}true' && echo 1 || echo 0))
@@ -65,12 +70,15 @@ image.daemon.verify:
 		exit 1; \
 	fi
 
+## image.build: Build docker images
 .PHONY: image.build
 image.build: image.verify go.build.verify $(addprefix image.build., $(addprefix $(IMAGE_PLAT)., $(IMAGES)))
 
+## image.build.multiarch: Build docker images for all platforms
 .PHONY: image.build.multiarch
 image.build.multiarch: image.verify go.build.verify $(foreach p,$(PLATFORMS),$(addprefix image.build., $(addprefix $(p)., $(IMAGES))))
 
+## image.build.%: Build docker image for a specific platform
 .PHONY: image.build.%
 image.build.%: go.build.%
 	$(eval IMAGE := $(COMMAND))
@@ -90,22 +98,27 @@ image.build.%: go.build.%
 	fi
 	@rm -rf $(TMP_DIR)/$(IMAGE)
 
+## image.push: Push docker images
 .PHONY: image.push
 image.push: image.verify go.build.verify $(addprefix image.push., $(addprefix $(IMAGE_PLAT)., $(IMAGES)))
 
+## image.push.multiarch: Push docker images for all platforms
 .PHONY: image.push.multiarch
 image.push.multiarch: image.verify go.build.verify $(foreach p,$(PLATFORMS),$(addprefix image.push., $(addprefix $(p)., $(IMAGES))))
 
+## image.push.%: Push docker image for a specific platform
 .PHONY: image.push.%
 image.push.%: image.build.%
 	@echo "===========> Pushing image $(IMAGE) $(VERSION) to $(REGISTRY_PREFIX)"
 	$(DOCKER) push $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION)
 
+## image.manifest.push: Push manifest list for multi-arch images
 .PHONY: image.manifest.push
 image.manifest.push: export DOCKER_CLI_EXPERIMENTAL := enabled
 image.manifest.push: image.verify go.build.verify \
 $(addprefix image.manifest.push., $(addprefix $(IMAGE_PLAT)., $(IMAGES)))
 
+## image.manifest.push.%: Push manifest list for multi-arch images for a specific platform
 .PHONY: image.manifest.push.%
 image.manifest.push.%: image.push.% image.manifest.remove.%
 	@echo "===========> Pushing manifest $(IMAGE) $(VERSION) to $(REGISTRY_PREFIX) and then remove the local manifest list"
@@ -120,13 +133,16 @@ image.manifest.push.%: image.push.% image.manifest.remove.%
 # If you find your manifests were not updated,
 # Please manually delete them in $HOME/.docker/manifests/
 # and re-run.
+## image.manifest.remove.%: Remove local manifest list
 .PHONY: image.manifest.remove.%
 image.manifest.remove.%:
 	@rm -rf ${HOME}/.docker/manifests/docker.io_$(REGISTRY_PREFIX)_$(IMAGE)-$(VERSION)
 
+## image.manifest.push.multiarch: Push manifest list for multi-arch images for all platforms
 .PHONY: image.manifest.push.multiarch
 image.manifest.push.multiarch: image.push.multiarch $(addprefix image.manifest.push.multiarch., $(IMAGES))
 
+## image.manifest.push.multiarch.%: Push manifest list for multi-arch images for all platforms for a specific image
 .PHONY: image.manifest.push.multiarch.%
 image.manifest.push.multiarch.%:
 	@echo "===========> Pushing manifest $* $(VERSION) to $(REGISTRY_PREFIX) and then remove the local manifest list"
@@ -135,5 +151,5 @@ image.manifest.push.multiarch.%:
 
 ## image.help: Print help for image targets
 .PHONY: image.help
-image.help: script/make-rules/image.mk
+image.help: scripts/make-rules/image.mk
 	$(call smallhelp)
