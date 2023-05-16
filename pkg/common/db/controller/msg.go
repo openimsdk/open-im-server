@@ -318,7 +318,7 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID st
 	var totalUnExistSeqs []int64
 	for docID, seqs := range m {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
-		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
+		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
