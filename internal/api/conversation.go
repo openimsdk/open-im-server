@@ -10,8 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewConversation(c discoveryregistry.SvcDiscoveryRegistry) *Conversation {
 	return &Conversation{c: c}
 }

@@ -11,8 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewFriend(c discoveryregistry.SvcDiscoveryRegistry) *Friend {
 	return &Friend{c: c}
 }

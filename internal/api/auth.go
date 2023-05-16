@@ -6,11 +6,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	auth "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
 	"github.com/gin-gonic/gin"
 )
-
-var _ context.Context // 解决goland编辑器bug
 
 func NewAuth(c discoveryregistry.SvcDiscoveryRegistry) *Auth {
 	return &Auth{c: c}

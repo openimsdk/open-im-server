@@ -15,8 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewUser(client discoveryregistry.SvcDiscoveryRegistry) *User {
 	return &User{c: client}
 }

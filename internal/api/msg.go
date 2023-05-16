@@ -21,8 +21,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var _ context.Context // 解决goland编辑器bug
-
 func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Message {
 	return &Message{c: c, validate: validator.New()}
 }
