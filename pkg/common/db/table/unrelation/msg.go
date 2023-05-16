@@ -31,7 +31,8 @@ type MsgDocModelInterface interface {
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) ([]*sdkws.MsgData, error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) ([]*sdkws.MsgData, error)
+	GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	Delete(ctx context.Context, docIDs []string) error
@@ -95,13 +96,6 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 		}
 	}
 	return t
-}
-
-func (m MsgDocModel) GetSeqsBeginEnd(seqs []int64) (int64, int64) {
-	if len(seqs) == 0 {
-		return 0, 0
-	}
-	return seqs[len(seqs)-1], seqs[0]
 }
 
 func (m MsgDocModel) GetMsgIndex(seq int64) int64 {

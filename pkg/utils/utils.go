@@ -252,6 +252,13 @@ func GetSelfNotificationConversationID(userID string) []string {
 	return []string{"n_" + userID + "_" + userID, "si_" + userID + "_" + userID}
 }
 
+func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
+	if len(seqs) == 0 {
+		return 0, 0
+	}
+	return seqs[len(seqs)-1], seqs[0]
+}
+
 type MsgBySeq []*sdkws.MsgData
 
 func (s MsgBySeq) Len() int {

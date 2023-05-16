@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/dtm-labs/rockscache"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -29,6 +31,7 @@ const (
 	getuiToken       = "GETUI_TOKEN"
 	getuiTaskID      = "GETUI_TASK_ID"
 	messageCache     = "MESSAGE_CACHE:"
+	messageReadCache = "MESSAGE_READ_CACHE:"
 	signalCache      = "SIGNAL_CACHE:"
 	signalListCache  = "SIGNAL_LIST_CACHE:"
 	fcmToken         = "FCM_TOKEN:"
@@ -84,6 +87,9 @@ type MsgModel interface {
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
+
+	GetMsgsByConversationIDAndSeq(ctx context.Context, docID string, seqs []int64) ([]*sdkws.MsgData, error)
+	DeleteMsgByConversationIDAndSeq(ctx context.Context, docID string, seq int64) MsgModel
 }
 
 func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
@@ -91,39 +97,11 @@ func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
 }
 
 type msgCache struct {
-	rdb redis.UniversalClient
-}
-
-// 兼容老版本调用
-func (c *msgCache) DelKeys() {
-	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE:", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE:", "JOINED_GROUP_LIST_CACHE:",
-		"GROUP_MEMBER_INFO_CACHE:", "GROUP_ALL_MEMBER_INFO_CACHE:", "ALL_FRIEND_INFO_CACHE:"} {
-		fName := utils.GetSelfFuncName()
-		var cursor uint64
-		var n int
-		for {
-			var keys []string
-			var err error
-			keys, cursor, err = c.rdb.Scan(context.Background(), cursor, key+"*", scanCount).Result()
-			if err != nil {
-				panic(err.Error())
-			}
-			n += len(keys)
-			// for each for redis cluster
-			for _, key := range keys {
-				if err = c.rdb.Del(context.Background(), key).Err(); err != nil {
-					log.NewError("", fName, key, err.Error())
-					err = c.rdb.Del(context.Background(), key).Err()
-					if err != nil {
-						panic(err.Error())
-					}
-				}
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-	}
+	metaCache
+	rdb            redis.UniversalClient
+	expireTime     time.Duration
+	rcClient       *rockscache.Client
+	msgDocDatabase unRelationTb.MsgDocModelInterface
 }
 
 func (c *msgCache) getMaxSeqKey(conversationID string) string {
@@ -145,7 +123,6 @@ func (c *msgCache) getSeq(ctx context.Context, conversationID string, getkey fun
 func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range items {
-		log.ZDebug(ctx, "getSeqs", "getkey", getkey(v))
 		if err := pipe.Get(ctx, getkey(v)).Err(); err != nil && err != redis.Nil {
 			return nil, errs.Wrap(err)
 		}
@@ -549,4 +526,42 @@ func (c *msgCache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID
 
 func (c *msgCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
 	return errs.Wrap(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
+}
+
+func (c *msgCache) NewCache() MsgModel {
+	return &msgCache{
+		metaCache:  NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDelKeys()...),
+		expireTime: c.expireTime,
+		rcClient:   c.rcClient,
+	}
+}
+
+func (c msgCache) getMsgReadCacheKey(docID string, seq int64) string {
+	return messageReadCache + docID + "_" + strconv.Itoa(int(seq))
+}
+
+func (c *msgCache) getMsgsIndex(msg *sdkws.MsgData, keys []string) (int, error) {
+	key := c.getMsgReadCacheKey(utils.GetConversationIDByMsg(msg), msg.Seq)
+	for i, _key := range keys {
+		if key == _key {
+			return i, nil
+		}
+	}
+	return 0, errIndex
+}
+
+func (c *msgCache) GetMsgsByConversationIDAndSeq(ctx context.Context, docID string, seqs []int64) ([]*sdkws.MsgData, error) {
+	var keys []string
+	for _, seq := range seqs {
+		keys = append(keys, c.getMsgReadCacheKey(docID, seq))
+	}
+	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.getMsgsIndex, func(ctx context.Context) ([]*sdkws.MsgData, error) {
+		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
+	})
+}
+
+func (c *msgCache) DeleteMsgByConversationIDAndSeq(ctx context.Context, docID string, seq int64) MsgModel {
+	cache := c.NewCache()
+	c.AddKeys(c.getMsgReadCacheKey(docID, seq))
+	return cache
 }

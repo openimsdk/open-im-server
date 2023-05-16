@@ -57,6 +57,37 @@ func (m *MsgMongoDriver) FindOneByDocID(ctx context.Context, docID string) (*tab
 	return doc, err
 }
 
+func (m *MsgMongoDriver) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error) {
+	doc, err := m.FindOneByDocID(ctx, docID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	singleCount := 0
+	var hasSeqList []int64
+	for i := 0; i < len(doc.Msg); i++ {
+		var msg sdkws.MsgData
+		if err := proto.Unmarshal(doc.Msg[i].Msg, &msg); err != nil {
+			return nil, nil, nil, err
+		}
+		if utils.Contain(msg.Seq, seqs...) {
+			indexes = append(indexes, i)
+			seqMsgs = append(seqMsgs, &msg)
+			hasSeqList = append(hasSeqList, msg.Seq)
+			singleCount++
+			if singleCount == len(seqs) {
+				break
+			}
+		}
+	}
+	for _, i := range seqs {
+		if utils.Contain(i, hasSeqList...) {
+			continue
+		}
+		unExistSeqs = append(unExistSeqs, i)
+	}
+	return seqMsgs, indexes, unExistSeqs, nil
+}
+
 func (m *MsgMongoDriver) GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*table.MsgDocModel, error) {
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": 1})
 	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}, findOpts)
@@ -134,7 +165,8 @@ func (m *MsgMongoDriver) UpdateOneDoc(ctx context.Context, msg *table.MsgDocMode
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, beginSeq, endSeq int64) (msgs []*sdkws.MsgData, err error) {
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) (msgs []*sdkws.MsgData, err error) {
+	beginSeq, endSeq := utils.GetSeqsBeginEnd(seqs)
 	beginIndex := m.msg.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
 	pipeline := bson.A{
