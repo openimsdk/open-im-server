@@ -59,7 +59,9 @@ $(shell mkdir -p $(TMP_DIR))
 endif
 
 ifeq ($(origin VERSION), undefined)
-VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')
+# VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')	#v2.3.3.dirty
+VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
+# v2.3.3: git tag
 endif
 
 # Check if the tree is dirty. default to dirty(maybe u should commit?)
