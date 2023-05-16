@@ -123,7 +123,6 @@ func (c *msgCache) getSeq(ctx context.Context, conversationID string, getkey fun
 func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s string) string) (m map[string]int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range items {
-		log.ZDebug(ctx, "getSeqs", "getkey", getkey(v))
 		if err := pipe.Get(ctx, getkey(v)).Err(); err != nil && err != redis.Nil {
 			return nil, errs.Wrap(err)
 		}
