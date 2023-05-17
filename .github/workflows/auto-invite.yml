@@ -6,7 +6,7 @@ on:
 jobs:
   issue_comment:
     name: Invite users to join our group
-    if: ${{ github.event.comment.body == '/invite' }}
+    if: ${{ github.event.comment.body == '/invite' || github.event.comment.body == '/close' || github.event.comment.body == '/comment' }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
