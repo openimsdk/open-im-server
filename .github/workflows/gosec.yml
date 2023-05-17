@@ -1,0 +1,31 @@
+name: Run gosec
+
+# gosec is a source code security audit tool for the Go language. It performs a static 
+# analysis of the Go code, looking for potential security problems. The main functions of gosec are:
+#     1. Find common security vulnerabilities, such as SQL injection, command injection, and cross-site scripting (XSS).
+#     2. Audit codes according to common security standards and find non-standard codes.
+#     3. Assist the Go language engineer to write safe and reliable code.
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: "*"
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '*.yml'
+      - '.github'
+
+jobs:
+  golang-security-action:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
