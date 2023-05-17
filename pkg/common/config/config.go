@@ -358,10 +358,10 @@ type Notification struct {
 func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	opts := utils.NewOptions()
 	if cfg.UnreadCount {
-		opts = utils.WithOptions(opts, utils.WithUnreadCount())
+		opts = utils.WithOptions(opts, utils.WithUnreadCount(true))
 	}
 	if cfg.OfflinePush.Enable {
-		opts = utils.WithOptions(opts, utils.WithOfflinePush())
+		opts = utils.WithOptions(opts, utils.WithOfflinePush(true))
 	}
 	switch cfg.ReliabilityLevel {
 	case constant.UnreliableNotification:
