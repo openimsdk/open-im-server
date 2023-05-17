@@ -23,22 +23,24 @@ import (
 
 type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
-	RegisterCenter    discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase       controller.CommonMsgDatabase
-	ExtendMsgDatabase controller.ExtendMsgDatabase
-	Group             *rpcclient.GroupClient
-	User              *rpcclient.UserClient
-	Conversation      *rpcclient.ConversationClient
-	friend            *rpcclient.FriendClient
-	black             *rpcclient.BlackClient
-	GroupLocalCache   *localcache.GroupLocalCache
-	MessageLocker     MessageLocker
-	Handlers          MessageInterceptorChain
+	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
+	MsgDatabase            controller.CommonMsgDatabase
+	ExtendMsgDatabase      controller.ExtendMsgDatabase
+	Group                  *rpcclient.GroupClient
+	User                   *rpcclient.UserClient
+	Conversation           *rpcclient.ConversationClient
+	friend                 *rpcclient.FriendClient
+	black                  *rpcclient.BlackClient
+	GroupLocalCache        *localcache.GroupLocalCache
+	ConversationLocalCache *localcache.ConversationLocalCache
+	MessageLocker          MessageLocker
+	Handlers               MessageInterceptorChain
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
+
 func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsgReq) error {
 	for _, handler := range m.Handlers {
 		msgData, err := handler(ctx, req)
@@ -49,6 +51,7 @@ func (m *msgServer) execInterceptorHandler(ctx context.Context, req *msg.SendMsg
 	}
 	return nil
 }
+
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
@@ -66,16 +69,17 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 
 	s := &msgServer{
-		Conversation:      rpcclient.NewConversationClient(client),
-		User:              rpcclient.NewUserClient(client),
-		Group:             rpcclient.NewGroupClient(client),
-		MsgDatabase:       msgDatabase,
-		ExtendMsgDatabase: extendMsgDatabase,
-		RegisterCenter:    client,
-		GroupLocalCache:   localcache.NewGroupLocalCache(client),
-		black:             rpcclient.NewBlackClient(client),
-		friend:            rpcclient.NewFriendClient(client),
-		MessageLocker:     NewLockerMessage(cacheModel),
+		Conversation:           rpcclient.NewConversationClient(client),
+		User:                   rpcclient.NewUserClient(client),
+		Group:                  rpcclient.NewGroupClient(client),
+		MsgDatabase:            msgDatabase,
+		ExtendMsgDatabase:      extendMsgDatabase,
+		RegisterCenter:         client,
+		GroupLocalCache:        localcache.NewGroupLocalCache(client),
+		ConversationLocalCache: localcache.NewConversationLocalCache(client),
+		black:                  rpcclient.NewBlackClient(client),
+		friend:                 rpcclient.NewFriendClient(client),
+		MessageLocker:          NewLockerMessage(cacheModel),
 	}
 	s.addInterceptorHandler(MessageHasReadEnabled, MessageModifyCallback)
 	s.initPrometheus()
@@ -127,7 +131,7 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	conversationIDs, err := m.Conversation.GetConversationIDs(ctx, req.UserID)
+	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}

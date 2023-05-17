@@ -195,9 +195,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation.DraftTextTime != nil {
 		m["draft_text_time"] = req.Conversation.DraftTextTime.Value
 	}
-	if req.Conversation.UnreadCount != nil {
-		m["unread_count"] = req.Conversation.UnreadCount.Value
-	}
 	if req.Conversation.AttachedInfo != nil {
 		m["attached_info"] = req.Conversation.AttachedInfo.Value
 	}
@@ -283,7 +280,8 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 
 func (c *conversationServer) DelGroupChatConversations(ctx context.Context, req *pbConversation.DelGroupChatConversationsReq) (*pbConversation.DelGroupChatConversationsResp, error) {
 	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID,
-		utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupID), map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
+		utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupID),
+		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
 	return &pbConversation.DelGroupChatConversationsResp{}, nil
@@ -314,4 +312,12 @@ func (c *conversationServer) GetConversationsHasReadAndMaxSeq(ctx context.Contex
 		}
 	}
 	return resp, nil
+}
+
+func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req *pbConversation.GetUserConversationIDsHashReq) (*pbConversation.GetUserConversationIDsHashResp, error) {
+	hash, err := c.conversationDatabase.GetUserConversationIDsHash(ctx, req.OwnerUserID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
