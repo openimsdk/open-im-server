@@ -165,6 +165,14 @@ message SetConversationsReq {
 message SetConversationsResp {
 }
 
+message GetUserConversationIDsHashReq {
+  string ownerUserID = 1;
+}
+
+message GetUserConversationIDsHashResp {
+  uint64 hash = 1;
+}
+
 service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
   rpc GetConversation(GetConversationReq)returns(GetConversationResp);
@@ -180,4 +188,5 @@ service conversation {
   rpc GetConversationIDs(GetConversationIDsReq) returns(GetConversationIDsResp);
   rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
   rpc SetConversations(SetConversationsReq) returns(SetConversationsResp);
+  rpc GetUserConversationIDsHash(GetUserConversationIDsHashReq) returns(GetUserConversationIDsHashResp);
 }
