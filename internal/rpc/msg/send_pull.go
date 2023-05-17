@@ -62,10 +62,14 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 	if err != nil {
 		return nil, err
 	}
+
+	var isSend bool = true
 	conversationID := utils.GetConversationIDByMsg(req.MsgData)
-	isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, conversationID, constant.SingleChatType, req)
-	if err != nil {
-		return nil, err
+	if utils.MsgIsNotification(req.MsgData) {
+		isSend, err = m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, conversationID, constant.SingleChatType, req)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if isSend {
 		err = m.MsgDatabase.MsgToMQ(ctx, conversationID, req.MsgData)

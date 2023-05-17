@@ -41,7 +41,7 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		// user
 		constant.UserInfoUpdatedNotification: config.Config.Notification.UserInfoUpdated,
 		// friend
-		constant.FriendApplicationNotification:         config.Config.Notification.FriendApplication,
+		constant.FriendApplicationNotification:         config.Config.Notification.FriendApplicationAdded,
 		constant.FriendApplicationApprovedNotification: config.Config.Notification.FriendApplicationApproved,
 		constant.FriendApplicationRejectedNotification: config.Config.Notification.FriendApplicationRejected,
 		constant.FriendAddedNotification:               config.Config.Notification.FriendAdded,

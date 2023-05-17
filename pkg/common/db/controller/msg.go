@@ -100,13 +100,12 @@ type commonMsgDatabase struct {
 	msgDocDatabase    unRelationTb.MsgDocModelInterface
 	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
 	extendMsgSetModel unRelationTb.ExtendMsgSetModel
+	msg               unRelationTb.MsgDocModel
 	cache             cache.MsgModel
 	producer          *kafka.Producer
 	producerToMongo   *kafka.Producer
 	producerToModify  *kafka.Producer
 	producerToPush    *kafka.Producer
-	// model
-	msg unRelationTb.MsgDocModel
 }
 
 func (db *commonMsgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error {
@@ -277,7 +276,7 @@ func (db *commonMsgDatabase) DelMsgBySeqs(ctx context.Context, conversationID st
 }
 
 func (db *commonMsgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (unExistSeqs []int64, err error) {
-	seqMsgs, indexes, unExistSeqs, err := db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
+	seqMsgs, indexes, unExistSeqs, err := db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
 	if err != nil {
 		return nil, err
 	}
@@ -287,37 +286,6 @@ func (db *commonMsgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID str
 		}
 	}
 	return unExistSeqs, nil
-}
-
-func (db *commonMsgDatabase) GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error) {
-	doc, err := db.msgDocDatabase.FindOneByDocID(ctx, docID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	singleCount := 0
-	var hasSeqList []int64
-	for i := 0; i < len(doc.Msg); i++ {
-		msgPb, err := db.unmarshalMsg(&doc.Msg[i])
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		if utils.Contain(msgPb.Seq, seqs...) {
-			indexes = append(indexes, i)
-			seqMsgs = append(seqMsgs, msgPb)
-			hasSeqList = append(hasSeqList, msgPb.Seq)
-			singleCount++
-			if singleCount == len(seqs) {
-				break
-			}
-		}
-	}
-	for _, i := range seqs {
-		if utils.Contain(i, hasSeqList...) {
-			continue
-		}
-		unExistSeqs = append(unExistSeqs, i)
-	}
-	return seqMsgs, indexes, unExistSeqs, nil
 }
 
 func (db *commonMsgDatabase) GetNewestMsg(ctx context.Context, conversationID string) (msgPb *sdkws.MsgData, err error) {
@@ -345,15 +313,22 @@ func (db *commonMsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (m
 	return msgPb, nil
 }
 
-func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, err error) {
-	seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
-	if err != nil {
-		return nil, err
+func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
+	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
+	var totalUnExistSeqs []int64
+	for docID, seqs := range m {
+		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
+		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
+		if err != nil {
+			return nil, err
+		}
+		totalMsgs = append(totalMsgs, seqMsgs...)
+		totalUnExistSeqs = append(totalUnExistSeqs, unexistSeqs...)
 	}
-	for _, unexistSeq := range unexistSeqs {
-		seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
+	for _, unexistSeq := range totalUnExistSeqs {
+		totalMsgs = append(totalMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
 	}
-	return seqMsgs, nil
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*sdkws.MsgData, err error) {
@@ -372,8 +347,8 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 	}
 	if len(reFetchSeqs) > 0 {
 		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-		for docID, seq := range m {
-			msgs, _, err := db.findMsgBySeq(ctx, docID, seq)
+		for docID, seqs := range m {
+			msgs, _, err := db.findMsgBySeq(ctx, docID, seqs)
 			if err != nil {
 				return nil, err
 			}
@@ -395,12 +370,11 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 }
 
 func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, unExistSeqs []int64, err error) {
-	beginSeq, endSeq := db.msg.GetSeqsBeginEnd(seqs)
-	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, beginSeq, endSeq)
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
 	if err != nil {
 		return nil, nil, err
 	}
-	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "len(msgs)", len(msgs))
+	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "len(msgs)", len(msgs))
 	seqMsgs = append(seqMsgs, msgs...)
 	if len(msgs) == 0 {
 		unExistSeqs = seqs
@@ -416,7 +390,7 @@ func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seq
 			}
 		}
 	}
-	msgs, _, unExistSeqs, err = db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, unExistSeqs)
+	msgs, _, unExistSeqs, err = db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, unExistSeqs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -446,7 +420,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 		m = db.msg.GetDocIDSeqsMap(conversationID, totalNotExistSeqs)
 		for docID, seqs := range m {
 			docID = db.msg.ToNextDoc(docID)
-			msgs, _, unExistSeqs, err := db.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
+			msgs, _, unExistSeqs, err := db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
 			if err != nil {
 				missedSeqs = append(missedSeqs, seqs...)
 				log.ZError(ctx, "get message from mongo exception", err, "docID", docID, "seqs", seqs)
@@ -477,7 +451,6 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 	if len(totalNotExistSeqs) > 0 || len(delSeqs) > 0 {
 		sort.Sort(utils.MsgBySeq(seqMsgs))
 	}
-	// missSeqs为依然缺失的
 	return seqMsgs, nil
 }
 
@@ -485,7 +458,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	var seqs []int64
 	for i := end; i > end-num; i-- {
 		if i >= begin {
-			seqs = append(seqs, i)
+			seqs = append([]int64{i}, seqs...)
 		} else {
 			break
 		}

@@ -235,14 +235,14 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	}
 	encodedBuf := bufferPool.Get().([]byte)
 	resultBuf := bufferPool.Get().([]byte)
-	encodeBuf, err := c.longConnServer.Encode(resp)
+	encodedBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	_ = c.conn.SetWriteDeadline(writeWait)
 	if c.isCompress {
 		var compressErr error
-		resultBuf, compressErr = c.longConnServer.Compress(encodeBuf)
+		resultBuf, compressErr = c.longConnServer.Compress(encodedBuf)
 		if compressErr != nil {
 			return utils.Wrap(compressErr, "")
 		}

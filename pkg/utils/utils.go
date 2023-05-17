@@ -170,6 +170,43 @@ func GetHashCode(s string) uint32 {
 	return crc32.ChecksumIEEE([]byte(s))
 }
 
+func MsgIsNotification(msg *sdkws.MsgData) bool {
+	options := Options(msg.Options)
+	return !options.IsNotNotification()
+}
+
+func GetNotificationConversationID(msg *sdkws.MsgData) string {
+	switch msg.SessionType {
+	case constant.SingleChatType:
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		return "n_" + strings.Join(l, "_")
+	case constant.GroupChatType:
+		return "n_" + msg.GroupID
+	case constant.SuperGroupChatType:
+		return "n_" + msg.GroupID
+	case constant.NotificationChatType:
+		return "n_" + msg.SendID + "_" + msg.RecvID
+	}
+	return ""
+}
+
+func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
+	switch msg.SessionType {
+	case constant.SingleChatType:
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		return "si_" + strings.Join(l, "_")
+	case constant.GroupChatType:
+		return "g_" + msg.GroupID
+	case constant.SuperGroupChatType:
+		return "sg_" + msg.GroupID
+	case constant.NotificationChatType:
+		return "sn_" + msg.SendID + "_" + msg.RecvID
+	}
+	return ""
+}
+
 func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 	options := Options(msg.Options)
 	switch msg.SessionType {
@@ -250,6 +287,13 @@ func GetNotificationConvetstionID(conversationID string) string {
 
 func GetSelfNotificationConversationID(userID string) []string {
 	return []string{"n_" + userID + "_" + userID, "si_" + userID + "_" + userID}
+}
+
+func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
+	if len(seqs) == 0 {
+		return 0, 0
+	}
+	return seqs[0], seqs[len(seqs)-1]
 }
 
 type MsgBySeq []*sdkws.MsgData

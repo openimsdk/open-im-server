@@ -341,7 +341,7 @@ type Notification struct {
 	////////////////////////user///////////////////////
 	UserInfoUpdated NotificationConf `yaml:"userInfoUpdated"`
 	//////////////////////friend///////////////////////
-	FriendApplication         NotificationConf `yaml:"friendApplicationAdded"`
+	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
 	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
 	FriendApplicationRejected NotificationConf `yaml:"friendApplicationRejected"`
 	FriendAdded               NotificationConf `yaml:"friendAdded"`

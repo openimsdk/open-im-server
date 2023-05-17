@@ -76,40 +76,36 @@ func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 
 // 插入多条 外部保证userID 不重复 且在db中不存在
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
-	return u.tx.Transaction(func(tx any) error {
+	if err := u.tx.Transaction(func(tx any) error {
 		err = u.userDB.Create(ctx, users)
 		if err != nil {
 			return err
 		}
-		var userIDs []string
-		for _, user := range users {
-			userIDs = append(userIDs, user.UserID)
-		}
-		return u.cache.DelUsersInfo(userIDs...).ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	var userIDs []string
+	for _, user := range users {
+		userIDs = append(userIDs, user.UserID)
+	}
+	return u.cache.DelUsersInfo(userIDs...).ExecDel(ctx)
 }
 
 // 更新（非零值） 外部保证userID存在
 func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (err error) {
-	return u.tx.Transaction(func(tx any) error {
-		err = u.userDB.Update(ctx, user)
-		if err != nil {
-			return err
-		}
-		return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
-	})
+	if err := u.userDB.Update(ctx, user); err != nil {
+		return err
+	}
+	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
 }
 
 // 更新（零值） 外部保证userID存在
 func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return u.tx.Transaction(func(tx any) error {
-		err = u.userDB.UpdateByMap(ctx, userID, args)
-		if err != nil {
-			return err
-		}
-		return u.cache.DelUsersInfo(userID).ExecDel(ctx)
-	})
-
+	if err := u.userDB.UpdateByMap(ctx, userID, args); err != nil {
+		return err
+	}
+	return u.cache.DelUsersInfo(userID).ExecDel(ctx)
 }
 
 // 获取，如果没找到，不返回错误

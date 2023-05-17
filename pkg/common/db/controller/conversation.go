@@ -46,14 +46,14 @@ type ConversationDataBase struct {
 	tx             tx.Tx
 }
 
-func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error {
-	return c.tx.Transaction(func(tx any) error {
+func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) (err error) {
+	cache := c.cache.NewCache()
+	if err := c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
 		haveUserIDs, err := conversationTx.FindUserID(ctx, userIDs, []string{conversation.ConversationID})
 		if err != nil {
 			return err
 		}
-		cache := c.cache.NewCache()
 		if len(haveUserIDs) > 0 {
 			_, err = conversationTx.UpdateByMap(ctx, haveUserIDs, conversation.ConversationID, filedMap)
 			if err != nil {
@@ -71,19 +71,20 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 			}
 			temp.OwnerUserID = v
 			conversations = append(conversations, temp)
-		}
 
+		}
 		if len(conversations) > 0 {
 			err = conversationTx.Create(ctx, conversations)
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs)
+			cache = cache.DelConversationIDs(NotUserIDs...)
 		}
-		// clear cache
-		log.ZDebug(ctx, "SetUsersConversationFiledTx", "cache", cache.GetPreDelKeys(), "addr", &cache)
-		return cache.ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error {
@@ -98,13 +99,17 @@ func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversat
 	if err := c.conversationDB.Create(ctx, conversations); err != nil {
 		return err
 	}
-	return nil
+	var userIDs []string
+	for _, conversation := range conversations {
+		userIDs = append(userIDs, conversation.OwnerUserID)
+	}
+	return c.cache.DelConversationIDs(userIDs...).ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationTb.ConversationModel) error {
-	return c.tx.Transaction(func(tx any) error {
+	cache := c.cache.NewCache()
+	if err := c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
-		cache := c.cache.NewCache()
 		for _, conversation := range conversations {
 			for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
 				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
@@ -126,12 +131,15 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 					if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 						return err
 					}
-					cache = cache.DelConversationIDs([]string{v[0]})
+					cache = cache.DelConversationIDs([]string{v[0]}...)
 				}
 			}
 		}
-		return c.cache.ExecDel(ctx)
-	})
+		return nil
+	}); err != nil {
+		return err
+	}
+	return c.cache.ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
@@ -147,7 +155,8 @@ func (c *ConversationDataBase) GetUserAllConversation(ctx context.Context, owner
 }
 
 func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error {
-	return c.tx.Transaction(func(tx any) error {
+	cache := c.cache.NewCache()
+	if err := c.tx.Transaction(func(tx any) error {
 		var conversationIDs []string
 		for _, conversation := range conversations {
 			conversationIDs = append(conversationIDs, conversation.ConversationID)
@@ -181,13 +190,14 @@ func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUs
 			if err != nil {
 				return err
 			}
+			cache = cache.DelConversationIDs([]string{ownerUserID}...)
 		}
-		cache := c.cache.NewCache()
-		if len(notExistConversations) > 0 {
-			cache = cache.DelConversationIDs([]string{ownerUserID})
-		}
-		return cache.DelConvsersations(ownerUserID, existConversationIDs).ExecDel(ctx)
-	})
+		cache = cache.DelConvsersations(ownerUserID, existConversationIDs...)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
@@ -195,27 +205,36 @@ func (c *ConversationDataBase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, 
 }
 
 func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
+	cache := c.cache.NewCache()
 	conversationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	return c.tx.Transaction(func(tx any) error {
-		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{groupID})
+	if err := c.tx.Transaction(func(tx any) error {
+		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{conversationID})
 		if err != nil {
 			return err
 		}
 		notExistUserIDs := utils.DifferenceString(userIDs, existConversationUserIDs)
-
 		var conversations []*relationTb.ConversationModel
 		for _, v := range notExistUserIDs {
 			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
 		}
+		cache = cache.DelConversationIDs(notExistUserIDs...)
 		err = c.conversationDB.Create(ctx, conversations)
 		if err != nil {
 			return err
 		}
-		_, err = c.conversationDB.UpdateByMap(ctx, userIDs, conversationID, map[string]interface{}{"max_seq": 0})
+		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]interface{}{"max_seq": 0})
+		if err != nil {
+			return err
+		}
+		for _, v := range existConversationUserIDs {
+			cache = cache.DelConvsersations(v, conversationID)
+		}
+		return nil
+	}); err != nil {
 		return err
-	})
-
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) GetConversationIDs(ctx context.Context, userID string) ([]string, error) {

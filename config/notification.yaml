@@ -13,6 +13,7 @@ groupCreated:
 
 groupInfoSet:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -23,6 +24,7 @@ groupInfoSet:
 
 joinGroupApplication:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -32,6 +34,7 @@ joinGroupApplication:
 
 memberQuit:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -41,6 +44,7 @@ memberQuit:
  
 groupApplicationAccepted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -50,6 +54,7 @@ groupApplicationAccepted:
  
 groupApplicationRejected:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -60,6 +65,7 @@ groupApplicationRejected:
 
 groupOwnerTransferred:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -69,6 +75,7 @@ groupOwnerTransferred:
 
 memberKicked:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -78,6 +85,7 @@ memberKicked:
 
 memberInvited:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -87,6 +95,7 @@ memberInvited:
 
 memberEnter:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -96,6 +105,7 @@ memberEnter:
 
 groupDismissed:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -105,6 +115,7 @@ groupDismissed:
 
 groupMuted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -114,6 +125,7 @@ groupMuted:
 
 groupCancelMuted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -126,6 +138,7 @@ groupCancelMuted:
 
 groupMemberMuted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -135,6 +148,7 @@ groupMemberMuted:
 
 groupMemberCancelMuted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -144,6 +158,7 @@ groupMemberCancelMuted:
 
 groupMemberInfoSet:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false
   offlinePush:
     enable: false
@@ -154,6 +169,7 @@ groupMemberInfoSet:
 #############################friend#################################
 friendApplicationAdded:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: false
@@ -163,6 +179,7 @@ friendApplicationAdded:
 
 friendApplicationApproved:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -172,6 +189,7 @@ friendApplicationApproved:
 
 friendApplicationRejected:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -181,6 +199,7 @@ friendApplicationRejected:
 
 friendAdded:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -190,6 +209,7 @@ friendAdded:
 
 friendDeleted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -199,6 +219,7 @@ friendDeleted:
 
 friendRemarkSet:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -208,6 +229,7 @@ friendRemarkSet:
 
 blackAdded:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -217,6 +239,7 @@ blackAdded:
 
 blackDeleted:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -226,6 +249,7 @@ blackDeleted:
 
 friendInfoUpdated:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -236,6 +260,7 @@ friendInfoUpdated:
 #####################user#########################
 userInfoUpdated:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -246,6 +271,7 @@ userInfoUpdated:
 #####################conversation#########################
 conversationChanged:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
@@ -255,6 +281,7 @@ conversationChanged:
 
 conversationSetPrivate:
   isSendMsg: true
+  reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
     enable: true
