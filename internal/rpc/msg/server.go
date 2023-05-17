@@ -168,7 +168,6 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 				continue
 			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs}
-
 		}
 	}
 	return resp, nil

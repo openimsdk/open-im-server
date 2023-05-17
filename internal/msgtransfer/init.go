@@ -58,16 +58,16 @@ func StartTransfer(prometheusPort int) error {
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCache, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
 	conversationRpcClient := rpcclient.NewConversationClient(client)
-
-	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, conversationRpcClient)
+	groupRpcClient := rpcclient.NewGroupClient(client)
+	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, conversationRpcClient, groupRpcClient)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationClient) *MsgTransfer {
-	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient),
+	conversationRpcClient *rpcclient.ConversationClient, groupRpcClient *rpcclient.GroupClient) *MsgTransfer {
+	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
 }
 
