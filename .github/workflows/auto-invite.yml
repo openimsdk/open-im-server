@@ -15,8 +15,8 @@ jobs:
       - name: Invite user to join our group
         uses: peter-evans/create-or-update-comment@v1
         with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          token: "${{ secrets.BOT_GITHUB_TOKEN }}"
           body: |
             We value close connections with our users, developers, and contributors here at Open-IM-Server. With a large community and maintainer team, we're always here to help and support you. Whether you're looking to join our community or have any questions or suggestions, we welcome you to get in touch with us.
 
@@ -32,8 +32,8 @@ jobs:
       - name: Close Issue
         uses: peter-evans/close-issue@v3
         with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           comment: 🤖 Auto-closing issue, if you still need help please reopen the issue or ask for help in the community above
-          token: "${{ secrets.BOT_GITHUB_TOKEN }}"
           labels: |
             triage/accepted
