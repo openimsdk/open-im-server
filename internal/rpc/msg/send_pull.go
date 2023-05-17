@@ -65,6 +65,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *msg.SendMsgReq) 
 
 	var isSend bool = true
 	conversationID := utils.GetConversationIDByMsg(req.MsgData)
+
 	if utils.MsgIsNotification(req.MsgData) {
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, conversationID, constant.SingleChatType, req)
 		if err != nil {
