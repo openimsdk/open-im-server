@@ -11,7 +11,8 @@ ADD ./open_im_sdk_server $WORKDIR/main
 # 创建用于挂载的几个目录，添加可执行权限
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \
   chmod +x $WORKDIR/main
-
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends ca-certificates curl
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script","/Open-IM-Server/db/sdk"]
 
 WORKDIR $CMDDIR
