@@ -62,6 +62,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 			return utils.Slice(users, func(e *sdkws.UserInfo) rpcclient.CommonUser { return e }), nil
 		}),
 		conversationRpcClient: rpcclient.NewConversationClient(client),
+		msgRpcClient:          rpcclient.NewMsgClient(client),
 	})
 	return nil
 }
