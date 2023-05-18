@@ -142,7 +142,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return nil, errs.ErrArgs.Wrap("no group owner")
 	}
 	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
-	if opUserID := mcontext.GetOpUserID(ctx); !utils.Contain(opUserID, userIDs...) {
+	opUserID := mcontext.GetOpUserID(ctx)
+	if !utils.Contain(opUserID, userIDs...) {
 		userIDs = append(userIDs, opUserID)
 	}
 	if utils.Duplicate(userIDs) {
@@ -208,8 +209,27 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}()
 	} else {
-		s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
+		//s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
+		tips := &sdkws.GroupCreatedTips{
+			Group:          resp.GroupInfo,
+			OperationTime:  group.CreateTime.UnixMilli(),
+			GroupOwnerUser: s.groupMemberDB2PB(groupMembers[0], userMap[groupMembers[0].UserID].AppMangerLevel),
+		}
+		for _, member := range groupMembers {
+			tips.MemberList = append(tips.MemberList, s.groupMemberDB2PB(member, userMap[member.UserID].AppMangerLevel))
+		}
+		for _, member := range groupMembers {
+			if member.UserID == opUserID {
+				tips.OpUser = s.groupMemberDB2PB(member, userMap[member.UserID].AppMangerLevel)
+				break
+			}
+		}
+		if tips.OpUser == nil {
+			tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: opUserID, AppMangerLevel: userMap[opUserID].AppMangerLevel}
+		}
+		s.Notification.GroupCreatedNotification(ctx, tips)
 	}
+
 	return resp, nil
 }
 
@@ -808,12 +828,14 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
+	var opMember *relationTb.GroupMemberModel
 	if !tokenverify.IsAppManagerUid(ctx) {
-		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
+		var err error
+		opMember, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
+		if !(opMember.RoleLevel == constant.GroupOwner || opMember.RoleLevel == constant.GroupAdmin) {
 			return nil, errs.ErrNoPermission.Wrap("no group owner or admin")
 		}
 	}
@@ -825,6 +847,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
 	resp := &pbGroup.SetGroupInfoResp{}
+	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, group.GroupID)
+	if err != nil {
+		return nil, err
+	}
 	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) == 0 {
 		return resp, nil
@@ -836,12 +866,17 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	members, err := s.GroupDatabase.FindGroupMember(ctx, []string{group.GroupID}, nil, nil)
-	if err != nil {
-		return nil, err
+	tips := &sdkws.GroupInfoSetTips{
+		Group:    s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+		MuteTime: 0,
+		OpUser:   &sdkws.GroupMemberFullInfo{},
 	}
-	userIDs := utils.Slice(members, func(e *relationTb.GroupMemberModel) string { return e.GroupID })
-	s.Notification.GroupInfoSetNotification(ctx, group, members, req.GroupInfoForSet.NeedVerification.GetValuePtr())
+	if opMember == nil {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
+	} else {
+		tips.OpUser = s.groupMemberDB2PB(opMember, 0)
+	}
+	s.Notification.GroupInfoSetNotification(ctx, tips)
 	if req.GroupInfoForSet.Notification != "" {
 		args := &pbConversation.ModifyConversationFieldReq{
 			Conversation: &pbConversation.Conversation{
