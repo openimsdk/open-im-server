@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"runtime"
-	"runtime/debug"
 	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -30,28 +29,28 @@ func rpcString(v interface{}) string {
 }
 
 func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
-			fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
-			pc, file, line, ok := runtime.Caller(4)
-			if !ok {
-				panic("get runtime.Caller failed")
-			}
-			errInfo := &errinfo.ErrorInfo{
-				Path:  file,
-				Line:  uint32(line),
-				Name:  runtime.FuncForPC(pc).Name(),
-				Cause: fmt.Sprintf("%s", r),
-				Warp:  nil,
-			}
-			sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
-			if err_ != nil {
-				panic(err_)
-			}
-			err = sta.Err()
-		}
-	}()
+	//defer func() {
+	//	if r := recover(); r != nil {
+	//		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
+	//		fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
+	//		pc, file, line, ok := runtime.Caller(4)
+	//		if !ok {
+	//			panic("get runtime.Caller failed")
+	//		}
+	//		errInfo := &errinfo.ErrorInfo{
+	//			Path:  file,
+	//			Line:  uint32(line),
+	//			Name:  runtime.FuncForPC(pc).Name(),
+	//			Cause: fmt.Sprintf("%s", r),
+	//			Warp:  nil,
+	//		}
+	//		sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
+	//		if err_ != nil {
+	//			panic(err_)
+	//		}
+	//		err = sta.Err()
+	//	}
+	//}()
 	funcName := info.FullMethod
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
