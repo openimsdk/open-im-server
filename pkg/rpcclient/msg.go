@@ -160,7 +160,6 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	}
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
-	// msg.Options = make(map[string]bool, 7)
 	options := config.GetOptionsByNotification(c.contentTypeConf[contentType])
 	options = utils.WithOptions(options, opts...)
 	msg.Options = options
