@@ -438,6 +438,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		memberMap := make(map[string]*relationTb.GroupMemberModel)
 		for i, member := range members {
+			if member.RoleLevel == constant.GroupOwner {
+				return nil, errs.ErrArgs.Wrap("can not kick group owner")
+			}
 			memberMap[member.UserID] = members[i]
 		}
 		for _, userID := range req.KickedUserIDs {
