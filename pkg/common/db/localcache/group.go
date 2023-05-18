@@ -10,10 +10,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 )
 
-type GroupLocalCacheInterface interface {
-	GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error)
-}
-
 type GroupLocalCache struct {
 	lock   sync.Mutex
 	cache  map[string]GroupMemberIDsHash

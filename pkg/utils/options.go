@@ -7,7 +7,7 @@ type OptionsOpt func(Options)
 
 func NewOptions(opts ...OptionsOpt) Options {
 	options := make(map[string]bool, 11)
-	options[constant.IsNotification] = false
+	options[constant.IsNotNotification] = false
 	options[constant.IsSendMsg] = false
 	options[constant.IsHistory] = false
 	options[constant.IsPersistent] = false
@@ -25,6 +25,12 @@ func NewOptions(opts ...OptionsOpt) Options {
 	return options
 }
 
+func NewMsgOptions() Options {
+	options := make(map[string]bool, 11)
+	options[constant.IsOfflinePush] = false
+	return make(map[string]bool)
+}
+
 func WithOptions(options Options, opts ...OptionsOpt) Options {
 	for _, opt := range opts {
 		opt(options)
@@ -32,9 +38,9 @@ func WithOptions(options Options, opts ...OptionsOpt) Options {
 	return options
 }
 
-func WithNotification(b bool) OptionsOpt {
+func WithNotNotification(b bool) OptionsOpt {
 	return func(options Options) {
-		options[constant.IsNotification] = b
+		options[constant.IsNotNotification] = b
 	}
 }
 
@@ -56,15 +62,15 @@ func WithPersistent() OptionsOpt {
 	}
 }
 
-func WithOfflinePush() OptionsOpt {
+func WithOfflinePush(b bool) OptionsOpt {
 	return func(options Options) {
-		options[constant.IsOfflinePush] = true
+		options[constant.IsOfflinePush] = b
 	}
 }
 
-func WithUnreadCount() OptionsOpt {
+func WithUnreadCount(b bool) OptionsOpt {
 	return func(options Options) {
-		options[constant.IsUnreadCount] = true
+		options[constant.IsUnreadCount] = b
 	}
 }
 
@@ -113,7 +119,7 @@ func (o Options) Is(notification string) bool {
 }
 
 func (o Options) IsNotNotification() bool {
-	return o.Is(constant.IsNotification)
+	return o.Is(constant.IsNotNotification)
 }
 
 func (o Options) IsSendMsg() bool {

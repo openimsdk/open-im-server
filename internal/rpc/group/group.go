@@ -62,6 +62,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 			return utils.Slice(users, func(e *sdkws.UserInfo) rpcclient.CommonUser { return e }), nil
 		}),
 		conversationRpcClient: rpcclient.NewConversationClient(client),
+		msgRpcClient:          rpcclient.NewMsgClient(client),
 	})
 	return nil
 }
@@ -751,11 +752,12 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 	if err != nil {
 		return err
 	}
-	maxSeq, ok := resp.MaxSeqs[conevrsationID]
-	if !ok {
-		return errs.ErrInternalServer.Wrap("get max seq error")
-	}
-	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, maxSeq)
+	//log.ZInfo(ctx, "deleteMemberAndSetConversationSeq.GetMaxSeq", "maxSeqs", resp.MaxSeqs, "conevrsationID", conevrsationID)
+	//maxSeq, ok := resp.MaxSeqs[conevrsationID]
+	//if !ok {
+	//	return errs.ErrInternalServer.Wrap("get max seq error")
+	//}
+	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, resp.MaxSeqs[conevrsationID])
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {

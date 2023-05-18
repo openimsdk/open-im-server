@@ -17,6 +17,7 @@ import (
 const (
 	conversationKey                          = "CONVERSATION:"
 	conversationIDsKey                       = "CONVERSATION_IDS:"
+	conversationIDsHashKey                   = "CONVERSATION_IDS_HASH:"
 	recvMsgOptKey                            = "RECV_MSG_OPT:"
 	superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
@@ -31,6 +32,10 @@ type ConversationCache interface {
 	// get user's conversationIDs from msgCache
 	GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error)
 	DelConversationIDs(userIDs ...string) ConversationCache
+
+	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
+	DelUserConversationIDsHash(ownerUserIDs ...string) ConversationCache
+
 	// get one conversation from msgCache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
 	DelConvsersations(ownerUserID string, conversationIDs ...string) ConversationCache
@@ -101,6 +106,33 @@ func (c *ConversationRedisCache) DelConversationIDs(userIDs ...string) Conversat
 	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, c.getConversationIDsKey(userID))
+	}
+	cache := c.NewCache()
+	cache.AddKeys(keys...)
+	return cache
+}
+
+func (c *ConversationRedisCache) getUserConversationIDsHashKey(ownerUserID string) string {
+	return conversationIDsHashKey + ownerUserID
+}
+
+func (c *ConversationRedisCache) GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error) {
+	return getCache(ctx, c.rcClient, c.getUserConversationIDsHashKey(ownerUserID), c.expireTime, func(ctx context.Context) (uint64, error) {
+		conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
+		if err != nil {
+			return 0, err
+		}
+		utils.Sort(conversationIDs, true)
+		bi := big.NewInt(0)
+		bi.SetString(utils.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
+		return bi.Uint64(), nil
+	})
+}
+
+func (c *ConversationRedisCache) DelUserConversationIDsHash(ownerUserIDs ...string) ConversationCache {
+	var keys []string
+	for _, ownerUserID := range ownerUserIDs {
+		keys = append(keys, c.getUserConversationIDsHashKey(ownerUserID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)

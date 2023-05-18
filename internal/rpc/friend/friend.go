@@ -117,7 +117,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.Res
 		return nil, err
 	}
 
-	friendRequest := tablerelation.FriendRequestModel{FromUserID: req.ToUserID, ToUserID: req.FromUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := tablerelation.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.friendDatabase.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
@@ -222,8 +222,6 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
-	log.ZInfo(ctx, "test log out")
-	log.ZInfo(ctx, "GetPaginationFriendsApplyFrom.xxx", "total", total, "friendRequests", len(friendRequests), "userRpcClient", s.userRpcClient == nil)
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err

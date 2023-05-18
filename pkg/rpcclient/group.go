@@ -114,7 +114,10 @@ func (g *GroupClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string)
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner, constant.GroupAdmin},
 	})
-	return resp.Members, err
+	if err != nil {
+		return nil, err
+	}
+	return resp.Members, nil
 }
 
 func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.GroupMemberFullInfo, error) {
@@ -137,5 +140,8 @@ func (g *GroupClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]
 	resp, err := group.NewGroupClient(cc).GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
 		GroupID: groupID,
 	})
-	return resp.UserIDs, err
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
 }

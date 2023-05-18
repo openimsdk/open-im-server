@@ -30,6 +30,7 @@ type ConversationDatabase interface {
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
+	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -78,7 +79,7 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...)
 		}
 		return nil
 	}); err != nil {
@@ -103,7 +104,7 @@ func (c *ConversationDataBase) CreateConversation(ctx context.Context, conversat
 	for _, conversation := range conversations {
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
-	return c.cache.DelConversationIDs(userIDs...).ExecDel(ctx)
+	return c.cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
 }
 
 func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationTb.ConversationModel) error {
@@ -131,7 +132,7 @@ func (c *ConversationDataBase) SyncPeerUserPrivateConversationTx(ctx context.Con
 					if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 						return err
 					}
-					cache = cache.DelConversationIDs([]string{v[0]}...)
+					cache = cache.DelConversationIDs(v[0]).DelUserConversationIDsHash(v[0])
 				}
 			}
 		}
@@ -190,7 +191,7 @@ func (c *ConversationDataBase) SetUserConversations(ctx context.Context, ownerUs
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs([]string{ownerUserID}...)
+			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
 		}
 		cache = cache.DelConvsersations(ownerUserID, existConversationIDs...)
 		return nil
@@ -218,7 +219,7 @@ func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, 
 			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
 		}
-		cache = cache.DelConversationIDs(notExistUserIDs...)
+		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
 		err = c.conversationDB.Create(ctx, conversations)
 		if err != nil {
 			return err
@@ -239,4 +240,8 @@ func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, 
 
 func (c *ConversationDataBase) GetConversationIDs(ctx context.Context, userID string) ([]string, error) {
 	return c.cache.GetUserConversationIDs(ctx, userID)
+}
+
+func (c *ConversationDataBase) GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error) {
+	return c.cache.GetUserConversationIDsHash(ctx, ownerUserID)
 }

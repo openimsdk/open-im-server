@@ -285,7 +285,7 @@ func (g *GroupNotificationSender) mergeGroupFull(ctx context.Context, groupID st
 }
 
 func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, userMap map[string]*sdkws.UserInfo) (err error) {
-	defer log.ZDebug(ctx, "return")
+	defer log.ZDebug(ctx, "GroupCreatedNotification.return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)

@@ -313,15 +313,22 @@ func (db *commonMsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (m
 	return msgPb, nil
 }
 
-func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (seqMsgs []*sdkws.MsgData, err error) {
-	seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, conversationID, seqs)
-	if err != nil {
-		return nil, err
+func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
+	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
+	var totalUnExistSeqs []int64
+	for docID, seqs := range m {
+		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
+		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
+		if err != nil {
+			return nil, err
+		}
+		totalMsgs = append(totalMsgs, seqMsgs...)
+		totalUnExistSeqs = append(totalUnExistSeqs, unexistSeqs...)
 	}
-	for _, unexistSeq := range unexistSeqs {
-		seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
+	for _, unexistSeq := range totalUnExistSeqs {
+		totalMsgs = append(totalMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
 	}
-	return seqMsgs, nil
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*sdkws.MsgData, err error) {
@@ -340,8 +347,8 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 	}
 	if len(reFetchSeqs) > 0 {
 		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-		for docID, seq := range m {
-			msgs, _, err := db.findMsgBySeq(ctx, docID, seq)
+		for docID, seqs := range m {
+			msgs, _, err := db.findMsgBySeq(ctx, docID, seqs)
 			if err != nil {
 				return nil, err
 			}
@@ -451,7 +458,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	var seqs []int64
 	for i := end; i > end-num; i-- {
 		if i >= begin {
-			seqs = append(seqs, i)
+			seqs = append([]int64{i}, seqs...)
 		} else {
 			break
 		}
