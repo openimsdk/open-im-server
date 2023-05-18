@@ -502,11 +502,18 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				NotificationUpdateTime: group.NotificationUpdateTime.UnixMilli(),
 				NotificationUserID:     group.NotificationUserID,
 			},
-			OpUser:         convert.Db2PbGroupMembersCMSResp(memberMap[opUserID]),
 			KickedUserList: []*sdkws.GroupMemberFullInfo{},
 		}
 		if len(owner) > 0 {
 			tips.Group.OwnerUserID = owner[0].UserID
+		}
+		if opMember, ok := memberMap[opUserID]; ok {
+			tips.OpUser = convert.Db2PbGroupMembersCMSResp(opMember)
+		} else {
+			tips.OpUser = &sdkws.GroupMemberFullInfo{
+				GroupID: group.GroupID,
+				UserID:  opUserID,
+			}
 		}
 		for _, userID := range req.KickedUserIDs {
 			tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMembersCMSResp(memberMap[userID]))
