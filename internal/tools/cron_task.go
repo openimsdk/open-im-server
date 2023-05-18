@@ -9,7 +9,6 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-const cronTaskOperationID = "cronTaskOperationID-"
 const moduleName = "cron"
 
 func StartCronTask() error {

@@ -90,13 +90,13 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("init failed")
 		return
 	}
-	msgTools.ClearUsersMsg(ctx, []string{conversationID})
+	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
 	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
@@ -133,13 +133,13 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("InsertOne failed", testUID1)
 	}
 
-	msgTools.ClearUsersMsg(ctx, []string{conversationID})
+	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
 	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
@@ -165,13 +165,13 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("InsertOne failed", conversationID)
 	}
 
-	msgTools.ClearUsersMsg(ctx, []string{conversationID})
+	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
 	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
@@ -211,7 +211,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("InsertOne failed", conversationID)
 	}
 
-	msgTools.ClearUsersMsg(ctx, []string{conversationID})
+	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -221,7 +221,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
@@ -252,7 +252,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("InsertOne failed", conversationID)
 	}
 
-	msgTools.ClearUsersMsg(ctx, []string{conversationID})
+	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -262,7 +262,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
@@ -312,7 +312,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	if err := msgTools.CheckMaxSeqWithMongo(ctx, conversationID, maxSeqCache, maxSeqMongo); err != nil {
+	if maxSeqCache != maxSeqMongo {
 		t.Error("checkMaxSeqWithMongo failed", conversationID)
 	}
 	if minSeqMongo != minSeqCache {
