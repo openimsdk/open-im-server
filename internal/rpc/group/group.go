@@ -749,12 +749,12 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 	if err != nil {
 		return err
 	}
-	log.ZInfo(ctx, "deleteMemberAndSetConversationSeq.GetMaxSeq", "maxSeqs", resp.MaxSeqs, "conevrsationID", conevrsationID)
-	maxSeq, ok := resp.MaxSeqs[conevrsationID]
-	if !ok {
-		return errs.ErrInternalServer.Wrap("get max seq error")
-	}
-	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, maxSeq)
+	//log.ZInfo(ctx, "deleteMemberAndSetConversationSeq.GetMaxSeq", "maxSeqs", resp.MaxSeqs, "conevrsationID", conevrsationID)
+	//maxSeq, ok := resp.MaxSeqs[conevrsationID]
+	//if !ok {
+	//	return errs.ErrInternalServer.Wrap("get max seq error")
+	//}
+	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, resp.MaxSeqs[conevrsationID])
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
