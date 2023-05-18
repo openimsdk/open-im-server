@@ -20,9 +20,10 @@ import (
 )
 
 type MsgTool struct {
-	msgDatabase   controller.CommonMsgDatabase
-	userDatabase  controller.UserDatabase
-	groupDatabase controller.GroupDatabase
+	msgDatabase          controller.CommonMsgDatabase
+	conversationDatabase controller.ConversationDataBase
+	userDatabase         controller.UserDatabase
+	groupDatabase        controller.GroupDatabase
 }
 
 var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
@@ -56,23 +57,15 @@ func InitMsgTool() (*MsgTool, error) {
 	return msgTool, nil
 }
 
-func (c *MsgTool) AllUserClearMsgAndFixSeq() {
+func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 	log.ZInfo(ctx, "============================ start del cron task ============================")
-	var err error
-	userIDs, err := c.userDatabase.GetAllUserID(ctx)
-	if err == nil {
-		c.ClearUsersMsg(ctx, userIDs)
-	} else {
-		log.ZError(ctx, "ClearUsersMsg failed", err)
+	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
+	if err != nil {
+		log.ZError(ctx, "GetAllConversationIDs failed", err)
+		return
 	}
-	// working group msg clear
-	superGroupIDs, err := c.groupDatabase.GetGroupIDsByGroupType(ctx, constant.WorkingGroup)
-	if err == nil {
-		c.ClearSuperGroupMsg(ctx, superGroupIDs)
-	} else {
-		log.ZError(ctx, "ClearSuperGroupMsg failed", err)
-	}
+	c.ClearSuperGroupMsg(ctx, conversationIDs)
 	log.ZInfo(ctx, "============================ start del cron finished ============================")
 }
 

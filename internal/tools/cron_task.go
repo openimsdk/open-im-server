@@ -2,10 +2,11 @@ package tools
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/robfig/cron/v3"
-	"sync"
 )
 
 const cronTaskOperationID = "cronTaskOperationID-"
@@ -22,7 +23,7 @@ func StartCronTask() error {
 	c := cron.New()
 	var wg sync.WaitGroup
 	wg.Add(1)
-	_, err = c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, msgTool.AllUserClearMsgAndFixSeq)
+	_, err = c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
 	if err != nil {
 		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
 		return err
