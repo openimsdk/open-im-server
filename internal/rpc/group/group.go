@@ -387,6 +387,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	//total, members, err := s.GroupDatabase.PageGroupMember(ctx, []string{req.GroupID}, nil, utils.If(req.Filter >= 0, []int32{req.Filter}, nil), req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	//total, members, err := s.GroupDatabase.PageGroupMember(ctx, []string{req.GroupID}, nil, nil, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	total, members, err := s.GroupDatabase.PageGetGroupMember(ctx, req.GroupID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	log.ZDebug(ctx, "GetGroupMemberList", "total", total, "members", members, "length", len(members))
 	if err != nil {
 		return nil, err
 	}
@@ -397,12 +398,14 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "GetGroupMemberList", "nameMap", nameMap)
 	resp.Members = utils.Slice(members, func(e *relationTb.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
 		return convert.Db2PbGroupMembersCMSResp(e)
 	})
+	log.ZDebug(ctx, "GetGroupMemberList", "resp", resp, "length", len(resp.Members))
 	return resp, nil
 }
 
