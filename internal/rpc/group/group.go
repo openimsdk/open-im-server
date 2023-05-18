@@ -749,6 +749,7 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 	if err != nil {
 		return err
 	}
+	log.ZInfo(ctx, "deleteMemberAndSetConversationSeq.GetMaxSeq", "maxSeqs", resp.MaxSeqs, "conevrsationID", conevrsationID)
 	maxSeq, ok := resp.MaxSeqs[conevrsationID]
 	if !ok {
 		return errs.ErrInternalServer.Wrap("get max seq error")
