@@ -453,30 +453,30 @@ func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.
 	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupOwnerTransferredNotification, tips)
 }
 
-func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, req *pbGroup.KickGroupMemberReq, kickedUserIDList []string) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
-	if err != nil {
-		return err
-	}
-	user, err := g.getGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.MemberKickedTips{Group: group, OpUser: user}
+func (g *GroupNotificationSender) MemberKickedNotification(ctx context.Context, tips *sdkws.MemberKickedTips) (err error) {
+	//defer log.ZDebug(ctx, "return")
+	//defer func() {
+	//	if err != nil {
+	//		log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
+	//	}
+	//}()
+	//group, err := g.getGroupInfo(ctx, tips.GroupID)
+	//if err != nil {
+	//	return err
+	//}
+	//user, err := g.getGroupMember(ctx, tips.GroupID, mcontext.GetOpUserID(ctx))
+	//if err != nil {
+	//	return err
+	//}
+	//tips := &sdkws.MemberKickedTips{Group: group, OpUser: user}
 	//for _, v := range kickedUserIDList {
 	//	var groupMemberInfo sdkws.GroupMemberFullInfo
-	//	if err := c.setGroupMemberInfo(ctx, req.GroupID, v, &groupMemberInfo); err != nil {
+	//	if err := c.setGroupMemberInfo(ctx, tips.GroupID, v, &groupMemberInfo); err != nil {
 	//		continue
 	//	}
 	//	MemberKickedTips.KickedUserList = append(MemberKickedTips.KickedUserList, &groupMemberInfo)
 	//}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberKickedNotification, tips)
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
 }
 
 func (g *GroupNotificationSender) MemberInvitedNotification(ctx context.Context, groupID, reason string, invitedUserIDList []string) (err error) {

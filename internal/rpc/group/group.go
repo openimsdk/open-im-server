@@ -471,10 +471,47 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				return nil, errs.ErrNoPermission.Wrap("opUserID is OrdinaryUser")
 			}
 		}
+		userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		owner, err := s.GroupDatabase.FindGroupMember(ctx, []string{req.GroupID}, nil, []int32{constant.GroupOwner})
+		if err != nil {
+			return nil, err
+		}
 		if err := s.GroupDatabase.DeleteGroupMember(ctx, group.GroupID, req.KickedUserIDs); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberKickedNotification(ctx, req, req.KickedUserIDs)
+		tips := &sdkws.MemberKickedTips{
+			Group: &sdkws.GroupInfo{
+				GroupID:      group.GroupID,
+				GroupName:    group.GroupName,
+				Notification: group.Notification,
+				Introduction: group.Introduction,
+				FaceURL:      group.FaceURL,
+				//OwnerUserID:            owner[0].UserID,
+				CreateTime:             group.CreateTime.UnixMilli(),
+				MemberCount:            uint32(len(userIDs)),
+				Ex:                     group.Ex,
+				Status:                 group.Status,
+				CreatorUserID:          group.CreatorUserID,
+				GroupType:              group.GroupType,
+				NeedVerification:       group.NeedVerification,
+				LookMemberInfo:         group.LookMemberInfo,
+				ApplyMemberFriend:      group.ApplyMemberFriend,
+				NotificationUpdateTime: group.NotificationUpdateTime.UnixMilli(),
+				NotificationUserID:     group.NotificationUserID,
+			},
+			OpUser:         convert.Db2PbGroupMembersCMSResp(memberMap[opUserID]),
+			KickedUserList: []*sdkws.GroupMemberFullInfo{},
+		}
+		if len(owner) > 0 {
+			tips.Group.OwnerUserID = owner[0].UserID
+		}
+		for _, userID := range req.KickedUserIDs {
+			tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMembersCMSResp(memberMap[userID]))
+		}
+		s.Notification.MemberKickedNotification(ctx, tips)
 	}
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, req.KickedUserIDs); err != nil {
 		return nil, err
