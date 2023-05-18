@@ -231,11 +231,19 @@ func (g *groupDatabase) PageGetJoinGroup(ctx context.Context, userID string, pag
 }
 
 func (g *groupDatabase) PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (total uint32, totalGroupMembers []*relationTb.GroupMemberModel, err error) {
-	groupMembers, err := g.cache.GetAllGroupMembersInfo(ctx, groupID)
+	groupMemberIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return 0, nil, err
 	}
-	return uint32(len(groupMembers)), utils.Paginate(groupMembers, int(pageNumber), int(showNumber)), nil
+	pageIDs := utils.Paginate(groupMemberIDs, int(pageNumber), int(showNumber))
+	if len(pageIDs) == 0 {
+		return uint32(len(groupMemberIDs)), nil, nil
+	}
+	members, err := g.cache.GetGroupMembersInfo(ctx, groupID, pageIDs)
+	if err != nil {
+		return 0, nil, err
+	}
+	return uint32(len(groupMemberIDs)), members, nil
 }
 
 func (g *groupDatabase) SearchGroupMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
