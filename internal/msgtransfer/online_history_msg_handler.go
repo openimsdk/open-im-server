@@ -120,19 +120,27 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(totalMsgs []
 	for _, v := range totalMsgs {
 		options := utils.Options(v.message.Options)
 		if !options.IsNotNotification() {
-			// 原通知
-			notificationMsg := proto.Clone(v.message).(*sdkws.MsgData)
+			// clone msg from notificationMsg
 			if options.IsSendMsg() {
+				msg := proto.Clone(v.message).(*sdkws.MsgData)
 				// 消息
 				if v.message.Options != nil {
-					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithNotNotification(true), utils.WithSendMsg(false))
+					msg.Options = utils.NewMsgOptions()
 				}
-				storageMsgList = append(storageMsgList, v.message)
+				if options.IsOfflinePush() {
+					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithOfflinePush(false))
+					msg.Options = utils.WithOptions(utils.Options(msg.Options), utils.WithOfflinePush(true))
+				}
+				if options.IsUnreadCount() {
+					v.message.Options = utils.WithOptions(utils.Options(v.message.Options), utils.WithUnreadCount(false))
+					msg.Options = utils.WithOptions(utils.Options(msg.Options), utils.WithUnreadCount(true))
+				}
+				storageMsgList = append(storageMsgList, msg)
 			}
-			if isStorage(notificationMsg) {
-				storageNotificatoinList = append(storageNotificatoinList, notificationMsg)
+			if isStorage(v.message) {
+				storageNotificatoinList = append(storageNotificatoinList, v.message)
 			} else {
-				notStorageNotificationList = append(notStorageNotificationList, notificationMsg)
+				notStorageNotificationList = append(notStorageNotificationList, v.message)
 			}
 		} else {
 			if isStorage(v.message) {

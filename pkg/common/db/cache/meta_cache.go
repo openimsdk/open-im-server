@@ -16,7 +16,7 @@ import (
 const (
 	scanCount     = 3000
 	maxRetryTimes = 5
-	retryInterval = time.Second * 1
+	retryInterval = time.Millisecond * 100
 )
 
 var errIndex = errors.New("err index")
@@ -49,7 +49,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 			if err := m.rcClient.TagAsDeletedBatch2(ctx, m.keys); err != nil {
 				if retryTimes >= m.maxRetryTimes {
 					err = errs.ErrInternalServer.Wrap(fmt.Sprintf("delete cache error: %v, keys: %v, retry times %d, please check redis server", err, m.keys, retryTimes))
-					log.ZWarn(ctx, "delete cache failed", err, "keys", m.keys)
+					log.ZWarn(ctx, "delete cache failed, please handle keys", err, "keys", m.keys)
 					return err
 				}
 				retryTimes++
@@ -106,11 +106,11 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 		return t, nil
 	}
 	if v == "" {
-		return t, errs.ErrRecordNotFound.Wrap("msgCache is not found")
+		return t, errs.ErrRecordNotFound.Wrap("cache is not found")
 	}
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
-		log.ZError(ctx, "msgCache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
+		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
 		return t, utils.Wrap(err, "")
 	}
 	return t, nil
