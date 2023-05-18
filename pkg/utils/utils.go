@@ -276,9 +276,9 @@ func IsNotification(conversationID string) bool {
 	return strings.HasPrefix(conversationID, "n_")
 }
 
-func GetNotificationConvetstionID(conversationID string) string {
+func GetNotificationConversationIDByConversationID(conversationID string) string {
 	l := strings.Split(conversationID, "_")
-	if len(l) > 2 {
+	if len(l) > 1 {
 		l[0] = "n"
 		return strings.Join(l, "_")
 	}

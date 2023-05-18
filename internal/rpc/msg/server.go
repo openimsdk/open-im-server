@@ -136,7 +136,7 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 		return nil, err
 	}
 	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConvetstionID(conversationID))
+		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
 	}
 	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)

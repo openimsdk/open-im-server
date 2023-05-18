@@ -137,7 +137,10 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 		if seq.Err() != nil && seq.Err() != redis.Nil {
 			return nil, errs.Wrap(v.Err())
 		}
-		m[items[i]] = utils.StringToInt64(seq.Val())
+		val := utils.StringToInt64(seq.Val())
+		if val != 0 {
+			m[items[i]] = val
+		}
 	}
 	return m, nil
 }

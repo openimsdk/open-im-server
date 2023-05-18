@@ -31,6 +31,7 @@ type ConversationDatabase interface {
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
+	GetAllConversationIDs(ctx context.Context) ([]string, error)
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -244,4 +245,8 @@ func (c *ConversationDataBase) GetConversationIDs(ctx context.Context, userID st
 
 func (c *ConversationDataBase) GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error) {
 	return c.cache.GetUserConversationIDsHash(ctx, ownerUserID)
+}
+
+func (c *ConversationDataBase) GetAllConversationIDs(ctx context.Context) ([]string, error) {
+	return c.conversationDB.GetAllConversationIDs(ctx)
 }
