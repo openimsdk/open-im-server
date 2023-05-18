@@ -228,15 +228,21 @@ func (g *GroupNotificationSender) mergeGroupFull(ctx context.Context, groupID st
 			return nil, err
 		}
 	}
+	if ms == nil {
+		var temp []*relation.GroupMemberModel
+		ms = &temp
+	}
+	if users == nil {
+		temp := make(map[string]*sdkws.UserInfo)
+		users = &temp
+	}
 	var members []*relation.GroupMemberModel
-	if ms == nil || len(*ms) == 0 {
+	if len(*ms) == 0 {
 		members, err = g.db.FindGroupMember(ctx, []string{groupID}, nil, nil)
 		if err != nil {
 			return nil, err
 		}
-		if ms != nil {
-			*ms = members
-		}
+		*ms = members
 	} else {
 		members = *ms
 	}
@@ -284,30 +290,46 @@ func (g *GroupNotificationSender) mergeGroupFull(ctx context.Context, groupID st
 	return groupInfo, nil
 }
 
-func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, userMap map[string]*sdkws.UserInfo) (err error) {
-	defer log.ZDebug(ctx, "GroupCreatedNotification.return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
-	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, &userMap)
-	if err != nil {
-		return err
-	}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCreatedNotification, groupInfo)
+//func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, userMap map[string]*sdkws.UserInfo) (err error) {
+//	defer log.ZDebug(ctx, "GroupCreatedNotification.return")
+//	defer func() {
+//		if err != nil {
+//			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
+//		}
+//	}()
+//	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, &userMap)
+//	if err != nil {
+//		return err
+//	}
+//	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCreatedNotification, groupInfo)
+//}
+
+func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) (err error) {
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, needVerification *int32) (err error) {
-	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
-	if needVerification != nil {
-		tips.Group.NeedVerification = *needVerification
-	}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, tips)
+//func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, needVerification *int32) (err error) {
+//	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
+//	if err != nil {
+//		return err
+//	}
+//	tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
+//	if needVerification != nil {
+//		tips.Group.NeedVerification = *needVerification
+//	}
+//	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, tips)
+//}
+
+func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) (err error) {
+	//groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
+	//if err != nil {
+	//	return err
+	//}
+	//tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
+	//if needVerification != nil {
+	//	tips.Group.NeedVerification = *needVerification
+	//}
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips)
 }
 
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {
