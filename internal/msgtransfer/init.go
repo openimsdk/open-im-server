@@ -87,7 +87,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
 	if config.Config.ChatPersistenceMysql {
-		go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
+		// go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
 	} else {
 		fmt.Println("msg transfer not start mysql consumer")
 	}

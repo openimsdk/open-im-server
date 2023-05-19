@@ -23,7 +23,6 @@ message MsgDataToMongoByMQ{
   int64 lastSeq = 1;
   string conversationID = 2;
   repeated sdkws.MsgData msgData = 3;
-  string triggerID = 4;
 }
 
 message GetMaxAndMinSeqReq {
@@ -187,8 +186,7 @@ message KeyValueResp {
 
 message MsgDataToModifyByMQ{
   repeated sdkws.MsgData messages = 1;
-  string triggerID = 2;
-  string conversationID = 3;
+  string conversationID = 2;
 }
 
 message DelMsgsReq{

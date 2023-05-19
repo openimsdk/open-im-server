@@ -29,9 +29,9 @@ const MongoMessages = 5
 const ChannelNum = 100
 
 type MsgChannelValue struct {
-	conversationID string //maybe userID or super groupID
-	ctx            context.Context
-	ctxMsgList     []*ContextMsg
+	uniqueKey  string
+	ctx        context.Context
+	ctxMsgList []*ContextMsg
 }
 
 type TriggerChannelValue struct {
@@ -90,14 +90,16 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				msgChannelValue := cmd.Value.(MsgChannelValue)
 				ctxMsgList := msgChannelValue.ctxMsgList
 				ctx := msgChannelValue.ctx
-				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "conversationID", msgChannelValue.conversationID)
+				log.ZDebug(ctx, "msg arrived channel", "channel id", channelID, "msgList length", len(ctxMsgList), "uniqueKey", msgChannelValue.uniqueKey)
 				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(ctxMsgList)
 				log.ZDebug(ctx, "msg lens", "storageMsgList", len(storageMsgList), "notStorageMsgList", len(notStorageMsgList),
 					"storageNotificationList", len(storageNotificationList), "notStorageNotificationList", len(notStorageNotificationList), "modifyMsgList", len(modifyMsgList))
-				och.handleMsg(ctx, utils.GetChatConversationIDByMsg(ctxMsgList[0].message), storageMsgList, notStorageMsgList)
-				och.handleNotification(ctx, utils.GetNotificationConversationID(ctxMsgList[0].message), storageNotificationList, notStorageNotificationList)
-				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.conversationID, modifyMsgList); err != nil {
-					log.ZError(ctx, "msg to modify mq error", err, "conversationID", msgChannelValue.conversationID, "modifyMsgList", modifyMsgList)
+				conversationIDMsg := utils.GetChatConversationIDByMsg(ctxMsgList[0].message)
+				conversationIDNotification := utils.GetNotificationConversationID(ctxMsgList[0].message)
+				och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
+				och.handleNotification(ctx, msgChannelValue.uniqueKey, conversationIDNotification, storageNotificationList, notStorageNotificationList)
+				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
+					log.ZError(ctx, "msg to modify mq error", err, "uniqueKey", msgChannelValue.uniqueKey, "modifyMsgList", modifyMsgList)
 				}
 			}
 		}
@@ -156,8 +158,8 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(totalMsgs []
 	return
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
-	och.toPushTopic(ctx, conversationID, notStorageList)
+func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Context, key, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
+	och.toPushTopic(ctx, key, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, _, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
 		if err != nil {
@@ -165,19 +167,19 @@ func (och *OnlineHistoryRedisConsumerHandler) handleNotification(ctx context.Con
 			return
 		}
 		log.ZDebug(ctx, "success to next topic", "conversationID", conversationID)
-		och.msgDatabase.MsgToMongoMQ(ctx, conversationID, storageList, lastSeq)
-		och.toPushTopic(ctx, conversationID, storageList)
+		och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) {
+func (och *OnlineHistoryRedisConsumerHandler) toPushTopic(ctx context.Context, key, conversationID string, msgs []*sdkws.MsgData) {
 	for _, v := range msgs {
-		och.msgDatabase.MsgToPushMQ(ctx, conversationID, v)
+		och.msgDatabase.MsgToPushMQ(ctx, key, conversationID, v)
 	}
 }
 
-func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
-	och.toPushTopic(ctx, conversationID, notStorageList)
+func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, key, conversationID string, storageList, notStorageList []*sdkws.MsgData) {
+	och.toPushTopic(ctx, key, conversationID, notStorageList)
 	if len(storageList) > 0 {
 		lastSeq, isNewConversation, err := och.msgDatabase.BatchInsertChat2Cache(ctx, conversationID, storageList)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
@@ -209,8 +211,8 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(ctx context.Context, con
 		och.singleMsgSuccessCountMutex.Lock()
 		och.singleMsgSuccessCount += uint64(len(storageList))
 		och.singleMsgSuccessCountMutex.Unlock()
-		och.msgDatabase.MsgToMongoMQ(ctx, conversationID, storageList, lastSeq)
-		och.toPushTopic(ctx, conversationID, storageList)
+		och.msgDatabase.MsgToMongoMQ(ctx, key, conversationID, storageList, lastSeq)
+		och.toPushTopic(ctx, key, conversationID, storageList)
 	}
 }
 
@@ -253,12 +255,12 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 					}
 				}
 				log.ZDebug(ctx, "generate map list users len", "length", len(aggregationMsgs))
-				for conversationID, v := range aggregationMsgs {
+				for uniqueKey, v := range aggregationMsgs {
 					if len(v) >= 0 {
-						hashCode := utils.GetHashCode(conversationID)
+						hashCode := utils.GetHashCode(uniqueKey)
 						channelID := hashCode % ChannelNum
-						log.ZDebug(ctx, "generate channelID", "hashCode", hashCode, "channelID", channelID, "conversationID", conversationID)
-						och.chArrays[channelID] <- Cmd2Value{Cmd: SourceMessages, Value: MsgChannelValue{conversationID: conversationID, ctxMsgList: v, ctx: ctx}}
+						log.ZDebug(ctx, "generate channelID", "hashCode", hashCode, "channelID", channelID, "uniqueKey", uniqueKey)
+						och.chArrays[channelID] <- Cmd2Value{Cmd: SourceMessages, Value: MsgChannelValue{uniqueKey: uniqueKey, ctxMsgList: v, ctx: ctx}}
 					}
 				}
 			}
