@@ -723,6 +723,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (resp *pbGroup.JoinGroupResp, err error) {
+	defer log.ZInfo(ctx, "JoinGroup.Return")
 	user, err := s.User.GetUserInfo(ctx, req.InviterUserID)
 	if err != nil {
 		return nil, err
