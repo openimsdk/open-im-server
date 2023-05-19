@@ -39,15 +39,14 @@ func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *Persiste
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	operationID := mcontext.GetOperationID(ctx)
-	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg), msgKey)
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.NewError(operationID, "msg_transfer Unmarshal msg err", "msg", string(msg), "err", err.Error())
+		log.ZError(ctx, "msg_transfer Unmarshal msg err", err)
 		return
 	}
-	log.Debug(operationID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
+	log.ZDebug(ctx, "handleChatWs2Mysql", "msg", msgFromMQ.MsgData)
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
 	//Only process receiver data
