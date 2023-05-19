@@ -648,7 +648,11 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		return e.GroupID
 	})
 	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *sdkws.GroupInfo {
-		return convert.Db2PbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
 	})
 	return resp, nil
 }
