@@ -50,7 +50,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 }
 
 func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
-	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
 	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
@@ -58,16 +57,17 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 	if len(conversations) < 1 {
 		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
 	}
+	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
 	return resp, nil
 }
 
 func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
-	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
 	return resp, nil
 }
@@ -297,7 +297,7 @@ func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConv
 }
 
 func (c *conversationServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *pbConversation.GetConversationsHasReadAndMaxSeqReq) (*pbConversation.GetConversationsHasReadAndMaxSeqResp, error) {
-	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.UserID)
+	conversations, err := c.conversationDatabase.GetUserAllHasReadSeqs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -306,10 +306,10 @@ func (c *conversationServer) GetConversationsHasReadAndMaxSeq(ctx context.Contex
 		return nil, err
 	}
 	resp := &pbConversation.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*pbConversation.Seqs)}
-	for _, v := range conversations {
-		resp.Seqs[v.ConversationID] = &pbConversation.Seqs{
-			HasReadSeq: v.HasReadSeq,
-			MaxSeq:     maxSeqs.MaxSeqs[v.ConversationID],
+	for conversationID, seq := range conversations {
+		resp.Seqs[conversationID] = &pbConversation.Seqs{
+			HasReadSeq: seq,
+			MaxSeq:     maxSeqs.MaxSeqs[conversationID],
 		}
 	}
 	return resp, nil

@@ -374,29 +374,28 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, re
 	if err != nil {
 		return err
 	}
-	// todo 退群后查不到
 	opUserID := mcontext.GetOpUserID(ctx)
 	user, err := g.getUser(ctx, opUserID)
 	if err != nil {
 		return err
 	}
-	userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
-	if err != nil {
-		return err
-	}
+	//userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
+	//if err != nil {
+	//	return err
+	//}
 	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
 		GroupID:  group.GroupID,
 		UserID:   user.UserID,
 		Nickname: user.Nickname,
 		FaceURL:  user.FaceURL,
 	}}
-	for _, userID := range append(userIDs, opUserID) {
-		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	//for _, userID := range append(userIDs, opUserID) {
+	//	err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
+	//	if err != nil {
+	//		log.ZError(ctx, "MemberQuitNotification failed", err, "group", req.GroupID, "userID", userID)
+	//	}
+	//}
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), req.GroupID, constant.MemberQuitNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (err error) {
@@ -614,11 +613,16 @@ func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, gr
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupMutedTips{Group: group, OpUser: user}
+	tips := &sdkws.GroupMutedTips{Group: group}
+	if len(users) > 0 {
+		tips.OpUser = users[0]
+	} else {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx), GroupID: groupID}
+	}
 	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
 }
 
@@ -633,12 +637,17 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupCancelMutedTips{Group: group, OpUser: user}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
+	tips := &sdkws.GroupCancelMutedTips{Group: group}
+	if len(users) > 0 {
+		tips.OpUser = users[0]
+	} else {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx), GroupID: groupID}
+	}
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
