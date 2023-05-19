@@ -19,7 +19,6 @@
 
 LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATES
 
-# TODO: GOBIN -> TOOLS_DIR
 ## copyright.verify: Validate boilerplate headers for assign files
 .PHONY: copyright.verify
 copyright.verify: tools.verify.addlicense
