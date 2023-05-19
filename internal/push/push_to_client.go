@@ -157,6 +157,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 				return err
 			}
+			log.ZInfo(ctx, "GroupDismissedNotification userIDs", "groupID", groupID, "userIDs", pushToUserIDs)
 			if len(config.Config.Manager.AppManagerUid) > 0 {
 				ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
 			}
