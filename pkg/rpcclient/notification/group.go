@@ -87,7 +87,8 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 }
 
 func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
-	members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, []int32{constant.GroupOwner})
+	//members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, []int32{constant.GroupOwner})
+	members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, nil)
 	if err != nil {
 		return nil, err
 	}
