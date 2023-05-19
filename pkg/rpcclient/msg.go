@@ -62,8 +62,8 @@ func newSessionTypeConf() map[int32]int32 {
 		// group
 		constant.GroupCreatedNotification:                 constant.SuperGroupChatType,
 		constant.GroupInfoSetNotification:                 constant.SuperGroupChatType,
-		constant.JoinGroupApplicationNotification:         constant.SuperGroupChatType,
-		constant.MemberQuitNotification:                   constant.SingleChatType,
+		constant.JoinGroupApplicationNotification:         constant.SingleChatType,
+		constant.MemberQuitNotification:                   constant.SuperGroupChatType,
 		constant.GroupApplicationAcceptedNotification:     constant.SingleChatType,
 		constant.GroupApplicationRejectedNotification:     constant.SingleChatType,
 		constant.GroupOwnerTransferredNotification:        constant.SuperGroupChatType,
