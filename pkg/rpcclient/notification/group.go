@@ -555,11 +555,19 @@ func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+	users, err := g.getGroupMembers(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupDismissedTips{Group: group, OpUser: user}
+	tips := &sdkws.GroupDismissedTips{Group: group}
+	if len(users) > 0 {
+		tips.OpUser = users[0]
+	} else {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{
+			GroupID: group.GroupID,
+			UserID:  mcontext.GetOpUserID(ctx),
+		}
+	}
 	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupDismissedNotification, tips)
 }
 
