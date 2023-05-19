@@ -9,6 +9,9 @@ on:
       - '.lycheeignore'
   push:
     branches: [ main ]
+  
+  schedule: 
+    - cron:  '0 11 * * *'
 
 jobs:
   linkChecker:
@@ -41,3 +44,4 @@ jobs:
           title: Bug reports for links in OpenIM docs
           content-filepath: ./lychee/out.md
           labels: kind/documentation, triage/unresolved, report
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
