@@ -1055,14 +1055,23 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err := s.CheckGroupAdmin(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
+	if !tokenverify.IsAppManagerUid(ctx) {
+		user, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
+		if err != nil {
+			return nil, err
+		}
+		if user.UserID != mcontext.GetOpUserID(ctx) {
+			return nil, errs.ErrNoPermission.Wrap("not group owner")
+		}
+	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.ErrArgs.Wrap("group status is dismissed")
-	}
-	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID); err != nil {
+	//if group.Status == constant.GroupStatusDismissed {
+	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
+	//}
+	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {

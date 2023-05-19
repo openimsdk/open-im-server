@@ -185,6 +185,7 @@ message GetGroupMembersCMSResp {
 
 message DismissGroupReq{
   string groupID = 1;
+  bool deleteMember = 2;
 }
 
 message DismissGroupResp{
