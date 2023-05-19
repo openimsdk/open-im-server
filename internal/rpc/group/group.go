@@ -781,7 +781,6 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	s.Notification.JoinGroupApplicationNotification(ctx, req)
 	return resp, nil
 }
-}
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
 	resp := &pbGroup.QuitGroupResp{}
