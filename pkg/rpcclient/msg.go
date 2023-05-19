@@ -135,11 +135,11 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 }
 
 type NotificationElem struct {
-	Detail interface{} `json:"detail,omitempty"`
+	Detail string `json:"detail,omitempty"`
 }
 
 func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
-	n := NotificationElem{Detail: m}
+	n := NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(n)
 	if err != nil {
 		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
