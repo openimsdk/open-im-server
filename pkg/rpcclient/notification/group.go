@@ -87,7 +87,8 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 }
 
 func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID string, userIDs []string) ([]*sdkws.GroupMemberFullInfo, error) {
-	members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, []int32{constant.GroupOwner})
+	//members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, []int32{constant.GroupOwner})
+	members, err := g.db.FindGroupMember(ctx, []string{groupID}, userIDs, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -351,9 +352,9 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	if err != nil {
 		return err
 	}
+	userIDs = append(userIDs, req.InviterUserID, mcontext.GetOpUserID(ctx))
 	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
-	for _, userID := range userIDs {
-		log.ZInfo(ctx, "JoinGroupApplicationNotification", "group", req.GroupID, "userID", userID)
+	for _, userID := range utils.Distinct(userIDs) {
 		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
 		if err != nil {
 			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
@@ -613,11 +614,16 @@ func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, gr
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupMutedTips{Group: group, OpUser: user}
+	tips := &sdkws.GroupMutedTips{Group: group}
+	if len(users) > 0 {
+		tips.OpUser = users[0]
+	} else {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx), GroupID: groupID}
+	}
 	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
 }
 
@@ -632,12 +638,17 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
+	users, err := g.getGroupMembers(ctx, groupID, []string{mcontext.GetOpUserID(ctx)})
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupCancelMutedTips{Group: group, OpUser: user}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
+	tips := &sdkws.GroupCancelMutedTips{Group: group}
+	if len(users) > 0 {
+		tips.OpUser = users[0]
+	} else {
+		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx), GroupID: groupID}
+	}
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Context, groupID, groupMemberUserID string) (err error) {
@@ -694,7 +705,7 @@ func (g *GroupNotificationSender) MemberEnterDirectlyNotification(ctx context.Co
 		return err
 	}
 	tips := &sdkws.MemberEnterTips{Group: group, EntrantUser: user}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberCancelMutedNotification, tips)
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
 func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) (err error) {

@@ -14,7 +14,7 @@ func UsersDB2Pb(users []*relationTb.UserModel) (result []*sdkws.UserInfo) {
 		userPb.Nickname = user.Nickname
 		userPb.FaceURL = user.FaceURL
 		userPb.Ex = user.Ex
-		userPb.CreateTime = user.CreateTime.Unix()
+		userPb.CreateTime = user.CreateTime.UnixMilli()
 		userPb.AppMangerLevel = user.AppMangerLevel
 		userPb.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
 		result = append(result, &userPb)
@@ -28,7 +28,7 @@ func UserPb2DB(user *sdkws.UserInfo) *relationTb.UserModel {
 	userDB.Nickname = user.Nickname
 	userDB.FaceURL = user.FaceURL
 	userDB.Ex = user.Ex
-	userDB.CreateTime = time.Unix(user.CreateTime, 0)
+	userDB.CreateTime = time.UnixMilli(user.CreateTime)
 	userDB.AppMangerLevel = user.AppMangerLevel
 	userDB.GlobalRecvMsgOpt = user.GlobalRecvMsgOpt
 	return &userDB

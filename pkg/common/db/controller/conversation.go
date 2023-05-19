@@ -222,9 +222,11 @@ func (c *ConversationDataBase) CreateGroupChatConversation(ctx context.Context, 
 			conversations = append(conversations, &conversation)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
-		err = c.conversationDB.Create(ctx, conversations)
-		if err != nil {
-			return err
+		if len(conversations) > 0 {
+			err = c.conversationDB.Create(ctx, conversations)
+			if err != nil {
+				return err
+			}
 		}
 		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]interface{}{"max_seq": 0})
 		if err != nil {
