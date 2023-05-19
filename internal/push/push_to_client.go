@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -19,8 +18,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/protobuf/proto"
 )
@@ -36,6 +37,7 @@ type Pusher struct {
 
 func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
+	rpcclient.NewGroupClient(client)
 	return &Pusher{
 		database:               database,
 		client:                 client,
@@ -57,6 +59,18 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 		offlinePusher = jpush.NewClient()
 	}
 	return offlinePusher
+}
+
+func (p *Pusher) DismissGroup(ctx context.Context, groupID string) error {
+	cc, err := p.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
+	if err != nil {
+		return err
+	}
+	_, err = group.NewGroupClient(cc).DismissGroup(ctx, &group.DismissGroupReq{
+		GroupID:      groupID,
+		DeleteMember: true,
+	})
+	return err
 }
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
@@ -138,6 +152,14 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}
 			kickedUsers := utils.Slice(tips.KickedUserList, func(e *sdkws.GroupMemberFullInfo) string { return e.UserID })
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
+		case constant.GroupDismissedNotification:
+			var tips sdkws.GroupDismissedTips
+			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
+				return err
+			}
+			if err := p.DismissGroup(ctx, groupID); err != nil {
+				return err
+			}
 		}
 	}
 	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)

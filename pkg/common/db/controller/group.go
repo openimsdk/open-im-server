@@ -25,7 +25,7 @@ type GroupDatabase interface {
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
 	SearchGroup(ctx context.Context, keyword string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
-	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	DismissGroup(ctx context.Context, groupID string, deleteMember bool) error // 解散群，并删除群成员
 	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
 	// GroupMember
 	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relationTb.GroupMemberModel, err error)
@@ -164,20 +164,23 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 	return g.cache.DelGroupsInfo(groupID).ExecDel(ctx)
 }
 
-func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string) error {
+func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, deleteMember bool) error {
 	cache := g.cache.NewCache()
 	if err := g.tx.Transaction(func(tx any) error {
 		if err := g.groupDB.NewTx(tx).UpdateStatus(ctx, groupID, constant.GroupStatusDismissed); err != nil {
 			return err
 		}
-		if err := g.groupMemberDB.NewTx(tx).DeleteGroup(ctx, []string{groupID}); err != nil {
-			return err
+		if deleteMember {
+			if err := g.groupMemberDB.NewTx(tx).DeleteGroup(ctx, []string{groupID}); err != nil {
+				return err
+			}
+			userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
+			if err != nil {
+				return err
+			}
+			cache = cache.DelJoinedGroupID(userIDs...).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID)
 		}
-		userIDs, err := g.cache.GetGroupMemberIDs(ctx, groupID)
-		if err != nil {
-			return err
-		}
-		cache = cache.DelJoinedGroupID(userIDs...).DelGroupsInfo(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID)
+		cache = cache.DelGroupsInfo(groupID)
 		return nil
 	}); err != nil {
 		return err
