@@ -353,7 +353,7 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	}
 	tips := &sdkws.JoinGroupApplicationTips{Group: group, Applicant: user, ReqMsg: req.ReqMessage}
 	for _, userID := range userIDs {
-		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.JoinGroupApplicationNotification, tips)
+		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.JoinGroupApplicationNotification, tips)
 		if err != nil {
 			log.ZError(ctx, "JoinGroupApplicationNotification failed", err, "group", req.GroupID, "userID", userID)
 		}
