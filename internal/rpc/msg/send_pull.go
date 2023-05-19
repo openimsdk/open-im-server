@@ -21,7 +21,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *msg.SendMsgR
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
-	err = m.MsgDatabase.MsgToMQ(ctx, req.MsgData.GroupID, req.MsgData)
+	err = m.MsgDatabase.MsgToMQ(ctx, utils.GetConversationIDByMsg(req.MsgData), req.MsgData)
 	if err != nil {
 		return nil, err
 	}

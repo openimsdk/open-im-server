@@ -80,3 +80,13 @@ func (c *ConversationGorm) GetUserRecvMsgOpt(ctx context.Context, ownerUserID, c
 func (c *ConversationGorm) GetAllConversationIDs(ctx context.Context) (conversationIDs []string, err error) {
 	return conversationIDs, utils.Wrap(c.db(ctx).Distinct("conversation_id").Pluck("conversation_id", &conversationIDs).Error, "")
 }
+
+func (c *ConversationGorm) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hasReadSeqs map[string]int64, err error) {
+	var conversations []*relation.ConversationModel
+	err = utils.Wrap(c.db(ctx).Where("owner_user_id = ?", ownerUserID).Select("conversation_id", "has_read_seq").Find(&conversations).Error, "")
+	hasReadSeqs = make(map[string]int64, len(conversations))
+	for _, conversation := range conversations {
+		hasReadSeqs[conversation.ConversationID] = conversation.HasReadSeq
+	}
+	return hasReadSeqs, err
+}
