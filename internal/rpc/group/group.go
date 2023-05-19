@@ -1079,7 +1079,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			return nil, err
 		}
 	} else {
-		s.Notification.GroupDismissedNotification(ctx, req)
+		if !req.DeleteMember {
+			s.Notification.GroupDismissedNotification(ctx, req)
+		}
 	}
 	return resp, nil
 }
