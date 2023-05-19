@@ -694,7 +694,7 @@ func (g *GroupNotificationSender) MemberEnterDirectlyNotification(ctx context.Co
 		return err
 	}
 	tips := &sdkws.MemberEnterTips{Group: group, EntrantUser: user}
-	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberCancelMutedNotification, tips)
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
 func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) (err error) {
