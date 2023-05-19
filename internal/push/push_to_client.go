@@ -2,6 +2,7 @@ package push
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
@@ -101,6 +102,16 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	return nil
 }
 
+func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t interface{}) error {
+	var notificationElem struct {
+		Detail string `json:"detail,omitempty"`
+	}
+	if err := json.Unmarshal(bytes, &notificationElem); err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(notificationElem.Detail), t)
+}
+
 func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
 	operationID := mcontext.GetOperationID(ctx)
 	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
@@ -112,6 +123,21 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 		pushToUserIDs, err = p.groupLocalCache.GetGroupMemberIDs(ctx, groupID)
 		if err != nil {
 			return err
+		}
+		switch msg.ContentType {
+		case constant.MemberQuitNotification:
+			var tips sdkws.MemberQuitTips
+			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
+				return err
+			}
+			pushToUserIDs = append(pushToUserIDs, tips.QuitUser.UserID)
+		case constant.MemberKickedNotification:
+			var tips sdkws.MemberKickedTips
+			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
+				return err
+			}
+			kickedUsers := utils.Slice(tips.KickedUserList, func(e *sdkws.GroupMemberFullInfo) string { return e.UserID })
+			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		}
 	}
 	wsResults, err := p.GetConnsAndOnlinePush(ctx, msg, pushToUserIDs)
