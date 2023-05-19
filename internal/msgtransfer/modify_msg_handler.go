@@ -40,12 +40,12 @@ func (ModifyMsgConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { r
 func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to mysql", "ModifyMsgConsumerHandler", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		ctx := mmc.modifyMsgConsumerGroup.GetContextFromMsg(msg)
+		log.ZDebug(ctx, "kafka get info to mysql", "ModifyMsgConsumerHandler", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
 		if len(msg.Value) != 0 {
-			ctx := mmc.modifyMsgConsumerGroup.GetContextFromMsg(msg)
 			mmc.ModifyMsg(ctx, msg, string(msg.Key), sess)
 		} else {
-			log.Error("", "msg get from kafka but is nil", msg.Key)
+			log.ZError(ctx, "msg get from kafka but is nil", nil, "key", msg.Key)
 		}
 		sess.MarkMessage(msg, "")
 	}
