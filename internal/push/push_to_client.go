@@ -158,6 +158,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				return err
 			}
 			if err := p.DismissGroup(ctx, groupID); err != nil {
+				log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 				return err
 			}
 		}
