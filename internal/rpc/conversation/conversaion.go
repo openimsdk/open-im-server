@@ -24,7 +24,7 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	msgRpcClient                   rpcclient.MsgClient
+	msgRpcClient                   *rpcclient.MsgClient
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -43,7 +43,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
 		groupRpcClient:                 rpcclient.NewGroupClient(client),
-		msgRpcClient:                   *rpcclient.NewMsgClient(client),
+		msgRpcClient:                   rpcclient.NewMsgClient(client),
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
