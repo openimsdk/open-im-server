@@ -49,8 +49,9 @@ var (
 	//不是对方的好友
 	ErrNotPeersFriend = NewCodeError(NotPeersFriend, "NotPeersFriend")
 
-	ErrMutedInGroup = NewCodeError(MutedInGroup, "MutedInGroup")
-	ErrMutedGroup   = NewCodeError(MutedGroup, "MutedGroup")
+	ErrMutedInGroup   = NewCodeError(MutedInGroup, "MutedInGroup")
+	ErrMutedGroup     = NewCodeError(MutedGroup, "MutedGroup")
+	ErrUserNotRecvMsg = NewCodeError(UserNotRecvMsg, "UserNotRecvMsg")
 
 	ErrConnOverMaxNumLimit = NewCodeError(ConnOverMaxNumLimit, "ConnOverMaxNumLimit")
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"math/rand"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -309,35 +308,4 @@ func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
 	}
 	msgData.Options = options
 	return &msg.SendMsgReq{MsgData: &msgData}
-}
-
-func (m *msgServer) sendMsgToGroupOptimization(ctx context.Context, list []string, req *msg.SendMsgReq, wg *sync.WaitGroup) (err error) {
-	defer wg.Done()
-	tempOptions := make(map[string]bool, 1)
-	for k, v := range req.MsgData.Options {
-		tempOptions[k] = v
-	}
-	for _, v := range list {
-		req.MsgData.RecvID = v
-		options := make(map[string]bool, 1)
-		for k, v := range tempOptions {
-			options[k] = v
-		}
-		req.MsgData.Options = options
-		conversationID := utils.GetConversationIDBySessionType(constant.GroupChatType, req.MsgData.GroupID)
-		isSend, err := m.modifyMessageByUserMessageReceiveOpt(ctx, v, conversationID, constant.GroupChatType, req)
-		if err != nil {
-			return err
-		}
-		if isSend {
-			if v == "" || req.MsgData.SendID == "" {
-				return errs.ErrArgs.Wrap("userID or groupPB.MsgData.SendID is empty")
-			}
-			err := m.MsgDatabase.MsgToMQ(ctx, v, req.MsgData)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }

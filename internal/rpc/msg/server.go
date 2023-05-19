@@ -116,8 +116,6 @@ func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg
 	switch req.MsgData.SessionType {
 	case constant.SingleChatType:
 		return m.sendMsgSingleChat(ctx, req)
-	case constant.GroupChatType:
-		return m.sendMsgGroupChat(ctx, req)
 	case constant.NotificationChatType:
 		return m.sendMsgNotification(ctx, req)
 	case constant.SuperGroupChatType:

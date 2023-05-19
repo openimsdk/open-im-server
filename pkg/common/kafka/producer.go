@@ -3,7 +3,6 @@ package kafka
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -17,7 +16,7 @@ import (
 	prome "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 )
 
-var emptyMsg = errors.New("binary msg is empty")
+var errEmptyMsg = errors.New("binary msg is empty")
 
 type Producer struct {
 	topic    string
@@ -40,15 +39,14 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	}
 	p.addr = addr
 	p.topic = topic
-
 	producer, err := sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
 	if err != nil {
 		panic(err.Error())
-		return nil
 	}
 	p.producer = producer
 	return &p
 }
+
 func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) {
 	operationID, opUserID, platform, connID, err := mcontext.GetCtxInfos(ctx)
 	if err != nil {
@@ -60,6 +58,7 @@ func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) 
 		{Key: []byte(constant.OpUserPlatform), Value: []byte(platform)},
 		{Key: []byte(constant.ConnID), Value: []byte(connID)}}, err
 }
+
 func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
 	var values []string
 	for _, recordHeader := range header {
@@ -67,30 +66,27 @@ func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
 	}
 	return mcontext.WithMustInfoCtx(values) // TODO
 }
-func (p *Producer) SendMessage(ctx context.Context, key string, m proto.Message) (int32, int64, error) {
-	log.ZDebug(ctx, "SendMessage", "key ", key, "msg", m, "topic", p.topic)
+
+func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Message) (int32, int64, error) {
+	log.ZDebug(ctx, "SendMessage", "msg", msg, "topic", p.topic, "key", key)
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
 	kMsg.Key = sarama.StringEncoder(key)
-	bMsg, err := proto.Marshal(m)
+	bMsg, err := proto.Marshal(msg)
 	if err != nil {
 		return 0, 0, utils.Wrap(err, "kafka proto Marshal err")
 	}
 	if len(bMsg) == 0 {
-		return 0, 0, utils.Wrap(emptyMsg, "")
+		return 0, 0, utils.Wrap(errEmptyMsg, "")
 	}
 	kMsg.Value = sarama.ByteEncoder(bMsg)
 	if kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 {
-		return 0, 0, utils.Wrap(emptyMsg, "")
+		return 0, 0, utils.Wrap(errEmptyMsg, "")
 	}
 	kMsg.Metadata = ctx
 	header, err := GetMQHeaderWithContext(ctx)
 	if err != nil {
 		return 0, 0, utils.Wrap(err, "")
-	}
-	var arr []string
-	for i, header := range header {
-		arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
 	}
 	kMsg.Headers = header
 	partition, offset, err := p.producer.SendMessage(kMsg)
