@@ -1068,9 +1068,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	if group.Status == constant.GroupStatusDismissed {
-		return nil, errs.ErrArgs.Wrap("group status is dismissed")
-	}
+	//if group.Status == constant.GroupStatusDismissed {
+	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
+	//}
 	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
 		return nil, err
 	}
