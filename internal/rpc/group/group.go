@@ -741,6 +741,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	} else if !s.IsNotFound(err) && utils.Unwrap(err) != errs.ErrRecordNotFound {
 		return nil, err
 	}
+	log.ZInfo(ctx, "JoinGroup.groupInfo", "group", group, "eq", group.NeedVerification == constant.Directly)
 	resp = &pbGroup.JoinGroupResp{}
 	if group.NeedVerification == constant.Directly {
 		if group.GroupType == constant.SuperGroup {
