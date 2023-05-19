@@ -374,29 +374,28 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, re
 	if err != nil {
 		return err
 	}
-	// todo 退群后查不到
 	opUserID := mcontext.GetOpUserID(ctx)
 	user, err := g.getUser(ctx, opUserID)
 	if err != nil {
 		return err
 	}
-	userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
-	if err != nil {
-		return err
-	}
+	//userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
+	//if err != nil {
+	//	return err
+	//}
 	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
 		GroupID:  group.GroupID,
 		UserID:   user.UserID,
 		Nickname: user.Nickname,
 		FaceURL:  user.FaceURL,
 	}}
-	for _, userID := range append(userIDs, opUserID) {
-		err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	//for _, userID := range append(userIDs, opUserID) {
+	//	err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
+	//	if err != nil {
+	//		log.ZError(ctx, "MemberQuitNotification failed", err, "group", req.GroupID, "userID", userID)
+	//	}
+	//}
+	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), req.GroupID, constant.MemberQuitNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (err error) {
