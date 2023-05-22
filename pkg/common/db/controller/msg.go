@@ -283,7 +283,7 @@ func (db *commonMsgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID str
 	}
 	for i, v := range seqMsgs {
 		if err = db.msgDocDatabase.UpdateMsgStatusByIndexInOneDoc(ctx, docID, v, indexes[i], constant.MsgDeleted); err != nil {
-			return nil, err
+			log.ZError(ctx, "UpdateMsgStatusByIndexInOneDoc", err, "docID", docID, "msg", v, "index", indexes[i])
 		}
 	}
 	return unExistSeqs, nil

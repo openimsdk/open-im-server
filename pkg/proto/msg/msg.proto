@@ -190,11 +190,17 @@ message MsgDataToModifyByMQ{
 }
 
 message DelMsgsReq{
-  string userID = 2;
-  repeated int64 seqs = 3;
 }
 
 message DelMsgsResp{
+}
+
+message RevokeMsgReq {
+  string conversationID = 1;
+  int64 seqs = 2;
+}
+
+message RevokeMsgResp {
 }
 
 service msg {
@@ -214,9 +220,7 @@ service msg {
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   //获取消息发送状态
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
-
-
-
+  rpc RevokeMsg(RevokeMsgReq) returns(RevokeMsgResp);
   // 修改消息
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
   rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);

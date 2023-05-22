@@ -8,11 +8,10 @@ import (
 )
 
 func (m *msgServer) DelMsgs(ctx context.Context, req *msg.DelMsgsReq) (*msg.DelMsgsResp, error) {
-	resp := &msg.DelMsgsResp{}
-	if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.Seqs); err != nil {
-		return nil, err
-	}
-	return resp, nil
+	// if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.Seqs); err != nil {
+	// 	return nil, err
+	// }
+	return &msg.DelMsgsResp{}, nil
 }
 
 func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
