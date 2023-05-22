@@ -131,6 +131,10 @@ func (m *Message) ClearMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearMsg, m.client, c)
 }
 
+func (m *Message) RevokeMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.RevokeMsg, m.client, c)
+}
+
 func (m *Message) SetMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.client, c)
 }

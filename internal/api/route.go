@@ -142,6 +142,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		msgGroup.POST("/del_msg", m.DelMsg)
 		msgGroup.POST("/del_super_group_msg", m.DelSuperGroupMsg)
 		msgGroup.POST("/clear_msg", m.ClearMsg)
+		msgGroup.POST("/revoke_msg", m.RevokeMsg)
 
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
