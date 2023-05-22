@@ -29,6 +29,8 @@ type MsgInfoModel struct {
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
+	UpdateMsg(ctx context.Context, docID string, index int64, info *MsgInfoModel) error
+	IsExistDocID(ctx context.Context, docID string) (bool, error)
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
 	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) ([]*sdkws.MsgData, error)
@@ -65,6 +67,10 @@ func (m *MsgDocModel) IsFull() bool {
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := seq / singleGocMsgNum
 	return m.indexGen(conversationID, seqSuffix)
+}
+
+func (m MsgDocModel) IndexDocID(conversationID string, index int64) string {
+	return m.indexGen(conversationID, index)
 }
 
 func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {

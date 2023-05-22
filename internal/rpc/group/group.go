@@ -135,11 +135,11 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
-		return nil, err
-	}
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.Wrap("no group owner")
+	}
+	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+		return nil, err
 	}
 	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
 	opUserID := mcontext.GetOpUserID(ctx)
