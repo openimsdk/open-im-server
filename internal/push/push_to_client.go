@@ -158,6 +158,11 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				return err
 			}
 			log.ZInfo(ctx, "GroupDismissedNotification userIDs", "groupID", groupID, "userIDs", pushToUserIDs)
+			if len(pushToUserIDs) == 0 {
+				log.ZInfo(ctx, "########################## userIDs empty", "groupID", groupID)
+			} else {
+				log.ZInfo(ctx, "************************** userIDs exist", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
+			}
 			if len(config.Config.Manager.AppManagerUid) > 0 {
 				ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
 			}
