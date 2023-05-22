@@ -425,9 +425,14 @@ message DeleteMessageTips{
 
 message RevokeMsgTip{
   string revokerUserID = 1;
-  string beRevokedUserID = 2;
-  int64 seq = 3;
-  string conversationID = 4;
+  int32 revokerLevel = 2;
+  string clientMsgID = 3;
+  string revokerNickName = 4;
+  int64 revokeTime = 5;
+  int64 sesstionType = 6;
+  int64 seq = 7;
+  string conversationID = 8;
+  string ex = 9;
 }
 
 ///////////////////signal//////////////
