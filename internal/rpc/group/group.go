@@ -1057,12 +1057,12 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	defer log.ZInfo(ctx, "DismissGroup.return")
 	resp := &pbGroup.DismissGroupResp{}
+	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
 	if !tokenverify.IsAppManagerUid(ctx) {
-		user, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
-		if err != nil {
-			return nil, err
-		}
-		if user.UserID != mcontext.GetOpUserID(ctx) {
+		if owner.UserID != mcontext.GetOpUserID(ctx) {
 			return nil, errs.ErrNoPermission.Wrap("not group owner")
 		}
 	}
@@ -1070,10 +1070,14 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
+	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
 	//if group.Status == constant.GroupStatusDismissed {
 	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
 	//}
-	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
+	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, false); err != nil {
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {
@@ -1082,7 +1086,18 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		}
 	} else {
 		if !req.DeleteMember {
-			s.Notification.GroupDismissedNotification(ctx, req)
+			//s.Notification.GroupDismissedNotification(ctx, req)
+			tips := &sdkws.GroupInfoSetTips{
+				Group:    s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+				MuteTime: 0,
+				OpUser:   &sdkws.GroupMemberFullInfo{},
+			}
+			if mcontext.GetOpUserID(ctx) == owner.UserID {
+				tips.OpUser = s.groupMemberDB2PB(owner, 0)
+			} else {
+				tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
+			}
+			s.Notification.GroupInfoSetNotification(ctx, tips)
 		}
 	}
 	return resp, nil
