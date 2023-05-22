@@ -648,7 +648,11 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		return e.GroupID
 	})
 	resp.GroupInfos = utils.Slice(groups, func(e *relationTb.GroupModel) *sdkws.GroupInfo {
-		return convert.Db2PbGroupInfo(e, ownerMap[e.GroupID].UserID, groupMemberNumMap[e.GroupID])
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupInfo(e, ownerUserID, groupMemberNumMap[e.GroupID])
 	})
 	return resp, nil
 }
@@ -1051,10 +1055,8 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 }
 
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
+	defer log.ZInfo(ctx, "DismissGroup.return")
 	resp := &pbGroup.DismissGroupResp{}
-	if err := s.CheckGroupAdmin(ctx, req.GroupID); err != nil {
-		return nil, err
-	}
 	if !tokenverify.IsAppManagerUid(ctx) {
 		user, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
 		if err != nil {
@@ -1079,7 +1081,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			return nil, err
 		}
 	} else {
-		s.Notification.GroupDismissedNotification(ctx, req)
+		if !req.DeleteMember {
+			s.Notification.GroupDismissedNotification(ctx, req)
+		}
 	}
 	return resp, nil
 }
