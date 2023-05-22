@@ -2,14 +2,12 @@ package msggateway
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
-	log.NewPrivateLog(constant.LogFileName)
 	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
 	longServer, err := NewWsServer(
 		WithPort(wsPort),

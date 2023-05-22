@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -12,8 +13,7 @@ import (
 const moduleName = "cron"
 
 func StartCronTask() error {
-	log.NewPrivateLog(moduleName)
-	log.NewInfo("StartCronTask", "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
+	log.ZInfo(context.Background(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
 	fmt.Println("cron task start, config", config.Config.Mongo.ChatRecordsClearTime)
 	msgTool, err := InitMsgTool()
 	if err != nil {

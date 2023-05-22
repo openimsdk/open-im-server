@@ -30,12 +30,12 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase)
 	return mc
 }
 
-func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Context, cMsg *sarama.ConsumerMessage, conversationID string, session sarama.ConsumerGroupSession) {
+func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Context, cMsg *sarama.ConsumerMessage, key string, session sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	msgFromMQ := pbMsg.MsgDataToMongoByMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.ZError(ctx, "unmarshall failed", err, "conversationID", conversationID, "len", len(msg))
+		log.ZError(ctx, "unmarshall failed", err, "key", key, "len", len(msg))
 		return
 	}
 	if len(msgFromMQ.MsgData) == 0 {

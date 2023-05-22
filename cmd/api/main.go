@@ -52,7 +52,6 @@ func run(port int) error {
 	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
 		return err
 	}
-	log.NewPrivateLog(constant.LogFileName)
 	router := api.NewGinRouter(client, rdb)
 	var address string
 	if config.Config.Api.ListenIP != "" {
