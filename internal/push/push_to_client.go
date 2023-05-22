@@ -152,16 +152,18 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			kickedUsers := utils.Slice(tips.KickedUserList, func(e *sdkws.GroupMemberFullInfo) string { return e.UserID })
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			var tips sdkws.GroupDismissedTips
-			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
-				return err
-			}
-			log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-			if len(config.Config.Manager.AppManagerUid) > 0 {
-				ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
-			}
-			if err := p.DismissGroup(ctx, groupID); err != nil {
-				log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
+			if utils.IsNotification(utils.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+				var tips sdkws.GroupDismissedTips
+				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
+					return err
+				}
+				log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
+				if len(config.Config.Manager.AppManagerUid) > 0 {
+					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
+				}
+				if err := p.DismissGroup(ctx, groupID); err != nil {
+					log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
+				}
 			}
 		}
 	}
