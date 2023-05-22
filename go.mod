@@ -6,7 +6,6 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.32.0
-	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dtm-labs/rockscache v0.1.0
 	github.com/gin-gonic/gin v1.8.2
@@ -24,9 +23,8 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
-	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/stretchr/testify v1.8.1
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	go.mongodb.org/mongo-driver v1.8.3
