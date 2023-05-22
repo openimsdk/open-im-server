@@ -63,6 +63,11 @@ func (c *ConversationDataBase) SetUsersConversationFiledTx(ctx context.Context, 
 				return err
 			}
 			cache = cache.DelUsersConversation(conversation.ConversationID, haveUserIDs...)
+			if _, ok := filedMap["has_read_seq"]; ok {
+				for _, userID := range haveUserIDs {
+					cache = cache.DelUserAllHasReadSeqs(userID, conversation.ConversationID)
+				}
+			}
 		}
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)

@@ -104,18 +104,6 @@ func (c *ConversationRedisCache) getConversationHasReadSeqKey(ownerUserID, conve
 	return conversationHasReadSeqKey + ownerUserID + ":" + conversationID
 }
 
-func (c *ConversationRedisCache) getAllConversationIDsKeys(ctx context.Context, ownerUserID string) ([]string, []string, error) {
-	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
-	if err != nil {
-		return nil, nil, err
-	}
-	var keys []string
-	for _, conversarionID := range conversationIDs {
-		keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
-	}
-	return keys, conversationIDs, nil
-}
-
 func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	return getCache(ctx, c.rcClient, c.getConversationIDsKey(ownerUserID), c.expireTime, func(ctx context.Context) ([]string, error) {
 		return c.conversationDB.FindUserIDAllConversationID(ctx, ownerUserID)
@@ -196,9 +184,13 @@ func (c *ConversationRedisCache) GetConversations(ctx context.Context, ownerUser
 }
 
 func (c *ConversationRedisCache) GetUserAllConversations(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
-	keys, _, err := c.getAllConversationIDsKeys(ctx, ownerUserID)
+	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
 	if err != nil {
 		return nil, err
+	}
+	var keys []string
+	for _, conversarionID := range conversationIDs {
+		keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	}
 	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.getConversationIndex, func(ctx context.Context) ([]*relationTb.ConversationModel, error) {
 		return c.conversationDB.FindUserIDAllConversations(ctx, ownerUserID)
@@ -268,9 +260,13 @@ func (c *ConversationRedisCache) getUserAllHasReadSeqsIndex(conversationID strin
 }
 
 func (c *ConversationRedisCache) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
-	keys, conversationIDs, err := c.getAllConversationIDsKeys(ctx, ownerUserID)
+	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
 	if err != nil {
 		return nil, err
+	}
+	var keys []string
+	for _, conversarionID := range conversationIDs {
+		keys = append(keys, c.getConversationHasReadSeqKey(ownerUserID, conversarionID))
 	}
 	return batchGetCacheMap(ctx, c.rcClient, keys, conversationIDs, c.expireTime, c.getUserAllHasReadSeqsIndex, func(ctx context.Context) (map[string]int64, error) {
 		return c.conversationDB.GetUserAllHasReadSeqs(ctx, ownerUserID)
