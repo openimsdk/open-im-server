@@ -172,7 +172,7 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	if err == nil {
 		log.ZDebug(ctx, "MsgClient Notification SendMsg success", "req", &req)
 	} else {
-		log.ZError(ctx, "MsgClient Notification SendMsg failed %s\n", err, "req", &req)
+		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
 	}
 	return err
 }
