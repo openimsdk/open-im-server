@@ -421,13 +421,14 @@ message DeleteMessageTips{
   string userID = 2;
   repeated int64 seqs = 3;
 }
-///cms
-message RequestPagination {
-  int32 pageNumber = 1;
-  int32 showNumber = 2;
+
+
+message RevokeMsgTip{
+  string revokerUserID = 1;
+  string beRevokedUserID = 2;
+  int64 seq = 3;
+  string conversationID = 4;
 }
-
-
 
 ///////////////////signal//////////////
 message SignalReq {
@@ -642,4 +643,9 @@ message ReactionMessageDeleteNotification {
   map <string, KeyValue>successReactionExtensions = 4;
   string clientMsgID = 5;
   int64 msgFirstModifyTime = 6;
+}
+
+message RequestPagination {
+  int32 pageNumber = 1;
+  int32 showNumber = 2;
 }
