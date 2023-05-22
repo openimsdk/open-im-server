@@ -38,6 +38,14 @@ func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) e
 	return err
 }
 
+func (m *MsgMongoDriver) UpdateMsg(ctx context.Context, docID string, index int64, info *table.MsgInfoModel) error {
+	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d", index): info}})
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	return nil
+}
+
 func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error {
 	msg.Status = status
 	bytes, err := proto.Marshal(msg)
@@ -211,4 +219,12 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 		}
 	}
 	return msgs, nil
+}
+
+func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
+	count, err := m.MsgCollection.CountDocuments(ctx, bson.M{"doc_id": docID})
+	if err != nil {
+		return false, errs.Wrap(err)
+	}
+	return count > 0, nil
 }
