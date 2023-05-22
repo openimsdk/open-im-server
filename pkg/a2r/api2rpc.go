@@ -36,7 +36,6 @@ func Call[A, B, C any](
 	}
 	data, err := rpc(cli, c, &req)
 	if err != nil {
-		log.ZError(c, "rpc call error", err, "req", req)
 		apiresp.GinError(c, err) // RPC调用失败
 		return
 	}
