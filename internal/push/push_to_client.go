@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -157,18 +156,12 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 				return err
 			}
-			log.ZInfo(ctx, "GroupDismissedNotification userIDs", "groupID", groupID, "userIDs", pushToUserIDs)
-			if len(pushToUserIDs) == 0 {
-				log.ZInfo(ctx, "########################## userIDs empty", "groupID", groupID)
-			} else {
-				log.ZInfo(ctx, "************************** userIDs exist", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-			}
+			log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
 			if len(config.Config.Manager.AppManagerUid) > 0 {
 				ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
 			}
 			if err := p.DismissGroup(ctx, groupID); err != nil {
 				log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
-				return err
 			}
 		}
 	}
