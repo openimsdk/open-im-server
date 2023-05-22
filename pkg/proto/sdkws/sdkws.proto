@@ -430,7 +430,6 @@ message RevokeMsgTip{
   int64 sesstionType = 5;
   int64 seq = 6;
   string conversationID = 7;
-  string ex = 8;
 }
 
 ///////////////////signal//////////////
