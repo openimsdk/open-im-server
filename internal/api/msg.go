@@ -9,7 +9,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -98,7 +97,7 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 		tips.JsonDetail = utils.StructToJsonString(params.Content)
 		pbData.MsgData.Content, err = proto.Marshal(&tips)
 		if err != nil {
-			log.Error(mcontext.GetOperationID(c), "Marshal failed ", err.Error(), tips.String())
+			log.ZError(c, "Marshal failed ", err, "tips", tips.String())
 		}
 	}
 	return &pbData

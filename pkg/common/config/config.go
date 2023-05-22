@@ -183,17 +183,13 @@ type config struct {
 		Password string   `yaml:"password"`
 	} `yaml:"zookeeper"`
 	Log struct {
-		StorageLocation       string   `yaml:"storageLocation"`
-		RotationTime          int      `yaml:"rotationTime"`
-		RemainRotationCount   uint     `yaml:"remainRotationCount"`
-		RemainLogLevel        int      `yaml:"remainLogLevel"`
-		IsStdout              bool     `yaml:"isStdout"`
-		WithStack             bool     `yaml:"withStack"`
-		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
-		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
-		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
-		ElasticSearchPassword string   `yaml:"elasticSearchPassword"`
-		IsJson                bool     `yaml:"isJson"`
+		StorageLocation     string `yaml:"storageLocation"`
+		RotationTime        int    `yaml:"rotationTime"`
+		RemainRotationCount uint   `yaml:"remainRotationCount"`
+		RemainLogLevel      int    `yaml:"remainLogLevel"`
+		IsStdout            bool   `yaml:"isStdout"`
+		WithStack           bool   `yaml:"withStack"`
+		IsJson              bool   `yaml:"isJson"`
 	}
 	ModuleName struct {
 		LongConnSvrName string `yaml:"longConnSvrName"`

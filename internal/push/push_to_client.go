@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -14,7 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -127,8 +127,7 @@ func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t interface{}) error {
 }
 
 func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {
-	operationID := mcontext.GetOperationID(ctx)
-	log.Debug(operationID, "Get super group msg from msg_transfer And push msg", msg.String(), groupID)
+	log.ZDebug(ctx, "Get super group msg from msg_transfer and push msg", "msg", msg.String(), "groupID", groupID)
 	var pushToUserIDs []string
 	if err := callbackBeforeSuperGroupOnlinePush(ctx, groupID, msg, &pushToUserIDs); err != nil && err != errs.ErrCallbackContinue {
 		return err
@@ -167,7 +166,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 	if err != nil {
 		return err
 	}
-	log.Debug(operationID, "push_result", wsResults, "sendData", msg)
+	log.ZDebug(ctx, "get conn and online push success", "result", wsResults, "msg", msg)
 	p.successCount++
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
 	if isOfflinePush {
@@ -195,7 +194,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 		if msg.ContentType != constant.SignalingNotification {
 			notNotificationUserIDs, err := p.conversationLocalCache.GetRecvMsgNotNotifyUserIDs(ctx, groupID)
 			if err != nil {
-				log.Error(operationID, utils.GetSelfFuncName(), "GetRecvMsgNotNotifyUserIDs failed", groupID)
+				log.ZError(ctx, "GetRecvMsgNotNotifyUserIDs failed", err, "groupID", groupID)
 				return err
 			}
 			needOfflinePushUserIDs = utils.DifferenceString(notNotificationUserIDs, needOfflinePushUserIDs)
@@ -212,12 +211,12 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}
 			err = p.offlinePushMsg(ctx, groupID, msg, offlinePushUserIDs)
 			if err != nil {
-				log.NewError(operationID, "offlinePushMsg failed", groupID)
+				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 				return err
 			}
 			_, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
 			if err != nil {
-				log.NewError(operationID, "offlinePushMsg failed", groupID)
+				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
 				return err
 			}
 		}

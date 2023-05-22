@@ -75,7 +75,7 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 				go func(index int, userIDs []string) {
 					defer wg.Done()
 					if err2 := g.batchPush(ctx, token, userIDs, pushReq); err2 != nil {
-						log.NewError(mcontext.GetOperationID(ctx), "batchPush failed", i, token, pushReq)
+						log.ZError(ctx, "batchPush failed", err2, "index", index, "token", token, "req", pushReq)
 						err = err2
 					}
 				}(i, v.Item)

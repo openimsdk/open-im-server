@@ -164,10 +164,6 @@ log:
   isStdout: false
   isJson: false
   withStack: false
-  elasticSearchSwitch: false
-  elasticSearchAddr: [ 127.0.0.1:9201 ]
-  elasticSearchUser: ""
-  elasticSearchPassword: ""
 
 modulename: #日志文件按模块命名，默认即可
   longConnSvrName: msg_gateway
