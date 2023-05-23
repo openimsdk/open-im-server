@@ -10,8 +10,6 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-const moduleName = "cron"
-
 func StartCronTask() error {
 	log.ZInfo(context.Background(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
 	fmt.Println("cron task start, config", config.Config.Mongo.ChatRecordsClearTime)
