@@ -84,6 +84,8 @@ const (
 	ConversationPrivateChatNotification = 1701
 	ConversationUnreadNotification      = 1702
 
+	MsgRevokeNotification = 1750
+
 	BusinessNotificationBegin = 2000
 	BusinessNotification      = 2001
 	BusinessNotificationEnd   = 2099

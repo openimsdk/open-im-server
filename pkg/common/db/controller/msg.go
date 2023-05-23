@@ -32,6 +32,8 @@ import (
 type CommonMsgDatabase interface {
 	// 批量插入消息
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
+	// 撤回消息
+	RevokeMsg(ctx context.Context, conversationID string, seq int64, msg []byte) error
 	// 刪除redis中消息缓存
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error
 	// incrSeq然后批量插入缓存
@@ -220,6 +222,12 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 		}
 	}
 	return nil
+}
+
+func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, msg []byte) error {
+	index := seq / db.msg.GetSingleGocMsgNum()
+	docID := db.msg.IndexDocID(conversationID, index)
+	return db.msgDocDatabase.UpdateMsgContent(ctx, docID, seq%db.msg.GetSingleGocMsgNum(), msg)
 }
 
 func (db *commonMsgDatabase) DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error {

@@ -138,8 +138,8 @@ message PullMsgs {
 }
 
 message PullMessageBySeqsResp {
-   map<string, PullMsgs> msgs = 1; 
-   map<string, PullMsgs> notificationMsgs = 2; 
+  map<string, PullMsgs> msgs = 1;
+  map<string, PullMsgs> notificationMsgs = 2;
 }
 
 message GetMaxSeqReq {
@@ -181,8 +181,8 @@ message MsgData {
   string  ex = 22;
 }
 message PushMessages{
-  map<string, PullMsgs> msgs = 1; 
-  map<string, PullMsgs> notificationMsgs = 2; 
+  map<string, PullMsgs> msgs = 1;
+  map<string, PullMsgs> notificationMsgs = 2;
 }
 message OfflinePushInfo{
   string title = 1;
@@ -329,7 +329,6 @@ message GroupMemberInfoSetTips{
   GroupMemberFullInfo changedUser = 4;
 }
 
-
 //////////////////////friend/////////////////////
 
 message FriendApplication{
@@ -411,6 +410,10 @@ message ConversationHasReadTips {
   int64 unreadCountTime = 4;
 }
 
+message NotificationElem {
+  string detail = 1;
+}
+
 ////////////////////message///////////////////////
 message seqs {
   repeated int64 seqs = 1;
@@ -423,11 +426,11 @@ message DeleteMessageTips{
 }
 
 
-message RevokeMsgTip{
+message RevokeMsgTips{
   string revokerUserID = 1;
   string clientMsgID = 2;
   int64 revokeTime = 3;
-  int64 sesstionType = 5;
+  int32 sesstionType = 5;
   int64 seq = 6;
   string conversationID = 7;
 }
