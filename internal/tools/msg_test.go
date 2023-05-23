@@ -21,6 +21,9 @@ import (
 
 func GenMsgDoc(startSeq, stopSeq, delSeq, index int64, conversationID string) *unRelationTb.MsgDocModel {
 	msgDoc := &unRelationTb.MsgDocModel{DocID: conversationID + strconv.Itoa(int(index))}
+	for i := 0; i < 5000; i++ {
+		msgDoc.Msg = append(msgDoc.Msg, unRelationTb.MsgInfoModel{SendTime: 0, Msg: []byte{}})
+	}
 	for i := startSeq; i <= stopSeq; i++ {
 		msg := sdkws.MsgData{
 			SendID:           "sendID1",
@@ -47,7 +50,7 @@ func GenMsgDoc(startSeq, stopSeq, delSeq, index int64, conversationID string) *u
 		} else {
 			sendTime = utils.GetCurrentTimestampByMill()
 		}
-		msgDoc.Msg = append(msgDoc.Msg, unRelationTb.MsgInfoModel{SendTime: int64(sendTime), Msg: bytes})
+		msgDoc.Msg[i-1] = unRelationTb.MsgInfoModel{SendTime: int64(sendTime), Msg: bytes}
 	}
 	return msgDoc
 }
