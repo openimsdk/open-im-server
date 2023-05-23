@@ -568,7 +568,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		}
 		return delStruct.getSetMinSeq() + 1, nil
 	}
-	log.ZDebug(ctx, "conversationID", conversationID, "index:", index, "docID", msgs.DocID, "len", len(msgs.Msg))
+	log.ZDebug(ctx, "doc info", "conversationID", conversationID, "index", index, "docID", msgs.DocID, "len", len(msgs.Msg))
 	if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
 		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgs.Msg), "docID:", msgs.DocID)
 	}
