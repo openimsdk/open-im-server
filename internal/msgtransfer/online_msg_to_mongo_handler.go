@@ -3,6 +3,7 @@ package msgtransfer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 
@@ -76,8 +77,17 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 				log.ZError(ctx, "json.Unmarshal RevokeMsgTips", err, "content", string(v.Content))
 				continue
 			}
-			v.Seq = tips.Seq
-			data, err := proto.Marshal(v)
+			msgs, err := mc.msgDatabase.GetMsgBySeqs(ctx, tips.ConversationID, []int64{tips.Seq})
+			if err != nil {
+				log.ZError(ctx, "GetMsgBySeqs", err, "conversationID", tips.ConversationID, "seq", tips.Seq)
+				continue
+			}
+			if len(msgs) == 0 {
+				log.ZError(ctx, "GetMsgBySeqs empty", errors.New("seq not found"), "conversationID", tips.ConversationID, "seq", tips.Seq)
+				continue
+			}
+			msgs[0].Content = []byte(elem.Detail)
+			data, err := proto.Marshal(msgs[0])
 			if err != nil {
 				log.ZError(ctx, "proto.Marshal MsgData", err)
 				continue
