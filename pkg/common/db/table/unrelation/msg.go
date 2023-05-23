@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
@@ -51,17 +50,7 @@ func (MsgDocModel) GetSingleGocMsgNum() int64 {
 }
 
 func (m *MsgDocModel) IsFull() bool {
-	index, _ := strconv.Atoi(strings.Split(m.DocID, ":")[1])
-	if index == 0 {
-		if len(m.Msg) >= singleGocMsgNum-1 {
-			return true
-		}
-	}
-	if len(m.Msg) >= singleGocMsgNum {
-		return true
-	}
-
-	return false
+	return m.Msg[len(m.Msg)-1].SendTime != 0
 }
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
@@ -123,17 +112,6 @@ func (MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkw
 	for _, v := range seqs {
 		msg := new(sdkws.MsgData)
 		msg.Seq = v
-		exceptionMsg = append(exceptionMsg, msg)
-	}
-	return exceptionMsg
-}
-
-func (MsgDocModel) GenExceptionSuperGroupMessageBySeqs(seqs []int64, groupID string) (exceptionMsg []*sdkws.MsgData) {
-	for _, v := range seqs {
-		msg := new(sdkws.MsgData)
-		msg.Seq = v
-		msg.GroupID = groupID
-		msg.SessionType = constant.SuperGroupChatType
 		exceptionMsg = append(exceptionMsg, msg)
 	}
 	return exceptionMsg

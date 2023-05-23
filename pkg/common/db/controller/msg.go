@@ -584,29 +584,31 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 	} else {
 		var hasMarkDelFlag bool
 		for i, msg := range msgs.Msg {
-			msgPb := &sdkws.MsgData{}
-			err = proto.Unmarshal(msg.Msg, msgPb)
-			if err != nil {
-				log.ZError(ctx, "proto.Unmarshal failed", err, "index", i, "docID", msgs.DocID)
-				return 0, utils.Wrap(err, "proto.Unmarshal failed")
-			}
-			if utils.GetCurrentTimestampByMill() > msg.SendTime+(remainTime*1000) {
-				msgPb.Status = constant.MsgDeleted
-				bytes, _ := proto.Marshal(msgPb)
-				msg.Msg = bytes
-				msg.SendTime = 0
-				hasMarkDelFlag = true
-			} else {
-				// 到本条消息不需要删除, minSeq置为这条消息的seq
-				if err := db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs); err != nil {
-					return 0, err
+			if msg.SendTime != 0 {
+				msgPb := &sdkws.MsgData{}
+				err = proto.Unmarshal(msg.Msg, msgPb)
+				if err != nil {
+					log.ZError(ctx, "proto.Unmarshal failed", err, "index", i, "docID", msgs.DocID)
+					return 0, utils.Wrap(err, "proto.Unmarshal failed")
 				}
-				if hasMarkDelFlag {
-					if err := db.msgDocDatabase.UpdateOneDoc(ctx, msgs); err != nil {
-						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
+				if utils.GetCurrentTimestampByMill() > msg.SendTime+(remainTime*1000) {
+					msgPb.Status = constant.MsgDeleted
+					bytes, _ := proto.Marshal(msgPb)
+					msg.Msg = bytes
+					msg.SendTime = 0
+					hasMarkDelFlag = true
+				} else {
+					// 到本条消息不需要删除, minSeq置为这条消息的seq
+					if err := db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs); err != nil {
+						return 0, err
 					}
+					if hasMarkDelFlag {
+						if err := db.msgDocDatabase.UpdateOneDoc(ctx, msgs); err != nil {
+							return delStruct.getSetMinSeq(), err
+						}
+					}
+					return msgPb.Seq, nil
 				}
-				return msgPb.Seq, nil
 			}
 		}
 	}
