@@ -19,18 +19,19 @@ import (
 
 type MsgTool struct {
 	msgDatabase          controller.CommonMsgDatabase
-	conversationDatabase controller.ConversationDataBase
+	conversationDatabase controller.ConversationDatabase
 	userDatabase         controller.UserDatabase
 	groupDatabase        controller.GroupDatabase
 }
 
 var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
 
-func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase, groupDatabase controller.GroupDatabase) *MsgTool {
+func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase, groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase) *MsgTool {
 	return &MsgTool{
-		msgDatabase:   msgDatabase,
-		userDatabase:  userDatabase,
-		groupDatabase: groupDatabase,
+		msgDatabase:          msgDatabase,
+		userDatabase:         userDatabase,
+		groupDatabase:        groupDatabase,
+		conversationDatabase: conversationDatabase,
 	}
 }
 
@@ -51,7 +52,8 @@ func InitMsgTool() (*MsgTool, error) {
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userDatabase := controller.NewUserDatabase(userDB, cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()), tx.NewGorm(db))
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
-	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase)
+	conversationDatabase := controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)), tx.NewGorm(db))
+	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase)
 	return msgTool, nil
 }
 
