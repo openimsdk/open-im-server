@@ -74,7 +74,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 			})
 			for j, s := range arr {
 				if j == 0 {
-					fmt.Sprintf("channnelID: %d, arr[0]: %d", channelID, arr[j])
+					fmt.Printf("channnelID: %d, arr[0]: %s\n", channelID, arr[j])
 				}
 				filter := bson.M{"doc_id": "test:0"}
 				update := bson.M{
