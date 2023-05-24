@@ -21,8 +21,11 @@ type MsgDocModel struct {
 }
 
 type MsgInfoModel struct {
-	SendTime int64  `bson:"sendtime"`
-	Msg      []byte `bson:"msg"`
+	SendTime int64    `bson:"sendtime"`
+	Msg      []byte   `bson:"msg"`
+	Revoke   bool     `bson:"revoke"`
+	ReadList []string `bson:"read_list"`
+	DelList  []string `bson:"del_list"`
 }
 
 type MsgDocModelInterface interface {

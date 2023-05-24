@@ -6,6 +6,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
@@ -35,17 +38,68 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	msgs := make([]*sdkws.MsgData, 0, 15000)
-
+	msgs := make([]*sdkws.MsgData, 0, 1)
 	for i := 0; i < cap(msgs); i++ {
 		msgs = append(msgs, &sdkws.MsgData{
 			Content:  []byte(fmt.Sprintf("test-%d", i)),
 			SendTime: time.Now().UnixMilli(),
 		})
 	}
-	err = db.BatchInsertChat2DB(ctx, "test", msgs, 4999)
+	err = db.BatchInsertChat2DB(ctx, "test", msgs, 0)
 	if err != nil {
 		panic(err)
 	}
+
+	_ = db.BatchInsertChat2DB
+	c := mongo.GetDatabase().Collection("msg")
+
+	ch := make(chan int)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-ch
+			for i := 0; i < 500; i++ {
+				filter := bson.M{"doc_id": "test:0"}
+				update := bson.M{
+					"$addToSet": bson.M{
+						"msgs.7.del_list": bson.M{"$each": []string{strconv.Itoa(i + 1)}},
+					},
+				}
+				_, err := c.UpdateOne(context.Background(), filter, update)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		}()
+	}
+
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-ch
+			for i := 0; i < 500; i++ {
+				filter := bson.M{"doc_id": "test:0"}
+				update := bson.M{
+					"$addToSet": bson.M{
+						"msgs.7.read_list": bson.M{"$each": []string{strconv.Itoa(200 + i + 1)}},
+					},
+				}
+				_, err := c.UpdateOne(context.Background(), filter, update)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		}()
+	}
+
+	time.Sleep(time.Second * 2)
+
+	close(ch)
+
+	wg.Wait()
 
 }

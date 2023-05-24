@@ -188,6 +188,10 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 				DocID: docID,
 				Msg:   make([]unRelationTb.MsgInfoModel, num),
 			}
+			for i := 0; i < len(doc.Msg); i++ {
+				doc.Msg[i].ReadList = []string{}
+				doc.Msg[i].DelList = []string{}
+			}
 			for _, msg := range *msgs {
 				data, err := proto.Marshal(msg)
 				if err != nil {
@@ -196,6 +200,8 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 				doc.Msg[msg.Seq%num] = unRelationTb.MsgInfoModel{
 					SendTime: msg.SendTime,
 					Msg:      data,
+					ReadList: []string{},
+					DelList:  []string{},
 				}
 			}
 			if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
