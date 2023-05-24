@@ -48,13 +48,13 @@ endif
 
 # TOOLS_DIR: The directory where tools are stored for build and testing.
 ifeq ($(origin TOOLS_DIR),undefined)
-TOOLS_DIR := $(ROOT_DIR)/tools
+TOOLS_DIR := $(OUTPUT_DIR)/tools
 $(shell mkdir -p $(TOOLS_DIR))
 endif
 
 # TMP_DIR: directory where temporary files are stored.
 ifeq ($(origin TMP_DIR),undefined)
-TMP_DIR := $(ROOT_DIR)/tmp
+TMP_DIR := $(OUTPUT_DIR)/tmp
 $(shell mkdir -p $(TMP_DIR))
 endif
 

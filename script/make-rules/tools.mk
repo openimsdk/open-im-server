@@ -58,11 +58,11 @@ tools.install-all.%:
 .PHONY: tools.verify.%
 tools.verify.%:
 	@echo "===========> Verifying $* is installed"
-	@if [ ! -f $(BIN_DIR)/$* ]; then GOBIN=$(BIN_DIR) $(MAKE) tools.install.$*; fi
-	@echo "===========> $* is install in $(BIN_DIR)/$*"
+	@if [ ! -f $(TOOLS_DIR)/$* ]; then GOBIN=$(TOOLS_DIR) $(MAKE) tools.install.$*; fi
+	@echo "===========> $* is install in $(TOOLS_DIR)/$*"
 
-.PHONY:  
 ## install.golangci-lint: Install golangci-lint
+.PHONY: install.golangci-lint
 install.golangci-lint:
 	@$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 

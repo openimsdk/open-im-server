@@ -136,7 +136,7 @@ go.test:
 # .PHONY: go.test.junit-report
 # go.test.junit-report: tools.verify.go-junit-report
 # 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
-# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(BIN_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
+# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 # 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
 # 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
 # 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
@@ -144,11 +144,11 @@ go.test:
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report
-	@echo "===========> Run unit test > $(OUTPUT_DIR)/report.xml"
-	@$(GO) test -v -coverprofile=$(OUTPUT_DIR)/coverage.out 2>&1 ./... | $(BIN_DIR)/go-junit-report -set-exit-code > $(OUTPUT_DIR)/report.xml
-	@sed -i '/mock_.*.go/d' $(OUTPUT_DIR)/coverage.out
+	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
+	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(OUTPUT_DIR)/report.xml
+	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
 	@echo "===========> Test coverage of Go code is reported to $(OUTPUT_DIR)/coverage.html by generating HTML"
-	@$(GO) tool cover -html=$(OUTPUT_DIR)/coverage.out -o $(OUTPUT_DIR)/coverage.html
+	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
 
 ## go.test.cover: Run unit test with coverage
 .PHONY: go.test.cover
@@ -162,14 +162,14 @@ go.test.cover: go.test.junit-report
 go.format: tools.verify.golines tools.verify.goimports
 	@echo "===========> Formating codes"
 	@$(FIND) -type f -name '*.go' | $(XARGS) gofmt -s -w
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(BIN_DIR)/goimports -w -local $(ROOT_PACKAGE)
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(BIN_DIR)/golines -w --max-len=120 --reformat-tags --shorten-comments --ignore-generated .
+	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
+	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=120 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
 ## imports: task to automatically handle import packages in Go files using goimports tool
 .PHONY: go.imports
 go.imports: tools.verify.goimports
-	@$(BIN_DIR)/goimports -l -w $(SRC)
+	@$(TOOLS_DIR)/goimports -l -w $(SRC)
 
 ## go.updates: Check for updates to go.mod dependencies
 .PHONY: go.updates
@@ -179,8 +179,8 @@ go.updates: tools.verify.go-mod-outdated
 ## go.clean: Clean all builds directories and files
 .PHONY: go.clean
 go.clean:
-	@echo "===========> Cleaning all builds OUTPUT_DIR($(OUTPUT_DIR)) AND BIN_DIR($(BIN_DIR))"
-	@-rm -vrf $(OUTPUT_DIR) $(BIN_DIR)
+	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR))"
+	@-rm -vrf $(TMP_DIR) $(BIN_DIR)
 	@echo "===========> End clean..."
 
 ## copyright.help: Show copyright help
