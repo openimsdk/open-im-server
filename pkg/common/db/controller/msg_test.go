@@ -62,7 +62,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
-		go func() {
+		go func(channelID int) {
 			defer wg.Done()
 			<-ch
 			var arr []string
@@ -72,7 +72,10 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 			rand.Shuffle(len(arr), func(i, j int) {
 				arr[i], arr[j] = arr[j], arr[i]
 			})
-			for _, s := range arr {
+			for j, s := range arr {
+				if j == 0 {
+					fmt.Sprintf("channnelID: %d, arr[0]: %d", channelID, arr[j])
+				}
 				filter := bson.M{"doc_id": "test:0"}
 				update := bson.M{
 					"$addToSet": bson.M{
@@ -84,7 +87,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-		}()
+		}(i)
 	}
 
 	for i := 0; i < 1000; i++ {
