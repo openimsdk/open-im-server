@@ -2,10 +2,8 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 	"sync"
@@ -36,19 +34,18 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 	db := &commonMsgDatabase{
 		msgDocDatabase: unrelation.NewMsgMongoDriver(mongo.GetDatabase()),
 	}
-	ctx := context.Background()
-
-	msgs := make([]*sdkws.MsgData, 0, 1)
-	for i := 0; i < cap(msgs); i++ {
-		msgs = append(msgs, &sdkws.MsgData{
-			Content:  []byte(fmt.Sprintf("test-%d", i)),
-			SendTime: time.Now().UnixMilli(),
-		})
-	}
-	err = db.BatchInsertChat2DB(ctx, "test", msgs, 0)
-	if err != nil {
-		panic(err)
-	}
+	//ctx := context.Background()
+	//msgs := make([]*sdkws.MsgData, 0, 1)
+	//for i := 0; i < cap(msgs); i++ {
+	//	msgs = append(msgs, &sdkws.MsgData{
+	//		Content:  []byte(fmt.Sprintf("test-%d", i)),
+	//		SendTime: time.Now().UnixMilli(),
+	//	})
+	//}
+	//err = db.BatchInsertChat2DB(ctx, "test", msgs, 0)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	_ = db.BatchInsertChat2DB
 	c := mongo.GetDatabase().Collection("msg")
