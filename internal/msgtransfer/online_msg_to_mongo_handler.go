@@ -2,9 +2,6 @@ package msgtransfer
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -66,36 +63,36 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 				log.ZError(ctx, "DelMsgBySeqs", err, "userIDs", deleteMessageTips.UserID, "seqs", deleteMessageTips.Seqs, "totalUnExistSeqs", totalUnExistSeqs)
 				continue
 			}
-		case constant.MsgRevokeNotification:
-			var elem sdkws.NotificationElem
-			if err := json.Unmarshal(v.Content, &elem); err != nil {
-				log.ZError(ctx, "json.Unmarshal NotificationElem", err, "content", string(v.Content))
-				continue
-			}
-			var tips sdkws.RevokeMsgTips
-			if err := json.Unmarshal([]byte(elem.Detail), &tips); err != nil {
-				log.ZError(ctx, "json.Unmarshal RevokeMsgTips", err, "content", string(v.Content))
-				continue
-			}
-			msgs, err := mc.msgDatabase.GetMsgBySeqs(ctx, tips.ConversationID, []int64{tips.Seq})
-			if err != nil {
-				log.ZError(ctx, "GetMsgBySeqs", err, "conversationID", tips.ConversationID, "seq", tips.Seq)
-				continue
-			}
-			if len(msgs) == 0 {
-				log.ZError(ctx, "GetMsgBySeqs empty", errors.New("seq not found"), "conversationID", tips.ConversationID, "seq", tips.Seq)
-				continue
-			}
-			msgs[0].Content = []byte(elem.Detail)
-			data, err := proto.Marshal(msgs[0])
-			if err != nil {
-				log.ZError(ctx, "proto.Marshal MsgData", err)
-				continue
-			}
-			if err := mc.msgDatabase.RevokeMsg(ctx, tips.ConversationID, tips.Seq, data); err != nil {
-				log.ZError(ctx, "RevokeMsg", err, "conversationID", tips.ConversationID, "seq", tips.Seq)
-				continue
-			}
+			//case constant.MsgRevokeNotification:
+			//	var elem sdkws.NotificationElem
+			//	if err := json.Unmarshal(v.Content, &elem); err != nil {
+			//		log.ZError(ctx, "json.Unmarshal NotificationElem", err, "content", string(v.Content))
+			//		continue
+			//	}
+			//	var tips sdkws.RevokeMsgTips
+			//	if err := json.Unmarshal([]byte(elem.Detail), &tips); err != nil {
+			//		log.ZError(ctx, "json.Unmarshal RevokeMsgTips", err, "content", string(v.Content))
+			//		continue
+			//	}
+			//	msgs, err := mc.msgDatabase.GetMsgBySeqs(ctx, tips.ConversationID, []int64{tips.Seq})
+			//	if err != nil {
+			//		log.ZError(ctx, "GetMsgBySeqs", err, "conversationID", tips.ConversationID, "seq", tips.Seq)
+			//		continue
+			//	}
+			//	if len(msgs) == 0 {
+			//		log.ZError(ctx, "GetMsgBySeqs empty", errors.New("seq not found"), "conversationID", tips.ConversationID, "seq", tips.Seq)
+			//		continue
+			//	}
+			//	msgs[0].Content = []byte(elem.Detail)
+			//	data, err := proto.Marshal(msgs[0])
+			//	if err != nil {
+			//		log.ZError(ctx, "proto.Marshal MsgData", err)
+			//		continue
+			//	}
+			//	if err := mc.msgDatabase.RevokeMsg(ctx, tips.ConversationID, tips.Seq, data); err != nil {
+			//		log.ZError(ctx, "RevokeMsg", err, "conversationID", tips.ConversationID, "seq", tips.Seq)
+			//		continue
+			//	}
 		}
 	}
 }
