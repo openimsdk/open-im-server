@@ -183,13 +183,13 @@ message ClearAllMsgReq {
 message ClearAllMsgResp {
 }
 
-message DeleteMsgReq {
+message DeleteMsgsReq {
   string conversationID = 1;
   repeated int64 seqs = 2;
   string userID = 3;
 }
 
-message DeleteMsgResp {
+message DeleteMsgsResp {
 }
 
 message DeleteMsgPhysicalReq {
@@ -200,12 +200,12 @@ message DeleteMsgPhysicalReq {
 message DeleteMsgPhysicalResp {
 }
 
-message DeleteNsgPhysicalBySeqReq {
+message DeleteMsgPhysicalBySeqReq {
   string conversationID = 1;
   repeated int64 seqs = 2;
 }
 
-message DeleteNsgPhysicalBySeqResp {
+message DeleteMsgPhysicalBySeqResp {
 }
 
 service msg {
@@ -221,9 +221,9 @@ service msg {
   // 删除用户全部消息 重置min seq 比最大seq大1
   rpc ClearAllMsg(ClearAllMsgReq) returns(ClearAllMsgResp);
   // 用户标记删除部分消息by Seq
-  rpc DeleteMsg(DeleteMsgReq) returns(DeleteMsgResp);
+  rpc DeleteMsgs(DeleteMsgsReq) returns(DeleteMsgsResp);
   // seq物理删除消息
-  rpc DeleteNsgPhysicalBySeq(DeleteNsgPhysicalBySeqReq) returns(DeleteNsgPhysicalBySeqResp);
+  rpc DeleteMsgPhysicalBySeq(DeleteMsgPhysicalBySeqReq) returns(DeleteMsgPhysicalBySeqResp);
 
   //设置消息是否发送成功-针对api发送的消息
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);

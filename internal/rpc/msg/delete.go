@@ -3,37 +3,21 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
-func (m *msgServer) DelMsgs(ctx context.Context, req *msg.DelMsgsReq) (*msg.DelMsgsResp, error) {
-	// if _, err := m.MsgDatabase.DelMsgBySeqs(ctx, req.UserID, req.Seqs); err != nil {
-	// 	return nil, err
-	// }
-	return &msg.DelMsgsResp{}, nil
+func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearConversationsMsgReq) (*msg.ClearConversationsMsgResp, error) {
+	return &msg.ClearConversationsMsgResp{}, nil
 }
 
-func (m *msgServer) DelSuperGroupMsg(ctx context.Context, req *msg.DelSuperGroupMsgReq) (*msg.DelSuperGroupMsgResp, error) {
-	resp := &msg.DelSuperGroupMsgResp{}
-	if err := tokenverify.CheckAdmin(ctx); err != nil {
-		return nil, err
-	}
-	if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, req.GroupID, 0); err != nil {
-		return nil, err
-	}
-	return resp, nil
+func (m *msgServer) ClearAllMsg(ctx context.Context, req *msg.ClearAllMsgReq) (*msg.ClearAllMsgResp, error) {
+	return &msg.ClearAllMsgResp{}, nil
 }
 
-func (m *msgServer) ClearMsg(ctx context.Context, req *msg.ClearMsgReq) (*msg.ClearMsgResp, error) {
-	resp := &msg.ClearMsgResp{}
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
-		return nil, err
-	}
-	conversationIDs, err := m.Conversation.GetConversationIDs(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	m.MsgDatabase.CleanUpUserConversationsMsgs(ctx, req.UserID, conversationIDs)
-	return resp, nil
+func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*msg.DeleteMsgsResp, error) {
+	return &msg.DeleteMsgsResp{}, nil
+}
+
+func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteMsgPhysicalBySeqReq) (*msg.DeleteMsgPhysicalBySeqResp, error) {
+	return &msg.DeleteMsgPhysicalBySeqResp{}, nil
 }
