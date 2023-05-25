@@ -16,8 +16,8 @@ const (
 )
 
 type MsgDocModel struct {
-	DocID string         `bson:"doc_id"`
-	Msg   []MsgInfoModel `bson:"msgs"`
+	DocID string          `bson:"doc_id"`
+	Msg   []*MsgInfoModel `bson:"msgs"`
 }
 
 type RevokeModel struct {

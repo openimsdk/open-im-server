@@ -159,21 +159,21 @@ func (m *MsgMongoDriver) GetMsgsByIndex(ctx context.Context, conversationID stri
 }
 
 func (m *MsgMongoDriver) GetNewestMsg(ctx context.Context, conversationID string) (*table.MsgInfoModel, error) {
-	var msgDocs []table.MsgDocModel
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"doc_id": -1}))
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	err = cursor.All(ctx, &msgDocs)
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	if len(msgDocs) > 0 {
-		if len(msgDocs[0].Msg) > 0 {
-			return &msgDocs[0].Msg[len(msgDocs[0].Msg)-1], nil
-		}
-		return nil, errs.ErrRecordNotFound.Wrap("len(msgDocs[0].Msgs) < 0")
-	}
+	//var msgDocs []table.MsgDocModel
+	//cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": bson.M{"$regex": fmt.Sprintf("^%s:", conversationID)}}, options.Find().SetLimit(1).SetSort(bson.M{"doc_id": -1}))
+	//if err != nil {
+	//	return nil, utils.Wrap(err, "")
+	//}
+	//err = cursor.All(ctx, &msgDocs)
+	//if err != nil {
+	//	return nil, utils.Wrap(err, "")
+	//}
+	//if len(msgDocs) > 0 {
+	//	if len(msgDocs[0].Msg) > 0 {
+	//		return &msgDocs[0].Msg[len(msgDocs[0].Msg)-1], nil
+	//	}
+	//	return nil, errs.ErrRecordNotFound.Wrap("len(msgDocs[0].Msgs) < 0")
+	//}
 	return nil, ErrMsgNotFound
 }
 

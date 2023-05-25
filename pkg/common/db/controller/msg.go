@@ -146,7 +146,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		return nil
 	}
 	num := db.msg.GetSingleGocMsgNum()
-	num = 100
+	//num = 100
 	if msgList[0].Msg != nil {
 		firstSeq = msgList[0].Msg.Seq
 	}
@@ -194,7 +194,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		}
 		doc := unRelationTb.MsgDocModel{
 			DocID: docID,
-			Msg:   make([]unRelationTb.MsgInfoModel, num),
+			Msg:   make([]*unRelationTb.MsgInfoModel, num),
 		}
 		var insert int
 		for j := i; j < len(msgList); j++ {
@@ -203,14 +203,21 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 				break
 			}
 			insert++
-			doc.Msg[getIndex(seq)] = *msgList[j]
+			doc.Msg[getIndex(seq)] = msgList[j]
 		}
 		for i, model := range doc.Msg {
-			if model.DelList == nil {
-				doc.Msg[i].DelList = []string{}
-			}
-			if model.ReadList == nil {
-				doc.Msg[i].ReadList = []string{}
+			if model == nil {
+				doc.Msg[i] = &unRelationTb.MsgInfoModel{
+					DelList:  []string{},
+					ReadList: []string{},
+				}
+			} else {
+				if model.DelList == nil {
+					doc.Msg[i].DelList = []string{}
+				}
+				if model.ReadList == nil {
+					doc.Msg[i].ReadList = []string{}
+				}
 			}
 		}
 		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
