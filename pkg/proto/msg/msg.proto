@@ -224,6 +224,8 @@ service msg {
   rpc DeleteMsgs(DeleteMsgsReq) returns(DeleteMsgsResp);
   // seq物理删除消息
   rpc DeleteMsgPhysicalBySeq(DeleteMsgPhysicalBySeqReq) returns(DeleteMsgPhysicalBySeqResp);
+  // 物理删除消息by 时间
+  rpc DeleteMsgPhysical(DeleteMsgPhysicalReq) returns(DeleteMsgPhysicalResp);
 
   //设置消息是否发送成功-针对api发送的消息
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
