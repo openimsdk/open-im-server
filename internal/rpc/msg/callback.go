@@ -38,7 +38,7 @@ func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command strin
 	}
 }
 
-func CallbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return nil
 	}
@@ -50,7 +50,7 @@ func CallbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) er
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg)
 }
 
-func CallbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -62,7 +62,7 @@ func CallbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
 }
 
-func CallbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -74,7 +74,7 @@ func CallbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
 }
 
-func CallbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -86,7 +86,7 @@ func CallbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) erro
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
-func CallbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackMsgModify.Enable || msg.MsgData.ContentType != constant.Text {
 		return nil
 	}

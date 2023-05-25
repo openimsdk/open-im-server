@@ -12,6 +12,28 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
+	resp = &msg.SendMsgResp{}
+	flag := isMessageHasReadEnabled(req.MsgData)
+	if !flag {
+		return nil, errs.ErrMessageHasReadDisable.Wrap()
+	}
+	m.encapsulateMsgData(req.MsgData)
+	if err := callbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		return nil, err
+	}
+	switch req.MsgData.SessionType {
+	case constant.SingleChatType:
+		return m.sendMsgSingleChat(ctx, req)
+	case constant.NotificationChatType:
+		return m.sendMsgNotification(ctx, req)
+	case constant.SuperGroupChatType:
+		return m.sendMsgSuperGroupChat(ctx, req)
+	default:
+		return nil, errs.ErrArgs.Wrap("unknown sessionType")
+	}
+}
+
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
 	resp = &pbMsg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
@@ -23,7 +45,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMs
 	if err != nil {
 		return nil, err
 	}
-	if err = CallbackAfterSendGroupMsg(ctx, req); err != nil {
+	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
 		log.ZError(ctx, "CallbackAfterSendGroupMsg", err)
 	}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
@@ -69,7 +91,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 			promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
 			return nil, err
 		}
-		err = CallbackAfterSendSingleMsg(ctx, req)
+		err = callbackAfterSendSingleMsg(ctx, req)
 		if err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}

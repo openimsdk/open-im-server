@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -30,7 +31,7 @@ func MessageHasReadEnabled(_ context.Context, req *msg.SendMsgReq) (*sdkws.MsgDa
 	return req.MsgData, nil
 }
 func MessageModifyCallback(ctx context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
-	if err := CallbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err := callbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		log.ZWarn(ctx, "CallbackMsgModify failed", err, "req", req.String())
 		return nil, err
 	}
@@ -39,18 +40,13 @@ func MessageModifyCallback(ctx context.Context, req *msg.SendMsgReq) (*sdkws.Msg
 func MessageBeforeSendCallback(ctx context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
 	switch req.MsgData.SessionType {
 	case constant.SingleChatType:
-		if err := CallbackBeforeSendSingleMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		if err := callbackBeforeSendSingleMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 			log.ZWarn(ctx, "CallbackBeforeSendSingleMsg failed", err, "req", req.String())
-			return nil, err
-		}
-	case constant.GroupChatType:
-		if err := CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-			log.ZWarn(ctx, "CallbackBeforeSendGroupMsg failed", err, "req", req.String())
 			return nil, err
 		}
 	case constant.NotificationChatType:
 	case constant.SuperGroupChatType:
-		if err := CallbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+		if err := callbackBeforeSendGroupMsg(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 			log.ZWarn(ctx, "CallbackBeforeSendGroupMsg failed", err, "req", req.String())
 			return nil, err
 		}

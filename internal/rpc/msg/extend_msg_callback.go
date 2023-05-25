@@ -11,7 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 )
 
-func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMessageReactionExtensionsReq) error {
+func callbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMessageReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -35,7 +35,7 @@ func CallbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 	return nil
 }
 
-func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionExtensionsReq) error {
+func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -54,7 +54,7 @@ func CallbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionE
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
-func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.GetMessagesReactionExtensionsReq) error {
+func callbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.GetMessagesReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -70,7 +70,7 @@ func CallbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
-func CallbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.ModifyMessageReactionExtensionsReq) error {
+func callbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.ModifyMessageReactionExtensionsReq) error {
 	req := &cbapi.CallbackAddMessageReactionExtReq{
 		OperationID:           mcontext.GetOperationID(ctx),
 		CallbackCommand:       constant.CallbackAddMessageListReactionExtensionsCommand,
