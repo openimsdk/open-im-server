@@ -58,6 +58,7 @@ type CommonMsgDatabase interface {
 	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
 	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
 	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
+	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error)
 
 	GetMongoMaxAndMinSeq(ctx context.Context, conversationID string) (maxSeq, minSeq int64, err error)
 	GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
@@ -754,6 +755,10 @@ func (db *commonMsgDatabase) SetConversationUserMinSeq(ctx context.Context, conv
 }
 func (db *commonMsgDatabase) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
 	return db.cache.SetConversationUserMinSeqs(ctx, conversationID, seqs)
+}
+
+func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
+	return db.cache.SetUserConversationsMinSeqs(ctx, userID, seqs)
 }
 
 func (db *commonMsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {
