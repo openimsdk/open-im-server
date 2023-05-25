@@ -44,21 +44,6 @@ message SendMsgResp {
 }
 
 
-message ClearMsgReq{
-  string userID = 1;
-}
-
-
-message ClearMsgResp{
-}
-
-message SetMsgMinSeqReq{
-  string userID = 1;
-  string groupID = 2;
-  uint32 minSeq = 3;
-}
-message SetMsgMinSeqResp{
-}
 
 message SetSendMsgStatusReq{
   int32 status = 1;
@@ -74,28 +59,6 @@ message GetSendMsgStatusResp{
   int32 status = 1;
 }
 
-message DelSuperGroupMsgReq{
-  string userID = 1;
-  string groupID = 2;
-}
-
-message DelSuperGroupMsgResp{
-}
-
-message GetSuperGroupMsgReq{
-  int64 Seq = 1;
-  string groupID = 2;
-}
-message GetSuperGroupMsgResp{
-  sdkws.MsgData msgData = 1;
-}
-
-message GetWriteDiffMsgReq{
-  int64 Seq = 1;
-}
-message GetWriteDiffMsgResp{
-  sdkws.MsgData msgData = 2;
-}
 
 message ModifyMessageReactionExtensionsReq {
   string conversationID = 1;
@@ -204,6 +167,46 @@ message RevokeMsgReq {
 message RevokeMsgResp {
 }
 
+message ClearConversationsMsgReq {
+  repeated string conversationIDs = 1;
+  string userID = 2;
+}
+
+message ClearConversationsMsgResp {
+}
+
+message ClearAllMsgReq {
+  string userID = 1;
+}
+
+message ClearAllMsgResp {
+}
+
+message DeleteMsgReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+  string userID = 3;
+}
+
+message DeleteMsgResp {
+}
+
+message DeleteMsgPhysicalReq {
+  repeated string conversationIDs = 1;
+  int64 remainTime = 2;
+}
+
+message DeleteMsgPhysicalResp {
+}
+
+message DeleteNsgPhysicalBySeqReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+}
+
+message DeleteNsgPhysicalBySeqResp {
+}
+
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
@@ -211,12 +214,16 @@ service msg {
   rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
   //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
-  //删除某人消息
-  rpc DelMsgs(DelMsgsReq) returns(DelMsgsResp);
-  //删除某个用户某个大群消息
-  rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
-  //清空某人所有消息
-  rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
+
+  // 全量清空指定会话消息 重置min seq 比最大seq大1
+  rpc ClearConversationsMsg(ClearConversationsMsgReq) returns(ClearConversationsMsgResp);
+  // 删除用户全部消息 重置min seq 比最大seq大1
+  rpc ClearAllMsg(ClearAllMsgReq) returns(ClearAllMsgResp);
+  // 用户标记删除部分消息by Seq
+  rpc DeleteMsg(DeleteMsgReq) returns(DeleteMsgResp);
+  // seq物理删除消息
+  rpc DeleteNsgPhysicalBySeq(DeleteNsgPhysicalBySeqReq) returns(DeleteNsgPhysicalBySeqResp);
+
   //设置消息是否发送成功-针对api发送的消息
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   //获取消息发送状态
