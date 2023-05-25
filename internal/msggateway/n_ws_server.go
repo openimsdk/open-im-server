@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -10,7 +11,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/go-playground/validator/v10"
 )
@@ -21,7 +21,8 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s interface{}) error
-	SetMessageHandler(msgRpcClient *rpcclient.MsgClient)
+	//SetMessageHandler(msgRpcClient *rpcclient.MsgClient)
+	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -51,8 +52,8 @@ type WsServer struct {
 	MessageHandler
 }
 
-func (ws *WsServer) SetMessageHandler(rpcClient *rpcclient.MsgClient) {
-	ws.MessageHandler = NewGrpcHandler(ws.validate, rpcClient)
+func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry) {
+	ws.MessageHandler = NewGrpcHandler(ws.validate, client)
 }
 
 func (ws *WsServer) UnRegister(c *Client) {
