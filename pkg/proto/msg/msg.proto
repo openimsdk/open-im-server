@@ -176,11 +176,11 @@ message ClearConversationsMsgReq {
 message ClearConversationsMsgResp {
 }
 
-message ClearAllMsgReq {
+message UserClearAllMsgReq {
   string userID = 1;
 }
 
-message ClearAllMsgResp {
+message UserClearAllMsgResp {
 }
 
 message DeleteMsgsReq {
@@ -219,7 +219,7 @@ service msg {
   // 全量清空指定会话消息 重置min seq 比最大seq大1
   rpc ClearConversationsMsg(ClearConversationsMsgReq) returns(ClearConversationsMsgResp);
   // 删除用户全部消息 重置min seq 比最大seq大1
-  rpc ClearAllMsg(ClearAllMsgReq) returns(ClearAllMsgResp);
+  rpc UserClearAllMsg(UserClearAllMsgReq) returns(UserClearAllMsgResp);
   // 用户标记删除部分消息by Seq
   rpc DeleteMsgs(DeleteMsgsReq) returns(DeleteMsgsResp);
   // seq物理删除消息

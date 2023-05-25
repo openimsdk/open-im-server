@@ -10,8 +10,8 @@ func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearCon
 	return &msg.ClearConversationsMsgResp{}, nil
 }
 
-func (m *msgServer) ClearAllMsg(ctx context.Context, req *msg.ClearAllMsgReq) (*msg.ClearAllMsgResp, error) {
-	return &msg.ClearAllMsgResp{}, nil
+func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMsgReq) (*msg.UserClearAllMsgResp, error) {
+	return &msg.UserClearAllMsgResp{}, nil
 }
 
 func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*msg.DeleteMsgsResp, error) {
