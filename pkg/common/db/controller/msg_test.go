@@ -38,6 +38,7 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 	db := &commonMsgDatabase{
 		msgDocDatabase: unrelation.NewMsgMongoDriver(mongo.GetDatabase()),
 	}
+
 	//ctx := context.Background()
 	//msgs := make([]*sdkws.MsgData, 0, 1)
 	//for i := 0; i < cap(msgs); i++ {

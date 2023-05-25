@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -137,6 +138,82 @@ func (db *commonMsgDatabase) MsgToMongoMQ(ctx context.Context, key, conversation
 	if len(messages) > 0 {
 		_, _, err := db.producerToMongo.SendMessage(ctx, key, &pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, ConversationID: conversationID, MsgData: messages})
 		return err
+	}
+	return nil
+}
+
+func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationID string, msgList []*unRelationTb.MsgInfoModel, firstSeq int64) error {
+	if len(msgList) == 0 {
+		return nil
+	}
+	num := db.msg.GetSingleGocMsgNum()
+	if msgList[0].Msg != nil {
+		firstSeq = msgList[0].Msg.Seq
+	}
+	getDocID := func(seq int64) string {
+		return conversationID + ":" + strconv.FormatInt(seq/num, 10)
+	}
+	getIndex := func(seq int64) int64 {
+		return seq % num
+	}
+	// 返回值为true表示数据库存在该文档，false表示数据库不存在该文档
+	updateMsgModel := func(docID string, index int64, msg *unRelationTb.MsgInfoModel) (bool, error) {
+		var (
+			res *mongo.UpdateResult
+			err error
+		)
+		if msg.Msg != nil {
+			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "msg", msgList[0].Msg)
+		} else if msg.Revoke != nil {
+			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "revoke", msgList[0].Revoke)
+		} else if msg.DelList != nil {
+			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "del_list", msgList[0].DelList)
+		} else if msg.ReadList != nil {
+			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "read_list", msgList[0].ReadList)
+		} else {
+			return false, errs.ErrArgs.Wrap("msg all field is nil")
+		}
+		if err != nil {
+			return false, err
+		}
+		return res.MatchedCount > 0, nil
+	}
+	tryUpdate := true
+	for i := 0; i < len(msgList); i++ {
+		msg := msgList[i]
+		seq := firstSeq + int64(i)
+		docID := getDocID(seq)
+		if tryUpdate {
+			matched, err := updateMsgModel(docID, getIndex(seq), msg)
+			if err != nil {
+				return err
+			}
+			if matched {
+				continue
+			}
+		}
+		doc := unRelationTb.MsgDocModel{
+			DocID: docID,
+			Msg:   make([]unRelationTb.MsgInfoModel, num),
+		}
+		var insert int
+		for j := i; j < len(msgList); j++ {
+			if getDocID(seq) != docID {
+				break
+			}
+			insert++
+			doc.Msg[getIndex(seq)] = *msgList[j]
+		}
+		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
+			if mongo.IsDuplicateKeyError(err) {
+				i--
+				tryUpdate = true
+				continue
+			}
+			return err
+		}
+		tryUpdate = false
+		i += insert - 1
 	}
 	return nil
 }

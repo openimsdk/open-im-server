@@ -38,12 +38,41 @@ func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) e
 	return err
 }
 
-func (m *MsgMongoDriver) UpdateMsg(ctx context.Context, docID string, index int64, info *table.MsgInfoModel) error {
-	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d", index): info}})
-	if err != nil {
-		return utils.Wrap(err, "")
+func (m *MsgMongoDriver) UpdateMsg(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error) {
+	var field string
+	if key == "" {
+		field = fmt.Sprintf("msgs.%d", index)
+	} else {
+		field = fmt.Sprintf("msgs.%d.%s", index, key)
 	}
-	return nil
+	filter := bson.M{"doc_id": docID}
+	update := bson.M{"$set": bson.M{field: value}}
+	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	return res, nil
+}
+
+// PushUnique value must slice
+func (m *MsgMongoDriver) PushUnique(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error) {
+	var field string
+	if key == "" {
+		field = fmt.Sprintf("msgs.%d", index)
+	} else {
+		field = fmt.Sprintf("msgs.%d.%s", index, key)
+	}
+	filter := bson.M{"doc_id": docID}
+	update := bson.M{
+		"$addToSet": bson.M{
+			field: bson.M{"$each": value},
+		},
+	}
+	res, err := m.MsgCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	return res, nil
 }
 
 func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error {
