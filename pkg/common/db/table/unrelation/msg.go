@@ -46,7 +46,7 @@ type MsgDataModel struct {
 	SessionType      int32             `bson:"session_type"`
 	MsgFrom          int32             `bson:"msg_from"`
 	ContentType      int32             `bson:"content_type"`
-	Content          []byte            `bson:"content"`
+	Content          string            `bson:"content"`
 	Seq              int64             `bson:"seq"`
 	SendTime         int64             `bson:"send_time"`
 	CreateTime       int64             `bson:"create_time"`
@@ -92,7 +92,8 @@ func (MsgDocModel) GetSingleGocMsgNum() int64 {
 }
 
 func (m *MsgDocModel) IsFull() bool {
-	return m.Msg[len(m.Msg)-1].SendTime != 0
+	//return m.Msg[len(m.Msg)-1].SendTime != 0
+	return false
 }
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
