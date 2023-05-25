@@ -1217,28 +1217,40 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 					return nil, errs.ErrArgs.Wrap("invalid role level")
 				}
 			}
+			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
+			if !ok {
+				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+			}
 			if member.UserID == opUserID {
 				if member.RoleLevel != nil {
 					return nil, errs.ErrNoPermission.Wrap("can not change self role level")
 				}
 				continue
 			}
-			opMember, ok := memberMap[[...]string{member.GroupID, opUserID}]
-			if !ok {
-				return nil, errs.ErrArgs.Wrap(fmt.Sprintf("user %s not in group %s", opUserID, member.GroupID))
+			if opMember.RoleLevel == constant.GroupOrdinaryUsers {
+				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
 			}
 			dbMember, ok := memberMap[[...]string{member.GroupID, member.UserID}]
 			if !ok {
 				return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("user %s not in group %s", member.UserID, member.GroupID))
 			}
-			if opMember.RoleLevel == constant.GroupOrdinaryUsers {
-				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
-			}
+			//if opMember.RoleLevel == constant.GroupOwner {
+			//	continue
+			//}
+			//if dbMember.RoleLevel == constant.GroupOwner {
+			//	return nil, errs.ErrNoPermission.Wrap("change group owner")
+			//}
+			//if opMember.RoleLevel == constant.GroupAdmin && dbMember.RoleLevel == constant.GroupAdmin {
+			//	return nil, errs.ErrNoPermission.Wrap("admin can not change other admin role info")
+			//}
 			switch opMember.RoleLevel {
 			case constant.GroupOrdinaryUsers:
 				return nil, errs.ErrNoPermission.Wrap("ordinary users can not change other role level")
 			case constant.GroupAdmin:
 				if dbMember.RoleLevel != constant.GroupOrdinaryUsers {
+					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
+				}
+				if member.RoleLevel != nil {
 					return nil, errs.ErrNoPermission.Wrap("admin can not change other role level")
 				}
 			case constant.GroupOwner:

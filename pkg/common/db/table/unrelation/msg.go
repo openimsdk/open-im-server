@@ -21,14 +21,18 @@ type MsgDocModel struct {
 }
 
 type MsgInfoModel struct {
-	SendTime int64  `bson:"sendtime"`
-	Msg      []byte `bson:"msg"`
+	SendTime int64    `bson:"sendtime"`
+	Msg      []byte   `bson:"msg"`
+	Revoke   bool     `bson:"revoke"`
+	ReadList []string `bson:"read_list"`
+	DelList  []string `bson:"del_list"`
 }
 
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
 	UpdateMsg(ctx context.Context, docID string, index int64, info *MsgInfoModel) error
+	UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error
 	IsExistDocID(ctx context.Context, docID string) (bool, error)
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
