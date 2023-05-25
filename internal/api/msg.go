@@ -119,18 +119,6 @@ func (m *Message) PullMsgBySeqs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.client, c)
 }
 
-func (m *Message) DelMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DelMsgs, m.client, c)
-}
-
-func (m *Message) DelSuperGroupMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DelSuperGroupMsg, m.client, c)
-}
-
-func (m *Message) ClearMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.ClearMsg, m.client, c)
-}
-
 func (m *Message) RevokeMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.RevokeMsg, m.client, c)
 }

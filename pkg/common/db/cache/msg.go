@@ -52,7 +52,10 @@ type MsgModel interface {
 	GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error)
 	GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error)
 	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
+	// seqs map: key userID value minSeq
 	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
+	// seqs map: key conversationID value minSeq
+	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error
 
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
 	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
@@ -186,6 +189,18 @@ func (c *msgCache) SetConversationUserMinSeq(ctx context.Context, conversationID
 func (c *msgCache) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
 	pipe := c.rdb.Pipeline()
 	for userID, minSeq := range seqs {
+		err = pipe.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+	}
+	_, err = pipe.Exec(ctx)
+	return err
+}
+
+func (c *msgCache) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error) {
+	pipe := c.rdb.Pipeline()
+	for conversationID, minSeq := range seqs {
 		err = pipe.Set(ctx, c.getConversationUserMinSeqKey(conversationID, userID), minSeq, 0).Err()
 		if err != nil {
 			return errs.Wrap(err)

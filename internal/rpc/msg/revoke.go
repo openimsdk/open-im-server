@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"time"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
@@ -22,7 +24,14 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.RecvID != "" && req.GroupID != "" {
 		return nil, errs.ErrArgs.Wrap("recv_id and group_id cannot exist at the same time")
 	}
+	if req.Seq < 0 {
+		return nil, errs.ErrArgs.Wrap("seq is invalid")
+	}
 	if err := tokenverify.CheckAccessV3(ctx, req.RecvID); err != nil {
+		return nil, err
+	}
+	user, err := m.User.GetUserInfo(ctx, req.UserID)
+	if err != nil {
 		return nil, err
 	}
 	var sessionType int32
@@ -33,6 +42,46 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	} else {
 		sessionType = constant.SuperGroupChatType
 		conversationID = utils.GenConversationUniqueKeyForGroup(req.GroupID)
+	}
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, conversationID, []int64{req.Seq})
+	if err != nil {
+		return nil, err
+	}
+	if len(msgs) == 0 {
+		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
+	}
+	sendID := msgs[0].SendID
+	if !tokenverify.IsAppManagerUid(ctx) {
+		if req.GroupID == "" {
+			if req.UserID != sendID {
+				return nil, errs.ErrNoPermission.Wrap("no permission")
+			}
+		} else {
+			members, err := m.Group.GetGroupMemberInfoMap(ctx, req.GroupID, utils.Distinct([]string{req.UserID, sendID}), true)
+			if err != nil {
+				return nil, err
+			}
+			if req.UserID != sendID {
+				roleLevel := members[req.UserID].RoleLevel
+				switch members[req.UserID].RoleLevel {
+				case constant.GroupOwner:
+				case constant.GroupAdmin:
+					if roleLevel != constant.GroupOrdinaryUsers {
+						return nil, errs.ErrNoPermission.Wrap("no permission")
+					}
+				default:
+					return nil, errs.ErrNoPermission.Wrap("no permission")
+				}
+			}
+		}
+	}
+	err = m.MsgDatabase.RevokeMsg(ctx, conversationID, req.Seq, &unRelationTb.RevokeModel{
+		UserID:   req.UserID,
+		Nickname: user.Nickname,
+		Time:     time.Now().UnixMilli(),
+	})
+	if err != nil {
+		return nil, err
 	}
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  req.UserID,
