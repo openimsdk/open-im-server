@@ -292,20 +292,3 @@ func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, us
 	}
 	return true, nil
 }
-
-func valueCopy(pb *msg.SendMsgReq) *msg.SendMsgReq {
-	offlinePushInfo := sdkws.OfflinePushInfo{}
-	if pb.MsgData.OfflinePushInfo != nil {
-		offlinePushInfo = *pb.MsgData.OfflinePushInfo
-	}
-	msgData := sdkws.MsgData{}
-	msgData = *pb.MsgData
-	msgData.OfflinePushInfo = &offlinePushInfo
-
-	options := make(map[string]bool, 10)
-	for key, value := range pb.MsgData.Options {
-		options[key] = value
-	}
-	msgData.Options = options
-	return &msg.SendMsgReq{MsgData: &msgData}
-}
