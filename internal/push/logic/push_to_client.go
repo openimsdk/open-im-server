@@ -143,14 +143,28 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		if detailContent == "" {
 			detailContent = title
 		}
-		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
-		if err != nil {
-			promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
-			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
+			go func() {
+				pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
+				if err != nil {
+					promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
+					log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+				} else {
+					promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
+					log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+				}
+			}()
 		} else {
-			promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
-			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+			pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
+			if err != nil {
+				promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
+				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+			} else {
+				promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
+				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+			}
 		}
+
 	}
 }
 
@@ -290,26 +304,54 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				}
 				detailContent = title
 			}
-			pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
-			if err != nil {
-				promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
-				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
-			} else {
-				promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
-				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
-			}
-			needBackgroupPushUserID := utils.IntersectString(needOfflinePushUserIDList, WebAndPcBackgroundUserIDList)
-			grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
-			if len(needBackgroupPushUserID) > 0 {
-				//Online push message
-				log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
-				for _, v := range grpcCons {
-					msgClient := pbRelay.NewRelayClient(v)
-					_, err := msgClient.SuperGroupBackgroundOnlinePush(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData,
-						PushToUserIDList: needBackgroupPushUserID})
+			if pushMsg.MsgData.ContentType == constant.SignalingNotification {
+				go func() {
+					pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
 					if err != nil {
-						log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
-						continue
+						promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
+						log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+					} else {
+						promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
+						log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+					}
+					needBackgroupPushUserID := utils.IntersectString(needOfflinePushUserIDList, WebAndPcBackgroundUserIDList)
+					grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
+					if len(needBackgroupPushUserID) > 0 {
+						//Online push message
+						log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+						for _, v := range grpcCons {
+							msgClient := pbRelay.NewRelayClient(v)
+							_, err := msgClient.SuperGroupBackgroundOnlinePush(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData,
+								PushToUserIDList: needBackgroupPushUserID})
+							if err != nil {
+								log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+								continue
+							}
+						}
+					}
+				}()
+			} else {
+				pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
+				if err != nil {
+					promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
+					log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+				} else {
+					promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
+					log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+				}
+				needBackgroupPushUserID := utils.IntersectString(needOfflinePushUserIDList, WebAndPcBackgroundUserIDList)
+				grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
+				if len(needBackgroupPushUserID) > 0 {
+					//Online push message
+					log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+					for _, v := range grpcCons {
+						msgClient := pbRelay.NewRelayClient(v)
+						_, err := msgClient.SuperGroupBackgroundOnlinePush(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData,
+							PushToUserIDList: needBackgroupPushUserID})
+						if err != nil {
+							log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+							continue
+						}
 					}
 				}
 			}

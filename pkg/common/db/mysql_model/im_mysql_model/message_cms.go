@@ -14,7 +14,7 @@ func GetChatLog(chatLog *db.ChatLog, pageNumber, showNumber int32, contentTypeLi
 	if chatLog.Content != "" {
 		mdb = mdb.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
-	if chatLog.SessionType == 1 {
+	if chatLog.SessionType == 1 || chatLog.SessionType == 4 {
 		mdb = mdb.Where("session_type = ?", chatLog.SessionType)
 	} else if chatLog.SessionType == 2 {
 		mdb = mdb.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
@@ -37,7 +37,7 @@ func GetChatLog(chatLog *db.ChatLog, pageNumber, showNumber int32, contentTypeLi
 	}
 	var chatLogs []db.ChatLog
 	mdb = mdb.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
-	if err := mdb.Find(&chatLogs).Error; err != nil {
+	if err := mdb.Order("send_time desc").Find(&chatLogs).Error; err != nil {
 		return 0, nil, err
 	}
 	return count, chatLogs, nil
