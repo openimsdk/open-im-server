@@ -2,10 +2,10 @@ package unrelation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"go.mongodb.org/mongo-driver/mongo"
 	"strconv"
 	"strings"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (
@@ -20,18 +20,56 @@ type MsgDocModel struct {
 	Msg   []MsgInfoModel `bson:"msgs"`
 }
 
+type RevokeModel struct {
+	UserID   string `bson:"user_id"`
+	Nickname string `bson:"nickname"`
+	Time     int64  `bson:"time"`
+}
+
+type OfflinePushModel struct {
+	Title         string `bson:"title"`
+	Desc          string `bson:"desc"`
+	Ex            string `bson:"ex"`
+	IOSPushSound  string `bson:"ios_push_sound"`
+	IOSBadgeCount bool   `bson:"ios_badge_count"`
+}
+
+type MsgDataModel struct {
+	SendID           string            `bson:"send_id"`
+	RecvID           string            `bson:"recv_id"`
+	GroupID          string            `bson:"group_id"`
+	ClientMsgID      string            `bson:"client_msg_id"`
+	ServerMsgID      string            `bson:"server_msg_id"`
+	SenderPlatformID int32             `bson:"sender_platform_id"`
+	SenderNickname   string            `bson:"sender_nickname"`
+	SenderFaceURL    string            `bson:"sender_face_url"`
+	SessionType      int32             `bson:"session_type"`
+	MsgFrom          int32             `bson:"msg_from"`
+	ContentType      int32             `bson:"content_type"`
+	Content          string            `bson:"content"`
+	Seq              int64             `bson:"seq"`
+	SendTime         int64             `bson:"send_time"`
+	CreateTime       int64             `bson:"create_time"`
+	Status           int32             `bson:"status"`
+	Options          map[string]bool   `bson:"options"`
+	OfflinePush      *OfflinePushModel `bson:"offline_push"`
+	AtUserIDList     []string          `bson:"at_user_id_list"`
+	AttachedInfo     string            `bson:"attached_info"`
+	Ex               string            `bson:"ex"`
+}
+
 type MsgInfoModel struct {
-	SendTime int64    `bson:"sendtime"`
-	Msg      []byte   `bson:"msg"`
-	Revoke   bool     `bson:"revoke"`
-	ReadList []string `bson:"read_list"`
-	DelList  []string `bson:"del_list"`
+	Msg      *MsgDataModel `bson:"msg"`
+	Revoke   *RevokeModel  `bson:"revoke"`
+	DelList  []string      `bson:"del_list"`
+	ReadList []string      `bson:"read_list"`
 }
 
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
-	UpdateMsg(ctx context.Context, docID string, index int64, info *MsgInfoModel) error
+	UpdateMsg(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error)
+	PushUnique(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error)
 	UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error
 	IsExistDocID(ctx context.Context, docID string) (bool, error)
 	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
@@ -54,7 +92,8 @@ func (MsgDocModel) GetSingleGocMsgNum() int64 {
 }
 
 func (m *MsgDocModel) IsFull() bool {
-	return m.Msg[len(m.Msg)-1].SendTime != 0
+	//return m.Msg[len(m.Msg)-1].SendTime != 0
+	return false
 }
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
