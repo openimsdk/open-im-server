@@ -197,3 +197,38 @@ func Test_Delete(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func Test_Delete1(t *testing.T) {
+	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
+	config.Config.Mongo.DBTimeout = 60
+	config.Config.Mongo.DBDatabase = "openIM"
+	config.Config.Mongo.DBSource = "admin"
+	config.Config.Mongo.DBUserName = "root"
+	config.Config.Mongo.DBPassword = "openIM123"
+	config.Config.Mongo.DBMaxPoolSize = 100
+	config.Config.Mongo.DBRetainChatRecords = 3650
+	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
+
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		panic(err)
+	}
+	err = mongo.GetDatabase().Client().Ping(context.Background(), nil)
+	if err != nil {
+		panic(err)
+	}
+
+	c := mongo.GetClient().Database("openIM").Collection("msg")
+
+	var o unRelationTb.MsgDocModel
+
+	err = c.FindOne(context.Background(), bson.M{"doc_id": "test:0"}).Decode(&o)
+	if err != nil {
+		panic(err)
+	}
+
+	for i, model := range o.Msg {
+		fmt.Println(i, model == nil)
+	}
+
+}

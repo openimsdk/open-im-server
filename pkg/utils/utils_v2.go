@@ -80,6 +80,15 @@ func DistinctAnyGetComparable[E any, K comparable](es []E, fn func(e E) K) []K {
 
 // Distinct 去重
 func Distinct[T comparable](ts []T) []T {
+	if len(ts) < 2 {
+		return ts
+	} else if len(ts) == 2 {
+		if ts[0] == ts[1] {
+			return ts[:1]
+		} else {
+			return ts
+		}
+	}
 	return DistinctAny(ts, func(t T) T {
 		return t
 	})

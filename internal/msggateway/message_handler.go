@@ -2,6 +2,8 @@ package msggateway
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -50,11 +52,13 @@ var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
 	msgRpcClient *rpcclient.MsgClient
+	pushClient   *rpcclient.PushClient
 	validate     *validator.Validate
 }
 
-func NewGrpcHandler(validate *validator.Validate, msgRpcClient *rpcclient.MsgClient) *GrpcHandler {
-	return &GrpcHandler{msgRpcClient: msgRpcClient, validate: validate}
+func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry) *GrpcHandler {
+	return &GrpcHandler{msgRpcClient: rpcclient.NewMsgClient(client),
+		pushClient: rpcclient.NewPushClient(client), validate: validate}
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
@@ -137,8 +141,11 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]
 }
 
 func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, error) {
-	//todo
-	resp, err := g.msgRpcClient.PullMessageBySeqList(context, nil)
+	req := push.DelUserPushTokenReq{}
+	if err := proto.Unmarshal(data.Data, &req); err != nil {
+		return nil, err
+	}
+	resp, err := g.pushClient.DelUserPushToken(context, req)
 	if err != nil {
 		return nil, err
 	}
