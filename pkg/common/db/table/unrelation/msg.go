@@ -3,7 +3,6 @@ package unrelation
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -94,29 +93,8 @@ func (m *MsgDocModel) IsFull() bool {
 }
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
-	seqSuffix := seq / singleGocMsgNum
+	seqSuffix := (seq - 1) / singleGocMsgNum
 	return m.indexGen(conversationID, seqSuffix)
-}
-
-func (m MsgDocModel) IndexDocID(conversationID string, index int64) string {
-	return m.indexGen(conversationID, index)
-}
-
-func (m MsgDocModel) GetSeqDocIDList(userID string, maxSeq int64) []string {
-	seqMaxSuffix := maxSeq / singleGocMsgNum
-	var seqUserIDs []string
-	for i := 0; i <= int(seqMaxSuffix); i++ {
-		seqUserID := m.indexGen(userID, int64(i))
-		seqUserIDs = append(seqUserIDs, seqUserID)
-	}
-	return seqUserIDs
-}
-
-func (m MsgDocModel) ToNextDoc(docID string) string {
-	l := strings.Split(docID, ":")
-	index, _ := strconv.Atoi(l[len(l)-1])
-	index++
-	return strings.Split(docID, ":")[0] + ":" + strconv.Itoa(index)
 }
 
 func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[string][]int64 {
@@ -134,14 +112,7 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 }
 
 func (m MsgDocModel) GetMsgIndex(seq int64) int64 {
-	seqSuffix := seq / singleGocMsgNum
-	var index int64
-	if seqSuffix == 0 {
-		index = (seq - seqSuffix*singleGocMsgNum) - 1
-	} else {
-		index = seq - seqSuffix*singleGocMsgNum
-	}
-	return index
+	return (seq - 1) % singleGocMsgNum
 }
 
 func (m MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {

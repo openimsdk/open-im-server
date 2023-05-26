@@ -52,14 +52,24 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
+	if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
+		return nil, err
+	}
 	return &msg.DeleteMsgsResp{}, nil
 }
 
 func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteMsgPhysicalBySeqReq) (*msg.DeleteMsgPhysicalBySeqResp, error) {
+	err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs)
+	if err != nil {
+		return nil, err
+	}
 	return &msg.DeleteMsgPhysicalBySeqResp{}, nil
 }
 
 func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhysicalReq) (*msg.DeleteMsgPhysicalResp, error) {
+	if err := tokenverify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
 	for _, conversationID := range req.ConversationIDs {
 		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, req.RemainTime); err != nil {
 			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)

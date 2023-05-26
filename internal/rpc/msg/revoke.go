@@ -3,6 +3,8 @@ package msg
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
@@ -11,7 +13,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"time"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
@@ -43,7 +44,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		sessionType = constant.SuperGroupChatType
 		conversationID = utils.GenConversationUniqueKeyForGroup(req.GroupID)
 	}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, conversationID, []int64{req.Seq})
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.RecvID, conversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
 	}

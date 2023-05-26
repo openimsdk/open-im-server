@@ -123,6 +123,26 @@ func (m *Message) RevokeMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.RevokeMsg, m.client, c)
 }
 
+func (m *Message) ClearConversationsMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.client, c)
+}
+
+func (m *Message) UserClearAllMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.UserClearAllMsg, m.client, c)
+}
+
+func (m *Message) DeleteMsgs(c *gin.Context) {
+	a2r.Call(msg.MsgClient.DeleteMsgs, m.client, c)
+}
+
+func (m *Message) DeleteMsgPhysicalBySeq(c *gin.Context) {
+	a2r.Call(msg.MsgClient.DeleteMsgPhysicalBySeq, m.client, c)
+}
+
+func (m *Message) DeleteMsgPhysical(c *gin.Context) {
+	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.client, c)
+}
+
 func (m *Message) SetMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.client, c)
 }

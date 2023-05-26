@@ -2,6 +2,7 @@ package rpcclient
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
@@ -20,12 +21,12 @@ func NewPushClient(client discoveryregistry.SvcDiscoveryRegistry) *PushClient {
 	}
 }
 
-func (p *PushClient) DelUserPushToken(ctx context.Context, req push.DelUserPushTokenReq) (*push.DelUserPushTokenResp, error) {
+func (p *PushClient) DelUserPushToken(ctx context.Context, req *push.DelUserPushTokenReq) (*push.DelUserPushTokenResp, error) {
 	cc, err := p.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := push.NewPushMsgServiceClient(cc).DelUserPushToken(ctx, &req)
+	resp, err := push.NewPushMsgServiceClient(cc).DelUserPushToken(ctx, req)
 	if err != nil {
 		return nil, err
 	}

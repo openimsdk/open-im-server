@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 
@@ -145,7 +146,7 @@ func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, erro
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
 	}
-	resp, err := g.pushClient.DelUserPushToken(context, req)
+	resp, err := g.pushClient.DelUserPushToken(context, &req)
 	if err != nil {
 		return nil, err
 	}
