@@ -153,16 +153,18 @@ func GetDB() *commonMsgDatabase {
 func Test_Insert(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	var arr []*unRelationTb.MsgInfoModel
+	var arr []any
 	for i := 0; i < 345; i++ {
-		arr = append(arr, &unRelationTb.MsgInfoModel{
-			Msg: &unRelationTb.MsgDataModel{
-				Seq:     int64(i),
-				Content: fmt.Sprintf("test-%d", i),
-			},
+		if i%2 == 0 {
+			arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
+			continue
+		}
+		arr = append(arr, &unRelationTb.MsgDataModel{
+			Seq:     int64(i),
+			Content: fmt.Sprintf("test-%d", i),
 		})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, 0); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 0); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -170,17 +172,15 @@ func Test_Insert(t *testing.T) {
 func Test_Revoke(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	var arr []*unRelationTb.MsgInfoModel
+	var arr []any
 	for i := 0; i < 456; i++ {
-		arr = append(arr, &unRelationTb.MsgInfoModel{
-			Revoke: &unRelationTb.RevokeModel{
-				UserID:   "uid_" + strconv.Itoa(i),
-				Nickname: "uname_" + strconv.Itoa(i),
-				Time:     time.Now().UnixMilli(),
-			},
+		arr = append(arr, &unRelationTb.RevokeModel{
+			UserID:   "uid_" + strconv.Itoa(i),
+			Nickname: "uname_" + strconv.Itoa(i),
+			Time:     time.Now().UnixMilli(),
 		})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, 123); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyRevoke, 123); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -188,48 +188,46 @@ func Test_Revoke(t *testing.T) {
 func Test_Delete(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	var arr []*unRelationTb.MsgInfoModel
+	var arr []any
 	for i := 0; i < 123; i++ {
-		arr = append(arr, &unRelationTb.MsgInfoModel{
-			DelList: []string{"uid_1", "uid_2"},
-		})
+		arr = append(arr, []string{"uid_1", "uid_2"})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, 210); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyDel, 210); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func Test_Delete1(t *testing.T) {
-	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
-	config.Config.Mongo.DBTimeout = 60
-	config.Config.Mongo.DBDatabase = "openIM"
-	config.Config.Mongo.DBSource = "admin"
-	config.Config.Mongo.DBUserName = "root"
-	config.Config.Mongo.DBPassword = "openIM123"
-	config.Config.Mongo.DBMaxPoolSize = 100
-	config.Config.Mongo.DBRetainChatRecords = 3650
-	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
-
-	mongo, err := unrelation.NewMongo()
-	if err != nil {
-		panic(err)
-	}
-	err = mongo.GetDatabase().Client().Ping(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-
-	c := mongo.GetClient().Database("openIM").Collection("msg")
-
-	var o unRelationTb.MsgDocModel
-
-	err = c.FindOne(context.Background(), bson.M{"doc_id": "test:0"}).Decode(&o)
-	if err != nil {
-		panic(err)
-	}
-
-	for i, model := range o.Msg {
-		fmt.Println(i, model == nil)
-	}
-
-}
+//func Test_Delete1(t *testing.T) {
+//	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
+//	config.Config.Mongo.DBTimeout = 60
+//	config.Config.Mongo.DBDatabase = "openIM"
+//	config.Config.Mongo.DBSource = "admin"
+//	config.Config.Mongo.DBUserName = "root"
+//	config.Config.Mongo.DBPassword = "openIM123"
+//	config.Config.Mongo.DBMaxPoolSize = 100
+//	config.Config.Mongo.DBRetainChatRecords = 3650
+//	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
+//
+//	mongo, err := unrelation.NewMongo()
+//	if err != nil {
+//		panic(err)
+//	}
+//	err = mongo.GetDatabase().Client().Ping(context.Background(), nil)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	c := mongo.GetClient().Database("openIM").Collection("msg")
+//
+//	var o unRelationTb.MsgDocModel
+//
+//	err = c.FindOne(context.Background(), bson.M{"doc_id": "test:0"}).Decode(&o)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	for i, model := range o.Msg {
+//		fmt.Println(i, model == nil)
+//	}
+//
+//}

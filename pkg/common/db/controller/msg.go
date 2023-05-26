@@ -247,6 +247,9 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversationID string, msgList []*sdkws.MsgData, currentMaxSeq int64) error {
+	if len(msgList) == 0 {
+		return errs.ErrArgs.Wrap("msgList is empty")
+	}
 	msgs := make([]any, len(msgList))
 	for i, msg := range msgList {
 		if msg == nil {
@@ -286,7 +289,18 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 			Ex:               msg.Ex,
 		}
 	}
-	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, currentMaxSeq-int64(len(msgList)))
+	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, msgList[0].Seq)
+}
+
+func (db *commonMsgDatabase) MarkUserDeleteMsg(ctx context.Context, conversationID string, seq int64, userIDs []string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	msgs := make([]any, len(userIDs))
+	for i, userID := range userIDs {
+		msgs[i] = userID
+	}
+	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyDel, seq)
 }
 
 func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unRelationTb.RevokeModel) error {
