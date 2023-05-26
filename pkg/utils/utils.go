@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
@@ -226,6 +227,35 @@ func GenConversationUniqueKey(msg *sdkws.MsgData) string {
 		return strings.Join(l, "_")
 	case constant.SuperGroupChatType:
 		return msg.GroupID
+	}
+	return ""
+}
+
+func GetConversationIDByMsgModel(msg *unrelation.MsgDataModel) string {
+	options := Options(msg.Options)
+	switch msg.SessionType {
+	case constant.SingleChatType:
+		l := []string{msg.SendID, msg.RecvID}
+		sort.Strings(l)
+		if !options.IsNotNotification() {
+			return "n_" + strings.Join(l, "_")
+		}
+		return "si_" + strings.Join(l, "_") // single chat
+	case constant.GroupChatType:
+		if !options.IsNotNotification() {
+			return "n_" + msg.GroupID // group chat
+		}
+		return "g_" + msg.GroupID // group chat
+	case constant.SuperGroupChatType:
+		if !options.IsNotNotification() {
+			return "n_" + msg.GroupID // super group chat
+		}
+		return "sg_" + msg.GroupID // super group chat
+	case constant.NotificationChatType:
+		if !options.IsNotNotification() {
+			return "n_" + msg.SendID + "_" + msg.RecvID // super group chat
+		}
+		return "sn_" + msg.SendID + "_" + msg.RecvID // server notification chat
 	}
 	return ""
 }

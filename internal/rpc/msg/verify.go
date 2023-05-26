@@ -94,74 +94,14 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, nil
 		}
 		return nil, nil
-	case constant.GroupChatType:
-		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return nil, nil
-		}
-		userIDList, err := m.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
-		if err != nil {
-			return nil, err
-		}
-		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return userIDList, nil
-		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return userIDList, nil
-		}
-		if !utils.IsContain(data.MsgData.SendID, userIDList) {
-			return nil, errs.ErrNotInGroupYet.Wrap()
-		}
-		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
-		if err != nil {
-			return nil, err
-		}
-		if isMute {
-			return nil, errs.ErrMutedInGroup.Wrap()
-		}
-
-		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
-		if err != nil {
-			return nil, err
-		}
-		if isAdmin {
-			return userIDList, nil
-		}
-
-		if isMute {
-			return nil, errs.ErrMutedGroup.Wrap()
-		}
-		return userIDList, nil
 	case constant.SuperGroupChatType:
 		groupInfo, err := m.Group.GetGroupInfo(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		if data.MsgData.ContentType == constant.AdvancedRevoke {
-			revokeMessage := new(MessageRevoked)
-			err := utils.JsonStringToStruct(string(data.MsgData.Content), revokeMessage)
-			if err != nil {
-				return nil, errs.ErrArgs.Wrap()
-			}
-
-			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
-				resp, err := m.MsgDatabase.GetMsgBySeqs(ctx, data.MsgData.GroupID, []int64{int64(revokeMessage.Seq)})
-				if err != nil {
-					return nil, err
-				}
-				if resp[0].ClientMsgID == revokeMessage.ClientMsgID && resp[0].Seq == int64(revokeMessage.Seq) {
-					revokeMessage.SourceMessageSendTime = resp[0].SendTime
-					revokeMessage.SourceMessageSenderNickname = resp[0].SenderNickname
-					revokeMessage.SourceMessageSendID = resp[0].SendID
-					data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
-				} else {
-					return nil, errs.ErrData.Wrap("MsgData")
-				}
-			}
-		}
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil, nil
 		}
-
 		userIDList, err := m.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
 		if err != nil {
 			return nil, err

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
@@ -16,7 +16,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/gogo/protobuf/sortkeys"
 
 	"context"
 	"errors"
@@ -37,15 +36,15 @@ type CommonMsgDatabase interface {
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error
 	// incrSeq然后批量插入缓存
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
-	// 删除消息 返回不存在的seqList
-	DelMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalUnExistSeqs []int64, err error)
+
 	//  通过seqList获取mongo中写扩散消息
-	GetMsgBySeqsRange(ctx context.Context, conversationID string, begin, end, num int64) (seqMsg []*sdkws.MsgData, err error)
+	GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num int64) (seqMsg []*sdkws.MsgData, err error)
 	// 通过seqList获取大群在 mongo里面的消息
-	GetMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
+	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, err error)
+
 	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
-	CleanUpUserConversationsMsgs(ctx context.Context, userID string, conversationIDs []string)
+
 	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
@@ -168,8 +167,8 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "revoke", msg.Revoke)
 		} else if msg.DelList != nil {
 			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "del_list", msg.DelList)
-		} else if msg.ReadList != nil {
-			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "read_list", msg.ReadList)
+			// } else if msg.ReadList != nil {
+			// 	res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "read_list", msg.ReadList)
 		} else {
 			return false, errs.ErrArgs.Wrap("msg all field is nil")
 		}
@@ -194,7 +193,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		}
 		doc := unRelationTb.MsgDocModel{
 			DocID: docID,
-			Msg:   make([]unRelationTb.MsgInfoModel, num),
+			Msg:   make([]*unRelationTb.MsgInfoModel, num),
 		}
 		var insert int
 		for j := i; j < len(msgList); j++ {
@@ -203,15 +202,15 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 				break
 			}
 			insert++
-			doc.Msg[getIndex(seq)] = *msgList[j]
+			doc.Msg[getIndex(seq)] = msgList[j]
 		}
 		for i, model := range doc.Msg {
 			if model.DelList == nil {
 				doc.Msg[i].DelList = []string{}
 			}
-			if model.ReadList == nil {
-				doc.Msg[i].ReadList = []string{}
-			}
+			// if model.ReadList == nil {
+			// 	doc.Msg[i].ReadList = []string{}
+			// }
 		}
 		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
 			if mongo.IsDuplicateKeyError(err) {
@@ -364,76 +363,17 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }
 
-func (db *commonMsgDatabase) DelMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalUnExistSeqs []int64, err error) {
-	sortkeys.Int64s(seqs)
-	docIDSeqsMap := db.msg.GetDocIDSeqsMap(conversationID, seqs)
-	lock := sync.Mutex{}
-	var wg sync.WaitGroup
-	wg.Add(len(docIDSeqsMap))
-	for k, v := range docIDSeqsMap {
-		go func(docID string, seqs []int64) {
-			defer wg.Done()
-			unExistSeqList, err := db.DelMsgBySeqsInOneDoc(ctx, docID, seqs)
-			if err != nil {
-				return
-			}
-			lock.Lock()
-			totalUnExistSeqs = append(totalUnExistSeqs, unExistSeqList...)
-			lock.Unlock()
-		}(k, v)
-	}
-	return totalUnExistSeqs, nil
-}
-
-func (db *commonMsgDatabase) DelMsgBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (unExistSeqs []int64, err error) {
-	seqMsgs, indexes, unExistSeqs, err := db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
-	if err != nil {
-		return nil, err
-	}
-	for i, v := range seqMsgs {
-		if err = db.msgDocDatabase.UpdateMsgStatusByIndexInOneDoc(ctx, docID, v, indexes[i], constant.MsgDeleted); err != nil {
-			log.ZError(ctx, "UpdateMsgStatusByIndexInOneDoc", err, "docID", docID, "msg", v, "index", indexes[i])
-		}
-	}
-	return unExistSeqs, nil
-}
-
-func (db *commonMsgDatabase) GetNewestMsg(ctx context.Context, conversationID string) (msgPb *sdkws.MsgData, err error) {
-	msgInfo, err := db.msgDocDatabase.GetNewestMsg(ctx, conversationID)
-	if err != nil {
-		return nil, err
-	}
-	return db.unmarshalMsg(msgInfo)
-}
-
-func (db *commonMsgDatabase) GetOldestMsg(ctx context.Context, conversationID string) (msgPb *sdkws.MsgData, err error) {
-	msgInfo, err := db.msgDocDatabase.GetOldestMsg(ctx, conversationID)
-	if err != nil {
-		return nil, err
-	}
-	return db.unmarshalMsg(msgInfo)
-}
-
-func (db *commonMsgDatabase) unmarshalMsg(msgInfo *unRelationTb.MsgInfoModel) (msgPb *sdkws.MsgData, err error) {
-	msgPb = &sdkws.MsgData{}
-	// todo: unmarshal
-	//err = proto.Unmarshal(msgInfo.Msg, msgPb)
-	//if err != nil {
-	//	return nil, utils.Wrap(err, "")
-	//}
-	return msgPb, nil
-}
-
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
-	m := db.msg.GetDocIDSeqsMap(conversationID, seqs)
 	var totalUnExistSeqs []int64
-	for docID, seqs := range m {
+	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
 		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
-		seqMsgs, unexistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
+		msgs, unexistSeqs, err := db.findMsgInfoBySeq(ctx, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
-		totalMsgs = append(totalMsgs, seqMsgs...)
+		for _, msg := range msgs {
+			totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
+		}
 		totalUnExistSeqs = append(totalUnExistSeqs, unexistSeqs...)
 	}
 	for _, unexistSeq := range totalUnExistSeqs {
@@ -442,7 +382,7 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID st
 	return totalMsgs, nil
 }
 
-func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*unRelationTb.MsgDataModel, err error) {
 	var reFetchSeqs []int64
 	if delNums > 0 {
 		newBeginSeq := rangeBegin - delNums
@@ -457,18 +397,18 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 		return
 	}
 	if len(reFetchSeqs) > 0 {
-		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-		for docID, seqs := range m {
-			msgs, _, err := db.findMsgBySeq(ctx, docID, seqs)
-			if err != nil {
-				return nil, err
-			}
-			for _, msg := range msgs {
-				if msg.Status != constant.MsgDeleted {
-					seqMsgs = append(seqMsgs, msg)
-				}
-			}
-		}
+		// m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
+		// for docID, seqs := range m {
+		// 	msgs, _, err := db.findMsgInfoBySeq(ctx, docID, seqs)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	for _, msg := range msgs {
+		// 		if msg.Status != constant.MsgDeleted {
+		// 			seqMsgs = append(seqMsgs, msg)
+		// 		}
+		// 	}
+		// }
 	}
 	if len(seqMsgs) < int(delNums) {
 		seqMsgs2, err := db.refetchDelSeqsMsgs(ctx, conversationID, delNums-int64(len(seqMsgs)), rangeBegin-1, begin)
@@ -480,19 +420,19 @@ func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversatio
 	return seqMsgs, nil
 }
 
-func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, unExistSeqs []int64, err error) {
+func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, unExistSeqs []int64, err error) {
 	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
 	if err != nil {
 		return nil, nil, err
 	}
-	log.ZDebug(ctx, "findMsgBySeq", "docID", docID, "seqs", seqs, "len(msgs)", len(msgs))
-	seqMsgs = append(seqMsgs, msgs...)
+	log.ZDebug(ctx, "findMsgInfoBySeq", "docID", docID, "seqs", seqs, "len(msgs)", len(msgs))
+	totalMsgs = append(totalMsgs, msgs...)
 	if len(msgs) == 0 {
 		unExistSeqs = seqs
 	} else {
 		for _, seq := range seqs {
 			for i, msg := range msgs {
-				if seq == msg.Seq {
+				if seq == msg.Msg.Seq {
 					break
 				}
 				if i == len(msgs)-1 {
@@ -501,50 +441,27 @@ func (db *commonMsgDatabase) findMsgBySeq(ctx context.Context, docID string, seq
 			}
 		}
 	}
-	msgs, _, unExistSeqs, err = db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, unExistSeqs)
-	if err != nil {
-		return nil, nil, err
-	}
-	seqMsgs = append(seqMsgs, msgs...)
-	return seqMsgs, unExistSeqs, nil
+	return totalMsgs, unExistSeqs, nil
 }
 
-func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID string, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {
 	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
-	m := db.msg.GetDocIDSeqsMap(conversationID, allSeqs)
 	var totalNotExistSeqs []int64
 	// mongo index
-	for docID, seqs := range m {
+	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
-		msgs, notExistSeqs, err := db.findMsgBySeq(ctx, docID, seqs)
+		msgs, notExistSeqs, err := db.findMsgInfoBySeq(ctx, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
 		log.ZDebug(ctx, "getMsgBySeqsRange", "unExistSeqs", notExistSeqs, "msgs", len(msgs))
-		seqMsgs = append(seqMsgs, msgs...)
+		for _, msg := range msgs {
+			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg.Msg))
+		}
 		totalNotExistSeqs = append(totalNotExistSeqs, notExistSeqs...)
 	}
 	log.ZDebug(ctx, "getMsgBySeqsRange", "totalNotExistSeqs", totalNotExistSeqs)
-	// find by next doc
-	var missedSeqs []int64
-	if len(totalNotExistSeqs) > 0 {
-		m = db.msg.GetDocIDSeqsMap(conversationID, totalNotExistSeqs)
-		for docID, seqs := range m {
-			docID = db.msg.ToNextDoc(docID)
-			msgs, _, unExistSeqs, err := db.msgDocDatabase.GetMsgAndIndexBySeqsInOneDoc(ctx, docID, seqs)
-			if err != nil {
-				missedSeqs = append(missedSeqs, seqs...)
-				log.ZError(ctx, "get message from mongo exception", err, "docID", docID, "seqs", seqs)
-				continue
-			}
-			missedSeqs = append(missedSeqs, unExistSeqs...)
-			seqMsgs = append(seqMsgs, msgs...)
-			if len(unExistSeqs) > 0 {
-				log.ZWarn(ctx, "some seqs lost in mongo", err, "docID", docID, "seqs", seqs, "unExistSeqs", unExistSeqs)
-			}
-		}
-	}
-	seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs(missedSeqs)...)
+	seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs(totalNotExistSeqs)...)
 	var delSeqs []int64
 	for _, msg := range seqMsgs {
 		if msg.Status == constant.MsgDeleted {
@@ -556,7 +473,9 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 		if err != nil {
 			log.ZWarn(ctx, "refetchDelSeqsMsgs", err, "delSeqs", delSeqs, "begin", begin)
 		}
-		seqMsgs = append(seqMsgs, msgs...)
+		for _, msg := range msgs {
+			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg))
+		}
 	}
 	// sort by seq
 	if len(totalNotExistSeqs) > 0 || len(delSeqs) > 0 {
@@ -565,7 +484,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, conversation
 	return seqMsgs, nil
 }
 
-func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversationID string, begin, end, num int64) (seqMsg []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num int64) (seqMsg []*sdkws.MsgData, err error) {
 	var seqs []int64
 	for i := end; i > end-num; i-- {
 		if i >= begin {
@@ -587,7 +506,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
 	if len(failedSeqs) > 0 {
-		mongoMsgs, err := db.getMsgBySeqsRange(ctx, conversationID, failedSeqs, begin, end)
+		mongoMsgs, err := db.getMsgBySeqsRange(ctx, userID, conversationID, failedSeqs, begin, end)
 		if err != nil {
 			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
 			return nil, err
@@ -598,8 +517,25 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, conversation
 	return successMsgs, nil
 }
 
-func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (successMsgs []*sdkws.MsgData, err error) {
-	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
+func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (successMsgs []*sdkws.MsgData, err error) {
+	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+	if err != nil {
+		return nil, err
+	}
+	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	if userMinSeq < minSeq {
+		minSeq = userMinSeq
+	}
+	var newSeqs []int64
+	for _, seq := range seqs {
+		if seq >= minSeq {
+			newSeqs = append(newSeqs, seq)
+		}
+	}
+	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
@@ -608,7 +544,7 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, conversationID st
 	}
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
 	if len(failedSeqs) > 0 {
-		mongoMsgs, err := db.getMsgBySeqs(ctx, conversationID, seqs)
+		mongoMsgs, err := db.getMsgBySeqs(ctx, conversationID, failedSeqs)
 		if err != nil {
 			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
 			return nil, err
@@ -621,7 +557,8 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, conversationID st
 
 func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error {
 	var delStruct delMsgRecursionStruct
-	minSeq, err := db.deleteMsgRecursion(ctx, conversationID, unRelationTb.OldestList, &delStruct, remainTime)
+	var skip int64
+	minSeq, err := db.deleteMsgRecursion(ctx, conversationID, skip, &delStruct, remainTime)
 	if err != nil {
 		return err
 	}
@@ -653,69 +590,56 @@ func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
 // recursion 删除list并且返回设置的最小seq
 func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversationID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
 	// find from oldest list
-	//msgs, err := db.msgDocDatabase.GetMsgsByIndex(ctx, conversationID, index)
-	//if err != nil || msgs.DocID == "" {
-	//	if err != nil {
-	//		if err == unrelation.ErrMsgListNotExist {
-	//			log.ZDebug(ctx, "deleteMsgRecursion ErrMsgListNotExist", "conversationID", conversationID, "index:", index)
-	//		} else {
-	//			log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
-	//		}
-	//	}
-	//	// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
-	//	err = db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs)
-	//	if err != nil {
-	//		return 0, err
-	//	}
-	//	return delStruct.getSetMinSeq() + 1, nil
-	//}
-	//log.ZDebug(ctx, "doc info", "conversationID", conversationID, "index", index, "docID", msgs.DocID, "len", len(msgs.Msg))
-	//if int64(len(msgs.Msg)) > db.msg.GetSingleGocMsgNum() {
-	//	log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgs.Msg), "docID:", msgs.DocID)
-	//}
-	//if msgs.Msg[len(msgs.Msg)-1].SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgs.IsFull() {
-	//	delStruct.delDocIDs = append(delStruct.delDocIDs, msgs.DocID)
-	//	lastMsgPb := &sdkws.MsgData{}
-	//	err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
-	//	if err != nil {
-	//		log.ZError(ctx, "proto.Unmarshal failed", err, "index", len(msgs.Msg)-1, "docID", msgs.DocID)
-	//		return 0, utils.Wrap(err, "proto.Unmarshal failed")
-	//	}
-	//	delStruct.minSeq = lastMsgPb.Seq
-	//} else {
-	//	var hasMarkDelFlag bool
-	//	for i, msg := range msgs.Msg {
-	//		if msg.SendTime != 0 {
-	//			msgPb := &sdkws.MsgData{}
-	//			err = proto.Unmarshal(msg.Msg, msgPb)
-	//			if err != nil {
-	//				log.ZError(ctx, "proto.Unmarshal failed", err, "index", i, "docID", msgs.DocID)
-	//				return 0, utils.Wrap(err, "proto.Unmarshal failed")
-	//			}
-	//			if utils.GetCurrentTimestampByMill() > msg.SendTime+(remainTime*1000) {
-	//				msgPb.Status = constant.MsgDeleted
-	//				bytes, _ := proto.Marshal(msgPb)
-	//				msg.Msg = bytes
-	//				msg.SendTime = 0
-	//				hasMarkDelFlag = true
-	//			} else {
-	//				// 到本条消息不需要删除, minSeq置为这条消息的seq
-	//				if err := db.msgDocDatabase.Delete(ctx, delStruct.delDocIDs); err != nil {
-	//					return 0, err
-	//				}
-	//				if hasMarkDelFlag {
-	//					if err := db.msgDocDatabase.UpdateOneDoc(ctx, msgs); err != nil {
-	//						return delStruct.getSetMinSeq(), err
-	//					}
-	//				}
-	//				return msgPb.Seq, nil
-	//			}
-	//		}
-	//	}
-	//}
-	////  继续递归 index+1
-	//seq, err := db.deleteMsgRecursion(ctx, conversationID, index+1, delStruct, remainTime)
-	//return seq, err
+	msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
+	if err != nil || msgDocModel.DocID == "" {
+		if err != nil {
+			if err == unrelation.ErrMsgListNotExist {
+				log.ZDebug(ctx, "deleteMsgRecursion ErrMsgListNotExist", "conversationID", conversationID, "index:", index)
+			} else {
+				log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
+			}
+		}
+		// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
+		err = db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs)
+		if err != nil {
+			return 0, err
+		}
+		return delStruct.getSetMinSeq() + 1, nil
+	}
+	log.ZDebug(ctx, "doc info", "conversationID", conversationID, "index", index, "docID", msgDocModel.DocID, "len", len(msgDocModel.Msg))
+	if int64(len(msgDocModel.Msg)) > db.msg.GetSingleGocMsgNum() {
+		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
+	}
+	if msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgDocModel.IsFull() {
+		delStruct.delDocIDs = append(delStruct.delDocIDs, msgDocModel.DocID)
+		delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
+	} else {
+		var hasMarkDelFlag bool
+		var delMsgIndexs []int
+		for i, MsgInfoModel := range msgDocModel.Msg {
+			if MsgInfoModel != nil {
+				if utils.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
+					delMsgIndexs = append(delMsgIndexs, i)
+					hasMarkDelFlag = true
+				} else {
+					// 到本条消息不需要删除, minSeq置为这条消息的seq
+					if err := db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs); err != nil {
+						return 0, err
+					}
+					if hasMarkDelFlag {
+						// mark del all delMsgIndexs
+						// if err := db.msgDocDatabase.UpdateOneDoc(ctx, msgDocModel); err != nil {
+						// 	return delStruct.getSetMinSeq(), err
+						// }
+					}
+					return MsgInfoModel.Msg.Seq, nil
+				}
+			}
+		}
+	}
+	//  继续递归 index+1
+	seq, err := db.deleteMsgRecursion(ctx, conversationID, index+1, delStruct, remainTime)
+	return seq, err
 	return 0, nil
 }
 
@@ -805,20 +729,12 @@ func (db *commonMsgDatabase) GetMinMaxSeqMongo(ctx context.Context, conversation
 	if err != nil {
 		return
 	}
-	msgPb, err := db.unmarshalMsg(oldestMsgMongo)
-	if err != nil {
-		return
-	}
-	minSeqMongo = msgPb.Seq
+	minSeqMongo = oldestMsgMongo.Msg.Seq
 	newestMsgMongo, err := db.msgDocDatabase.GetNewestMsg(ctx, conversationID)
 	if err != nil {
 		return
 	}
-	msgPb, err = db.unmarshalMsg(newestMsgMongo)
-	if err != nil {
-		return
-	}
-	maxSeqMongo = msgPb.Seq
+	maxSeqMongo = newestMsgMongo.Msg.Seq
 	return
 }
 

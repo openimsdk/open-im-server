@@ -7,10 +7,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
-	"google.golang.org/protobuf/proto"
 
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
@@ -22,10 +20,10 @@ import (
 func GenMsgDoc(startSeq, stopSeq, delSeq, index int64, conversationID string) *unRelationTb.MsgDocModel {
 	msgDoc := &unRelationTb.MsgDocModel{DocID: conversationID + strconv.Itoa(int(index))}
 	for i := 0; i < 5000; i++ {
-		msgDoc.Msg = append(msgDoc.Msg, unRelationTb.MsgInfoModel{SendTime: 0, Msg: []byte{}})
+		msgDoc.Msg = append(msgDoc.Msg, &unRelationTb.MsgInfoModel{})
 	}
 	for i := startSeq; i <= stopSeq; i++ {
-		msg := sdkws.MsgData{
+		msg := &unRelationTb.MsgDataModel{
 			SendID:           "sendID1",
 			RecvID:           "recvID1",
 			GroupID:          "",
@@ -37,20 +35,17 @@ func GenMsgDoc(startSeq, stopSeq, delSeq, index int64, conversationID string) *u
 			SessionType:      1,
 			MsgFrom:          100,
 			ContentType:      101,
-			Content:          []byte("testFaceURL"),
+			Content:          "testContent",
 			Seq:              i,
-			SendTime:         time.Now().Unix(),
 			CreateTime:       time.Now().Unix(),
 			Status:           1,
 		}
-		bytes, _ := proto.Marshal(&msg)
-		var sendTime int64
 		if i <= delSeq {
-			sendTime = 10000
+			msg.SendTime = 10000
 		} else {
-			sendTime = utils.GetCurrentTimestampByMill()
+			msg.SendTime = utils.GetCurrentTimestampByMill()
 		}
-		msgDoc.Msg[i-1] = unRelationTb.MsgInfoModel{SendTime: int64(sendTime), Msg: bytes}
+		msgDoc.Msg[i-1] = &unRelationTb.MsgInfoModel{Msg: msg}
 	}
 	return msgDoc
 }

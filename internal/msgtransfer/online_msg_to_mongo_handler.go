@@ -55,17 +55,6 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(ctx context.Cont
 	}
 	for _, v := range msgFromMQ.MsgData {
 		switch v.ContentType {
-		case constant.DeleteMessageNotification:
-			deleteMessageTips := sdkws.DeleteMessageTips{}
-			err := proto.Unmarshal(v.Content, &deleteMessageTips)
-			if err != nil {
-				log.ZError(ctx, "tips unmarshal err:", err, "msg", msg)
-				continue
-			}
-			if totalUnExistSeqs, err := mc.msgDatabase.DelMsgBySeqs(ctx, deleteMessageTips.UserID, deleteMessageTips.Seqs); err != nil {
-				log.ZError(ctx, "DelMsgBySeqs", err, "userIDs", deleteMessageTips.UserID, "seqs", deleteMessageTips.Seqs, "totalUnExistSeqs", totalUnExistSeqs)
-				continue
-			}
 		case constant.MsgRevokeNotification:
 			var elem sdkws.NotificationElem
 			if err := json.Unmarshal(v.Content, &elem); err != nil {

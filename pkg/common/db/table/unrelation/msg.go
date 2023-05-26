@@ -2,10 +2,11 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"go.mongodb.org/mongo-driver/mongo"
 	"strconv"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -16,8 +17,8 @@ const (
 )
 
 type MsgDocModel struct {
-	DocID string         `bson:"doc_id"`
-	Msg   []MsgInfoModel `bson:"msgs"`
+	DocID string          `bson:"doc_id"`
+	Msg   []*MsgInfoModel `bson:"msgs"`
 }
 
 type RevokeModel struct {
@@ -59,10 +60,9 @@ type MsgDataModel struct {
 }
 
 type MsgInfoModel struct {
-	Msg      *MsgDataModel `bson:"msg"`
-	Revoke   *RevokeModel  `bson:"revoke"`
-	DelList  []string      `bson:"del_list"`
-	ReadList []string      `bson:"read_list"`
+	Msg     *MsgDataModel `bson:"msg"`
+	Revoke  *RevokeModel  `bson:"revoke"`
+	DelList []string      `bson:"del_list"`
 }
 
 type MsgDocModelInterface interface {
@@ -72,15 +72,12 @@ type MsgDocModelInterface interface {
 	PushUnique(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error)
 	UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error
 	IsExistDocID(ctx context.Context, docID string) (bool, error)
-	UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) ([]*sdkws.MsgData, error)
-	GetMsgAndIndexBySeqsInOneDoc(ctx context.Context, docID string, seqs []int64) (seqMsgs []*sdkws.MsgData, indexes []int, unExistSeqs []int64, err error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) ([]*MsgInfoModel, error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
-	Delete(ctx context.Context, docIDs []string) error
-	GetMsgsByIndex(ctx context.Context, conversationID string, index int64) (*MsgDocModel, error)
-	UpdateOneDoc(ctx context.Context, msg *MsgDocModel) error
+	DeleteDocs(ctx context.Context, docIDs []string) error
+	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 }
 
 func (MsgDocModel) TableName() string {
@@ -92,8 +89,7 @@ func (MsgDocModel) GetSingleGocMsgNum() int64 {
 }
 
 func (m *MsgDocModel) IsFull() bool {
-	//return m.Msg[len(m.Msg)-1].SendTime != 0
-	return false
+	return m.Msg[len(m.Msg)-1].Msg != nil
 }
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
@@ -153,9 +149,9 @@ func (m MsgDocModel) indexGen(conversationID string, seqSuffix int64) string {
 
 func (MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkws.MsgData) {
 	for _, v := range seqs {
-		msg := new(sdkws.MsgData)
-		msg.Seq = v
-		exceptionMsg = append(exceptionMsg, msg)
+		msgModel := new(sdkws.MsgData)
+		msgModel.Seq = v
+		exceptionMsg = append(exceptionMsg, msgModel)
 	}
 	return exceptionMsg
 }

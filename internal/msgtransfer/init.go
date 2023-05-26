@@ -43,6 +43,9 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+	if err := mongo.CreateMsgIndex(); err != nil {
+		return err
+	}
 	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 		openKeeper.WithFreq(time.Hour), openKeeper.WithRoundRobin(), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
 			config.Config.Zookeeper.Password), openKeeper.WithTimeout(10))
