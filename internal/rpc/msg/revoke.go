@@ -18,15 +18,9 @@ import (
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
 	defer log.ZInfo(ctx, "RevokeMsg return line")
-	//if req.UserID == "" {
-	//	return nil, errs.ErrArgs.Wrap("user_id is empty")
-	//}
-	//if req.RecvID == "" && req.GroupID == "" {
-	//	return nil, errs.ErrArgs.Wrap("recv_id and group_id are empty")
-	//}
-	//if req.RecvID != "" && req.GroupID != "" {
-	//	return nil, errs.ErrArgs.Wrap("recv_id and group_id cannot exist at the same time")
-	//}
+	if req.UserID == "" {
+		return nil, errs.ErrArgs.Wrap("user_id is empty")
+	}
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.Wrap("conversation_id is empty")
 	}
@@ -47,33 +41,39 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if len(msgs) == 0 {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
+	if msgs[0].SendID == "" || msgs[0].RecvID == "" {
+		return nil, errs.ErrRecordNotFound.Wrap("sendID or recvID is empty")
+	}
+	// todo: 判断是否已经撤回
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
-	//sendID := msgs[0]
-	//if !tokenverify.IsAppManagerUid(ctx) {
-	//	if req.GroupID == "" {
-	//		if req.UserID != sendID {
-	//			return nil, errs.ErrNoPermission.Wrap("no permission")
-	//		}
-	//	} else {
-	//		members, err := m.Group.GetGroupMemberInfoMap(ctx, req.GroupID, utils.Distinct([]string{req.UserID, sendID}), true)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		if req.UserID != sendID {
-	//			roleLevel := members[req.UserID].RoleLevel
-	//			switch members[req.UserID].RoleLevel {
-	//			case constant.GroupOwner:
-	//			case constant.GroupAdmin:
-	//				if roleLevel != constant.GroupOrdinaryUsers {
-	//					return nil, errs.ErrNoPermission.Wrap("no permission")
-	//				}
-	//			default:
-	//				return nil, errs.ErrNoPermission.Wrap("no permission")
-	//			}
-	//		}
-	//	}
-	//}
+	if !tokenverify.IsAppManagerUid(ctx) {
+		switch msgs[0].SessionType {
+		case constant.SingleChatType:
+			if err := tokenverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
+				return nil, err
+			}
+		case constant.SuperGroupChatType:
+			members, err := m.Group.GetGroupMemberInfoMap(ctx, msgs[0].RecvID, utils.Distinct([]string{req.UserID, msgs[0].SendID}), true)
+			if err != nil {
+				return nil, err
+			}
+			if req.UserID != msgs[0].SendID {
+				roleLevel := members[req.UserID].RoleLevel
+				switch members[req.UserID].RoleLevel {
+				case constant.GroupOwner:
+				case constant.GroupAdmin:
+					if roleLevel != constant.GroupOrdinaryUsers {
+						return nil, errs.ErrNoPermission.Wrap("no permission")
+					}
+				default:
+					return nil, errs.ErrNoPermission.Wrap("no permission")
+				}
+			}
+		default:
+			return nil, errs.ErrInternalServer.Wrap("msg sessionType not supported")
+		}
+	}
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
 		UserID:   req.UserID,
 		Nickname: user.Nickname,
@@ -110,7 +110,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		CreateTime:  utils.GetCurrentTimestampByMill(),
 		ClientMsgID: utils.GetMsgID(req.UserID),
 		Options: config.GetOptionsByNotification(config.NotificationConf{
-			IsSendMsg:        true,
+			IsSendMsg:        false,
 			ReliabilityLevel: 2,
 		}),
 		OfflinePushInfo: nil,
