@@ -448,6 +448,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
 	var totalNotExistSeqs []int64
 	// mongo index
+	var delSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
 		msgs, notExistSeqs, err := db.findMsgInfoBySeq(ctx, docID, seqs)
@@ -456,26 +457,28 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 		}
 		log.ZDebug(ctx, "getMsgBySeqsRange", "unExistSeqs", notExistSeqs, "msgs", len(msgs))
 		for _, msg := range msgs {
+			if utils.IsContain(userID, msg.DelList) {
+				delSeqs = append(delSeqs, msg.Msg.Seq)
+			}
 			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg.Msg))
 		}
 		totalNotExistSeqs = append(totalNotExistSeqs, notExistSeqs...)
 	}
 	log.ZDebug(ctx, "getMsgBySeqsRange", "totalNotExistSeqs", totalNotExistSeqs)
 	seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs(totalNotExistSeqs)...)
-	var delSeqs []int64
 	for _, msg := range seqMsgs {
 		if msg.Status == constant.MsgDeleted {
 			delSeqs = append(delSeqs, msg.Seq)
 		}
 	}
 	if len(delSeqs) > 0 {
-		msgs, err := db.refetchDelSeqsMsgs(ctx, conversationID, int64(len(delSeqs)), allSeqs[0], begin)
-		if err != nil {
-			log.ZWarn(ctx, "refetchDelSeqsMsgs", err, "delSeqs", delSeqs, "begin", begin)
-		}
-		for _, msg := range msgs {
-			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg))
-		}
+		// msgs, err := db.refetchDelSeqsMsgs(ctx, conversationID, int64(len(delSeqs)), allSeqs[0], begin)
+		// if err != nil {
+		// 	log.ZWarn(ctx, "refetchDelSeqsMsgs", err, "delSeqs", delSeqs, "begin", begin)
+		// }
+		// for _, msg := range msgs {
+		// 	seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg))
+		// }
 	}
 	// sort by seq
 	if len(totalNotExistSeqs) > 0 || len(delSeqs) > 0 {
@@ -628,9 +631,9 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 					}
 					if hasMarkDelFlag {
 						// mark del all delMsgIndexs
-						// if err := db.msgDocDatabase.UpdateOneDoc(ctx, msgDocModel); err != nil {
-						// 	return delStruct.getSetMinSeq(), err
-						// }
+						if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
+							return delStruct.getSetMinSeq(), err
+						}
 					}
 					return MsgInfoModel.Msg.Seq, nil
 				}
@@ -640,7 +643,6 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 	//  继续递归 index+1
 	seq, err := db.deleteMsgRecursion(ctx, conversationID, index+1, delStruct, remainTime)
 	return seq, err
-	return 0, nil
 }
 
 func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, user string, conversationIDs []string) {

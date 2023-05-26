@@ -78,6 +78,7 @@ type MsgDocModelInterface interface {
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	DeleteDocs(ctx context.Context, docIDs []string) error
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
+	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 }
 
 func (MsgDocModel) TableName() string {

@@ -154,6 +154,22 @@ func (m *MsgMongoDriver) GetOldestMsg(ctx context.Context, conversationID string
 	}
 }
 
+func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error {
+	updates := bson.M{
+		"$set": bson.M{},
+	}
+	for _, index := range indexes {
+		updates["$set"].(bson.M)[fmt.Sprintf("msgs.%d", index)] = bson.M{
+			"msg": nil,
+		}
+	}
+	_, err := m.MsgCollection.UpdateMany(ctx, bson.M{"doc_id": docID}, updates)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	return nil
+}
+
 func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error {
 	if docIDs == nil {
 		return nil
