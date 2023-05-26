@@ -182,6 +182,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	beginSeq, endSeq := utils.GetSeqsBeginEnd(seqs)
 	beginIndex := m.model.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
+	log.ZInfo(ctx, "GetMsgBySeqIndexIn1Doc", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "beginIndex", beginIndex, "num", num)
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{"doc_id": docID},
@@ -200,15 +201,15 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	}
 	defer cursor.Close(ctx)
 	var doc table.MsgDocModel
-	i := 0
+	//i := 0
 	for cursor.Next(ctx) {
 		err := cursor.Decode(&doc)
 		if err != nil {
 			return nil, err
 		}
-		if i == 0 {
-			break
-		}
+		//if i == 0 {
+		//	break
+		//}
 	}
 	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
 	for _, v := range doc.Msg {
