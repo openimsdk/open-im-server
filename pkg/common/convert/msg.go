@@ -5,7 +5,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
-func MsgPb2DB(msg *sdkws.MsgData) unrelation.MsgDataModel {
+func MsgPb2DB(msg *sdkws.MsgData) *unrelation.MsgDataModel {
+	if msg == nil {
+		return nil
+	}
 	var msgDataModel unrelation.MsgDataModel
 	msgDataModel.SendID = msg.SendID
 	msgDataModel.RecvID = msg.RecvID
@@ -24,21 +27,26 @@ func MsgPb2DB(msg *sdkws.MsgData) unrelation.MsgDataModel {
 	msgDataModel.CreateTime = msg.CreateTime
 	msgDataModel.Status = msg.Status
 	msgDataModel.Options = msg.Options
-	msgDataModel.OfflinePush = &unrelation.OfflinePushModel{
-		Title:         msg.OfflinePushInfo.Title,
-		Desc:          msg.OfflinePushInfo.Desc,
-		Ex:            msg.OfflinePushInfo.Ex,
-		IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
-		IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
+	if msg.OfflinePushInfo != nil {
+		msgDataModel.OfflinePush = &unrelation.OfflinePushModel{
+			Title:         msg.OfflinePushInfo.Title,
+			Desc:          msg.OfflinePushInfo.Desc,
+			Ex:            msg.OfflinePushInfo.Ex,
+			IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
+			IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
+		}
 	}
 	msgDataModel.AtUserIDList = msg.AtUserIDList
 	msgDataModel.AttachedInfo = msg.AttachedInfo
 	msgDataModel.Ex = msg.Ex
-	return msgDataModel
+	return &msgDataModel
 
 }
 
 func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
+	if msgModel == nil {
+		return nil
+	}
 	var msg sdkws.MsgData
 	msg.SendID = msgModel.SendID
 	msg.RecvID = msgModel.RecvID
@@ -57,12 +65,14 @@ func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
 	msg.CreateTime = msgModel.CreateTime
 	msg.Status = msgModel.Status
 	msg.Options = msgModel.Options
-	msg.OfflinePushInfo = &sdkws.OfflinePushInfo{
-		Title:         msgModel.OfflinePush.Title,
-		Desc:          msgModel.OfflinePush.Desc,
-		Ex:            msgModel.OfflinePush.Ex,
-		IOSPushSound:  msgModel.OfflinePush.IOSPushSound,
-		IOSBadgeCount: msgModel.OfflinePush.IOSBadgeCount,
+	if msgModel.OfflinePush != nil {
+		msg.OfflinePushInfo = &sdkws.OfflinePushInfo{
+			Title:         msgModel.OfflinePush.Title,
+			Desc:          msgModel.OfflinePush.Desc,
+			Ex:            msgModel.OfflinePush.Ex,
+			IOSPushSound:  msgModel.OfflinePush.IOSPushSound,
+			IOSBadgeCount: msgModel.OfflinePush.IOSBadgeCount,
+		}
 	}
 	msg.AtUserIDList = msgModel.AtUserIDList
 	msg.AttachedInfo = msgModel.AttachedInfo
