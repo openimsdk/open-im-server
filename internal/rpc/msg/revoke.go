@@ -46,7 +46,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		sessionType = constant.SuperGroupChatType
 		conversationID = utils.GenConversationUniqueKeyForGroup(req.GroupID)
 	}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.RecvID, conversationID, []int64{req.Seq})
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, conversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
 	}
