@@ -28,6 +28,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const (
+	updateKeyMsg = iota
+	updateKeyRevoke
+	updateKeyDel
+	updateKeyRead
+)
+
 type CommonMsgDatabase interface {
 	// 批量插入消息
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
@@ -141,14 +148,33 @@ func (db *commonMsgDatabase) MsgToMongoMQ(ctx context.Context, key, conversation
 	return nil
 }
 
-func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationID string, msgList []*unRelationTb.MsgInfoModel, firstSeq int64) error {
-	if len(msgList) == 0 {
+func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationID string, fields []any, key int8, firstSeq int64) error {
+	if len(fields) == 0 {
 		return nil
 	}
 	num := db.msg.GetSingleGocMsgNum()
 	//num = 100
-	if msgList[0].Msg != nil {
-		firstSeq = msgList[0].Msg.Seq
+	for i, field := range fields { // 检查类型
+		var ok bool
+		switch key {
+		case updateKeyMsg:
+			var msg *unRelationTb.MsgDataModel
+			msg, ok = field.(*unRelationTb.MsgDataModel)
+			if msg != nil && msg.Seq != firstSeq+int64(i) {
+				return errs.ErrInternalServer.Wrap("seq is invalid")
+			}
+		case updateKeyRevoke:
+			_, ok = field.(*unRelationTb.RevokeModel)
+		case updateKeyDel:
+			_, ok = field.([]string)
+		case updateKeyRead:
+			_, ok = field.([]string)
+		default:
+			return errs.ErrInternalServer.Wrap("key is invalid")
+		}
+		if !ok {
+			return errs.ErrInternalServer.Wrap("field type is invalid")
+		}
 	}
 	getDocID := func(seq int64) string {
 		return conversationID + ":" + strconv.FormatInt(seq/num, 10)
@@ -157,21 +183,23 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		return seq % num
 	}
 	// 返回值为true表示数据库存在该文档，false表示数据库不存在该文档
-	updateMsgModel := func(docID string, index int64, msg *unRelationTb.MsgInfoModel) (bool, error) {
+	updateMsgModel := func(seq int64, i int) (bool, error) {
 		var (
 			res *mongo.UpdateResult
 			err error
 		)
-		if msg.Msg != nil {
-			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "msg", msg.Msg)
-		} else if msg.Revoke != nil {
-			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "revoke", msg.Revoke)
-		} else if msg.DelList != nil {
-			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "del_list", msg.DelList)
-		} else if msg.ReadList != nil {
-			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "read_list", msg.ReadList)
-		} else {
-			return false, errs.ErrArgs.Wrap("msg all field is nil")
+		docID := getDocID(seq)
+		index := getIndex(seq)
+		field := fields[i]
+		switch key {
+		case updateKeyMsg:
+			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "msg", field)
+		case updateKeyRevoke:
+			res, err = db.msgDocDatabase.UpdateMsg(ctx, docID, index, "revoke", field)
+		case updateKeyDel:
+			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "del_list", field)
+		case updateKeyRead:
+			res, err = db.msgDocDatabase.PushUnique(ctx, docID, index, "read_list", field)
 		}
 		if err != nil {
 			return false, err
@@ -179,154 +207,118 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		return res.MatchedCount > 0, nil
 	}
 	tryUpdate := true
-	for i := 0; i < len(msgList); i++ {
-		msg := msgList[i]
-		seq := firstSeq + int64(i)
-		docID := getDocID(seq)
+	for i := 0; i < len(fields); i++ {
+		seq := firstSeq + int64(i) // 当前seq
 		if tryUpdate {
-			matched, err := updateMsgModel(docID, getIndex(seq), msg)
+			matched, err := updateMsgModel(seq, i)
 			if err != nil {
 				return err
 			}
 			if matched {
-				continue
+				continue // 匹配到了，继续下一个(不一定修改)
 			}
 		}
 		doc := unRelationTb.MsgDocModel{
-			DocID: docID,
+			DocID: getDocID(seq),
 			Msg:   make([]*unRelationTb.MsgInfoModel, num),
 		}
-		var insert int
-		for j := i; j < len(msgList); j++ {
+		var insert int // 插入的数量
+		for j := i; j < len(fields); j++ {
 			seq = firstSeq + int64(j)
-			if getDocID(seq) != docID {
+			if getDocID(seq) != doc.DocID {
 				break
 			}
 			insert++
-			doc.Msg[getIndex(seq)] = msgList[j]
+			switch key {
+			case updateKeyMsg:
+				doc.Msg[getIndex(seq)] = &unRelationTb.MsgInfoModel{
+					Msg: fields[j].(*unRelationTb.MsgDataModel),
+				}
+			case updateKeyRevoke:
+				doc.Msg[getIndex(seq)] = &unRelationTb.MsgInfoModel{
+					Revoke: fields[j].(*unRelationTb.RevokeModel),
+				}
+			case updateKeyDel:
+				doc.Msg[getIndex(seq)] = &unRelationTb.MsgInfoModel{
+					DelList: fields[j].([]string),
+				}
+			case updateKeyRead:
+				doc.Msg[getIndex(seq)] = &unRelationTb.MsgInfoModel{
+					ReadList: fields[j].([]string),
+				}
+			}
 		}
 		for i, model := range doc.Msg {
 			if model == nil {
-				doc.Msg[i] = &unRelationTb.MsgInfoModel{
-					DelList:  []string{},
-					ReadList: []string{},
-				}
-			} else {
-				if model.DelList == nil {
-					doc.Msg[i].DelList = []string{}
-				}
-				if model.ReadList == nil {
-					doc.Msg[i].ReadList = []string{}
-				}
+				model = &unRelationTb.MsgInfoModel{}
+				doc.Msg[i] = model
+			}
+			if model.DelList == nil {
+				doc.Msg[i].DelList = []string{}
+			}
+			if model.ReadList == nil {
+				doc.Msg[i].ReadList = []string{}
 			}
 		}
 		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
 			if mongo.IsDuplicateKeyError(err) {
-				i--
-				tryUpdate = true
+				i--              // 存在并发,重试当前数据
+				tryUpdate = true // 以修改模式
 				continue
 			}
 			return err
 		}
-		tryUpdate = false
-		i += insert - 1
+		tryUpdate = false // 当前以插入成功,下一块优先插入模式
+		i += insert - 1   // 跳过已插入的数据
 	}
 	return nil
 }
 
 func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversationID string, msgList []*sdkws.MsgData, currentMaxSeq int64) error {
-	//num := db.msg.GetSingleGocMsgNum()
-	//currentIndex := currentMaxSeq / num
-	//var blockMsgs []*[]*sdkws.MsgData
-	//for i, data := range msgList {
-	//	data.Seq = currentMaxSeq + int64(i+1)
-	//	index := data.Seq/num - currentIndex
-	//	if i == 0 && index == 1 {
-	//		index--
-	//		currentIndex++
-	//	}
-	//	var block *[]*sdkws.MsgData
-	//	if len(blockMsgs) == int(index) {
-	//		var size int64
-	//		if i == 0 {
-	//			size = num - data.Seq%num
-	//		} else {
-	//			temp := int64(len(msgList)-len(*blockMsgs[0])) - int64(len(blockMsgs)-1)*num
-	//			if temp >= num {
-	//				size = num
-	//			} else {
-	//				size = temp % num
-	//			}
-	//		}
-	//		temp := make([]*sdkws.MsgData, 0, size)
-	//		block = &temp
-	//		blockMsgs = append(blockMsgs, block)
-	//	} else {
-	//		block = blockMsgs[index]
-	//	}
-	//	*block = append(*block, msgList[i])
-	//}
-	//create := currentMaxSeq == 0 || ((*blockMsgs[0])[0].Seq%num == 0)
-	//if !create {
-	//	exist, err := db.msgDocDatabase.IsExistDocID(ctx, db.msg.IndexDocID(conversationID, currentIndex))
-	//	if err != nil {
-	//		return err
-	//	}
-	//	create = !exist
-	//}
-	//for i, msgs := range blockMsgs {
-	//	docID := db.msg.IndexDocID(conversationID, currentIndex+int64(i))
-	//	if create || i != 0 { // 插入
-	//		doc := unRelationTb.MsgDocModel{
-	//			DocID: docID,
-	//			Msg:   make([]unRelationTb.MsgInfoModel, num),
-	//		}
-	//		for i := 0; i < len(doc.Msg); i++ {
-	//			doc.Msg[i].ReadList = []string{}
-	//			doc.Msg[i].DelList = []string{}
-	//		}
-	//		for _, msg := range *msgs {
-	//			data, err := proto.Marshal(msg)
-	//			if err != nil {
-	//				return err
-	//			}
-	//			doc.Msg[msg.Seq%num] = unRelationTb.MsgInfoModel{
-	//				SendTime: msg.SendTime,
-	//				Msg:      data,
-	//				ReadList: []string{},
-	//				DelList:  []string{},
-	//			}
-	//		}
-	//		if err := db.msgDocDatabase.Create(ctx, &doc); err != nil {
-	//			prome.Inc(prome.MsgInsertMongoFailedCounter)
-	//			return utils.Wrap(err, "")
-	//		}
-	//		prome.Inc(prome.MsgInsertMongoSuccessCounter)
-	//	} else { // 修改
-	//		for _, msg := range *msgs {
-	//			data, err := proto.Marshal(msg)
-	//			if err != nil {
-	//				return err
-	//			}
-	//			info := unRelationTb.MsgInfoModel{
-	//				SendTime: msg.SendTime,
-	//				Msg:      data,
-	//			}
-	//			if err := db.msgDocDatabase.UpdateMsg(ctx, docID, msg.Seq%num, &info); err != nil {
-	//				prome.Inc(prome.MsgInsertMongoFailedCounter)
-	//				return err
-	//			}
-	//			prome.Inc(prome.MsgInsertMongoSuccessCounter)
-	//		}
-	//	}
-	//}
-	return nil
+	msgs := make([]any, len(msgList))
+	for i, msg := range msgList {
+		if msg == nil {
+			continue
+		}
+		var offlinePushModel *unRelationTb.OfflinePushModel
+		if msg.OfflinePushInfo != nil {
+			offlinePushModel = &unRelationTb.OfflinePushModel{
+				Title:         msg.OfflinePushInfo.Title,
+				Desc:          msg.OfflinePushInfo.Desc,
+				Ex:            msg.OfflinePushInfo.Ex,
+				IOSPushSound:  msg.OfflinePushInfo.IOSPushSound,
+				IOSBadgeCount: msg.OfflinePushInfo.IOSBadgeCount,
+			}
+		}
+		msgs[i] = &unRelationTb.MsgDataModel{
+			SendID:           msg.SendID,
+			RecvID:           msg.RecvID,
+			GroupID:          msg.GroupID,
+			ClientMsgID:      msg.ClientMsgID,
+			ServerMsgID:      msg.ServerMsgID,
+			SenderPlatformID: msg.SenderPlatformID,
+			SenderNickname:   msg.SenderNickname,
+			SenderFaceURL:    msg.SenderFaceURL,
+			SessionType:      msg.SessionType,
+			MsgFrom:          msg.MsgFrom,
+			ContentType:      msg.ContentType,
+			Content:          string(msg.Content),
+			Seq:              msg.Seq,
+			SendTime:         msg.SendTime,
+			CreateTime:       msg.CreateTime,
+			Status:           msg.Status,
+			Options:          msg.Options,
+			OfflinePush:      offlinePushModel,
+			AtUserIDList:     msg.AtUserIDList,
+			AttachedInfo:     msg.AttachedInfo,
+			Ex:               msg.Ex,
+		}
+	}
+	return db.BatchInsertBlock(ctx, conversationID, msgs, updateKeyMsg, currentMaxSeq-int64(len(msgList)))
 }
 
 func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unRelationTb.RevokeModel) error {
-	msgs := []*unRelationTb.MsgInfoModel{{Revoke: revoke}}
-	return db.BatchInsertBlock(ctx, conversationID, msgs, seq)
-	//return db.msgDocDatabase.UpdateMsgContent(ctx, docID, seq%db.msg.GetSingleGocMsgNum(), msg)
+	return db.BatchInsertBlock(ctx, conversationID, []any{revoke}, updateKeyRevoke, seq)
 }
 
 func (db *commonMsgDatabase) DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error {
