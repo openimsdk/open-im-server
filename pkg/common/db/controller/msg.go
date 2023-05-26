@@ -465,7 +465,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		}
 	}
 	if len(failedSeqs) != 0 {
-		log.ZDebug(ctx, "get message from redis failed", err, "seqs", seqs)
+		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", seqs)
 	}
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
@@ -483,11 +483,11 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 
 func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (successMsgs []*sdkws.MsgData, err error) {
 	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
-	if err != nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	minSeq, err := db.cache.GetMinSeq(ctx, conversationID)
-	if err != nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return nil, err
 	}
 	if userMinSeq < minSeq {
