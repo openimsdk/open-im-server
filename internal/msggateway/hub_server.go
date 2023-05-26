@@ -11,14 +11,13 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	s.LongConnServer.SetMessageHandler(rpcclient.NewMsgClient(client))
+	s.LongConnServer.SetDiscoveryRegistry(client)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
