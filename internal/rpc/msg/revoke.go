@@ -18,14 +18,17 @@ import (
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
 	defer log.ZInfo(ctx, "RevokeMsg return line")
-	if req.UserID == "" {
-		return nil, errs.ErrArgs.Wrap("user_id is empty")
-	}
-	if req.RecvID == "" && req.GroupID == "" {
-		return nil, errs.ErrArgs.Wrap("recv_id and group_id are empty")
-	}
-	if req.RecvID != "" && req.GroupID != "" {
-		return nil, errs.ErrArgs.Wrap("recv_id and group_id cannot exist at the same time")
+	//if req.UserID == "" {
+	//	return nil, errs.ErrArgs.Wrap("user_id is empty")
+	//}
+	//if req.RecvID == "" && req.GroupID == "" {
+	//	return nil, errs.ErrArgs.Wrap("recv_id and group_id are empty")
+	//}
+	//if req.RecvID != "" && req.GroupID != "" {
+	//	return nil, errs.ErrArgs.Wrap("recv_id and group_id cannot exist at the same time")
+	//}
+	if req.ConversationID == "" {
+		return nil, errs.ErrArgs.Wrap("conversation_id is empty")
 	}
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.Wrap("seq is invalid")
@@ -37,48 +40,41 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
-	var sessionType int32
-	var conversationID string
-	if req.GroupID == "" {
-		sessionType = constant.SingleChatType
-		conversationID = utils.GenConversationUniqueKeyForSingle(req.UserID, req.RecvID)
-	} else {
-		sessionType = constant.SuperGroupChatType
-		conversationID = utils.GenConversationUniqueKeyForGroup(req.GroupID)
-	}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.RecvID, conversationID, []int64{req.Seq})
+	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
 	}
 	if len(msgs) == 0 {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
-	sendID := msgs[0].SendID
-	if !tokenverify.IsAppManagerUid(ctx) {
-		if req.GroupID == "" {
-			if req.UserID != sendID {
-				return nil, errs.ErrNoPermission.Wrap("no permission")
-			}
-		} else {
-			members, err := m.Group.GetGroupMemberInfoMap(ctx, req.GroupID, utils.Distinct([]string{req.UserID, sendID}), true)
-			if err != nil {
-				return nil, err
-			}
-			if req.UserID != sendID {
-				roleLevel := members[req.UserID].RoleLevel
-				switch members[req.UserID].RoleLevel {
-				case constant.GroupOwner:
-				case constant.GroupAdmin:
-					if roleLevel != constant.GroupOrdinaryUsers {
-						return nil, errs.ErrNoPermission.Wrap("no permission")
-					}
-				default:
-					return nil, errs.ErrNoPermission.Wrap("no permission")
-				}
-			}
-		}
-	}
-	err = m.MsgDatabase.RevokeMsg(ctx, conversationID, req.Seq, &unRelationTb.RevokeModel{
+	data, _ := json.Marshal(msgs[0])
+	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
+	//sendID := msgs[0]
+	//if !tokenverify.IsAppManagerUid(ctx) {
+	//	if req.GroupID == "" {
+	//		if req.UserID != sendID {
+	//			return nil, errs.ErrNoPermission.Wrap("no permission")
+	//		}
+	//	} else {
+	//		members, err := m.Group.GetGroupMemberInfoMap(ctx, req.GroupID, utils.Distinct([]string{req.UserID, sendID}), true)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//		if req.UserID != sendID {
+	//			roleLevel := members[req.UserID].RoleLevel
+	//			switch members[req.UserID].RoleLevel {
+	//			case constant.GroupOwner:
+	//			case constant.GroupAdmin:
+	//				if roleLevel != constant.GroupOrdinaryUsers {
+	//					return nil, errs.ErrNoPermission.Wrap("no permission")
+	//				}
+	//			default:
+	//				return nil, errs.ErrNoPermission.Wrap("no permission")
+	//			}
+	//		}
+	//	}
+	//}
+	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
 		UserID:   req.UserID,
 		Nickname: user.Nickname,
 		Time:     time.Now().UnixMilli(),
@@ -91,8 +87,8 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		ClientMsgID:    "",
 		RevokeTime:     utils.GetCurrentTimestampByMill(),
 		Seq:            req.Seq,
-		SesstionType:   sessionType,
-		ConversationID: conversationID,
+		SesstionType:   msgs[0].SessionType,
+		ConversationID: req.ConversationID,
 	}
 	detail, err := json.Marshal(&tips)
 	if err != nil {
@@ -105,12 +101,12 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	msgData := sdkws.MsgData{
 		SendID:      req.UserID,
-		RecvID:      req.RecvID,
-		GroupID:     req.GroupID,
+		RecvID:      msgs[0].RecvID,
+		GroupID:     msgs[0].GroupID,
 		Content:     content,
 		MsgFrom:     constant.SysMsgType,
 		ContentType: constant.MsgRevokeNotification,
-		SessionType: sessionType,
+		SessionType: msgs[0].SessionType,
 		CreateTime:  utils.GetCurrentTimestampByMill(),
 		ClientMsgID: utils.GetMsgID(req.UserID),
 		Options: config.GetOptionsByNotification(config.NotificationConf{

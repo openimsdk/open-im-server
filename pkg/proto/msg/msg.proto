@@ -159,10 +159,9 @@ message DelMsgsResp{
 }
 
 message RevokeMsgReq {
-  string userID = 1;
-  string recvID = 2;
-  string groupID = 3;
-  int64 seq = 4;
+  string conversationID = 1;
+  int64 seq = 2;
+  string userID = 3;
 }
 
 message RevokeMsgResp {
