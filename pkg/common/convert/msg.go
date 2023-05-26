@@ -1,8 +1,6 @@
 package convert
 
 import (
-	"encoding/json"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
@@ -53,8 +51,7 @@ func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
 	msg.SessionType = msgModel.SessionType
 	msg.MsgFrom = msgModel.MsgFrom
 	msg.ContentType = msgModel.ContentType
-	b, _ := json.Marshal(msgModel.Content)
-	msg.Content = b
+	msg.Content = []byte(msgModel.Content)
 	msg.Seq = msgModel.Seq
 	msg.SendTime = msgModel.SendTime
 	msg.CreateTime = msgModel.CreateTime
