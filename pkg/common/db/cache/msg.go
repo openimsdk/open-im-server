@@ -91,7 +91,7 @@ type MsgModel interface {
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 
-	GetMsgsByConversationIDAndSeq(ctx context.Context, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error)
+	GetMsgsByConversationIDAndSeq(ctx context.Context, userID, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error)
 	DeleteMsgByConversationIDAndSeq(ctx context.Context, docID string, seq int64) MsgModel
 }
 
@@ -568,13 +568,13 @@ func (c *msgCache) getMsgsIndex(msg *unRelationTb.MsgInfoModel, keys []string) (
 	return 0, errIndex
 }
 
-func (c *msgCache) GetMsgsByConversationIDAndSeq(ctx context.Context, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error) {
+func (c *msgCache) GetMsgsByConversationIDAndSeq(ctx context.Context, userID, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error) {
 	var keys []string
 	for _, seq := range seqs {
 		keys = append(keys, c.getMsgReadCacheKey(docID, seq))
 	}
 	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.getMsgsIndex, func(ctx context.Context) ([]*unRelationTb.MsgInfoModel, error) {
-		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
+		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	})
 }
 

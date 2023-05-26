@@ -178,7 +178,7 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
 	beginSeq, endSeq := utils.GetSeqsBeginEnd(seqs)
 	beginIndex := m.model.GetMsgIndex(beginSeq)
 	num := endSeq - beginSeq + 1
@@ -206,9 +206,10 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 		if err != nil {
 			return nil, err
 		}
-		if i == 0 {
+		if i == 1 {
 			break
 		}
+		i++
 	}
 	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
 	for _, v := range doc.Msg {

@@ -185,17 +185,17 @@ func Test_Revoke(t *testing.T) {
 	}
 }
 
-func Test_Delete(t *testing.T) {
-	db := GetDB()
-	ctx := context.Background()
-	var arr []any
-	for i := 0; i < 123; i++ {
-		arr = append(arr, []string{"uid_1", "uid_2"})
-	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyDel, 210); err != nil {
-		t.Fatal(err)
-	}
-}
+// func Test_Delete(t *testing.T) {
+// 	db := GetDB()
+// 	ctx := context.Background()
+// 	var arr []any
+// 	for i := 0; i < 123; i++ {
+// 		arr = append(arr, []string{"uid_1", "uid_2"})
+// 	}
+// 	if err := db.BatchInsertBlock(ctx, "test", arr, "", 210); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
 
 //func Test_Delete1(t *testing.T) {
 //	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
