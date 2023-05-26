@@ -154,6 +154,10 @@ func Test_Insert(t *testing.T) {
 	ctx := context.Background()
 	var arr []any
 	for i := 0; i < 345; i++ {
+		if i%2 == 0 {
+			arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
+			continue
+		}
 		arr = append(arr, &unRelationTb.MsgDataModel{
 			Seq:     int64(i),
 			Content: fmt.Sprintf("test-%d", i),
