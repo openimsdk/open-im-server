@@ -30,7 +30,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if req.Seq < 0 {
 		return nil, errs.ErrArgs.Wrap("seq is invalid")
 	}
-	if err := tokenverify.CheckAccessV3(ctx, req.RecvID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	user, err := m.User.GetUserInfo(ctx, req.UserID)
