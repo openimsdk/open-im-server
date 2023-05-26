@@ -53,6 +53,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if len(msgs) == 0 {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
+	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", conversationID, "seq", req.Seq, "msg", msgs[0])
 	sendID := msgs[0].SendID
 	if !tokenverify.IsAppManagerUid(ctx) {
 		if req.GroupID == "" {
