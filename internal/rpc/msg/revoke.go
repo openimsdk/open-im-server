@@ -110,7 +110,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		CreateTime:  utils.GetCurrentTimestampByMill(),
 		ClientMsgID: utils.GetMsgID(req.UserID),
 		Options: config.GetOptionsByNotification(config.NotificationConf{
-			IsSendMsg:        true,
+			IsSendMsg:        false,
 			ReliabilityLevel: 2,
 		}),
 		OfflinePushInfo: nil,
