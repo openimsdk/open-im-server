@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -155,17 +154,17 @@ func Test_Insert(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
 	var arr []any
-	for i := 1; i <= 2000; i++ {
-		//if i%2 == 0 {
-		//	arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
-		//	continue
-		//}
+	for i := 0; i < 345; i++ {
+		if i%2 == 0 {
+			arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
+			continue
+		}
 		arr = append(arr, &unRelationTb.MsgDataModel{
 			Seq:     int64(i),
-			Content: fmt.Sprintf("seq-%d", i),
+			Content: fmt.Sprintf("test-%d", i),
 		})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 1); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 0); err != nil {
 		t.Fatal(err)
 	}
 }
