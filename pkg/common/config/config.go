@@ -12,6 +12,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 
+	_ "embed"
+
 	"gopkg.in/yaml.v3"
 )
 
