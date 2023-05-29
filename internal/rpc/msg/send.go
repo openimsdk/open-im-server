@@ -2,18 +2,14 @@ package msg
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/protobuf/proto"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
@@ -107,43 +103,4 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 		return resp, nil
 	}
-}
-
-func (m *msgServer) notification(ctx context.Context, sendID, recvID string, contentType, sessionType int32, msgPb proto.Message, cfg config.NotificationConf, opts ...utils.OptionsOpt) error {
-	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
-	content, err := json.Marshal(&n)
-	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
-		return err
-	}
-	var req msg.SendMsgReq
-	var msg sdkws.MsgData
-	var offlineInfo sdkws.OfflinePushInfo
-	var title, desc, ex string
-	msg.SendID = sendID
-	msg.RecvID = recvID
-	msg.Content = content
-	msg.MsgFrom = constant.SysMsgType
-	msg.ContentType = contentType
-	msg.SessionType = sessionType
-	if msg.SessionType == constant.SuperGroupChatType {
-		msg.GroupID = recvID
-	}
-	msg.CreateTime = utils.GetCurrentTimestampByMill()
-	msg.ClientMsgID = utils.GetMsgID(sendID)
-	options := config.GetOptionsByNotification(cfg)
-	options = utils.WithOptions(options, opts...)
-	msg.Options = options
-	offlineInfo.Title = title
-	offlineInfo.Desc = desc
-	offlineInfo.Ex = ex
-	msg.OfflinePushInfo = &offlineInfo
-	req.MsgData = &msg
-	_, err = m.SendMsg(ctx, &req)
-	if err == nil {
-		log.ZDebug(ctx, "MsgClient Notification SendMsg success", "req", &req)
-	} else {
-		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
-	}
-	return err
 }
