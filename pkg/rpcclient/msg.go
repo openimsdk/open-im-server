@@ -52,6 +52,8 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.ConversationChangeNotification:      config.Config.Notification.ConversationChanged,
 		constant.ConversationUnreadNotification:      config.Config.Notification.ConversationChanged,
 		constant.ConversationPrivateChatNotification: config.Config.Notification.ConversationSetPrivate,
+		// msg
+		constant.MsgRevokeNotification: {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
 	}
 }
 
@@ -158,7 +160,7 @@ func NewNotificationSender(opts ...NewNotificationSenderOptions) *NotificationSe
 	return notificationSender
 }
 
-func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...utils.OptionsOpt) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
@@ -195,4 +197,8 @@ func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID st
 		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
 	}
 	return err
+}
+
+func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }

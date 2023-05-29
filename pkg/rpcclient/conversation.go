@@ -76,3 +76,12 @@ func (c *ConversationClient) GetConversationIDs(ctx context.Context, ownerUserID
 	resp, err := conversation.NewConversationClient(cc).GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
 	return resp.ConversationIDs, err
 }
+
+func (c *ConversationClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbConversation.Conversation, error) {
+	cc, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := conversation.NewConversationClient(cc).GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
+	return resp.Conversation, err
+}

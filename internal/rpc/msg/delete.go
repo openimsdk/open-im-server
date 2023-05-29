@@ -3,6 +3,7 @@ package msg
 import (
 	"context"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -27,6 +28,7 @@ func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearCon
 	if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, req.UserID, m.getMinSeqs(maxSeqs)); err != nil {
 		return nil, err
 	}
+	m.conversationClearSync(ctx, req.DeleteSyncOpt, req.UserID, req.ConversationIDs)
 	return &msg.ClearConversationsMsgResp{}, nil
 }
 
@@ -46,6 +48,7 @@ func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMs
 	if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, req.UserID, m.getMinSeqs(maxSeqs)); err != nil {
 		return nil, err
 	}
+	m.conversationClearSync(ctx, req.DeleteSyncOpt, req.UserID, conversationIDs)
 	return &msg.UserClearAllMsgResp{}, nil
 }
 
@@ -56,6 +59,7 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 	if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 		return nil, err
 	}
+	m.DeleteMsgsNotification(ctx, req.ConversationID, req.UserID, req.Seqs, req.DeleteSyncOpt)
 	return &msg.DeleteMsgsResp{}, nil
 }
 
@@ -77,4 +81,32 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 		}
 	}
 	return &msg.DeleteMsgPhysicalResp{}, nil
+}
+
+func (m *msgServer) conversationClearSync(ctx context.Context, opt *msg.DeleteSyncOpt, userID string, conversationIDs []string) {
+	if opt == nil {
+		return
+	}
+	for _, conversationID := range conversationIDs {
+		conversation, err := m.Conversation.GetConversation(ctx, userID, conversationID)
+		if err != nil {
+			log.ZWarn(ctx, "GetConversation error", err, "conversationID", conversationID, "userID", userID)
+			continue
+		}
+		if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+
+		} else if conversation.ConversationType == constant.SuperGroupChatType {
+
+		}
+	}
+
+	if opt.IsSyncSelf {
+
+	} else if opt.IsSyncOther {
+	}
+
+}
+
+func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, userID string, seqs []int64, opt *msg.DeleteSyncOpt) error {
+	return nil
 }
