@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -82,6 +81,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
+
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  req.UserID,
 		ClientMsgID:    "",
@@ -90,36 +90,13 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		SesstionType:   msgs[0].SessionType,
 		ConversationID: req.ConversationID,
 	}
-	detail, err := json.Marshal(&tips)
-	if err != nil {
-		return nil, err
+	var recvID string
+	if msgs[0].SessionType == constant.SuperGroupChatType {
+		recvID = msgs[0].GroupID
+	} else {
+		recvID = msgs[0].RecvID
 	}
-	notificationElem := sdkws.NotificationElem{Detail: string(detail)}
-	content, err := json.Marshal(&notificationElem)
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	msgData := sdkws.MsgData{
-		SendID:      req.UserID,
-		RecvID:      msgs[0].RecvID,
-		GroupID:     msgs[0].GroupID,
-		Content:     content,
-		MsgFrom:     constant.SysMsgType,
-		ContentType: constant.MsgRevokeNotification,
-		SessionType: msgs[0].SessionType,
-		CreateTime:  utils.GetCurrentTimestampByMill(),
-		ClientMsgID: utils.GetMsgID(req.UserID),
-		Options: config.GetOptionsByNotification(config.NotificationConf{
-			IsSendMsg:        false,
-			ReliabilityLevel: 2,
-		}),
-		OfflinePushInfo: nil,
-	}
-	if msgData.SessionType == constant.SuperGroupChatType {
-		msgData.GroupID = msgData.RecvID
-	}
-	_, err = m.SendMsg(ctx, &msg.SendMsgReq{MsgData: &msgData})
-	if err != nil {
+	if err := m.notificationSender.Notification(ctx, req.UserID, recvID, constant.MsgRevokeNotification, &tips, utils.WithSendMsg(false), utils.WithHistory(true), utils.WithPersistent()); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

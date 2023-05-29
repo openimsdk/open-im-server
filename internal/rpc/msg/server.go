@@ -29,6 +29,7 @@ type msgServer struct {
 	ConversationLocalCache *localcache.ConversationLocalCache
 	MessageLocker          MessageLocker
 	Handlers               MessageInterceptorChain
+	notificationSender     *rpcclient.NotificationSender
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
@@ -64,7 +65,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
-
 	s := &msgServer{
 		Conversation:           rpcclient.NewConversationClient(client),
 		User:                   rpcclient.NewUserClient(client),
@@ -78,6 +78,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		friend:                 rpcclient.NewFriendClient(client),
 		MessageLocker:          NewLockerMessage(cacheModel),
 	}
+	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled, MessageModifyCallback)
 	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)

@@ -4,15 +4,13 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-
 	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
@@ -99,12 +97,10 @@ func newSessionTypeConf() map[int32]int32 {
 
 type MsgClient struct {
 	*MetaClient
-	contentTypeConf map[int32]config.NotificationConf
-	sessionTypeConf map[int32]int32
 }
 
-func NewMsgClient(zk discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
-	return &MsgClient{MetaClient: NewMetaClient(zk, config.Config.RpcRegisterName.OpenImMsgName), contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+func NewMsgClient(discov discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
+	return &MsgClient{MetaClient: NewMetaClient(discov, config.Config.RpcRegisterName.OpenImMsgName)}
 }
 
 func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
@@ -134,7 +130,35 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 	return resp, err
 }
 
-func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+type NotificationSender struct {
+	contentTypeConf map[int32]config.NotificationConf
+	sessionTypeConf map[int32]int32
+	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
+}
+
+type NewNotificationSenderOptions func(*NotificationSender)
+
+func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NewNotificationSenderOptions {
+	return func(s *NotificationSender) {
+		s.sendMsg = sendMsg
+	}
+}
+
+func WithDiscov(discov discoveryregistry.SvcDiscoveryRegistry) NewNotificationSenderOptions {
+	return func(s *NotificationSender) {
+		s.sendMsg = NewMsgClient(discov).SendMsg
+	}
+}
+
+func NewNotificationSender(opts ...NewNotificationSenderOptions) *NotificationSender {
+	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+	for _, opt := range opts {
+		opt(notificationSender)
+	}
+	return notificationSender
+}
+
+func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
@@ -150,13 +174,13 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
-	msg.SessionType = c.sessionTypeConf[contentType]
+	msg.SessionType = s.sessionTypeConf[contentType]
 	if msg.SessionType == constant.SuperGroupChatType {
 		msg.GroupID = recvID
 	}
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
-	options := config.GetOptionsByNotification(c.contentTypeConf[contentType])
+	options := config.GetOptionsByNotification(s.contentTypeConf[contentType])
 	options = utils.WithOptions(options, opts...)
 	msg.Options = options
 	offlineInfo.Title = title
@@ -164,7 +188,7 @@ func (c *MsgClient) Notification(ctx context.Context, sendID, recvID string, con
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	_, err = c.SendMsg(ctx, &req)
+	_, err = s.sendMsg(ctx, &req)
 	if err == nil {
 		log.ZDebug(ctx, "MsgClient Notification SendMsg success", "req", &req)
 	} else {

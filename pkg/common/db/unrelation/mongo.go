@@ -99,7 +99,7 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 	index := mongo.IndexModel{
 		Keys: keysDoc,
 	}
-	if isUnique == true {
+	if isUnique {
 		index.Options = options.Index().SetUnique(true)
 	}
 	result, err := indexView.CreateOne(
