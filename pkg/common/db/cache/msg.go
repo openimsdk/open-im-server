@@ -170,7 +170,7 @@ func (c *msgCache) GetMinSeq(ctx context.Context, conversationID string) (int64,
 }
 
 func (c *msgCache) getConversationUserMinSeqKey(conversationID, userID string) string {
-	return conversationUserMinSeq + "g:" + conversationID + "u:" + userID
+	return conversationUserMinSeq + conversationID + "u:" + userID
 }
 
 func (c *msgCache) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {

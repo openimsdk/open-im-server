@@ -206,16 +206,6 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, doc
 			return nil, err
 		}
 	}
-	////i := 0
-	//for cursor.Next(ctx) {
-	//	err := cursor.Decode(&doc)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	//if i == 0 {
-	//	//	break
-	//	//}
-	//}
 	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
 	for _, v := range doc.Msg {
 		if v.Msg == nil {

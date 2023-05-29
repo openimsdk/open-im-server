@@ -34,10 +34,11 @@ func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMs
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	conversationIDs, err := m.Conversation.GetConversationIDs(ctx, req.UserID)
+	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
