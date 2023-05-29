@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -178,47 +177,66 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
-	beginSeq, endSeq := utils.GetSeqsBeginEnd(seqs)
-	beginIndex := m.model.GetMsgIndex(beginSeq)
-	num := endSeq - beginSeq + 1
-	log.ZInfo(ctx, "GetMsgBySeqIndexIn1Doc", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "beginIndex", beginIndex, "num", num)
-	pipeline := bson.A{
-		bson.M{
-			"$match": bson.M{"doc_id": docID},
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID string, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
+	indexs := make([]int64, 0, len(seqs))
+	for _, seq := range seqs {
+		indexs = append(indexs, m.model.GetMsgIndex(seq))
+	}
+	pipeline := mongo.Pipeline{
+		{
+			{"$match", bson.D{
+				{"doc_id", docID},
+			}},
 		},
-		bson.M{
-			"$project": bson.M{
-				"msgs": bson.M{
-					"$slice": bson.A{"$msgs", beginIndex, num},
-				},
-			},
+		{
+			{"$project", bson.D{
+				{"_id", 0},
+				{"msgs", bson.D{
+					{"$map", bson.D{
+						{"input", indexs},
+						{"as", "index"},
+						{"in", bson.D{
+							{"$let", bson.D{
+								{"vars", bson.D{
+									{"currentMsg", bson.D{
+										{"$arrayElemAt", []string{"$msgs", "$$index"}},
+									}},
+								}},
+								{"in", bson.D{
+									{"$cond", bson.D{
+										{"if", bson.D{
+											{"$in", []string{userID, "$$currentMsg.del_list"}},
+										}},
+										{"then", nil},
+										{"else", "$$currentMsg"},
+									}},
+								}},
+							}},
+						}},
+					}},
+				}},
+			}},
+		},
+		{
+			{"$project", bson.D{
+				{"doc_id", 0},
+				{"msgs.del_list", 0},
+			}},
 		},
 	}
-	cursor, err := m.MsgCollection.Aggregate(ctx, pipeline)
+	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
-	defer cursor.Close(ctx)
-	var doc table.MsgDocModel
-	if cursor.Next(ctx) {
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
-		}
+	defer cur.Close(ctx)
+	var msgDocModel []table.MsgDocModel
+	if err := cur.All(ctx, &msgDocModel); err != nil {
+		return nil, errs.Wrap(err)
 	}
-	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
-	for _, v := range doc.Msg {
-		if v.Msg == nil {
-			continue
-		}
-		if v.Msg.Seq >= beginSeq && v.Msg.Seq <= endSeq {
-			log.ZDebug(ctx, "find msg", "msg", v.Msg)
-			msgs = append(msgs, v)
-		} else {
-			log.ZWarn(ctx, "this msg is at wrong position", nil, "msg", v.Msg)
-		}
+	if len(msgDocModel) == 0 {
+		return nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
-	return msgs, nil
+	return msgDocModel[0].Msg, nil
 }
 
 func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
