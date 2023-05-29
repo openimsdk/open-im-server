@@ -191,6 +191,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 		{
 			{"$project", bson.D{
 				{"_id", 0},
+				{"doc_id", 1},
 				{"msgs", bson.D{
 					{"$map", bson.D{
 						{"input", indexs},
@@ -219,7 +220,6 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 		},
 		{
 			{"$project", bson.D{
-				{"doc_id", 0},
 				{"msgs.del_list", 0},
 			}},
 		},

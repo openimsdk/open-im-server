@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -165,7 +164,7 @@ func Test_Insert(t *testing.T) {
 			Content: fmt.Sprintf("test-%d", i),
 		})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 0); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 1); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -189,12 +188,14 @@ func Test_Revoke(t *testing.T) {
 func Test_FindBySeq(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, _ := json.Marshal(res)
-	fmt.Println(string(data))
+	fmt.Println(db.getMsgBySeqs(ctx, "100", "si_100_101", []int64{1}))
+	//res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//db.GetMsgBySeqs(ctx, "100", "si_100_101:0", []int64{6})
+	//data, _ := json.Marshal(res)
+	//fmt.Println(string(data))
 }
 
 //func Test_Delete(t *testing.T) {

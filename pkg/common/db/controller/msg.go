@@ -341,7 +341,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
 	var totalUnExistSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
-		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
+		//log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
 		msgs, unexistSeqs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
 		if err != nil {
 			return nil, err
@@ -396,7 +396,7 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 // }
 
 func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, unExistSeqs []int64, err error) {
-	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, userID, seqs)
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	if err != nil {
 		return nil, nil, err
 	}
