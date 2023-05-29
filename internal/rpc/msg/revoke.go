@@ -33,11 +33,11 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
-	msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
+	_, msgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, req.ConversationID, []int64{req.Seq})
 	if err != nil {
 		return nil, err
 	}
-	if len(msgs) == 0 {
+	if len(msgs) == 0 || msgs[0] == nil {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
 	if msgs[0].SendID == "" || msgs[0].RecvID == "" {
