@@ -64,6 +64,11 @@ type MsgInfoModel struct {
 	DelList []string      `bson:"del_list"`
 }
 
+//type MsgDocModel struct {
+//	DocID string          `bson:"doc_id"`
+//	Msgs  []*MsgInfoModel `bson:"msgs"`
+//}
+
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
@@ -72,7 +77,7 @@ type MsgDocModelInterface interface {
 	UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error
 	IsExistDocID(ctx context.Context, docID string) (bool, error)
 	FindOneByDocID(ctx context.Context, docID string) (*MsgDocModel, error)
-	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) ([]*MsgInfoModel, error)
+	GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, userID string, seqs []int64) ([]*MsgInfoModel, error)
 	GetNewestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	GetOldestMsg(ctx context.Context, conversationID string) (*MsgInfoModel, error)
 	DeleteDocs(ctx context.Context, docIDs []string) error

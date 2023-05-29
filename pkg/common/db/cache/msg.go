@@ -574,7 +574,7 @@ func (c *msgCache) GetMsgsByConversationIDAndSeq(ctx context.Context, docID stri
 		keys = append(keys, c.getMsgReadCacheKey(docID, seq))
 	}
 	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.getMsgsIndex, func(ctx context.Context) ([]*unRelationTb.MsgInfoModel, error) {
-		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
+		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, "", seqs)
 	})
 }
 

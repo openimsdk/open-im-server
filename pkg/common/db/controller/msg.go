@@ -338,11 +338,11 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }
 
-func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID string, userID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
 	var totalUnExistSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
 		log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
-		msgs, unexistSeqs, err := db.findMsgInfoBySeq(ctx, docID, seqs)
+		msgs, unexistSeqs, err := db.findMsgInfoBySeq(ctx, docID, userID, seqs)
 		if err != nil {
 			return nil, err
 		}
@@ -395,8 +395,8 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, conversationID st
 // 	return seqMsgs, nil
 // }
 
-func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, unExistSeqs []int64, err error) {
-	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, seqs)
+func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, docID string, userID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, unExistSeqs []int64, err error) {
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, docID, userID, seqs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -426,7 +426,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 	var delSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
-		msgs, notExistSeqs, err := db.findMsgInfoBySeq(ctx, docID, seqs)
+		msgs, notExistSeqs, err := db.findMsgInfoBySeq(ctx, docID, userID, seqs)
 		if err != nil {
 			return nil, err
 		}
@@ -509,7 +509,7 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	log.ZInfo(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs", seqs, "successMsgs", len(successMsgs), "failedSeqs", failedSeqs, "conversationID", conversationID)
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
 	if len(failedSeqs) > 0 {
-		mongoMsgs, err := db.getMsgBySeqs(ctx, conversationID, failedSeqs)
+		mongoMsgs, err := db.getMsgBySeqs(ctx, conversationID, userID, failedSeqs)
 		if err != nil {
 			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
 			return nil, err

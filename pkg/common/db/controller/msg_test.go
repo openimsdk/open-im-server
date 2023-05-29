@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -154,17 +155,17 @@ func Test_Insert(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
 	var arr []any
-	for i := 0; i < 345; i++ {
-		if i%2 == 0 {
-			arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
-			continue
-		}
+	for i := 1; i <= 2000; i++ {
+		//if i%2 == 0 {
+		//	arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
+		//	continue
+		//}
 		arr = append(arr, &unRelationTb.MsgDataModel{
 			Seq:     int64(i),
-			Content: fmt.Sprintf("test-%d", i),
+			Content: fmt.Sprintf("seq-%d", i),
 		})
 	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 0); err != nil {
+	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyMsg, 1); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -185,17 +186,28 @@ func Test_Revoke(t *testing.T) {
 	}
 }
 
-func Test_Delete(t *testing.T) {
+func Test_FindBySeq(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	var arr []any
-	for i := 0; i < 123; i++ {
-		arr = append(arr, []string{"uid_1", "uid_2"})
-	}
-	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyDel, 210); err != nil {
+	res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "test:0", "123456", []int64{1, 2, 3})
+	if err != nil {
 		t.Fatal(err)
 	}
+	data, _ := json.Marshal(res)
+	fmt.Println(string(data))
 }
+
+//func Test_Delete(t *testing.T) {
+//	db := GetDB()
+//	ctx := context.Background()
+//	var arr []any
+//	for i := 0; i < 123; i++ {
+//		arr = append(arr, []string{"uid_1", "uid_2"})
+//	}
+//	if err := db.BatchInsertBlock(ctx, "test", arr, updateKeyDel, 210); err != nil {
+//		t.Fatal(err)
+//	}
+//}
 
 //func Test_Delete1(t *testing.T) {
 //	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
