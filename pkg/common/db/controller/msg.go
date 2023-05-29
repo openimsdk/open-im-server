@@ -407,7 +407,7 @@ func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID
 	} else {
 		for _, seq := range seqs {
 			for i, msg := range msgs {
-				if seq == msg.Msg.Seq {
+				if msg.Msg != nil && seq == msg.Msg.Seq {
 					break
 				}
 				if i == len(msgs)-1 {
