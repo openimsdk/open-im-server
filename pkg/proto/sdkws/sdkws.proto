@@ -135,6 +135,7 @@ message SeqRange {
 
 message PullMsgs {
   repeated MsgData Msgs = 1;
+  int64 minSeq = 2;
 }
 
 message PullMessageBySeqsResp {
