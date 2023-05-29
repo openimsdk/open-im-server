@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -13,7 +14,7 @@ import (
 )
 
 type FriendNotificationSender struct {
-	*rpcclient.MsgClient
+	*rpcclient.NotificationSender
 	// 找不到报错
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)
 	// db controller
@@ -62,7 +63,7 @@ func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserIn
 
 func NewFriendNotificationSender(client discoveryregistry.SvcDiscoveryRegistry, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		MsgClient: rpcclient.NewMsgClient(client),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithDiscov(client)),
 	}
 	for _, opt := range opts {
 		opt(f)

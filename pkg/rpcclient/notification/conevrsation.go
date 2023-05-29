@@ -10,11 +10,11 @@ import (
 )
 
 type ConversationNotificationSender struct {
-	*rpcclient.MsgClient
+	*rpcclient.NotificationSender
 }
 
 func NewConversationNotificationSender(client discoveryregistry.SvcDiscoveryRegistry) *ConversationNotificationSender {
-	return &ConversationNotificationSender{rpcclient.NewMsgClient(client)}
+	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithDiscov(client))}
 }
 
 // SetPrivate调用
