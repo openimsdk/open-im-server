@@ -177,7 +177,7 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, userID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID string, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
 	indexs := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
@@ -238,59 +238,6 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID strin
 	}
 	return msgDocModel[0].Msg, nil
 }
-
-//func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
-//	beginSeq, endSeq := utils.GetSeqsBeginEnd(seqs)
-//	beginIndex := m.model.GetMsgIndex(beginSeq)
-//	num := endSeq - beginSeq + 1
-//	log.ZInfo(ctx, "GetMsgBySeqIndexIn1Doc", "docID", docID, "seqs", seqs, "beginSeq", beginSeq, "endSeq", endSeq, "beginIndex", beginIndex, "num", num)
-//	pipeline := bson.A{
-//		bson.M{
-//			"$match": bson.M{"doc_id": docID},
-//		},
-//		bson.M{
-//			"$project": bson.M{
-//				"msgs": bson.M{
-//					"$slice": bson.A{"$msgs", beginIndex, num},
-//				},
-//			},
-//		},
-//	}
-//	cursor, err := m.MsgCollection.Aggregate(ctx, pipeline)
-//	if err != nil {
-//		return nil, errs.Wrap(err)
-//	}
-//	defer cursor.Close(ctx)
-//	var doc table.MsgDocModel
-//	if cursor.Next(ctx) {
-//		if err := cursor.Decode(&doc); err != nil {
-//			return nil, err
-//		}
-//	}
-//	////i := 0
-//	//for cursor.Next(ctx) {
-//	//	err := cursor.Decode(&doc)
-//	//	if err != nil {
-//	//		return nil, err
-//	//	}
-//	//	//if i == 0 {
-//	//	//	break
-//	//	//}
-//	//}
-//	log.ZDebug(ctx, "msgInfos", "num", len(doc.Msg), "docID", docID)
-//	for _, v := range doc.Msg {
-//		if v.Msg == nil {
-//			continue
-//		}
-//		if v.Msg.Seq >= beginSeq && v.Msg.Seq <= endSeq {
-//			log.ZDebug(ctx, "find msg", "msg", v.Msg)
-//			msgs = append(msgs, v)
-//		} else {
-//			log.ZWarn(ctx, "this msg is at wrong position", nil, "msg", v.Msg)
-//		}
-//	}
-//	return msgs, nil
-//}
 
 func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
 	count, err := m.MsgCollection.CountDocuments(ctx, bson.M{"doc_id": docID})

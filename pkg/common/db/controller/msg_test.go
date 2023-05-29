@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -188,7 +189,7 @@ func Test_Revoke(t *testing.T) {
 func Test_FindBySeq(t *testing.T) {
 	db := GetDB()
 	ctx := context.Background()
-	res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "test:0", "123456", []int64{1, 2, 3})
+	res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
 	if err != nil {
 		t.Fatal(err)
 	}
