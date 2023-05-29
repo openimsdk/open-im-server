@@ -167,6 +167,11 @@ message RevokeMsgReq {
 message RevokeMsgResp {
 }
 
+message DeleteSyncOpt {
+  bool IsSyncSelf = 3;
+  bool IsSyncOther = 4;
+}
+
 message ClearConversationsMsgReq {
   repeated string conversationIDs = 1;
   string userID = 2;
