@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"google.golang.org/grpc"
@@ -21,6 +22,8 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	if err != nil {
 		panic(err)
 	}
+	log.ZInfo(context.Background(), "user rpc conn", "conn", conn)
+
 	return &User{conn: conn}
 }
 
