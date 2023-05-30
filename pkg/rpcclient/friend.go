@@ -7,22 +7,23 @@ import (
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"google.golang.org/grpc"
 )
 
 type FriendClient struct {
-	*MetaClient
+	conn *grpc.ClientConn
 }
 
-func NewFriendClient(zk discoveryRegistry.SvcDiscoveryRegistry) *FriendClient {
-	return &FriendClient{NewMetaClient(zk, config.Config.RpcRegisterName.OpenImFriendName)}
+func NewFriendClient(discov discoveryRegistry.SvcDiscoveryRegistry) *FriendClient {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+	if err != nil {
+		panic(err)
+	}
+	return &FriendClient{conn: conn}
 }
 
 func (f *FriendClient) GetFriendsInfo(ctx context.Context, ownerUserID, friendUserID string) (resp *sdkws.FriendInfo, err error) {
-	cc, err := f.getConn(ctx)
-	if err != nil {
-		return nil, err
-	}
-	r, err := friend.NewFriendClient(cc).GetDesignatedFriends(ctx, &friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
+	r, err := friend.NewFriendClient(f.conn).GetDesignatedFriends(ctx, &friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +33,7 @@ func (f *FriendClient) GetFriendsInfo(ctx context.Context, ownerUserID, friendUs
 
 // possibleFriendUserID是否在userID的好友中
 func (f *FriendClient) IsFriend(ctx context.Context, possibleFriendUserID, userID string) (bool, error) {
-	cc, err := f.getConn(ctx)
-	if err != nil {
-		return false, err
-	}
-	resp, err := friend.NewFriendClient(cc).IsFriend(ctx, &friend.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID})
+	resp, err := friend.NewFriendClient(f.conn).IsFriend(ctx, &friend.IsFriendReq{UserID1: userID, UserID2: possibleFriendUserID})
 	if err != nil {
 		return false, err
 	}
@@ -45,12 +42,8 @@ func (f *FriendClient) IsFriend(ctx context.Context, possibleFriendUserID, userI
 }
 
 func (f *FriendClient) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
-	cc, err := f.getConn(ctx)
-	if err != nil {
-		return nil, err
-	}
 	req := friend.GetFriendIDsReq{UserID: ownerUserID}
-	resp, err := friend.NewFriendClient(cc).GetFriendIDs(ctx, &req)
+	resp, err := friend.NewFriendClient(f.conn).GetFriendIDs(ctx, &req)
 	if err != nil {
 		return nil, err
 	}

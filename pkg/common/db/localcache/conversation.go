@@ -7,13 +7,14 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"google.golang.org/grpc"
 )
 
 type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	SuperGroupRecvMsgNotNotifyUserIDs map[string]Hash
 	ConversationIDs                   map[string]Hash
-	client                            discoveryregistry.SvcDiscoveryRegistry
+	conn                              *grpc.ClientConn
 }
 
 type Hash struct {
@@ -22,19 +23,19 @@ type Hash struct {
 }
 
 func NewConversationLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *ConversationLocalCache {
+	conn, err := client.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+	if err != nil {
+		panic(err)
+	}
 	return &ConversationLocalCache{
 		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string]Hash),
 		ConversationIDs:                   make(map[string]Hash),
-		client:                            client,
+		conn:                              conn,
 	}
 }
 
 func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error) {
-	conn, err := g.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
-	if err != nil {
-		return nil, err
-	}
-	client := conversation.NewConversationClient(conn)
+	client := conversation.NewConversationClient(g.conn)
 	resp, err := client.GetRecvMsgNotNotifyUserIDs(ctx, &conversation.GetRecvMsgNotNotifyUserIDsReq{
 		GroupID: groupID,
 	})
@@ -45,11 +46,7 @@ func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context,
 }
 
 func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID string) ([]string, error) {
-	conn, err := g.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
-	if err != nil {
-		return nil, err
-	}
-	client := conversation.NewConversationClient(conn)
+	client := conversation.NewConversationClient(g.conn)
 	resp, err := client.GetUserConversationIDsHash(ctx, &conversation.GetUserConversationIDsHashReq{
 		OwnerUserID: userID,
 	})

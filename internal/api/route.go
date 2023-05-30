@@ -16,8 +16,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
-	zk.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
+func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
+	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
 	//f, _ := os.Create("../logs/api.log")
 	//gin.DefaultWriter = io.MultiWriter(f)
@@ -37,7 +37,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	}
 	userRouterGroup := r.Group("/user")
 	{
-		u := NewUser(zk)
+		u := NewUser(discov)
 		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "")
 		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
 		userRouterGroupChild.POST("/user_register", u.UserRegister)
@@ -52,7 +52,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		f := NewFriend(zk)
+		f := NewFriend(discov)
 		friendRouterGroup.Use(mw.GinParseToken(rdb))
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
@@ -67,7 +67,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
 		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
 	}
-	g := NewGroup(zk)
+	g := NewGroup(discov)
 	groupRouterGroup := r.Group("/group")
 	{
 
@@ -105,8 +105,8 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	////certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := NewAuth(zk)
-		u := NewUser(zk)
+		a := NewAuth(discov)
+		u := NewUser(discov)
 		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "")
 		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
 		authRouterGroupChild.POST("/user_register", u.UserRegister)    //1
@@ -117,7 +117,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	////Third service
 	thirdGroup := r.Group("/third")
 	{
-		t := NewThird(zk)
+		t := NewThird(discov)
 		thirdGroup.Use(mw.GinParseToken(rdb))
 		thirdGroup.POST("/get_rtc_invitation_info", t.GetSignalInvitationInfo)
 		thirdGroup.POST("/get_rtc_invitation_start_app", t.GetSignalInvitationInfoStartApp)
@@ -134,7 +134,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	////Message
 	msgGroup := r.Group("/msg")
 	{
-		m := NewMsg(zk)
+		m := NewMsg(discov)
 		msgGroup.Use(mw.GinParseToken(rdb))
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
@@ -158,7 +158,7 @@ func NewGinRouter(zk discoveryregistry.SvcDiscoveryRegistry, rdb redis.Universal
 	////Conversation
 	conversationGroup := r.Group("/conversation")
 	{
-		c := NewConversation(zk)
+		c := NewConversation(discov)
 		conversationGroup.Use(mw.GinParseToken(rdb))
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)

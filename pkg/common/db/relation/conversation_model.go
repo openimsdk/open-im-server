@@ -90,3 +90,8 @@ func (c *ConversationGorm) GetUserAllHasReadSeqs(ctx context.Context, ownerUserI
 	}
 	return hasReadSeqs, err
 }
+
+func (c *ConversationGorm) GetConversationByConversationID(ctx context.Context, conversationID string) (*relation.ConversationModel, error) {
+	var conversation relation.ConversationModel
+	return &conversation, utils.Wrap(c.db(ctx).Where("conversation_id = ?", conversationID).Take(&conversation).Error, "")
+}

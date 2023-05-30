@@ -8,22 +8,23 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 func NewConversation(c discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	return &Conversation{c: c}
+	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+	if err != nil {
+		panic(err)
+	}
+	return &Conversation{conn: conn}
 }
 
 type Conversation struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (o *Conversation) client(ctx context.Context) (conversation.ConversationClient, error) {
-	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
-	if err != nil {
-		return nil, err
-	}
-	return conversation.NewConversationClient(conn), nil
+	return conversation.NewConversationClient(o.conn), nil
 }
 
 func (o *Conversation) GetAllConversations(c *gin.Context) {

@@ -441,6 +441,17 @@ message RevokeMsgTips{
   string conversationID = 7;
 }
 
+message ClearConversationTips {
+  string userID = 1;
+  repeated string conversationIDs = 2;
+}
+
+message DeleteMsgsTips {
+  string userID  = 1;
+  string conversationID = 2;
+  repeated int64 seqs = 3;
+}
+
 ///////////////////signal//////////////
 message SignalReq {
   oneof payload {

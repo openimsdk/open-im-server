@@ -46,5 +46,6 @@ type ConversationModelInterface interface {
 	FindSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hashReadSeqs map[string]int64, err error)
+	GetConversationByConversationID(ctx context.Context, conversationID string) (*ConversationModel, error)
 	NewTx(tx any) ConversationModelInterface
 }

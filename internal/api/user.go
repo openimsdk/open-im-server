@@ -5,8 +5,10 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -15,20 +17,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewUser(client discoveryregistry.SvcDiscoveryRegistry) *User {
-	return &User{c: client}
+func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
+	if err != nil {
+		panic(err)
+	}
+	log.ZInfo(context.Background(), "user rpc conn", "conn", conn)
+
+	return &User{conn: conn}
 }
 
 type User struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (u *User) client(ctx context.Context) (user.UserClient, error) {
-	conn, err := u.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
-	if err != nil {
-		return nil, err
-	}
-	return user.NewUserClient(conn), nil
+	return user.NewUserClient(u.conn), nil
 }
 
 func (u *User) UserRegister(c *gin.Context) {
@@ -58,6 +62,7 @@ func (u *User) AccountCheck(c *gin.Context) {
 func (u *User) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.client, c)
 }
+
 func (u *User) GetUsersOnlineStatus(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -68,5 +73,4 @@ func (u *User) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
-
 }

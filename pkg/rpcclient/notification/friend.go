@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -13,9 +14,9 @@ import (
 )
 
 type FriendNotificationSender struct {
-	*rpcclient.MsgClient
+	*rpcclient.NotificationSender
 	// 找不到报错
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	// db controller
 	db controller.FriendDatabase
 }
@@ -30,7 +31,7 @@ func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions 
 
 func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -46,7 +47,7 @@ func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relatio
 
 func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -62,7 +63,7 @@ func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserIn
 
 func NewFriendNotificationSender(client discoveryregistry.SvcDiscoveryRegistry, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		MsgClient: rpcclient.NewMsgClient(client),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithDiscov(client)),
 	}
 	for _, opt := range opts {
 		opt(f)

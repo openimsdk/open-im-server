@@ -14,22 +14,23 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
-func NewThird(c discoveryregistry.SvcDiscoveryRegistry) *Third {
-	return &Third{c: c}
+func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+	if err != nil {
+		panic(err)
+	}
+	return &Third{conn: conn}
 }
 
 type Third struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (o *Third) client(ctx context.Context) (third.ThirdClient, error) {
-	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImThirdName)
-	if err != nil {
-		return nil, err
-	}
-	return third.NewThirdClient(conn), nil
+	return third.NewThirdClient(o.conn), nil
 }
 
 func (o *Third) ApplyPut(c *gin.Context) {

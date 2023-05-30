@@ -5,25 +5,28 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 )
 
 func NewAuth(c discoveryregistry.SvcDiscoveryRegistry) *Auth {
-	return &Auth{c: c}
+	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
+	if err != nil {
+		panic(err)
+	}
+	log.ZInfo(context.Background(), "auth rpc conn", "conn", conn)
+	return &Auth{conn: conn}
 }
 
 type Auth struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
-	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImAuthName)
-	if err != nil {
-		return nil, err
-	}
-	return auth.NewAuthClient(conn), nil
+	return auth.NewAuthClient(o.conn), nil
 }
 
 func (o *Auth) UserRegister(c *gin.Context) {

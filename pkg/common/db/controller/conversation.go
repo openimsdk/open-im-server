@@ -33,6 +33,7 @@ type ConversationDatabase interface {
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
+	GetConversationByConversationID(ctx context.Context, conversationID string) (*relationTb.ConversationModel, error)
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -261,4 +262,8 @@ func (c *conversationDatabase) GetAllConversationIDs(ctx context.Context) ([]str
 
 func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
 	return c.cache.GetUserAllHasReadSeqs(ctx, ownerUserID)
+}
+
+func (c *conversationDatabase) GetConversationByConversationID(ctx context.Context, conversationID string) (*relationTb.ConversationModel, error) {
+	return c.conversationDB.GetConversationByConversationID(ctx, conversationID)
 }
