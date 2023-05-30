@@ -7,6 +7,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"google.golang.org/protobuf/proto"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -87,26 +89,48 @@ func (m *msgServer) conversationClearSync(ctx context.Context, opt *msg.DeleteSy
 	if opt == nil {
 		return
 	}
-	for _, conversationID := range conversationIDs {
-		conversation, err := m.Conversation.GetConversation(ctx, userID, conversationID)
-		if err != nil {
-			log.ZWarn(ctx, "GetConversation error", err, "conversationID", conversationID, "userID", userID)
-			continue
-		}
-		if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
-
-		} else if conversation.ConversationType == constant.SuperGroupChatType {
-
-		}
-	}
-
 	if opt.IsSyncSelf {
-
-	} else if opt.IsSyncOther {
+		tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: conversationIDs}
+		m.notificationSender.Notification(ctx, userID, userID, constant.ClearConversationNotification, tips)
 	}
-
+	if opt.IsSyncOther {
+		for _, conversationID := range conversationIDs {
+			m.getConversationAndSendNoti(ctx, conversationID, userID, &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversationID}})
+		}
+	}
 }
 
-func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, userID string, seqs []int64, opt *msg.DeleteSyncOpt) error {
-	return nil
+func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, userID string, seqs []int64, opt *msg.DeleteSyncOpt) {
+	if opt == nil {
+		return
+	}
+	if opt.IsSyncSelf {
+		tips := &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs}
+		m.notificationSender.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, tips)
+	}
+	if opt.IsSyncOther {
+		m.getConversationAndSendNoti(ctx, conversationID, userID, &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs})
+	}
+}
+
+func (m *msgServer) getConversationAndSendNoti(ctx context.Context, conversationID, userID string, tips proto.Message) {
+	conversation, err := m.Conversation.GetConversationByConversationID(ctx, conversationID)
+	if err != nil {
+		log.ZWarn(ctx, "GetConversation error", err, "conversationID", conversationID, "userID", userID)
+		return
+	}
+	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+		var recvID string
+		if conversation.OwnerUserID == userID {
+			recvID = conversation.UserID
+		} else if conversation.UserID == userID {
+			recvID = conversation.OwnerUserID
+		} else {
+			log.ZWarn(ctx, "invalid recvID", nil, "conversation", conversation)
+			return
+		}
+		m.notificationSender.Notification(ctx, userID, recvID, constant.DeleteMsgsNotification, tips)
+	} else if conversation.ConversationType == constant.SuperGroupChatType {
+		m.notificationSender.Notification(ctx, userID, conversation.GroupID, constant.DeleteMsgsNotification, tips)
+	}
 }

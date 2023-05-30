@@ -322,3 +322,11 @@ func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req
 	}
 	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
+
+func (c *conversationServer) GetConversationByConversationID(ctx context.Context, req *pbConversation.GetConversationByConversationIDReq) (*pbConversation.GetConversationByConversationIDResp, error) {
+	conversation, err := c.conversationDatabase.GetConversationByConversationID(ctx, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbConversation.GetConversationByConversationIDResp{Conversation: convert.ConversationDB2Pb(conversation)}, nil
+}

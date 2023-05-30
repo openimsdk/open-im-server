@@ -5,7 +5,6 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 )
 
@@ -22,7 +21,7 @@ func (c *ConversationClient) ModifyConversationField(ctx context.Context, req *p
 	if err != nil {
 		return err
 	}
-	_, err = conversation.NewConversationClient(cc).ModifyConversationField(ctx, req)
+	_, err = pbConversation.NewConversationClient(cc).ModifyConversationField(ctx, req)
 	return err
 }
 
@@ -31,10 +30,10 @@ func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context
 	if err != nil {
 		return 0, err
 	}
-	var req conversation.GetConversationReq
+	var req pbConversation.GetConversationReq
 	req.OwnerUserID = userID
 	req.ConversationID = conversationID
-	conversation, err := conversation.NewConversationClient(cc).GetConversation(ctx, &req)
+	conversation, err := pbConversation.NewConversationClient(cc).GetConversation(ctx, &req)
 	if err != nil {
 		return 0, err
 	}
@@ -46,7 +45,7 @@ func (c *ConversationClient) SingleChatFirstCreateConversation(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	_, err = conversation.NewConversationClient(cc).CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+	_, err = pbConversation.NewConversationClient(cc).CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
 	return err
 }
 
@@ -55,7 +54,7 @@ func (c *ConversationClient) GroupChatFirstCreateConversation(ctx context.Contex
 	if err != nil {
 		return err
 	}
-	_, err = conversation.NewConversationClient(cc).CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
+	_, err = pbConversation.NewConversationClient(cc).CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
 	return err
 }
 
@@ -64,7 +63,7 @@ func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, owne
 	if err != nil {
 		return err
 	}
-	_, err = conversation.NewConversationClient(cc).DelGroupChatConversations(ctx, &pbConversation.DelGroupChatConversationsReq{OwnerUserID: ownerUserIDs, GroupID: groupID, MaxSeq: maxSeq})
+	_, err = pbConversation.NewConversationClient(cc).DelGroupChatConversations(ctx, &pbConversation.DelGroupChatConversationsReq{OwnerUserID: ownerUserIDs, GroupID: groupID, MaxSeq: maxSeq})
 	return err
 }
 
@@ -73,7 +72,7 @@ func (c *ConversationClient) GetConversationIDs(ctx context.Context, ownerUserID
 	if err != nil {
 		return nil, err
 	}
-	resp, err := conversation.NewConversationClient(cc).GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
+	resp, err := pbConversation.NewConversationClient(cc).GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
 	return resp.ConversationIDs, err
 }
 
@@ -82,6 +81,15 @@ func (c *ConversationClient) GetConversation(ctx context.Context, ownerUserID, c
 	if err != nil {
 		return nil, err
 	}
-	resp, err := conversation.NewConversationClient(cc).GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
+	resp, err := pbConversation.NewConversationClient(cc).GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
+	return resp.Conversation, err
+}
+
+func (c *ConversationClient) GetConversationByConversationID(ctx context.Context, conversationID string) (*pbConversation.Conversation, error) {
+	cc, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := pbConversation.NewConversationClient(cc).GetConversationByConversationID(ctx, &pbConversation.GetConversationByConversationIDReq{ConversationID: conversationID})
 	return resp.Conversation, err
 }
