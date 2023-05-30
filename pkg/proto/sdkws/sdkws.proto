@@ -122,8 +122,9 @@ message FriendRequest{
 
 ///////////////////////////////////base end/////////////////////////////////////
 enum PullOrder{
-  PullOrderDesc = 0;
-  PullOrderAsc = 1;
+  PullOrderAsc = 0;
+  PullOrderDesc = 1;
+
 }
 message PullMessageBySeqsReq{
   string userID = 1;
