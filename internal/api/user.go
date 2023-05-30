@@ -17,7 +17,7 @@ import (
 )
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
