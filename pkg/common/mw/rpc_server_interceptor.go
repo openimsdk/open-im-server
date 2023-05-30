@@ -29,6 +29,8 @@ func rpcString(v interface{}) string {
 }
 
 func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	log.ZDebug(ctx, "rpc server req", "req", rpcString(req))
+
 	//defer func() {
 	//	if r := recover(); r != nil {
 	//		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
