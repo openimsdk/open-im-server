@@ -28,6 +28,7 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	if err != nil {
 		return err
 	}
+	log.ZDebug(ctx, "get rpc ctx success")
 	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
 		// log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
