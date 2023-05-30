@@ -17,15 +17,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
 func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Message {
-	return &Message{c: c, validate: validator.New()}
+	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	return &Message{conn: conn, validate: validator.New()}
 }
 
 type Message struct {
-	c        discoveryregistry.SvcDiscoveryRegistry
+	conn     *grpc.ClientConn
 	validate *validator.Validate
 }
 
@@ -104,11 +109,7 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 }
 
 func (m *Message) client(ctx context.Context) (msg.MsgClient, error) {
-	conn, err := m.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		return nil, err
-	}
-	return msg.NewMsgClient(conn), nil
+	return msg.NewMsgClient(m.conn), nil
 }
 
 func (m *Message) GetSeq(c *gin.Context) {
@@ -208,12 +209,7 @@ func (m *Message) SendMessage(c *gin.Context) {
 		return
 	}
 	pbReq := m.newUserSendMsgReq(c, &params)
-	conn, err := m.c.GetConn(c, config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		apiresp.GinError(c, errs.ErrInternalServer)
-		return
-	}
-	client := msg.NewMsgClient(conn)
+	client := msg.NewMsgClient(m.conn)
 	var status int
 	respPb, err := client.SendMsg(c, pbReq)
 	if err != nil {

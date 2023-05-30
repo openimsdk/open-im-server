@@ -11,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
@@ -98,37 +99,29 @@ func newSessionTypeConf() map[int32]int32 {
 }
 
 type MsgClient struct {
-	*MetaClient
+	conn *grpc.ClientConn
 }
 
 func NewMsgClient(discov discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
-	return &MsgClient{MetaClient: NewMetaClient(discov, config.Config.RpcRegisterName.OpenImMsgName)}
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	return &MsgClient{conn: conn}
 }
 
 func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
-	cc, err := m.getConn(ctx)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := msg.NewMsgClient(cc).SendMsg(ctx, req)
+	resp, err := msg.NewMsgClient(m.conn).SendMsg(ctx, req)
 	return resp, err
 }
 
 func (m *MsgClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	cc, err := m.getConn(ctx)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := msg.NewMsgClient(cc).GetMaxSeq(ctx, req)
+	resp, err := msg.NewMsgClient(m.conn).GetMaxSeq(ctx, req)
 	return resp, err
 }
 
 func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	cc, err := m.getConn(ctx)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := msg.NewMsgClient(cc).PullMessageBySeqs(ctx, req)
+	resp, err := msg.NewMsgClient(m.conn).PullMessageBySeqs(ctx, req)
 	return resp, err
 }
 

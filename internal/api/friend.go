@@ -7,24 +7,25 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	"google.golang.org/grpc"
 
 	"github.com/gin-gonic/gin"
 )
 
 func NewFriend(c discoveryregistry.SvcDiscoveryRegistry) *Friend {
-	return &Friend{c: c}
+	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+	if err != nil {
+		panic(err)
+	}
+	return &Friend{conn: conn}
 }
 
 type Friend struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (o *Friend) client(ctx context.Context) (friend.FriendClient, error) {
-	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
-	if err != nil {
-		return nil, err
-	}
-	return friend.NewFriendClient(conn), nil
+	return friend.NewFriendClient(o.conn), nil
 }
 
 func (o *Friend) ApplyToAddFriend(c *gin.Context) {

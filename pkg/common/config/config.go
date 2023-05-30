@@ -173,7 +173,6 @@ type config struct {
 		OpenImGroupName          string `yaml:"openImGroupName"`
 		OpenImAuthName           string `yaml:"openImAuthName"`
 		OpenImConversationName   string `yaml:"openImConversationName"`
-		OpenImCacheName          string `yaml:"openImCacheName"`
 		OpenImRtcName            string `yaml:"openImRtcName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
 	}

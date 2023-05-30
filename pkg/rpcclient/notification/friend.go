@@ -16,7 +16,7 @@ import (
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
 	// 找不到报错
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	// db controller
 	db controller.FriendDatabase
 }
@@ -31,7 +31,7 @@ func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions 
 
 func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -47,7 +47,7 @@ func WithDBFunc(fn func(ctx context.Context, userIDs []string) (users []*relatio
 
 func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error)) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
-		f := func(ctx context.Context, userIDs []string) (result []rpcclient.CommonUser, err error) {
+		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {
 			users, err := fn(ctx, userIDs)
 			if err != nil {
 				return nil, err

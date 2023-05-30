@@ -5,28 +5,27 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
+	"google.golang.org/grpc"
 
 	"github.com/gin-gonic/gin"
 )
 
 func NewGroup(c discoveryregistry.SvcDiscoveryRegistry) *Group {
-	return &Group{c: c}
+	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
+	if err != nil {
+		panic(err)
+	}
+	return &Group{conn: conn}
 }
 
 type Group struct {
-	c discoveryregistry.SvcDiscoveryRegistry
+	conn *grpc.ClientConn
 }
 
 func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
-	conn, err := o.c.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		return nil, err
-	}
-	log.ZDebug(ctx, "get conn", "local", o.c.GetClientLocalConns())
-	return group.NewGroupClient(conn), nil
+	return group.NewGroupClient(o.conn), nil
 }
 
 func (o *Group) NewCreateGroup(c *gin.Context) {

@@ -17,7 +17,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, sdr discoveryregistry.SvcDiscoveryRegistry, fn func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(db controller.GroupDatabase, sdr discoveryregistry.SvcDiscoveryRegistry, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
 	return &GroupNotificationSender{
 		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithDiscov(sdr)),
 		getUsersInfo:       fn,
@@ -27,7 +27,7 @@ func NewGroupNotificationSender(db controller.GroupDatabase, sdr discoveryregist
 
 type GroupNotificationSender struct {
 	*rpcclient.NotificationSender
-	getUsersInfo func(ctx context.Context, userIDs []string) ([]rpcclient.CommonUser, error)
+	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	db           controller.GroupDatabase
 }
 

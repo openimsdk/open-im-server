@@ -8,12 +8,13 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
+	"google.golang.org/grpc"
 )
 
 type GroupLocalCache struct {
-	lock   sync.Mutex
-	cache  map[string]GroupMemberIDsHash
-	client discoveryregistry.SvcDiscoveryRegistry
+	lock  sync.Mutex
+	cache map[string]GroupMemberIDsHash
+	conn  *grpc.ClientConn
 }
 
 type GroupMemberIDsHash struct {
@@ -22,20 +23,20 @@ type GroupMemberIDsHash struct {
 }
 
 func NewGroupLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *GroupLocalCache {
+	conn, err := client.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
+	if err != nil {
+		panic(err)
+	}
 	return &GroupLocalCache{
-		cache:  make(map[string]GroupMemberIDsHash, 0),
-		client: client,
+		cache: make(map[string]GroupMemberIDsHash, 0),
+		conn:  conn,
 	}
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	conn, err := g.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		return nil, err
-	}
-	client := group.NewGroupClient(conn)
+	client := group.NewGroupClient(g.conn)
 	resp, err := client.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
 		GroupIDs: []string{groupID},
 	})
