@@ -1883,7 +1883,7 @@ type GetConversationByConversationIDReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ConversationID string `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
+	ConversationID string `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID,omitempty"`
 }
 
 func (x *GetConversationByConversationIDReq) Reset() {
@@ -1930,7 +1930,7 @@ type GetConversationByConversationIDResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Conversation *Conversation `protobuf:"bytes,1,opt,name=conversation,proto3" json:"conversation"`
+	Conversation *Conversation `protobuf:"bytes,1,opt,name=conversation,proto3" json:"conversation,omitempty"`
 }
 
 func (x *GetConversationByConversationIDResp) Reset() {
