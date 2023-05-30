@@ -176,7 +176,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
-	msg.SessionType = s.sessionTypeConf[contentType]
+	msg.SessionType = sesstionType
 	if msg.SessionType == constant.SuperGroupChatType {
 		msg.GroupID = recvID
 	}
