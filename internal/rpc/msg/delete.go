@@ -95,7 +95,7 @@ func (m *msgServer) conversationClearSync(ctx context.Context, opt *msg.DeleteSy
 	}
 	if opt.IsSyncOther {
 		for _, conversationID := range conversationIDs {
-			m.getConversationAndSendNoti(ctx, conversationID, userID, &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversationID}})
+			m.getConversationAndNotification(ctx, conversationID, userID, &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversationID}})
 		}
 	}
 }
@@ -109,11 +109,11 @@ func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, 
 		m.notificationSender.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, tips)
 	}
 	if opt.IsSyncOther {
-		m.getConversationAndSendNoti(ctx, conversationID, userID, &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs})
+		m.getConversationAndNotification(ctx, conversationID, userID, &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs})
 	}
 }
 
-func (m *msgServer) getConversationAndSendNoti(ctx context.Context, conversationID, userID string, tips proto.Message) {
+func (m *msgServer) getConversationAndNotification(ctx context.Context, conversationID, userID string, tips proto.Message) {
 	conversation, err := m.Conversation.GetConversationByConversationID(ctx, conversationID)
 	if err != nil {
 		log.ZWarn(ctx, "GetConversation error", err, "conversationID", conversationID, "userID", userID)
