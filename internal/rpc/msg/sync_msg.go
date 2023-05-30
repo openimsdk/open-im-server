@@ -15,23 +15,23 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
 	for _, seq := range req.SeqRanges {
 		if !utils.IsNotification(seq.ConversationID) {
-			minSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num)
+			_, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqsRange error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue
 			}
-			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs, MinSeq: minSeq}
+			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs}
 		} else {
 			var seqs []int64
 			for i := seq.Begin; i <= seq.End; i++ {
 				seqs = append(seqs, i)
 			}
-			minSeq, notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, seq.ConversationID, seqs)
+			_, notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, seq.ConversationID, seqs)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqs error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue
 			}
-			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, MinSeq: minSeq}
+			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs}
 		}
 	}
 	return resp, nil
