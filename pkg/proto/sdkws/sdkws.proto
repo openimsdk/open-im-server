@@ -121,9 +121,14 @@ message FriendRequest{
 
 
 ///////////////////////////////////base end/////////////////////////////////////
+enum PullOrder{
+  PullOrderDesc = 0;
+  PullOrderAsc = 1;
+}
 message PullMessageBySeqsReq{
   string userID = 1;
   repeated SeqRange seqRanges = 2;
+  PullOrder order = 3;
 }
 
 message SeqRange {
@@ -135,7 +140,7 @@ message SeqRange {
 
 message PullMsgs {
   repeated MsgData Msgs = 1;
-  int64 minSeq = 2;
+  bool isEnd = 2;
 }
 
 message PullMessageBySeqsResp {
