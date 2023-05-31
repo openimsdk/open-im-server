@@ -141,7 +141,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
+	userIDs := append(append(req.MemberUserIDs, req.AdminUserIDs...), req.OwnerUserID)
 	opUserID := mcontext.GetOpUserID(ctx)
 	if !utils.Contain(opUserID, userIDs...) {
 		userIDs = append(userIDs, opUserID)
@@ -190,7 +190,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
-		for _, userID := range req.InitMembers {
+		for _, userID := range req.MemberUserIDs {
 			if err := joinGroup(userID, constant.GroupOrdinaryUsers); err != nil {
 				return nil, err
 			}

@@ -7,7 +7,7 @@ option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group";
 
 
 message CreateGroupReq{
-  repeated string initMembers = 1;
+  repeated string memberUserIDs = 1;
   sdkws.GroupInfo groupInfo = 2;
   repeated string adminUserIDs = 3;
   string ownerUserID = 4; //owner
