@@ -170,5 +170,11 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/get_conversations_has_read_and_max_seq", c.GetConversationsHasReadAndMaxSeq)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
+
+	office := r.Group("/office")
+	{
+		o := NewOffice(discov)
+		_, _ = office, o
+	}
 	return r
 }

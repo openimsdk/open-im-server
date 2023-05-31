@@ -45,7 +45,7 @@ redis:
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
-  SASLUserName: 
+  SASLUserName:
   SASLPassword:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
@@ -141,7 +141,8 @@ rpcport: #rpc服务端口 默认即可
   openImPushPort: [ 10170 ]
   openImConversationPort: [ 10180 ]
   openImRtcPort: [ 10190 ]
-  openImThirdPort : [ 10200 ]
+  openImThirdPort: [ 10200 ]
+  openImOfficePort: [ 10210 ]
 
 rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
@@ -154,6 +155,7 @@ rpcregistername: #rpc注册服务名，默认即可
   openImConversationName: Conversation
   openImRtcName: Rtc
   openImThirdName: Third
+  openImOfficeName: Office
 
 log:
   storageLocation: ../logs/
@@ -187,12 +189,12 @@ push:
       secretKey: 111
     enable: false # true or false (bool)
   jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
-    appKey:  
-    masterSecret:  
-    pushUrl:  
-    pushIntent:  
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
     enable: false # true or false (bool)
-  getui:  #个推推送
+  getui: #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
@@ -200,13 +202,13 @@ push:
     enable: false # true or false (bool)
     channelID: ""
     channelName: ""
-  fcm:  #firebase cloud message 消息推送
+  fcm: #firebase cloud message 消息推送
     serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
 
 manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
-  appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
+  appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin" ]
   nickname: [ "系统通知","openIM654321", "openIM333", "openIMAdmin" ]
 
 
@@ -240,7 +242,7 @@ iospush:
 
 callback:
   # callback url 需要自行更换callback url
-  callbackUrl : "http://127.0.0.1:8080/callback"
+  callbackUrl: "http://127.0.0.1:8080/callback"
   # 开启关闭操作前后回调的配置
   callbackBeforeSendSingleMsg:
     enable: false # 回调是否启用
