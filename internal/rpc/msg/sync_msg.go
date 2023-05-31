@@ -15,7 +15,7 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
 	for _, seq := range req.SeqRanges {
 		if !utils.IsNotification(seq.ConversationID) {
-			minSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num)
+			minSeq, maxSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqsRange error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue
@@ -23,11 +23,6 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			var isEnd bool
 			switch req.Order {
 			case sdkws.PullOrder_PullOrderAsc:
-				maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, seq.ConversationID)
-				if err != nil {
-					log.ZError(ctx, "GetMaxSeq error", err, "conversationID", seq.ConversationID)
-					continue
-				}
 				isEnd = maxSeq <= seq.End
 			case sdkws.PullOrder_PullOrderDesc:
 				isEnd = seq.Begin <= minSeq
@@ -38,14 +33,9 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			for i := seq.Begin; i <= seq.End; i++ {
 				seqs = append(seqs, i)
 			}
-			minSeq, notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, seq.ConversationID, seqs)
+			minSeq, maxSeq, notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, seq.ConversationID, seqs)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqs error", err, "conversationID", seq.ConversationID, "seq", seq)
-				continue
-			}
-			maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, seq.ConversationID)
-			if err != nil {
-				log.ZError(ctx, "GetMaxSeq error", err, "conversationID", seq.ConversationID)
 				continue
 			}
 			var isEnd bool
