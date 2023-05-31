@@ -213,6 +213,10 @@ func GenConversationUniqueKeyForGroup(groupID string) string {
 	return groupID
 }
 
+func GenGroupConversationID(groupID string) string {
+	return "sg_" + groupID
+}
+
 func GenConversationUniqueKeyForSingle(sendID, recvID string) string {
 	l := []string{sendID, recvID}
 	sort.Strings(l)

@@ -272,7 +272,11 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 }
 
 func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbConversation.CreateGroupChatConversationsReq) (*pbConversation.CreateGroupChatConversationsResp, error) {
-	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
+	maxSeq, err := c.msgRpcClient.GetConversationMaxSeq(ctx, utils.GenGroupConversationID(req.GroupID))
+	if err != nil {
+		return nil, err
+	}
+	err = c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs, maxSeq)
 	if err != nil {
 		return nil, err
 	}
