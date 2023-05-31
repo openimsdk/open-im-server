@@ -142,7 +142,6 @@ rpcport: #rpc服务端口 默认即可
   openImConversationPort: [ 10180 ]
   openImRtcPort: [ 10190 ]
   openImThirdPort: [ 10200 ]
-  openImOfficePort: [ 10210 ]
 
 rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
@@ -155,7 +154,6 @@ rpcregistername: #rpc注册服务名，默认即可
   openImConversationName: Conversation
   openImRtcName: Rtc
   openImThirdName: Third
-  openImOfficeName: Office
 
 log:
   storageLocation: ../logs/

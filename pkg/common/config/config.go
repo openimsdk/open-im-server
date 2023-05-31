@@ -161,7 +161,6 @@ type config struct {
 		OpenImCachePort          []int `yaml:"openImCachePort"`
 		OpenImRtcPort            []int `yaml:"openImRtcPort"`
 		OpenImThirdPort          []int `yaml:"openImThirdPort"`
-		OpenImOfficePort         []int `yaml:"openImOfficePort"`
 	}
 	RpcRegisterName struct {
 		OpenImUserName           string `yaml:"openImUserName"`
@@ -174,7 +173,6 @@ type config struct {
 		OpenImConversationName   string `yaml:"openImConversationName"`
 		OpenImRtcName            string `yaml:"openImRtcName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
-		OpenImOfficeName         string `yaml:"openImOfficeName"`
 	}
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
