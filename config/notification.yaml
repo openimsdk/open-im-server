@@ -168,7 +168,7 @@ groupMemberInfoSet:
 
 #############################friend#################################
 friendApplicationAdded:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -188,7 +188,7 @@ friendApplicationApproved:
     ext: "Someone applies to add your friend application"
 
 friendApplicationRejected:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -198,7 +198,7 @@ friendApplicationRejected:
     ext: "Someone rejected your friend application"
 
 friendAdded:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -208,7 +208,7 @@ friendAdded:
     ext: "We have become friends"
 
 friendDeleted:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -218,7 +218,7 @@ friendDeleted:
     ext: "deleted a friend"
 
 friendRemarkSet:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -228,7 +228,7 @@ friendRemarkSet:
     ext: "Your friend's profile has been changed"
 
 blackAdded:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -238,7 +238,7 @@ blackAdded:
     ext: "blocked a user"
 
 blackDeleted:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
@@ -248,7 +248,7 @@ blackDeleted:
     ext: "Remove a blocked user"
 
 friendInfoUpdated:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
