@@ -19,7 +19,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	//if err != nil {
 	//	return err
 	//}
-	office.RegisterOfficeServiceServer(server, &officeServer{
+	office.RegisterOfficeServer(server, &officeServer{
 		officeDatabase: controller.NewOfficeDatabase(mongo),
 		msgRpcClient:   rpcclient.NewMsgClient(client),
 		user:           rpcclient.NewUserClient(client),
