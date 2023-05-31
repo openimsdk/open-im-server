@@ -11,3 +11,4 @@ protoc --go_out=plugins=grpc:./sdkws --go_opt=module=github.com/OpenIMSDK/Open-I
 protoc --go_out=plugins=grpc:./third --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third third/third.proto
 protoc --go_out=plugins=grpc:./user --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user user/user.proto
 protoc --go_out=plugins=grpc:./wrapperspb --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb wrapperspb/wrapperspb.proto
+protoc --go_out=plugins=grpc:./office --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/office office/office.proto
