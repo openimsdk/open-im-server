@@ -125,6 +125,14 @@ func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMes
 	return resp, err
 }
 
+func (m *MsgClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
+	resp, err := msg.NewMsgClient(m.conn).GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
+	if err != nil {
+		return 0, err
+	}
+	return resp.MaxSeq, nil
+}
+
 type NotificationSender struct {
 	contentTypeConf map[int32]config.NotificationConf
 	sessionTypeConf map[int32]int32

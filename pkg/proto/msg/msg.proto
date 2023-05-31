@@ -213,11 +213,21 @@ message DeleteMsgPhysicalBySeqReq {
 }
 
 message DeleteMsgPhysicalBySeqResp {
+  
+}
+
+message GetConversationMaxSeqReq {
+  string conversationID = 1;
+}
+
+message GetConversationMaxSeqResp {
+  int64 maxSeq = 1;
 }
 
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
+  rpc GetConversationMaxSeq(GetConversationMaxSeqReq) returns(GetConversationMaxSeqResp);
   //拉取历史消息（包括用户的，以及指定群组的）
   rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
   //发送消息
