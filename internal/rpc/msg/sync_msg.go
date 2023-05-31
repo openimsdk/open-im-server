@@ -20,7 +20,19 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 				log.ZWarn(ctx, "GetMsgBySeqsRange error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue
 			}
-			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs}
+			var isEnd bool
+			switch req.Order {
+			case sdkws.PullOrder_PullOrderAsc:
+				maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, seq.ConversationID)
+				if err != nil {
+					log.ZError(ctx, "GetMaxSeq error", err, "conversationID", seq.ConversationID)
+					continue
+				}
+				isEnd = maxSeq <= seq.End
+			case sdkws.PullOrder_PullOrderDesc:
+				isEnd = seq.Begin <= minSeq
+			}
+			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs, IsEnd: isEnd}
 		} else {
 			var seqs []int64
 			for i := seq.Begin; i <= seq.End; i++ {
@@ -31,7 +43,19 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 				log.ZWarn(ctx, "GetMsgBySeqs error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue
 			}
-			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs}
+			maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, seq.ConversationID)
+			if err != nil {
+				log.ZError(ctx, "GetMaxSeq error", err, "conversationID", seq.ConversationID)
+				continue
+			}
+			var isEnd bool
+			switch req.Order {
+			case sdkws.PullOrder_PullOrderAsc:
+				isEnd = maxSeq <= seq.End
+			case sdkws.PullOrder_PullOrderDesc:
+				isEnd = seq.Begin <= minSeq
+			}
+			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, IsEnd: isEnd}
 		}
 	}
 	return resp, nil
