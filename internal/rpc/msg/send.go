@@ -7,13 +7,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (m *msgServer) SendMsg(ctx context.Context, req *msg.SendMsgReq) (resp *msg.SendMsgResp, error error) {
-	resp = &msg.SendMsgResp{}
+func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
+	resp = &pbMsg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)
 	if !flag {
 		return nil, errs.ErrMessageHasReadDisable.Wrap()
@@ -95,7 +94,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		if err != nil && err != errs.ErrCallbackContinue {
 			return nil, err
 		}
-		resp = &msg.SendMsgResp{
+		resp = &pbMsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,
 			ClientMsgID: req.MsgData.ClientMsgID,
 			SendTime:    req.MsgData.SendTime,
