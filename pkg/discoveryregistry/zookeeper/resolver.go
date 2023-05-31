@@ -22,14 +22,13 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 	log.ZDebug(context.Background(), "start resolve now", "target", r.target)
 	newConns, err := r.getConnsRemote(strings.TrimLeft(r.target.URL.Path, "/"))
 	if err != nil {
+		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
 		return
 	}
-	log.ZDebug(context.Background(), "resolve now", "newConns", newConns, "target", r.target)
 	r.lock.Lock()
 	r.addrs = newConns
 	r.lock.Unlock()
 	r.cc.UpdateState(resolver.State{Addresses: r.addrs})
-	log.ZDebug(context.Background(), "resolve now ok", "newConns", newConns, "target", r.target)
 }
 
 func (s *Resolver) Close() {}
@@ -44,7 +43,6 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.resolvers[strings.TrimLeft(target.URL.Path, "/")] = r
-	log.ZDebug(context.Background(), "build resolver ok", "target", target)
 	return r, nil
 }
 
