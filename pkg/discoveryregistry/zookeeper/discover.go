@@ -95,9 +95,20 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 	return ret, nil
 }
 
+// func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+// 	// newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+// 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(s.options, opts...)...)
+// }
+
 func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	// newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
-	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(s.options, opts...)...)
+	conns, err := s.GetConns(ctx, serviceName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if len(conns) == 0 {
+		return nil, ErrConnIsNil
+	}
+	return conns[0], nil
 }
 
 func (s *ZkClient) GetFirstConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
