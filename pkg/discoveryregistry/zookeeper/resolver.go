@@ -3,7 +3,6 @@ package openKeeper
 import (
 	"context"
 	"strings"
-	"sync"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"google.golang.org/grpc/resolver"
@@ -13,7 +12,6 @@ type Resolver struct {
 	target resolver.Target
 	cc     resolver.ClientConn
 	addrs  []resolver.Address
-	lock   sync.RWMutex
 
 	getConnsRemote func(serviceName string) (conns []resolver.Address, err error)
 }
@@ -25,9 +23,7 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
 		return
 	}
-	r.lock.Lock()
 	r.addrs = newConns
-	r.lock.Unlock()
 	r.cc.UpdateState(resolver.State{Addresses: r.addrs})
 }
 

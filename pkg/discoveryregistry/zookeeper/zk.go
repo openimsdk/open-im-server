@@ -103,8 +103,8 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	resolver.Register(client)
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go client.refresh(&wg)
-	go client.watch(&wg)
+	// go client.refresh(&wg)
+	// go client.watch(&wg)
 	wg.Wait()
 	return client, nil
 }

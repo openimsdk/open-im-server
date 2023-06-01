@@ -71,7 +71,6 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 
 func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 	s.lock.Lock()
-	defer s.lock.Unlock()
 	opts = append(s.options, opts...)
 	conns := s.localConns[serviceName]
 	if len(conns) == 0 {
@@ -82,6 +81,7 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 		}
 		s.localConns[serviceName] = conns
 	}
+	s.lock.Unlock()
 	var ret []*grpc.ClientConn
 	for _, conn := range conns {
 		c, err := grpc.DialContext(ctx, conn.Addr, append(s.options, opts...)...)
@@ -94,9 +94,8 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 }
 
 func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	// newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
-	// return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
-	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(s.options, opts...)...)
+	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }
 
 func (s *ZkClient) GetFirstConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
