@@ -1,11 +1,13 @@
 package openKeeper
 
 import (
+	"context"
 	"net"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -102,8 +104,8 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	}
 	resolver.Register(client)
 	var wg sync.WaitGroup
-	wg.Add(1)
-	// go client.refresh(&wg)
+	wg.Add(2)
+	go client.refresh(&wg)
 	go client.watch(&wg)
 	wg.Wait()
 	return client, nil
@@ -130,6 +132,7 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 	wg.Done()
 	for range s.ticker.C {
+		log.ZDebug(context.Background(), "refresh local conns")
 		s.lock.Lock()
 		for rpcName := range s.resolvers {
 			s.flushResolver(rpcName)
