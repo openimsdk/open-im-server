@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -339,20 +338,15 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 }
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
-	var totalUnExistSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
 		//log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
-		msgs, unexistSeqs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
+		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
 		for _, msg := range msgs {
 			totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 		}
-		totalUnExistSeqs = append(totalUnExistSeqs, unexistSeqs...)
-	}
-	for _, unexistSeq := range totalUnExistSeqs {
-		totalMsgs = append(totalMsgs, db.msg.GenExceptionMessageBySeqs([]int64{unexistSeq})...)
 	}
 	return totalMsgs, nil
 }
@@ -395,55 +389,21 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 // 	return seqMsgs, nil
 // }
 
-func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, unExistSeqs []int64, err error) {
-	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
-	if err != nil {
-		return nil, nil, err
-	}
-	log.ZDebug(ctx, "findMsgInfoBySeq", "docID", docID, "seqs", seqs, "len(msgs)", len(msgs))
-	totalMsgs = append(totalMsgs, msgs...)
-	if len(msgs) == 0 {
-		unExistSeqs = seqs
-	} else {
-		for _, seq := range seqs {
-			for i, msg := range msgs {
-				if msg.Msg != nil && seq == msg.Msg.Seq {
-					break
-				}
-				if i == len(msgs)-1 {
-					unExistSeqs = append(unExistSeqs, seq)
-				}
-			}
-		}
-	}
-	return totalMsgs, unExistSeqs, nil
+func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, err error) {
+	return db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 }
 
 func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID string, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {
 	log.ZDebug(ctx, "getMsgBySeqsRange", "conversationID", conversationID, "allSeqs", allSeqs, "begin", begin, "end", end)
-	var totalNotExistSeqs []int64
-	// mongo index
-	var delSeqs []int64
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, allSeqs) {
 		log.ZDebug(ctx, "getMsgBySeqsRange", "docID", docID, "seqs", seqs)
-		msgs, notExistSeqs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
+		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
 		if err != nil {
 			return nil, err
 		}
-		log.ZDebug(ctx, "getMsgBySeqsRange", "unExistSeqs", notExistSeqs, "msgs", len(msgs))
 		for _, msg := range msgs {
-			if utils.IsContain(userID, msg.DelList) {
-				delSeqs = append(delSeqs, msg.Msg.Seq)
-			}
 			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg.Msg))
 		}
-		totalNotExistSeqs = append(totalNotExistSeqs, notExistSeqs...)
-	}
-	log.ZDebug(ctx, "getMsgBySeqsRange", "totalNotExistSeqs", totalNotExistSeqs, "del seqs", delSeqs)
-	// 补未找到的消息
-	seqMsgs = append(seqMsgs, db.msg.GenExceptionMessageBySeqs(totalNotExistSeqs)...)
-	if len(totalNotExistSeqs) > 0 || len(delSeqs) > 0 {
-		sort.Sort(utils.MsgBySeq(seqMsgs))
 	}
 	return seqMsgs, nil
 }

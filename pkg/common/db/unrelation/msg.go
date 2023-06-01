@@ -239,8 +239,13 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 	if len(msgDocModel) == 0 {
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
-	for i, msg := range msgDocModel[0].Msg {
-		if msg != nil && msg.Msg != nil && msg.Revoke != nil {
+	msgs = make([]*table.MsgInfoModel, 0, len(msgDocModel[0].Msg))
+	for i := range msgDocModel[0].Msg {
+		msg := msgDocModel[0].Msg[i]
+		if msg == nil || msg.Msg == nil {
+			continue
+		}
+		if msg.Revoke != nil {
 			var conversationID string
 			if index := strings.LastIndex(docID, ":"); index > 0 {
 				conversationID = docID[:index]
@@ -258,11 +263,12 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 				Detail: string(tipsData),
 			}
 			content, _ := json.Marshal(&elem)
-			msgDocModel[0].Msg[i].Msg.ContentType = constant.Revoke
-			msgDocModel[0].Msg[i].Msg.Content = string(content)
+			msg.Msg.ContentType = constant.Revoke
+			msg.Msg.Content = string(content)
 		}
+		msgs = append(msgs, msg)
 	}
-	return msgDocModel[0].Msg, nil
+	return msgs, nil
 }
 
 func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, error) {
