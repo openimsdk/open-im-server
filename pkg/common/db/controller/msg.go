@@ -457,7 +457,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
 	}
-	if userMinSeq < minSeq {
+	if userMinSeq > minSeq {
 		minSeq = userMinSeq
 	}
 	if minSeq > end {
