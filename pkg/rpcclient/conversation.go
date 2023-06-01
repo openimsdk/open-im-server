@@ -2,7 +2,6 @@ package rpcclient
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -31,12 +30,10 @@ func (c *ConversationClient) GetSingleConversationRecvMsgOpt(ctx context.Context
 	var req pbConversation.GetConversationReq
 	req.OwnerUserID = userID
 	req.ConversationID = conversationID
-	log.ZDebug(ctx, "GetSingleConversationRecvMsgOpt start", "req", req)
 	conversation, err := pbConversation.NewConversationClient(c.conn).GetConversation(ctx, &req)
 	if err != nil {
 		return 0, err
 	}
-	log.ZDebug(ctx, "GetSingleConversationRecvMsgOpt end", "req", req)
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 

@@ -34,7 +34,7 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 func (s *Resolver) Close() {}
 
 func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	log.ZDebug(context.Background(), "build resolver", "target", target, "opts", opts, "cc", cc)
+	log.ZDebug(context.Background(), "build resolver", "target", target, "cc", cc)
 	r := &Resolver{}
 	r.target = target
 	r.cc = cc
