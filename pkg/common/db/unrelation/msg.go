@@ -2,8 +2,11 @@ package unrelation
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"strings"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -235,6 +238,29 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 	}
 	if len(msgDocModel) == 0 {
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
+	}
+	for i, model := range msgDocModel[0].Msg {
+		if model.Msg != nil && model.Revoke != nil {
+			var conversationID string
+			if index := strings.LastIndex(docID, ":"); index > 0 {
+				conversationID = docID[:index]
+			}
+			tips := sdkws.RevokeMsgTips{
+				RevokerUserID:  model.Revoke.UserID,
+				ClientMsgID:    model.Msg.ClientMsgID,
+				RevokeTime:     model.Revoke.Time,
+				SesstionType:   model.Msg.SessionType,
+				Seq:            model.Msg.Seq,
+				ConversationID: conversationID,
+			}
+			tipsData, _ := json.Marshal(&tips)
+			elem := sdkws.NotificationElem{
+				Detail: string(tipsData),
+			}
+			content, _ := json.Marshal(&elem)
+			msgDocModel[0].Msg[i].Msg.ContentType = constant.Revoke
+			msgDocModel[0].Msg[i].Msg.Content = string(content)
+		}
 	}
 	return msgDocModel[0].Msg, nil
 }
