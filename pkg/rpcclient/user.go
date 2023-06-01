@@ -11,23 +11,27 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type UserClient struct {
-	conn *grpc.ClientConn
+	MetaClient
 }
 
-func NewUserClient(discov discoveryregistry.SvcDiscoveryRegistry) *UserClient {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
-	if err != nil {
-		panic(err)
+func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *UserClient {
+	return &UserClient{
+		MetaClient: MetaClient{
+			client:          client,
+			rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
+		},
 	}
-	return &UserClient{conn: conn}
 }
 
 func (u *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
-	resp, err := user.NewUserClient(u.conn).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
+	cc, err := u.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := user.NewUserClient(cc).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
 	if err != nil {
@@ -93,7 +97,11 @@ func (u *UserClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string,
 }
 
 func (u *UserClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-	resp, err := user.NewUserClient(u.conn).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
+	cc, err := u.getConn(ctx)
+	if err != nil {
+		return 0, err
+	}
+	resp, err := user.NewUserClient(cc).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
 	})
 	if err != nil {
