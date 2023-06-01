@@ -89,7 +89,7 @@ func (m *msgServer) conversationClearSync(ctx context.Context, opt *msg.DeleteSy
 	if opt == nil {
 		return
 	}
-	if opt.IsSyncSelf {
+	if opt.IsSyncSelf && !opt.IsSyncOther {
 		tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: conversationIDs}
 		m.notificationSender.Notification(ctx, userID, userID, constant.ClearConversationNotification, tips)
 	}
@@ -104,7 +104,7 @@ func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, 
 	if opt == nil {
 		return
 	}
-	if opt.IsSyncSelf {
+	if opt.IsSyncSelf && !opt.IsSyncOther {
 		tips := &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs}
 		m.notificationSender.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, tips)
 	}
