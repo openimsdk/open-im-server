@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/pkg/errors"
 
 	"github.com/go-zookeeper/zk"
@@ -24,6 +25,7 @@ func (s *ZkClient) watch(wg *sync.WaitGroup) {
 		case zk.EventSession:
 		case zk.EventNodeCreated:
 		case zk.EventNodeChildrenChanged:
+			log.ZDebug(context.Background(), "zk event", "event", event.Path)
 			l := strings.Split(event.Path, "/")
 			s.lock.Lock()
 			if len(l) > 1 {
