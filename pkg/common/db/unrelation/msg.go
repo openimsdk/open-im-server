@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
@@ -182,7 +181,6 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 }
 
 func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID string, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
-	log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc in", "docID", docID, "userID", userID, "seqs", seqs)
 	indexs := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
@@ -238,26 +236,21 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 	if err := cur.All(ctx, &msgDocModel); err != nil {
 		return nil, errs.Wrap(err)
 	}
-	log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc mongo res", "docID", docID, "userID", userID, "seqs", seqs, "msgDocModel", len(msgDocModel))
 	if len(msgDocModel) == 0 {
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
-	for i, model := range msgDocModel[0].Msg {
-		if i < 10 {
-			log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc for", "index", i, "model", model, "eq nil", model == nil)
-			log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc for", "index", i, "msg", model.Msg, "del", model.DelList, "revoke", model.Revoke)
-		}
-		if model.Msg != nil && model.Revoke != nil {
+	for i, msg := range msgDocModel[0].Msg {
+		if msg != nil && msg.Msg != nil && msg.Revoke != nil {
 			var conversationID string
 			if index := strings.LastIndex(docID, ":"); index > 0 {
 				conversationID = docID[:index]
 			}
 			tips := sdkws.RevokeMsgTips{
-				RevokerUserID:  model.Revoke.UserID,
-				ClientMsgID:    model.Msg.ClientMsgID,
-				RevokeTime:     model.Revoke.Time,
-				SesstionType:   model.Msg.SessionType,
-				Seq:            model.Msg.Seq,
+				RevokerUserID:  msg.Revoke.UserID,
+				ClientMsgID:    msg.Msg.ClientMsgID,
+				RevokeTime:     msg.Revoke.Time,
+				SesstionType:   msg.Msg.SessionType,
+				Seq:            msg.Msg.Seq,
 				ConversationID: conversationID,
 			}
 			tipsData, _ := json.Marshal(&tips)

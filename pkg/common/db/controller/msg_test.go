@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -186,9 +187,12 @@ func Test_Revoke(t *testing.T) {
 }
 
 func Test_FindBySeq(t *testing.T) {
+	if err := log.InitFromConfig("", 6, true, false, "", 2); err != nil {
+		t.Fatal(err)
+	}
 	db := GetDB()
 	ctx := context.Background()
-	fmt.Println(db.getMsgBySeqs(ctx, "100", "si_100_101", []int64{1}))
+	fmt.Println(db.msgDocDatabase.(*unrelation.MsgMongoDriver).GetMsgBySeqIndexIn1Doc(ctx, "100", "si_100_101:0", []int64{1}))
 	//res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
 	//if err != nil {
 	//	t.Fatal(err)
