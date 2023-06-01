@@ -39,6 +39,7 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.resolvers[strings.TrimLeft(target.URL.Path, "/")] = r
+	log.ZDebug(context.Background(), "build resolver finished", "target", target, "cc", cc)
 	return r, nil
 }
 
