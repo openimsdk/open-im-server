@@ -244,6 +244,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 	}
 	for i, model := range msgDocModel[0].Msg {
 		if i < 10 {
+			log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc for", "index", i, "model", model, "eq nil", model == nil)
 			log.ZDebug(ctx, "GetMsgBySeqIndexIn1Doc for", "index", i, "msg", model.Msg, "del", model.DelList, "revoke", model.Revoke)
 		}
 		if model.Msg != nil && model.Revoke != nil {
