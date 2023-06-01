@@ -24,8 +24,10 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 		return
 	}
 	r.addrs = newConns
+	if err := r.cc.UpdateState(resolver.State{Addresses: newConns}); err != nil {
+		log.ZError(context.Background(), "UpdateState error", err, "conns", newConns)
+	}
 	log.ZDebug(context.Background(), "resolve now finished", "target", r.target, "conns", r.addrs)
-	r.cc.UpdateState(resolver.State{Addresses: newConns})
 }
 
 func (s *Resolver) Close() {}
