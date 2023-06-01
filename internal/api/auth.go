@@ -18,15 +18,20 @@ func NewAuth(c discoveryregistry.SvcDiscoveryRegistry) *Auth {
 		panic(err)
 	}
 	log.ZInfo(context.Background(), "auth rpc conn", "conn", conn)
-	return &Auth{conn: conn}
+	return &Auth{conn: conn, discov: c}
 }
 
 type Auth struct {
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
-	return auth.NewAuthClient(o.conn), nil
+	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImAuthName)
+	if err != nil {
+		return nil, err
+	}
+	return auth.NewAuthClient(c), nil
 }
 
 func (o *Auth) UserRegister(c *gin.Context) {
