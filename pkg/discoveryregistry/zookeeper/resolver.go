@@ -24,6 +24,7 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 		return
 	}
 	r.addrs = newConns
+	log.ZDebug(context.Background(), "resolve now finished", "target", r.target, "conns", r.addrs)
 	r.cc.UpdateState(resolver.State{Addresses: r.addrs})
 }
 
