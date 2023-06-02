@@ -1129,9 +1129,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
 	resp := &pbGroup.MuteGroupMemberResp{}
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
-		return nil, err
-	}
+	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	//	return nil, err
+	//}
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
@@ -1177,9 +1177,9 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	//		return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
 	//	}
 	//}
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
-		return nil, err
-	}
+	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	//	return nil, err
+	//}
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
