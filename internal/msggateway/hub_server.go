@@ -88,6 +88,8 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 		}
 		clients, ok := s.LongConnServer.GetUserAllCons(v)
 		if !ok {
+			tempT.Resp = resp
+			singleUserResult = append(singleUserResult, tempT)
 			continue
 		}
 		log.ZDebug(ctx, "SuperGroupOnlineBatchPushOneMsg", "clients", clients)
