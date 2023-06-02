@@ -1129,17 +1129,29 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
 	resp := &pbGroup.MuteGroupMemberResp{}
+	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	//	return nil, err
+	//}
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if !(mcontext.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
-		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
+	if !tokenverify.IsAppManagerUid(ctx) {
+		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		if opMember.RoleLevel <= member.RoleLevel {
-			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+		switch member.RoleLevel {
+		case constant.GroupOwner:
+			return nil, errs.ErrNoPermission.Wrap("set group owner mute")
+		case constant.GroupAdmin:
+			if opMember.RoleLevel != constant.GroupOwner {
+				return nil, errs.ErrNoPermission.Wrap("set group admin mute")
+			}
+		case constant.GroupOrdinaryUsers:
+			if !(opMember.RoleLevel == constant.GroupAdmin || opMember.RoleLevel == constant.GroupOwner) {
+				return nil, errs.ErrNoPermission.Wrap("set group ordinary users mute")
+			}
 		}
 	}
 	data := UpdateGroupMemberMutedTimeMap(time.Now().Add(time.Second * time.Duration(req.MutedSeconds)))
@@ -1152,17 +1164,42 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 
 func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
 	resp := &pbGroup.CancelMuteGroupMemberResp{}
+	//member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if !(mcontext.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
+	//	opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	if opMember.RoleLevel <= member.RoleLevel {
+	//		return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+	//	}
+	//}
+	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	//	return nil, err
+	//}
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if !(mcontext.GetOpUserID(ctx) == req.UserID || tokenverify.IsAppManagerUid(ctx)) {
+	if !tokenverify.IsAppManagerUid(ctx) {
 		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		if opMember.RoleLevel <= member.RoleLevel {
-			return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+		switch member.RoleLevel {
+		case constant.GroupOwner:
+			return nil, errs.ErrNoPermission.Wrap("set group owner mute")
+		case constant.GroupAdmin:
+			if opMember.RoleLevel != constant.GroupOwner {
+				return nil, errs.ErrNoPermission.Wrap("set group admin mute")
+			}
+		case constant.GroupOrdinaryUsers:
+			if !(opMember.RoleLevel == constant.GroupAdmin || opMember.RoleLevel == constant.GroupOwner) {
+				return nil, errs.ErrNoPermission.Wrap("set group ordinary users mute")
+			}
 		}
 	}
 	data := UpdateGroupMemberMutedTimeMap(time.Unix(0, 0))
