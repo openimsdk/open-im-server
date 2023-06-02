@@ -327,10 +327,10 @@ func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req
 	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
 
-func (c *conversationServer) GetConversationByConversationID(ctx context.Context, req *pbConversation.GetConversationByConversationIDReq) (*pbConversation.GetConversationByConversationIDResp, error) {
-	conversation, err := c.conversationDatabase.GetConversationByConversationID(ctx, req.ConversationID)
+func (c *conversationServer) GetConversationsByConversationID(ctx context.Context, req *pbConversation.GetConversationsByConversationIDReq) (*pbConversation.GetConversationsByConversationIDResp, error) {
+	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetConversationByConversationIDResp{Conversation: convert.ConversationDB2Pb(conversation)}, nil
+	return &pbConversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }

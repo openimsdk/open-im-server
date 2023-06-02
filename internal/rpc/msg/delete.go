@@ -6,9 +6,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"google.golang.org/protobuf/proto"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -19,18 +19,20 @@ func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
 	return minSeqs
 }
 
+func (m *msgServer) validateDeleteSyncOpt(opt *msg.DeleteSyncOpt) (isSyncSelf, isSyncOther bool) {
+	if opt == nil {
+		return
+	}
+	return opt.IsSyncSelf, opt.IsSyncOther
+}
+
 func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearConversationsMsgReq) (*msg.ClearConversationsMsgResp, error) {
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, req.ConversationIDs)
-	if err != nil {
+	if err := m.clearConversation(ctx, req.ConversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, req.UserID, m.getMinSeqs(maxSeqs)); err != nil {
-		return nil, err
-	}
-	m.conversationClearSync(ctx, req.DeleteSyncOpt, req.UserID, req.ConversationIDs)
 	return &msg.ClearConversationsMsgResp{}, nil
 }
 
@@ -43,14 +45,9 @@ func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMs
 		return nil, err
 	}
 	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
-	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
-	if err != nil {
+	if err := m.clearConversation(ctx, conversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, req.UserID, m.getMinSeqs(maxSeqs)); err != nil {
-		return nil, err
-	}
-	m.conversationClearSync(ctx, req.DeleteSyncOpt, req.UserID, conversationIDs)
 	return &msg.UserClearAllMsgResp{}, nil
 }
 
@@ -58,10 +55,36 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
-		return nil, err
+	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(req.DeleteSyncOpt)
+	if isSyncOther {
+		if err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs); err != nil {
+			return nil, err
+		}
+		conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{req.ConversationID})
+		if err != nil {
+			return nil, err
+		}
+		var recvID string
+		if conversations[0].ConversationType == constant.SingleChatType || conversations[0].ConversationType == constant.NotificationChatType {
+			if conversations[0].OwnerUserID == recvID {
+				recvID = conversations[0].UserID
+			} else if conversations[0].UserID == recvID {
+				recvID = conversations[0].OwnerUserID
+			}
+		} else if conversations[0].ConversationType == constant.SuperGroupChatType {
+			recvID = conversations[0].GroupID
+		}
+		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
+		m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.DeleteMsgsNotification, conversations[0].ConversationType, tips)
+	} else {
+		if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
+			return nil, err
+		}
+		if isSyncSelf {
+			tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
+			m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, req.UserID, constant.DeleteMsgsNotification, constant.SingleChatType, tips)
+		}
 	}
-	m.DeleteMsgsNotification(ctx, req.ConversationID, req.UserID, req.Seqs, req.DeleteSyncOpt)
 	return &msg.DeleteMsgsResp{}, nil
 }
 
@@ -85,52 +108,50 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 	return &msg.DeleteMsgPhysicalResp{}, nil
 }
 
-func (m *msgServer) conversationClearSync(ctx context.Context, opt *msg.DeleteSyncOpt, userID string, conversationIDs []string) {
-	if opt == nil {
-		return
-	}
-	if opt.IsSyncSelf && !opt.IsSyncOther {
-		tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: conversationIDs}
-		m.notificationSender.Notification(ctx, userID, userID, constant.ClearConversationNotification, tips)
-	}
-	if opt.IsSyncOther {
-		for _, conversationID := range conversationIDs {
-			m.getConversationAndNotification(ctx, conversationID, userID, &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversationID}})
-		}
-	}
-}
-
-func (m *msgServer) DeleteMsgsNotification(ctx context.Context, conversationID, userID string, seqs []int64, opt *msg.DeleteSyncOpt) {
-	if opt == nil {
-		return
-	}
-	if opt.IsSyncSelf && !opt.IsSyncOther {
-		tips := &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs}
-		m.notificationSender.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, tips)
-	}
-	if opt.IsSyncOther {
-		m.getConversationAndNotification(ctx, conversationID, userID, &sdkws.DeleteMsgsTips{UserID: userID, ConversationID: conversationID, Seqs: seqs})
-	}
-}
-
-func (m *msgServer) getConversationAndNotification(ctx context.Context, conversationID, userID string, tips proto.Message) {
-	conversation, err := m.Conversation.GetConversationByConversationID(ctx, conversationID)
+func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
+	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, conversationIDs)
 	if err != nil {
-		log.ZWarn(ctx, "GetConversation error", err, "conversationID", conversationID, "userID", userID)
-		return
+		return err
 	}
-	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
-		var recvID string
-		if conversation.OwnerUserID == userID {
-			recvID = conversation.UserID
-		} else if conversation.UserID == userID {
-			recvID = conversation.OwnerUserID
-		} else {
-			log.ZWarn(ctx, "invalid recvID", nil, "conversation", conversation)
-			return
+	var existConversations []*conversation.Conversation
+	var existConversationIDs []string
+	for _, conversation := range conversations {
+		existConversations = append(existConversations, conversation)
+		existConversationIDs = append(existConversationIDs, conversation.ConversationID)
+	}
+	log.ZDebug(ctx, "ClearConversationsMsg", "existConversationIDs", existConversationIDs)
+	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, existConversationIDs)
+	if err != nil {
+		return err
+	}
+	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(deleteSyncOpt)
+	if !isSyncOther {
+		if err := m.MsgDatabase.SetUserConversationsMinSeqs(ctx, userID, m.getMinSeqs(maxSeqs)); err != nil {
+			return err
 		}
-		m.notificationSender.Notification(ctx, userID, recvID, constant.DeleteMsgsNotification, tips)
-	} else if conversation.ConversationType == constant.SuperGroupChatType {
-		m.notificationSender.Notification(ctx, userID, conversation.GroupID, constant.DeleteMsgsNotification, tips)
+		// notification 2 self
+		if isSyncSelf {
+			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: existConversationIDs}
+			m.notificationSender.NotificationWithSesstionType(ctx, userID, userID, constant.ClearConversationNotification, constant.SingleChatType, tips)
+		}
+	} else {
+		if err := m.MsgDatabase.SetMinSeqs(ctx, m.getMinSeqs(maxSeqs)); err != nil {
+			return err
+		}
+		for _, conversation := range existConversations {
+			var recvID string
+			if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+				if conversation.OwnerUserID == recvID {
+					recvID = conversation.UserID
+				} else if conversation.UserID == recvID {
+					recvID = conversation.OwnerUserID
+				}
+			} else if conversation.ConversationType == constant.SuperGroupChatType {
+				recvID = conversation.GroupID
+			}
+			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
+			m.notificationSender.NotificationWithSesstionType(ctx, userID, recvID, constant.ClearConversationNotification, conversation.ConversationType, tips)
+		}
 	}
+	return nil
 }

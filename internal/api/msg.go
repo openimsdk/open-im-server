@@ -124,6 +124,10 @@ func (m *Message) RevokeMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.RevokeMsg, m.client, c)
 }
 
+func (m *Message) MarkMsgsAsRead(c *gin.Context) {
+	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.client, c)
+}
+
 func (m *Message) ClearConversationsMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.client, c)
 }

@@ -167,6 +167,15 @@ message RevokeMsgReq {
 message RevokeMsgResp {
 }
 
+message MarkMsgsAsReadReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+  string userID = 3;
+}
+
+message MarkMsgsAsReadResp {
+}
+
 message DeleteSyncOpt {
   bool IsSyncSelf = 3;
   bool IsSyncOther = 4;
@@ -249,6 +258,7 @@ service msg {
   //获取消息发送状态
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
   rpc RevokeMsg(RevokeMsgReq) returns(RevokeMsgResp);
+  rpc MarkMsgsAsRead(MarkMsgsAsReadReq) returns(MarkMsgsAsReadResp);
   // 修改消息
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
   rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
