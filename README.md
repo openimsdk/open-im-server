@@ -42,7 +42,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 - Supports multiple protocols
 
 ## Community
-- Visit the Chinese official website here: [Open-IM中文开发文档](https://www.openim.online/zh)
+- Visit the Chinese official website here: [📚 Open-IM docs](https://www.openim.online/zh)
 
 ## Quick start
 
