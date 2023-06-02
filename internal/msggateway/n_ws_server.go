@@ -132,6 +132,8 @@ func (ws *WsServer) registerClient(client *Client) {
 		if clientOK { //已经有同平台的连接存在
 			ws.clients.Set(client.userID, client)
 			ws.multiTerminalLoginChecker(cli)
+			log.ZInfo(client.ctx, "repeat login", "userID", client.userID, "platformID", client.platformID)
+			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
 			ws.clients.Set(client.userID, client)
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
