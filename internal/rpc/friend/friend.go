@@ -113,7 +113,7 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbfriend.ImportFr
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbfriend.RespondFriendApplyReq) (resp *pbfriend.RespondFriendApplyResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.RespondFriendApplyResp{}
-	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := tokenverify.CheckAccessV3(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
 

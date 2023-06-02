@@ -11,23 +11,27 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type GroupClient struct {
-	conn *grpc.ClientConn
+	MetaClient
 }
 
-func NewGroupClient(discov discoveryregistry.SvcDiscoveryRegistry) *GroupClient {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		panic(err)
+func NewGroupClient(client discoveryregistry.SvcDiscoveryRegistry) *GroupClient {
+	return &GroupClient{
+		MetaClient: MetaClient{
+			client:          client,
+			rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
+		},
 	}
-	return &GroupClient{conn: conn}
 }
 
 func (g *GroupClient) GetGroupInfos(ctx context.Context, groupIDs []string, complete bool) ([]*sdkws.GroupInfo, error) {
-	resp, err := group.NewGroupClient(g.conn).GetGroupsInfo(ctx, &group.GetGroupsInfoReq{
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupsInfo(ctx, &group.GetGroupsInfoReq{
 		GroupIDs: groupIDs,
 	})
 	if err != nil {
@@ -62,7 +66,11 @@ func (g *GroupClient) GetGroupInfoMap(ctx context.Context, groupIDs []string, co
 }
 
 func (g *GroupClient) GetGroupMemberInfos(ctx context.Context, groupID string, userIDs []string, complete bool) ([]*sdkws.GroupMemberFullInfo, error) {
-	resp, err := group.NewGroupClient(g.conn).GetGroupMembersInfo(ctx, &group.GetGroupMembersInfoReq{
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMembersInfo(ctx, &group.GetGroupMembersInfoReq{
 		GroupID: groupID,
 		UserIDs: userIDs,
 	})
@@ -98,7 +106,11 @@ func (g *GroupClient) GetGroupMemberInfoMap(ctx context.Context, groupID string,
 }
 
 func (g *GroupClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string) ([]*sdkws.GroupMemberFullInfo, error) {
-	resp, err := group.NewGroupClient(g.conn).GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner, constant.GroupAdmin},
 	})
@@ -109,7 +121,11 @@ func (g *GroupClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string)
 }
 
 func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.GroupMemberFullInfo, error) {
-	resp, err := group.NewGroupClient(g.conn).GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner},
 	})
@@ -117,7 +133,11 @@ func (g *GroupClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.
 }
 
 func (g *GroupClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
-	resp, err := group.NewGroupClient(g.conn).GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
 		GroupID: groupID,
 	})
 	if err != nil {
