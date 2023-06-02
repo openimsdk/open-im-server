@@ -11,20 +11,25 @@ import (
 	"google.golang.org/grpc"
 )
 
-func NewConversation(c discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
-	return &Conversation{conn: conn}
+	return &Conversation{conn: conn, discov: discov}
 }
 
 type Conversation struct {
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Conversation) client(ctx context.Context) (conversation.ConversationClient, error) {
-	return conversation.NewConversationClient(o.conn), nil
+	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+	if err != nil {
+		return nil, err
+	}
+	return conversation.NewConversationClient(c), nil
 }
 
 func (o *Conversation) GetAllConversations(c *gin.Context) {

@@ -12,20 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewFriend(c discoveryregistry.SvcDiscoveryRegistry) *Friend {
-	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry) *Friend {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
-	return &Friend{conn: conn}
+	return &Friend{conn: conn, discov: discov}
 }
 
 type Friend struct {
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Friend) client(ctx context.Context) (friend.FriendClient, error) {
-	return friend.NewFriendClient(o.conn), nil
+	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	if err != nil {
+		return nil, err
+	}
+	return friend.NewFriendClient(c), nil
 }
 
 func (o *Friend) ApplyToAddFriend(c *gin.Context) {
