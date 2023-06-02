@@ -100,33 +100,46 @@ func newSessionTypeConf() map[int32]int32 {
 
 type MsgClient struct {
 	conn *grpc.ClientConn
+	*MetaClient
 }
 
 func NewMsgClient(discov discoveryregistry.SvcDiscoveryRegistry) *MsgClient {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		panic(err)
-	}
-	return &MsgClient{conn: conn}
+	return &MsgClient{MetaClient: NewMetaClient(discov, config.Config.RpcRegisterName.OpenImMsgName)}
 }
 
 func (m *MsgClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
-	resp, err := msg.NewMsgClient(m.conn).SendMsg(ctx, req)
+	cc, err := m.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := msg.NewMsgClient(cc).SendMsg(ctx, req)
 	return resp, err
 }
 
 func (m *MsgClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	resp, err := msg.NewMsgClient(m.conn).GetMaxSeq(ctx, req)
+	cc, err := m.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := msg.NewMsgClient(cc).GetMaxSeq(ctx, req)
 	return resp, err
 }
 
 func (m *MsgClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
-	resp, err := msg.NewMsgClient(m.conn).PullMessageBySeqs(ctx, req)
+	cc, err := m.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := msg.NewMsgClient(cc).PullMessageBySeqs(ctx, req)
 	return resp, err
 }
 
 func (m *MsgClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
-	resp, err := msg.NewMsgClient(m.conn).GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
+	cc, err := m.getConn(ctx)
+	if err != nil {
+		return 0, err
+	}
+	resp, err := msg.NewMsgClient(cc).GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
 	if err != nil {
 		return 0, err
 	}
