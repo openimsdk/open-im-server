@@ -54,5 +54,5 @@ func (f *FriendClient) GetFriendIDs(ctx context.Context, ownerUserID string) (fr
 	if err != nil {
 		return nil, err
 	}
-	return resp.FriendIDs, err
+	return resp.FriendIDs, nil
 }
