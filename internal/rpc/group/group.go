@@ -153,6 +153,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err != nil {
 		return nil, err
 	}
+	if len(userMap) != len(userIDs) {
+		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
+	}
 	if err := CallbackBeforeCreateGroup(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
@@ -163,7 +166,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	joinGroup := func(userID string, roleLevel int32) error {
 		groupMember := convert.Pb2DbGroupMember(userMap[userID])
-		groupMember.Nickname = ""
+		groupMember.Nickname = userMap[userID].Nickname
 		groupMember.GroupID = group.GroupID
 		groupMember.RoleLevel = roleLevel
 		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
