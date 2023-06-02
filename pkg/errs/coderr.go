@@ -82,7 +82,7 @@ func (e *codeError) Is(err error, loose ...bool) bool {
 }
 
 func (e *codeError) Error() string {
-	return fmt.Sprintf("[%d]%s", e.code, e.msg)
+	return fmt.Sprintf("%s", e.msg)
 }
 
 func Unwrap(err error) error {

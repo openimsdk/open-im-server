@@ -40,9 +40,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if len(msgs) == 0 || msgs[0] == nil {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
-	if msgs[0].SendID == "" || msgs[0].RecvID == "" {
-		return nil, errs.ErrRecordNotFound.Wrap("sendID or recvID is empty")
-	}
 	// todo: 判断是否已经撤回
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
