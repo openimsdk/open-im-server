@@ -173,12 +173,12 @@ message GetUserConversationIDsHashResp {
   uint64 hash = 1;
 }
 
-message GetConversationByConversationIDReq {
-  string conversationID = 1;
+message GetConversationsByConversationIDReq {
+  repeated string conversationIDs = 1;
 }
 
-message GetConversationByConversationIDResp {
-  Conversation conversation = 1;
+message GetConversationsByConversationIDResp {
+  repeated Conversation conversations = 1;
 }
 
 service conversation {
@@ -197,5 +197,5 @@ service conversation {
   rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
   rpc SetConversations(SetConversationsReq) returns(SetConversationsResp);
   rpc GetUserConversationIDsHash(GetUserConversationIDsHashReq) returns(GetUserConversationIDsHashResp);
-  rpc GetConversationByConversationID(GetConversationByConversationIDReq) returns(GetConversationByConversationIDResp);
+  rpc GetConversationsByConversationID(GetConversationsByConversationIDReq) returns(GetConversationsByConversationIDResp);
 }
