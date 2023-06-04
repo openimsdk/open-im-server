@@ -50,7 +50,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 				return nil, err
 			}
 		case constant.SuperGroupChatType:
-			members, err := m.Group.GetGroupMemberInfoMap(ctx, msgs[0].RecvID, utils.Distinct([]string{req.UserID, msgs[0].SendID}), true)
+			members, err := m.Group.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}), true)
 			if err != nil {
 				return nil, err
 			}

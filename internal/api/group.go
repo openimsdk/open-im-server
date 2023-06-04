@@ -12,20 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewGroup(c discoveryregistry.SvcDiscoveryRegistry) *Group {
-	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
+func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
-	return &Group{conn: conn}
+	return &Group{conn: conn, discov: discov}
 }
 
 type Group struct {
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
-	return group.NewGroupClient(o.conn), nil
+	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
+	if err != nil {
+		return nil, err
+	}
+	return group.NewGroupClient(c), nil
 }
 
 func (o *Group) NewCreateGroup(c *gin.Context) {

@@ -99,6 +99,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if err != nil {
 			return nil, err
 		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			return nil, errs.ErrArgs.Wrap("group is dismissed")
+		}
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil, nil
 		}

@@ -21,17 +21,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func NewMsg(c discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := c.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+func NewMsg(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
-	return &Message{conn: conn, validate: validator.New()}
+	return &Message{conn: conn, validate: validator.New(), discov: discov}
 }
 
 type Message struct {
 	conn     *grpc.ClientConn
 	validate *validator.Validate
+	discov   discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (Message) SetOptions(options map[string]bool, value bool) {
@@ -109,7 +110,11 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 }
 
 func (m *Message) client(ctx context.Context) (msg.MsgClient, error) {
-	return msg.NewMsgClient(m.conn), nil
+	c, err := m.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		return nil, err
+	}
+	return msg.NewMsgClient(c), nil
 }
 
 func (m *Message) GetSeq(c *gin.Context) {

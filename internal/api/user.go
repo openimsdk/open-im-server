@@ -23,16 +23,20 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 		panic(err)
 	}
 	log.ZInfo(context.Background(), "user rpc conn", "conn", conn)
-
-	return &User{conn: conn}
+	return &User{conn: conn, discov: discov}
 }
 
 type User struct {
-	conn *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
+	conn   *grpc.ClientConn
 }
 
 func (u *User) client(ctx context.Context) (user.UserClient, error) {
-	return user.NewUserClient(u.conn), nil
+	conn, err := u.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+	if err != nil {
+		panic(err)
+	}
+	return user.NewUserClient(conn), nil
 }
 
 func (u *User) UserRegister(c *gin.Context) {

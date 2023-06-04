@@ -22,15 +22,20 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 	if err != nil {
 		panic(err)
 	}
-	return &Third{conn: conn}
+	return &Third{conn: conn, discov: discov}
 }
 
 type Third struct {
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func (o *Third) client(ctx context.Context) (third.ThirdClient, error) {
-	return third.NewThirdClient(o.conn), nil
+	conn, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImThirdName)
+	if err != nil {
+		return nil, err
+	}
+	return third.NewThirdClient(conn), nil
 }
 
 func (o *Third) ApplyPut(c *gin.Context) {
