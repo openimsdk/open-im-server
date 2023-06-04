@@ -270,7 +270,7 @@ userInfoUpdated:
 
 #####################conversation#########################
 conversationChanged:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:
