@@ -1,4 +1,4 @@
-package openKeeper
+package zookeeper
 
 import (
 	"context"
@@ -38,6 +38,7 @@ type ZkClient struct {
 	resolvers    map[string]*Resolver
 	localConns   map[string][]resolver.Address
 	balancerName string
+	RoundRobin
 }
 
 type ZkOption func(*ZkClient)
