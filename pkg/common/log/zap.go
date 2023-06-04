@@ -213,6 +213,9 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 }
 
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
+	if ctx == nil {
+		return keysAndValues
+	}
 	operationID := mcontext.GetOperationID(ctx)
 	opUserID := mcontext.GetOpUserID(ctx)
 	connID := mcontext.GetConnID(ctx)
