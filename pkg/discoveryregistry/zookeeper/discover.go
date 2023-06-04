@@ -1,4 +1,4 @@
-package openKeeper
+package zookeeper
 
 import (
 	"context"
@@ -107,7 +107,7 @@ func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc
 	if len(conns) == 0 {
 		return nil, ErrConnIsNil
 	}
-	return conns[0], nil
+	return s.getConnBalance(conns), nil
 }
 
 func (s *ZkClient) GetFirstConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {

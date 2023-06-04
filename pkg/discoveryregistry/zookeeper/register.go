@@ -1,4 +1,4 @@
-package openKeeper
+package zookeeper
 
 import (
 	"github.com/go-zookeeper/zk"
