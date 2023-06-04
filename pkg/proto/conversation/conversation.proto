@@ -40,6 +40,7 @@ message ConversationReq{
   OpenIMServer.protobuf.Int64Value minSeq = 13;
   OpenIMServer.protobuf.Int64Value maxSeq = 14;
   OpenIMServer.protobuf.Int64Value hasReadSeq = 15;
+  OpenIMServer.protobuf.Int32Value groupAtType = 16;
 }
 
 message ModifyConversationFieldReq{
