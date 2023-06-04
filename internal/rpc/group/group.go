@@ -1101,7 +1101,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	//if group.Status == constant.GroupStatusDismissed {
 	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
 	//}
-	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, false); err != nil {
+	if err := s.GroupDatabase.DismissGroup(ctx, req.GroupID, req.DeleteMember); err != nil {
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {
@@ -1109,19 +1109,19 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			return nil, err
 		}
 	} else {
-		//if !req.DeleteMember {
-		//s.Notification.GroupDismissedNotification(ctx, req)
-		tips := &sdkws.GroupDismissedTips{
-			Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
-			OpUser: &sdkws.GroupMemberFullInfo{},
+		if !req.DeleteMember {
+			//s.Notification.GroupDismissedNotification(ctx, req)
+			tips := &sdkws.GroupDismissedTips{
+				Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+				OpUser: &sdkws.GroupMemberFullInfo{},
+			}
+			if mcontext.GetOpUserID(ctx) == owner.UserID {
+				tips.OpUser = s.groupMemberDB2PB(owner, 0)
+			} else {
+				tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
+			}
+			s.Notification.GroupDismissedNotification(ctx, tips)
 		}
-		if mcontext.GetOpUserID(ctx) == owner.UserID {
-			tips.OpUser = s.groupMemberDB2PB(owner, 0)
-		} else {
-			tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
-		}
-		s.Notification.GroupDismissedNotification(ctx, tips)
-		//}
 	}
 	return resp, nil
 }
