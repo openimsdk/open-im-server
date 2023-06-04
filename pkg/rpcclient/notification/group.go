@@ -542,31 +542,32 @@ func (g *GroupNotificationSender) MemberEnterNotification(ctx context.Context, r
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, req *pbGroup.DismissGroupReq) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
-	if err != nil {
-		return err
-	}
-	users, err := g.getGroupMembers(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.GroupDismissedTips{Group: group}
-	if len(users) > 0 {
-		tips.OpUser = users[0]
-	} else {
-		tips.OpUser = &sdkws.GroupMemberFullInfo{
-			GroupID: group.GroupID,
-			UserID:  mcontext.GetOpUserID(ctx),
-		}
-	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupDismissedNotification, tips)
+func (g *GroupNotificationSender) GroupDismissedNotification(ctx context.Context, tips *sdkws.GroupDismissedTips) (err error) {
+	//defer log.ZDebug(ctx, "return")
+	//defer func() {
+	//	if err != nil {
+	//		log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
+	//	}
+	//}()
+	//group, err := g.getGroupInfo(ctx, req.GroupID)
+	//if err != nil {
+	//	return err
+	//}
+	//users, err := g.getGroupMembers(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
+	//if err != nil {
+	//	return err
+	//}
+	//tips := &sdkws.GroupDismissedTips{Group: group}
+	//if len(users) > 0 {
+	//	tips.OpUser = users[0]
+	//} else {
+	//	tips.OpUser = &sdkws.GroupMemberFullInfo{
+	//		GroupID: group.GroupID,
+	//		UserID:  mcontext.GetOpUserID(ctx),
+	//	}
+	//}
+	//return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupDismissedNotification, tips)
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Context, groupID, groupMemberUserID string, mutedSeconds uint32) (err error) {

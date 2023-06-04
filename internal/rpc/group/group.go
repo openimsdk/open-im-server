@@ -1111,17 +1111,16 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	} else {
 		if !req.DeleteMember {
 			//s.Notification.GroupDismissedNotification(ctx, req)
-			tips := &sdkws.GroupInfoSetTips{
-				Group:    s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
-				MuteTime: 0,
-				OpUser:   &sdkws.GroupMemberFullInfo{},
+			tips := &sdkws.GroupDismissedTips{
+				Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+				OpUser: &sdkws.GroupMemberFullInfo{},
 			}
 			if mcontext.GetOpUserID(ctx) == owner.UserID {
 				tips.OpUser = s.groupMemberDB2PB(owner, 0)
 			} else {
 				tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
 			}
-			s.Notification.GroupInfoSetNotification(ctx, tips)
+			s.Notification.GroupDismissedNotification(ctx, tips)
 		}
 	}
 	return resp, nil
