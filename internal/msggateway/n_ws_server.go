@@ -132,7 +132,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		if clientOK { //已经有同平台的连接存在
 			ws.clients.Set(client.userID, client)
 			ws.multiTerminalLoginChecker(cli)
-			log.ZInfo(client.ctx, "repeat login", "userID", client.userID, "platformID", client.platformID)
+			log.ZInfo(client.ctx, "repeat login", "userID", client.userID, "platformID", client.platformID, "old remote addr", getRemoteAdders(cli))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
 			ws.clients.Set(client.userID, client)
@@ -140,6 +140,17 @@ func (ws *WsServer) registerClient(client *Client) {
 		}
 	}
 	log.ZInfo(client.ctx, "user online", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
+}
+func getRemoteAdders(client []*Client) string {
+	var ret string
+	for i, c := range client {
+		if i == 0 {
+			ret = c.ctx.GetRemoteAddr()
+		} else {
+			ret += "@" + c.ctx.GetRemoteAddr()
+		}
+	}
+	return ret
 }
 
 func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {

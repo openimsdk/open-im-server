@@ -56,6 +56,9 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 		ConnID:     utils.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))),
 	}
 }
+func (c *UserConnContext) GetRemoteAddr() string {
+	return c.RemoteAddr
+}
 func (c *UserConnContext) Query(key string) (string, bool) {
 	var value string
 	if value = c.Req.URL.Query().Get(key); value == "" {
