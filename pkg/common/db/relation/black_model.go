@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -51,7 +52,7 @@ func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pag
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	totalUint32, blacks, err := ormutil.GormPage[relation.BlackModel](b.db(ctx), pageNumber, showNumber)
+	totalUint32, blacks, err := ormutil.GormPage[relation.BlackModel](b.db(ctx).Where("ownerUserID = ?", ownerUserID), pageNumber, showNumber)
 	total = int64(totalUint32)
 	return
 }
