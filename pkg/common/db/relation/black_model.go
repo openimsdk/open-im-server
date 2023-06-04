@@ -52,7 +52,7 @@ func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pag
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	totalUint32, blacks, err := ormutil.GormPage[relation.BlackModel](b.db(ctx).Where("owner_userID = ?", ownerUserID), pageNumber, showNumber)
+	totalUint32, blacks, err := ormutil.GormPage[relation.BlackModel](b.db(ctx).Where("owner_user_id = ?", ownerUserID), pageNumber, showNumber)
 	total = int64(totalUint32)
 	return
 }
