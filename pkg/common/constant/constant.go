@@ -281,7 +281,7 @@ const (
 const OperationID = "operationID"
 const OpUserID = "opUserID"
 const ConnID = "connID"
-const OpUserPlatform = "platformID"
+const OpUserPlatform = "platform"
 const Token = "token"
 const RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
 const CheckKey = "CheckKey"
