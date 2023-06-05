@@ -1339,6 +1339,14 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		return nil, err
 	}
 	for _, member := range req.Members {
+		if member.RoleLevel != nil {
+			switch member.RoleLevel.Value {
+			case constant.GroupAdmin:
+				s.Notification.GroupMemberSetToAdminNotification(ctx, member.GroupID, member.UserID)
+			case constant.GroupOrdinaryUsers:
+				s.Notification.GroupMemberSetToOrdinaryUserNotification(ctx, member.GroupID, member.UserID)
+			}
+		}
 		s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
 	}
 	return resp, nil
