@@ -3,6 +3,7 @@ package msg
 import (
 	"context"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
@@ -10,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"google.golang.org/grpc"
@@ -99,4 +101,25 @@ func (m *msgServer) initPrometheus() {
 	prome.NewGroupChatMsgProcessFailedCounter()
 	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
 	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
+}
+
+func (m *msgServer) getConversationAndGetRecvID(ctx context.Context, userID, conversationID string) (recvID string, err error) {
+	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{conversationID})
+	if err != nil {
+		return
+	}
+	return m.conversationAndGetRecvID(conversations[0], userID), nil
+}
+
+func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
+	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+		if userID == conversation.OwnerUserID {
+			recvID = conversation.UserID
+		} else {
+			recvID = conversation.OwnerUserID
+		}
+	} else if conversation.ConversationType == constant.SuperGroupChatType {
+		recvID = conversation.GroupID
+	}
+	return
 }

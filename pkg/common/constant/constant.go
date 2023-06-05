@@ -4,23 +4,22 @@ const (
 
 	///ContentType
 	//UserRelated
-	Text                         = 101
-	Picture                      = 102
-	Voice                        = 103
-	Video                        = 104
-	File                         = 105
-	AtText                       = 106
-	Merger                       = 107
-	Card                         = 108
-	Location                     = 109
-	Custom                       = 110
-	Revoke                       = 111
-	HasReadReceipt               = 112
-	Typing                       = 113
-	Quote                        = 114
-	GroupHasReadReceipt          = 116
-	AdvancedText                 = 117
-	AdvancedRevoke               = 118 //影响前者消息
+	Text     = 101
+	Picture  = 102
+	Voice    = 103
+	Video    = 104
+	File     = 105
+	AtText   = 106
+	Merger   = 107
+	Card     = 108
+	Location = 109
+	Custom   = 110
+	Revoke   = 111
+	Typing   = 113
+	Quote    = 114
+
+	AdvancedText = 117
+
 	CustomNotTriggerConversation = 119
 	CustomOnlineOnly             = 120
 	ReactionMessageModifier      = 121
@@ -92,6 +91,8 @@ const (
 
 	ClearConversationNotification = 2101
 	DeleteMsgsNotification        = 2102
+
+	HasReadReceipt = 2200
 
 	NotificationEnd = 5000
 

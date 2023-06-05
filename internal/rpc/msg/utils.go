@@ -10,14 +10,14 @@ import (
 )
 
 func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
-	switch msgData.ContentType {
-	case constant.HasReadReceipt:
+	switch {
+	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SingleChatType:
 		if config.Config.SingleMessageHasReadReceiptEnable {
 			return true
 		} else {
 			return false
 		}
-	case constant.GroupHasReadReceipt:
+	case msgData.ContentType == constant.HasReadReceipt && msgData.SessionType == constant.SuperGroupChatType:
 		if config.Config.GroupMessageHasReadReceiptEnable {
 			return true
 		} else {

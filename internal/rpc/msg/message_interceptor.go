@@ -14,14 +14,14 @@ import (
 type MessageInterceptorFunc func(ctx context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error)
 
 func MessageHasReadEnabled(_ context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
-	switch req.MsgData.ContentType {
-	case constant.HasReadReceipt:
+	switch {
+	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
 		if config.Config.SingleMessageHasReadReceiptEnable {
 			return req.MsgData, nil
 		} else {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
-	case constant.GroupHasReadReceipt:
+	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SuperGroupChatType:
 		if config.Config.GroupMessageHasReadReceiptEnable {
 			return req.MsgData, nil
 		} else {
