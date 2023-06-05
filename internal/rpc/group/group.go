@@ -1347,7 +1347,9 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 				s.Notification.GroupMemberSetToOrdinaryUserNotification(ctx, member.GroupID, member.UserID)
 			}
 		}
-		s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
+			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+		}
 	}
 	return resp, nil
 }
