@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
@@ -68,6 +69,7 @@ func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (i
 	if err != nil {
 		return
 	}
+	log.ZDebug(ctx, "blackIDs", "user1BlackIDs", userID1BlackIDs, "user2BlackIDs", userID2BlackIDs)
 	return utils.IsContain(userID2, userID1BlackIDs), utils.IsContain(userID1, userID2BlackIDs), nil
 }
 
