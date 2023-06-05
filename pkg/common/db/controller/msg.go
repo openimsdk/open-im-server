@@ -408,7 +408,13 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 // }
 
 func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, err error) {
-	return db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
+	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
+	for _, msg := range msgs {
+		if msg.IsRead {
+			msg.Msg.IsRead = true
+		}
+	}
+	return msgs, err
 }
 
 func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID string, conversationID string, allSeqs []int64, begin, end int64) (seqMsgs []*sdkws.MsgData, err error) {

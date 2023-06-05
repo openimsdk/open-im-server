@@ -5,7 +5,7 @@ components
 out-test
 .github
 .idea
-
+.exe
 
 deploy/open_im_api
 deploy/open_im_msg_gateway
