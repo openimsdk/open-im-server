@@ -240,7 +240,7 @@ iospush:
 
 callback:
   # callback url 需要自行更换callback url
-  callbackUrl: "http://127.0.0.1:8080/callback"
+  callbackUrl: "http://127.0.0.1:10008/callback"
   # 开启关闭操作前后回调的配置
   callbackBeforeSendSingleMsg:
     enable: false # 回调是否启用
