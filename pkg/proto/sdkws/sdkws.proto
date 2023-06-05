@@ -181,11 +181,12 @@ message MsgData {
   int64 sendTime = 15;
   int64 createTime = 16;
   int32 status = 17;
-  map<string, bool> options = 18;
-  OfflinePushInfo offlinePushInfo = 19;
-  repeated string atUserIDList = 20;
-  string attachedInfo = 21;
-  string  ex = 22;
+  bool isRead = 18;
+  map<string, bool> options = 19;
+  OfflinePushInfo offlinePushInfo = 20;
+  repeated string atUserIDList = 21;
+  string attachedInfo = 22;
+  string ex = 23;
 }
 message PushMessages{
   map<string, PullMsgs> msgs = 1;
@@ -449,6 +450,12 @@ message ClearConversationTips {
 
 message DeleteMsgsTips {
   string userID  = 1;
+  string conversationID = 2;
+  repeated int64 seqs = 3;
+}
+
+message MarkAsReadTips {
+  string markAsReadUserID = 1;
   string conversationID = 2;
   repeated int64 seqs = 3;
 }

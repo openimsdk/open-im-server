@@ -34,6 +34,8 @@ type CommonMsgDatabase interface {
 	BatchInsertChat2DB(ctx context.Context, conversationID string, msgs []*sdkws.MsgData, currentMaxSeq int64) error
 	// 撤回消息
 	RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unRelationTb.RevokeModel) error
+	// mark as read
+	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// 刪除redis中消息缓存
 	DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error
 	// incrSeq然后批量插入缓存
@@ -295,6 +297,10 @@ func (db *commonMsgDatabase) BatchInsertChat2DB(ctx context.Context, conversatio
 
 func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID string, seq int64, revoke *unRelationTb.RevokeModel) error {
 	return db.BatchInsertBlock(ctx, conversationID, []any{revoke}, updateKeyRevoke, seq)
+}
+
+func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error {
+	return db.msgDocDatabase.MarkSingleChatMsgsAsRead(ctx, userID, conversationID, seqs)
 }
 
 func (db *commonMsgDatabase) DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error {

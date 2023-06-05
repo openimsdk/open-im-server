@@ -8,6 +8,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"google.golang.org/grpc"
@@ -52,7 +53,11 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (re
 		err = r.pusher.Push2User(ctx, []string{pbData.MsgData.RecvID, pbData.MsgData.SendID}, pbData.MsgData)
 	}
 	if err != nil {
-		return nil, err
+		if err != errNoOfflinePusher {
+			return nil, err
+		} else {
+			log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
+		}
 	}
 	return &pbPush.PushMsgResp{}, nil
 }

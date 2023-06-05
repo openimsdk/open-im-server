@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -277,4 +278,13 @@ func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, 
 		return false, errs.Wrap(err)
 	}
 	return count > 0, nil
+}
+
+func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error {
+	indexs := make([]int64, 0, len(seqs))
+	for _, seq := range seqs {
+		indexs = append(indexs, m.model.GetMsgIndex(seq))
+	}
+
+	return nil
 }
