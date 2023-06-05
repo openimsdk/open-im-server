@@ -12,7 +12,7 @@ import (
 )
 
 func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {
-	log.ZInfo(ctx, "CallbackBeforeAddFriend", "argsIn", req)
+	log.ZInfo(ctx, "CallbackBeforeAddFriend", "in", req)
 	if !config.Config.Callback.CallbackBeforeAddFriend.Enable {
 		return nil
 	}
@@ -24,5 +24,6 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		OperationID:     mcontext.GetOperationID(ctx),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
+	defer log.ZInfo(ctx, "CallbackBeforeAddFriend", "out", &resp)
 	return http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend)
 }
