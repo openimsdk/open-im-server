@@ -1,7 +1,6 @@
 package callbackstruct
 
 import (
-	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
@@ -41,11 +40,12 @@ type CommonCallbackResp struct {
 	ActionCode int    `json:"actionCode"`
 	ErrCode    int32  `json:"errCode"`
 	ErrMsg     string `json:"errMsg"`
+	ErrDlt     string `json:"errDlt"`
 }
 
 func (c CommonCallbackResp) Parse() error {
 	if c.ActionCode != errs.NoError || c.ErrCode != errs.NoError {
-		return errs.NewCodeError(int(c.ErrCode), "Callback").Wrap(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
+		return errs.NewCodeError(int(c.ErrCode), c.ErrMsg).WithDetail(c.ErrDlt)
 	}
 	return nil
 }
