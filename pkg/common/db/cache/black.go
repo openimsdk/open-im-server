@@ -62,6 +62,6 @@ func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (black
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) BlackCache {
 	cache := b.NewCache()
-	cache.AddKeys(userID)
+	cache.AddKeys(b.getBlackIDsKey(userID))
 	return cache
 }

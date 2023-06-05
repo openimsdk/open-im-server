@@ -12,7 +12,7 @@ groupCreated:
 
 
 groupInfoSet:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
@@ -23,7 +23,7 @@ groupInfoSet:
 
 
 joinGroupApplication:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
@@ -43,7 +43,7 @@ memberQuit:
     ext: "memberQuit ext"
  
 groupApplicationAccepted:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
@@ -53,7 +53,7 @@ groupApplicationAccepted:
     ext: "groupApplicationAccepted ext"
  
 groupApplicationRejected:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
@@ -157,7 +157,7 @@ groupMemberCancelMuted:
     ext: "groupMemberCancelMuted ext"
 
 groupMemberInfoSet:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false
   offlinePush:
@@ -259,7 +259,7 @@ friendInfoUpdated:
 
 #####################user#########################
 userInfoUpdated:
-  isSendMsg: true
+  isSendMsg: false
   reliabilityLevel: 1
   unreadCount: false 
   offlinePush:

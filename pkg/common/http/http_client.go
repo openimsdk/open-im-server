@@ -8,15 +8,20 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"io"
 	"io/ioutil"
 	"net/http"
 	urlLib "net/url"
 	"time"
 )
+
+var client http.Client
 
 func Get(url string) (response []byte, err error) {
 	client := http.Client{Timeout: 5 * time.Second}
@@ -32,36 +37,41 @@ func Get(url string) (response []byte, err error) {
 	return body, nil
 }
 
-// application/json; charset=utf-8
-func Post(url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
+func Post(ctx context.Context, url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
+	if timeout > 0 {
+		var cancel func()
+		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
+		defer cancel()
+	}
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
+	}
+	if operationID, _ := ctx.Value(constant.OperationID).(string); operationID != "" {
+		req.Header.Set(constant.OperationID, operationID)
 	}
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
-	req.Close = true
 	req.Header.Add("content-type", "application/json; charset=utf-8")
-	client := &http.Client{Timeout: time.Duration(timeout) * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func PostReturn(url string, header map[string]string, input, output interface{}, timeOutSecond int) error {
-	b, err := Post(url, header, input, timeOutSecond)
+func PostReturn(ctx context.Context, url string, header map[string]string, input, output interface{}, timeOutSecond int) error {
+	b, err := Post(ctx, url, header, input, timeOutSecond)
 	if err != nil {
 		return err
 	}
@@ -69,11 +79,11 @@ func PostReturn(url string, header map[string]string, input, output interface{},
 	return err
 }
 
-func callBackPostReturn(url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
 	v := urlLib.Values{}
-	v.Set("callbackCommand", command)
+	v.Set(constant.CallbackCommand, command)
 	url = url + "?" + v.Encode()
-	b, err := Post(url, nil, input, callbackConfig.CallbackTimeOut)
+	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			return errs.ErrCallbackContinue
@@ -89,6 +99,6 @@ func callBackPostReturn(url, command string, input interface{}, output callbacks
 	return output.Parse()
 }
 
-func CallBackPostReturn(url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
-	return callBackPostReturn(url, req.GetCallbackCommand(), req, resp, callbackConfig)
+func CallBackPostReturn(ctx context.Context, url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+	return callBackPostReturn(ctx, url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }

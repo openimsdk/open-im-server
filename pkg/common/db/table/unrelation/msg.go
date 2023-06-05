@@ -78,6 +78,7 @@ type MsgDocModelInterface interface {
 	DeleteDocs(ctx context.Context, docIDs []string) error
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
+	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
 }
 
 func (MsgDocModel) TableName() string {

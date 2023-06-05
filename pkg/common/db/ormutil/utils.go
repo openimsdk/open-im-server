@@ -1,8 +1,10 @@
 package ormutil
 
 import (
+	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"gorm.io/gorm"
+	"strings"
 )
 
 func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {
@@ -20,16 +22,14 @@ func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, e
 
 func GormSearch[E any](db *gorm.DB, fields []string, value string, pageNumber, showNumber int32) (uint32, []*E, error) {
 	if len(fields) > 0 && value != "" {
-		value = "%" + value + "%"
-		if len(fields) == 1 {
-			db = db.Where(fields[0]+" like ?", value)
-		} else {
-			t := db
-			for _, field := range fields {
-				t = t.Or(field+" like ?", value)
-			}
-			db = db.Where(t)
+		val := "%" + value + "%"
+		arr := make([]string, 0, len(fields))
+		vals := make([]interface{}, 0, len(fields))
+		for _, field := range fields {
+			arr = append(arr, fmt.Sprintf("`%s` like ?", field))
+			vals = append(vals, val)
 		}
+		db = db.Where(strings.Join(arr, " or "), vals...)
 	}
 	return GormPage[E](db, pageNumber, showNumber)
 }

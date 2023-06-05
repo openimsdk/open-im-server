@@ -20,7 +20,7 @@ import (
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
 	return &Third{conn: conn, discov: discov}
 }

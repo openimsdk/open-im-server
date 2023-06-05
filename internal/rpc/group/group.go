@@ -485,34 +485,30 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		memberMap := make(map[string]*relationTb.GroupMemberModel)
 		for i, member := range members {
-			if member.RoleLevel == constant.GroupOwner {
-				return nil, errs.ErrArgs.Wrap("can not kick group owner")
-			}
 			memberMap[member.UserID] = members[i]
 		}
+		isAppManagerUid := tokenverify.IsAppManagerUid(ctx)
+		opMember := memberMap[opUserID]
 		for _, userID := range req.KickedUserIDs {
-			if _, ok := memberMap[userID]; !ok {
+			member, ok := memberMap[userID]
+			if !ok {
 				return nil, errs.ErrUserIDNotFound.Wrap(userID)
 			}
-		}
-		if !tokenverify.IsAppManagerUid(ctx) {
-			member := memberMap[opUserID]
-			if member == nil {
-				return nil, errs.ErrNoPermission.Wrap(fmt.Sprintf("opUserID %s no in group", opUserID))
-			}
-			switch member.RoleLevel {
-			case constant.GroupOwner:
-			case constant.GroupAdmin:
-				for _, member := range members {
-					if member.UserID == opUserID {
-						continue
-					}
-					if member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin {
-						return nil, errs.ErrNoPermission.Wrap("userID:" + member.UserID)
-					}
+			if !isAppManagerUid {
+				if opMember == nil {
+					return nil, errs.ErrNoPermission.Wrap("opUserID no in group")
 				}
-			default:
-				return nil, errs.ErrNoPermission.Wrap("opUserID is OrdinaryUser")
+				switch opMember.RoleLevel {
+				case constant.GroupOwner:
+				case constant.GroupAdmin:
+					if member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin {
+						return nil, errs.ErrNoPermission.Wrap("group admins cannot remove the group owner and other admins")
+					}
+				case constant.GroupOrdinaryUsers:
+					return nil, errs.ErrNoPermission.Wrap("opUserID no permission")
+				default:
+					return nil, errs.ErrNoPermission.Wrap("opUserID roleLevel unknown")
+				}
 			}
 		}
 		userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
@@ -1343,7 +1339,17 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		return nil, err
 	}
 	for _, member := range req.Members {
-		s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+		if member.RoleLevel != nil {
+			switch member.RoleLevel.Value {
+			case constant.GroupAdmin:
+				s.Notification.GroupMemberSetToAdminNotification(ctx, member.GroupID, member.UserID)
+			case constant.GroupOrdinaryUsers:
+				s.Notification.GroupMemberSetToOrdinaryUserNotification(ctx, member.GroupID, member.UserID)
+			}
+		}
+		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
+			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+		}
 	}
 	return resp, nil
 }

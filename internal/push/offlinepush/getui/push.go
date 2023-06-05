@@ -146,11 +146,11 @@ func (g *Client) request(ctx context.Context, url string, input interface{}, tok
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(config.Config.Push.Getui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, config.Config.Push.Getui.PushUrl+url, header, input, resp, 3)
 }
 
-func (g *Client) postReturn(url string, header map[string]string, input interface{}, output RespI, timeout int) error {
-	err := http2.PostReturn(url, header, input, output, timeout)
+func (g *Client) postReturn(ctx context.Context, url string, header map[string]string, input interface{}, output RespI, timeout int) error {
+	err := http2.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -34,6 +35,8 @@ type Pusher struct {
 	conversationLocalCache *localcache.ConversationLocalCache
 	successCount           int
 }
+
+var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
 func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
@@ -286,7 +289,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts,
 
 func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
 	if p.offlinePusher == nil {
-		err = errors.New("no offlinePusher is configured")
+		err = errNoOfflinePusher
 		return
 	}
 	type AtContent struct {

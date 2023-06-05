@@ -93,7 +93,7 @@ const (
 	ClearConversationNotification = 2101
 	DeleteMsgsNotification        = 2102
 
-	NotificationEnd = 3000
+	NotificationEnd = 5000
 
 	//status
 	MsgNormal  = 1
@@ -334,3 +334,5 @@ const (
 )
 
 const OpenIMCommonConfigKey = "OpenIMServerConfig"
+
+const CallbackCommand = "command"

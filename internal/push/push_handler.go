@@ -51,7 +51,11 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		err = c.pusher.Push2User(ctx, []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}, pbData.MsgData)
 	}
 	if err != nil {
-		log.ZError(ctx, "push failed", err, "msg", pbData.String())
+		if err == errNoOfflinePusher {
+			log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
+		} else {
+			log.ZError(ctx, "push failed", err, "msg", pbData.String())
+		}
 	}
 }
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
