@@ -58,5 +58,5 @@ func (b *BlackGorm) FindOwnerBlacks(ctx context.Context, ownerUserID string, pag
 }
 
 func (b *BlackGorm) FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error) {
-	return blackUserIDs, utils.Wrap(b.db(ctx).Where("owner_user_id = ?", blackUserIDs).Pluck("block_user_id", &blackUserIDs).Error, "")
+	return blackUserIDs, utils.Wrap(b.db(ctx).Where("owner_user_id = ?", ownerUserID).Pluck("block_user_id", &blackUserIDs).Error, "")
 }
