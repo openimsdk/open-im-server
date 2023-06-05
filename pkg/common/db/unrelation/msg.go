@@ -264,7 +264,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 				Detail: string(tipsData),
 			}
 			content, _ := json.Marshal(&elem)
-			msg.Msg.ContentType = constant.Revoke
+			msg.Msg.ContentType = constant.MsgRevokeNotification
 			msg.Msg.Content = string(content)
 		}
 		msgs = append(msgs, msg)
