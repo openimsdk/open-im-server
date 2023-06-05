@@ -51,6 +51,7 @@ type MsgDataModel struct {
 	SendTime         int64             `bson:"send_time"`
 	CreateTime       int64             `bson:"create_time"`
 	Status           int32             `bson:"status"`
+	IsRead           bool              `bson:"is_read"`
 	Options          map[string]bool   `bson:"options"`
 	OfflinePush      *OfflinePushModel `bson:"offline_push"`
 	AtUserIDList     []string          `bson:"at_user_id_list"`
@@ -62,6 +63,7 @@ type MsgInfoModel struct {
 	Msg     *MsgDataModel `bson:"msg"`
 	Revoke  *RevokeModel  `bson:"revoke"`
 	DelList []string      `bson:"del_list"`
+	IsRead  bool          `bson:"is_read"`
 }
 
 type MsgDocModelInterface interface {
@@ -78,7 +80,7 @@ type MsgDocModelInterface interface {
 	DeleteDocs(ctx context.Context, docIDs []string) error
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
-	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error
+	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
 }
 
 func (MsgDocModel) TableName() string {

@@ -299,8 +299,18 @@ func (db *commonMsgDatabase) RevokeMsg(ctx context.Context, conversationID strin
 	return db.BatchInsertBlock(ctx, conversationID, []any{revoke}, updateKeyRevoke, seq)
 }
 
-func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	return db.msgDocDatabase.MarkSingleChatMsgsAsRead(ctx, userID, conversationID, seqs)
+func (db *commonMsgDatabase) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, totalSeqs []int64) error {
+	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, totalSeqs) {
+		var indexes []int64
+		for _, seq := range seqs {
+			indexes = append(indexes, db.msg.GetMsgIndex(seq))
+		}
+		if err := db.msgDocDatabase.MarkSingleChatMsgsAsRead(ctx, userID, docID, indexes); err != nil {
+			log.ZError(ctx, "MarkSingleChatMsgsAsRead", err, "userID", userID, "docID", docID, "indexes", indexes)
+			return err
+		}
+	}
+	return nil
 }
 
 func (db *commonMsgDatabase) DeleteMessageFromCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) error {

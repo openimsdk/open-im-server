@@ -64,18 +64,8 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 		if err != nil {
 			return nil, err
 		}
-		var recvID string
-		if conversations[0].ConversationType == constant.SingleChatType || conversations[0].ConversationType == constant.NotificationChatType {
-			if conversations[0].OwnerUserID == recvID {
-				recvID = conversations[0].UserID
-			} else if conversations[0].UserID == recvID {
-				recvID = conversations[0].OwnerUserID
-			}
-		} else if conversations[0].ConversationType == constant.SuperGroupChatType {
-			recvID = conversations[0].GroupID
-		}
 		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-		m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.DeleteMsgsNotification, conversations[0].ConversationType, tips)
+		m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, m.conversationAndGetRecvID(conversations[0], req.UserID), constant.DeleteMsgsNotification, conversations[0].ConversationType, tips)
 	} else {
 		if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 			return nil, err
@@ -139,18 +129,8 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 			return err
 		}
 		for _, conversation := range existConversations {
-			var recvID string
-			if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
-				if conversation.OwnerUserID == recvID {
-					recvID = conversation.UserID
-				} else if conversation.UserID == recvID {
-					recvID = conversation.OwnerUserID
-				}
-			} else if conversation.ConversationType == constant.SuperGroupChatType {
-				recvID = conversation.GroupID
-			}
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
-			m.notificationSender.NotificationWithSesstionType(ctx, userID, recvID, constant.ClearConversationNotification, conversation.ConversationType, tips)
+			m.notificationSender.NotificationWithSesstionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
 		}
 	}
 	return nil

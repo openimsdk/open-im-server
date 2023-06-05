@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ExcludeContentType = []int{constant.HasReadReceipt, constant.GroupHasReadReceipt}
+	ExcludeContentType = []int{constant.HasReadReceipt}
 )
 
 type Validator interface {

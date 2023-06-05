@@ -62,8 +62,6 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 		fallthrough
 	case constant.CustomOnlineOnly:
 		fallthrough
-	case constant.AdvancedRevoke:
-		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
 		newContent = params.Content["revokeMsgClientID"].(string)
 	default:
@@ -197,8 +195,6 @@ func (m *Message) SendMessage(c *gin.Context) {
 		data = apistruct.CustomElem{}
 	case constant.Revoke:
 		data = apistruct.RevokeElem{}
-	case constant.AdvancedRevoke:
-		data = apistruct.MessageRevoked{}
 	case constant.OANotification:
 		data = apistruct.OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
