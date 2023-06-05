@@ -55,9 +55,9 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 	pushObj.SetMessage(&msg)
 	pushObj.SetOptions(&opt)
 	var resp interface{}
-	return j.request(pushObj, resp, 5)
+	return j.request(ctx, pushObj, resp, 5)
 }
 
-func (j *JPush) request(po body.PushObj, resp interface{}, timeout int) error {
-	return http2.PostReturn(config.Config.Push.Jpns.PushUrl, map[string]string{"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret)}, po, resp, timeout)
+func (j *JPush) request(ctx context.Context, po body.PushObj, resp interface{}, timeout int) error {
+	return http2.PostReturn(ctx, config.Config.Push.Jpns.PushUrl, map[string]string{"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret)}, po, resp, timeout)
 }

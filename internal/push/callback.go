@@ -39,7 +39,7 @@ func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDa
 		Content:         utils.GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	err := http.CallBackPostReturn(url(), req, resp, config.Config.Callback.CallbackOfflinePush)
+	err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		Content:     utils.GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
-	return http.CallBackPostReturn(url(), req, resp, config.Config.Callback.CallbackOnlinePush)
+	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
 }
 
 func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *sdkws.MsgData, pushToUserIDs *[]string) error {
@@ -99,7 +99,7 @@ func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg
 		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		return err
 	}
 	if len(resp.UserIDs) != 0 {

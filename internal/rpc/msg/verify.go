@@ -100,7 +100,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 			return nil, err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed && data.MsgData.ContentType != constant.GroupDismissedNotification {
-			return nil, errs.ErrArgs.Wrap("group is dismissed")
+			return nil, errs.ErrDismissedAlready.Wrap()
 		}
 		if groupInfo.GroupType == constant.SuperGroup {
 			return nil, nil

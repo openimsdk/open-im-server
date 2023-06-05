@@ -42,7 +42,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 		})
 	}
 	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
-	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeCreateGroup)
+	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeCreateGroup)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, groupMember *relation.Gr
 		GroupEx:         groupEx,
 	}
 	resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
-	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeMemberJoinGroup)
+	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeMemberJoinGroup)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 		callbackReq.Ex = &req.Ex.Value
 	}
 	resp := &callbackstruct.CallbackBeforeSetGroupMemberInfoResp{}
-	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo)
+	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo)
 	if err != nil {
 		return err
 	}

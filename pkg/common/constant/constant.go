@@ -335,3 +335,5 @@ const (
 )
 
 const OpenIMCommonConfigKey = "OpenIMServerConfig"
+
+const CallbackCommand = "command"

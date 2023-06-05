@@ -28,14 +28,14 @@ func callbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
 	resp := &cbapi.CallbackBeforeSetMessageReactionExtResp{}
-	if err := http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
 		return err
 	}
 	setReq.MsgFirstModifyTime = resp.MsgFirstModifyTime
 	return nil
 }
 
-func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionExtensionsReq) error {
+func callbackDeleteMessageReactionExtensions(ctx context.Context, setReq *msg.DeleteMessagesReactionExtensionsReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -51,7 +51,7 @@ func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessagesReactionE
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
 	resp := &cbapi.CallbackDeleteMessageReactionExtResp{}
-	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
 func callbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.GetMessagesReactionExtensionsReq) error {
@@ -67,7 +67,7 @@ func callbackGetMessageListReactionExtensions(ctx context.Context, getReq *msg.G
 		TypeKeyList:     getReq.TypeKeys,
 	}
 	resp := &cbapi.CallbackGetMessageListReactionExtResp{}
-	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
 
 func callbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.ModifyMessageReactionExtensionsReq) error {
@@ -84,5 +84,5 @@ func callbackAddMessageReactionExtensions(ctx context.Context, setReq *msg.Modif
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
 	resp := &cbapi.CallbackAddMessageReactionExtResp{}
-	return http.CallBackPostReturn(cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
 }
