@@ -724,7 +724,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	if groupRequest.HandleResult != 0 {
-		return nil, errs.ErrArgs.Wrap("group request already processed")
+		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
@@ -733,17 +733,16 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	user, err := s.User.GetPublicUserInfo(ctx, req.FromUserID)
-	if err != nil {
+	if _, err := s.User.GetPublicUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
 	if (!inGroup) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
-			UserID:         user.UserID,
-			Nickname:       user.Nickname,
-			FaceURL:        user.FaceURL,
+			UserID:         req.FromUserID,
+			Nickname:       "",
+			FaceURL:        "",
 			RoleLevel:      constant.GroupOrdinaryUsers,
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
