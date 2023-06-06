@@ -764,6 +764,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		if !inGroup {
 			groupMember := &relationTb.GroupMemberModel{}
 			groupMember.GroupID = group.GroupID
+			groupMember.UserID = req.FromUserID
 			groupMember.RoleLevel = constant.GroupOrdinaryUsers
 			groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
 			groupMember.JoinSource = groupRequest.JoinSource
