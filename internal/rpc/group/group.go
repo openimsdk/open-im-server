@@ -297,7 +297,11 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
 	}), func(group *relationTb.GroupModel) *sdkws.GroupInfo {
-		return convert.Db2PbGroupInfo(group, ownerMap[group.GroupID].UserID, groupMemberNum[group.GroupID])
+		var userID string
+		if user := ownerMap[group.GroupID]; user != nil {
+			userID = user.UserID
+		}
+		return convert.Db2PbGroupInfo(group, userID, groupMemberNum[group.GroupID])
 	})
 	return resp, nil
 }
