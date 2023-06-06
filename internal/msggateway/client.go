@@ -45,10 +45,10 @@ type PongHandler func(string) error
 type Client struct {
 	w              *sync.Mutex
 	conn           LongConn
-	platformID     int
-	isCompress     bool
-	userID         string
-	isBackground   bool
+	platformID     int    `json:"platformID"`
+	isCompress     bool   `json:"isCompress"`
+	userID         string `json:"userID"`
+	isBackground   bool   `json:"isBackground"`
 	ctx            *UserConnContext
 	longConnServer LongConnServer
 	closed         bool
