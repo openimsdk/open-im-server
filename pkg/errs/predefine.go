@@ -62,4 +62,5 @@ var (
 
 	ErrFileUploadedComplete = NewCodeError(FileUploadedCompleteError, "FileUploadedComplete")
 	ErrFileUploadedExpired  = NewCodeError(FileUploadedExpiredError, "FileUploadedExpiredError")
+	ErrGroupRequestHandled  = NewCodeError(GroupRequestHandled, "GroupRequestHandled")
 )

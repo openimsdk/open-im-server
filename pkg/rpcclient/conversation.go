@@ -8,7 +8,6 @@ import (
 	discoveryRegistry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 )
 
 type ConversationClient struct {
@@ -107,15 +106,4 @@ func (c *ConversationClient) GetConversationsByConversationID(ctx context.Contex
 		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("conversationIDs: %v not found", conversationIDs))
 	}
 	return resp.Conversations, nil
-}
-
-func (c *ConversationClient) SetHasReadSeq(ctx context.Context, userID, conversationID string, conversationType int32, hasReadSeq int64) error {
-	cc, err := c.getConn(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = pbConversation.NewConversationClient(cc).SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: []string{userID},
-		Conversation: &pbConversation.ConversationReq{ConversationID: conversationID, ConversationType: conversationType, HasReadSeq: &wrapperspb.Int64Value{Value: hasReadSeq}}})
-
-	return err
 }

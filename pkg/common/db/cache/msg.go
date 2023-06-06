@@ -26,6 +26,7 @@ const (
 	maxSeq                 = "MAX_SEQ:"
 	minSeq                 = "MIN_SEQ:"
 	conversationUserMinSeq = "CON_USER_MIN_SEQ:"
+	hasReadSeq             = "HAS_READ_SEQ:"
 
 	appleDeviceToken = "DEVICE_TOKEN"
 	getuiToken       = "GETUI_TOKEN"
@@ -42,7 +43,7 @@ const (
 	uidPidToken             = "UID_PID_TOKEN_STATUS:"
 )
 
-type MsgModel interface {
+type SeqCache interface {
 	SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error
 	GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error)
 	GetMaxSeq(ctx context.Context, conversationID string) (int64, error)
@@ -57,7 +58,13 @@ type MsgModel interface {
 	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
 	// seqs map: key conversationID value minSeq
 	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error
+	// has read seq
+	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
+	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
+}
 
+type MsgModel interface {
+	SeqCache
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
 	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
 	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
@@ -114,6 +121,10 @@ func (c *msgCache) getMaxSeqKey(conversationID string) string {
 
 func (c *msgCache) getMinSeqKey(conversationID string) string {
 	return minSeq + conversationID
+}
+
+func (c *msgCache) getHasReadSeqKey(conversationID string, userID string) string {
+	return hasReadSeq + userID + ":" + conversationID
 }
 
 func (c *msgCache) setSeq(ctx context.Context, conversationID string, seq int64, getkey func(conversationID string) string) error {
@@ -213,6 +224,16 @@ func (c *msgCache) SetConversationUserMinSeqs(ctx context.Context, conversationI
 func (c *msgCache) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error) {
 	return c.setSeqs(ctx, seqs, func(conversationID string) string {
 		return c.getConversationUserMinSeqKey(conversationID, userID)
+	})
+}
+
+func (c *msgCache) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
+	return utils.Wrap1(c.rdb.Set(ctx, c.getHasReadSeqKey(conversationID, userID), hasReadSeq, 0).Err())
+}
+
+func (c *msgCache) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	return c.getSeqs(ctx, conversationIDs, func(conversationID string) string {
+		return c.getHasReadSeqKey(conversationID, userID)
 	})
 }
 

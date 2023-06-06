@@ -226,19 +226,15 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
 	res := make(map[string]*relationTb.GroupSimpleUserID)
 	for _, groupID := range groupIDs {
-		userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+		hash, err := g.GetGroupMembersHash(ctx, groupID)
 		if err != nil {
 			return nil, err
 		}
-		users := &relationTb.GroupSimpleUserID{}
-		if len(userIDs) > 0 {
-			utils.Sort(userIDs, true)
-			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
-			users.Hash = bi.Uint64()
-			users.MemberNum = uint32(len(userIDs))
+		num, err := g.GetGroupMemberNum(ctx, groupID)
+		if err != nil {
+			return nil, err
 		}
-		res[groupID] = users
+		res[groupID] = &relationTb.GroupSimpleUserID{Hash: hash, MemberNum: uint32(num)}
 	}
 	return res, nil
 }

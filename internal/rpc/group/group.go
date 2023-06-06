@@ -445,7 +445,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	return resp, nil
 }
@@ -471,7 +471,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	log.ZDebug(ctx, "GetGroupMemberList", "resp", resp, "length", len(resp.Members))
 	return resp, nil
@@ -572,7 +572,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			tips.Group.OwnerUserID = owner[0].UserID
 		}
 		if opMember, ok := memberMap[opUserID]; ok {
-			tips.OpUser = convert.Db2PbGroupMembersCMSResp(opMember)
+			tips.OpUser = convert.Db2PbGroupMember(opMember)
 		} else {
 			tips.OpUser = &sdkws.GroupMemberFullInfo{
 				GroupID: group.GroupID,
@@ -580,7 +580,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			}
 		}
 		for _, userID := range req.KickedUserIDs {
-			tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMembersCMSResp(memberMap[userID]))
+			tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMember(memberMap[userID]))
 		}
 		s.Notification.MemberKickedNotification(ctx, tips)
 	}
@@ -612,7 +612,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	return resp, nil
 }
@@ -724,7 +724,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	if groupRequest.HandleResult != 0 {
-		return nil, errs.ErrArgs.Wrap("group request already processed")
+		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
@@ -733,17 +733,16 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	user, err := s.User.GetPublicUserInfo(ctx, req.FromUserID)
-	if err != nil {
+	if _, err := s.User.GetPublicUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
 	if (!inGroup) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
-			UserID:         user.UserID,
-			Nickname:       user.Nickname,
-			FaceURL:        user.FaceURL,
+			UserID:         req.FromUserID,
+			Nickname:       "",
+			FaceURL:        "",
 			RoleLevel:      constant.GroupOrdinaryUsers,
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
@@ -1059,7 +1058,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	return resp, nil
 }
@@ -1449,7 +1448,7 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	return resp, nil
 }
@@ -1482,7 +1481,7 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.
 		if e.Nickname == "" {
 			e.Nickname = nameMap[e.UserID]
 		}
-		return convert.Db2PbGroupMembersCMSResp(e)
+		return convert.Db2PbGroupMember(e)
 	})
 	return resp, nil
 }

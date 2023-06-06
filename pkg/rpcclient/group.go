@@ -145,3 +145,32 @@ func (g *GroupClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]
 	}
 	return resp.UserIDs, nil
 }
+
+func (g *GroupClient) GetGroupInfoCache(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupInfoCache(ctx, &group.GetGroupInfoCacheReq{
+		GroupID: groupID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.GroupInfo, nil
+}
+
+func (g *GroupClient) GetGroupMemberCache(ctx context.Context, groupID string, groupMemberID string) (*sdkws.GroupMemberFullInfo, error) {
+	cc, err := g.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := group.NewGroupClient(cc).GetGroupMemberCache(ctx, &group.GetGroupMemberCacheReq{
+		GroupID:       groupID,
+		GroupMemberID: groupMemberID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Member, nil
+}

@@ -145,18 +145,7 @@ message GetConversationIDsResp {
   repeated string conversationIDs = 1;
 }
 
-message GetConversationsHasReadAndMaxSeqReq {
-  string userID = 1;
-}
 
-message Seqs {
-  int64 maxSeq = 1;
-  int64 hasReadSeq = 2;
-}
-
-message GetConversationsHasReadAndMaxSeqResp {
-  map<string, Seqs> seqs = 1;
-}
 
 message SetConversationsReq {
   repeated string userIDs = 1;
@@ -195,7 +184,6 @@ service conversation {
   rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);
   rpc DelGroupChatConversations(DelGroupChatConversationsReq) returns(DelGroupChatConversationsResp);
   rpc GetConversationIDs(GetConversationIDsReq) returns(GetConversationIDsResp);
-  rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
   rpc SetConversations(SetConversationsReq) returns(SetConversationsResp);
   rpc GetUserConversationIDsHash(GetUserConversationIDsHashReq) returns(GetUserConversationIDsHashResp);
   rpc GetConversationsByConversationID(GetConversationsByConversationIDReq) returns(GetConversationsByConversationIDResp);

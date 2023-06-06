@@ -35,112 +35,75 @@ type MessageRevoked struct {
 	Seq                         uint32 `json:"seq"`
 }
 
-func (m *msgServer) userIsMuteAndIsAdminInGroup(ctx context.Context, groupID, userID string) (isMute bool, err error) {
-	groupMemberInfo, err := m.Group.GetGroupMemberInfo(ctx, groupID, userID)
-	if err != nil {
-		return false, err
-	}
-	if groupMemberInfo.MuteEndTime >= time.Now().Unix() {
-		return true, nil
-	}
-	return false, nil
-}
-
-// 如果禁言了，再看下是否群管理员
-func (m *msgServer) groupIsMuted(ctx context.Context, groupID string, userID string) (bool, bool, error) {
-	groupInfo, err := m.Group.GetGroupInfo(ctx, groupID)
-	if err != nil {
-		return false, false, err
-	}
-
-	if groupInfo.Status == constant.GroupStatusMuted {
-		groupMemberInfo, err := m.Group.GetGroupMemberInfo(ctx, groupID, userID)
-		if err != nil {
-			return false, false, err
-		}
-		return true, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
-	}
-	return false, false, nil
-}
-
-func (m *msgServer) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-	return m.GroupLocalCache.GetGroupMemberIDs(ctx, groupID)
-}
-
-func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) ([]string, error) {
+func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return nil, nil
+			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return nil, nil
+			return nil
 		}
 		black, err := m.black.IsBlocked(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if black {
-			return nil, errs.ErrBlockedByPeer.Wrap()
+			return errs.ErrBlockedByPeer.Wrap()
 		}
 		if *config.Config.MessageVerify.FriendVerify {
 			friend, err := m.friend.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			if !friend {
-				return nil, errs.ErrNotPeersFriend.Wrap()
+				return errs.ErrNotPeersFriend.Wrap()
 			}
-			return nil, nil
+			return nil
 		}
-		return nil, nil
+		return nil
 	case constant.SuperGroupChatType:
-		groupInfo, err := m.Group.GetGroupInfo(ctx, data.MsgData.GroupID)
+		groupInfo, err := m.Group.GetGroupInfoCache(ctx, data.MsgData.GroupID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed && data.MsgData.ContentType != constant.GroupDismissedNotification {
-			return nil, errs.ErrDismissedAlready.Wrap()
+			return errs.ErrDismissedAlready.Wrap()
 		}
 		if groupInfo.GroupType == constant.SuperGroup {
-			return nil, nil
-		}
-		userIDList, err := m.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
-		if err != nil {
-			return nil, err
+			return nil
 		}
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return nil, nil
+			return nil
 		}
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return userIDList, nil
+			return nil
 		} else {
-			if !utils.IsContain(data.MsgData.SendID, userIDList) {
-				return nil, errs.ErrNotInGroupYet.Wrap()
+			memberIDs, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+			if err != nil {
+				return err
+			}
+			if !utils.IsContain(data.MsgData.SendID, memberIDs) {
+				return errs.ErrNotInGroupYet.Wrap()
 			}
 		}
-		isMute, err := m.userIsMuteAndIsAdminInGroup(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		groupMemberInfo, err := m.Group.GetGroupMemberCache(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		if isMute {
-			return nil, errs.ErrMutedInGroup.Wrap()
+		if groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers {
+			return nil
+		} else {
+			if groupMemberInfo.MuteEndTime >= time.Now().Unix() {
+				return errs.ErrMutedInGroup.Wrap()
+			}
+			if groupInfo.Status == constant.GroupStatusMuted {
+				return errs.ErrMutedGroup.Wrap()
+			}
 		}
-
-		isMute, isAdmin, err := m.groupIsMuted(ctx, data.MsgData.GroupID, data.MsgData.SendID)
-		if err != nil {
-			return nil, err
-		}
-		if isAdmin {
-			return userIDList, nil
-		}
-		if isMute {
-			return nil, errs.ErrMutedGroup.Wrap()
-		}
-		return userIDList, nil
-
+		return nil
 	default:
-		return nil, nil
+		return nil
 	}
 }
 func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {

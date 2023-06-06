@@ -56,6 +56,7 @@ const (
 	OwnerNotAllowedQuitError = 1207 //群主不能退群
 	GroupTypeNotSupport      = 1208
 	GroupNoOwner             = 1209
+	GroupRequestHandled      = 1210
 
 	// 关系链错误码
 	CanNotAddYourselfError = 1301 //不能添加自己为好友
