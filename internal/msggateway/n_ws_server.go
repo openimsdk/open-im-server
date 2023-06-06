@@ -161,7 +161,7 @@ func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
 }
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.delete(client.userID, client.platformID)
+	isDeleteUser := ws.clients.delete(client.userID, client.ctx.GetRemoteAddr())
 	if isDeleteUser {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}

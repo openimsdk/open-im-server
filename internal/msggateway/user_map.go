@@ -51,13 +51,13 @@ func (u *UserMap) Set(key string, v *Client) {
 		u.m.Store(key, clients)
 	}
 }
-func (u *UserMap) delete(key string, platformID int) (isDeleteUser bool) {
+func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) {
 	allClients, existed := u.m.Load(key)
 	if existed {
 		oldClients := allClients.([]*Client)
 		var a []*Client
 		for _, client := range oldClients {
-			if client.platformID != platformID {
+			if client.ctx.GetRemoteAddr() != connRemoteAddr {
 				a = append(a, client)
 			}
 		}
