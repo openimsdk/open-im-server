@@ -724,7 +724,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	if groupRequest.HandleResult != 0 {
-		return nil, errs.ErrArgs.Wrap("group request already processed")
+		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
@@ -733,17 +733,16 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
-	user, err := s.User.GetPublicUserInfo(ctx, req.FromUserID)
-	if err != nil {
+	if _, err := s.User.GetPublicUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
 	if (!inGroup) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
-			UserID:         user.UserID,
-			Nickname:       user.Nickname,
-			FaceURL:        user.FaceURL,
+			UserID:         req.FromUserID,
+			Nickname:       "",
+			FaceURL:        "",
 			RoleLevel:      constant.GroupOrdinaryUsers,
 			JoinTime:       time.Now(),
 			JoinSource:     groupRequest.JoinSource,
@@ -762,28 +761,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
-		if !inGroup {
-			groupMember := &relationTb.GroupMemberModel{}
-			groupMember.GroupID = group.GroupID
-			groupMember.RoleLevel = constant.GroupOrdinaryUsers
-			groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
-			groupMember.JoinSource = groupRequest.JoinSource
-			groupMember.InviterUserID = groupRequest.InviterUserID
-			groupMember.JoinTime = time.Now()
-			groupMember.MuteEndTime = time.Unix(0, 0)
-			if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
-				return nil, err
-			}
-			if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
-				return nil, err
-			}
-			if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
-				return nil, err
-			}
-			s.Notification.MemberEnterNotification(ctx, req)
-		}
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
+	}
+	if member != nil {
+		s.Notification.MemberEnterNotification(ctx, req)
 	}
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
