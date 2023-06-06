@@ -38,6 +38,7 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("api start init discov client")
 	var client discoveryregistry.SvcDiscoveryRegistry
 	client, err = openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
@@ -45,14 +46,18 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("api init discov client success")
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {
 		return err
 	}
+	fmt.Println("api register public config to discov")
 	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
 		return err
 	}
+	fmt.Println("api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
+	fmt.Println("api init router success")
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
