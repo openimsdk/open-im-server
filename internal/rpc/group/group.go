@@ -717,10 +717,10 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if groupRequest.HandleResult != 0 {
 		return nil, errs.ErrArgs.Wrap("group request already processed")
 	}
-	var join bool
+	var inGroup bool
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
 	if err == nil {
-		join = true // 已经在群里了
+		inGroup = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
@@ -729,7 +729,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
-	if (!join) && req.HandleResult == constant.GroupResponseAgree {
+	if (!inGroup) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
 			UserID:         user.UserID,
@@ -750,14 +750,20 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
-	if !join {
-		if req.HandleResult == constant.GroupResponseAgree {
-			s.Notification.GroupApplicationAcceptedNotification(ctx, req)
-			s.Notification.MemberEnterNotification(ctx, req)
-		} else if req.HandleResult == constant.GroupResponseRefuse {
-			s.Notification.GroupApplicationRejectedNotification(ctx, req)
-		}
+	switch req.HandleResult {
+	case constant.GroupResponseAgree:
+		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+	case constant.GroupResponseRefuse:
+		s.Notification.GroupApplicationRejectedNotification(ctx, req)
 	}
+	//if !inGroup {
+	//	if req.HandleResult == constant.GroupResponseAgree {
+	//		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+	//		s.Notification.MemberEnterNotification(ctx, req)
+	//	} else if req.HandleResult == constant.GroupResponseRefuse {
+	//		s.Notification.GroupApplicationRejectedNotification(ctx, req)
+	//	}
+	//}
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
 
