@@ -1105,9 +1105,8 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
+	if req.DeleteMember == false && group.Status == constant.GroupStatusDismissed {
+		return nil, errs.ErrDismissedAlready.Wrap("group status is dismissed")
 	}
 	//if group.Status == constant.GroupStatusDismissed {
 	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
@@ -1121,6 +1120,10 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		}
 	} else {
 		if !req.DeleteMember {
+			userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+			if err != nil {
+				return nil, err
+			}
 			//s.Notification.GroupDismissedNotification(ctx, req)
 			tips := &sdkws.GroupDismissedTips{
 				Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
