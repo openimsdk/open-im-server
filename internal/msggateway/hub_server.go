@@ -88,11 +88,12 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 		}
 		clients, ok := s.LongConnServer.GetUserAllCons(v)
 		if !ok {
+			log.ZDebug(ctx, "push user not online", "userID", v)
 			tempT.Resp = resp
 			singleUserResult = append(singleUserResult, tempT)
 			continue
 		}
-		log.ZDebug(ctx, "SuperGroupOnlineBatchPushOneMsg", "clients", clients)
+		log.ZDebug(ctx, "push user online", "clients", clients, "userID", v)
 		for _, client := range clients {
 			if client != nil {
 				temp := &msggateway.SingleMsgToUserPlatform{

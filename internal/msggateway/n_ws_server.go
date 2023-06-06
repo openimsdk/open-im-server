@@ -147,7 +147,7 @@ func getRemoteAdders(client []*Client) string {
 		if i == 0 {
 			ret = c.ctx.GetRemoteAddr()
 		} else {
-			ret += "@" + c.ctx.GetRemoteAddr()
+			ret += " @ " + c.ctx.GetRemoteAddr()
 		}
 	}
 	return ret
