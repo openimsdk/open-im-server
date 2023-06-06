@@ -257,6 +257,21 @@ func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, us
 	return members, nil
 }
 
+func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
+	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	if owner.Nickname == "" {
+		user, err := s.User.GetUserInfo(ctx, owner.UserID)
+		if err != nil {
+			return nil, err
+		}
+		owner.Nickname = user.Nickname
+	}
+	return owner, nil
+}
+
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
@@ -877,7 +892,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, group.GroupID)
+	owner, err := s.TakeGroupOwner(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,7 +1092,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	defer log.ZInfo(ctx, "DismissGroup.return")
 	resp := &pbGroup.DismissGroupResp{}
-	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
+	owner, err := s.TakeGroupOwner(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
