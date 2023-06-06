@@ -24,9 +24,12 @@ func NewRootCmd(name string) (rootCmd *RootCmd) {
 		Long:  fmt.Sprintf(`Start %s server`, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
-				return err
+				panic(err)
 			}
-			return log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount)
+			if err := log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
+				panic(err)
+			}
+			return nil
 		},
 	}
 	rootCmd.Command = c

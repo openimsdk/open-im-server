@@ -85,9 +85,9 @@ func (c *ConversationGorm) GetUserAllHasReadSeqs(ctx context.Context, ownerUserI
 	var conversations []*relation.ConversationModel
 	err = utils.Wrap(c.db(ctx).Where("owner_user_id = ?", ownerUserID).Select("conversation_id", "has_read_seq").Find(&conversations).Error, "")
 	hasReadSeqs = make(map[string]int64, len(conversations))
-	for _, conversation := range conversations {
-		hasReadSeqs[conversation.ConversationID] = conversation.HasReadSeq
-	}
+	// for _, conversation := range conversations {
+	// 	hasReadSeqs[conversation.ConversationID] = conversation.HasReadSeq
+	// }
 	return hasReadSeqs, err
 }
 

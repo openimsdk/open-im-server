@@ -40,9 +40,9 @@ require (
 require github.com/google/uuid v1.3.0
 
 require (
-	github.com/OpenIMSDK/openKeeper v0.0.11
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-zookeeper/zk v1.0.3
 )
 
 require (
@@ -64,7 +64,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/go-zookeeper/zk v1.0.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect

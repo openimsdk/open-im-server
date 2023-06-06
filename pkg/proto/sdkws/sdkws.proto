@@ -458,6 +458,7 @@ message MarkAsReadTips {
   string markAsReadUserID = 1;
   string conversationID = 2;
   repeated int64 seqs = 3;
+  int64 hasReadSeq = 4;
 }
 
 ///////////////////signal//////////////
