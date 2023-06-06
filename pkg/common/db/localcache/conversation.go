@@ -11,8 +11,8 @@ import (
 
 type ConversationLocalCache struct {
 	lock                              sync.Mutex
-	SuperGroupRecvMsgNotNotifyUserIDs map[string]Hash
-	ConversationIDs                   map[string]Hash
+	superGroupRecvMsgNotNotifyUserIDs map[string]Hash
+	conversationIDs                   map[string]Hash
 	client                            discoveryregistry.SvcDiscoveryRegistry
 }
 
@@ -23,8 +23,8 @@ type Hash struct {
 
 func NewConversationLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *ConversationLocalCache {
 	return &ConversationLocalCache{
-		SuperGroupRecvMsgNotNotifyUserIDs: make(map[string]Hash),
-		ConversationIDs:                   make(map[string]Hash),
+		superGroupRecvMsgNotNotifyUserIDs: make(map[string]Hash),
+		conversationIDs:                   make(map[string]Hash),
 		client:                            client,
 	}
 }
@@ -58,7 +58,7 @@ func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID 
 	}
 	g.lock.Lock()
 	defer g.lock.Unlock()
-	hash, ok := g.ConversationIDs[userID]
+	hash, ok := g.conversationIDs[userID]
 	if !ok || hash.hash != resp.Hash {
 		conversationIDsResp, err := client.GetConversationIDs(ctx, &conversation.GetConversationIDsReq{
 			UserID: userID,
@@ -66,7 +66,7 @@ func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID 
 		if err != nil {
 			return nil, err
 		}
-		g.ConversationIDs[userID] = Hash{
+		g.conversationIDs[userID] = Hash{
 			hash: resp.Hash,
 			ids:  conversationIDsResp.ConversationIDs,
 		}

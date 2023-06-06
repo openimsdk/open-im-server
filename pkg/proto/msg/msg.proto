@@ -233,6 +233,20 @@ message GetConversationMaxSeqResp {
   int64 maxSeq = 1;
 }
 
+
+message GetConversationsHasReadAndMaxSeqReq {
+  string userID = 1;
+}
+
+message Seqs {
+  int64 maxSeq = 1;
+  int64 hasReadSeq = 2;
+}
+
+message GetConversationsHasReadAndMaxSeqResp {
+  map<string, Seqs> seqs = 1;
+}
+
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
@@ -264,4 +278,6 @@ service msg {
   rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
   rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
   rpc DeleteMessageReactionExtensions(DeleteMessagesReactionExtensionsReq) returns(DeleteMessagesReactionExtensionsResp);
+
+  rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
 }

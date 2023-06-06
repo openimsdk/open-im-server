@@ -13,7 +13,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -298,25 +297,6 @@ func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConv
 		return nil, err
 	}
 	return &pbConversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
-}
-
-func (c *conversationServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *pbConversation.GetConversationsHasReadAndMaxSeqReq) (*pbConversation.GetConversationsHasReadAndMaxSeqResp, error) {
-	conversations, err := c.conversationDatabase.GetUserAllHasReadSeqs(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	maxSeqs, err := c.msgRpcClient.GetMaxSeq(ctx, &sdkws.GetMaxSeqReq{UserID: req.UserID})
-	if err != nil {
-		return nil, err
-	}
-	resp := &pbConversation.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*pbConversation.Seqs)}
-	for conversationID, seq := range conversations {
-		resp.Seqs[conversationID] = &pbConversation.Seqs{
-			HasReadSeq: seq,
-			MaxSeq:     maxSeqs.MaxSeqs[conversationID],
-		}
-	}
-	return resp, nil
 }
 
 func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req *pbConversation.GetUserConversationIDsHashReq) (*pbConversation.GetUserConversationIDsHashResp, error) {

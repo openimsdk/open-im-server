@@ -65,6 +65,9 @@ type CommonMsgDatabase interface {
 	SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error
 	SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error)
 	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) (err error)
+	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
+	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
+
 	GetMongoMaxAndMinSeq(ctx context.Context, conversationID string) (maxSeq, minSeq int64, err error)
 	GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
@@ -702,6 +705,13 @@ func (db *commonMsgDatabase) SetConversationUserMinSeqs(ctx context.Context, con
 
 func (db *commonMsgDatabase) SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error {
 	return db.cache.SetUserConversationsMinSeqs(ctx, userID, seqs)
+}
+
+func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
+	return db.cache.SetHasReadSeq(ctx, userID, conversationID, hasReadSeq)
+}
+func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
+	return db.cache.GetHasReadSeqs(ctx, userID, conversationIDs)
 }
 
 func (db *commonMsgDatabase) SetSendMsgStatus(ctx context.Context, id string, status int32) error {

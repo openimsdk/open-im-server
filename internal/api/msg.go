@@ -131,6 +131,10 @@ func (m *Message) MarkMsgsAsRead(c *gin.Context) {
 	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.client, c)
 }
 
+func (m *Message) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.client, c)
+}
+
 func (m *Message) ClearConversationsMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.client, c)
 }

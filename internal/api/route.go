@@ -141,6 +141,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
 		msgGroup.POST("/revoke_msg", m.RevokeMsg)
 		msgGroup.POST("/mark_msgs_as_read", m.MarkMsgsAsRead)
+		msgGroup.POST("/get_conversations_has_read_and_max_seq", m.GetConversationsHasReadAndMaxSeq)
 
 		msgGroup.POST("/clear_conversation_msg", m.ClearConversationsMsg)
 		msgGroup.POST("/user_clear_all_msg", m.UserClearAllMsg)
@@ -168,7 +169,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/batch_set_conversation", c.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
-		conversationGroup.POST("/get_conversations_has_read_and_max_seq", c.GetConversationsHasReadAndMaxSeq)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
 	return r

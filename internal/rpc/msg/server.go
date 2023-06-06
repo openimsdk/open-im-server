@@ -103,14 +103,6 @@ func (m *msgServer) initPrometheus() {
 	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
-func (m *msgServer) getConversationAndGetRecvID(ctx context.Context, userID, conversationID string) (recvID string, err error) {
-	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{conversationID})
-	if err != nil {
-		return
-	}
-	return m.conversationAndGetRecvID(conversations[0], userID), nil
-}
-
 func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
 	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
 		if userID == conversation.OwnerUserID {
