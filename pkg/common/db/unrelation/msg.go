@@ -280,11 +280,17 @@ func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, 
 	return count > 0, nil
 }
 
-func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	indexs := make([]int64, 0, len(seqs))
-	for _, seq := range seqs {
-		indexs = append(indexs, m.model.GetMsgIndex(seq))
+func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error {
+	updates := bson.M{
+		"$set": bson.M{},
 	}
-
+	for _, index := range indexes {
+		updates["$set"].(bson.M)[fmt.Sprintf("msgs.%d.is_read", index)] = true
+	}
+	filter := bson.M{"doc_id": docID}
+	_, err := m.MsgCollection.UpdateMany(ctx, filter, updates)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
 	return nil
 }

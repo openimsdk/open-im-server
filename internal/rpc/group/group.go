@@ -297,7 +297,11 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	resp.Groups = utils.Slice(utils.Order(groupIDs, groups, func(group *relationTb.GroupModel) string {
 		return group.GroupID
 	}), func(group *relationTb.GroupModel) *sdkws.GroupInfo {
-		return convert.Db2PbGroupInfo(group, ownerMap[group.GroupID].UserID, groupMemberNum[group.GroupID])
+		var userID string
+		if user := ownerMap[group.GroupID]; user != nil {
+			userID = user.UserID
+		}
+		return convert.Db2PbGroupInfo(group, userID, groupMemberNum[group.GroupID])
 	})
 	return resp, nil
 }
@@ -321,17 +325,22 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if err != nil {
 		return nil, err
 	}
+	var groupMember *relationTb.GroupMemberModel
+	var opUserID string
+	if !tokenverify.IsAppManagerUid(ctx) {
+		opUserID = mcontext.GetOpUserID(ctx)
+		groupMembers, err := s.FindGroupMember(ctx, []string{req.GroupID}, []string{opUserID}, nil)
+		if err != nil {
+			return nil, err
+		}
+		if len(groupMembers) <= 0 {
+			return nil, errs.ErrNoPermission.Wrap("not in group")
+		}
+		groupMember = groupMembers[0]
+	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !tokenverify.IsAppManagerUid(ctx) {
-			opUserID := mcontext.GetOpUserID(ctx)
-			groupMembers, err := s.FindGroupMember(ctx, []string{req.GroupID}, []string{opUserID}, nil)
-			if err != nil {
-				return nil, err
-			}
-			if len(groupMembers) <= 0 {
-				return nil, errs.ErrNoPermission.Wrap("not in group")
-			}
-			if !(groupMembers[0].RoleLevel == constant.GroupOwner || groupMembers[0].RoleLevel == constant.GroupAdmin) {
+			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
 					requests = append(requests, &relationTb.GroupRequestModel{

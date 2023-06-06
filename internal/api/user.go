@@ -20,7 +20,7 @@ import (
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
-		panic(err)
+		// panic(err)
 	}
 	log.ZInfo(context.Background(), "user rpc conn", "conn", conn)
 	return &User{conn: conn, discov: discov}
@@ -34,7 +34,7 @@ type User struct {
 func (u *User) client(ctx context.Context) (user.UserClient, error) {
 	conn, err := u.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return user.NewUserClient(conn), nil
 }
