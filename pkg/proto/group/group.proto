@@ -301,6 +301,23 @@ message GetGroupMemberRoleLevelResp {
   repeated sdkws.GroupMemberFullInfo members = 1;
 }
 
+message GetGroupInfoCacheReq {
+  string groupID = 1;
+}
+
+message GetGroupInfoCacheResp {
+  sdkws.GroupInfo groupInfo = 1;
+}
+
+message GetGroupMemberCacheReq {
+  string groupID = 1;
+  string groupMemberID = 2;
+}
+
+message GetGroupMemberCacheResp {
+  sdkws.GroupMemberFullInfo member = 1;
+}
+
 service group{
   //创建群
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -360,6 +377,9 @@ service group{
   rpc getGroupMemberUserIDs(GetGroupMemberUserIDsReq) returns (GetGroupMemberUserIDsResp);
   //查询群组中对应级别的成员
   rpc GetGroupMemberRoleLevel(GetGroupMemberRoleLevelReq)returns (GetGroupMemberRoleLevelResp);
+
+  rpc GetGroupInfoCache(GetGroupInfoCacheReq) returns (GetGroupInfoCacheResp);
+  rpc GetGroupMemberCache(GetGroupMemberCacheReq) returns (GetGroupMemberCacheResp);
 }
 
 

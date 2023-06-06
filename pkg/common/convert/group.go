@@ -49,7 +49,7 @@ func Db2PbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName str
 	}
 }
 
-func Db2PbGroupMembersCMSResp(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
+func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 	return &sdkws.GroupMemberFullInfo{
 		GroupID:   m.GroupID,
 		UserID:    m.UserID,

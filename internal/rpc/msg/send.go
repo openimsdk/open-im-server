@@ -36,7 +36,7 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
 	resp = &pbMsg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
-	if _, err = m.messageVerification(ctx, req); err != nil {
+	if err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
@@ -70,8 +70,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbMsg.SendMsgR
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
-	_, err = m.messageVerification(ctx, req)
-	if err != nil {
+	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
 	var isSend bool = true
