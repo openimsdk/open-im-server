@@ -257,6 +257,21 @@ func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, us
 	return members, nil
 }
 
+func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
+	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	if owner.Nickname == "" {
+		user, err := s.User.GetUserInfo(ctx, owner.UserID)
+		if err != nil {
+			return nil, err
+		}
+		owner.Nickname = user.Nickname
+	}
+	return owner, nil
+}
+
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
@@ -711,10 +726,10 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if groupRequest.HandleResult != 0 {
 		return nil, errs.ErrArgs.Wrap("group request already processed")
 	}
-	var join bool
+	var inGroup bool
 	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
 	if err == nil {
-		join = true // 已经在群里了
+		inGroup = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
 	}
@@ -723,7 +738,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	var member *relationTb.GroupMemberModel
-	if (!join) && req.HandleResult == constant.GroupResponseAgree {
+	if (!inGroup) && req.HandleResult == constant.GroupResponseAgree {
 		member = &relationTb.GroupMemberModel{
 			GroupID:        req.GroupID,
 			UserID:         user.UserID,
@@ -744,13 +759,31 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
-	if !join {
-		if req.HandleResult == constant.GroupResponseAgree {
-			s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+	switch req.HandleResult {
+	case constant.GroupResponseAgree:
+		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+		if !inGroup {
+			groupMember := &relationTb.GroupMemberModel{}
+			groupMember.GroupID = group.GroupID
+			groupMember.RoleLevel = constant.GroupOrdinaryUsers
+			groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
+			groupMember.JoinSource = groupRequest.JoinSource
+			groupMember.InviterUserID = groupRequest.InviterUserID
+			groupMember.JoinTime = time.Now()
+			groupMember.MuteEndTime = time.Unix(0, 0)
+			if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
+				return nil, err
+			}
+			if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {
+				return nil, err
+			}
+			if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+				return nil, err
+			}
 			s.Notification.MemberEnterNotification(ctx, req)
-		} else if req.HandleResult == constant.GroupResponseRefuse {
-			s.Notification.GroupApplicationRejectedNotification(ctx, req)
 		}
+	case constant.GroupResponseRefuse:
+		s.Notification.GroupApplicationRejectedNotification(ctx, req)
 	}
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
@@ -886,7 +919,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, group.GroupID)
+	owner, err := s.TakeGroupOwner(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1086,7 +1119,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	defer log.ZInfo(ctx, "DismissGroup.return")
 	resp := &pbGroup.DismissGroupResp{}
-	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, req.GroupID)
+	owner, err := s.TakeGroupOwner(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -1099,9 +1132,8 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
-	if err != nil {
-		return nil, err
+	if req.DeleteMember == false && group.Status == constant.GroupStatusDismissed {
+		return nil, errs.ErrDismissedAlready.Wrap("group status is dismissed")
 	}
 	//if group.Status == constant.GroupStatusDismissed {
 	//	return nil, errs.ErrArgs.Wrap("group status is dismissed")
@@ -1115,6 +1147,10 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		}
 	} else {
 		if !req.DeleteMember {
+			userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+			if err != nil {
+				return nil, err
+			}
 			//s.Notification.GroupDismissedNotification(ctx, req)
 			tips := &sdkws.GroupDismissedTips{
 				Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
