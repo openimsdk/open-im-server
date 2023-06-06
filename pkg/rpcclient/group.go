@@ -160,13 +160,14 @@ func (g *GroupClient) GetGroupInfoCache(ctx context.Context, groupID string) (*s
 	return resp.GroupInfo, nil
 }
 
-func (g *GroupClient) GetGroupMemberCache(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupClient) GetGroupMemberCache(ctx context.Context, groupID string, groupMemberID string) (*sdkws.GroupMemberFullInfo, error) {
 	cc, err := g.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
 	resp, err := group.NewGroupClient(cc).GetGroupMemberCache(ctx, &group.GetGroupMemberCacheReq{
-		GroupID: groupID,
+		GroupID:       groupID,
+		GroupMemberID: groupMemberID,
 	})
 	if err != nil {
 		return nil, err
