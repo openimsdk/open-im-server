@@ -1,6 +1,10 @@
 package msggateway
 
-import "sync"
+import (
+	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"sync"
+)
 
 type UserMap struct {
 	m sync.Map
@@ -36,22 +40,24 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 func (u *UserMap) Set(key string, v *Client) {
 	allClients, existed := u.m.Load(key)
 	if existed {
+		log.ZDebug(context.Background(), "Set existed", "user_id", key, "client", v)
 		oldClients := allClients.([]*Client)
 		oldClients = append(oldClients, v)
 		u.m.Store(key, oldClients)
 	} else {
+		log.ZDebug(context.Background(), "Set not existed", "user_id", key, "client", v)
 		var clients []*Client
 		clients = append(clients, v)
 		u.m.Store(key, clients)
 	}
 }
-func (u *UserMap) delete(key string, platformID int) (isDeleteUser bool) {
+func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) {
 	allClients, existed := u.m.Load(key)
 	if existed {
 		oldClients := allClients.([]*Client)
 		var a []*Client
 		for _, client := range oldClients {
-			if client.platformID != platformID {
+			if client.ctx.GetRemoteAddr() != connRemoteAddr {
 				a = append(a, client)
 			}
 		}

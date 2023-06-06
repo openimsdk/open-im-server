@@ -1,6 +1,7 @@
 package msggateway
 
 import (
+	context2 "context"
 	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"net/http"
@@ -124,11 +125,13 @@ func (ws *WsServer) registerClient(client *Client) {
 	)
 	cli, userOK, clientOK = ws.clients.Get(client.userID, client.platformID)
 	if !userOK {
+		log.ZDebug(client.ctx, "user not exist", "userID", client.userID, "platformID", client.platformID)
 		ws.clients.Set(client.userID, client)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
 
 	} else {
+		log.ZDebug(client.ctx, "user exist", "userID", client.userID, "platformID", client.platformID)
 		if clientOK { //已经有同平台的连接存在
 			ws.clients.Set(client.userID, client)
 			ws.multiTerminalLoginChecker(cli)
@@ -147,7 +150,7 @@ func getRemoteAdders(client []*Client) string {
 		if i == 0 {
 			ret = c.ctx.GetRemoteAddr()
 		} else {
-			ret += "@" + c.ctx.GetRemoteAddr()
+			ret += " @ " + c.ctx.GetRemoteAddr()
 		}
 	}
 	return ret
@@ -158,7 +161,7 @@ func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
 }
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.delete(client.userID, client.platformID)
+	isDeleteUser := ws.clients.delete(client.userID, client.ctx.GetRemoteAddr())
 	if isDeleteUser {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
@@ -195,6 +198,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
+	log.ZDebug(context2.Background(), "conn", "platformID", platformID)
 	err := tokenverify.WsVerifyToken(token, userID, platformID)
 	if err != nil {
 		httpError(context, err)
