@@ -225,9 +225,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				break
 			}
 		}
-		if tips.OpUser == nil {
-			tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: opUserID, AppMangerLevel: userMap[opUserID].AppMangerLevel}
-		}
 		s.Notification.GroupCreatedNotification(ctx, tips)
 	}
 	return resp, nil
@@ -476,6 +473,21 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	return resp, nil
 }
 
+func (s *groupServer) TakeGroupMember(ctx context.Context, groupID string, userID string) (*relationTb.GroupMemberModel, error) {
+	member, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if member.Nickname == "" {
+		user, err := s.User.GetPublicUserInfo(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+		member.Nickname = user.Nickname
+	}
+	return member, nil
+}
+
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
 	resp := &pbGroup.KickGroupMemberResp{}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
@@ -534,7 +546,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				}
 			}
 		}
-		userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+		num, err := s.GroupDatabase.FindGroupMemberNum(ctx, req.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -554,7 +566,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				FaceURL:      group.FaceURL,
 				//OwnerUserID:            owner[0].UserID,
 				CreateTime:             group.CreateTime.UnixMilli(),
-				MemberCount:            uint32(len(userIDs)),
+				MemberCount:            num,
 				Ex:                     group.Ex,
 				Status:                 group.Status,
 				CreatorUserID:          group.CreatorUserID,
@@ -572,11 +584,6 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		if opMember, ok := memberMap[opUserID]; ok {
 			tips.OpUser = convert.Db2PbGroupMember(opMember)
-		} else {
-			tips.OpUser = &sdkws.GroupMemberFullInfo{
-				GroupID: group.GroupID,
-				UserID:  opUserID,
-			}
 		}
 		for _, userID := range req.KickedUserIDs {
 			tips.KickedUserList = append(tips.KickedUserList, convert.Db2PbGroupMember(memberMap[userID]))
@@ -841,7 +848,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		}
 		s.Notification.SuperGroupNotification(ctx, mcontext.GetOpUserID(ctx), mcontext.GetOpUserID(ctx))
 	} else {
-		info, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+		info, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -880,7 +887,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	var opMember *relationTb.GroupMemberModel
 	if !tokenverify.IsAppManagerUid(ctx) {
 		var err error
-		opMember, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
+		opMember, err = s.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -896,7 +903,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return nil, utils.Wrap(errs.ErrDismissedAlready, "")
 	}
 	resp := &pbGroup.SetGroupInfoResp{}
-	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, group.GroupID)
+	count, err := s.GroupDatabase.FindGroupMemberNum(ctx, group.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -916,13 +923,11 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return nil, err
 	}
 	tips := &sdkws.GroupInfoSetTips{
-		Group:    s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+		Group:    s.groupDB2PB(group, owner.UserID, count),
 		MuteTime: 0,
 		OpUser:   &sdkws.GroupMemberFullInfo{},
 	}
-	if opMember == nil {
-		tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
-	} else {
+	if opMember != nil {
 		tips.OpUser = s.groupMemberDB2PB(opMember, 0)
 	}
 	var num int
@@ -1141,19 +1146,17 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		}
 	} else {
 		if !req.DeleteMember {
-			userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, req.GroupID)
+			num, err := s.GroupDatabase.FindGroupMemberNum(ctx, req.GroupID)
 			if err != nil {
 				return nil, err
 			}
 			//s.Notification.GroupDismissedNotification(ctx, req)
 			tips := &sdkws.GroupDismissedTips{
-				Group:  s.groupDB2PB(group, owner.UserID, uint32(len(userIDs))),
+				Group:  s.groupDB2PB(group, owner.UserID, num),
 				OpUser: &sdkws.GroupMemberFullInfo{},
 			}
 			if mcontext.GetOpUserID(ctx) == owner.UserID {
 				tips.OpUser = s.groupMemberDB2PB(owner, 0)
-			} else {
-				tips.OpUser = &sdkws.GroupMemberFullInfo{UserID: mcontext.GetOpUserID(ctx)}
 			}
 			s.Notification.GroupDismissedNotification(ctx, tips)
 		}
@@ -1166,12 +1169,12 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 	//	return nil, err
 	//}
-	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
+	member, err := s.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 	if !tokenverify.IsAppManagerUid(ctx) {
-		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+		opMember, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -1214,12 +1217,12 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	//if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 	//	return nil, err
 	//}
-	member, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.UserID)
+	member, err := s.TakeGroupMember(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
 	if !tokenverify.IsAppManagerUid(ctx) {
-		opMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+		opMember, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
