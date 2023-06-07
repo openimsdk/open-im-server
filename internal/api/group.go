@@ -13,11 +13,11 @@ import (
 )
 
 func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		// panic(err)
-	}
-	return &Group{conn: conn, discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &Group{discov: discov}
 }
 
 type Group struct {
