@@ -12,11 +12,11 @@ import (
 )
 
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
-	if err != nil {
-		// panic(err)
-	}
-	return &Conversation{conn: conn, discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &Conversation{discov: discov}
 }
 
 type Conversation struct {
