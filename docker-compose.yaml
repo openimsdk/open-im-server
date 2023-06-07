@@ -65,7 +65,6 @@ services:
       TZ: Asia/Shanghai
     restart: always
 
-
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
@@ -112,7 +111,6 @@ services:
       MINIO_ROOT_PASSWORD: ${PASSWORD}
     restart: always
     command: minio server /data --console-address ':9090'
-
 
   open_im_server:
     image: openim/open_im_server:v2.3.9

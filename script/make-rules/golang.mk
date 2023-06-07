@@ -110,11 +110,11 @@ go.build.%:
 	@echo "=====> PLATFORM=$(PLATFORM)"
 	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
-	@mkdir -p $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)
+	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "rpc" ] || [ "$(COMMAND)" == "Open-IM-SDK-Core" ]; then \
 		echo "===========> Compilation is not yet supported $(COMMAND)"; \
 	else \
-		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(OUTPUT_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
 	fi
 
 ## go.multiarch: Build multi-arch binaries
@@ -147,7 +147,7 @@ go.test.junit-report: tools.verify.go-junit-report
 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(OUTPUT_DIR)/report.xml
 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
-	@echo "===========> Test coverage of Go code is reported to $(OUTPUT_DIR)/coverage.html by generating HTML"
+	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
 
 ## go.test.cover: Run unit test with coverage
