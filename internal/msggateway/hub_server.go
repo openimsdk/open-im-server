@@ -60,10 +60,10 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 		for _, client := range clients {
 			if client != nil {
 				ps := new(msggateway.GetUsersOnlineStatusResp_SuccessDetail)
-				ps.Platform = constant.PlatformIDToName(client.platformID)
+				ps.Platform = constant.PlatformIDToName(client.PlatformID)
 				ps.Status = constant.OnlineStatus
 				ps.ConnID = client.ctx.GetConnID()
-				ps.IsBackground = client.isBackground
+				ps.IsBackground = client.IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
 			}
@@ -98,15 +98,15 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 			if client != nil {
 				temp := &msggateway.SingleMsgToUserPlatform{
 					RecvID:         v,
-					RecvPlatFormID: int32(client.platformID),
+					RecvPlatFormID: int32(client.PlatformID),
 				}
-				if !client.isBackground {
+				if !client.IsBackground {
 					err := client.PushMessage(ctx, req.MsgData)
 					if err != nil {
 						temp.ResultCode = -2
 						resp = append(resp, temp)
 					} else {
-						if utils.IsContainInt(client.platformID, s.pushTerminal) {
+						if utils.IsContainInt(client.PlatformID, s.pushTerminal) {
 							tempT.OnlinePush = true
 							prome.Inc(prome.MsgOnlinePushSuccessCounter)
 							resp = append(resp, temp)

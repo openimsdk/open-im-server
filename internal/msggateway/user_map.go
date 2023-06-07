@@ -25,7 +25,7 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 	if userExisted {
 		var clients []*Client
 		for _, client := range allClients.([]*Client) {
-			if client.platformID == platformID {
+			if client.PlatformID == platformID {
 				clients = append(clients, client)
 			}
 		}

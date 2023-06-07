@@ -45,10 +45,10 @@ type PongHandler func(string) error
 type Client struct {
 	w              *sync.Mutex
 	conn           LongConn
-	platformID     int
-	isCompress     bool
-	userID         string
-	isBackground   bool
+	PlatformID     int    `json:"platformID"`
+	IsCompress     bool   `json:"isCompress"`
+	UserID         string `json:"userID"`
+	IsBackground   bool   `json:"isBackground"`
 	ctx            *UserConnContext
 	longConnServer LongConnServer
 	closed         bool
@@ -59,21 +59,21 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 	return &Client{
 		w:          new(sync.Mutex),
 		conn:       conn,
-		platformID: utils.StringToInt(ctx.GetPlatformID()),
-		isCompress: isCompress,
-		userID:     ctx.GetUserID(),
+		PlatformID: utils.StringToInt(ctx.GetPlatformID()),
+		IsCompress: isCompress,
+		UserID:     ctx.GetUserID(),
 		ctx:        ctx,
 	}
 }
 func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
-	c.platformID = utils.StringToInt(ctx.GetPlatformID())
-	c.isCompress = isCompress
-	c.userID = ctx.GetUserID()
+	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
+	c.IsCompress = isCompress
+	c.UserID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer
-	c.isBackground = false
+	c.IsBackground = false
 	c.closed = false
 	c.closedErr = nil
 }
@@ -126,7 +126,7 @@ func (c *Client) readMessage() {
 
 }
 func (c *Client) handleMessage(message []byte) error {
-	if c.isCompress {
+	if c.IsCompress {
 		var decompressErr error
 		message, decompressErr = c.longConnServer.DeCompress(message)
 		if decompressErr != nil {
@@ -141,10 +141,10 @@ func (c *Client) handleMessage(message []byte) error {
 	if err := c.longConnServer.Validate(binaryReq); err != nil {
 		return utils.Wrap(err, "")
 	}
-	if binaryReq.SendID != c.userID {
+	if binaryReq.SendID != c.UserID {
 		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
-	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.platformID), c.ctx.GetConnID()})
+	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.PlatformID), c.ctx.GetConnID()})
 	log.ZDebug(ctx, "gateway req message", "req", binaryReq.String())
 	var messageErr error
 	var resp []byte
@@ -173,7 +173,7 @@ func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, e
 	if messageErr != nil {
 		return nil, messageErr
 	}
-	c.isBackground = isBackground
+	c.IsBackground = isBackground
 	//todo callback
 	return resp, nil
 
@@ -240,7 +240,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 		return utils.Wrap(err, "")
 	}
 	_ = c.conn.SetWriteDeadline(writeWait)
-	if c.isCompress {
+	if c.IsCompress {
 		var compressErr error
 		resultBuf, compressErr = c.longConnServer.Compress(encodedBuf)
 		if compressErr != nil {
