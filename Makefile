@@ -118,6 +118,26 @@ imports:
 clean:
 	@$(MAKE) go.clean
 
+## image: Build docker images for host arch.
+.PHONY: image
+image:
+	@$(MAKE) image.build
+
+## image.multiarch: Build docker images for multiple platforms. See option PLATFORMS.
+.PHONY: image.multiarch
+image.multiarch:
+	@$(MAKE) image.build.multiarch
+
+## push: Build docker images for host arch and push images to registry.
+.PHONY: push
+push:
+	@$(MAKE) image.push
+
+## push.multiarch: Build docker images for multiple platforms and push images to registry.
+.PHONY: push.multiarch
+push.multiarch:
+	@$(MAKE) image.push.multiarch
+
 ## tools: Install dependent tools.
 .PHONY: tools
 tools:
