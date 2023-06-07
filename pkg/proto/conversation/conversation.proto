@@ -128,13 +128,13 @@ message CreateGroupChatConversationsReq {
 message CreateGroupChatConversationsResp {
 }
 
-message DelGroupChatConversationsReq {
-  string groupID = 1;
+message SetConversationMaxSeqReq {
+  string conversationID = 1;
   repeated string ownerUserID = 2;
   int64 maxSeq = 3;
 }
 
-message DelGroupChatConversationsResp {
+message SetConversationMaxSeqResp {
 }
 
 message GetConversationIDsReq {
@@ -182,7 +182,7 @@ service conversation {
   rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
   rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
   rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);
-  rpc DelGroupChatConversations(DelGroupChatConversationsReq) returns(DelGroupChatConversationsResp);
+  rpc SetConversationMaxSeq(SetConversationMaxSeqReq) returns(SetConversationMaxSeqResp);
   rpc GetConversationIDs(GetConversationIDsReq) returns(GetConversationIDsResp);
   rpc SetConversations(SetConversationsReq) returns(SetConversationsResp);
   rpc GetUserConversationIDsHash(GetUserConversationIDsHashReq) returns(GetUserConversationIDsHashResp);

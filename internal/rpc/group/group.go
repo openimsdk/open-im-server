@@ -869,18 +869,12 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 
 func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	resp, err := s.msgRpcClient.GetMaxSeq(ctx, &sdkws.GetMaxSeqReq{
-		UserID: mcontext.GetOpUserID(ctx),
-	})
+	maxSeq, err := s.msgRpcClient.GetConversationMaxSeq(ctx, utils.GenConversationUniqueKeyForGroup(groupID))
 	if err != nil {
+
 		return err
 	}
-	//log.ZInfo(ctx, "deleteMemberAndSetConversationSeq.GetMaxSeq", "maxSeqs", resp.MaxSeqs, "conevrsationID", conevrsationID)
-	//maxSeq, ok := resp.MaxSeqs[conevrsationID]
-	//if !ok {
-	//	return errs.ErrInternalServer.Wrap("get max seq error")
-	//}
-	return s.conversationRpcClient.DelGroupChatConversations(ctx, userIDs, groupID, resp.MaxSeqs[conevrsationID])
+	return s.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {

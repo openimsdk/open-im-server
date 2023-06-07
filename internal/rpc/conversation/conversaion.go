@@ -282,13 +282,12 @@ func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, r
 	return &pbConversation.CreateGroupChatConversationsResp{}, nil
 }
 
-func (c *conversationServer) DelGroupChatConversations(ctx context.Context, req *pbConversation.DelGroupChatConversationsReq) (*pbConversation.DelGroupChatConversationsResp, error) {
-	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID,
-		utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupID),
+func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbConversation.SetConversationMaxSeqReq) (*pbConversation.SetConversationMaxSeqResp, error) {
+	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
-	return &pbConversation.DelGroupChatConversationsResp{}, nil
+	return &pbConversation.SetConversationMaxSeqResp{}, nil
 }
 
 func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConversation.GetConversationIDsReq) (*pbConversation.GetConversationIDsResp, error) {

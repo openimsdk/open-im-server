@@ -60,12 +60,12 @@ func (c *ConversationClient) GroupChatFirstCreateConversation(ctx context.Contex
 	return err
 }
 
-func (c *ConversationClient) DelGroupChatConversations(ctx context.Context, ownerUserIDs []string, groupID string, maxSeq int64) error {
+func (c *ConversationClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
 	cc, err := c.getConn(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = pbConversation.NewConversationClient(cc).DelGroupChatConversations(ctx, &pbConversation.DelGroupChatConversationsReq{OwnerUserID: ownerUserIDs, GroupID: groupID, MaxSeq: maxSeq})
+	_, err = pbConversation.NewConversationClient(cc).SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
 	return err
 }
 
