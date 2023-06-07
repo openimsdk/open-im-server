@@ -13,11 +13,11 @@ import (
 )
 
 func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry) *Friend {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
-	if err != nil {
-		// panic(err)
-	}
-	return &Friend{conn: conn, discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &Friend{discov: discov}
 }
 
 type Friend struct {

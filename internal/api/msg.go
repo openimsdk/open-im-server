@@ -22,11 +22,11 @@ import (
 )
 
 func NewMsg(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		// panic(err)
-	}
-	return &Message{conn: conn, validate: validator.New(), discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &Message{validate: validator.New(), discov: discov}
 }
 
 type Message struct {

@@ -233,6 +233,16 @@ message GroupInfoSetTips{
   GroupInfo group = 3;
 }
 
+message GroupInfoSetNameTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  GroupInfo group = 2;
+}
+
+message GroupInfoSetAnnouncementTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  GroupInfo group = 2;
+}
+
 //	OnJoinGroupApplication()
 message JoinGroupApplicationTips{
   GroupInfo group = 1;

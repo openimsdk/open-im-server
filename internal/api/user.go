@@ -5,7 +5,6 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"google.golang.org/grpc"
@@ -18,12 +17,11 @@ import (
 )
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
-	if err != nil {
-		// panic(err)
-	}
-	log.ZInfo(context.Background(), "user rpc conn", "conn", conn)
-	return &User{conn: conn, discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &User{discov: discov}
 }
 
 type User struct {

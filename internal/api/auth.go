@@ -12,11 +12,11 @@ import (
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
-	if err != nil {
-		// panic(err)
-	}
-	return &Auth{conn: conn, discov: discov}
+	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
+	// if err != nil {
+	// panic(err)
+	// }
+	return &Auth{discov: discov}
 }
 
 type Auth struct {
