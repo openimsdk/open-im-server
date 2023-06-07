@@ -210,7 +210,7 @@ message DeleteMsgsResp {
 
 message DeleteMsgPhysicalReq {
   repeated string conversationIDs = 1;
-  int64 remainTime = 2;
+  int64 timestamp = 2;
 }
 
 message DeleteMsgPhysicalResp {

@@ -600,7 +600,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		var hasMarkDelFlag bool
 		var delMsgIndexs []int
 		for i, MsgInfoModel := range msgDocModel.Msg {
-			if MsgInfoModel != nil {
+			if MsgInfoModel != nil && MsgInfoModel.Msg != nil {
 				if utils.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
 					delMsgIndexs = append(delMsgIndexs, i)
 					hasMarkDelFlag = true
