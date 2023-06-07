@@ -194,7 +194,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	platformID, exists = context.Query(PlatformID)
-	if !exists {
+	if !exists || utils.StringToInt(platformID) == 0 {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
