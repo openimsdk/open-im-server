@@ -172,9 +172,9 @@ groupInfoSetAnnouncement:
   unreadCount: false
   offlinePush:
     enable: false
-    title: "groupMemberInfoSet title"
-    desc: "groupMemberInfoSet desc"
-    ext: "groupMemberInfoSet ext"
+    title: "groupInfoSetAnnouncement title"
+    desc: "groupInfoSetAnnouncement desc"
+    ext: "groupInfoSetAnnouncement ext"
 
 
 groupInfoSetName:
@@ -183,9 +183,9 @@ groupInfoSetName:
   unreadCount: false
   offlinePush:
     enable: false
-    title: "groupMemberInfoSet title"
-    desc: "groupMemberInfoSet desc"
-    ext: "groupMemberInfoSet ext"
+    title: "groupInfoSetName title"
+    desc: "groupInfoSetName desc"
+    ext: "groupInfoSetName ext"
 
 
 #############################friend#################################
