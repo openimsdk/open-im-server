@@ -289,55 +289,23 @@ func (g *GroupNotificationSender) mergeGroupFull(ctx context.Context, groupID st
 	return groupInfo, nil
 }
 
-//func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, userMap map[string]*sdkws.UserInfo) (err error) {
-//	defer log.ZDebug(ctx, "GroupCreatedNotification.return")
-//	defer func() {
-//		if err != nil {
-//			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-//		}
-//	}()
-//	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, &userMap)
-//	if err != nil {
-//		return err
-//	}
-//	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCreatedNotification, groupInfo)
-//}
-
 func (g *GroupNotificationSender) GroupCreatedNotification(ctx context.Context, tips *sdkws.GroupCreatedTips) (err error) {
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
 }
 
-//func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, group *relation.GroupModel, members []*relation.GroupMemberModel, needVerification *int32) (err error) {
-//	groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
-//	if err != nil {
-//		return err
-//	}
-//	tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
-//	if needVerification != nil {
-//		tips.Group.NeedVerification = *needVerification
-//	}
-//	return g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupInfoSetNotification, tips)
-//}
-
 func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, tips *sdkws.GroupInfoSetTips) (err error) {
-	//groupInfo, err := g.mergeGroupFull(ctx, group.GroupID, group, &members, nil)
-	//if err != nil {
-	//	return err
-	//}
-	//tips := &sdkws.GroupInfoSetTips{Group: groupInfo.Group, OpUser: groupInfo.GroupOwnerUser}
-	//if needVerification != nil {
-	//	tips.Group.NeedVerification = *needVerification
-	//}
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips)
 }
 
+func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) (err error) {
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNameNotification, tips)
+}
+
+func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx context.Context, tips *sdkws.GroupInfoSetAnnouncementTips) (err error) {
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips)
+}
+
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {
-	defer log.ZDebug(ctx, "return")
-	defer func() {
-		if err != nil {
-			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
-		}
-	}()
 	group, err := g.getGroupInfo(ctx, req.GroupID)
 	if err != nil {
 		return err
@@ -377,22 +345,12 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, re
 	if err != nil {
 		return err
 	}
-	//userIDs, err := g.getGroupOwnerAndAdminUserID(ctx, req.GroupID)
-	//if err != nil {
-	//	return err
-	//}
 	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
 		GroupID:  group.GroupID,
 		UserID:   user.UserID,
 		Nickname: user.Nickname,
 		FaceURL:  user.FaceURL,
 	}}
-	//for _, userID := range append(userIDs, opUserID) {
-	//	err = g.msgClient.Notification(ctx, mcontext.GetOpUserID(ctx), userID, constant.MemberQuitNotification, tips)
-	//	if err != nil {
-	//		log.ZError(ctx, "MemberQuitNotification failed", err, "group", req.GroupID, "userID", userID)
-	//	}
-	//}
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), req.GroupID, constant.MemberQuitNotification, tips)
 }
 

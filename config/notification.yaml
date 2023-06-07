@@ -7,7 +7,7 @@ groupCreated:
     title: "create group title" # xx create the group
     desc: "create group desc"
     ext: "create group ext"
-  
+
 # 不加消息contentType，content统一json 结构体使用pb的
 
 
@@ -41,7 +41,7 @@ memberQuit:
     title: "memberQuit title"
     desc: "memberQuit desc"
     ext: "memberQuit ext"
- 
+
 groupApplicationAccepted:
   isSendMsg: false
   reliabilityLevel: 1
@@ -51,7 +51,7 @@ groupApplicationAccepted:
     title: "groupApplicationAccepted title"
     desc: "groupApplicationAccepted desc"
     ext: "groupApplicationAccepted ext"
- 
+
 groupApplicationRejected:
   isSendMsg: false
   reliabilityLevel: 1
@@ -166,11 +166,33 @@ groupMemberInfoSet:
     desc: "groupMemberInfoSet desc"
     ext: "groupMemberInfoSet ext"
 
+groupInfoSetAnnouncement:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupInfoSetAnnouncement title"
+    desc: "groupInfoSetAnnouncement desc"
+    ext: "groupInfoSetAnnouncement ext"
+
+
+groupInfoSetName:
+  isSendMsg: true
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "groupInfoSetName title"
+    desc: "groupInfoSetName desc"
+    ext: "groupInfoSetName ext"
+
+
 #############################friend#################################
 friendApplicationAdded:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: false
     title: "Somebody applies to add you as a friend"
@@ -180,7 +202,7 @@ friendApplicationAdded:
 friendApplicationApproved:
   isSendMsg: true
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "Someone applies to add your friend application"
@@ -190,7 +212,7 @@ friendApplicationApproved:
 friendApplicationRejected:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "Someone rejected your friend application"
@@ -200,7 +222,7 @@ friendApplicationRejected:
 friendAdded:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "We have become friends"
@@ -210,7 +232,7 @@ friendAdded:
 friendDeleted:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "deleted a friend"
@@ -220,7 +242,7 @@ friendDeleted:
 friendRemarkSet:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "Your friend's profile has been changed"
@@ -230,7 +252,7 @@ friendRemarkSet:
 blackAdded:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "blocked a user"
@@ -240,7 +262,7 @@ blackAdded:
 blackDeleted:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "Remove a blocked user"
@@ -250,7 +272,7 @@ blackDeleted:
 friendInfoUpdated:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "friend info updated"
@@ -261,7 +283,7 @@ friendInfoUpdated:
 userInfoUpdated:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "Remove a blocked user"
@@ -272,7 +294,7 @@ userInfoUpdated:
 conversationChanged:
   isSendMsg: false
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "conversation changed"
@@ -282,7 +304,7 @@ conversationChanged:
 conversationSetPrivate:
   isSendMsg: true
   reliabilityLevel: 1
-  unreadCount: false 
+  unreadCount: false
   offlinePush:
     enable: true
     title: "burn after reading"

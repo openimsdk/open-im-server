@@ -123,22 +123,22 @@ func (ws *WsServer) registerClient(client *Client) {
 		clientOK bool
 		cli      []*Client
 	)
-	cli, userOK, clientOK = ws.clients.Get(client.userID, client.platformID)
+	cli, userOK, clientOK = ws.clients.Get(client.UserID, client.PlatformID)
 	if !userOK {
-		log.ZDebug(client.ctx, "user not exist", "userID", client.userID, "platformID", client.platformID)
-		ws.clients.Set(client.userID, client)
+		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
+		ws.clients.Set(client.UserID, client)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
 
 	} else {
-		log.ZDebug(client.ctx, "user exist", "userID", client.userID, "platformID", client.platformID)
+		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK { //已经有同平台的连接存在
-			ws.clients.Set(client.userID, client)
+			ws.clients.Set(client.UserID, client)
 			ws.multiTerminalLoginChecker(cli)
-			log.ZInfo(client.ctx, "repeat login", "userID", client.userID, "platformID", client.platformID, "old remote addr", getRemoteAdders(cli))
+			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(cli))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
-			ws.clients.Set(client.userID, client)
+			ws.clients.Set(client.UserID, client)
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		}
 	}
@@ -161,7 +161,7 @@ func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
 }
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
-	isDeleteUser := ws.clients.delete(client.userID, client.ctx.GetRemoteAddr())
+	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())
 	if isDeleteUser {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
