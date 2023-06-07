@@ -28,7 +28,7 @@ type ConversationDatabase interface {
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
 	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
-	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string, maxSeq int64) error
+	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
@@ -213,7 +213,7 @@ func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, 
 	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 }
 
-func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string, maxSeq int64) error {
+func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
 	cache := c.cache.NewCache()
 	conversationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	if err := c.tx.Transaction(func(tx any) error {
@@ -224,7 +224,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		notExistUserIDs := utils.DifferenceString(userIDs, existConversationUserIDs)
 		var conversations []*relationTb.ConversationModel
 		for _, v := range notExistUserIDs {
-			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID, MaxSeq: maxSeq}
+			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
@@ -234,7 +234,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 				return err
 			}
 		}
-		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]interface{}{"max_seq": maxSeq})
+		_, err = c.conversationDB.UpdateByMap(ctx, existConversationUserIDs, conversationID, map[string]interface{}{"max_seq": 0})
 		if err != nil {
 			return err
 		}
