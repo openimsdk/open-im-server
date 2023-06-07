@@ -9,6 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -90,8 +91,9 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
+	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp
 	for _, conversationID := range req.ConversationIDs {
-		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, req.RemainTime); err != nil {
+		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
 			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)
 		}
 	}
