@@ -543,6 +543,7 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	if err != nil {
 		return err
 	}
+	log.ZInfo(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
 	if minSeq == 0 {
 		return nil
 	}
@@ -592,6 +593,7 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
 	}
 	if msgDocModel.IsFull() && msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() {
+		log.ZDebug(ctx, "doc is full and all msg is expired", "docID", msgDocModel.DocID)
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgDocModel.DocID)
 		delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
 	} else {
@@ -604,10 +606,14 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 					hasMarkDelFlag = true
 				} else {
 					// 到本条消息不需要删除, minSeq置为这条消息的seq
+					if len(delStruct.delDocIDs) > 0 {
+						log.ZDebug(ctx, "delete docs", "delDocIDs", delStruct.delDocIDs)
+					}
 					if err := db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs); err != nil {
 						return 0, err
 					}
 					if hasMarkDelFlag {
+						log.ZDebug(ctx, "delete msg by index", "delMsgIndexs", delMsgIndexs, "docID", msgDocModel.DocID)
 						// mark del all delMsgIndexs
 						if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
 							return delStruct.getSetMinSeq(), err
