@@ -42,7 +42,7 @@ type CommonMsgDatabase interface {
 	BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNewConversation bool, err error)
 
 	//  通过seqList获取mongo中写扩散消息
-	GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
+	GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
 	// 通过seqList获取大群在 mongo里面的消息
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
 	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
@@ -435,7 +435,7 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 	return seqMsgs, nil
 }
 
-func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num int64) (int64, int64, []*sdkws.MsgData, error) {
+func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID string, conversationID string, begin, end, num, userMaxSeq int64) (int64, int64, []*sdkws.MsgData, error) {
 	userMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
@@ -454,6 +454,9 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	maxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return 0, 0, nil, err
+	}
+	if userMaxSeq < maxSeq {
+		maxSeq = userMaxSeq
 	}
 	if begin < minSeq {
 		begin = minSeq
@@ -543,6 +546,7 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	if err != nil {
 		return err
 	}
+	log.ZInfo(ctx, "DeleteConversationMsgsAndSetMinSeq", "conversationID", conversationID, "minSeq", minSeq)
 	if minSeq == 0 {
 		return nil
 	}
@@ -591,23 +595,28 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 	if int64(len(msgDocModel.Msg)) > db.msg.GetSingleGocMsgNum() {
 		log.ZWarn(ctx, "msgs too large", nil, "lenth", len(msgDocModel.Msg), "docID:", msgDocModel.DocID)
 	}
-	if msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() && msgDocModel.IsFull() {
+	if msgDocModel.IsFull() && msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.SendTime+(remainTime*1000) < utils.GetCurrentTimestampByMill() {
+		log.ZDebug(ctx, "doc is full and all msg is expired", "docID", msgDocModel.DocID)
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgDocModel.DocID)
 		delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
 	} else {
 		var hasMarkDelFlag bool
 		var delMsgIndexs []int
 		for i, MsgInfoModel := range msgDocModel.Msg {
-			if MsgInfoModel != nil {
+			if MsgInfoModel != nil && MsgInfoModel.Msg != nil {
 				if utils.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
 					delMsgIndexs = append(delMsgIndexs, i)
 					hasMarkDelFlag = true
 				} else {
 					// 到本条消息不需要删除, minSeq置为这条消息的seq
+					if len(delStruct.delDocIDs) > 0 {
+						log.ZDebug(ctx, "delete docs", "delDocIDs", delStruct.delDocIDs)
+					}
 					if err := db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs); err != nil {
 						return 0, err
 					}
 					if hasMarkDelFlag {
+						log.ZDebug(ctx, "delete msg by index", "delMsgIndexs", delMsgIndexs, "docID", msgDocModel.DocID)
 						// mark del all delMsgIndexs
 						if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
 							return delStruct.getSetMinSeq(), err

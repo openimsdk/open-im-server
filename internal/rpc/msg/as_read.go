@@ -36,6 +36,14 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	if len(req.Seqs) < 1 {
 		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
 	}
+	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
+	if err != nil {
+		return
+	}
+	hasReadSeq := req.Seqs[len(req.Seqs)-1]
+	if hasReadSeq > maxSeq {
+		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+	}
 	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{req.ConversationID})
 	if err != nil {
 		return
@@ -44,7 +52,6 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	if err != nil {
 		return
 	}
-	hasReadSeq := req.Seqs[len(req.Seqs)-1]
 	err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, hasReadSeq)
 	if err != nil {
 		return

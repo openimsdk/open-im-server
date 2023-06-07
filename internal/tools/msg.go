@@ -77,7 +77,7 @@ func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []s
 		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(config.Config.Mongo.DBRetainChatRecords*24*60*60)); err != nil {
 			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", config.Config.Mongo.DBRetainChatRecords)
 		}
-		if err := c.fixAndCheckSeq(ctx, conversationID); err != nil {
+		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)
 		}
 
@@ -95,19 +95,10 @@ func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID strin
 	return nil
 }
 
-func (c *MsgTool) fixAndCheckSeq(ctx context.Context, conversationID string) error {
+func (c *MsgTool) checkMaxSeq(ctx context.Context, conversationID string) error {
 	maxSeq, err := c.msgDatabase.GetMaxSeq(ctx, conversationID)
 	if err != nil {
 		return err
-	}
-	minSeq, err := c.msgDatabase.GetMinSeq(ctx, conversationID)
-	if err != nil {
-		return err
-	}
-	if minSeq > maxSeq {
-		if err = c.msgDatabase.SetMinSeq(ctx, conversationID, maxSeq); err != nil {
-			return err
-		}
 	}
 	if err := c.checkMaxSeqWithMongo(ctx, conversationID, maxSeq); err != nil {
 		return err
@@ -125,8 +116,8 @@ func (c *MsgTool) FixAllSeq(ctx context.Context) error {
 		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
 	}
 	for _, conversationID := range conversationIDs {
-		if err := c.fixAndCheckSeq(ctx, conversationID); err != nil {
-			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)
+		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
+			log.ZWarn(ctx, "fixSeq failed", err, "conversationID", conversationID)
 		}
 	}
 	fmt.Println("fix all seq finished")
