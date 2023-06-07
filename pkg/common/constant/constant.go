@@ -70,6 +70,8 @@ const (
 	GroupMemberInfoSetNotification           = 1516
 	GroupMemberSetToAdminNotification        = 1517
 	GroupMemberSetToOrdinaryUserNotification = 1518
+	GroupInfoSetAnnouncementNotification     = 1519
+	GroupInfoSetNameNotification             = 1520
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601

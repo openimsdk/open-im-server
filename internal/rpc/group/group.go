@@ -26,7 +26,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -926,21 +925,34 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	} else {
 		tips.OpUser = s.groupMemberDB2PB(opMember, 0)
 	}
-	s.Notification.GroupInfoSetNotification(ctx, tips)
+	var num int
 	if req.GroupInfoForSet.Notification != "" {
-		args := &pbConversation.ModifyConversationFieldReq{
-			Conversation: &pbConversation.Conversation{
-				OwnerUserID:      mcontext.GetOpUserID(ctx),
-				ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
-				ConversationType: constant.SuperGroupChatType,
-				GroupID:          group.GroupID,
-			},
-			FieldType:  constant.FieldGroupAtType,
-			UserIDList: userIDs,
+		num++
+		s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
+		//args := &pbConversation.ModifyConversationFieldReq{
+		//	Conversation: &pbConversation.Conversation{
+		//		OwnerUserID:      mcontext.GetOpUserID(ctx),
+		//		ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
+		//		ConversationType: constant.SuperGroupChatType,
+		//		GroupID:          group.GroupID,
+		//	},
+		//	FieldType:  constant.FieldGroupAtType,
+		//	UserIDList: userIDs,
+		//}
+		//if err := s.conversationRpcClient.ModifyConversationField(ctx, args); err != nil {
+		//	log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
+		//}
+	}
+	switch len(data) - num {
+	case 0:
+	case 1:
+		if req.GroupInfoForSet.GroupName == "" {
+			s.Notification.GroupInfoSetNotification(ctx, tips)
+		} else {
+			s.Notification.GroupInfoSetNameNotification(ctx, &sdkws.GroupInfoSetNameTips{Group: tips.Group, OpUser: tips.OpUser})
 		}
-		if err := s.conversationRpcClient.ModifyConversationField(ctx, args); err != nil {
-			log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
-		}
+	default:
+		s.Notification.GroupInfoSetNotification(ctx, tips)
 	}
 	return resp, nil
 }
