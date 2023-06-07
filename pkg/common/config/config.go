@@ -332,6 +332,8 @@ type Notification struct {
 	GroupMemberInfoSet       NotificationConf `yaml:"groupMemberInfoSet"`
 	GroupMemberSetToAdmin    NotificationConf `yaml:"groupMemberSetToAdmin"`
 	GroupMemberSetToOrdinary NotificationConf `yaml:"groupMemberSetToOrdinaryUser"`
+	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
+	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
 	////////////////////////user///////////////////////
 	UserInfoUpdated NotificationConf `yaml:"userInfoUpdated"`
 	//////////////////////friend///////////////////////

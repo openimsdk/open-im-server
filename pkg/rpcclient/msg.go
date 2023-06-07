@@ -37,6 +37,8 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.GroupMemberInfoSetNotification:           config.Config.Notification.GroupMemberInfoSet,
 		constant.GroupMemberSetToAdminNotification:        config.Config.Notification.GroupMemberSetToAdmin,
 		constant.GroupMemberSetToOrdinaryUserNotification: config.Config.Notification.GroupMemberSetToOrdinary,
+		constant.GroupInfoSetAnnouncementNotification:     config.Config.Notification.GroupInfoSetAnnouncement,
+		constant.GroupInfoSetNameNotification:             config.Config.Notification.GroupInfoSetName,
 		// user
 		constant.UserInfoUpdatedNotification: config.Config.Notification.UserInfoUpdated,
 		// friend
@@ -79,6 +81,8 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.GroupMemberInfoSetNotification:           constant.SuperGroupChatType,
 		constant.GroupMemberSetToAdminNotification:        constant.SuperGroupChatType,
 		constant.GroupMemberSetToOrdinaryUserNotification: constant.SuperGroupChatType,
+		constant.GroupInfoSetAnnouncementNotification:     constant.SuperGroupChatType,
+		constant.GroupInfoSetNameNotification:             constant.SuperGroupChatType,
 		// user
 		constant.UserInfoUpdatedNotification: constant.SingleChatType,
 		// friend
