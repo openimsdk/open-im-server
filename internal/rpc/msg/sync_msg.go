@@ -18,6 +18,7 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			conversation, err := m.Conversation.GetConversation(ctx, req.UserID, seq.ConversationID)
 			if err != nil {
 				log.ZError(ctx, "GetConversation error", err, "conversationID", seq.ConversationID)
+				continue
 			}
 			minSeq, maxSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num, conversation.MaxSeq)
 			if err != nil {
