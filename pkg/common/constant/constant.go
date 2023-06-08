@@ -267,9 +267,9 @@ const (
 	AppOrdinaryUsers = 1
 	AppAdmin         = 2
 
-	GroupOwner         = 1
-	GroupAdmin         = 2
-	GroupOrdinaryUsers = 3
+	GroupOwner         = 100
+	GroupAdmin         = 60
+	GroupOrdinaryUsers = 20
 
 	GroupResponseAgree  = 1
 	GroupResponseRefuse = -1
