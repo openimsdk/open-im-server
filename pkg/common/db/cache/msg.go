@@ -365,7 +365,7 @@ func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, se
 }
 
 func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error) {
-	result, err := c.rdb.SMembers(ctx, c.getUserDelList(userID, conversationID)).Result()
+	result, err := c.rdb.SMembers(ctx, c.getUserDelList(conversationID, userID)).Result()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}

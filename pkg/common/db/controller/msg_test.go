@@ -3,12 +3,13 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"math/rand"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
@@ -187,7 +188,7 @@ func Test_Revoke(t *testing.T) {
 }
 
 func Test_FindBySeq(t *testing.T) {
-	if err := log.InitFromConfig("", 6, true, false, "", 2); err != nil {
+	if err := log.InitFromConfig("", "", 6, true, false, "", 2); err != nil {
 		t.Fatal(err)
 	}
 	db := GetDB()
