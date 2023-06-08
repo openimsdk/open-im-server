@@ -681,7 +681,7 @@ func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID st
 	for _, msg := range msgs {
 		cacheSeqs = append(cacheSeqs, msg.Seq)
 	}
-	if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
+	if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil && errs.Unwrap(err) != redis.Nil {
 		return err
 	}
 
