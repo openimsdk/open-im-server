@@ -31,12 +31,13 @@ const (
 	appleDeviceToken = "DEVICE_TOKEN"
 	getuiToken       = "GETUI_TOKEN"
 	getuiTaskID      = "GETUI_TASK_ID"
-	messageCache     = "MESSAGE_CACHE:"
-	messageReadCache = "MESSAGE_READ_CACHE:"
 	signalCache      = "SIGNAL_CACHE:"
 	signalListCache  = "SIGNAL_LIST_CACHE:"
 	fcmToken         = "FCM_TOKEN:"
 
+	messageCache            = "MESSAGE_CACHE:"
+	messageDelUserList      = "MESSAGE_DEL_USER_LIST:"
+	userDelMessagesList     = "USER_DEL_MESSAGES_LIST:"
 	sendMsgFailedFlag       = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum = "USER_BADGE_UNREAD_COUNT_SUM:"
 	exTypeKeyLocker         = "EX_LOCK:"
@@ -63,33 +64,40 @@ type SeqCache interface {
 	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
 }
 
-type MsgModel interface {
-	SeqCache
-	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
-	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
-	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
-	DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error
-	GetMessagesBySeq(ctx context.Context, conversationID string, seqList []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
-	SetMessageToCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) (int, error)
-	DeleteMessageFromCache(ctx context.Context, conversationID string, msgList []*sdkws.MsgData) error
-	CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error
+type thirdCache interface {
 	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
 	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
 	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error)
 	DelUserSignalList(ctx context.Context, userID string) error
-	DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error
-	SetGetuiToken(ctx context.Context, token string, expireTime int64) error
-	GetGetuiToken(ctx context.Context) (string, error)
-	SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error
-	GetGetuiTaskID(ctx context.Context) (string, error)
-	SetSendMsgStatus(ctx context.Context, id string, status int32) error
-	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error)
 	GetFcmToken(ctx context.Context, account string, platformID int) (string, error)
 	DelFcmToken(ctx context.Context, account string, platformID int) error
 	IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error)
 	SetUserBadgeUnreadCountSum(ctx context.Context, userID string, value int) error
 	GetUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error)
+	SetGetuiToken(ctx context.Context, token string, expireTime int64) error
+	GetGetuiToken(ctx context.Context) (string, error)
+	SetGetuiTaskID(ctx context.Context, taskID string, expireTime int64) error
+	GetGetuiTaskID(ctx context.Context) (string, error)
+}
+
+type MsgModel interface {
+	SeqCache
+	thirdCache
+	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
+	GetTokensWithoutError(ctx context.Context, userID, platformID string) (map[string]int, error)
+	SetTokenMapByUidPid(ctx context.Context, userID string, platform string, m map[string]int) error
+	DeleteTokenByUidPid(ctx context.Context, userID string, platform string, fields []string) error
+	GetMessagesBySeq(ctx context.Context, conversationID string, seqs []int64) (seqMsg []*sdkws.MsgData, failedSeqList []int64, err error)
+	SetMessageToCache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (int, error)
+	UserDeleteMsgs(ctx context.Context, conversationID string, seqs []int64, userID string) error
+	DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64)
+	DeleteMessages(ctx context.Context, conversationID string, seqs []int64) error
+	GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error)
+	CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error
+	DelMsgFromCache(ctx context.Context, userID string, seqList []int64) error
+	SetSendMsgStatus(ctx context.Context, id string, status int32) error
+	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
 	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
 	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
 	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
@@ -98,9 +106,6 @@ type MsgModel interface {
 	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
 	LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error
-
-	GetMsgsByConversationIDAndSeq(ctx context.Context, userID, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error)
-	DeleteMsgByConversationIDAndSeq(ctx context.Context, docID string, seq int64) MsgModel
 }
 
 func NewMsgCacheModel(client redis.UniversalClient) MsgModel {
@@ -327,10 +332,73 @@ func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string,
 	return len(failedMsgs), err
 }
 
-func (c *msgCache) DeleteMessageFromCache(ctx context.Context, userID string, msgList []*sdkws.MsgData) error {
+func (c *msgCache) getMessageDelUserListKey(conversationID string, seq int64) string {
+	return messageDelUserList + conversationID + ":" + strconv.Itoa(int(seq))
+}
+
+func (c *msgCache) getUserDelList(conversationID, userID string) string {
+	return userDelMessagesList + conversationID + ":" + userID
+}
+
+func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, seqs []int64, userID string) error {
 	pipe := c.rdb.Pipeline()
-	for _, v := range msgList {
-		if err := pipe.Del(ctx, c.getMessageCacheKey(userID, v.Seq)).Err(); err != nil {
+	for _, seq := range seqs {
+		delUserListKey := c.getMessageDelUserListKey(conversationID, seq)
+		userDelListKey := c.getUserDelList(conversationID, userID)
+		err := pipe.SAdd(ctx, delUserListKey, userID).Err()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		err = pipe.SAdd(ctx, userDelListKey, seq).Err()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		if err := pipe.Expire(ctx, delUserListKey, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
+			return errs.Wrap(err)
+		}
+		if err := pipe.Expire(ctx, userDelListKey, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
+			return errs.Wrap(err)
+		}
+	}
+	_, err := pipe.Exec(ctx)
+	return errs.Wrap(err)
+}
+
+func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID string) (seqs []int64, err error) {
+	result, err := c.rdb.SMembers(ctx, c.getUserDelList(userID, conversationID)).Result()
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	seqs = make([]int64, len(result))
+	for i, v := range result {
+		seqs[i] = utils.StringToInt64(v)
+	}
+	return seqs, nil
+}
+
+func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID string, seqs []int64) {
+	for _, seq := range seqs {
+		delUsers, err := c.rdb.SMembers(ctx, c.getMessageDelUserListKey(conversationID, seq)).Result()
+		if err != nil {
+			log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
+			continue
+		}
+		for _, userID := range delUsers {
+			if err := c.rdb.SRem(ctx, c.getUserDelList(conversationID, userID), seq).Err(); err != nil {
+				log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq, "userID", userID)
+			}
+
+			if err := c.rdb.Del(ctx, c.getMessageDelUserListKey(conversationID, seq)).Err(); err != nil {
+				log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
+			}
+		}
+	}
+}
+
+func (c *msgCache) DeleteMessages(ctx context.Context, conversationID string, seqs []int64) error {
+	pipe := c.rdb.Pipeline()
+	for _, seq := range seqs {
+		if err := pipe.Del(ctx, c.getMessageCacheKey(conversationID, seq)).Err(); err != nil {
 			return errs.Wrap(err)
 		}
 	}
@@ -571,42 +639,4 @@ func (c *msgCache) GetOneMessageAllReactionList(ctx context.Context, clientMsgID
 
 func (c *msgCache) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
 	return errs.Wrap(c.rdb.HDel(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), subKey).Err())
-}
-
-func (c *msgCache) NewCache() MsgModel {
-	return &msgCache{
-		metaCache:  NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDelKeys()...),
-		expireTime: c.expireTime,
-		rcClient:   c.rcClient,
-	}
-}
-
-func (c msgCache) getMsgReadCacheKey(docID string, seq int64) string {
-	return messageReadCache + docID + "_" + strconv.Itoa(int(seq))
-}
-
-func (c *msgCache) getMsgsIndex(msg *unRelationTb.MsgInfoModel, keys []string) (int, error) {
-	key := c.getMsgReadCacheKey(utils.GetConversationIDByMsgModel(msg.Msg), msg.Msg.Seq)
-	for i, _key := range keys {
-		if key == _key {
-			return i, nil
-		}
-	}
-	return 0, errIndex
-}
-
-func (c *msgCache) GetMsgsByConversationIDAndSeq(ctx context.Context, userID, docID string, seqs []int64) ([]*unRelationTb.MsgInfoModel, error) {
-	var keys []string
-	for _, seq := range seqs {
-		keys = append(keys, c.getMsgReadCacheKey(docID, seq))
-	}
-	return batchGetCache(ctx, c.rcClient, keys, c.expireTime, c.getMsgsIndex, func(ctx context.Context) ([]*unRelationTb.MsgInfoModel, error) {
-		return c.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
-	})
-}
-
-func (c *msgCache) DeleteMsgByConversationIDAndSeq(ctx context.Context, docID string, seq int64) MsgModel {
-	cache := c.NewCache()
-	c.AddKeys(c.getMsgReadCacheKey(docID, seq))
-	return cache
 }
