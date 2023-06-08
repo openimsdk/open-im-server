@@ -26,7 +26,7 @@ func NewRootCmd(name string) (rootCmd *RootCmd) {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
 				panic(err)
 			}
-			if err := log.InitFromConfig(name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
+			if err := log.InitFromConfig("OpenIM.log.all", name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
 				panic(err)
 			}
 			return nil

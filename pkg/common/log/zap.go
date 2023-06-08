@@ -32,14 +32,14 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(name string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) error {
-	l, err := NewZapLogger(name, logLevel, isStdout, isJson, logLocation, rotateCount)
+func InitFromConfig(loggerPrefixName, moduleName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) error {
+	l, err := NewZapLogger(loggerPrefixName, moduleName, logLevel, isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return err
 	}
 	pkgLogger = l.WithCallDepth(2)
 	if isJson {
-		pkgLogger = pkgLogger.WithName(name)
+		pkgLogger = pkgLogger.WithName(moduleName)
 	}
 	return nil
 }
@@ -61,12 +61,13 @@ func ZError(ctx context.Context, msg string, err error, keysAndValues ...interfa
 }
 
 type ZapLogger struct {
-	zap        *zap.SugaredLogger
-	level      zapcore.Level
-	loggerName string
+	zap              *zap.SugaredLogger
+	level            zapcore.Level
+	loggerName       string
+	loggerPrefixName string
 }
 
-func NewZapLogger(loggerName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
+func NewZapLogger(loggerPrefixName, loggerName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level: zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		// EncoderConfig: zap.NewProductionEncoderConfig(),
@@ -81,7 +82,7 @@ func NewZapLogger(loggerName string, logLevel int, isStdout bool, isJson bool, l
 	// if isStdout {
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
-	zl := &ZapLogger{level: logLevelMap[logLevel], loggerName: loggerName}
+	zl := &ZapLogger{level: logLevelMap[logLevel], loggerName: loggerName, loggerPrefixName: loggerPrefixName}
 	opts, err := zl.cores(isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
@@ -158,7 +159,7 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 }
 
 func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
-	logf, err := rotatelogs.New(logLocation+sp+"OpenIM.log.all"+".%Y-%m-%d",
+	logf, err := rotatelogs.New(logLocation+sp+l.loggerPrefixName+".%Y-%m-%d",
 		rotatelogs.WithRotationCount(rorateCount),
 		rotatelogs.WithRotationTime(time.Duration(config.Config.Log.RotationTime)*time.Hour),
 	)

@@ -624,15 +624,17 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	resp := &pbGroup.GetGroupApplicationListResp{}
+	pageNumber, showNumber := utils.GetPage(req.Pagination)
+
 	groupIDs, err := s.GroupDatabase.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbGroup.GetGroupApplicationListResp{}
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -1384,7 +1386,10 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			}
 		}
 		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
-			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+			log.ZDebug(ctx, "setGroupMemberInfo notification", "member", member.UserID)
+			if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
+				log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+			}
 		}
 	}
 	return resp, nil
