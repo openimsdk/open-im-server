@@ -86,10 +86,12 @@ func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID s
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "getGroupMembers", "members", members)
 	users, err := g.getUsersInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "getUsersInfoMap", "users", users)
 	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
 	for _, member := range members {
 		user, ok := users[member.UserID]
