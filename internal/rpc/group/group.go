@@ -869,7 +869,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 
 func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	maxSeq, err := s.msgRpcClient.GetConversationMaxSeq(ctx, utils.GenConversationUniqueKeyForGroup(groupID))
+	maxSeq, err := s.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 
 		return err
