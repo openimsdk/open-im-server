@@ -506,7 +506,7 @@ func (g *GroupNotificationSender) GroupMemberInfoSetNotification(ctx context.Con
 	if err != nil {
 		return err
 	}
-	user, err := g.getGroupMemberMap(ctx, groupID, []string{mcontext.GetOpUserID(ctx), groupMemberUserID})
+	user, err := g.getGroupMemberMap(ctx, groupID, []string{groupMemberUserID})
 	if err != nil {
 		return err
 	}
