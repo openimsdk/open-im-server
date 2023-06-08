@@ -465,20 +465,23 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			maxSeq = userMaxSeq
 		}
 	}
+	newBegin := begin
+	newEnd := end
 	if begin < minSeq {
-		begin = minSeq
+		newBegin = minSeq
 	}
 	if end > maxSeq {
-		end = maxSeq
+		newEnd = maxSeq
 	}
 	var seqs []int64
-	for i := end; i > end-num; i-- {
-		if i >= begin {
+	for i := newEnd; i > newEnd-num; i-- {
+		if i >= newBegin {
 			seqs = append([]int64{i}, seqs...)
 		} else {
 			break
 		}
 	}
+	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs)
 	cachedMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
 		if err != redis.Nil {
@@ -500,10 +503,19 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 				successMsgs = append(successMsgs, msg)
 			}
 		}
+		for i := 0; i < len(delSeqs); i++ {
+			newSeq := newBegin - 1
+			if newSeq >= begin {
+				log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
+				failedSeqs = append(failedSeqs, newSeq)
+			} else {
+				break
+			}
+		}
 	}
 	log.ZDebug(ctx, "get msgs from cache", "successMsgs", successMsgs)
 	if len(failedSeqs) != 0 {
-		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", seqs)
+		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", failedSeqs)
 	}
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
