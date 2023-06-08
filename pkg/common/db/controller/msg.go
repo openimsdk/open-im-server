@@ -672,17 +672,19 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	msgs, _, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
-	if err != nil {
+	cachedMsgs, _, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZWarn(ctx, "DeleteUserMsgsBySeqs", err, "conversationID", conversationID, "seqs", seqs)
 		return err
 	}
-	var cacheSeqs []int64
-	for _, msg := range msgs {
-		cacheSeqs = append(cacheSeqs, msg.Seq)
-	}
-	if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil && errs.Unwrap(err) != redis.Nil {
-		return err
+	if len(cachedMsgs) > 0 {
+		var cacheSeqs []int64
+		for _, msg := range cachedMsgs {
+			cacheSeqs = append(cacheSeqs, msg.Seq)
+		}
+		if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
+			return err
+		}
 	}
 
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
