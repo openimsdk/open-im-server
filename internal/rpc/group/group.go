@@ -1386,7 +1386,10 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 			}
 		}
 		if member.Nickname != nil || member.FaceURL != nil || member.Ex != nil {
-			s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID)
+			log.ZDebug(ctx, "setGroupMemberInfo notification", "member", member.UserID)
+			if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
+				log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+			}
 		}
 	}
 	return resp, nil
