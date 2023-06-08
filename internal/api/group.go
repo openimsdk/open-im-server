@@ -33,11 +33,11 @@ func (o *Group) client(ctx context.Context) (group.GroupClient, error) {
 	return group.NewGroupClient(c), nil
 }
 
-func (o *Group) NewCreateGroup(c *gin.Context) {
+func (o *Group) CreateGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.CreateGroup, o.client, c)
 }
 
-func (o *Group) NewSetGroupInfo(c *gin.Context) {
+func (o *Group) SetGroupInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.SetGroupInfo, o.client, c)
 }
 

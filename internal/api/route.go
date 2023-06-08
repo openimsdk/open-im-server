@@ -72,8 +72,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	{
 
 		groupRouterGroup.Use(mw.GinParseToken(rdb))
-		groupRouterGroup.POST("/create_group", g.NewCreateGroup)                                //1
-		groupRouterGroup.POST("/set_group_info", g.NewSetGroupInfo)                             //1
+		groupRouterGroup.POST("/create_group", g.CreateGroup)                                   //1
+		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)                                //1
 		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
 		groupRouterGroup.POST("/quit_group", g.QuitGroup)                                       //1
 		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)        //1
