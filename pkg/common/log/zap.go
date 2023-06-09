@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -119,13 +118,13 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 		return nil, err
 	}
 	var cores []zapcore.Core
+	// if logLocation == "" && !isStdout {
+	// 	return nil, errors.New("log storage location is empty and not stdout")
+	// }
 	if logLocation != "" {
 		cores = []zapcore.Core{
 			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(l.level)),
 		}
-	}
-	if logLocation == "" && !isStdout {
-		return nil, errors.New("log storage location is empty and not stdout")
 	}
 	if isStdout {
 		cores = append(cores, zapcore.NewCore(fileEncoder, zapcore.Lock(os.Stdout), zap.NewAtomicLevelAt(l.level)))
