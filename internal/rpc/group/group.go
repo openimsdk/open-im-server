@@ -230,44 +230,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	return resp, nil
 }
 
-func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
-	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, userIDs, roleLevels)
-	if err != nil {
-		return nil, err
-	}
-	emptyUserIDs := make(map[string]int)
-	for i, member := range members {
-		if member.Nickname == "" {
-			emptyUserIDs[member.UserID] = i
-		}
-	}
-	if len(emptyUserIDs) > 0 {
-		users, err := s.User.GetPublicUserInfos(ctx, utils.Keys(emptyUserIDs), true)
-		if err != nil {
-			return nil, err
-		}
-		for _, user := range users {
-			members[emptyUserIDs[user.UserID]].Nickname = user.Nickname
-		}
-	}
-	return members, nil
-}
-
-func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*relationTb.GroupMemberModel, error) {
-	owner, err := s.GroupDatabase.TakeGroupOwner(ctx, groupID)
-	if err != nil {
-		return nil, err
-	}
-	if owner.Nickname == "" {
-		user, err := s.User.GetUserInfo(ctx, owner.UserID)
-		if err != nil {
-			return nil, err
-		}
-		owner.Nickname = user.Nickname
-	}
-	return owner, nil
-}
-
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
 	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
@@ -448,8 +410,6 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
 	resp := &pbGroup.GetGroupMemberListResp{}
-	//total, members, err := s.GroupDatabase.PageGroupMember(ctx, []string{req.GroupID}, nil, utils.If(req.Filter >= 0, []int32{req.Filter}, nil), req.Pagination.PageNumber, req.Pagination.ShowNumber)
-	//total, members, err := s.GroupDatabase.PageGroupMember(ctx, []string{req.GroupID}, nil, nil, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	total, members, err := s.GroupDatabase.PageGetGroupMember(ctx, req.GroupID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	log.ZDebug(ctx, "GetGroupMemberList", "total", total, "members", members, "length", len(members))
 	if err != nil {
@@ -471,21 +431,6 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	})
 	log.ZDebug(ctx, "GetGroupMemberList", "resp", resp, "length", len(resp.Members))
 	return resp, nil
-}
-
-func (s *groupServer) TakeGroupMember(ctx context.Context, groupID string, userID string) (*relationTb.GroupMemberModel, error) {
-	member, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, userID)
-	if err != nil {
-		return nil, err
-	}
-	if member.Nickname == "" {
-		user, err := s.User.GetPublicUserInfo(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-		member.Nickname = user.Nickname
-	}
-	return member, nil
 }
 
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
