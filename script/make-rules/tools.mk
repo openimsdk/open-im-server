@@ -130,10 +130,11 @@ install.github-release:
 	@$(GO) install github.com/github-release/github-release@latest
 
 ## install.gvm: Install gvm, gvm is a Go version manager, built on top of the official go tool.
+# github: https://github.com/moovweb/gvm
 .PHONY: install.gvm
 install.gvm:
 	@echo "===========> Installing gvm,The default installation path is ~/.gvm/script/gvm"
-	@bash < <(curl -s -S -L https://raw.gitee.com/moovweb/gvm/master/binscripts/gvm-installer)
+	@bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
 	@$(shell source /root/.gvm/script/gvm)
 
 ## install.golines: Install golines, used to format long lines
