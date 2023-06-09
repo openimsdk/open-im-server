@@ -1,0 +1,29 @@
+# https://github.com/BetaHuhn/repo-file-sync-action
+OpenIMSDK/openim-sdk-core:
+  - source: LICENSE
+    dest: LICENSE 
+  - source: .golangci.yml
+    dest: .golangci.yml
+  - source: .github/workflows/
+    dest: .github/workflows/
+    replace: true
+    exclude: |
+      e2e-test.yml
+      sync.yml
+
+# group:
+#   repos: |
+#     OpenIMSDK/OpenIM-Docs
+#     OpenIMSDK/community
+#   files: 
+#     - source: .gitingore
+#       dest: .gitingore
+#     - source: LICENSE
+#       dest: LICENSE
+#       replace: false
+#     - source: .github/sync_docs.yml
+#       dest: .github/sync_docs.yml
+#     - source: workflows/
+#       dest: .github/workflows/
+#       exclude: |
+#         e2e-test.yml
