@@ -82,7 +82,7 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 }
 
 func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
-	log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
+	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
 	v := urlLib.Values{}
 	v.Set(constant.CallbackCommand, command)
 	url = url + "?" + v.Encode()
