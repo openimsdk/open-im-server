@@ -72,6 +72,7 @@ func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbMsg.SendMsgR
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
+	defer log.ZDebug(ctx, "sendMsgSingleChat return line")
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err

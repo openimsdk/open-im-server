@@ -89,15 +89,15 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			log.ZWarn(ctx, "callback failed but continue", err, "url", url, "err", err.Error())
-			return nil
+			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
+			return errs.ErrCallbackContinue
 		}
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			log.ZWarn(ctx, "callback failed but continue", err, "url", url, "err", err.Error())
-			return nil
+			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
+			return errs.ErrCallbackContinue
 		}
 		return errs.ErrData.Wrap(err.Error())
 	}
