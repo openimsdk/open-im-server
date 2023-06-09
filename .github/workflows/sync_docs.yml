@@ -1,15 +1,14 @@
 # https://github.com/BetaHuhn/repo-file-sync-action
 name: Sync Docs
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - ".golangci.yml"
-      - ".gitingore"
-      - "LICENSE"
-      - "workflow/*"
-  workflow_dispatch:
+    push:
+        branches:
+          - main
+    pull_request:
+        branches:
+          - main
+    workflow_dispatch:
+
 jobs:
   sync:
     runs-on: ubuntu-latest
