@@ -806,7 +806,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err != nil {
 			return nil, err
 		}
-		s.Notification.MemberQuitNotification(ctx, req)
+		s.Notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(info, 0))
 	}
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
 		return nil, err

@@ -292,29 +292,19 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.C
 	return nil
 }
 
-func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, req *pbGroup.QuitGroupReq) (err error) {
+func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, member *sdkws.GroupMemberFullInfo) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
 			log.ZError(ctx, utils.GetFuncName(1)+" failed", err)
 		}
 	}()
-	group, err := g.getGroupInfo(ctx, req.GroupID)
+	group, err := g.getGroupInfo(ctx, member.GroupID)
 	if err != nil {
 		return err
 	}
-	opUserID := mcontext.GetOpUserID(ctx)
-	user, err := g.getUser(ctx, opUserID)
-	if err != nil {
-		return err
-	}
-	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: &sdkws.GroupMemberFullInfo{
-		GroupID:  group.GroupID,
-		UserID:   user.UserID,
-		Nickname: user.Nickname,
-		FaceURL:  user.FaceURL,
-	}}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), req.GroupID, constant.MemberQuitNotification, tips)
+	tips := &sdkws.MemberQuitTips{Group: group, QuitUser: member}
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), member.GroupID, constant.MemberQuitNotification, tips)
 }
 
 func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (err error) {
