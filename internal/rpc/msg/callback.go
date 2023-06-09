@@ -71,7 +71,7 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
+	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg)
 }
 
 func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -94,7 +94,7 @@ func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
 		return err
 	}
 	if resp.Content != nil {
