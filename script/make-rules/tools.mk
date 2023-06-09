@@ -133,8 +133,8 @@ install.github-release:
 ## install.coscli: Install coscli, used to upload files to cos
 .PHONY: install.coscli
 install.coscli:
-	@wget -q https://github.com/tencentyun/coscli/releases/download/v0.10.2-beta/coscli-linux -O ${HOME}/bin/coscli
-	@chmod +x ${HOME}/bin/coscli
+	@wget -q https://github.com/tencentyun/coscli/releases/download/v0.13.0-beta/coscli-linux -O ${TOOLS_DIR}/coscli
+	@chmod +x ${TOOLS_DIR}/coscli
 
 ## install.coscmd: Install coscmd, used to upload files to cos
 .PHONY: install.coscmd
@@ -202,11 +202,6 @@ install.richgo:
 .PHONY: install.rts
 install.rts:
 	@$(GO) install github.com/galeone/rts/cmd/rts@latest
-
-## install.codegen: Install code generator, used to generate code
-.PHONY: install.codegen
-install.codegen:
-	@$(GO) install ${ROOT_DIR}/tools/codegen/codegen.go
 
 ## tools.help: Display help information about the tools package
 .PHONY: tools.help
