@@ -4,9 +4,9 @@ OpenIMSDK/community:
     dest: LICENSE 
   - source: .golangci.yml
     dest: .golangci.yml
-  - source: workflows/
+  - source: .githubworkflows/
     dest: .github/workflows/
-    replace: false
+    replace: true
     exclude: |
       e2e-test.yml
 

@@ -26,4 +26,4 @@ jobs:
           COMMIT_EACH_FILE: false
           GIT_EMAIL: "3293172751nss@gmail.com"
           GIT_USERNAME: "cubxxw"
-          FORK: kubbot
+          FORK: cubxxw
