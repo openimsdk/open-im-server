@@ -10,15 +10,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"io"
 	"io/ioutil"
 	"net/http"
 	urlLib "net/url"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
 var client http.Client
@@ -86,13 +88,15 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return errs.ErrCallbackContinue
+			log.ZWarn(ctx, "callback failed but continue", err, "url", url, "err", err.Error())
+			return nil
 		}
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
-			return errs.ErrCallbackContinue
+			log.ZWarn(ctx, "callback failed but continue", err, "url", url, "err", err.Error())
+			return nil
 		}
 		return errs.ErrData.Wrap(err.Error())
 	}
