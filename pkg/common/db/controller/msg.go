@@ -483,6 +483,9 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			break
 		}
 	}
+	if len(seqs) == 0 {
+		return 0, 0, nil, nil
+	}
 	newBegin := seqs[0]
 	newEnd := seqs[len(seqs)-1]
 	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs, "newBegin", newBegin, "newEnd", newEnd)
