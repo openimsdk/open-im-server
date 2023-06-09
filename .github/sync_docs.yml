@@ -19,5 +19,10 @@ OpenIMSDK/community:
 #       dest: .gitingore
 #     - source: LICENSE
 #       dest: LICENSE
+#       replace: false
 #     - source: .github/sync_docs.yml
 #       dest: .github/sync_docs.yml
+#     - source: workflows/
+#       dest: .github/workflows/
+#       exclude: |
+#         e2e-test.yml
