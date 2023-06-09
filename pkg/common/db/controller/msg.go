@@ -465,28 +465,32 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			maxSeq = userMaxSeq
 		}
 	}
-	newBegin := begin
-	newEnd := end
+
 	if begin < minSeq {
-		newBegin = minSeq
+		begin = minSeq
 	}
 	if end > maxSeq {
-		newEnd = maxSeq
+		end = maxSeq
+	}
+	if end < begin {
+		return 0, 0, nil, errs.ErrArgs.Wrap("seq end < begin")
 	}
 	var seqs []int64
-	for i := newEnd; i > newEnd-num; i-- {
-		if i >= newBegin {
+	for i := end; i > end-num; i-- {
+		if i >= begin {
 			seqs = append([]int64{i}, seqs...)
 		} else {
 			break
 		}
 	}
-	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs)
+	newBegin := seqs[0]
+	newEnd := seqs[len(seqs)-1]
+	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs, "newBegin", newBegin, "newEnd", newEnd)
 	cachedMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
-			log.ZError(ctx, "get message from redis exception", err, conversationID, seqs)
+			log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", seqs)
 		}
 	}
 	var successMsgs []*sdkws.MsgData
@@ -503,8 +507,8 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 				successMsgs = append(successMsgs, msg)
 			}
 		}
-		for i := 0; i < len(delSeqs); i++ {
-			newSeq := newBegin - 1
+		for i := 1; i <= len(delSeqs); i++ {
+			newSeq := newBegin - int64(i)
 			if newSeq >= begin {
 				log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
 				failedSeqs = append(failedSeqs, newSeq)
