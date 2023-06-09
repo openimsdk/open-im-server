@@ -87,6 +87,7 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	v.Set(constant.CallbackCommand, command)
 	url = url + "?" + v.Encode()
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)
+	log.ZError(ctx, "post", err, "b", string(b))
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
