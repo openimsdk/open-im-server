@@ -519,7 +519,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	}
 	log.ZDebug(ctx, "get msgs from cache", "successMsgs", successMsgs)
 	if len(failedSeqs) != 0 {
-		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", failedSeqs)
+		log.ZDebug(ctx, "msgs not exist in redis", "seqs", failedSeqs)
 	}
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
