@@ -383,13 +383,23 @@ func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID str
 			log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
 			continue
 		}
-		for _, userID := range delUsers {
-			if err := c.rdb.SRem(ctx, c.getUserDelList(conversationID, userID), seq).Err(); err != nil {
-				log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq, "userID", userID)
+		if len(delUsers) > 0 {
+			pipe := c.rdb.Pipeline()
+			var failedFlag bool
+			for _, userID := range delUsers {
+				err = pipe.SRem(ctx, c.getUserDelList(conversationID, userID), seq).Err()
+				if err != nil {
+					failedFlag = true
+					log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq, "userID", userID)
+				}
 			}
-
-			if err := c.rdb.Del(ctx, c.getMessageDelUserListKey(conversationID, seq)).Err(); err != nil {
-				log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
+			if !failedFlag {
+				if err := pipe.Del(ctx, c.getMessageDelUserListKey(conversationID, seq)).Err(); err != nil {
+					log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
+				}
+			}
+			if _, err := pipe.Exec(ctx); err != nil {
+				log.ZError(ctx, "pipe exec failed", err, "conversationID", conversationID, "seq", seq)
 			}
 		}
 	}

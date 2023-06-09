@@ -119,7 +119,7 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 		return nil, err
 	}
 	var cores []zapcore.Core
-	if logLocation != "" && !isStdout {
+	if logLocation != "" {
 		cores = []zapcore.Core{
 			zapcore.NewCore(fileEncoder, writer, zap.NewAtomicLevelAt(l.level)),
 		}

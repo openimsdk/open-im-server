@@ -465,11 +465,15 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			maxSeq = userMaxSeq
 		}
 	}
+
 	if begin < minSeq {
 		begin = minSeq
 	}
 	if end > maxSeq {
 		end = maxSeq
+	}
+	if end < begin {
+		return 0, 0, nil, errs.ErrArgs.Wrap("seq end < begin")
 	}
 	var seqs []int64
 	for i := end; i > end-num; i-- {
@@ -479,11 +483,14 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			break
 		}
 	}
+	newBegin := seqs[0]
+	newEnd := seqs[len(seqs)-1]
+	log.ZDebug(ctx, "GetMsgBySeqsRange", "first seqs", seqs, "newBegin", newBegin, "newEnd", newEnd)
 	cachedMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
 		if err != redis.Nil {
 			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
-			log.ZError(ctx, "get message from redis exception", err, conversationID, seqs)
+			log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", seqs)
 		}
 	}
 	var successMsgs []*sdkws.MsgData
@@ -500,10 +507,19 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 				successMsgs = append(successMsgs, msg)
 			}
 		}
+		for i := 1; i <= len(delSeqs); i++ {
+			newSeq := newBegin - int64(i)
+			if newSeq >= begin {
+				log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
+				failedSeqs = append(failedSeqs, newSeq)
+			} else {
+				break
+			}
+		}
 	}
 	log.ZDebug(ctx, "get msgs from cache", "successMsgs", successMsgs)
 	if len(failedSeqs) != 0 {
-		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", seqs)
+		log.ZDebug(ctx, "msgs not exist in redis", err, "seqs", failedSeqs)
 	}
 	// get from cache or db
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
@@ -672,17 +688,19 @@ func (db *commonMsgDatabase) DeleteMsgsPhysicalBySeqs(ctx context.Context, conve
 }
 
 func (db *commonMsgDatabase) DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error {
-	msgs, _, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
-	if err != nil {
+	cachedMsgs, _, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		log.ZWarn(ctx, "DeleteUserMsgsBySeqs", err, "conversationID", conversationID, "seqs", seqs)
 		return err
 	}
-	var cacheSeqs []int64
-	for _, msg := range msgs {
-		cacheSeqs = append(cacheSeqs, msg.Seq)
-	}
-	if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
-		return err
+	if len(cachedMsgs) > 0 {
+		var cacheSeqs []int64
+		for _, msg := range cachedMsgs {
+			cacheSeqs = append(cacheSeqs, msg.Seq)
+		}
+		if err := db.cache.UserDeleteMsgs(ctx, conversationID, cacheSeqs, userID); err != nil {
+			return err
+		}
 	}
 
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
