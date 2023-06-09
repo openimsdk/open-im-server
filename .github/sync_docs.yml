@@ -2,8 +2,6 @@
 OpenIMSDK/openim-sdk-core:
   - source: LICENSE
     dest: LICENSE 
-  - source: .gitingore
-    dest: .gitingore
   - source: .golangci.yml
     dest: .golangci.yml
   - source: workflows/
