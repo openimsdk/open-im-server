@@ -70,6 +70,10 @@ tidy:
 vendor:
 	@$(GO) mod vendor
 
+## style: code style -> fmt,vet,lint
+.PHONY: style
+style: fmt vet lint
+
 ## fmt: Run go fmt against code.
 .PHONY: fmt
 fmt:
@@ -85,13 +89,9 @@ vet:
 lint:
 	@$(MAKE) go.lint
 
-## style: code style -> fmt,vet,lint
-.PHONY: style
-style: fmt vet lint
-
 ## format: Gofmt (reformat) package sources (exclude vendor dir if existed).
 .PHONY: format
-format: 
+format:
 	@$(MAKE) go.format
 
 ## test: Run unit test.
