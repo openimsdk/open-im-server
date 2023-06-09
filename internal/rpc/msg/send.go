@@ -31,7 +31,6 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 }
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
-	resp = &pbMsg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
@@ -51,6 +50,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMs
 		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	resp = &pbMsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
 	resp.ServerMsgID = req.MsgData.ServerMsgID
 	resp.ClientMsgID = req.MsgData.ClientMsgID
