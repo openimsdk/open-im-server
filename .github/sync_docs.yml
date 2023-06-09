@@ -1,5 +1,5 @@
 # https://github.com/BetaHuhn/repo-file-sync-action
-OpenIMSDK/community:
+OpenIMSDK/openim-sdk-core:
   - source: LICENSE
     dest: LICENSE 
   - source: .golangci.yml
