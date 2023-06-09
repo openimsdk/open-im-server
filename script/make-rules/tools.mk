@@ -131,6 +131,8 @@ install.github-release:
 	@$(GO) install github.com/github-release/github-release@latest
 
 ## install.coscli: Install coscli, used to upload files to cos
+# example: ./coscli  cp/sync -r  /home/off-line/docker-off-line/ cos://openim-1306374445/openim/openim/image/amd/off-line/off-line/ -e cos.ap-guangzhou.myqcloud.com
+# https://cloud.tencent.com/document/product/436/71763
 .PHONY: install.coscli
 install.coscli:
 	@wget -q https://github.com/tencentyun/coscli/releases/download/v0.13.0-beta/coscli-linux -O ${TOOLS_DIR}/coscli
