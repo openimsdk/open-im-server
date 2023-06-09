@@ -25,7 +25,7 @@ ANALYSIS_TOOLS = golangci-lint goimports golines go-callvis kube-score
 GENERATION_TOOLS = deepcopy-gen conversion-gen protoc-gen-go cfssl rts codegen
 # Testing tools
 TEST_TOOLS = ginkgo go-junit-report gotests
-# cos tools
+# tenxun cos tools
 COS_TOOLS = coscli coscmd
 # Version control tools
 VERSION_CONTROL_TOOLS = addlicense go-gitlint git-chglog github-release gsemver
