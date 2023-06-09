@@ -8,6 +8,7 @@ on:
       - ".golangci.yml"
       - ".gitingore"
       - "LICENSE"
+      - "workflow/*"
   workflow_dispatch:
 jobs:
   sync:
@@ -26,3 +27,9 @@ jobs:
           COMMIT_EACH_FILE: false
           GIT_EMAIL: "3293172751nss@gmail.com"
           GIT_USERNAME: "openim-kubbot"
+          REVIEWERS: |
+            cubxxw
+            kubbot
+          PR_LABELS: |
+            file-sync
+            automerge
