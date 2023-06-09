@@ -27,9 +27,3 @@ jobs:
           GIT_EMAIL: "3293172751nss@gmail.com"
           GIT_USERNAME: "cubxxw"
           FORK: kubbot
-          REVIEWERS: |
-            cubxxw
-            kubbot
-          PR_LABELS: |
-            file-sync
-            automerge
