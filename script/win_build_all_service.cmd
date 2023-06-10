@@ -18,5 +18,5 @@ cd ..\..\..\cmd\rpc\open_im_office\&& go build -ldflags="-w -s" && move open_im_
 cd ..\..\..\cmd\rpc\open_im_organization\&& go build -ldflags="-w -s" && move open_im_organization.exe %ROOT%\..\bin\
 cd ..\..\..\cmd\rpc\open_im_statistics\&& go build -ldflags="-w -s" && move open_im_statistics.exe %ROOT%\..\bin\
 cd ..\..\..\cmd\rpc\open_im_user\&& go build -ldflags="-w -s" && move open_im_user.exe %ROOT%\..\bin\
-cd ..\..\..\cmd\Open-IM-SDK-Core\ws_wrapper\cmd\&& go build -ldflags="-w -s" open_im_sdk_server.go && move open_im_sdk_server.exe %ROOT%\..\bin\
+cd ..\..\..\cmd\openim-sdk-core\ws_wrapper\cmd\&& go build -ldflags="-w -s" open_im_sdk_server.go && move open_im_sdk_server.exe %ROOT%\..\bin\
 cd %ROOT%

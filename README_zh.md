@@ -93,7 +93,7 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
 
    ```
    git clone <https://github.com/OpenIMSDK/Open-IM-Server.git> --recursive
-   cd cmd/Open-IM-SDK-Core
+   cd cmd/openim-sdk-core
    git checkout main
    ```
 

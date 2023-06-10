@@ -11,6 +11,5 @@ ADD ./open_im_rpc_auth $WORKDIR/main
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \
   chmod +x $WORKDIR/main
 
-
 WORKDIR $WORKDIR
 CMD ./main

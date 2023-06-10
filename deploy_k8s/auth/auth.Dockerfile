@@ -14,6 +14,5 @@ RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/script && \
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script"]
 
-
 WORKDIR $CMDDIR
 CMD ./main

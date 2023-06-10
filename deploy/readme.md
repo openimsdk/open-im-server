@@ -6,7 +6,7 @@
 make win-build-all
 
 # 得到各个二进制程序之后，打包为镜像
-# 目前没有处理 Open-IM-SDK-Core ，需要的话可以自己单独处理这个模块
+# 目前没有处理 openim-sdk-core ，需要的话可以自己单独处理这个模块
 make image-all
 
 # docker-compose.yaml 分成了两部分，一部分是openIM的镜像容器 openim.yaml，一部分是依赖的环境 env.yaml

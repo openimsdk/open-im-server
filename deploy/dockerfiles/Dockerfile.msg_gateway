@@ -11,6 +11,5 @@ ADD ./open_im_msg_gateway $WORKDIR/main
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \
   chmod +x $WORKDIR/main
 
-
 WORKDIR $WORKDIR
 CMD ./main

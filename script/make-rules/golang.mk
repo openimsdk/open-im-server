@@ -70,7 +70,7 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # ==============================================================================
 # ❯ tree -L 1 cmd
 # cmd
-# ├── Open-IM-SDK-Core/ - main.go
+# ├── openim-sdk-core/ - main.go
 # ├── open_im_api	
 # ├── open_im_cms_api
 # ├── open_im_cron_task
