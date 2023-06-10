@@ -143,7 +143,7 @@ add-copyright:
 help: Makefile
 	$(call makehelp)
 
-## all-help: Show all help details info.
+## help-all: Show all help details info.
 .PHONY: help-all
 help-all: go.help copyright.help tools.help image.help help
 	$(call makeallhelp)
