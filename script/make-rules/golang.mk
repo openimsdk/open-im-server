@@ -111,8 +111,12 @@ go.build.%:
 	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
-	@if [ "$(COMMAND)" == "rpc" ] || [ "$(COMMAND)" == "Open-IM-SDK-Core" ]; then \
+	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> Compilation is not yet supported $(COMMAND)"; \
+	elif [ "$(COMMAND)" == "rpc" ]; then \
+		for d in $(wildcard $(ROOT_DIR)/cmd/rpc/*/); do \
+			cd $$d && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $$d)$(GO_OUT_EXT) .; \
+		done; \
 	else \
 		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o $(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
 	fi
