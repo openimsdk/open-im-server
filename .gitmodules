@@ -1,4 +1,3 @@
-
-[submodule "cmd/Open-IM-SDK-Core"]
-	path = cmd/Open-IM-SDK-Core
-	url = https://github.com/OpenIMSDK/Open-IM-SDK-Core.git
+[submodule "cmd/openim-sdk-core"]
+	path = cmd/openim-sdk-core
+	url = https://github.com/OpenIMSDK/openim-sdk-core.git
