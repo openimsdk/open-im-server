@@ -60,6 +60,11 @@ export USAGE_OPTIONS
 build:
 	@$(MAKE) go.build
 
+## multiarch: Build binaries for multiple platforms. See option PLATFORMS.
+.PHONY: build-multiarch
+build-multiarch:
+	@$(MAKE) go.build.multiarch
+
 ## tidy: tidy go.mod
 .PHONY: tidy
 tidy:
