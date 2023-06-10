@@ -26,7 +26,6 @@ RUN apt-get install -y vim curl tzdata gawk
 #Time zone adjusted to East eighth District
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 
-
 #set directory to map logs,config file,script file.
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script","/Open-IM-Server/db/sdk"]
 
