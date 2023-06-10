@@ -17,7 +17,7 @@
 # Makefile helper functions for copyright
 #
 
-LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE_TEMPLATES
+LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE/LICENSE_TEMPLATES
 
 # TODO: GOBIN -> TOOLS_DIR
 # Questions about go mod instead of go path: https://github.com/kubernetes/kubernetes/issues/117181
