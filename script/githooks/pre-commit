@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Copyright © 2023 OpenIMSDK.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +21,7 @@
 # GIT_FILE_SIZE_LIMIT=50000000 git commit -m "test: this commit is allowed file sizes up to 50MB"
 #
 # ==============================================================================
-
+#
 
 YELLOW="\e[93m"
 GREEN="\e[32m"
