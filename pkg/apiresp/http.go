@@ -5,15 +5,21 @@ import (
 	"net/http"
 )
 
-func HttpError(w http.ResponseWriter, err error) {
-	data, err := json.Marshal(ParseError(err))
+func httpJson(w http.ResponseWriter, data any) {
+	body, err := json.Marshal(data)
 	if err != nil {
-		panic(err)
+		http.Error(w, "json marshal error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
-	_ = data
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(body)
+}
 
+func HttpError(w http.ResponseWriter, err error) {
+	httpJson(w, ParseError(err))
 }
 
 func HttpSuccess(w http.ResponseWriter, data any) {
-
+	httpJson(w, ApiSuccess(data))
 }
