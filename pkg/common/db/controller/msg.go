@@ -343,9 +343,11 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 		isNew = true
 	}
 	lastMaxSeq := currentMaxSeq
+	userSeqMap := make(map[string]int64)
 	for _, m := range msgs {
 		currentMaxSeq++
 		m.Seq = currentMaxSeq
+		userSeqMap[m.SendID] = m.Seq
 	}
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
@@ -356,6 +358,13 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
+		prome.Inc(prome.SeqSetFailedCounter)
+	} else {
+		prome.Inc(prome.SeqSetSuccessCounter)
+	}
+	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
+	if err != nil {
+		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
 		prome.Inc(prome.SeqSetFailedCounter)
 	} else {
 		prome.Inc(prome.SeqSetSuccessCounter)
