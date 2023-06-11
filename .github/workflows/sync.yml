@@ -36,5 +36,8 @@ jobs:
           REVIEWERS: |
             kubbot
             cubxxw
+          PR_LABELS: |
+            file-sync
+            automerge
           ASSIGNEES: |
             kubbot

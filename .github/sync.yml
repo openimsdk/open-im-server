@@ -32,7 +32,7 @@ OpenIMSDK/community:
 
 OpenIMSDK/openim-sdk-core:
   - source: LICENSE
-    dest: LICENSE 
+    dest: LICENSE
   - source: script/LICENSE/
     dest: scripts/LICENSE/
     replace: true
@@ -47,19 +47,23 @@ OpenIMSDK/openim-sdk-core:
     exclude: |
       sync.yml
 
-# group:
-#   repos: |
-#     OpenIMSDK/OpenIM-Docs
-#     OpenIMSDK/community
-#   files: 
-#     - source: .gitingore
-#       dest: .gitingore
-#     - source: LICENSE
-#       dest: LICENSE
-#       replace: false
-#     - source: .github/sync_docs.yml
-#       dest: .github/sync_docs.yml
-#     - source: workflows/
-#       dest: .github/workflows/
-#       exclude: |
-#         e2e-test.yml
+group:
+  # first group：common to all warehouses
+  # TODO: add the required warehouse here
+  - repos: |
+      kubecub/OpenIM-Docs@main
+    files: 
+      # - source: .gitingore
+      #   dest: .gitingore
+      #   replace: false
+      - source: LICENSE
+        dest: LICENSE
+        replace: false
+      - source: .github/workflows/
+        dest: .github/workflows/
+        exclude: |
+          e2e-test.yml
+          sync.yml
+      - source: script/githooks/
+        dest: scripts/githooks/
+        replace: false
