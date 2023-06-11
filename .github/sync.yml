@@ -30,6 +30,19 @@ OpenIMSDK/community:
     exclude: |
       sync.yml
 
+OpenIMSDK/openim-sdk-core:
+  - source: LICENSE
+    dest: LICENSE 
+  - source: script/LICENSE/
+    dest: scripts/LICENSE/
+    replace: true
+  - source: .github/
+    dest: .github/
+    replace: true
+    exclude: |
+      workflows/
+      sync.yml
+
 # group:
 #   repos: |
 #     OpenIMSDK/OpenIM-Docs
