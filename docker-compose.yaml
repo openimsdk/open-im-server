@@ -54,7 +54,7 @@ services:
 
 
   zookeeper:
-    image: wurstmeister/zookeeper:latest
+    image: zookeeper
     ports:
       - 2181:2181
     container_name: zookeeper
