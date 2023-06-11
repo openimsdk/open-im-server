@@ -87,7 +87,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	for _, option := range options {
 		option(client)
 	}
-	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(false))
+	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(true), zk.WithLogger(&log.ZkLogger{}))
 	if err != nil {
 		return nil, err
 	}
@@ -105,10 +105,8 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	}
 	// resolver.Register(client)
 	var wg sync.WaitGroup
-	wg.Add(2)
 	go client.refresh(&wg)
 	go client.watch(&wg)
-	wg.Wait()
 	return client, nil
 }
 
@@ -131,7 +129,6 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 }
 
 func (s *ZkClient) refresh(wg *sync.WaitGroup) {
-	wg.Done()
 	for range s.ticker.C {
 		log.ZDebug(context.Background(), "refresh local conns")
 		s.lock.Lock()

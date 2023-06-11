@@ -18,24 +18,26 @@ var ErrConnIsNil = errors.New("conn is nil")
 var ErrConnIsNilButLocalNotNil = errors.New("conn is nil, but local is not nil")
 
 func (s *ZkClient) watch(wg *sync.WaitGroup) {
-	wg.Done()
 	for {
 		event := <-s.eventChan
 		switch event.Type {
 		case zk.EventSession:
+			log.ZDebug(context.Background(), "zk session event", "event", event)
 		case zk.EventNodeCreated:
 		case zk.EventNodeChildrenChanged:
 			log.ZDebug(context.Background(), "zk event", "event", event.Path)
 			l := strings.Split(event.Path, "/")
-			s.lock.Lock()
 			if len(l) > 1 {
+				s.lock.Lock()
 				rpcName := l[len(l)-1]
 				s.flushResolver(rpcName)
 				if len(s.localConns[rpcName]) != 0 {
 					delete(s.localConns, rpcName)
 				}
+				s.lock.Unlock()
+
 			}
-			s.lock.Unlock()
+			log.ZDebug(context.Background(), "zk event handle success", "event", event.Path)
 		case zk.EventNodeDataChanged:
 		case zk.EventNodeDeleted:
 		case zk.EventNotWatching:
@@ -72,11 +74,13 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 }
 
 func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
+	log.ZDebug(ctx, "get conns from client", "serviceName", serviceName)
 	s.lock.Lock()
 	opts = append(s.options, opts...)
 	conns := s.localConns[serviceName]
 	if len(conns) == 0 {
 		var err error
+		log.ZDebug(ctx, "get conns from zk remote", "serviceName", serviceName)
 		conns, err = s.GetConnsRemote(serviceName)
 		if err != nil {
 			return nil, err
@@ -85,6 +89,7 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 	}
 	s.lock.Unlock()
 	var ret []*grpc.ClientConn
+	log.ZDebug(ctx, "get conns from zk success", "conns", conns)
 	for _, conn := range conns {
 		c, err := grpc.DialContext(ctx, conn.Addr, append(s.options, opts...)...)
 		if err != nil {
@@ -92,6 +97,7 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 		}
 		ret = append(ret, c)
 	}
+	log.ZDebug(ctx, "dial ctx success", "conns", ret)
 	return ret, nil
 }
 
@@ -107,6 +113,7 @@ func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc
 	if len(conns) == 0 {
 		return nil, ErrConnIsNil
 	}
+	log.ZDebug(ctx, "get conn from conns", "conns", conns)
 	return s.getConnBalance(conns)
 }
 
