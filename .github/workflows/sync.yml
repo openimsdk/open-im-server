@@ -24,6 +24,6 @@ jobs:
           ORIGINAL_MESSAGE: true
           SKIP_PR: true
           COMMIT_EACH_FILE: false
-          GIT_EMAIL: "3293172751nss@gmail.com"
-          GIT_USERNAME: "cubxxw"
-          FORK: cubxxw
+          GIT_EMAIL: "3293172751ysy@gmail.com"
+          GIT_USERNAME: "kubbot"
+          FORK: kubbot
