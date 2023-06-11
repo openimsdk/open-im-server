@@ -223,7 +223,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(context, wsLongConn, compression, ws)
+	client.ResetClient(context, wsLongConn, context.GetBackground(), compression, ws)
 	ws.registerChan <- client
 	go client.readMessage()
 }

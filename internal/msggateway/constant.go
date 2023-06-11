@@ -11,6 +11,7 @@ const (
 	OperationID             = "operationID"
 	Compression             = "compression"
 	GzipCompressionProtocol = "gzip"
+	BackgroundStatus        = "isBackground"
 )
 const (
 	WebSocket = iota + 1
