@@ -1,5 +1,5 @@
 # https://github.com/BetaHuhn/repo-file-sync-action
-name: Sync Docs
+name: Synchronize kubecub public code to other repositories
 on:
     push:
         branches:
@@ -19,11 +19,14 @@ jobs:
       - name: Run GitHub File Sync
         uses: BetaHuhn/repo-file-sync-action@v1.21.0
         with:
-          GH_PAT: ${{ secrets.BOT_GITHUB_TOKEN }}
+          GH_INSTALLATION_TOKEN: "${{ secrets.BOT_GITHUB_TOKEN }}"
           CONFIG_PATH: .github/sync.yml
+          GH_PAT: "${{ secrets.BOT_GITHUB_TOKEN }}"
           ORIGINAL_MESSAGE: true
           SKIP_PR: true
           COMMIT_EACH_FILE: false
+          COMMIT_BODY: "🤖 kubbot to synchronize the warehouse"
           GIT_EMAIL: "3293172751ysy@gmail.com"
           GIT_USERNAME: "kubbot"
+          PR_BODY: 👌 kubecub provides automated community services
           FORK: kubbot
