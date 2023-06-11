@@ -3,7 +3,7 @@
 OpenIMSDK/.github:
   - source: LICENSE
     dest: LICENSE 
-  - source: scripts/LICENSE/
+  - source: script/LICENSE/
     dest: scripts/LICENSE/
     replace: true
   - source: .github/
@@ -16,7 +16,7 @@ OpenIMSDK/.github:
 OpenIMSDK/community:
   - source: LICENSE
     dest: LICENSE 
-  - source: scripts/LICENSE/
+  - source: script/LICENSE/
     dest: scripts/LICENSE/
     replace: true
   - source: .github/workflows/
