@@ -155,7 +155,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if len(userMap) != len(userIDs) {
 		return nil, errs.ErrUserIDNotFound.Wrap("user not found")
 	}
-	if err := CallbackBeforeCreateGroup(ctx, req); err != nil && err != errs.ErrCallbackContinue {
+	if err := CallbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
 	var groupMembers []*relationTb.GroupMemberModel
@@ -173,7 +173,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
 		groupMember.JoinTime = time.Now()
 		groupMember.MuteEndTime = time.Unix(0, 0)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return err
 		}
 		groupMembers = append(groupMembers, groupMember)
@@ -364,7 +364,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			member.JoinSource = constant.JoinByInvitation
 			member.JoinTime = time.Now()
 			member.MuteEndTime = time.Unix(0, 0)
-			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
+			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
 				return nil, err
 			}
 			groupMembers = append(groupMembers, member)
@@ -704,7 +704,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			OperatorUserID: mcontext.GetOpUserID(ctx),
 			Ex:             groupRequest.Ex,
 		}
-		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil && err != errs.ErrCallbackContinue {
+		if err = CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
 			return nil, err
 		}
 	}
@@ -756,7 +756,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		groupMember.InviterUserID = req.InviterUserID
 		groupMember.JoinTime = time.Now()
 		groupMember.MuteEndTime = time.Unix(0, 0)
-		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil && err != errs.ErrCallbackContinue {
+		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
 		if err := s.GroupDatabase.CreateGroup(ctx, nil, []*relationTb.GroupMemberModel{groupMember}); err != nil {

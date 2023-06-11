@@ -7,7 +7,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
@@ -47,7 +49,13 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) er
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
-	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg)
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -55,11 +63,17 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendSingleMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackAfterSendSingleMsgCommand),
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
-	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -67,11 +81,17 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		return nil
 	}
 	req := &cbapi.CallbackAfterSendGroupMsgReq{
-		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendSingleMsgCommand),
+		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackBeforeSendGroupMsgCommand),
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg)
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -83,7 +103,13 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) erro
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
-	return http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg)
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
@@ -94,7 +120,10 @@ func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 		CommonCallbackReq: toCommonCallback(ctx, msg, constant.CallbackMsgModifyCommand),
 	}
 	resp := &cbapi.CallbackMsgModifyCommandResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackMsgModify); err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
 		return err
 	}
 	if resp.Content != nil {
@@ -116,5 +145,6 @@ func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
 	utils.NotNilReplace(&msg.MsgData.AtUserIDList, resp.AtUserIDList)
 	utils.NotNilReplace(&msg.MsgData.AttachedInfo, resp.AttachedInfo)
 	utils.NotNilReplace(&msg.MsgData.Ex, resp.Ex)
+	log.ZDebug(ctx, "callbackMsgModify", "msg", msg.MsgData)
 	return nil
 }

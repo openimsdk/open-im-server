@@ -18,9 +18,6 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 		return nil, errs.ErrMessageHasReadDisable.Wrap()
 	}
 	m.encapsulateMsgData(req.MsgData)
-	if err := callbackMsgModify(ctx, req); err != nil && err != errs.ErrCallbackContinue {
-		return nil, err
-	}
 	switch req.MsgData.SessionType {
 	case constant.SingleChatType:
 		return m.sendMsgSingleChat(ctx, req)
@@ -34,10 +31,15 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 }
 
 func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
-	resp = &pbMsg.SendMsgResp{}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+		return nil, err
+	}
+	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
+		return nil, err
+	}
+	if err := callbackMsgModify(ctx, req); err != nil {
 		return nil, err
 	}
 	err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
@@ -45,9 +47,10 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMs
 		return nil, err
 	}
 	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
-		log.ZError(ctx, "CallbackAfterSendGroupMsg", err)
+		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	resp = &pbMsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
 	resp.ServerMsgID = req.MsgData.ServerMsgID
 	resp.ClientMsgID = req.MsgData.ClientMsgID
@@ -85,13 +88,19 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
 		return nil, errs.ErrUserNotRecvMsg
 	} else {
+		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
+			return nil, err
+		}
+		if err := callbackMsgModify(ctx, req); err != nil {
+			return nil, err
+		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 			promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
 			return nil, err
 		}
 		err = callbackAfterSendSingleMsg(ctx, req)
-		if err != nil && err != errs.ErrCallbackContinue {
-			return nil, err
+		if err != nil {
+			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
 		}
 		resp = &pbMsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,

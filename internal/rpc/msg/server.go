@@ -81,7 +81,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		MessageLocker:          NewLockerMessage(cacheModel),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
-	s.addInterceptorHandler(MessageHasReadEnabled, MessageModifyCallback)
+	s.addInterceptorHandler(MessageHasReadEnabled)
 	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)
 	return nil

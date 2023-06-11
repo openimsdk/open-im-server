@@ -11,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -44,6 +45,9 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
 	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeCreateGroup)
 	if err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
 		return err
 	}
 	utils.NotNilReplace(&req.GroupInfo.GroupID, resp.GroupID)
@@ -76,6 +80,9 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, groupMember *relation.Gr
 	resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
 	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeMemberJoinGroup)
 	if err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
 		return err
 	}
 	if resp.MuteEndTime != nil {
@@ -113,6 +120,9 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	resp := &callbackstruct.CallbackBeforeSetGroupMemberInfoResp{}
 	err = http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo)
 	if err != nil {
+		if err == errs.ErrCallbackContinue {
+			return nil
+		}
 		return err
 	}
 	if resp.FaceURL != nil {
