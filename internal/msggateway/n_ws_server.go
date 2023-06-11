@@ -1,13 +1,13 @@
 package msggateway
 
 import (
-	context2 "context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -198,7 +198,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
-	log.ZDebug(context2.Background(), "conn", "platformID", platformID)
+	// log.ZDebug(context2.Background(), "conn", "platformID", platformID)
 	err := tokenverify.WsVerifyToken(token, userID, platformID)
 	if err != nil {
 		httpError(context, err)
