@@ -6,7 +6,7 @@ OpenIMSDK/openim-sdk-core:
     dest: .golangci.yml
   - source: .github/workflows/
     dest: .github/workflows/
-    replace: true
+    replace: false
     exclude: |
       e2e-test.yml
       sync.yml
