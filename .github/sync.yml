@@ -36,11 +36,15 @@ OpenIMSDK/openim-sdk-core:
   - source: script/LICENSE/
     dest: scripts/LICENSE/
     replace: true
+  - source: .github/workflows/
+    dest: .github/workflows/
+    exclude:
+      - e2e-test.yml
+      - sync.yml
   - source: .github/
     dest: .github/
     replace: true
     exclude: |
-      workflows/
       sync.yml
 
 # group:
