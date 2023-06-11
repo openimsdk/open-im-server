@@ -1,12 +1,23 @@
 package tokenverify
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/golang-jwt/jwt/v4"
 	"testing"
 )
 
 func Test_ParseToken(t *testing.T) {
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVSUQiOiJvcGVuSU1BZG1pbiIsIlBsYXRmb3JtIjoiQVBhZCIsImV4cCI6MTY3NDYxNTA2MSwibmJmIjoxNjY2ODM4NzYxLCJpYXQiOjE2NjY4MzkwNjF9.l8RiIu6pR4ItwDOpNIDYA9LBzIcpk8r8n6NRtXjqOp8"
-	_, err := GetClaimFromToken(token)
-	assert.Nil(t, err)
+	config.Config.TokenPolicy.AccessSecret = "OpenIM_server"
+	claims1 := BuildClaims("123456", constant.AndroidPlatformStr, 10)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims1)
+	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
+	if err != nil {
+		t.Fatal(err)
+	}
+	claim2, err := GetClaimFromToken(tokenString)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(claim2)
 }
