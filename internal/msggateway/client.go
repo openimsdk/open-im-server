@@ -65,11 +65,12 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		ctx:        ctx,
 	}
 }
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isCompress bool, longConnServer LongConnServer) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
 	c.IsCompress = isCompress
+	c.IsBackground = isBackground
 	c.UserID = ctx.GetUserID()
 	c.ctx = ctx
 	c.longConnServer = longConnServer

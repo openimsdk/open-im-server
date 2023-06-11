@@ -91,3 +91,11 @@ func (c *UserConnContext) GetPlatformID() string {
 func (c *UserConnContext) GetOperationID() string {
 	return c.Req.URL.Query().Get(OperationID)
 }
+func (c *UserConnContext) GetBackground() bool {
+	b, err := strconv.ParseBool(c.Req.URL.Query().Get(BackgroundStatus))
+	if err != nil {
+		return false
+	} else {
+		return b
+	}
+}

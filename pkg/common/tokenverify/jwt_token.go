@@ -89,15 +89,15 @@ func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
 }
 func WsVerifyToken(token, userID, platformID string) error {
-	claim, err := GetClaimFromToken(token)
-	if err != nil {
-		return err
-	}
-	if claim.UID != userID {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UID, userID))
-	}
-	if claim.Platform != platformID {
-		return errs.ErrInternalServer.Wrap(fmt.Sprintf("token platform %s != platformID %s", claim.Platform, platformID))
-	}
+	//claim, err := GetClaimFromToken(token)
+	//if err != nil {
+	//	return err
+	//}
+	//if claim.UID != userID {
+	//	return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UID, userID))
+	//}
+	//if claim.Platform != platformID {
+	//	return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %s != platformID %s", claim.Platform, platformID))
+	//}
 	return nil
 }

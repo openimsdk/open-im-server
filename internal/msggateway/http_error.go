@@ -1,13 +1,11 @@
 package msggateway
 
-import (
-	"net/http"
-)
+import "github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 
 func httpError(ctx *UserConnContext, err error) {
-	code := http.StatusUnauthorized
-	ctx.SetHeader("Sec-Websocket-Version", "13")
-	ctx.SetHeader("ws_err_msg", err.Error())
+	//code := http.StatusUnauthorized
+	//ctx.SetHeader("Sec-Websocket-Version", "13")
+	//ctx.SetHeader("ws_err_msg", err.Error())
 	//if errors.Is(err, errs.ErrTokenExpired) {
 	//	code = errs.ErrTokenExpired.Code()
 	//}
@@ -38,5 +36,6 @@ func httpError(ctx *UserConnContext, err error) {
 	//if errors.Is(err, errs.ErrConnArgsErr) {
 	//	code = errs.ErrConnArgsErr.Code()
 	//}
-	ctx.ErrReturn(err.Error(), code)
+	//ctx.ErrReturn(err.Error(), code)
+	apiresp.HttpError(ctx.RespWriter, err)
 }
