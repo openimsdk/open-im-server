@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
+	"strconv"
 	"time"
 )
 
@@ -89,15 +91,23 @@ func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
 }
 func WsVerifyToken(token, userID, platformID string) error {
-	//claim, err := GetClaimFromToken(token)
-	//if err != nil {
-	//	return err
-	//}
-	//if claim.UID != userID {
-	//	return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UID, userID))
-	//}
-	//if claim.Platform != platformID {
-	//	return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %s != platformID %s", claim.Platform, platformID))
-	//}
+	platformIDInt, err := strconv.Atoi(platformID)
+	if err != nil {
+		return errs.ErrArgs.Wrap(fmt.Sprintf("platformID %s is not int", platformID))
+	}
+	platform := constant.PlatformIDToName(platformIDInt)
+	if platform == "" {
+		return errs.ErrArgs.Wrap(fmt.Sprintf("platformID %s is not exist", platformID))
+	}
+	claim, err := GetClaimFromToken(token)
+	if err != nil {
+		return err
+	}
+	if claim.UID != userID {
+		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UID, userID))
+	}
+	if claim.Platform != platform {
+		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %s != %s", claim.Platform, platform))
+	}
 	return nil
 }
