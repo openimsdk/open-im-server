@@ -61,7 +61,10 @@ type SeqCache interface {
 	SetUserConversationsMinSeqs(ctx context.Context, userID string, seqs map[string]int64) error
 	// has read seq
 	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
+	// k: user, v: seq
+	SetHasReadSeqs(ctx context.Context, conversationID string, hasReadSeqs map[string]int64) error
 	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
+	GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error)
 }
 
 type thirdCache interface {
@@ -236,10 +239,20 @@ func (c *msgCache) SetHasReadSeq(ctx context.Context, userID string, conversatio
 	return utils.Wrap1(c.rdb.Set(ctx, c.getHasReadSeqKey(conversationID, userID), hasReadSeq, 0).Err())
 }
 
+func (c *msgCache) SetHasReadSeqs(ctx context.Context, conversationID string, hasReadSeqs map[string]int64) error {
+	return c.setSeqs(ctx, hasReadSeqs, func(userID string) string {
+		return c.getHasReadSeqKey(conversationID, userID)
+	})
+}
+
 func (c *msgCache) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
 	return c.getSeqs(ctx, conversationIDs, func(conversationID string) string {
 		return c.getHasReadSeqKey(conversationID, userID)
 	})
+}
+
+func (c *msgCache) GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error) {
+	return utils.Wrap2(c.rdb.Get(ctx, c.getHasReadSeqKey(conversationID, userID)).Int64())
 }
 
 func (c *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
