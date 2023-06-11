@@ -51,7 +51,7 @@ group:
   # first group：common to all warehouses
   # TODO: add the required warehouse here
   - repos: |
-      kubecub/OpenIM-Docs@main
+      OpenIMSDK/OpenIM-Docs@main
     files: 
       # - source: .gitingore
       #   dest: .gitingore
