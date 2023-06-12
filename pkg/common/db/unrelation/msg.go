@@ -298,7 +298,6 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 			SetFilter(filter).
 			SetUpdate(update)
 		updates = append(updates, updateModel)
-
 	}
 	_, err := m.MsgCollection.BulkWrite(ctx, updates)
 	return err
