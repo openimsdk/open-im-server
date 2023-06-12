@@ -281,16 +281,25 @@ func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, 
 }
 
 func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error {
-	updates := bson.M{
-		"$set": bson.M{},
-	}
+	updates := []mongo.WriteModel{}
 	for _, index := range indexes {
-		updates["$set"].(bson.M)[fmt.Sprintf("msgs.%d.is_read", index)] = true
+		filter := bson.M{
+			"doc_id": docID,
+			fmt.Sprintf("msgs.%d.msg.send_id", index): bson.M{
+				"$ne": userID,
+			},
+		}
+		update := bson.M{
+			"$set": bson.M{
+				fmt.Sprintf("msgs.%d.msg.is_read", index): true,
+			},
+		}
+		updateModel := mongo.NewUpdateManyModel().
+			SetFilter(filter).
+			SetUpdate(update)
+		updates = append(updates, updateModel)
+
 	}
-	filter := bson.M{"doc_id": docID}
-	_, err := m.MsgCollection.UpdateMany(ctx, filter, updates)
-	if err != nil {
-		return utils.Wrap(err, "")
-	}
-	return nil
+	_, err := m.MsgCollection.BulkWrite(ctx, updates)
+	return err
 }

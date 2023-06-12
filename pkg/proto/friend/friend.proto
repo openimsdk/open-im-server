@@ -8,11 +8,8 @@ message getPaginationFriendsReq{
   string userID = 2;
 }
 message getPaginationFriendsResp{
-  repeated sdkws.FriendInfo FriendsInfo = 1;
+  repeated sdkws.FriendInfo friendsInfo = 1;
   int32 total = 2;
-
-
-
 }
 
 

@@ -62,6 +62,35 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	return &msg.MarkMsgsAsReadResp{}, nil
 }
 
+func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (resp *msg.MarkConversationAsReadResp, err error) {
+	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
+	if err != nil {
+		return
+	}
+	var seqs []int64
+	for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
+		seqs = append(seqs, i)
+	}
+	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{req.ConversationID})
+	if err != nil {
+		return
+	}
+	if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.ConversationID, req.UserID, seqs); err != nil {
+		return
+	}
+	if req.HasReadSeq > hasReadSeq {
+		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
+		if err != nil {
+			return
+		}
+		hasReadSeq = req.HasReadSeq
+	}
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversations[0].ConversationType, req.UserID, m.conversationAndGetRecvID(conversations[0], req.UserID), seqs, hasReadSeq); err != nil {
+		return
+	}
+	return &msg.MarkConversationAsReadResp{}, nil
+}
+
 func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
