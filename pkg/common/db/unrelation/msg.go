@@ -291,7 +291,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 		}
 		update := bson.M{
 			"$set": bson.M{
-				fmt.Sprintf("msgs.%d.msg.is_read", index): true,
+				fmt.Sprintf("msgs.%d.is_read", index): true,
 			},
 		}
 		updateModel := mongo.NewUpdateManyModel().
