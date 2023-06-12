@@ -510,23 +510,40 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		delSeqs, err := db.cache.GetUserDelList(ctx, userID, conversationID)
 		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return 0, 0, nil, err
-		} else {
-			log.ZDebug(ctx, "get delSeqs from redis", "delSeqs", delSeqs, "userID", userID, "conversationID", conversationID)
 		}
-
+		var cacheDelNum int
 		for _, msg := range cachedMsgs {
 			if !utils.Contain(msg.Seq, delSeqs...) {
 				successMsgs = append(successMsgs, msg)
+			} else {
+				cacheDelNum += 1
 			}
 		}
-		for i := 1; i <= len(delSeqs); i++ {
+		log.ZDebug(ctx, "get delSeqs from redis", "delSeqs", delSeqs, "userID", userID, "conversationID", conversationID, "cacheDelNum", cacheDelNum)
+		var reGetSeqsCache []int64
+		for i := 1; i <= cacheDelNum; {
 			newSeq := newBegin - int64(i)
 			if newSeq >= begin {
-				log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
-				failedSeqs = append(failedSeqs, newSeq)
+				if !utils.Contain(newSeq, delSeqs...) {
+					log.ZDebug(ctx, "seq del in cache, a new seq in range append", "new seq", newSeq)
+					reGetSeqsCache = append(reGetSeqsCache, newSeq)
+					i++
+				}
 			} else {
 				break
 			}
+		}
+		if len(reGetSeqsCache) > 0 {
+			log.ZDebug(ctx, "reGetSeqsCache", "reGetSeqsCache", reGetSeqsCache)
+			cachedMsgs, failedSeqs2, err := db.cache.GetMessagesBySeq(ctx, conversationID, reGetSeqsCache)
+			if err != nil {
+				if err != redis.Nil {
+					prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs2))
+					log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", reGetSeqsCache)
+				}
+			}
+			failedSeqs = append(failedSeqs, failedSeqs2...)
+			successMsgs = append(successMsgs, cachedMsgs...)
 		}
 	}
 	log.ZDebug(ctx, "get msgs from cache", "successMsgs", successMsgs)
@@ -544,6 +561,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		prome.Add(prome.MsgPullFromMongoSuccessCounter, len(mongoMsgs))
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
+
 	return minSeq, maxSeq, successMsgs, nil
 }
 

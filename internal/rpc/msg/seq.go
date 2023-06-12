@@ -7,7 +7,9 @@ import (
 )
 
 func (m *msgServer) GetConversationMaxSeq(ctx context.Context, req *pbMsg.GetConversationMaxSeqReq) (resp *pbMsg.GetConversationMaxSeqResp, err error) {
-	resp = &pbMsg.GetConversationMaxSeqResp{}
-	resp.MaxSeq, err = m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
-	return resp, err
+	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbMsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil
 }

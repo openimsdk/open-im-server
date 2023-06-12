@@ -173,6 +173,9 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 }
 
 func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
+	if req.Conversation == nil {
+		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
+	}
 	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
