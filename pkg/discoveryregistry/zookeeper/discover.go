@@ -83,6 +83,7 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 		log.ZDebug(ctx, "get conns from zk remote", "serviceName", serviceName)
 		conns, err = s.GetConnsRemote(serviceName)
 		if err != nil {
+			s.lock.Unlock()
 			return nil, err
 		}
 		s.localConns[serviceName] = conns
