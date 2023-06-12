@@ -57,6 +57,7 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.ConversationPrivateChatNotification: config.Config.Notification.ConversationSetPrivate,
 		// msg
 		constant.MsgRevokeNotification: {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
+		constant.HasReadReceipt:        {IsSendMsg: false, ReliabilityLevel: constant.ReliableNotificationNoMsg},
 	}
 }
 
