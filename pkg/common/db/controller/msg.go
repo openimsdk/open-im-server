@@ -445,6 +445,9 @@ func (db *commonMsgDatabase) getMsgBySeqsRange(ctx context.Context, userID strin
 			return nil, err
 		}
 		for _, msg := range msgs {
+			if msg.IsRead {
+				msg.Msg.IsRead = true
+			}
 			seqMsgs = append(seqMsgs, convert.MsgDB2Pb(msg.Msg))
 		}
 	}
