@@ -55,9 +55,15 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	if err != nil {
 		return
 	}
-	err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, hasReadSeq)
-	if err != nil {
+	currentHasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
+	if err != nil && errors.Unwrap(err) != redis.Nil {
 		return
+	}
+	if hasReadSeq > currentHasReadSeq {
+		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, hasReadSeq)
+		if err != nil {
+			return
+		}
 	}
 	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversations[0].ConversationType, req.UserID, m.conversationAndGetRecvID(conversations[0], req.UserID), req.Seqs, hasReadSeq); err != nil {
 		return
