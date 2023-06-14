@@ -232,7 +232,6 @@ func (ws *WsServer) unregisterClient(client *Client) {
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
-	defer log.ZInfo(context.Background(), "wsHandler", "remote addr", "url", r.URL.String())
 	connContext := newContext(w, r)
 	if ws.onlineUserConnNum >= ws.wsMaxConnNum {
 		httpError(connContext, errs.ErrConnOverMaxNumLimit)
