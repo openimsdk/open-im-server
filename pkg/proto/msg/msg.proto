@@ -185,13 +185,13 @@ message MarkConversationAsReadReq {
 message MarkConversationAsReadResp {
 }
 
-message SetConversationHasReadMaxSeqReq {
+message SetConversationHasReadSeqReq {
   string conversationID = 1;
   string userID = 2;
   int64 hasReadSeq = 3;
 }
 
-message SetConversationHasReadMaxSeqResp {
+message SetConversationHasReadSeqResp {
 }
 
 message DeleteSyncOpt {
@@ -293,7 +293,7 @@ service msg {
   // mark as read
   rpc MarkMsgsAsRead(MarkMsgsAsReadReq) returns(MarkMsgsAsReadResp);
   rpc MarkConversationAsRead(MarkConversationAsReadReq) returns(MarkConversationAsReadResp);
-  rpc SetConversationHasReadMaxSeq(SetConversationHasReadMaxSeqReq) returns(SetConversationHasReadMaxSeqResp);
+  rpc SetConversationHasReadSeq(SetConversationHasReadSeqReq) returns(SetConversationHasReadSeqResp);
   // 修改消息
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
   rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
