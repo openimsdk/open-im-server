@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	redis "github.com/go-redis/redis/v8"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -187,13 +188,35 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if info.clientOK {
+			ws.clients.deleteClients(info.newClient.UserID, info.oldClients)
 			for _, c := range info.oldClients {
 				err := c.KickOnlineMessage()
 				if err != nil {
-					log.ZError(c.ctx, "KickOnlineMessage", err)
+					log.ZWarn(c.ctx, "KickOnlineMessage", err)
 				}
 			}
-			ws.cache.GetTokensWithoutError(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID)
+			m, err := ws.cache.GetTokensWithoutError(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID)
+			if err != nil && err != redis.Nil {
+				log.ZWarn(info.newClient.ctx, "get token from redis err", err, "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				return
+			}
+			if m == nil {
+				log.ZWarn(info.newClient.ctx, "m is nil", errors.New("m is nil"), "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				return
+			}
+			log.ZDebug(info.newClient.ctx, "get token from redis", "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID, "tokenMap", m)
+
+			for k, _ := range m {
+				if k != info.newClient.ctx.GetToken() {
+					m[k] = constant.KickedToken
+				}
+			}
+			log.ZDebug(info.newClient.ctx, "set token map is ", "token map", m, "userID", info.newClient.UserID)
+			err = ws.cache.SetTokenMapByUidPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
+			if err != nil {
+				log.ZWarn(info.newClient.ctx, "SetTokenMapByUidPid err", err, "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				return
+			}
 		}
 	}
 
