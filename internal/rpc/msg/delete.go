@@ -101,6 +101,7 @@ func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhy
 }
 
 func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
+	defer log.ZDebug(ctx, "clearConversation return line")
 	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, conversationIDs)
 	if err != nil {
 		return err
@@ -134,6 +135,9 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
 			m.notificationSender.NotificationWithSesstionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
 		}
+	}
+	if err := m.MsgDatabase.UserSetHasReadSeqs(ctx, userID, maxSeqs); err != nil {
+		return err
 	}
 	return nil
 }

@@ -63,6 +63,8 @@ type SeqCache interface {
 	SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error
 	// k: user, v: seq
 	SetHasReadSeqs(ctx context.Context, conversationID string, hasReadSeqs map[string]int64) error
+	// k: conversation, v :seq
+	UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error
 	GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error)
 	GetHasReadSeq(ctx context.Context, userID string, conversationID string) (int64, error)
 }
@@ -241,6 +243,12 @@ func (c *msgCache) SetHasReadSeq(ctx context.Context, userID string, conversatio
 
 func (c *msgCache) SetHasReadSeqs(ctx context.Context, conversationID string, hasReadSeqs map[string]int64) error {
 	return c.setSeqs(ctx, hasReadSeqs, func(userID string) string {
+		return c.getHasReadSeqKey(conversationID, userID)
+	})
+}
+
+func (c *msgCache) UserSetHasReadSeqs(ctx context.Context, userID string, hasReadSeqs map[string]int64) error {
+	return c.setSeqs(ctx, hasReadSeqs, func(conversationID string) string {
 		return c.getHasReadSeqKey(conversationID, userID)
 	})
 }
