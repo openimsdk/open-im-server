@@ -2,6 +2,9 @@ package msggateway
 
 import (
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -22,7 +25,7 @@ type LongConnServer interface {
 	GetUserAllCons(userID string) ([]*Client, bool)
 	GetUserPlatformCons(userID string, platform int) ([]*Client, bool, bool)
 	Validate(s interface{}) error
-	//SetMessageHandler(msgRpcClient *rpcclient.MsgClient)
+	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
 	UnRegister(c *Client)
 	Compressor
@@ -41,6 +44,7 @@ type WsServer struct {
 	wsMaxConnNum      int64
 	registerChan      chan *Client
 	unregisterChan    chan *Client
+	kickHandlerChan   chan *kickHandler
 	clients           *UserMap
 	clientPool        sync.Pool
 	onlineUserNum     int64
@@ -48,13 +52,22 @@ type WsServer struct {
 	handshakeTimeout  time.Duration
 	hubServer         *Server
 	validate          *validator.Validate
+	cache             cache.MsgModel
 	Compressor
 	Encoder
 	MessageHandler
 }
+type kickHandler struct {
+	clientOK   bool
+	oldClients []*Client
+	newClient  *Client
+}
 
 func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, client)
+}
+func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {
+	ws.cache = cache
 }
 
 func (ws *WsServer) UnRegister(c *Client) {
@@ -92,12 +105,13 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 				return new(Client)
 			},
 		},
-		registerChan:   make(chan *Client, 1000),
-		unregisterChan: make(chan *Client, 1000),
-		validate:       v,
-		clients:        newUserMap(),
-		Compressor:     NewGzipCompressor(),
-		Encoder:        NewGobEncoder(),
+		registerChan:    make(chan *Client, 1000),
+		unregisterChan:  make(chan *Client, 1000),
+		kickHandlerChan: make(chan *kickHandler, 1000),
+		validate:        v,
+		clients:         newUserMap(),
+		Compressor:      NewGzipCompressor(),
+		Encoder:         NewGobEncoder(),
 	}, nil
 }
 func (ws *WsServer) Run() error {
@@ -109,6 +123,8 @@ func (ws *WsServer) Run() error {
 				ws.registerClient(client)
 			case client = <-ws.unregisterChan:
 				ws.unregisterClient(client)
+			case onlineInfo := <-ws.kickHandlerChan:
+				ws.multiTerminalLoginChecker(onlineInfo)
 			}
 		}
 	}()
@@ -119,26 +135,29 @@ func (ws *WsServer) Run() error {
 
 func (ws *WsServer) registerClient(client *Client) {
 	var (
-		userOK   bool
-		clientOK bool
-		cli      []*Client
+		userOK     bool
+		clientOK   bool
+		oldClients []*Client
 	)
-	cli, userOK, clientOK = ws.clients.Get(client.UserID, client.PlatformID)
+	ws.clients.Set(client.UserID, client)
+	oldClients, userOK, clientOK = ws.clients.Get(client.UserID, client.PlatformID)
 	if !userOK {
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
-		ws.clients.Set(client.UserID, client)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
 
 	} else {
+		i := &kickHandler{
+			clientOK:   clientOK,
+			oldClients: oldClients,
+			newClient:  client,
+		}
+		ws.kickHandlerChan <- i
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK { //已经有同平台的连接存在
-			ws.clients.Set(client.UserID, client)
-			ws.multiTerminalLoginChecker(cli)
-			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(cli))
+			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
-			ws.clients.Set(client.UserID, client)
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		}
 	}
@@ -156,7 +175,24 @@ func getRemoteAdders(client []*Client) string {
 	return ret
 }
 
-func (ws *WsServer) multiTerminalLoginChecker(client []*Client) {
+func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
+	switch config.Config.MultiLoginPolicy {
+	case constant.DefalutNotKick:
+	case constant.PCAndOther:
+		if constant.PlatformIDToClass(info.newClient.PlatformID) == constant.TerminalPC {
+			return
+		}
+		fallthrough
+	case constant.AllLoginButSameTermKick:
+		if info.clientOK {
+			for _, c := range info.oldClients {
+				err := c.KickOnlineMessage()
+				if err != nil {
+					log.ZWarn()
+				}
+			}
+		}
+	}
 
 }
 func (ws *WsServer) unregisterClient(client *Client) {
@@ -198,7 +234,6 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(context, errs.ErrConnArgsErr)
 		return
 	}
-	// log.ZDebug(context2.Background(), "conn", "platformID", platformID)
 	err := tokenverify.WsVerifyToken(token, userID, platformID)
 	if err != nil {
 		httpError(context, err)
