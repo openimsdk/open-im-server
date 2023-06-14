@@ -35,7 +35,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
-func (m *msgServer) SetConversationHasReadMaxSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
+func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return
