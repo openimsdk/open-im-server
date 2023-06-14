@@ -142,9 +142,9 @@ func (ws *WsServer) registerClient(client *Client) {
 		clientOK   bool
 		oldClients []*Client
 	)
-	ws.clients.Set(client.UserID, client)
 	oldClients, userOK, clientOK = ws.clients.Get(client.UserID, client.PlatformID)
 	if !userOK {
+		ws.clients.Set(client.UserID, client)
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
@@ -157,10 +157,14 @@ func (ws *WsServer) registerClient(client *Client) {
 		}
 		ws.kickHandlerChan <- i
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
-		if clientOK { //已经有同平台的连接存在
+		if clientOK {
+			ws.clients.Set(client.UserID, client)
+			//已经有同平台的连接存在
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
+			ws.clients.Set(client.UserID, client)
+
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		}
 	}
