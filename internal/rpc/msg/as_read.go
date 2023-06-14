@@ -35,6 +35,23 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
+func (m *msgServer) SetConversationHasReadMaxSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
+	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
+	if err != nil {
+		return
+	}
+	if req.HasReadSeq > maxSeq {
+		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
+	}
+	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
+		return nil, err
+	}
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID, req.UserID, nil, req.HasReadSeq); err != nil {
+		return
+	}
+	return &msg.SetConversationHasReadSeqResp{}, nil
+}
+
 func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
 	if len(req.Seqs) < 1 {
 		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
@@ -51,8 +68,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	if err != nil {
 		return
 	}
-	err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, req.Seqs)
-	if err != nil {
+	if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 		return
 	}
 	currentHasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
@@ -72,6 +88,10 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 }
 
 func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (resp *msg.MarkConversationAsReadResp, err error) {
+	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{req.ConversationID})
+	if err != nil {
+		return
+	}
 	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
 	if err != nil && errors.Unwrap(err) != redis.Nil {
 		return
@@ -81,13 +101,11 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 		seqs = append(seqs, i)
 	}
-	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, []string{req.ConversationID})
-	if err != nil {
-		return
-	}
-	log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
-	if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
-		return
+	if len(seqs) > 0 {
+		log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
+		if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
+			return
+		}
 	}
 	if req.HasReadSeq > hasReadSeq {
 		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
