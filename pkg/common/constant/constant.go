@@ -118,6 +118,7 @@ const (
 	ExpiredToken = 3
 
 	//MultiTerminalLogin
+	DefalutNotKick = 0
 	//Full-end login, but the same end is mutually exclusive
 	AllLoginButSameTermKick = 1
 	//Only one of the endpoints can log in

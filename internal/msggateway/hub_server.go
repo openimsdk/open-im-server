@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -17,7 +18,13 @@ import (
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	msgModel := cache.NewMsgCacheModel(rdb)
 	s.LongConnServer.SetDiscoveryRegistry(client)
+	s.LongConnServer.SetCacheHandler(msgModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
 }
@@ -131,7 +138,7 @@ func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOf
 	for _, v := range req.KickUserIDList {
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
-				err := client.KickOnlineMessage(ctx)
+				err := client.KickOnlineMessage()
 				if err != nil {
 					return nil, err
 				}

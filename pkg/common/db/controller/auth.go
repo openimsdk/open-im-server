@@ -12,9 +12,9 @@ import (
 
 type AuthDatabase interface {
 	//结果为空 不返回错误
-	GetTokensWithoutError(ctx context.Context, userID, platform string) (map[string]int, error)
+	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
 	//创建token
-	CreateToken(ctx context.Context, userID string, platform string) (string, error)
+	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
 }
 
 type authDatabase struct {
@@ -29,13 +29,13 @@ func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int
 }
 
 // 结果为空 不返回错误
-func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID, platform string) (map[string]int, error) {
-	return a.cache.GetTokensWithoutError(ctx, userID, platform)
+func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
+	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
 }
 
 // 创建token
-func (a *authDatabase) CreateToken(ctx context.Context, userID string, platform string) (string, error) {
-	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platform)
+func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
+	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platformID)
 	if err != nil {
 		return "", err
 	}
@@ -47,16 +47,16 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platform 
 		}
 	}
 	if len(deleteTokenKey) != 0 {
-		err := a.cache.DeleteTokenByUidPid(ctx, userID, platform, deleteTokenKey)
+		err := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}
 	}
-	claims := tokenverify.BuildClaims(userID, platform, a.accessExpire)
+	claims := tokenverify.BuildClaims(userID, platformID, a.accessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(a.accessSecret))
 	if err != nil {
 		return "", utils.Wrap(err, "")
 	}
-	return tokenString, a.cache.AddTokenFlag(ctx, userID, constant.PlatformNameToID(platform), tokenString, constant.NormalToken)
+	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
 }

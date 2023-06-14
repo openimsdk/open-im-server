@@ -224,8 +224,11 @@ func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error 
 	return c.writeBinaryMsg(resp)
 }
 
-func (c *Client) KickOnlineMessage(ctx context.Context) error {
-	return nil
+func (c *Client) KickOnlineMessage() error {
+	resp := Resp{
+		ReqIdentifier: WSKickOnlineMsg,
+	}
+	return c.writeBinaryMsg(resp)
 }
 
 func (c *Client) writeBinaryMsg(resp Resp) error {

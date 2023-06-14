@@ -3,6 +3,7 @@ package msggateway
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"sync"
 )
 
@@ -58,6 +59,29 @@ func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) 
 		var a []*Client
 		for _, client := range oldClients {
 			if client.ctx.GetRemoteAddr() != connRemoteAddr {
+				a = append(a, client)
+			}
+		}
+		if len(a) == 0 {
+			u.m.Delete(key)
+			return true
+		} else {
+			u.m.Store(key, a)
+			return false
+		}
+	}
+	return existed
+}
+func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser bool) {
+	m := utils.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
+		return c.ctx.GetRemoteAddr(), struct{}{}
+	})
+	allClients, existed := u.m.Load(key)
+	if existed {
+		oldClients := allClients.([]*Client)
+		var a []*Client
+		for _, client := range oldClients {
+			if _, ok := m[client.ctx.GetRemoteAddr()]; !ok {
 				a = append(a, client)
 			}
 		}
