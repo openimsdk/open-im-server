@@ -8,7 +8,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
-	"strconv"
 	"time"
 )
 
@@ -89,11 +88,7 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
 }
-func WsVerifyToken(token, userID, platformID string) error {
-	platformIDInt, err := strconv.Atoi(platformID)
-	if err != nil {
-		return errs.ErrArgs.Wrap(fmt.Sprintf("platformID %s is not int", platformID))
-	}
+func WsVerifyToken(token, userID string, platformID int) error {
 	claim, err := GetClaimFromToken(token)
 	if err != nil {
 		return err
@@ -101,8 +96,8 @@ func WsVerifyToken(token, userID, platformID string) error {
 	if claim.UserID != userID {
 		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
 	}
-	if claim.PlatformID != platformIDInt {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformIDInt))
+	if claim.PlatformID != platformID {
+		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
 	}
 	return nil
 }

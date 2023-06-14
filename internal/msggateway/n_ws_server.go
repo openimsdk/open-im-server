@@ -7,6 +7,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"net/http"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -214,11 +215,11 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var (
-		token       string
-		userID      string
-		platformID  string
-		exists      bool
-		compression bool
+		token         string
+		userID        string
+		platformIDStr string
+		exists        bool
+		compression   bool
 	)
 
 	token, exists = connContext.Query(Token)
@@ -231,13 +232,17 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(connContext, errs.ErrConnArgsErr)
 		return
 	}
-	platformID, exists = connContext.Query(PlatformID)
-	if !exists || utils.StringToInt(platformID) == 0 {
+	platformIDStr, exists = connContext.Query(PlatformID)
+	if !exists {
 		httpError(connContext, errs.ErrConnArgsErr)
 		return
 	}
-	err := tokenverify.WsVerifyToken(token, userID, platformID)
+	platformID, err := strconv.Atoi(platformIDStr)
 	if err != nil {
+		httpError(connContext, errs.ErrConnArgsErr)
+		return
+	}
+	if err := tokenverify.WsVerifyToken(token, userID, platformID); err != nil {
 		httpError(connContext, err)
 		return
 	}
