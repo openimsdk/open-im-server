@@ -155,6 +155,9 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 					c.Abort()
 					return
 				}
+			} else {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				return
 			}
 			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
 			c.Set(constant.OpUserID, claims.UserID)
