@@ -93,7 +93,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		return
 	}
 	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
-	if err != nil && errors.Unwrap(err) != redis.Nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return
 	}
 	log.ZDebug(ctx, "MarkConversationAsRead", "hasReadSeq", hasReadSeq, "req.HasReadSeq", req.HasReadSeq)
