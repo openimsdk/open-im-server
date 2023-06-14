@@ -1,0 +1,39 @@
+name: 'OpenCommit Action'
+
+on:
+  push:
+    # this list of branches is often enough,
+    # but you may still ignore other public branches
+    branches-ignore: [main master dev development release]
+
+jobs:
+  opencommit:
+    timeout-minutes: 10
+    name: OpenCommit
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: di-sukharev/opencommit@github-action-v1.0.4
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        env:
+          # set openAI api key in repo actions secrets,
+          # for openAI keys go to: https://platform.openai.com/account/api-keys
+          # for repo secret go to: https://github.com/kuebcub/settings/secrets/actions
+          OCO_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+          # customization
+          OCO_OPENAI_MAX_TOKENS: 500
+          OCO_OPENAI_BASE_PATH: ''
+          OCO_DESCRIPTION: false
+          OCO_EMOJI: false
+          OCO_MODEL: gpt-3.5-turbo
+          OCO_LANGUAGE: en
