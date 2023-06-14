@@ -81,6 +81,7 @@ func (f *friendDatabase) AddFriendRequest(ctx context.Context, fromUserID, toUse
 			m["handle_msg"] = ""
 			m["req_msg"] = reqMsg
 			m["ex"] = ex
+			m["create_time"] = time.Now()
 			if err := f.friendRequest.NewTx(tx).UpdateByMap(ctx, fromUserID, toUserID, m); err != nil {
 				return err
 			}
