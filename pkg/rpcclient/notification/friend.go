@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -91,9 +92,9 @@ func (f *FriendNotificationSender) getFromToUserNickname(ctx context.Context, fr
 	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
 }
 
-func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) error {
+func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, changedUserID string) error {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	return f.Notification(ctx, opUserID, changedUserID, constant.UserInfoUpdatedNotification, &tips)
+	return f.Notification(ctx, mcontext.GetOpUserID(ctx), changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
 func (f *FriendNotificationSender) FriendApplicationAddNotification(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) error {
@@ -171,7 +172,7 @@ func (c *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 	c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
-func (c *FriendNotificationSender) FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string, opUserID string) {
+func (c *FriendNotificationSender) FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	c.Notification(ctx, opUserID, needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
+	c.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
 }
