@@ -35,7 +35,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
-func (m *msgServer) SetConversationHasReadMaxSeq(ctx context.Context, req *msg.SetConversationHasReadMaxSeqReq) (resp *msg.SetConversationHasReadMaxSeqResp, err error) {
+func (m *msgServer) SetConversationHasReadMaxSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return
@@ -49,7 +49,7 @@ func (m *msgServer) SetConversationHasReadMaxSeq(ctx context.Context, req *msg.S
 	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID, req.UserID, nil, req.HasReadSeq); err != nil {
 		return
 	}
-	return &msg.SetConversationHasReadMaxSeqResp{}, nil
+	return &msg.SetConversationHasReadSeqResp{}, nil
 }
 
 func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
