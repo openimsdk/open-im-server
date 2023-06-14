@@ -188,9 +188,10 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 			for _, c := range info.oldClients {
 				err := c.KickOnlineMessage()
 				if err != nil {
-					log.ZWarn()
+					log.ZWarn(c.ctx, "kick online message error", err)
 				}
 			}
+			ws.cache.GetTokensWithoutError(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID)
 		}
 	}
 

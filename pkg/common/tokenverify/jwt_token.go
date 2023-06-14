@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -14,17 +13,17 @@ import (
 )
 
 type Claims struct {
-	UID      string
-	Platform string //login platform
+	UserID     string
+	PlatformID int //login platform
 	jwt.RegisteredClaims
 }
 
-func BuildClaims(uid, platform string, ttl int64) Claims {
+func BuildClaims(uid string, platformID int, ttl int64) Claims {
 	now := time.Now()
 	before := now.Add(-time.Minute * 5)
 	return Claims{
-		UID:      uid,
-		Platform: platform,
+		UserID:     uid,
+		PlatformID: platformID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
 			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
@@ -95,19 +94,15 @@ func WsVerifyToken(token, userID, platformID string) error {
 	if err != nil {
 		return errs.ErrArgs.Wrap(fmt.Sprintf("platformID %s is not int", platformID))
 	}
-	platform := constant.PlatformIDToName(platformIDInt)
-	if platform == "" {
-		return errs.ErrArgs.Wrap(fmt.Sprintf("platformID %s is not exist", platformID))
-	}
 	claim, err := GetClaimFromToken(token)
 	if err != nil {
 		return err
 	}
-	if claim.UID != userID {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UID, userID))
+	if claim.UserID != userID {
+		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token uid %s != userID %s", claim.UserID, userID))
 	}
-	if claim.Platform != platform {
-		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %s != %s", claim.Platform, platform))
+	if claim.PlatformID != platformIDInt {
+		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformIDInt))
 	}
 	return nil
 }

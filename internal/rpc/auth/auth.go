@@ -42,7 +42,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	token, err := s.authDatabase.CreateToken(ctx, req.UserID, constant.PlatformIDToName(int(req.PlatformID)))
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UID, claims.Platform)
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +82,8 @@ func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) 
 	if err != nil {
 		return nil, err
 	}
-	resp.UserID = claims.UID
-	resp.Platform = claims.Platform
+	resp.UserID = claims.UserID
+	resp.Platform = constant.PlatformIDToName(claims.PlatformID)
 	resp.ExpireTimeSeconds = claims.ExpiresAt.Unix()
 	return resp, nil
 }
