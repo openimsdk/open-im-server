@@ -3,17 +3,18 @@ package msggateway
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	redis "github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
