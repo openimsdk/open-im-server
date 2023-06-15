@@ -57,6 +57,9 @@ type ConversationCache interface {
 
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache
+
+	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error)
+	DelConversationByConversationID(conversationIDs ...string) ConversationCache
 }
 
 func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationTb.ConversationModelInterface) ConversationCache {
@@ -279,4 +282,12 @@ func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string, conve
 		cache.AddKeys(c.getConversationHasReadSeqKey(ownerUserID, conversationID))
 	}
 	return cache
+}
+
+func (c *ConversationRedisCache) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
+	panic("implement me")
+}
+
+func (c *ConversationRedisCache) DelConversationByConversationID(conversationIDs ...string) ConversationCache {
+	panic("implement me")
 }
