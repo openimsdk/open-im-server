@@ -265,5 +265,5 @@ func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerU
 }
 
 func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
-	return c.conversationDB.GetConversationsByConversationID(ctx, conversationIDs)
+	return c.cache.GetConversationsByConversationID(ctx, conversationIDs)
 }

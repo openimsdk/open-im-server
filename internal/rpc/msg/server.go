@@ -34,11 +34,6 @@ type msgServer struct {
 	notificationSender     *rpcclient.NotificationSender
 }
 
-func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (*msg.SetConversationHasReadSeqResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
 }
