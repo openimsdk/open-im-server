@@ -89,6 +89,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 
 		groupMemberInfo, err := m.Group.GetGroupMemberCache(ctx, data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
+			if err == errs.ErrRecordNotFound {
+				return errs.ErrNotInGroupYet.Wrap(err.Error())
+			}
 			return err
 		}
 		if groupMemberInfo.RoleLevel == constant.GroupOwner {
