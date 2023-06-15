@@ -77,3 +77,35 @@ func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*rela
 	}
 	return owner, nil
 }
+
+func (s *groupServer) PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
+	total, members, err := s.GroupDatabase.PageGetGroupMember(ctx, groupID, pageNumber, showNumber)
+	if err != nil {
+		return 0, nil, err
+	}
+	emptyUserIDs := make(map[string]struct{})
+	for _, member := range members {
+		if member.Nickname == "" || member.FaceURL == "" {
+			emptyUserIDs[member.UserID] = struct{}{}
+		}
+	}
+	if len(emptyUserIDs) > 0 {
+		users, err := s.User.GetPublicUserInfoMap(ctx, utils.Keys(emptyUserIDs), true)
+		if err != nil {
+			return 0, nil, err
+		}
+		for i, member := range members {
+			user, ok := users[member.UserID]
+			if !ok {
+				continue
+			}
+			if member.Nickname == "" {
+				members[i].Nickname = user.Nickname
+			}
+			if member.FaceURL == "" {
+				members[i].FaceURL = user.FaceURL
+			}
+		}
+	}
+	return total, members, nil
+}
