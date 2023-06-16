@@ -5,7 +5,7 @@ ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.cn,direct
 
 RUN mkdir -p /Open-IM-Server
-COPY . /Open-IM-Server
+COPY ../. /Open-IM-Server
 WORKDIR /Open-IM-Server/cmd/api
 
 RUN apt-get update && apt-get install apt-transport-https && apt-get install procps\
@@ -17,7 +17,7 @@ RUN apt-get install -y vim curl tzdata gawk
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
-
+RUN echo pwd
 RUN make build
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
