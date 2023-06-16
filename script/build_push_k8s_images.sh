@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 version=errcode
 repository=${1}
+if [ -z ${repository} ]
+exit 0
+fi
 
 set +e
 echo "repository: ${repository}"
