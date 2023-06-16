@@ -15,6 +15,8 @@ currentPwd=${pwd}
 i=0
 for path in  ${service_source_root[*]}
 do
+  mkdir ${path}/Open-IM-Server
+  cp -r ../* ${path}/Open-IM-Server
   image="${repository}/${image_names[${i}]}:$version"
   echo ${image}
   docker build -t $image . -f ${path}/deploy.Dockerfile
@@ -23,6 +25,7 @@ do
   echo "push ${image} success"
   echo "=============================="
   i=$((i + 1))
+  rm -rf ${path}/Open-IM-Server
 done
 
 echo "build all images success"
