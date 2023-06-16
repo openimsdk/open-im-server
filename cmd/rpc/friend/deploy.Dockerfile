@@ -11,8 +11,8 @@ RUN apt-get install -y vim curl tzdata gawk
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
-COPY ./open_im_api ./
+COPY ./open_im_friend ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
-CMD ["./open_im_api","--port", "10002"]
+CMD ["./open_im_friend", "--port", "10120", "--prometheus_port","20120"]
