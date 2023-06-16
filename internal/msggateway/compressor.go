@@ -3,8 +3,9 @@ package msggateway
 import (
 	"bytes"
 	"compress/gzip"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"io"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type Compressor interface {
@@ -29,6 +30,7 @@ func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	}
 	return gzipBuffer.Bytes(), nil
 }
+
 func (g *GzipCompressor) DeCompress(compressedData []byte) ([]byte, error) {
 	buff := bytes.NewBuffer(compressedData)
 	reader, err := gzip.NewReader(buff)

@@ -6,6 +6,7 @@ out-test
 .github
 .idea
 .exe
+_output/
 
 deploy/open_im_api
 deploy/open_im_msg_gateway
