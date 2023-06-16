@@ -1,10 +1,5 @@
-FROM golang as build
+FROM ubuntu
 
-# go mod Installation source, container environment variable addition will override the default variable value
-ENV GO111MODULE=on
-ENV GOPROXY=https://goproxy.cn,direct
-
-COPY ./Open-IM-Server /
 WORKDIR /Open-IM-Server/cmd/api
 
 RUN apt-get update && apt-get install apt-transport-https && apt-get install procps\
