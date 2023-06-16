@@ -15,8 +15,6 @@ currentPwd=${pwd}
 i=0
 for path in  ${service_source_root[*]}
 do
-  cd ${path}
-  make build
   image="${repository}/${image_names[${i}]}:$version"
   echo ${image}
   docker build -t $image . -f ${path}/deploy.Dockerfile
@@ -25,8 +23,6 @@ do
   echo "push ${image} success"
   echo "=============================="
   i=$((i + 1))
-  rm -rf ${service_names[${i}]}
-  cd ${currentPwd}
 done
 
 echo "build all images success"
