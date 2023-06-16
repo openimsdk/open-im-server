@@ -4,7 +4,7 @@ FROM golang as build
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.cn,direct
 
-COPY ../* /Open-IM-Server
+COPY ../../Open-IM-Server /
 ENV WORKDIR /Open-IM-Server/cmd/api
 
 RUN apt-get update && apt-get install apt-transport-https && apt-get install procps\
