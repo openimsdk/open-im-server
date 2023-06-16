@@ -19,7 +19,7 @@ do
   make build
   image="${repository}/${image_names[${i}]}:$version"
   echo ${image}
-  docker build -t $image . -f ${path}/deploy.Dockerfile
+  docker build -t $image . -f ./deploy.Dockerfile
   echo "build ${image} success"
   docker push ${image}
   echo "push ${image} success"

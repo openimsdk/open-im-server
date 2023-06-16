@@ -16,7 +16,6 @@ RUN apt-get install -y vim curl tzdata gawk
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
-RUN echo pwd
 COPY ./open_im_api ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
