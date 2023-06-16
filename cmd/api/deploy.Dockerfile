@@ -15,4 +15,4 @@ COPY ./open_im_api ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
-CMD ["${WORKDIR}/open_im_api","--port", "10002"]
+CMD ["./open_im_api","--port", "10002"]
