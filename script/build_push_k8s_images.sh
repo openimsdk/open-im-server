@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 version=errcode
 repository=${1}
-if [ -z ${repository} ]
-exit 0
+if [[ -z ${repository} ]]
+then
+  echo "repository is empty"
+  exit 0
 fi
 
 set +e
