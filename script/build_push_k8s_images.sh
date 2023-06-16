@@ -12,6 +12,7 @@ echo "repository: ${repository}"
 source ./path_info.cfg
 echo "start to build docker images"
 currentPwd=${pwd}
+echo ${currentPwd}
 i=0
 for path in  ${service_source_root[*]}
 do
@@ -23,6 +24,7 @@ do
   echo "build ${image} success"
   docker push ${image}
   echo "push ${image} success"
+  cd ${currentPwd}
   echo "=============================="
   i=$((i + 1))
   cd ${currentPwd}
