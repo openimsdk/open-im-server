@@ -17,7 +17,7 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure 
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
 RUN echo pwd
-RUN make build
+COPY ./open_im_api ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
