@@ -66,11 +66,11 @@ group:
       OpenIMSDK/openim-miniprogram-demo@main
       OpenIMSDK/openim-sdk-cpp@main
     files: 
-  - source: LICENSE
-    dest: LICENSE
-    replace: false
-  - source: .github/workflows/
-    dest: .github/workflows/
-    exclude: |
-      e2e-test.yml
-      sync.yml
+      - source: LICENSE
+        dest: LICENSE
+        replace: false
+      - source: .github/workflows/
+        dest: .github/workflows/
+        exclude: |
+          e2e-test.yml
+          sync.yml
