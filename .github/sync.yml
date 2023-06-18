@@ -47,23 +47,30 @@ OpenIMSDK/openim-sdk-core:
     exclude: |
       sync.yml
 
+OpenIMSDK/OpenIM-Docs:
+  - source: .github/workflows/
+    dest: .github/workflows/
+    exclude: |
+      e2e-test.yml
+      sync.yml
+  - source: script/githooks/
+    dest: scripts/githooks/
+    replace: false
+
+
 group:
   # first group：common to all warehouses
   # TODO: add the required warehouse here
   - repos: |
-      OpenIMSDK/OpenIM-Docs@main
+      OpenIMSDK/OpenKF@main
+      OpenIMSDK/openim-miniprogram-demo@main
+      OpenIMSDK/openim-sdk-cpp@main
     files: 
-      # - source: .gitingore
-      #   dest: .gitingore
-      #   replace: false
-      - source: LICENSE
-        dest: LICENSE
-        replace: false
-      - source: .github/workflows/
-        dest: .github/workflows/
-        exclude: |
-          e2e-test.yml
-          sync.yml
-      - source: script/githooks/
-        dest: scripts/githooks/
-        replace: false
+  - source: LICENSE
+    dest: LICENSE
+    replace: false
+  - source: .github/workflows/
+    dest: .github/workflows/
+    exclude: |
+      e2e-test.yml
+      sync.yml
