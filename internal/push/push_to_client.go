@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -31,6 +30,8 @@ type Pusher struct {
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
+	msgClient              *rpcclient.MsgClient
+	conversationClient     *rpcclient.ConversationClient
 	successCount           int
 }
 
@@ -45,6 +46,8 @@ func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offl
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
+		msgClient:              rpcclient.NewMsgClient(client),
+		conversationClient:     rpcclient.NewConversationClient(client),
 	}
 }
 
@@ -72,6 +75,15 @@ func (p *Pusher) DismissGroup(ctx context.Context, groupID string) error {
 		DeleteMember: true,
 	})
 	return err
+}
+
+func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
+	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	maxSeq, err := p.msgClient.GetConversationMaxSeq(ctx, conevrsationID)
+	if err != nil {
+		return err
+	}
+	return p.conversationClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
 }
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
@@ -135,6 +147,11 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 				return err
 			}
+			defer func(groupID string, userIDs []string) {
+				if err := p.DeleteMemberAndSetConversationSeq(ctx, groupID, userIDs); err != nil {
+					log.ZError(ctx, "MemberQuitNotification DeleteMemberAndSetConversationSeq", err, "groupID", groupID, "userIDs", userIDs)
+				}
+			}(groupID, []string{tips.QuitUser.UserID})
 			pushToUserIDs = append(pushToUserIDs, tips.QuitUser.UserID)
 		case constant.MemberKickedNotification:
 			var tips sdkws.MemberKickedTips
@@ -142,6 +159,11 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				return err
 			}
 			kickedUsers := utils.Slice(tips.KickedUserList, func(e *sdkws.GroupMemberFullInfo) string { return e.UserID })
+			defer func(groupID string, userIDs []string) {
+				if err := p.DeleteMemberAndSetConversationSeq(ctx, groupID, userIDs); err != nil {
+					log.ZError(ctx, "MemberKickedNotification DeleteMemberAndSetConversationSeq", err, "groupID", groupID, "userIDs", userIDs)
+				}
+			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
 			if utils.IsNotification(utils.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
@@ -153,9 +175,11 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				if len(config.Config.Manager.AppManagerUid) > 0 {
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
 				}
-				if err := p.DismissGroup(ctx, groupID); err != nil {
-					log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
-				}
+				defer func(groupID string) {
+					if err := p.DismissGroup(ctx, groupID); err != nil {
+						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
+					}
+				}(groupID)
 			}
 		}
 	}

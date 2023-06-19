@@ -809,7 +809,6 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	maxSeq, err := s.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
-
 		return err
 	}
 	return s.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
