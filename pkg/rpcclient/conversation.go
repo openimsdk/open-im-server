@@ -107,3 +107,15 @@ func (c *ConversationClient) GetConversationsByConversationID(ctx context.Contex
 	}
 	return resp.Conversations, nil
 }
+
+func (c *ConversationClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+	cc, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := pbConversation.NewConversationClient(cc).GetConversations(ctx, &pbConversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Conversations, nil
+}
