@@ -302,9 +302,6 @@ callback:
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
 
-rtc:
-  signalTimeout: 35
-
 # prometheus每个服务监听的端口数量需要和rpc port保持一致
 prometheus:
   enable: false

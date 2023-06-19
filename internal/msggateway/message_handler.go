@@ -102,15 +102,6 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 }
 
 func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byte, error) {
-	signalReq := sdkws.SignalReq{}
-	if err := proto.Unmarshal(data.Data, &signalReq); err != nil {
-		return nil, err
-	}
-	if err := g.validate.Struct(&signalReq); err != nil {
-		return nil, err
-	}
-	//req := pbRtc.SignalMessageAssembleReq{SignalReq: &signalReq, OperationID: "111"}
-	//todo rtc rpc call
 	resp, err := g.msgRpcClient.SendMsg(context, nil)
 	if err != nil {
 		return nil, err

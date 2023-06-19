@@ -23,7 +23,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/protobuf/proto"
 )
 
 type Pusher struct {
@@ -94,15 +93,6 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 			// save invitation info for offline push
 			for _, v := range wsResults {
 				if v.OnlinePush {
-					return nil
-				}
-			}
-			if msg.ContentType == constant.SignalingNotification {
-				isSend, err := p.database.HandleSignalInvite(ctx, msg, userID)
-				if err != nil {
-					return err
-				}
-				if !isSend {
 					return nil
 				}
 			}
@@ -268,16 +258,16 @@ func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg 
 
 func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts, err error) {
 	opts = &offlinepush.Opts{}
-	if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
-		req := &sdkws.SignalReq{}
-		if err := proto.Unmarshal(msg.Content, req); err != nil {
-			return nil, utils.Wrap(err, "")
-		}
-		switch req.Payload.(type) {
-		case *sdkws.SignalReq_Invite, *sdkws.SignalReq_InviteInGroup:
-			opts.Signal = &offlinepush.Signal{ClientMsgID: msg.ClientMsgID}
-		}
-	}
+	// if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
+	// 	req := &sdkws.SignalReq{}
+	// 	if err := proto.Unmarshal(msg.Content, req); err != nil {
+	// 		return nil, utils.Wrap(err, "")
+	// 	}
+	// 	switch req.Payload.(type) {
+	// 	case *sdkws.SignalReq_Invite, *sdkws.SignalReq_InviteInGroup:
+	// 		opts.Signal = &offlinepush.Signal{ClientMsgID: msg.ClientMsgID}
+	// 	}
+	// }
 	if msg.OfflinePushInfo != nil {
 		opts.IOSBadgeCount = msg.OfflinePushInfo.IOSBadgeCount
 		opts.IOSPushSound = msg.OfflinePushInfo.IOSPushSound

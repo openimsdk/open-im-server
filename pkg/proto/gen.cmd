@@ -6,7 +6,6 @@ protoc --go_out=plugins=grpc:./group --go_opt=module=github.com/OpenIMSDK/Open-I
 protoc --go_out=plugins=grpc:./msg --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg msg/msg.proto
 protoc --go_out=plugins=grpc:./msggateway --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway msggateway/msggateway.proto
 protoc --go_out=plugins=grpc:./push --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push push/push.proto
-protoc --go_out=plugins=grpc:./rtc --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/rtc rtc/rtc.proto
 protoc --go_out=plugins=grpc:./sdkws --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws sdkws/sdkws.proto
 protoc --go_out=plugins=grpc:./third --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third third/third.proto
 protoc --go_out=plugins=grpc:./user --go_opt=module=github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user user/user.proto

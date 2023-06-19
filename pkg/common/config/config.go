@@ -293,9 +293,6 @@ type config struct {
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification Notification `yaml:"notification"`
-	Rtc          struct {
-		SignalTimeout string `yaml:"signalTimeout"`
-	} `yaml:"rtc"`
 
 	Prometheus struct {
 		Enable                        bool  `yaml:"enable"`

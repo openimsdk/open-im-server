@@ -119,8 +119,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	{
 		t := NewThird(discov)
 		thirdGroup.Use(mw.GinParseToken(rdb))
-		thirdGroup.POST("/get_rtc_invitation_info", t.GetSignalInvitationInfo)
-		thirdGroup.POST("/get_rtc_invitation_start_app", t.GetSignalInvitationInfoStartApp)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 

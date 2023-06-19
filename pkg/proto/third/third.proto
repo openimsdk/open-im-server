@@ -1,6 +1,5 @@
 syntax = "proto3";
 package OpenIMServer.third;
-import "sdkws/sdkws.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third";
 
 message ApplyPutReq {
@@ -79,25 +78,6 @@ message GetHashInfoResp {
   int64 size = 2;
 }
 
-
-message GetSignalInvitationInfoReq {
-  string clientMsgID = 1;
-}
-
-message GetSignalInvitationInfoResp {
-  sdkws.InvitationInfo invitationInfo = 1;
-  sdkws.OfflinePushInfo offlinePushInfo = 2;
-}
-
-message GetSignalInvitationInfoStartAppReq {
-  string userID = 1;
-}
-
-message GetSignalInvitationInfoStartAppResp {
-  sdkws.InvitationInfo invitationInfo = 1;
-  sdkws.OfflinePushInfo offlinePushInfo = 2;
-}
-
 message FcmUpdateTokenReq {
   int32 platformID = 1;
   string fcmToken = 2;
@@ -122,9 +102,6 @@ service third {
   rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
   rpc GetUrl(GetUrlReq) returns(GetUrlResp);
   rpc GetHashInfo(GetHashInfoReq) returns(GetHashInfoResp);
-
-  rpc GetSignalInvitationInfo(GetSignalInvitationInfoReq) returns(GetSignalInvitationInfoResp);
-  rpc GetSignalInvitationInfoStartApp(GetSignalInvitationInfoStartAppReq) returns(GetSignalInvitationInfoStartAppResp);
   rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);
   rpc SetAppBadge(SetAppBadgeReq) returns(SetAppBadgeResp);
 }

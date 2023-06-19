@@ -54,14 +54,6 @@ func (o *Third) GetHash(c *gin.Context) {
 	a2r.Call(third.ThirdClient.GetHashInfo, o.client, c)
 }
 
-func (o *Third) GetSignalInvitationInfo(c *gin.Context) {
-	a2r.Call(third.ThirdClient.GetSignalInvitationInfo, o.client, c)
-}
-
-func (o *Third) GetSignalInvitationInfoStartApp(c *gin.Context) {
-	a2r.Call(third.ThirdClient.GetSignalInvitationInfoStartApp, o.client, c)
-}
-
 func (o *Third) FcmUpdateToken(c *gin.Context) {
 	a2r.Call(third.ThirdClient.FcmUpdateToken, o.client, c)
 }

@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
@@ -16,8 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/gogo/protobuf/jsonpb"
-
-	"google.golang.org/protobuf/proto"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -70,10 +67,6 @@ type SeqCache interface {
 }
 
 type thirdCache interface {
-	HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error)
-	GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (invitationInfo *sdkws.SignalInviteReq, err error)
-	GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error)
-	DelUserSignalList(ctx context.Context, userID string) error
 	SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error)
 	GetFcmToken(ctx context.Context, account string, platformID int) (string, error)
 	DelFcmToken(ctx context.Context, account string, platformID int) error
@@ -453,95 +446,6 @@ func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversatio
 	}
 	_, err = pipe.Exec(ctx)
 	return errs.Wrap(err)
-}
-
-func (c *msgCache) HandleSignalInvite(ctx context.Context, msg *sdkws.MsgData, pushToUserID string) (isSend bool, err error) {
-	req := &sdkws.SignalReq{}
-	if err := proto.Unmarshal(msg.Content, req); err != nil {
-		return false, errs.Wrap(err)
-	}
-	var inviteeUserIDs []string
-	var isInviteSignal bool
-	switch signalInfo := req.Payload.(type) {
-	case *sdkws.SignalReq_Invite:
-		inviteeUserIDs = signalInfo.Invite.Invitation.InviteeUserIDList
-		isInviteSignal = true
-	case *sdkws.SignalReq_InviteInGroup:
-		inviteeUserIDs = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
-		isInviteSignal = true
-		if !utils.Contain(pushToUserID, inviteeUserIDs...) {
-			return false, nil
-		}
-	case *sdkws.SignalReq_HungUp, *sdkws.SignalReq_Cancel, *sdkws.SignalReq_Reject, *sdkws.SignalReq_Accept:
-		return false, errs.Wrap(errors.New("signalInfo do not need offlinePush"))
-	default:
-		return false, nil
-	}
-	if isInviteSignal {
-		pipe := c.rdb.Pipeline()
-		for _, userID := range inviteeUserIDs {
-			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
-			if err != nil {
-				return false, errs.Wrap(err)
-			}
-			keys := signalListCache + userID
-			err = pipe.LPush(ctx, keys, msg.ClientMsgID).Err()
-			if err != nil {
-				return false, errs.Wrap(err)
-			}
-			err = pipe.Expire(ctx, keys, time.Duration(timeout)*time.Second).Err()
-			if err != nil {
-				return false, errs.Wrap(err)
-			}
-			key := signalCache + msg.ClientMsgID
-			err = pipe.Set(ctx, key, msg.Content, time.Duration(timeout)*time.Second).Err()
-			if err != nil {
-				return false, errs.Wrap(err)
-			}
-		}
-		_, err := pipe.Exec(ctx)
-		if err != nil {
-			return false, errs.Wrap(err)
-		}
-	}
-	return true, nil
-}
-
-func (c *msgCache) GetSignalInvitationInfoByClientMsgID(ctx context.Context, clientMsgID string) (signalInviteReq *sdkws.SignalInviteReq, err error) {
-	bytes, err := c.rdb.Get(ctx, signalCache+clientMsgID).Bytes()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	signalReq := &sdkws.SignalReq{}
-	if err = proto.Unmarshal(bytes, signalReq); err != nil {
-		return nil, errs.Wrap(err)
-	}
-	signalInviteReq = &sdkws.SignalInviteReq{}
-	switch req := signalReq.Payload.(type) {
-	case *sdkws.SignalReq_Invite:
-		signalInviteReq.Invitation = req.Invite.Invitation
-		signalInviteReq.OpUserID = req.Invite.OpUserID
-	case *sdkws.SignalReq_InviteInGroup:
-		signalInviteReq.Invitation = req.InviteInGroup.Invitation
-		signalInviteReq.OpUserID = req.InviteInGroup.OpUserID
-	}
-	return signalInviteReq, nil
-}
-
-func (c *msgCache) GetAvailableSignalInvitationInfo(ctx context.Context, userID string) (invitationInfo *sdkws.SignalInviteReq, err error) {
-	key, err := c.rdb.LPop(ctx, signalListCache+userID).Result()
-	if err != nil {
-		return nil, errs.Wrap(err)
-	}
-	invitationInfo, err = c.GetSignalInvitationInfoByClientMsgID(ctx, key)
-	if err != nil {
-		return nil, err
-	}
-	return invitationInfo, errs.Wrap(c.DelUserSignalList(ctx, userID))
-}
-
-func (c *msgCache) DelUserSignalList(ctx context.Context, userID string) error {
-	return errs.Wrap(c.rdb.Del(ctx, signalListCache+userID).Err())
 }
 
 func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []int64) error {
