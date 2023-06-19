@@ -9,7 +9,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
@@ -21,6 +21,16 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	if err != nil {
 		return nil, err
 	}
+	conversations, err := m.Conversation.GetConversations(ctx, req.UserID, conversationIDs)
+	if err != nil {
+		return nil, err
+	}
+	var conversationMaxSeqMap = make(map[string]int64)
+	for _, conversation := range conversations {
+		if conversation.MaxSeq != 0 {
+			conversationMaxSeqMap[conversation.ConversationID] = conversation.MaxSeq
+		}
+	}
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
 		return nil, err
@@ -30,6 +40,9 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 		resp.Seqs[conversarionID] = &msg.Seqs{
 			HasReadSeq: hasReadSeqs[conversarionID],
 			MaxSeq:     maxSeq,
+		}
+		if v, ok := conversationMaxSeqMap[conversarionID]; ok {
+			resp.Seqs[conversarionID].MaxSeq = v
 		}
 	}
 	return resp, nil

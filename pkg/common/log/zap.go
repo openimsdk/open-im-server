@@ -208,7 +208,7 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 	if err != nil {
 		keysAndValues = append(keysAndValues, "error", err.Error())
 	}
-	keysAndValues = append([]interface{}{constant.OperationID, mcontext.GetOperationID(ctx)}, keysAndValues...)
+	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Errorw(msg, keysAndValues...)
 }
 

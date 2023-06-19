@@ -699,6 +699,9 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
+	if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+		return nil, err
+	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
