@@ -1,117 +1,101 @@
 package api
 
 import (
-	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
-	"google.golang.org/grpc"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
 	"github.com/gin-gonic/gin"
 )
 
-func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		panic(err)
-	}
-	client := group.NewGroupClient(conn)
-	return &Group{discov: discov, conn: conn, client: client}
+type GroupApi rpcclient.Group
+
+func NewGroupApi(discov discoveryregistry.SvcDiscoveryRegistry) GroupApi {
+	return GroupApi(*rpcclient.NewGroup(discov))
 }
 
-type Group struct {
-	conn   *grpc.ClientConn
-	client group.GroupClient
-	discov discoveryregistry.SvcDiscoveryRegistry
-}
-
-func (o *Group) Client() group.GroupClient {
-	return o.client
-}
-
-func (o *Group) CreateGroup(c *gin.Context) {
+func (o *GroupApi) CreateGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.CreateGroup, o.Client, c)
 }
 
-func (o *Group) SetGroupInfo(c *gin.Context) {
+func (o *GroupApi) SetGroupInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.SetGroupInfo, o.Client, c)
 }
 
-func (o *Group) JoinGroup(c *gin.Context) {
+func (o *GroupApi) JoinGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.JoinGroup, o.Client, c)
 }
 
-func (o *Group) QuitGroup(c *gin.Context) {
+func (o *GroupApi) QuitGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.QuitGroup, o.Client, c)
 }
 
-func (o *Group) ApplicationGroupResponse(c *gin.Context) {
+func (o *GroupApi) ApplicationGroupResponse(c *gin.Context) {
 	a2r.Call(group.GroupClient.GroupApplicationResponse, o.Client, c)
 }
 
-func (o *Group) TransferGroupOwner(c *gin.Context) {
+func (o *GroupApi) TransferGroupOwner(c *gin.Context) {
 	a2r.Call(group.GroupClient.TransferGroupOwner, o.Client, c)
 }
 
-func (o *Group) GetRecvGroupApplicationList(c *gin.Context) {
+func (o *GroupApi) GetRecvGroupApplicationList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupApplicationList, o.Client, c)
 }
 
-func (o *Group) GetUserReqGroupApplicationList(c *gin.Context) {
+func (o *GroupApi) GetUserReqGroupApplicationList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetUserReqApplicationList, o.Client, c)
 }
 
-func (o *Group) GetGroupsInfo(c *gin.Context) {
+func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
 }
 
-func (o *Group) KickGroupMember(c *gin.Context) {
+func (o *GroupApi) KickGroupMember(c *gin.Context) {
 	a2r.Call(group.GroupClient.KickGroupMember, o.Client, c)
 }
 
-func (o *Group) GetGroupMembersInfo(c *gin.Context) {
+func (o *GroupApi) GetGroupMembersInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMembersInfo, o.Client, c)
 }
 
-func (o *Group) GetGroupMemberList(c *gin.Context) {
+func (o *GroupApi) GetGroupMemberList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupMemberList, o.Client, c)
 }
 
-func (o *Group) InviteUserToGroup(c *gin.Context) {
+func (o *GroupApi) InviteUserToGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.InviteUserToGroup, o.Client, c)
 }
 
-func (o *Group) GetJoinedGroupList(c *gin.Context) {
+func (o *GroupApi) GetJoinedGroupList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetJoinedGroupList, o.Client, c)
 }
 
-func (o *Group) DismissGroup(c *gin.Context) {
+func (o *GroupApi) DismissGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.DismissGroup, o.Client, c)
 }
 
-func (o *Group) MuteGroupMember(c *gin.Context) {
+func (o *GroupApi) MuteGroupMember(c *gin.Context) {
 	a2r.Call(group.GroupClient.MuteGroupMember, o.Client, c)
 }
 
-func (o *Group) CancelMuteGroupMember(c *gin.Context) {
+func (o *GroupApi) CancelMuteGroupMember(c *gin.Context) {
 	a2r.Call(group.GroupClient.CancelMuteGroupMember, o.Client, c)
 }
 
-func (o *Group) MuteGroup(c *gin.Context) {
+func (o *GroupApi) MuteGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.MuteGroup, o.Client, c)
 }
 
-func (o *Group) CancelMuteGroup(c *gin.Context) {
+func (o *GroupApi) CancelMuteGroup(c *gin.Context) {
 	a2r.Call(group.GroupClient.CancelMuteGroup, o.Client, c)
 }
 
-func (o *Group) SetGroupMemberInfo(c *gin.Context) {
+func (o *GroupApi) SetGroupMemberInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.SetGroupMemberInfo, o.Client, c)
 }
 
-func (o *Group) GetGroupAbstractInfo(c *gin.Context) {
+func (o *GroupApi) GetGroupAbstractInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupAbstractInfo, o.Client, c)
 }
 
@@ -123,10 +107,10 @@ func (o *Group) GetGroupAbstractInfo(c *gin.Context) {
 //	a2r.Call(group.GroupClient.GetGroupAllMember, g.userClient, c)
 //}
 
-func (o *Group) GetJoinedSuperGroupList(c *gin.Context) {
+func (o *GroupApi) GetJoinedSuperGroupList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetJoinedSuperGroupList, o.Client, c)
 }
 
-func (o *Group) GetSuperGroupsInfo(c *gin.Context) {
+func (o *GroupApi) GetSuperGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetSuperGroupsInfo, o.Client, c)
 }

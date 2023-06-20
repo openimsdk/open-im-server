@@ -21,10 +21,10 @@ import (
 )
 
 type conversationServer struct {
-	groupRpcClient                 *rpcclient.GroupClient
+	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	msgRpcClient                   *rpcclient.MsgClient
+	msgRpcClient                   *rpcclient.MessageRpcClient
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -40,10 +40,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	conversationDB := relation.NewConversationGorm(db)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(client),
-		groupRpcClient:                 rpcclient.NewGroupClient(client),
-		msgRpcClient:                   rpcclient.NewMsgClient(client),
+		groupRpcClient:                 &groupRpcClient,
+		msgRpcClient:                   &msgRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil

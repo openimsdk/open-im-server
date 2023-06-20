@@ -1,50 +1,40 @@
 package api
 
 import (
-	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
 
-func NewMsg(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		panic(err)
-	}
-	client := msg.NewMsgClient(conn)
-	return &Message{validate: validator.New(), discov: discov, conn: conn, client: client}
-}
-
-type Message struct {
-	conn     *grpc.ClientConn
-	client   msg.MsgClient
+type MessageApi struct {
+	rpcclient.Message
 	validate *validator.Validate
-	discov   discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (Message) SetOptions(options map[string]bool, value bool) {
+func NewMessageApi(discov discoveryregistry.SvcDiscoveryRegistry) MessageApi {
+	return MessageApi{Message: *rpcclient.NewMessage(discov), validate: validator.New()}
+}
+
+func (MessageApi) SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
-func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
+func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 	var newContent string
 	var err error
 	switch params.ContentType {
@@ -109,75 +99,71 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 	return &pbData
 }
 
-func (m *Message) Client() msg.MsgClient {
-	return m.client
-}
-
-func (m *Message) GetSeq(c *gin.Context) {
+func (m *MessageApi) GetSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMaxSeq, m.Client, c)
 }
 
-func (m *Message) PullMsgBySeqs(c *gin.Context) {
+func (m *MessageApi) PullMsgBySeqs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.Client, c)
 }
 
-func (m *Message) RevokeMsg(c *gin.Context) {
+func (m *MessageApi) RevokeMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.RevokeMsg, m.Client, c)
 }
 
-func (m *Message) MarkMsgsAsRead(c *gin.Context) {
+func (m *MessageApi) MarkMsgsAsRead(c *gin.Context) {
 	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.Client, c)
 }
 
-func (m *Message) MarkConversationAsRead(c *gin.Context) {
+func (m *MessageApi) MarkConversationAsRead(c *gin.Context) {
 	a2r.Call(msg.MsgClient.MarkConversationAsRead, m.Client, c)
 }
 
-func (m *Message) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
+func (m *MessageApi) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.Client, c)
 }
 
-func (m *Message) SetConversationHasReadSeq(c *gin.Context) {
+func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.Client, c)
 }
 
-func (m *Message) ClearConversationsMsg(c *gin.Context) {
+func (m *MessageApi) ClearConversationsMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.Client, c)
 }
 
-func (m *Message) UserClearAllMsg(c *gin.Context) {
+func (m *MessageApi) UserClearAllMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.UserClearAllMsg, m.Client, c)
 }
 
-func (m *Message) DeleteMsgs(c *gin.Context) {
+func (m *MessageApi) DeleteMsgs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgs, m.Client, c)
 }
 
-func (m *Message) DeleteMsgPhysicalBySeq(c *gin.Context) {
+func (m *MessageApi) DeleteMsgPhysicalBySeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysicalBySeq, m.Client, c)
 }
 
-func (m *Message) DeleteMsgPhysical(c *gin.Context) {
+func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
-func (m *Message) SetMessageReactionExtensions(c *gin.Context) {
+func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
 }
 
-func (m *Message) GetMessageListReactionExtensions(c *gin.Context) {
+func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
 }
 
-func (m *Message) AddMessageReactionExtensions(c *gin.Context) {
+func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
 }
 
-func (m *Message) DeleteMessageReactionExtensions(c *gin.Context) {
+func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
 }
 
-func (m *Message) SendMessage(c *gin.Context) {
+func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
@@ -224,16 +210,15 @@ func (m *Message) SendMessage(c *gin.Context) {
 		return
 	}
 	pbReq := m.newUserSendMsgReq(c, &params)
-	client := msg.NewMsgClient(m.conn)
 	var status int
-	respPb, err := client.SendMsg(c, pbReq)
+	respPb, err := m.Client.SendMsg(c, pbReq)
 	if err != nil {
 		status = constant.MsgSendFailed
 		apiresp.GinError(c, err)
 		return
 	}
 	status = constant.MsgSendSuccessed
-	_, err = client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
+	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
 		Status: int32(status),
 	})
 	if err != nil {
@@ -242,14 +227,14 @@ func (m *Message) SendMessage(c *gin.Context) {
 	apiresp.GinSuccess(c, respPb)
 }
 
-func (m *Message) ManagementBatchSendMsg(c *gin.Context) {
+func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SendMsg, m.Client, c)
 }
 
-func (m *Message) CheckMsgIsSendSuccess(c *gin.Context) {
+func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }
 
-func (m *Message) GetUsersOnlineStatus(c *gin.Context) {
+func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }

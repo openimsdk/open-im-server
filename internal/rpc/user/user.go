@@ -28,7 +28,7 @@ import (
 type userServer struct {
 	controller.UserDatabase
 	notificationSender *notification.FriendNotificationSender
-	friendRpcClient    *rpcclient.FriendClient
+	friendRpcClient    *rpcclient.FriendRpcClient
 	RegisterCenter     registry.SvcDiscoveryRegistry
 }
 
@@ -54,10 +54,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	userDB := relation.NewUserGorm(db)
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
+	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	u := &userServer{
 		UserDatabase:       database,
 		RegisterCenter:     client,
-		friendRpcClient:    rpcclient.NewFriendClient(client),
+		friendRpcClient:    &friendRpcClient,
 		notificationSender: notification.NewFriendNotificationSender(client, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)

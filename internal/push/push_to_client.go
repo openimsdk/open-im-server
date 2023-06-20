@@ -31,8 +31,8 @@ type Pusher struct {
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
-	msgClient              *rpcclient.MsgClient
-	conversationClient     *rpcclient.ConversationClient
+	msgClient              *rpcclient.MessageRpcClient
+	conversationClient     *rpcclient.ConversationRpcClient
 	successCount           int
 }
 
@@ -40,15 +40,17 @@ var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
 func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
-	rpcclient.NewGroupClient(client)
+
+	msgClient := rpcclient.NewMessageRpcClient(client)
+	conversationClient := rpcclient.NewConversationRpcClient(client)
 	return &Pusher{
 		database:               database,
 		client:                 client,
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
-		msgClient:              rpcclient.NewMsgClient(client),
-		conversationClient:     rpcclient.NewConversationClient(client),
+		msgClient:              &msgClient,
+		conversationClient:     &conversationClient,
 	}
 }
 

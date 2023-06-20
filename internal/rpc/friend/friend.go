@@ -25,7 +25,7 @@ import (
 type friendServer struct {
 	friendDatabase     controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
-	userRpcClient      *rpcclient.UserClient
+	userRpcClient      *rpcclient.UserRpcClient
 	notificationSender *notification.FriendNotificationSender
 	RegisterCenter     registry.SvcDiscoveryRegistry
 }
@@ -44,12 +44,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	blackDB := relation.NewBlackGorm(db)
 	friendDB := relation.NewFriendGorm(db)
-	userRpcClient := rpcclient.NewUserClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client)
 	notificationSender := notification.NewFriendNotificationSender(client, notification.WithRpcFunc(userRpcClient.GetUsersInfo))
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase:     controller.NewFriendDatabase(friendDB, relation.NewFriendRequestGorm(db), cache.NewFriendCacheRedis(rdb, friendDB, cache.GetDefaultOpt()), tx.NewGorm(db)),
 		blackDatabase:      controller.NewBlackDatabase(blackDB, cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt())),
-		userRpcClient:      userRpcClient,
+		userRpcClient:      &userRpcClient,
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
 	})

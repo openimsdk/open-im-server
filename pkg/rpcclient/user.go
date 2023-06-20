@@ -11,27 +11,32 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/grpc"
 )
 
-type UserClient struct {
-	MetaClient
+type User struct {
+	conn   *grpc.ClientConn
+	Client user.UserClient
+	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func NewUserClient(client discoveryregistry.SvcDiscoveryRegistry) *UserClient {
-	return &UserClient{
-		MetaClient: MetaClient{
-			client:          client,
-			rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
-		},
-	}
-}
-
-func (u *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
-	cc, err := u.getConn(ctx)
+func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	resp, err := user.NewUserClient(cc).GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
+	client := user.NewUserClient(conn)
+	return &User{discov: discov, Client: client, conn: conn}
+}
+
+type UserRpcClient User
+
+func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClient {
+	return UserRpcClient(*NewUser(client))
+}
+
+func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
+	resp, err := u.Client.GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
 	if err != nil {
@@ -45,7 +50,7 @@ func (u *UserClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdk
 	return resp.UsersInfo, nil
 }
 
-func (u *UserClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
+func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
@@ -53,7 +58,7 @@ func (u *UserClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.Use
 	return users[0], nil
 }
 
-func (u *UserClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -63,7 +68,7 @@ func (u *UserClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map
 	}), nil
 }
 
-func (u *UserClient) GetPublicUserInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -78,7 +83,7 @@ func (u *UserClient) GetPublicUserInfos(ctx context.Context, userIDs []string, c
 	}), nil
 }
 
-func (u *UserClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err
@@ -86,7 +91,7 @@ func (u *UserClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdk
 	return users[0], nil
 }
 
-func (u *UserClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, userIDs, complete)
 	if err != nil {
 		return nil, err
@@ -96,12 +101,8 @@ func (u *UserClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string,
 	}), nil
 }
 
-func (u *UserClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
-	cc, err := u.getConn(ctx)
-	if err != nil {
-		return 0, err
-	}
-	resp, err := user.NewUserClient(cc).GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
+func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
+	resp, err := u.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
 	})
 	if err != nil {
@@ -110,7 +111,7 @@ func (u *UserClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string)
 	return resp.GlobalRecvMsgOpt, err
 }
 
-func (u *UserClient) Access(ctx context.Context, ownerUserID string) error {
+func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	_, err := u.GetUserInfo(ctx, ownerUserID)
 	if err != nil {
 		return err

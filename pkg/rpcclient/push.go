@@ -8,11 +8,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 )
 
-type PushClient struct {
-	MetaClient
+type Push struct {
 }
 
-func NewPushClient(client discoveryregistry.SvcDiscoveryRegistry) *PushClient {
+func NewPushPush(client discoveryregistry.SvcDiscoveryRegistry) *PushClient {
 	return &PushClient{
 		MetaClient: MetaClient{
 			client:          client,
