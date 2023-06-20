@@ -39,6 +39,8 @@ type ZkClient struct {
 	localConns   map[string][]resolver.Address
 	balancerName string
 	RoundRobin
+
+	logger *log.ZkLogger
 }
 
 type ZkOption func(*ZkClient)
@@ -74,6 +76,12 @@ func WithTimeout(timeout int) ZkOption {
 	}
 }
 
+func WithLogger(logger *log.ZkLogger) ZkOption {
+	return func(client *ZkClient) {
+		client.logger = logger
+	}
+}
+
 func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClient, error) {
 	client := &ZkClient{
 		zkServers:  zkServers,
@@ -87,7 +95,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	for _, option := range options {
 		option(client)
 	}
-	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(true), zk.WithLogger(&log.ZkLogger{}))
+	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(true), zk.WithLogger(client.logger))
 	if err != nil {
 		return nil, err
 	}
