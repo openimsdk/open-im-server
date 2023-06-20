@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -29,6 +30,10 @@ type UserDatabase interface {
 	GetAllUserID(ctx context.Context) ([]string, error)
 	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
+	// 获取用户总数
+	CountTotal(ctx context.Context) (int64, error)
+	// 获取范围内用户增量
+	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }
 
 type userDatabase struct {
@@ -127,4 +132,12 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 
 func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
 	return u.userDB.GetAllUserID(ctx)
+}
+
+func (u *userDatabase) CountTotal(ctx context.Context) (count int64, err error) {
+	return u.userDB.CountTotal(ctx)
+}
+
+func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }

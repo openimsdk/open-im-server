@@ -118,11 +118,11 @@ func (o *Group) GetGroupAbstractInfo(c *gin.Context) {
 }
 
 //func (g *Group) SetGroupMemberNickname(c *gin.Context) {
-//	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.client, c)
+//	a2r.Call(group.GroupClient.SetGroupMemberNickname, g.userClient, c)
 //}
 //
 //func (g *Group) GetGroupAllMemberList(c *gin.Context) {
-//	a2r.Call(group.GroupClient.GetGroupAllMember, g.client, c)
+//	a2r.Call(group.GroupClient.GetGroupAllMember, g.userClient, c)
 //}
 
 func (o *Group) GetJoinedSuperGroupList(c *gin.Context) {
