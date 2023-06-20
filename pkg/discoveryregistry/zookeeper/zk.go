@@ -18,6 +18,10 @@ const (
 	timeout     = 5
 )
 
+type Logger interface {
+	Printf(string, ...interface{})
+}
+
 type ZkClient struct {
 	zkServers []string
 	zkRoot    string
@@ -40,7 +44,7 @@ type ZkClient struct {
 	balancerName string
 	RoundRobin
 
-	logger *log.ZkLogger
+	logger Logger
 }
 
 type ZkOption func(*ZkClient)
@@ -76,7 +80,7 @@ func WithTimeout(timeout int) ZkOption {
 	}
 }
 
-func WithLogger(logger *log.ZkLogger) ZkOption {
+func WithLogger(logger Logger) ZkOption {
 	return func(client *ZkClient) {
 		client.logger = logger
 	}
