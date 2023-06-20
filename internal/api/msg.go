@@ -22,15 +22,17 @@ import (
 )
 
 func NewMsg(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	// if err != nil {
-	// panic(err)
-	// }
-	return &Message{validate: validator.New(), discov: discov}
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	client := msg.NewMsgClient(conn)
+	return &Message{validate: validator.New(), discov: discov, conn: conn, client: client}
 }
 
 type Message struct {
 	conn     *grpc.ClientConn
+	client   msg.MsgClient
 	validate *validator.Validate
 	discov   discoveryregistry.SvcDiscoveryRegistry
 }
@@ -107,76 +109,72 @@ func (m Message) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementS
 	return &pbData
 }
 
-func (m *Message) client(ctx context.Context) (msg.MsgClient, error) {
-	c, err := m.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		return nil, err
-	}
-	return msg.NewMsgClient(c), nil
+func (m *Message) Client() msg.MsgClient {
+	return m.client
 }
 
 func (m *Message) GetSeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMaxSeq, m.client, c)
+	a2r.Call(msg.MsgClient.GetMaxSeq, m.Client, c)
 }
 
 func (m *Message) PullMsgBySeqs(c *gin.Context) {
-	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.client, c)
+	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.Client, c)
 }
 
 func (m *Message) RevokeMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.RevokeMsg, m.client, c)
+	a2r.Call(msg.MsgClient.RevokeMsg, m.Client, c)
 }
 
 func (m *Message) MarkMsgsAsRead(c *gin.Context) {
-	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.client, c)
+	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.Client, c)
 }
 
 func (m *Message) MarkConversationAsRead(c *gin.Context) {
-	a2r.Call(msg.MsgClient.MarkConversationAsRead, m.client, c)
+	a2r.Call(msg.MsgClient.MarkConversationAsRead, m.Client, c)
 }
 
 func (m *Message) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.client, c)
+	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.Client, c)
 }
 
 func (m *Message) SetConversationHasReadSeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.client, c)
+	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.Client, c)
 }
 
 func (m *Message) ClearConversationsMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.client, c)
+	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.Client, c)
 }
 
 func (m *Message) UserClearAllMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.UserClearAllMsg, m.client, c)
+	a2r.Call(msg.MsgClient.UserClearAllMsg, m.Client, c)
 }
 
 func (m *Message) DeleteMsgs(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMsgs, m.client, c)
+	a2r.Call(msg.MsgClient.DeleteMsgs, m.Client, c)
 }
 
 func (m *Message) DeleteMsgPhysicalBySeq(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMsgPhysicalBySeq, m.client, c)
+	a2r.Call(msg.MsgClient.DeleteMsgPhysicalBySeq, m.Client, c)
 }
 
 func (m *Message) DeleteMsgPhysical(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.client, c)
+	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
 func (m *Message) SetMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.client, c)
+	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
 }
 
 func (m *Message) GetMessageListReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.client, c)
+	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
 }
 
 func (m *Message) AddMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.client, c)
+	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
 }
 
 func (m *Message) DeleteMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.client, c)
+	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
 }
 
 func (m *Message) SendMessage(c *gin.Context) {
@@ -245,13 +243,13 @@ func (m *Message) SendMessage(c *gin.Context) {
 }
 
 func (m *Message) ManagementBatchSendMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SendMsg, m.client, c)
+	a2r.Call(msg.MsgClient.SendMsg, m.Client, c)
 }
 
 func (m *Message) CheckMsgIsSendSuccess(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
+	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }
 
 func (m *Message) GetUsersOnlineStatus(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.client, c)
+	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }

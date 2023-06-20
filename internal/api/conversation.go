@@ -12,56 +12,54 @@ import (
 )
 
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
-	// if err != nil {
-	// panic(err)
-	// }
-	return &Conversation{discov: discov}
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+	if err != nil {
+		panic(err)
+	}
+	client := conversation.NewConversationClient(conn)
+	return &Conversation{discov: discov, conn: conn, client: client}
 }
 
 type Conversation struct {
+	client conversation.ConversationClient
 	conn   *grpc.ClientConn
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Conversation) client(ctx context.Context) (conversation.ConversationClient, error) {
-	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
-	if err != nil {
-		return nil, err
-	}
-	return conversation.NewConversationClient(c), nil
+func (o *Conversation) Client() conversation.ConversationClient {
+	return o.client
 }
 
 func (o *Conversation) GetAllConversations(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.GetAllConversations, o.client, c)
+	a2r.Call(conversation.ConversationClient.GetAllConversations, o.Client, c)
 }
 
 func (o *Conversation) GetConversation(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.GetConversation, o.client, c)
+	a2r.Call(conversation.ConversationClient.GetConversation, o.Client, c)
 }
 
 func (o *Conversation) GetConversations(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.GetConversations, o.client, c)
+	a2r.Call(conversation.ConversationClient.GetConversations, o.Client, c)
 }
 
 // deprecated
 func (o *Conversation) SetConversation(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.SetConversation, o.client, c)
+	a2r.Call(conversation.ConversationClient.SetConversation, o.Client, c)
 }
 
 // deprecated
 func (o *Conversation) BatchSetConversations(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.client, c)
+	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.Client, c)
 }
 
 func (o *Conversation) SetRecvMsgOpt(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.SetRecvMsgOpt, o.client, c)
+	a2r.Call(conversation.ConversationClient.SetRecvMsgOpt, o.Client, c)
 }
 
 func (o *Conversation) ModifyConversationField(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.ModifyConversationField, o.client, c)
+	a2r.Call(conversation.ConversationClient.ModifyConversationField, o.Client, c)
 }
 
 func (o *Conversation) SetConversations(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.SetConversations, o.client, c)
+	a2r.Call(conversation.ConversationClient.SetConversations, o.Client, c)
 }

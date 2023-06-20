@@ -12,7 +12,7 @@ import (
 
 func Call[A, B, C any](
 	rpc func(client C, ctx context.Context, req *A, options ...grpc.CallOption) (*B, error),
-	client func(ctx context.Context) (C, error),
+	client func() C,
 	c *gin.Context,
 ) {
 	var req A
@@ -29,12 +29,7 @@ func Call[A, B, C any](
 		}
 	}
 	log.ZDebug(c, "gin bind json success", "req", req)
-	cli, err := client(c)
-	if err != nil {
-		log.ZError(c, "get conn error", err, "req", req)
-		apiresp.GinError(c, errs.ErrInternalServer.Wrap(err.Error())) // 获取RPC连接失败
-		return
-	}
+	cli := client()
 	log.ZDebug(c, "get conn success", "req", req)
 	data, err := rpc(cli, c, &req)
 	if err != nil {

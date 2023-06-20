@@ -18,53 +18,51 @@ import (
 )
 
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
-	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
-	// if err != nil {
-	// panic(err)
-	// }
-	return &Third{discov: discov}
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+	if err != nil {
+		panic(err)
+	}
+	client := third.NewThirdClient(conn)
+	return &Third{discov: discov, client: client, conn: conn}
 }
 
 type Third struct {
 	conn   *grpc.ClientConn
+	client third.ThirdClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Third) client(ctx context.Context) (third.ThirdClient, error) {
-	conn, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImThirdName)
-	if err != nil {
-		return nil, err
-	}
-	return third.NewThirdClient(conn), nil
+func (o *Third) Client() third.ThirdClient {
+	return o.client
 }
 
 func (o *Third) ApplyPut(c *gin.Context) {
-	a2r.Call(third.ThirdClient.ApplyPut, o.client, c)
+	a2r.Call(third.ThirdClient.ApplyPut, o.Client, c)
 }
 
 func (o *Third) GetPut(c *gin.Context) {
-	a2r.Call(third.ThirdClient.GetPut, o.client, c)
+	a2r.Call(third.ThirdClient.GetPut, o.Client, c)
 }
 
 func (o *Third) ConfirmPut(c *gin.Context) {
-	a2r.Call(third.ThirdClient.ConfirmPut, o.client, c)
+	a2r.Call(third.ThirdClient.ConfirmPut, o.Client, c)
 }
 
 func (o *Third) GetHash(c *gin.Context) {
-	a2r.Call(third.ThirdClient.GetHashInfo, o.client, c)
+	a2r.Call(third.ThirdClient.GetHashInfo, o.Client, c)
 }
 
 func (o *Third) FcmUpdateToken(c *gin.Context) {
-	a2r.Call(third.ThirdClient.FcmUpdateToken, o.client, c)
+	a2r.Call(third.ThirdClient.FcmUpdateToken, o.Client, c)
 }
 
 func (o *Third) SetAppBadge(c *gin.Context) {
-	a2r.Call(third.ThirdClient.SetAppBadge, o.client, c)
+	a2r.Call(third.ThirdClient.SetAppBadge, o.Client, c)
 }
 
 func (o *Third) GetURL(c *gin.Context) {
 	if c.Request.Method == http.MethodPost {
-		a2r.Call(third.ThirdClient.GetUrl, o.client, c)
+		a2r.Call(third.ThirdClient.GetUrl, o.Client, c)
 		return
 	}
 	name := c.Query("name")
@@ -81,13 +79,8 @@ func (o *Third) GetURL(c *gin.Context) {
 		expires = 3600 * 1000
 	}
 	attachment, _ := strconv.ParseBool(c.Query("attachment"))
-	client, err := o.client(c)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
 	c.Set(constant.OperationID, operationID)
-	resp, err := client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires, Attachment: attachment})
+	resp, err := o.client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires, Attachment: attachment})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())

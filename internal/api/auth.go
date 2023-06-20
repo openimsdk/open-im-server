@@ -26,8 +26,8 @@ type Auth struct {
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Auth) Client(ctx context.Context) (auth.AuthClient, error) {
-	return o.client, nil
+func (o *Auth) Client() auth.AuthClient {
+	return o.client
 }
 
 func (o *Auth) UserToken(c *gin.Context) {

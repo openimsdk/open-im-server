@@ -177,8 +177,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		s := NewStatistics(discov)
 		conversationGroup.Use(mw.GinParseToken(rdb))
 		statisticsGroup.POST("/user_register", s.UserRegister)
-
 	}
-
 	return r
 }
