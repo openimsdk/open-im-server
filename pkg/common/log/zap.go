@@ -44,18 +44,30 @@ func InitFromConfig(loggerPrefixName, moduleName string, logLevel int, isStdout 
 }
 
 func ZDebug(ctx context.Context, msg string, keysAndValues ...interface{}) {
+	if pkgLogger == nil {
+		return
+	}
 	pkgLogger.Debug(ctx, msg, keysAndValues...)
 }
 
 func ZInfo(ctx context.Context, msg string, keysAndValues ...interface{}) {
+	if pkgLogger == nil {
+		return
+	}
 	pkgLogger.Info(ctx, msg, keysAndValues...)
 }
 
 func ZWarn(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
+	if pkgLogger == nil {
+		return
+	}
 	pkgLogger.Warn(ctx, msg, err, keysAndValues...)
 }
 
 func ZError(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
+	if pkgLogger == nil {
+		return
+	}
 	pkgLogger.Error(ctx, msg, err, keysAndValues...)
 }
 

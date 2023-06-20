@@ -1,13 +1,11 @@
 package zookeeper
 
 import (
-	"context"
 	"net"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -142,7 +140,7 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 
 func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 	for range s.ticker.C {
-		log.ZDebug(context.Background(), "refresh local conns")
+		s.logger.Printf("refresh local conns")
 		s.lock.Lock()
 		for rpcName := range s.resolvers {
 			s.flushResolver(rpcName)
