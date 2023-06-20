@@ -10,6 +10,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tableRelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
@@ -261,14 +262,19 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 	var conversation tableRelation.ConversationModel
 	conversation.ConversationID = utils.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
 	conversation.ConversationType = constant.SingleChatType
+	conversation.OwnerUserID = req.SendID
+	conversation.UserID = req.RecvID
+	err := c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation})
+	if err != nil {
+		log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
+	}
+
 	conversation2 := conversation
 	conversation2.OwnerUserID = req.RecvID
 	conversation2.UserID = req.SendID
-	conversation.OwnerUserID = req.SendID
-	conversation.UserID = req.RecvID
-	err := c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation, &conversation2})
+	err = c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation2})
 	if err != nil {
-		return nil, err
+		log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 	}
 	return &pbConversation.CreateSingleChatConversationsResp{}, nil
 }
