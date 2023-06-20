@@ -1,13 +1,11 @@
 package zookeeper
 
 import (
-	"context"
 	"net"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -17,6 +15,10 @@ const (
 	defaultFreq = time.Minute * 30
 	timeout     = 5
 )
+
+type Logger interface {
+	Printf(string, ...interface{})
+}
 
 type ZkClient struct {
 	zkServers []string
@@ -40,7 +42,7 @@ type ZkClient struct {
 	balancerName string
 	RoundRobin
 
-	logger *log.ZkLogger
+	logger Logger
 }
 
 type ZkOption func(*ZkClient)
@@ -76,7 +78,7 @@ func WithTimeout(timeout int) ZkOption {
 	}
 }
 
-func WithLogger(logger *log.ZkLogger) ZkOption {
+func WithLogger(logger Logger) ZkOption {
 	return func(client *ZkClient) {
 		client.logger = logger
 	}
@@ -138,7 +140,7 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 
 func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 	for range s.ticker.C {
-		log.ZDebug(context.Background(), "refresh local conns")
+		s.logger.Printf("refresh local conns")
 		s.lock.Lock()
 		for rpcName := range s.resolvers {
 			s.flushResolver(rpcName)

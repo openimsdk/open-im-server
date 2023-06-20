@@ -126,11 +126,21 @@ message userRegisterResp {
 
 
 message getGlobalRecvMessageOptReq{
-  string userID  = 1;
+  string userID = 1;
 }
 
 message getGlobalRecvMessageOptResp{
   int32 globalRecvMsgOpt = 1;
+}
+
+message userRegisterCountReq {
+  int64 start = 1;
+  int64 end = 2;
+}
+
+message userRegisterCountResp {
+  int64 total = 1;
+  map<string, int64> count = 2;
 }
 
 service user {
@@ -150,5 +160,7 @@ service user {
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
   //获取所有用户ID
   rpc getAllUserID(getAllUserIDReq) returns (getAllUserIDResp);
+  // 获取用户总数和指定时间段内的用户增量
+  rpc userRegisterCount(userRegisterCountReq)returns(userRegisterCountResp);
 }
 

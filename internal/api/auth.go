@@ -33,7 +33,7 @@ func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
 }
 
 func (o *Auth) UserRegister(c *gin.Context) {
-	//a2r.Call(auth.AuthClient.UserRegister, o.client, c) // todo
+	//a2r.Call(auth.AuthClient.UserRegister, o.userClient, c) // todo
 }
 
 func (o *Auth) UserToken(c *gin.Context) {

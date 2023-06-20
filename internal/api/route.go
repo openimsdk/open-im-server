@@ -171,5 +171,14 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
+
+	statisticsGroup := r.Group("/statistics")
+	{
+		s := NewStatistics(discov)
+		conversationGroup.Use(mw.GinParseToken(rdb))
+		statisticsGroup.POST("/user_register", s.UserRegister)
+
+	}
+
 	return r
 }

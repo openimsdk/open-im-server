@@ -2,6 +2,8 @@ package relation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -63,4 +65,25 @@ func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err erro
 func (u *UserGorm) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {
 	err = u.db(ctx).Model(&relation.UserModel{}).Where("user_id = ?", userID).Pluck("global_recv_msg_opt", &opt).Error
 	return opt, err
+}
+
+func (u *UserGorm) CountTotal(ctx context.Context) (count int64, err error) {
+	err = u.db(ctx).Model(&relation.UserModel{}).Count(&count).Error
+	return count, errs.Wrap(err)
+}
+
+func (u *UserGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+	var res []struct {
+		Date  string `gorm:"column:date"`
+		Count int64  `gorm:"column:count"`
+	}
+	err := u.db(ctx).Model(&relation.UserModel{}).Select("DATE(create_time) AS date, count(1) AS count").Where("create_time >= ? and create_time < ?", start, end).Group("date").Find(&res).Error
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	v := make(map[string]int64)
+	for _, r := range res {
+		v[r.Date] = r.Count
+	}
+	return v, nil
 }
