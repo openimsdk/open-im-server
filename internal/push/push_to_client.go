@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -255,6 +256,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
+		v.Close()
 		if err != nil {
 			continue
 		}
@@ -262,6 +264,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		if reply != nil && reply.SinglePushResult != nil {
 			wsResults = append(wsResults, reply.SinglePushResult...)
 		}
+
 	}
 	return wsResults, nil
 }

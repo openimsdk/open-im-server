@@ -108,6 +108,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
+		v.Close()
 		return utils.Wrap(err, "")
 	}
 	return errs.ErrInternalServer.Wrap()

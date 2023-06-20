@@ -22,7 +22,6 @@ func (s *ZkClient) watch(wg *sync.WaitGroup) {
 		switch event.Type {
 		case zk.EventSession:
 			s.logger.Printf("zk session event: %+v", event)
-		case zk.EventNodeCreated:
 		case zk.EventNodeChildrenChanged:
 			s.logger.Printf("zk event: %s", event.Path)
 			l := strings.Split(event.Path, "/")
@@ -37,6 +36,7 @@ func (s *ZkClient) watch(wg *sync.WaitGroup) {
 			}
 			s.logger.Printf("zk event handle success: %s", event.Path)
 		case zk.EventNodeDataChanged:
+		case zk.EventNodeCreated:
 		case zk.EventNodeDeleted:
 		case zk.EventNotWatching:
 		}
@@ -101,24 +101,6 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 }
 
 func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	conns, err := s.GetConns(ctx, serviceName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	if len(conns) == 0 {
-		return nil, ErrConnIsNil
-	}
-	s.logger.Printf("get conn from conns, serviceName: %s", serviceName)
-	return s.getConnBalance(conns)
-}
-
-func (s *ZkClient) GetFirstConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	conns, err := s.GetConns(ctx, serviceName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	if len(conns) == 0 {
-		return nil, ErrConnIsNil
-	}
-	return conns[0], nil
+	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }

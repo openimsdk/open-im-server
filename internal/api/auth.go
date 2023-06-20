@@ -12,38 +12,32 @@ import (
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
-	// conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
-	// if err != nil {
-	// panic(err)
-	// }
-	return &Auth{discov: discov}
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
+	if err != nil {
+		panic(err)
+	}
+	client := auth.NewAuthClient(conn)
+	return &Auth{discov: discov, conn: conn, client: client}
 }
 
 type Auth struct {
 	conn   *grpc.ClientConn
+	client auth.AuthClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (o *Auth) client(ctx context.Context) (auth.AuthClient, error) {
-	c, err := o.discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImAuthName)
-	if err != nil {
-		return nil, err
-	}
-	return auth.NewAuthClient(c), nil
-}
-
-func (o *Auth) UserRegister(c *gin.Context) {
-	//a2r.Call(auth.AuthClient.UserRegister, o.userClient, c) // todo
+func (o *Auth) Client(ctx context.Context) (auth.AuthClient, error) {
+	return o.client, nil
 }
 
 func (o *Auth) UserToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.UserToken, o.client, c)
+	a2r.Call(auth.AuthClient.UserToken, o.Client, c)
 }
 
 func (o *Auth) ParseToken(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ParseToken, o.client, c)
+	a2r.Call(auth.AuthClient.ParseToken, o.Client, c)
 }
 
 func (o *Auth) ForceLogout(c *gin.Context) {
-	a2r.Call(auth.AuthClient.ForceLogout, o.client, c)
+	a2r.Call(auth.AuthClient.ForceLogout, o.Client, c)
 }
