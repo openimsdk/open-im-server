@@ -38,7 +38,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	third.RegisterThirdServer(server, &thirdServer{
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb)),
-		userRpcClient: rpcclient.NewUserClient(client),
+		userRpcClient: rpcclient.NewUserRpcClient(client),
 		s3dataBase:    controller.NewS3Database(o, relation.NewObjectHash(db), relation.NewObjectInfo(db), relation.NewObjectPut(db), u),
 	})
 	return nil
@@ -47,7 +47,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 type thirdServer struct {
 	thirdDatabase controller.ThirdDatabase
 	s3dataBase    controller.S3Database
-	userRpcClient *rpcclient.UserClient
+	userRpcClient rpcclient.UserRpcClient
 }
 
 func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
