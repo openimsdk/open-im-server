@@ -104,3 +104,7 @@ func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc
 	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }
+
+func (s *ZkClient) CloseConn(conn *grpc.ClientConn) {
+	conn.Close()
+}

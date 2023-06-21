@@ -11,6 +11,7 @@ type Conn interface {
 	GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
 	GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error)
 	AddOption(opts ...grpc.DialOption)
+	CloseConn(conn *grpc.ClientConn)
 	// do not use this method for call rpc
 	GetClientLocalConns() map[string][]resolver.Address
 }
