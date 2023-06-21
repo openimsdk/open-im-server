@@ -107,7 +107,7 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 					RecvID:         v,
 					RecvPlatFormID: int32(client.PlatformID),
 				}
-				if !client.IsBackground {
+				if !client.IsBackground || (client.IsBackground == true && client.PlatformID != constant.IOSPlatformID) {
 					err := client.PushMessage(ctx, req.MsgData)
 					if err != nil {
 						temp.ResultCode = -2
