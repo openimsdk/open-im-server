@@ -16,11 +16,11 @@ import (
 )
 
 type ExtendMsgNotificationSender struct {
-	*rpcclient.MsgClient
+	*rpcclient.MessageRpcClient
 }
 
 func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistry) *ExtendMsgNotificationSender {
-	return &ExtendMsgNotificationSender{rpcclient.NewMsgClient(client)}
+	return &ExtendMsgNotificationSender{}
 }
 
 func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, conversationID string, sessionType int32,

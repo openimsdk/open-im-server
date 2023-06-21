@@ -59,11 +59,11 @@ type OnlineHistoryRedisConsumerHandler struct {
 	singleMsgFailedCountMutex  sync.Mutex
 
 	msgDatabase           controller.CommonMsgDatabase
-	conversationRpcClient *rpcclient.ConversationClient
-	groupRpcClient        *rpcclient.GroupClient
+	conversationRpcClient *rpcclient.ConversationRpcClient
+	groupRpcClient        *rpcclient.GroupRpcClient
 }
 
-func NewOnlineHistoryRedisConsumerHandler(database controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationClient, groupRpcClient *rpcclient.GroupClient) *OnlineHistoryRedisConsumerHandler {
+func NewOnlineHistoryRedisConsumerHandler(database controller.CommonMsgDatabase, conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *OnlineHistoryRedisConsumerHandler {
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
 	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel

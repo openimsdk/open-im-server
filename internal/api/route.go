@@ -37,7 +37,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	userRouterGroup := r.Group("/user")
 	{
-		u := NewUser(discov)
+		u := NewUserApi(discov)
 		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "")
 		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
 		userRouterGroupChild.POST("/user_register", u.UserRegister)
@@ -52,7 +52,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		f := NewFriend(discov)
+		f := NewFriendApi(discov)
 		friendRouterGroup.Use(mw.GinParseToken(rdb))
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
@@ -67,7 +67,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
 		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
 	}
-	g := NewGroup(discov)
+	g := NewGroupApi(discov)
 	groupRouterGroup := r.Group("/group")
 	{
 
@@ -105,8 +105,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	////certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := NewAuth(discov)
-		u := NewUser(discov)
+		a := NewAuthApi(discov)
+		u := NewUserApi(discov)
 		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "")
 		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
 		authRouterGroupChild.POST("/user_register", u.UserRegister)    //1
@@ -117,7 +117,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	////Third service
 	thirdGroup := r.Group("/third")
 	{
-		t := NewThird(discov)
+		t := NewThirdApi(discov)
 		thirdGroup.Use(mw.GinParseToken(rdb))
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
@@ -132,7 +132,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	////Message
 	msgGroup := r.Group("/msg")
 	{
-		m := NewMsg(discov)
+		m := NewMessageApi(discov)
 		msgGroup.Use(mw.GinParseToken(rdb))
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
@@ -160,7 +160,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	////Conversation
 	conversationGroup := r.Group("/conversation")
 	{
-		c := NewConversation(discov)
+		c := NewConversationApi(discov)
 		conversationGroup.Use(mw.GinParseToken(rdb))
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
@@ -174,10 +174,9 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	statisticsGroup := r.Group("/statistics")
 	{
-		s := NewStatistics(discov)
+		s := NewStatisticsApi(discov)
 		conversationGroup.Use(mw.GinParseToken(rdb))
-		statisticsGroup.POST("/user/register", s.UserRegister)
+		statisticsGroup.POST("/user_register", s.UserRegister)
 	}
-
 	return r
 }

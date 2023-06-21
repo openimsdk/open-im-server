@@ -5,10 +5,15 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"runtime"
 	"strconv"
 	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
@@ -27,6 +32,16 @@ func main() {
 	if err := apiCmd.Execute(); err != nil {
 		panic(err.Error())
 	}
+}
+
+func startPprof() {
+	runtime.GOMAXPROCS(1)
+	runtime.SetMutexProfileFraction(1)
+	runtime.SetBlockProfileRate(1)
+	if err := http.ListenAndServe(":6060", nil); err != nil {
+		panic(err)
+	}
+	os.Exit(0)
 }
 
 func run(port int) error {
@@ -66,6 +81,7 @@ func run(port int) error {
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
 	log.ZInfo(context.Background(), "start server success", "address", address, "version", config.Version)
+	go startPprof()
 	err = router.Run(address)
 	if err != nil {
 		log.ZError(context.Background(), "api run failed ", err, "address", address)

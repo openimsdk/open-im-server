@@ -20,7 +20,7 @@ import (
 
 type authServer struct {
 	authDatabase   controller.AuthDatabase
-	userRpcClient  *rpcclient.UserClient
+	userRpcClient  *rpcclient.UserRpcClient
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
@@ -29,8 +29,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	userRpcClient := rpcclient.NewUserRpcClient(client)
 	pbAuth.RegisterAuthServer(server, &authServer{
-		userRpcClient:  rpcclient.NewUserClient(client),
+		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
 	})
@@ -108,6 +109,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
+		v.Close()
 		return utils.Wrap(err, "")
 	}
 	return errs.ErrInternalServer.Wrap()

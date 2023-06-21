@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
@@ -17,7 +18,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -30,24 +30,27 @@ type Pusher struct {
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
-	msgClient              *rpcclient.MsgClient
-	conversationClient     *rpcclient.ConversationClient
+	msgClient              *rpcclient.MessageRpcClient
+	conversationRpcClient  *rpcclient.ConversationRpcClient
+	groupRpcClient         *rpcclient.GroupRpcClient
 	successCount           int
 }
 
 var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
-func NewPusher(client discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
+func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
-	rpcclient.NewGroupClient(client)
+	msgClient := rpcclient.NewMessageRpcClient(discov)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(discov)
+	groupRpcClient := rpcclient.NewGroupRpcClient(discov)
 	return &Pusher{
 		database:               database,
-		client:                 client,
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
-		msgClient:              rpcclient.NewMsgClient(client),
-		conversationClient:     rpcclient.NewConversationClient(client),
+		msgClient:              &msgClient,
+		conversationRpcClient:  &conversationRpcClient,
+		groupRpcClient:         &groupRpcClient,
 	}
 }
 
@@ -65,25 +68,13 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	return offlinePusher
 }
 
-func (p *Pusher) DismissGroup(ctx context.Context, groupID string) error {
-	cc, err := p.client.GetConn(ctx, config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		return err
-	}
-	_, err = group.NewGroupClient(cc).DismissGroup(ctx, &group.DismissGroupReq{
-		GroupID:      groupID,
-		DeleteMember: true,
-	})
-	return err
-}
-
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	maxSeq, err := p.msgClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
 	}
-	return p.conversationClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
+	return p.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
 }
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
@@ -176,7 +167,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
 				}
 				defer func(groupID string) {
-					if err := p.DismissGroup(ctx, groupID); err != nil {
+					if err := p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
 						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
@@ -255,6 +246,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
+		v.Close()
 		if err != nil {
 			continue
 		}
@@ -262,6 +254,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 		if reply != nil && reply.SinglePushResult != nil {
 			wsResults = append(wsResults, reply.SinglePushResult...)
 		}
+
 	}
 	return wsResults, nil
 }

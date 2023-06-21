@@ -22,11 +22,10 @@ type msgServer struct {
 	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase            controller.CommonMsgDatabase
 	ExtendMsgDatabase      controller.ExtendMsgDatabase
-	Group                  *rpcclient.GroupClient
-	User                   *rpcclient.UserClient
-	Conversation           *rpcclient.ConversationClient
-	friend                 *rpcclient.FriendClient
-	black                  *rpcclient.BlackClient
+	Group                  *rpcclient.GroupRpcClient
+	User                   *rpcclient.UserRpcClient
+	Conversation           *rpcclient.ConversationRpcClient
+	friend                 *rpcclient.FriendRpcClient
 	GroupLocalCache        *localcache.GroupLocalCache
 	ConversationLocalCache *localcache.ConversationLocalCache
 	MessageLocker          MessageLocker
@@ -67,17 +66,20 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+	conversationClient := rpcclient.NewConversationRpcClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	s := &msgServer{
-		Conversation:           rpcclient.NewConversationClient(client),
-		User:                   rpcclient.NewUserClient(client),
-		Group:                  rpcclient.NewGroupClient(client),
+		Conversation:           &conversationClient,
+		User:                   &userRpcClient,
+		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
 		ExtendMsgDatabase:      extendMsgDatabase,
 		RegisterCenter:         client,
 		GroupLocalCache:        localcache.NewGroupLocalCache(client),
 		ConversationLocalCache: localcache.NewConversationLocalCache(client),
-		black:                  rpcclient.NewBlackClient(client),
-		friend:                 rpcclient.NewFriendClient(client),
+		friend:                 &friendRpcClient,
 		MessageLocker:          NewLockerMessage(cacheModel),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))

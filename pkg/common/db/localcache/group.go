@@ -4,17 +4,16 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
-	"google.golang.org/grpc"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type GroupLocalCache struct {
-	lock  sync.Mutex
-	cache map[string]GroupMemberIDsHash
-	conn  *grpc.ClientConn
+	lock   sync.Mutex
+	cache  map[string]GroupMemberIDsHash
+	client *rpcclient.Group
 }
 
 type GroupMemberIDsHash struct {
@@ -22,22 +21,16 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupLocalCache(client discoveryregistry.SvcDiscoveryRegistry) *GroupLocalCache {
-	conn, err := client.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
-	if err != nil {
-		panic(err)
-	}
+func NewGroupLocalCache(discov discoveryregistry.SvcDiscoveryRegistry) *GroupLocalCache {
+	client := rpcclient.NewGroup(discov)
 	return &GroupLocalCache{
-		cache: make(map[string]GroupMemberIDsHash, 0),
-		conn:  conn,
+		cache:  make(map[string]GroupMemberIDsHash, 0),
+		client: client,
 	}
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
-	client := group.NewGroupClient(g.conn)
-	resp, err := client.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
+	resp, err := g.client.Client.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
 		GroupIDs: []string{groupID},
 	})
 	if err != nil {
@@ -46,11 +39,13 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	if len(resp.GroupAbstractInfos) < 1 {
 		return nil, errs.ErrGroupIDNotFound
 	}
+	g.lock.Lock()
+	defer g.lock.Unlock()
 	localHashInfo, ok := g.cache[groupID]
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {
 		return localHashInfo.userIDs, nil
 	}
-	groupMembersResp, err := client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
+	groupMembersResp, err := g.client.Client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
 		GroupID: groupID,
 	})
 	if err != nil {

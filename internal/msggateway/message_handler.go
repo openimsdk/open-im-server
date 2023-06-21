@@ -52,14 +52,16 @@ type MessageHandler interface {
 var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
-	msgRpcClient *rpcclient.MsgClient
-	pushClient   *rpcclient.PushClient
+	msgRpcClient *rpcclient.MessageRpcClient
+	pushClient   *rpcclient.PushRpcClient
 	validate     *validator.Validate
 }
 
 func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry) *GrpcHandler {
-	return &GrpcHandler{msgRpcClient: rpcclient.NewMsgClient(client),
-		pushClient: rpcclient.NewPushClient(client), validate: validate}
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	pushRpcClient := rpcclient.NewPushRpcClient(client)
+	return &GrpcHandler{msgRpcClient: &msgRpcClient,
+		pushClient: &pushRpcClient, validate: validate}
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
