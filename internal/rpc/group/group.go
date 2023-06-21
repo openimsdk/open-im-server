@@ -48,7 +48,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	user := rpcclient.NewUserClient(client)
+	user := rpcclient.NewUserRpcClient(client)
 	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
@@ -60,18 +60,18 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 			}
 			return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
 		}),
-		conversationRpcClient: rpcclient.NewConversationClient(client),
-		msgRpcClient:          rpcclient.NewMsgClient(client),
+		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
+		msgRpcClient:          rpcclient.NewMessageRpcClient(client),
 	})
 	return nil
 }
 
 type groupServer struct {
 	GroupDatabase         controller.GroupDatabase
-	User                  *rpcclient.UserClient
+	User                  rpcclient.UserRpcClient
 	Notification          *notification.GroupNotificationSender
-	conversationRpcClient *rpcclient.ConversationClient
-	msgRpcClient          *rpcclient.MsgClient
+	conversationRpcClient rpcclient.ConversationRpcClient
+	msgRpcClient          rpcclient.MessageRpcClient
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
