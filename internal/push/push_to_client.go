@@ -26,7 +26,7 @@ import (
 
 type Pusher struct {
 	database               controller.PushDatabase
-	client                 discoveryregistry.SvcDiscoveryRegistry
+	discov                 discoveryregistry.SvcDiscoveryRegistry
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
@@ -44,6 +44,7 @@ func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offl
 	conversationRpcClient := rpcclient.NewConversationRpcClient(discov)
 	groupRpcClient := rpcclient.NewGroupRpcClient(discov)
 	return &Pusher{
+		discov:                 discov,
 		database:               database,
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
@@ -237,7 +238,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 }
 
 func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	conns, err := p.client.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := p.discov.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
 		return nil, err
