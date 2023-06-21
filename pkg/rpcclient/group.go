@@ -155,3 +155,11 @@ func (g *GroupRpcClient) GetGroupMemberCache(ctx context.Context, groupID string
 	}
 	return resp.Member, nil
 }
+
+func (g *GroupRpcClient) DismissGroup(ctx context.Context, groupID string) error {
+	_, err := g.Client.DismissGroup(ctx, &group.DismissGroupReq{
+		GroupID:      groupID,
+		DeleteMember: true,
+	})
+	return err
+}
