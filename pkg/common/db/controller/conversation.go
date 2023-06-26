@@ -109,10 +109,12 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 		return err
 	}
 	var userIDs []string
+	cache := c.cache.NewCache()
 	for _, conversation := range conversations {
+		cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
-	return c.cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
+	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
 }
 
 func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationTb.ConversationModel) error {

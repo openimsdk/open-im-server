@@ -111,8 +111,12 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	}
 	log.ZDebug(ctx, "MarkConversationAsRead", "hasReadSeq", hasReadSeq, "req.HasReadSeq", req.HasReadSeq)
 	var seqs []int64
-	for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
-		seqs = append(seqs, i)
+	if len(req.Seqs) == 0 {
+		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
+			seqs = append(seqs, i)
+		}
+	} else {
+		seqs = req.Seqs
 	}
 	if len(seqs) > 0 {
 		log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
