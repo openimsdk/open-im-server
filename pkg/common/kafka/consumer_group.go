@@ -8,6 +8,7 @@ package kafka
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/Shopify/sarama"
 )
@@ -46,6 +47,7 @@ func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) contex
 }
 
 func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {
+	log.ZDebug(context.Background(), "register consumer group", "groupID", mc.groupID)
 	ctx := context.Background()
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
