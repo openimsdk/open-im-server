@@ -180,6 +180,7 @@ message MarkConversationAsReadReq {
   string conversationID = 1;
   string userID = 2;
   int64 hasReadSeq = 3;
+  repeated int64 seqs = 4;
 }
 
 message MarkConversationAsReadResp {
