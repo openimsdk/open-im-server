@@ -40,7 +40,6 @@ type ZkClient struct {
 	resolvers    map[string]*Resolver
 	localConns   map[string][]resolver.Address
 	balancerName string
-	RoundRobin
 
 	logger Logger
 }
@@ -154,6 +153,7 @@ func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 }
 
 func (s *ZkClient) flushResolver(serviceName string) {
+	s.logger.Printf("start flush")
 	r, ok := s.resolvers[serviceName]
 	if ok {
 		r.ResolveNow(resolver.ResolveNowOptions{})
