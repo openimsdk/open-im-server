@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	pkgLogger   Logger = &ZapLogger{}
-	sp                 = string(filepath.Separator)
-	logLevelMap        = map[int]zapcore.Level{
+	pkgLogger   Logger
+	sp          = string(filepath.Separator)
+	logLevelMap = map[int]zapcore.Level{
 		6: zapcore.DebugLevel,
 		5: zapcore.DebugLevel,
 		4: zapcore.InfoLevel,
