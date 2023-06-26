@@ -2,7 +2,6 @@ package msg
 
 import (
 	"context"
-	"errors"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -85,7 +84,7 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 		return
 	}
 	currentHasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
-	if err != nil && errors.Unwrap(err) != redis.Nil {
+	if err != nil && errs.Unwrap(err) != redis.Nil {
 		return
 	}
 	if hasReadSeq > currentHasReadSeq {
