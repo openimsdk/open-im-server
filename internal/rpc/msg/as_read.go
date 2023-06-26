@@ -110,13 +110,9 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		return
 	}
 	log.ZDebug(ctx, "MarkConversationAsRead", "hasReadSeq", hasReadSeq, "req.HasReadSeq", req.HasReadSeq)
-	var seqs []int64
-	for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
-		seqs = append(seqs, i)
-	}
-	if len(seqs) > 0 {
-		log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
-		if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
+	if len(req.Seqs) > 0 {
+		log.ZDebug(ctx, "MarkConversationAsRead", "seqs", req.Seqs, "conversationID", req.ConversationID)
+		if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 			return
 		}
 	}
@@ -127,7 +123,7 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 		}
 		hasReadSeq = req.HasReadSeq
 	}
-	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID, m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID, m.conversationAndGetRecvID(conversation, req.UserID), req.Seqs, hasReadSeq); err != nil {
 		return
 	}
 	return &msg.MarkConversationAsReadResp{}, nil
