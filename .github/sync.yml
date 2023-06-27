@@ -71,3 +71,9 @@ group:
       - source: .github/workflows/stale.yml
         dest: .github/workflows/stale.yml
         replace: false
+      - source: .github/workflows/project-progress.yml
+        dest: .github/workflows/project-progress.yml
+        replace: false
+      - source: .github/workflows/help-comment-issue.yml
+        dest: .github/workflows/help-comment-issue.yml
+        replace: false
