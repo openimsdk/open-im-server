@@ -210,6 +210,9 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation.IsPinned != nil {
 		m["is_pinned"] = req.Conversation.IsPinned.Value
 	}
+	if req.Conversation.GroupAtType != nil {
+		m["group_at_type"] = req.Conversation.GroupAtType.Value
+	}
 	if req.Conversation.IsPrivateChat != nil {
 		var conversations []*tableRelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
