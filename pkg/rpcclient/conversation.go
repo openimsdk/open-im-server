@@ -63,6 +63,10 @@ func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, owner
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
 	return err
 }
+func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
+	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
+	return err
+}
 
 func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	resp, err := c.Client.GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
