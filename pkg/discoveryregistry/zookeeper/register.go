@@ -1,6 +1,8 @@
 package zookeeper
 
 import (
+	"time"
+
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
@@ -32,6 +34,7 @@ func (s *ZkClient) UnRegister() error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(time.Second)
 	s.node = ""
 	s.localConns = make(map[string][]resolver.Address)
 	s.resolvers = make(map[string]*Resolver)
