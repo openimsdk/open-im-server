@@ -246,24 +246,30 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 			continue
 		}
 		if msg.Revoke != nil {
-			// var conversationID string
-			// if index := strings.LastIndex(docID, ":"); index > 0 {
-			// 	conversationID = docID[:index]
-			// }
 			revokeContent := sdkws.MessageRevokedContent{
-				// RevokerID:      msg.Revoke.UserID,
-				// ClientMsgID:    msg.Msg.ClientMsgID,
-				// RevokeTime:     msg.Revoke.Time,
-				// SesstionType:   msg.Msg.SessionType,
-				// Seq:            msg.Msg.Seq,
-				// ConversationID: conversationID,
-				// ex:             msg.Msg.Ex,
+				RevokerID:                   msg.Revoke.ID,
+				RevokerRole:                 msg.Revoke.Role,
+				ClientMsgID:                 msg.Msg.ClientMsgID,
+				RevokerNickname:             msg.Revoke.Nickname,
+				RevokeTime:                  msg.Revoke.Time,
+				SourceMessageSendTime:       msg.Msg.SendTime,
+				SourceMessageSendID:         msg.Msg.SendID,
+				SourceMessageSenderNickname: msg.Msg.SenderNickname,
+				SessionType:                 msg.Msg.SessionType,
+				Seq:                         msg.Msg.Seq,
+				Ex:                          msg.Msg.Ex,
 			}
-			data, _ := json.Marshal(&revokeContent)
+			data, err := json.Marshal(&revokeContent)
+			if err != nil {
+				return nil, err
+			}
 			elem := sdkws.NotificationElem{
 				Detail: string(data),
 			}
-			content, _ := json.Marshal(&elem)
+			content, err := json.Marshal(&elem)
+			if err != nil {
+				return nil, err
+			}
 			msg.Msg.ContentType = constant.MsgRevokeNotification
 			msg.Msg.Content = string(content)
 		}
