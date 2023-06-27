@@ -63,7 +63,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMs
 	return resp, nil
 }
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
-	log.ZDebug(nctx, "setConversationAtInfo", msg)
+	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
 	var atUserID []string
 	conversation := &pbConversation.ConversationReq{
@@ -85,14 +85,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
 			err := m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {
-				log.ZWarn(ctx, "SetConversations", err, atUserID, conversation)
+				log.ZWarn(ctx, "SetConversations", err, "userID", atUserID, "conversation", conversation)
 			}
 			memberUserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 		}
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		err = m.Conversation.SetConversations(ctx, memberUserIDList, conversation)
 		if err != nil {
-			log.ZWarn(ctx, "SetConversations", err, memberUserIDList, conversation)
+			log.ZWarn(ctx, "SetConversations", err, "userID", memberUserIDList, "conversation", conversation)
 		}
 	} else {
 		conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtMe}
