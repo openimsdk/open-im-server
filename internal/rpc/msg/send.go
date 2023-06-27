@@ -63,6 +63,7 @@ func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMs
 	return resp, nil
 }
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
+	log.ZDebug(nctx, "setConversationAtInfo", msg)
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
 	var atUserID []string
 	conversation := &pbConversation.ConversationReq{
