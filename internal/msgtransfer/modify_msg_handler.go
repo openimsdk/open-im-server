@@ -30,7 +30,7 @@ func NewModifyMsgConsumerHandler(database controller.ExtendMsgDatabase) *ModifyM
 	return &ModifyMsgConsumerHandler{
 		modifyMsgConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToModify.Topic},
-			config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.ConsumerGroupID.MsgToModify),
+			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToModify),
 		extendMsgDatabase: database,
 	}
 }

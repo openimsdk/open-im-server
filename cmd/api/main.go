@@ -45,9 +45,6 @@ func startPprof() {
 }
 
 func run(port int) error {
-	if port == 0 {
-		port = config.Config.Api.GinPort[0]
-	}
 	var err error
 	rdb, err := cache.NewRedis()
 	if err != nil {

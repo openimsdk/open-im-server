@@ -21,7 +21,7 @@ import (
 
 func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error, options ...grpc.ServerOption) error {
 	fmt.Println("start", rpcRegisterName, "server, port: ", rpcPort, "prometheusPort:", prometheusPort, ", OpenIM version: ", config.Version)
-	listener, err := net.Listen("tcp", net.JoinHostPort(config.Config.ListenIP, strconv.Itoa(rpcPort)))
+	listener, err := net.Listen("tcp", net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort)))
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func Start(rpcPort int, rpcRegisterName string, prometheusPort int, rpcFn func(c
 	}
 	defer zkClient.CloseZK()
 	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	registerIP, err := network.GetRpcRegisterIP(config.Config.RpcRegisterIP)
+	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
 		return err
 	}

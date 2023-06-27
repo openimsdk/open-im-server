@@ -57,7 +57,7 @@ func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offl
 
 func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	var offlinePusher offlinepush.OfflinePusher
-	if config.Config.Push.Getui.Enable {
+	if config.Config.Push.GeTui.Enable {
 		offlinePusher = getui.NewClient(cache)
 	}
 	if config.Config.Push.Fcm.Enable {
@@ -164,8 +164,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					return err
 				}
 				log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
-				if len(config.Config.Manager.AppManagerUid) > 0 {
-					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUid[0])
+				if len(config.Config.Manager.AppManagerUserID) > 0 {
+					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.AppManagerUserID[0])
 				}
 				defer func(groupID string) {
 					if err := p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {

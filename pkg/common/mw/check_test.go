@@ -7,7 +7,7 @@ import (
 )
 
 func TestCheck(t *testing.T) {
-	config.Config.Secret = "123456"
+	config.Config.TokenPolicy.Secret = "123456"
 
 	args := []string{"1", "2", "3"}
 

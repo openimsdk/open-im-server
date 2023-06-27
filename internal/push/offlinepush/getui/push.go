@@ -1,8 +1,13 @@
 package getui
 
 import (
+	"github.com/go-redis/redis"
 	"sync"
 
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -11,12 +16,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
-	"github.com/redis/go-redis/v9"
-
-	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"errors"
 	"strconv"
 	"time"
 
@@ -98,12 +97,12 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
-	h.Write([]byte(config.Config.Push.Getui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.Getui.MasterSecret))
+	h.Write([]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret))
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
 		Timestamp: strconv.Itoa(int(timeStamp)),
-		AppKey:    config.Config.Push.Getui.AppKey,
+		AppKey:    config.Config.Push.GeTui.AppKey,
 	}
 	respAuth := AuthResp{}
 	err = g.request(ctx, authURL, reqAuth, "", &respAuth)
@@ -146,7 +145,7 @@ func (g *Client) request(ctx context.Context, url string, input interface{}, tok
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(ctx, config.Config.Push.Getui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
 func (g *Client) postReturn(ctx context.Context, url string, header map[string]string, input interface{}, output RespI, timeout int) error {
