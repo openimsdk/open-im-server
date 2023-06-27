@@ -5,10 +5,10 @@ OpenIMSDK/.github:
     dest: LICENSE 
   - source: script/LICENSE/
     dest: scripts/LICENSE/
-    replace: true
+    replace: false
   - source: .github/
     dest: .github/
-    replace: true
+    replace: false
     exclude: |
       workflows/
       sync.yml
@@ -18,7 +18,7 @@ OpenIMSDK/community:
     dest: LICENSE 
   - source: script/LICENSE/
     dest: scripts/LICENSE/
-    replace: true
+    replace: false
   - source: .github/workflows/
     dest: .github/workflows/
     exclude:
@@ -26,7 +26,7 @@ OpenIMSDK/community:
       - sync.yml
   - source: .github/
     dest: .github/
-    replace: true
+    replace: false
     exclude: |
       sync.yml
 
@@ -35,17 +35,13 @@ OpenIMSDK/openim-sdk-core:
     dest: LICENSE
   - source: script/LICENSE/
     dest: scripts/LICENSE/
-    replace: true
-  - source: .github/workflows/
-    dest: .github/workflows/
-    exclude:
-      - e2e-test.yml
-      - sync.yml
-  - source: .github/
-    dest: .github/
-    replace: true
-    exclude: |
-      sync.yml
+    replace: false
+  - source: .github/workflows/issue-robot.yml
+    dest: .github/workflows/issue-robot.yml
+    replace: false
+  - source: .github/workflows/stale.yml
+    dest: .github/workflows/stale.yml
+    replace: false
 
 OpenIMSDK/OpenIM-Docs:
   - source: .github/workflows/
@@ -69,8 +65,9 @@ group:
       - source: LICENSE
         dest: LICENSE
         replace: false
-      - source: .github/workflows/
-        dest: .github/workflows/
-        exclude: |
-          e2e-test.yml
-          sync.yml
+      - source: .github/workflows/issue-robot.yml
+        dest: .github/workflows/issue-robot.yml
+        replace: false
+      - source: .github/workflows/stale.yml
+        dest: .github/workflows/stale.yml
+        replace: false

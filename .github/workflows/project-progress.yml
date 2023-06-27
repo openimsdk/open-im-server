@@ -1,0 +1,22 @@
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Move assigned card
+on:
+  issues:
+    types:
+      - assigned
+  pull_request:
+    types: 
+      - assigned
+
+jobs:
+  move-assigned-card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: OpenIM 2023 Sprint 🔥
+          column: In Progress
+          repo-token: ${{ secrets.BOT_GITHUB_TOKEN }}
