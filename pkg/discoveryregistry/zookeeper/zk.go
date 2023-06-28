@@ -34,7 +34,7 @@ type ZkClient struct {
 	node      string
 	ticker    *time.Ticker
 
-	lock    sync.RWMutex
+	lock    Lock
 	options []grpc.DialOption
 
 	resolvers    map[string]*Resolver
@@ -91,6 +91,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		timeout:    timeout,
 		localConns: make(map[string][]resolver.Address),
 		resolvers:  make(map[string]*Resolver),
+		lock:       &FakeLock{},
 	}
 	client.ticker = time.NewTicker(defaultFreq)
 	for _, option := range options {
@@ -196,3 +197,13 @@ func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
 	return s.localConns
 }
+
+type Lock interface {
+	Lock()
+	Unlock()
+}
+
+type FakeLock struct{}
+
+func (s *FakeLock) Lock()   {}
+func (s *FakeLock) Unlock() {}
