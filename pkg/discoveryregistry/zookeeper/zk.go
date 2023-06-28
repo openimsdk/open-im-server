@@ -91,7 +91,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		timeout:    timeout,
 		localConns: make(map[string][]resolver.Address),
 		resolvers:  make(map[string]*Resolver),
-		lock:       &sync.Mutex{},
+		lock:       &FakeLock{},
 	}
 	client.ticker = time.NewTicker(defaultFreq)
 	for _, option := range options {
@@ -198,7 +198,7 @@ func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
 	return s.localConns
 }
 
-//type FakeLock struct{}
-//
-//func (s *FakeLock) Lock()   {}
-//func (s *FakeLock) Unlock() {}
+type FakeLock struct{}
+
+func (s *FakeLock) Lock()   {}
+func (s *FakeLock) Unlock() {}
