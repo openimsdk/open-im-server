@@ -15,7 +15,7 @@ import (
 )
 
 type Group struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client group.GroupClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }

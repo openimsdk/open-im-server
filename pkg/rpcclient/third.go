@@ -10,7 +10,7 @@ import (
 )
 
 type Third struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client third.ThirdClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }

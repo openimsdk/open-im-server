@@ -11,7 +11,7 @@ import (
 )
 
 type Friend struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client friend.FriendClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }

@@ -14,7 +14,7 @@ import (
 
 type Conversation struct {
 	Client conversation.ConversationClient
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 

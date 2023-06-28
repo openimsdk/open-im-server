@@ -10,7 +10,7 @@ import (
 )
 
 type Push struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }

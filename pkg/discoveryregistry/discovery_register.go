@@ -8,10 +8,10 @@ import (
 )
 
 type Conn interface {
-	GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
-	GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error)
+	GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error)
+	GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error)
 	AddOption(opts ...grpc.DialOption)
-	CloseConn(conn *grpc.ClientConn)
+	CloseConn(conn grpc.ClientConnInterface)
 	// do not use this method for call rpc
 	GetClientLocalConns() map[string][]resolver.Address
 }
