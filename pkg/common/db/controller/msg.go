@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -100,7 +100,7 @@ func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheMo
 		cache:            cacheModel,
 		producer:         kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
 		producerToMongo:  kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic),
-		producerToPush:   kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.Ms2pschat.Topic),
+		producerToPush:   kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic),
 		producerToModify: kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToModify.Topic),
 	}
 }

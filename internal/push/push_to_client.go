@@ -57,13 +57,12 @@ func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offl
 
 func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 	var offlinePusher offlinepush.OfflinePusher
-	if config.Config.Push.GeTui.Enable {
+	switch config.Config.Push.Enable {
+	case "getui":
 		offlinePusher = getui.NewClient(cache)
-	}
-	if config.Config.Push.Fcm.Enable {
+	case "fcm":
 		offlinePusher = fcm.NewClient(cache)
-	}
-	if config.Config.Push.Jpns.Enable {
+	case "jpush":
 		offlinePusher = jpush.NewClient()
 	}
 	return offlinePusher

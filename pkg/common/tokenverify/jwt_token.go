@@ -62,7 +62,7 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
-	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
+	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUserID) {
 		return nil
 	}
 	if opUserID == ownerUserID {
@@ -72,11 +72,11 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
-	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUid)
+	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUserID)
 }
 
 func CheckAdmin(ctx context.Context) error {
-	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
+	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.AppManagerUserID) {
 		return nil
 	}
 	return errs.ErrIdentity.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
@@ -86,7 +86,7 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
 func IsManagerUserID(opUserID string) bool {
-	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUid)
+	return utils.IsContain(opUserID, config.Config.Manager.AppManagerUserID)
 }
 func WsVerifyToken(token, userID string, platformID int) error {
 	claim, err := GetClaimFromToken(token)

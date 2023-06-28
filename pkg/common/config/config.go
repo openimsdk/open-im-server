@@ -2,37 +2,15 @@ package config
 
 import (
 	_ "embed"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"runtime"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-
-	"gopkg.in/yaml.v3"
 )
 
 //go:embed version
 var Version string
 
-var (
-	_, b, _, _ = runtime.Caller(0)
-	// Root folder of this project
-	Root = filepath.Join(filepath.Dir(b), "../../..")
-)
-
-const (
-	FileName             = "config.yaml"
-	NotificationFileName = "notification.yaml"
-	ENV                  = "CONFIG_NAME"
-	DefaultFolderPath    = "../config/"
-	ConfKey              = "conf"
-)
-
-var Config config
+var Config struct {
+	config
+	Notification notification
+}
 
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
@@ -63,49 +41,49 @@ type config struct {
 	} `yaml:"zookeeper"`
 
 	Mysql struct {
-		DBAddress      []string `yaml:"address"`
-		DBUserName     string   `yaml:"userName"`
-		DBPassword     string   `yaml:"password"`
-		DBDatabaseName string   `yaml:"databaseName"`
-		DBMaxOpenConns int      `yaml:"maxOpenConns"`
-		DBMaxIdleConns int      `yaml:"maxIdleConns"`
-		DBMaxLifeTime  int      `yaml:"maxLifeTime"`
-		LogLevel       int      `yaml:"logLevel"`
-		SlowThreshold  int      `yaml:"slowThreshold"`
+		Address       []string `yaml:"address"`
+		Username      string   `yaml:"username"`
+		Password      string   `yaml:"password"`
+		Database      string   `yaml:"database"`
+		MaxOpenConn   int      `yaml:"maxOpenConn"`
+		MaxIdleConn   int      `yaml:"maxIdleConn"`
+		MaxLifeTime   int      `yaml:"maxLifeTime"`
+		LogLevel      int      `yaml:"logLevel"`
+		SlowThreshold int      `yaml:"slowThreshold"`
 	} `yaml:"mysql"`
 
 	Mongo struct {
-		DBUri                string   `yaml:"uri"`
-		DBAddress            []string `yaml:"address"`
-		DBTimeout            int      `yaml:"timeout"`
-		DBDatabase           string   `yaml:"database"`
-		DBSource             string   `yaml:"source"`
-		DBUserName           string   `yaml:"userName"`
-		DBPassword           string   `yaml:"password"`
-		DBMaxPoolSize        int      `yaml:"maxPoolSize"`
-		DBRetainChatRecords  int      `yaml:"retainChatRecords"`
+		Uri                  string   `yaml:"uri"`
+		Address              []string `yaml:"address"`
+		Timeout              int      `yaml:"timeout"`
+		Database             string   `yaml:"database"`
+		Source               string   `yaml:"source"`
+		Username             string   `yaml:"username"`
+		Password             string   `yaml:"password"`
+		MaxPoolSize          int      `yaml:"maxPoolSize"`
+		RetainChatRecords    int      `yaml:"retainChatRecords"`
 		ChatRecordsClearTime string   `yaml:"chatRecordsClearTime"`
 	} `yaml:"mongo"`
 
 	Redis struct {
-		DBAddress  []string `yaml:"address"`
-		DBUserName string   `yaml:"userName"`
-		DBPassWord string   `yaml:"passWord"`
+		Address  []string `yaml:"address"`
+		Username string   `yaml:"username"`
+		Password string   `yaml:"passWord"`
 	} `yaml:"redis"`
 
 	Kafka struct {
-		SASLUserName     string   `yaml:"SASLUserName"`
-		SASLPassword     string   `yaml:"SASLPassword"`
+		Username         string   `yaml:"username"`
+		Password         string   `yaml:"password"`
 		Addr             []string `yaml:"addr"`
 		LatestMsgToRedis struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"latestMsgToRedis"`
-		OfflineMsgToMongoMysql struct {
+		MsgToMongo struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"offlineMsgToMongoMysql"`
-		MsqToPush struct {
+		MsgToPush struct {
 			Topic string `yaml:"topic"`
-		} `yaml:"msqToPush"`
+		} `yaml:"msgToPush"`
 		MsgToModify struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"msgToModify"`
@@ -126,10 +104,6 @@ type config struct {
 	Api struct {
 		ListenIP string `yaml:"listenIP"`
 	} `yaml:"api"`
-
-	Sdk struct {
-		DataDir []string `yaml:"dataDir"`
-	} `yaml:"sdk"`
 
 	Object struct {
 		Enable string `yaml:"enable"`
@@ -174,7 +148,19 @@ type config struct {
 	} `yaml:"object"`
 
 	RpcPort struct {
+		OpenImUserPort           []int `yaml:"openImUserPort"`
+		OpenImFriendPort         []int `yaml:"openImFriendPort"`
+		OpenImMessagePort        []int `yaml:"openImMessagePort"`
+		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+		OpenImGroupPort          []int `yaml:"openImGroupPort"`
+		OpenImAuthPort           []int `yaml:"openImAuthPort"`
+		OpenImPushPort           []int `yaml:"openImPushPort"`
+		OpenImConversationPort   []int `yaml:"openImConversationPort"`
+		OpenImCachePort          []int `yaml:"openImCachePort"`
+		OpenImRtcPort            []int `yaml:"openImRtcPort"`
+		OpenImThirdPort          []int `yaml:"openImThirdPort"`
 	} `yaml:"rpcPort"`
+
 	RpcRegisterName struct {
 		OpenImUserName           string `yaml:"openImUserName"`
 		OpenImFriendName         string `yaml:"openImFriendName"`
@@ -199,9 +185,10 @@ type config struct {
 	} `yaml:"log"`
 
 	LongConnSvr struct {
-		WebsocketMaxConnNum int `yaml:"websocketMaxConnNum"`
-		WebsocketMaxMsgLen  int `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeOut    int `yaml:"websocketTimeOut"`
+		OpenImWsPort        []int `yaml:"openImWsPort"`
+		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
+		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
+		WebsocketTimeOut    int   `yaml:"websocketTimeOut"`
 	} `yaml:"longConnSvr"`
 
 	Push struct {
@@ -266,7 +253,6 @@ type config struct {
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
-	Notification Notification `yaml:"notification"`
 
 	Prometheus struct {
 		Enable                        bool  `yaml:"enable"`
@@ -284,7 +270,7 @@ type config struct {
 	} `yaml:"prometheus"`
 }
 
-type Notification struct {
+type notification struct {
 	GroupCreated             NotificationConf `yaml:"groupCreated"`
 	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
 	JoinGroupApplication     NotificationConf `yaml:"joinGroupApplication"`
@@ -320,76 +306,4 @@ type Notification struct {
 	//////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
-}
-
-func GetOptionsByNotification(cfg NotificationConf) utils.Options {
-	opts := utils.NewOptions()
-	if cfg.UnreadCount {
-		opts = utils.WithOptions(opts, utils.WithUnreadCount(true))
-	}
-	if cfg.OfflinePush.Enable {
-		opts = utils.WithOptions(opts, utils.WithOfflinePush(true))
-	}
-	switch cfg.ReliabilityLevel {
-	case constant.UnreliableNotification:
-	case constant.ReliableNotificationNoMsg:
-		opts = utils.WithOptions(opts, utils.WithHistory(true), utils.WithPersistent())
-	}
-	opts = utils.WithOptions(opts, utils.WithSendMsg(cfg.IsSendMsg))
-	return opts
-}
-
-func (c *config) unmarshalConfig(config interface{}, configPath string) error {
-	bytes, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		return err
-	}
-	if err = yaml.Unmarshal(bytes, config); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *config) initConfig(config interface{}, configName, configFolderPath string) error {
-	if configFolderPath == "" {
-		configFolderPath = DefaultFolderPath
-	}
-	configPath := filepath.Join(configFolderPath, configName)
-	defer func() {
-		fmt.Println("use config", configPath)
-	}()
-	_, err := os.Stat(configPath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return err
-		}
-		configPath = filepath.Join(Root, "config", configName)
-	} else {
-		Root = filepath.Dir(configPath)
-	}
-	return c.unmarshalConfig(config, configPath)
-}
-
-func (c *config) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
-	bytes, err := yaml.Marshal(Config)
-	if err != nil {
-		return err
-	}
-	return registry.RegisterConf2Registry(ConfKey, bytes)
-}
-
-func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
-	return registry.GetConfFromRegistry(ConfKey)
-}
-
-func InitConfig(configFolderPath string) error {
-	err := Config.initConfig(&Config, FileName, configFolderPath)
-	if err != nil {
-		return err
-	}
-	err = Config.initConfig(&Config.Notification, NotificationFileName, configFolderPath)
-	if err != nil {
-		return err
-	}
-	return nil
 }

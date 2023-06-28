@@ -10,11 +10,11 @@ zookeeper:
 
 mysql:
   address: [ 127.0.0.1:13306 ]            #mysql地址 目前仅支持单机，默认即可
-  userName: root                          #mysql用户名，建议修改
+  username: root                          #mysql用户名，建议修改
   password: openIM123                     # mysql密码，建议修改
-  databaseName: openIM_v2                 #默认即可
-  maxOpenConns: 100                       #
-  maxIdleConns: 10                        #
+  database: openIM_v2                     #默认即可
+  maxOpenConn: 100                        #
+  maxIdleConn: 10                         #
   maxLifeTime: 5                          #
   logLevel: 4                             # 1=slient 2=error 3=warn 4=info
   slowThreshold: 500                      # 毫秒
@@ -25,7 +25,7 @@ mongo:
   timeout: 60
   database: openIM                        #mongo db 默认即可
   source: admin
-  userName: root                          #mongo用户名，建议先不设置
+  username: root                          #mongo用户名，建议先不设置
   password: openIM123                     #mongo密码，建议先不设置
   maxPoolSize: 100
   retainChatRecords: 3650                 #mongo保存离线消息时间（天），根据需求修改
@@ -33,12 +33,12 @@ mongo:
 
 redis:
   address: [ 127.0.0.1:16379 ]            #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
-  userName:                               #only redis version 6.0+ need username
-  passWord: openIM123                     #redis密码 建议修改
+  username:                               #only redis version 6.0+ need username
+  password: openIM123                     #redis密码 建议修改
 
 kafka:
-  SASLUserName:
-  SASLPassword:
+  username:
+  password:
   addr: [ 127.0.0.1:9092 ]                #kafka配置，默认即可
   latestMsgToRedis:
     topic: "latestMsgToRedis"             #
@@ -69,13 +69,6 @@ rpc:
 api:
   openImApiPort: [ 10002 ]                #api服务端口
   listenIP:
-
-sdk:
-  openImSdkWsPort: [ 10003 ]              #jssdk服务端口
-  dataDir: [ ../db/sdk/ ]
-  openImWsAddress: ws://127.0.0.1:10001
-  openImApiAddress: http://127.0.0.1:10002
-
 
 object:
   enable: minio
@@ -114,7 +107,7 @@ object:
     externalId:                               #角色扩展Id
     roleSessionName:                          #角色SESSION名称
 
-rpcPort:                                      #rpc服务端口 默认即可
+rpcPort: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -126,7 +119,7 @@ rpcPort:                                      #rpc服务端口 默认即可
   openImRtcPort: [ 10190 ]
   openImThirdPort: [ 10200 ]
 
-rpcRegisterName:                            #rpc注册服务名，默认即可
+rpcRegisterName: #rpc注册服务名，默认即可
   openImUserName: User
   openImFriendName: Friend
   openImMsgName: Msg
@@ -156,16 +149,22 @@ longConnSvr:
 
 push:
   enable: getui
-  geTui:                                  #个推推送
+  geTui: #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
     channelID: ""
     channelName: ""
-  fcm:                            #firebase cloud message 消息推送
+  fcm: #firebase cloud message 消息推送
     serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-
+  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
+    enable: false
+    
 manager:
   #app管理员userID和nickename，  用于管理后台登录
   appManagerUserID: [ "openIM123456","openIM654321","openIMAdmin" ]

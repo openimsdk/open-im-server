@@ -23,7 +23,7 @@ func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
 	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ms2pschat.Topic}, config.Config.Kafka.Addr,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
 	return &consumerHandler
 }
