@@ -31,10 +31,10 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	log.ZDebug(ctx, "get rpc ctx success", "conn target", cc.Target())
 	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
-		// log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
+		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
 	}
-	// log.ZError(ctx, "rpc resp error", err)
+	log.ZError(ctx, "rpc resp error", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())
