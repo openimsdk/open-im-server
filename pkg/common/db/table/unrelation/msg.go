@@ -21,6 +21,8 @@ type MsgDocModel struct {
 }
 
 type RevokeModel struct {
+	ID       string `bson:"id"`
+	Role     int32  `bson:"role"`
 	UserID   string `bson:"user_id"`
 	Nickname string `bson:"nickname"`
 	Time     int64  `bson:"time"`

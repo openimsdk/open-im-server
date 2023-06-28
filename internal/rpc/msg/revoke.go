@@ -3,6 +3,7 @@ package msg
 import (
 	"context"
 	"encoding/json"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -40,15 +41,19 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if len(msgs) == 0 || msgs[0] == nil {
 		return nil, errs.ErrRecordNotFound.Wrap("msg not found")
 	}
-	// todo: 判断是否已经撤回
+	if msgs[0].ContentType == constant.MsgRevokeNotification {
+		return nil, errs.ErrMsgAlreadyRevoke.Wrap("msg already revoke")
+	}
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
+	var role int32
 	if !tokenverify.IsAppManagerUid(ctx) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
 			if err := tokenverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
 				return nil, err
 			}
+			role = user.AppMangerLevel
 		case constant.SuperGroupChatType:
 			members, err := m.Group.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}), true)
 			if err != nil {
@@ -65,23 +70,28 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 					return nil, errs.ErrNoPermission.Wrap("no permission")
 				}
 			}
+			if member := members[req.UserID]; member != nil {
+				role = member.RoleLevel
+			}
 		default:
 			return nil, errs.ErrInternalServer.Wrap("msg sessionType not supported")
 		}
 	}
+	now := time.Now().UnixMilli()
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
+		ID:       uuid.New().String(),
+		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,
-		Time:     time.Now().UnixMilli(),
+		Time:     now,
 	})
 	if err != nil {
 		return nil, err
 	}
-
 	tips := sdkws.RevokeMsgTips{
 		RevokerUserID:  req.UserID,
-		ClientMsgID:    "",
-		RevokeTime:     utils.GetCurrentTimestampByMill(),
+		ClientMsgID:    msgs[0].ClientMsgID,
+		RevokeTime:     now,
 		Seq:            req.Seq,
 		SesstionType:   msgs[0].SessionType,
 		ConversationID: req.ConversationID,
