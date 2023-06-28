@@ -15,7 +15,7 @@ OpenIMSDK/.github:
 
 OpenIMSDK/community:
   - source: LICENSE
-    dest: LICENSE 
+    dest: LICENSE
   - source: script/LICENSE/
     dest: scripts/LICENSE/
     replace: false
@@ -51,7 +51,7 @@ OpenIMSDK/OpenIM-Docs:
       sync.yml
   - source: script/githooks/
     dest: scripts/githooks/
-    replace: false
+    replace: true
 
 
 group:
@@ -77,3 +77,6 @@ group:
       - source: .github/workflows/help-comment-issue.yml
         dest: .github/workflows/help-comment-issue.yml
         replace: false
+      - source: ./script/githooks/
+        dest: ./scripts/githooks/
+        replace: true
