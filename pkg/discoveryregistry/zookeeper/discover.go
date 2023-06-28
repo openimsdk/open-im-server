@@ -3,6 +3,7 @@ package zookeeper
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 
@@ -109,5 +110,7 @@ func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc
 }
 
 func (s *ZkClient) CloseConn(conn grpc.ClientConnInterface) {
-	//conn.Close()
+	if closer, ok := conn.(io.Closer); ok {
+		closer.Close()
+	}
 }
