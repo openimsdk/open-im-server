@@ -1,14 +1,14 @@
 package zookeeper
 
 import (
+	"time"
+
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 )
 
 func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc.DialOption) error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
 	if err := s.ensureName(rpcRegisterName); err != nil {
 		return err
 	}
@@ -32,6 +32,7 @@ func (s *ZkClient) UnRegister() error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(time.Second)
 	s.node = ""
 	s.localConns = make(map[string][]resolver.Address)
 	s.resolvers = make(map[string]*Resolver)

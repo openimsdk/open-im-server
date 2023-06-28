@@ -34,13 +34,12 @@ type ZkClient struct {
 	node      string
 	ticker    *time.Ticker
 
-	lock    sync.RWMutex
+	lock    sync.Locker
 	options []grpc.DialOption
 
 	resolvers    map[string]*Resolver
 	localConns   map[string][]resolver.Address
 	balancerName string
-	RoundRobin
 
 	logger Logger
 }
@@ -92,6 +91,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		timeout:    timeout,
 		localConns: make(map[string][]resolver.Address),
 		resolvers:  make(map[string]*Resolver),
+		lock:       &sync.Mutex{},
 	}
 	client.ticker = time.NewTicker(defaultFreq)
 	for _, option := range options {
@@ -154,6 +154,7 @@ func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 }
 
 func (s *ZkClient) flushResolver(serviceName string) {
+	s.logger.Printf("start flush")
 	r, ok := s.resolvers[serviceName]
 	if ok {
 		r.ResolveNow(resolver.ResolveNowOptions{})
@@ -196,3 +197,8 @@ func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
 	return s.localConns
 }
+
+type FakeLock struct{}
+
+func (s *FakeLock) Lock()   {}
+func (s *FakeLock) Unlock() {}

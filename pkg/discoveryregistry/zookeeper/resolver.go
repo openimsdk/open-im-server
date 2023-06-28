@@ -2,8 +2,9 @@ package zookeeper
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"google.golang.org/grpc/resolver"
 )

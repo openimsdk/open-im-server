@@ -247,7 +247,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
-		v.Close()
+		p.discov.CloseConn(v)
 		if err != nil {
 			continue
 		}

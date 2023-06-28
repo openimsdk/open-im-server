@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
@@ -247,23 +246,30 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 			continue
 		}
 		if msg.Revoke != nil {
-			var conversationID string
-			if index := strings.LastIndex(docID, ":"); index > 0 {
-				conversationID = docID[:index]
+			revokeContent := sdkws.MessageRevokedContent{
+				RevokerID:                   msg.Revoke.ID,
+				RevokerRole:                 msg.Revoke.Role,
+				ClientMsgID:                 msg.Msg.ClientMsgID,
+				RevokerNickname:             msg.Revoke.Nickname,
+				RevokeTime:                  msg.Revoke.Time,
+				SourceMessageSendTime:       msg.Msg.SendTime,
+				SourceMessageSendID:         msg.Msg.SendID,
+				SourceMessageSenderNickname: msg.Msg.SenderNickname,
+				SessionType:                 msg.Msg.SessionType,
+				Seq:                         msg.Msg.Seq,
+				Ex:                          msg.Msg.Ex,
 			}
-			tips := sdkws.RevokeMsgTips{
-				RevokerUserID:  msg.Revoke.UserID,
-				ClientMsgID:    msg.Msg.ClientMsgID,
-				RevokeTime:     msg.Revoke.Time,
-				SesstionType:   msg.Msg.SessionType,
-				Seq:            msg.Msg.Seq,
-				ConversationID: conversationID,
+			data, err := json.Marshal(&revokeContent)
+			if err != nil {
+				return nil, err
 			}
-			tipsData, _ := json.Marshal(&tips)
 			elem := sdkws.NotificationElem{
-				Detail: string(tipsData),
+				Detail: string(data),
 			}
-			content, _ := json.Marshal(&elem)
+			content, err := json.Marshal(&elem)
+			if err != nil {
+				return nil, err
+			}
 			msg.Msg.ContentType = constant.MsgRevokeNotification
 			msg.Msg.Content = string(content)
 		}

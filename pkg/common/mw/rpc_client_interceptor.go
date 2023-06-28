@@ -23,7 +23,7 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
-	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req))
+	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req), "invoker", invoker, "invoker_type", fmt.Sprintf("%T", invoker))
 	ctx, err = getRpcContext(ctx, method)
 	if err != nil {
 		return err
@@ -31,10 +31,10 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	log.ZDebug(ctx, "get rpc ctx success", "conn target", cc.Target())
 	err = invoker(ctx, method, req, resp, cc, opts...)
 	if err == nil {
-		// log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
+		log.ZInfo(ctx, "rpc client resp", "funcName", method, "resp", rpcString(resp))
 		return nil
 	}
-	// log.ZError(ctx, "rpc resp error", err)
+	log.ZError(ctx, "rpc resp error", err)
 	rpcErr, ok := err.(interface{ GRPCStatus() *status.Status })
 	if !ok {
 		return errs.ErrInternalServer.Wrap(err.Error())

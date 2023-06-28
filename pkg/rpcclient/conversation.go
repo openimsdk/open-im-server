@@ -14,7 +14,7 @@ import (
 
 type Conversation struct {
 	Client conversation.ConversationClient
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
@@ -61,6 +61,10 @@ func (c *ConversationRpcClient) GroupChatFirstCreateConversation(ctx context.Con
 
 func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
+	return err
+}
+func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
+	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
 	return err
 }
 

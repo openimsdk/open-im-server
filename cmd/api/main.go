@@ -45,7 +45,9 @@ func startPprof() {
 }
 
 func run(port int) error {
-	var err error
+	if port == 0 {
+		return fmt.Errorf("port is empty")
+	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err

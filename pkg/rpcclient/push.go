@@ -10,13 +10,13 @@ import (
 )
 
 type Push struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImPushName)
 	if err != nil {
 		panic(err)
 	}

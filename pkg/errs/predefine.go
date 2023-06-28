@@ -49,9 +49,10 @@ var (
 	//不是对方的好友
 	ErrNotPeersFriend = NewCodeError(NotPeersFriend, "NotPeersFriend")
 
-	ErrMutedInGroup   = NewCodeError(MutedInGroup, "MutedInGroup")
-	ErrMutedGroup     = NewCodeError(MutedGroup, "MutedGroup")
-	ErrUserNotRecvMsg = NewCodeError(UserNotRecvMsg, "UserNotRecvMsg")
+	ErrMutedInGroup     = NewCodeError(MutedInGroup, "MutedInGroup")
+	ErrMutedGroup       = NewCodeError(MutedGroup, "MutedGroup")
+	ErrUserNotRecvMsg   = NewCodeError(UserNotRecvMsg, "UserNotRecvMsg")
+	ErrMsgAlreadyRevoke = NewCodeError(MsgAlreadyRevoke, "MsgAlreadyRevoke")
 
 	ErrConnOverMaxNumLimit = NewCodeError(ConnOverMaxNumLimit, "ConnOverMaxNumLimit")
 

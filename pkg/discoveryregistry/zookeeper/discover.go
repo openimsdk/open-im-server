@@ -3,6 +3,7 @@ package zookeeper
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 
@@ -71,9 +72,10 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 	return conns, nil
 }
 
-func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
+func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
 	s.lock.Lock()
+	defer s.lock.Unlock()
 	opts = append(s.options, opts...)
 	conns := s.localConns[serviceName]
 	if len(conns) == 0 {
@@ -81,30 +83,34 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 		s.logger.Printf("get conns from zk remote, serviceName: %s", serviceName)
 		conns, err = s.GetConnsRemote(serviceName)
 		if err != nil {
-			s.lock.Unlock()
 			return nil, err
 		}
 		s.localConns[serviceName] = conns
 	}
-	s.lock.Unlock()
-	var ret []*grpc.ClientConn
+	var ret []grpc.ClientConnInterface
 	s.logger.Printf("get conns from zk success, serviceName: %s", serviceName)
 	for _, conn := range conns {
-		c, err := grpc.DialContext(ctx, conn.Addr, append(s.options, opts...)...)
+		cc, err := grpc.DialContext(ctx, conn.Addr, append(s.options, opts...)...)
 		if err != nil {
 			return nil, errors.Wrap(err, fmt.Sprintf("conns dialContext error, conn: %s", conn.Addr))
 		}
-		ret = append(ret, c)
+		ret = append(ret, newClientConnInterface(cc))
 	}
 	s.logger.Printf("dial ctx success, serviceName: %s", serviceName)
 	return ret, nil
 }
 
-func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
 	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
-	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
+	cc, err := grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
+	if err != nil {
+		return nil, err
+	}
+	return newClientConnInterface(cc), nil
 }
 
-func (s *ZkClient) CloseConn(conn *grpc.ClientConn) {
-	conn.Close()
+func (s *ZkClient) CloseConn(conn grpc.ClientConnInterface) {
+	if closer, ok := conn.(io.Closer); ok {
+		closer.Close()
+	}
 }

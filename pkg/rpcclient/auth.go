@@ -19,7 +19,7 @@ func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 }
 
 type Auth struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }

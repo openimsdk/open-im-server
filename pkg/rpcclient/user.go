@@ -15,7 +15,7 @@ import (
 )
 
 type User struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client user.UserClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
