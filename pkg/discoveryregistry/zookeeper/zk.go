@@ -198,7 +198,7 @@ func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
 	return s.localConns
 }
 
-//type FakeLock struct{}
-//
-//func (s *FakeLock) Lock()   {}
-//func (s *FakeLock) Unlock() {}
+type FakeLock struct{}
+
+func (s *FakeLock) Lock()   {}
+func (s *FakeLock) Unlock() {}
