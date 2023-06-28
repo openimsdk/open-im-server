@@ -9,8 +9,6 @@ import (
 )
 
 func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc.DialOption) error {
-	// s.lock.Lock()
-	// defer s.lock.Unlock()
 	if err := s.ensureName(rpcRegisterName); err != nil {
 		return err
 	}
@@ -28,8 +26,8 @@ func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc
 }
 
 func (s *ZkClient) UnRegister() error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	//s.lock.Lock()
+	//defer s.lock.Unlock()
 	err := s.conn.Delete(s.node, -1)
 	if err != nil {
 		return err
