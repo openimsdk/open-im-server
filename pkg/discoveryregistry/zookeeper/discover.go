@@ -27,13 +27,13 @@ func (s *ZkClient) watch(wg *sync.WaitGroup) {
 			s.logger.Printf("zk event: %s", event.Path)
 			l := strings.Split(event.Path, "/")
 			if len(l) > 1 {
-				//s.lock.Lock()
+				s.lock.Lock()
 				rpcName := l[len(l)-1]
 				s.flushResolver(rpcName)
 				if len(s.localConns[rpcName]) != 0 {
 					delete(s.localConns, rpcName)
 				}
-				//s.lock.Unlock()
+				s.lock.Unlock()
 			}
 			s.logger.Printf("zk event handle success: %s", event.Path)
 		case zk.EventNodeDataChanged:
@@ -74,8 +74,8 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 
 func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
-	//s.lock.Lock()
-	//defer s.lock.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	opts = append(s.options, opts...)
 	conns := s.localConns[serviceName]
 	if len(conns) == 0 {

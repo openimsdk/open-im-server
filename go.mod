@@ -29,7 +29,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.3
 	golang.org/x/image v0.3.0
 	google.golang.org/api v0.114.0
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.5
@@ -121,6 +121,7 @@ require (
 	golang.org/x/time v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230525234020-1aefcd67740a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230626202813-9b080da550b3 // indirect
 )
 
