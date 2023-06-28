@@ -2,8 +2,9 @@ package zookeeper
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"google.golang.org/grpc/resolver"
 )
@@ -39,8 +40,8 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	r.cc = cc
 	r.getConnsRemote = s.GetConnsRemote
 	r.ResolveNow(resolver.ResolveNowOptions{})
-	//s.lock.Lock()
-	//defer s.lock.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	s.resolvers[strings.TrimLeft(target.URL.Path, "/")] = r
 	s.logger.Printf("build resolver finished: %+v, cc: %+v", target, cc)
 	return r, nil
