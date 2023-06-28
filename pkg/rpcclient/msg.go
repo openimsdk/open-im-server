@@ -104,7 +104,7 @@ func newSessionTypeConf() map[int32]int32 {
 }
 
 type Message struct {
-	conn   *grpc.ClientConn
+	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
