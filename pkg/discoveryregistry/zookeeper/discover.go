@@ -44,6 +44,10 @@ func (s *ZkClient) watch() {
 
 func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address, err error) {
 	path := s.getPath(serviceName)
+	_, _, _, err = s.conn.ChildrenW(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "children watch error")
+	}
 	childNodes, _, err := s.conn.Children(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "get children error")
@@ -57,12 +61,8 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 			}
 			return nil, errors.Wrap(err, "get children error")
 		}
-		log.ZDebug(context.Background(), "get conns from remote", "conn", data)
+		log.ZDebug(context.Background(), "get conns from remote", "conn", string(data))
 		conns = append(conns, resolver.Address{Addr: string(data), ServerName: serviceName})
-	}
-	_, _, _, err = s.conn.ChildrenW(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "children watch error")
 	}
 	if len(conns) == 0 {
 		return nil, fmt.Errorf("no conn for service %s, grpc server may not exist, local conn is %v, please check zookeeper server %v, path: %s", serviceName, s.localConns, s.zkServers, s.zkRoot)
