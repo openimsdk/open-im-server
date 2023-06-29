@@ -22,7 +22,7 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 	newConns, err := r.getConnsRemote(strings.TrimLeft(r.target.URL.Path, "/"))
 	if err != nil {
 		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
-		r.ResolveNow(o)
+		// r.ResolveNow(o)
 		return
 	}
 	r.addrs = newConns
