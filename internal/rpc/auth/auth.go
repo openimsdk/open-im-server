@@ -48,7 +48,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*
 		return nil, err
 	}
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire * 24 * 60 * 60
 	return &resp, nil
 }
 
