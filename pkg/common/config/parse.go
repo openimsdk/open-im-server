@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -95,4 +96,12 @@ func InitConfig(configFolderPath string) error {
 		return err
 	}
 	return nil
+}
+
+func EncodeConfig() []byte {
+	buf := bytes.NewBuffer(nil)
+	if err := yaml.NewEncoder(buf).Encode(Config); err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
 }

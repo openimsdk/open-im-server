@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -9,8 +8,6 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-
-	"gopkg.in/yaml.v3"
 
 	"net/http"
 	_ "net/http/pprof"
@@ -61,12 +58,8 @@ func run(port int) error {
 		return err
 	}
 	fmt.Println("api init discov client success")
-	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {
-		return err
-	}
 	fmt.Println("api register public config to discov")
-	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
+	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov success")
