@@ -19,9 +19,9 @@ import (
 
 func Test_BatchInsertChat2DB(t *testing.T) {
 	config.Config.Mongo.Address = []string{"192.168.44.128:37017"}
-	config.Config.Mongo.Timeout = 60
+	// config.Config.Mongo.Timeout = 60
 	config.Config.Mongo.Database = "openIM"
-	config.Config.Mongo.Source = "admin"
+	// config.Config.Mongo.Source = "admin"
 	config.Config.Mongo.Username = "root"
 	config.Config.Mongo.Password = "openIM123"
 	config.Config.Mongo.MaxPoolSize = 100
@@ -130,9 +130,9 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 
 func GetDB() *commonMsgDatabase {
 	config.Config.Mongo.Address = []string{"192.168.44.128:37017"}
-	config.Config.Mongo.Timeout = 60
+	// config.Config.Mongo.Timeout = 60
 	config.Config.Mongo.Database = "openIM"
-	config.Config.Mongo.Source = "admin"
+	// config.Config.Mongo.Source = "admin"
 	config.Config.Mongo.Username = "root"
 	config.Config.Mongo.Password = "openIM123"
 	config.Config.Mongo.MaxPoolSize = 100

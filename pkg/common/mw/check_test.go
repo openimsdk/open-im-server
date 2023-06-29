@@ -2,12 +2,11 @@ package mw
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"testing"
 )
 
 func TestCheck(t *testing.T) {
-	config.Config.TokenPolicy.Secret = "123456"
+	// config.Config.TokenPolicy.Secret = "123456"
 
 	args := []string{"1", "2", "3"}
 
