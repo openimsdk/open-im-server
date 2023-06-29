@@ -1,93 +1,84 @@
-# OpenIM config
+#OpenIM config
 
 
 #---------------Infrastructure configuration---------------------#
 zookeeper:
-  schema: openim                          #默认即可
+  schema: openim                          #不建议修改
   address: [ 127.0.0.1:2181 ]             #
-  username:
-  password:
+  username:                               #用户名
+  password:                               #密码
 
 mysql:
-  address: [ 127.0.0.1:13306 ]            #mysql地址 目前仅支持单机，默认即可
-  username: root                          #mysql用户名，建议修改
-  password: openIM123                     # mysql密码，建议修改
-  database: openIM_v2                     #默认即可
-  maxOpenConn: 100                        #
-  maxIdleConn: 10                         #
-  maxLifeTime: 5                          #
-  logLevel: 4                             # 1=slient 2=error 3=warn 4=info
-  slowThreshold: 500                      # 毫秒
+  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
+  username: root                          #用户名
+  password: openIM123                     #密码
+  database: openIM_v2                     #不建议修改
+  maxOpenConn: 1000                       #最大连接数
+  maxIdleConn: 100                        #最大空闲连接数
+  maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
+  logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
+  slowThreshold: 500                      #慢语句阈值 （毫秒）
 
 mongo:
   uri:                                    #不为空则直接使用该值
-  address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
-  timeout: 60
+  address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
   database: openIM                        #mongo db 默认即可
-  source: admin
-  username: root                          #mongo用户名，建议先不设置
-  password: openIM123                     #mongo密码，建议先不设置
+  username: root                          #用户名
+  password: openIM123                     #密码
   maxPoolSize: 100
-  retainChatRecords: 3650                 #mongo保存离线消息时间（天），根据需求修改
-  chatRecordsClearTime: "0 2 * * 3"       #每周三凌晨2点清除mongo中的过期消息，该配置和linux定时任务一样
 
 redis:
-  address: [ 127.0.0.1:16379 ]            #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
+  address: [ 127.0.0.1:16379 ]            #
   username:                               #only redis version 6.0+ need username
-  password: openIM123                     #redis密码 建议修改
+  password: openIM123                     #密码
 
 kafka:
-  username:
-  password:
-  addr: [ 127.0.0.1:9092 ]                #kafka配置，默认即可
+  username:                               #用户名
+  password:                               #密码
+  addr: [ 127.0.0.1:9092 ]                #
   latestMsgToRedis:
-    topic: "latestMsgToRedis"             #
+    topic: "latestMsgToRedis"             #不建议修改
   offlineMsgToMongo:
-    topic: "offlineMsgToMongoMysql"       #用于mongo和mysql保存消息
+    topic: "offlineMsgToMongoMysql"       #不建议修改
   msgToPush:
-    topic: "msqToPush"                    #消息push
+    topic: "msqToPush"                    #不建议修改
   msgToModify:
-    topic: "msgToModify"                  #消息push
-  consumerGroupID:
-    msgToRedis: redis
-    msgToMongo: mongo
-    msgToMySql: mysql
-    msgToPush: push
-    msgToModify: modify
-
-
-#---------------Internal service configuration---------------------#
-
-
+    topic: "msgToModify"                  #不建议修改
+  consumerGroupID:                        #消费者组，不建议修改
+    msgToRedis: redis                     #
+    msgToMongo: mongo                     #
+    msgToMySql: mysql                     #
+    msgToPush: push                       #
+    msgToModify: modify                   #
 
 
 rpc:
   registerIP:                             #作为rpc启动时，注册到zookeeper的IP，api/gateway能访问到此ip和对应的rpcPort中的端口
-  listenIP:                               #如不设置则为 0.0.0.0
+  listenIP:                               #默认为0.0.0.0
 
 
 api:
   openImApiPort: [ 10002 ]                #api服务端口
-  listenIP:
+  listenIP:                               #默认为0.0.0.0
 
 object:
-  enable: minio
+  enable: minio                           #使用minio
   apiURL: http://127.0.0.1:10002/third/object
   minio:
-    tempBucket: "openim"
-    dataBucket: "openim"
-    location: us-east-1
-    endpoint: http://127.0.0.1:10005      #minio外网ip 这个ip是给客户端访问的
-    accessKeyID: root
-    secretAccessKey: openIM123
-    isDistributedMod: false               #是否分布式多硬盘部署 默认docker-compose中为false，如果是多硬盘部署，需要修改为true
-  tencent:
+    tempBucket: "openim"                  #不建议修改
+    dataBucket: "openim"                  #不建议修改
+    location: us-east-1                   #不建议修改
+    endpoint: http://127.0.0.1:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
+    accessKeyID: root                     #ID
+    secretAccessKey: openIM123            #秘钥
+    isDistributedMod: false               #是否分布式多硬盘部署，如果是多硬盘部署，需要修改为true
+  tencent:                                #tencent cos
     appID:
     region:
     bucket:
     secretID:
     secretKey:
-  ali: # ali oss
+  ali:                                    #ali oss
     regionID:
     accessKeyID:
     accessKeySecret:
@@ -98,16 +89,16 @@ object:
     stsDurationSeconds:
     OssRoleArn:
   aws:
-    accessKeyID:                              #AssumeRole用户关联的accessKeyID
-    accessKeySecret:                          #AssumeRole用户关联的accessKeySecrect
-    region:                                   #分区
-    bucket:                                   #桶
-    finalHost:                                #对外Host
-    roleArn:                                  #RoleArn
-    externalId:                               #角色扩展Id
-    roleSessionName:                          #角色SESSION名称
+    accessKeyID:
+    accessKeySecret:
+    region:
+    bucket:
+    finalHost:
+    roleArn:
+    externalId:
+    roleSessionName:
 
-rpcPort: #rpc服务端口 默认即可
+rpcPort:                              #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如 openImUserPort: [10110, 10111]
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -119,7 +110,7 @@ rpcPort: #rpc服务端口 默认即可
   openImRtcPort: [ 10190 ]
   openImThirdPort: [ 10200 ]
 
-rpcRegisterName: #rpc注册服务名，默认即可
+rpcRegisterName:                      #rpc注册服务名，不建议修改
   openImUserName: User
   openImFriendName: Friend
   openImMsgName: Msg
@@ -128,71 +119,66 @@ rpcRegisterName: #rpc注册服务名，默认即可
   openImGroupName: Group
   openImAuthName: Auth
   openImConversationName: Conversation
-  openImRtcName: Rtc
   openImThirdName: Third
 
 log:
-  storageLocation: ../logs/
-  rotationTime: 24
-  remainRotationCount: 2                  #日志数量
-  remainLogLevel: 6                       #日志级别 6表示全都打印，测试阶段建议设置为6
+  storageLocation: ../logs/           #存放目录
+  rotationTime: 24                    #日志旋转时间
+  remainRotationCount: 2              #日志数量
+  remainLogLevel: 6                   #日志级别 6表示全都打印，
   isStdout: false
   isJson: false
   withStack: false
 
-
 longConnSvr:
-  openImWsPort: [ 10001 ]                 #ws服务端口，默认即可，要开放此端口或做nginx转发
-  websocketMaxConnNum: 10000
-  websocketMaxMsgLen: 4096
-  websocketTimeOut: 10
+  openImWsPort: [ 10001 ]             #msg_gateway的websocket端口
+  websocketMaxConnNum: 100000         #websocket最大连接数
+  websocketMaxMsgLen: 4096            #websocket请求包最大长度
+  websocketTimeout: 10                #websocket连接握手超时时间
 
 push:
   enable: getui
-  geTui: #个推推送
+  geTui:                              #个推离线推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
     channelID: ""
     channelName: ""
-  fcm: #firebase cloud message 消息推送
-    serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
+  fcm:                                #fcm离线推送
+    serviceAccount: "x.json"          #帐号文件，并放在 config目录下
+  jpns:                               #极光推送 在极光后台申请后，修改以下四项
     appKey:
     masterSecret:
     pushUrl:
     pushIntent:
-    enable: false
     
 manager:
-  #app管理员userID和nickename，  用于管理后台登录
-  userID: [ "openIM123456","openIM654321","openIMAdmin" ]
-  nickname: [ "system1","system2", "system3" ]
+  userID: [ "openIM123456","openIM654321","openIMAdmin" ]   #内置的app管理员userID
+  nickname: [ "system1","system2", "system3" ]              #内置的app管理员nickname
 
 
 
-# 多端互踢策略
-# 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
-multiLoginPolicy: 1
 
-#msg log insert to db
-chatPersistenceMysql: true
-#消息缓存时间
-msgCacheTimeout: 86400
-#群聊已读开启
-groupMessageHasReadReceiptEnable: true
-#单聊已读开启
-singleMessageHasReadReceiptEnable: true
+multiLoginPolicy: 1                                     #多平台登录：Android、iOS、Windows、Mac、web 每种平台只能有一个在线
 
-#token config
+
+chatPersistenceMysql: true                              #消息是否存入mysql，mysql中的消息仅用于管理后台使用
+msgCacheTimeout: 86400                                  #信消息缓存时间秒，不建议修改
+groupMessageHasReadReceiptEnable: true                  #群聊已读是否开启
+singleMessageHasReadReceiptEnable: true                 #单聊已读是否开启
+
+retainChatRecords: 365                                  #mongo保存离线消息时间（天）
+chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息
+
+
+
 tokenPolicy:
-  accessSecret: openIM123 #token生成相关，默认即可
-  # Token effective time day as a unit
-  accessExpire: 90  #token过期时间（天） 默认即可
+  accessSecret: openIM123                              #秘钥，获取token时校验
+  accessExpire: 90                                     #过期时间（天）
 
 messageVerify:
-  friendVerify: false
+  friendVerify: false                                  #发送消息时是否验证好友关系
 
 #ios系统推送声音以及标记计数
 iosPush:
@@ -201,12 +187,12 @@ iosPush:
   production: false
 
 callback:
-  # callback url 需要自行更换callback url
+  # 回调callback
   url:
   beforeSendSingleMsg:
-    enable: false # 回调是否启用
-    timeout: 5 #callback超时时间（秒）
-    failedContinue: true #如果callback失败是否继续
+    enable: false                                     #是否启用此回调事件
+    timeout: 5                                        #超时时间（秒）
+    failedContinue: true                              #如回调失败是否继续往后执行
   afterSendSingleMsg:
     enable: false
     timeout: 5
@@ -263,8 +249,8 @@ callback:
     timeout: 5
     failedContinue: true
 
-# prometheus每个服务监听的端口数量需要和rpc port保持一致
-prometheus:
+
+prometheus:                                                   #prometheus每个服务的端口数量需要和rpcPort保持对应
   enable: false
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
@@ -276,5 +262,5 @@ prometheus:
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # 端口数量和 script/path_info.cfg  msg_transfer_service_num保持一致
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.cfg中的msg_transfer_service_num保持一致
 

@@ -53,16 +53,12 @@ type config struct {
 	} `yaml:"mysql"`
 
 	Mongo struct {
-		Uri                  string   `yaml:"uri"`
-		Address              []string `yaml:"address"`
-		Timeout              int      `yaml:"timeout"`
-		Database             string   `yaml:"database"`
-		Source               string   `yaml:"source"`
-		Username             string   `yaml:"username"`
-		Password             string   `yaml:"password"`
-		MaxPoolSize          int      `yaml:"maxPoolSize"`
-		RetainChatRecords    int      `yaml:"retainChatRecords"`
-		ChatRecordsClearTime string   `yaml:"chatRecordsClearTime"`
+		Uri         string   `yaml:"uri"`
+		Address     []string `yaml:"address"`
+		Database    string   `yaml:"database"`
+		Username    string   `yaml:"username"`
+		Password    string   `yaml:"password"`
+		MaxPoolSize int      `yaml:"maxPoolSize"`
 	} `yaml:"mongo"`
 
 	Redis struct {
@@ -170,7 +166,6 @@ type config struct {
 		OpenImGroupName          string `yaml:"openImGroupName"`
 		OpenImAuthName           string `yaml:"openImAuthName"`
 		OpenImConversationName   string `yaml:"openImConversationName"`
-		OpenImRtcName            string `yaml:"openImRtcName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
 	} `yaml:"rpcRegisterName"`
 
@@ -188,7 +183,7 @@ type config struct {
 		OpenImWsPort        []int `yaml:"openImWsPort"`
 		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeOut    int   `yaml:"websocketTimeOut"`
+		WebsocketTimeout    int   `yaml:"websocketTimeout"`
 	} `yaml:"longConnSvr"`
 
 	Push struct {
@@ -216,13 +211,14 @@ type config struct {
 		Nickname []string `yaml:"nickname"`
 	} `yaml:"manager"`
 
-	MultiLoginPolicy                  int  `yaml:"multiLoginPolicy"`
-	ChatPersistenceMysql              bool `yaml:"chatPersistenceMysql"`
-	MsgCacheTimeout                   int  `yaml:"msgCacheTimeout"`
-	GroupMessageHasReadReceiptEnable  bool `yaml:"groupMessageHasReadReceiptEnable"`
-	SingleMessageHasReadReceiptEnable bool `yaml:"singleMessageHasReadReceiptEnable"`
-
-	TokenPolicy struct {
+	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
+	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
+	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
+	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
+	RetainChatRecords                 int    `yaml:"retainChatRecords"`
+	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
+	TokenPolicy                       struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	} `yaml:"tokenPolicy"`

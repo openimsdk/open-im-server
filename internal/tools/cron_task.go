@@ -11,8 +11,8 @@ import (
 )
 
 func StartCronTask() error {
-	log.ZInfo(context.Background(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
-	fmt.Println("cron task start, config", config.Config.Mongo.ChatRecordsClearTime)
+	log.ZInfo(context.Background(), "start cron task", "cron config", config.Config.ChatRecordsClearTime)
+	fmt.Println("cron task start, config", config.Config.ChatRecordsClearTime)
 	msgTool, err := InitMsgTool()
 	if err != nil {
 		return err
@@ -20,9 +20,9 @@ func StartCronTask() error {
 	c := cron.New()
 	var wg sync.WaitGroup
 	wg.Add(1)
-	_, err = c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
+	_, err = c.AddFunc(config.Config.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
 	if err != nil {
-		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
+		fmt.Println("start cron failed", err.Error(), config.Config.ChatRecordsClearTime)
 		return err
 	}
 	c.Start()
