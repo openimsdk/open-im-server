@@ -3,9 +3,10 @@ package zookeeper
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"google.golang.org/grpc"
-	"strings"
 )
 
 func newClientConnInterface(cc grpc.ClientConnInterface) grpc.ClientConnInterface {
