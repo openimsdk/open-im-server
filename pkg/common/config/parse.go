@@ -98,9 +98,9 @@ func InitConfig(configFolderPath string) error {
 	return nil
 }
 
-func (c *config) EncodeConfig() []byte {
+func EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
+	if err := yaml.NewEncoder(buf).Encode(Config); err != nil {
 		panic(err)
 	}
 	return buf.Bytes()
