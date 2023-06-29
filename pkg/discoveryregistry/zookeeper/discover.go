@@ -44,25 +44,26 @@ func (s *ZkClient) watch() {
 
 func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address, err error) {
 	path := s.getPath(serviceName)
-	childNodes, _, err := s.conn.Children(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "get children error")
-	}
-	for _, child := range childNodes {
-		fullPath := path + "/" + child
-		data, _, err := s.conn.Get(fullPath)
-		if err != nil {
-			if err == zk.ErrNoNode {
-				return nil, errors.Wrap(err, "this is zk ErrNoNode")
-			}
-			return nil, errors.Wrap(err, "get children error")
-		}
-		log.ZDebug(context.Background(), "get conns from remote", "conn", string(data))
-		conns = append(conns, resolver.Address{Addr: string(data), ServerName: serviceName})
-	}
 	_, _, _, err = s.conn.ChildrenW(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "children watch error")
+	}
+	childNodes, _, err := s.conn.Children(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "get children error")
+	} else {
+		for _, child := range childNodes {
+			fullPath := path + "/" + child
+			data, _, err := s.conn.Get(fullPath)
+			if err != nil {
+				if err == zk.ErrNoNode {
+					return nil, errors.Wrap(err, "this is zk ErrNoNode")
+				}
+				return nil, errors.Wrap(err, "get children error")
+			}
+			log.ZDebug(context.Background(), "get conns from remote", "conn", string(data))
+			conns = append(conns, resolver.Address{Addr: string(data), ServerName: serviceName})
+		}
 	}
 	return conns, nil
 }
