@@ -91,7 +91,6 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		timeout:    timeout,
 		localConns: make(map[string][]resolver.Address),
 		resolvers:  make(map[string]*Resolver),
-		lock:       &sync.Mutex{},
 	}
 	client.ticker = time.NewTicker(defaultFreq)
 	for _, option := range options {
@@ -114,9 +113,8 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		return nil, err
 	}
 	resolver.Register(client)
-	var wg sync.WaitGroup
-	go client.refresh(&wg)
-	go client.watch(&wg)
+	go client.refresh()
+	go client.watch()
 	return client, nil
 }
 
@@ -138,7 +136,7 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 	return nil
 }
 
-func (s *ZkClient) refresh(wg *sync.WaitGroup) {
+func (s *ZkClient) refresh() {
 	for range s.ticker.C {
 		s.logger.Printf("refresh local conns")
 		s.lock.Lock()
@@ -149,12 +147,17 @@ func (s *ZkClient) refresh(wg *sync.WaitGroup) {
 			delete(s.localConns, rpcName)
 		}
 		s.lock.Unlock()
+		s.logger.Printf("refresh local conns success")
 	}
+}
 
+func (s *ZkClient) flushResolverAndDeleteLocal(serviceName string) {
+	s.logger.Printf("start flush %s", serviceName)
+	s.flushResolver(serviceName)
+	delete(s.localConns, serviceName)
 }
 
 func (s *ZkClient) flushResolver(serviceName string) {
-	s.logger.Printf("start flush")
 	r, ok := s.resolvers[serviceName]
 	if ok {
 		r.ResolveNow(resolver.ResolveNowOptions{})
@@ -197,8 +200,3 @@ func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
 	return s.localConns
 }
-
-type FakeLock struct{}
-
-func (s *FakeLock) Lock()   {}
-func (s *FakeLock) Unlock() {}
