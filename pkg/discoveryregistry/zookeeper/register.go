@@ -10,7 +10,7 @@ import (
 
 func (s *ZkClient) CreateRpcRootNodes(serviceNames []string) error {
 	for _, serviceName := range serviceNames {
-		if err := s.ensureName(serviceName); err != nil {
+		if err := s.ensureName(serviceName); err != nil && err != zk.ErrNodeExists {
 			return err
 		}
 	}

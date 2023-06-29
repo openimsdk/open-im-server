@@ -348,6 +348,13 @@ type Notification struct {
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }
 
+func GetServiceNames() []string {
+	return []string{Config.RpcRegisterName.OpenImUserName, Config.RpcRegisterName.OpenImFriendName, Config.RpcRegisterName.OpenImMsgName,
+		Config.RpcRegisterName.OpenImPushName, Config.RpcRegisterName.OpenImMessageGatewayName, Config.RpcRegisterName.OpenImGroupName,
+		Config.RpcRegisterName.OpenImAuthName, Config.RpcRegisterName.OpenImConversationName, Config.RpcRegisterName.OpenImRtcName,
+		Config.RpcRegisterName.OpenImThirdName}
+}
+
 func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	opts := utils.NewOptions()
 	if cfg.UnreadCount {

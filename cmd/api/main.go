@@ -60,6 +60,9 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
+	if client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+		return err
+	}
 	fmt.Println("api init discov client success")
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {

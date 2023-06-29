@@ -26,7 +26,7 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 	}
 	r.addrs = newConns
 	if err := r.cc.UpdateState(resolver.State{Addresses: newConns}); err != nil {
-		log.ZError(context.Background(), "UpdateState error", err, "conns", newConns)
+		log.ZError(context.Background(), "UpdateState error, conns is nil from svr", err, "conns", newConns)
 		return
 	}
 	log.ZDebug(context.Background(), "resolve now finished", "target", r.target, "conns", r.addrs)
