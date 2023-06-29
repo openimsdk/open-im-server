@@ -1,0 +1,169 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./friend;friend";
+package friend;
+
+message CommonResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+message CommID{
+  string OpUserID = 1;
+  string OperationID = 2;
+  string ToUserID = 4;
+  string FromUserID = 5;
+}
+
+
+message GetFriendsInfoReq{
+    CommID CommID = 1;
+}
+message GetFriendInfoResp{
+  int32  ErrCode = 1;
+  string ErrMsg = 2;
+  repeated server_api_params.FriendInfo FriendInfoList = 3;
+//  int32 IsBlack = 4;
+}
+
+
+message AddFriendReq{
+  CommID CommID = 1;
+  string ReqMsg = 2;
+}
+message AddFriendResp{
+    CommonResp CommonResp = 1;
+}
+
+
+message ImportFriendReq{
+  repeated string FriendUserIDList = 1;
+  string  OperationID = 2;
+  string FromUserID = 3;
+  string OpUserID = 4;
+}
+message UserIDResult{
+  string UserID = 1;
+  int32 Result = 2;
+}
+message ImportFriendResp{
+  CommonResp CommonResp = 1;
+  repeated UserIDResult UserIDResultList = 2;
+}
+
+
+message GetFriendApplyListReq{
+  CommID CommID = 1;
+}
+message GetFriendApplyListResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  repeated server_api_params.FriendRequest FriendRequestList = 3;
+}
+
+
+message GetFriendListReq{
+    CommID CommID = 1;
+}
+message GetFriendListResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  repeated server_api_params.FriendInfo FriendInfoList = 3;
+}
+
+
+message AddBlacklistReq{
+    CommID CommID = 1;
+}
+message AddBlacklistResp{
+  CommonResp CommonResp = 1;
+}
+
+
+message RemoveBlacklistReq{
+  CommID CommID = 1;
+}
+message RemoveBlacklistResp{
+  CommonResp CommonResp = 1;
+}
+
+message GetBlacklistReq{
+  CommID CommID = 1;
+}
+message GetBlacklistResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  repeated server_api_params.PublicUserInfo BlackUserInfoList = 3;
+}
+
+
+message IsFriendReq{
+  CommID CommID = 1;
+}
+message IsFriendResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  bool    Response = 3;
+}
+
+
+message IsInBlackListReq{
+  CommID CommID = 1;
+}
+message IsInBlackListResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  bool    Response = 3;
+}
+
+
+message DeleteFriendReq{
+  CommID CommID = 1;
+}
+message DeleteFriendResp{
+  CommonResp CommonResp = 1;
+}
+
+//process
+message AddFriendResponseReq{
+  CommID CommID = 1;
+  int32  handleResult = 2;
+  string handleMsg = 3;
+}
+message AddFriendResponseResp{
+  CommonResp CommonResp = 1;
+}
+
+message SetFriendRemarkReq{
+  CommID CommID = 1;
+  string Remark = 2;
+}
+message SetFriendRemarkResp{
+  CommonResp CommonResp = 1;
+}
+
+message GetSelfApplyListReq{
+  CommID CommID = 1;
+}
+message GetSelfApplyListResp{
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  repeated server_api_params.FriendRequest FriendRequestList = 3;
+}
+
+service friend{
+ // rpc getFriendsInfo(GetFriendsInfoReq) returns(GetFriendInfoResp);
+  rpc addFriend(AddFriendReq) returns(AddFriendResp);
+  rpc getFriendApplyList(GetFriendApplyListReq) returns(GetFriendApplyListResp);
+  rpc getSelfApplyList(GetSelfApplyListReq) returns(GetSelfApplyListResp);
+  rpc getFriendList(GetFriendListReq) returns(GetFriendListResp);
+  rpc addBlacklist(AddBlacklistReq) returns(AddBlacklistResp);
+  rpc removeBlacklist(RemoveBlacklistReq) returns(RemoveBlacklistResp);
+  rpc isFriend(IsFriendReq) returns(IsFriendResp);
+  rpc isInBlackList(IsInBlackListReq) returns(IsInBlackListResp);
+  rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
+  rpc deleteFriend(DeleteFriendReq) returns(DeleteFriendResp);
+  rpc addFriendResponse(AddFriendResponseReq) returns(AddFriendResponseResp);
+  rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
+  rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
+}

@@ -1,0 +1,93 @@
+syntax = "proto3";
+// import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./statistics;statistics";
+package statistics;
+
+message StatisticsReq {
+    string from = 1;
+    string to = 2;
+}
+
+message GetActiveUserReq{
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message UserResp{
+    string NickName = 1;
+    string UserId = 2;
+    int32 MessageNum = 3;
+}
+
+message GetActiveUserResp {
+    repeated UserResp Users = 1;
+}
+
+message GetActiveGroupReq{
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message GroupResp {
+    string GroupName = 1;
+    string GroupId = 2;
+    int32 MessageNum = 3;
+}
+
+message GetActiveGroupResp {
+    repeated GroupResp Groups = 1;
+}
+
+message DateNumList {
+    string Date = 1;
+    int32 Num = 2;
+}
+
+
+message GetMessageStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+
+message GetMessageStatisticsResp {
+    int32 PrivateMessageNum = 1;
+    int32 GroupMessageNum = 2;
+    repeated DateNumList PrivateMessageNumList = 3;
+    repeated DateNumList GroupMessageNumList = 4;
+}
+
+message GetGroupStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+
+message GetGroupStatisticsResp {
+    int32 IncreaseGroupNum = 1;
+    int32 TotalGroupNum = 2;
+    repeated DateNumList IncreaseGroupNumList = 3;
+    repeated DateNumList TotalGroupNumList = 4;
+}
+
+message GetUserStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message GetUserStatisticsResp {
+    int32 IncreaseUserNum = 1;
+    int32 ActiveUserNum = 2;
+    int32 TotalUserNum = 3;
+    repeated DateNumList IncreaseUserNumList = 4;
+    repeated DateNumList ActiveUserNumList = 5;
+    repeated DateNumList TotalUserNumList = 6;
+}
+
+service user {
+    rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
+    rpc GetActiveGroup(GetActiveGroupReq) returns(GetActiveGroupResp);
+    rpc GetMessageStatistics(GetMessageStatisticsReq) returns(GetMessageStatisticsResp);
+    rpc GetGroupStatistics(GetGroupStatisticsReq) returns(GetGroupStatisticsResp);
+    rpc GetUserStatistics(GetUserStatisticsReq) returns(GetUserStatisticsResp);
+}

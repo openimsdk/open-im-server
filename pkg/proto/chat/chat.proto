@@ -1,0 +1,82 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./chat;pbChat";
+package pbChat;
+
+
+
+message MsgDataToMQ{
+  string token =1;
+  string operationID = 2;
+  server_api_params.MsgData msgData = 3;
+}
+
+
+message MsgDataToDB {
+  server_api_params.MsgData msgData = 1;
+  string operationID = 2;
+
+}
+message PushMsgDataToMQ{
+  string OperationID = 1;
+  server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
+}
+
+//message PullMessageReq {
+//  string UserID = 1;
+//  int64 SeqBegin = 2;
+//  int64 SeqEnd = 3;
+//  string OperationID = 4;
+//}
+//
+//message PullMessageResp {
+//  int32 ErrCode = 1;
+//  string ErrMsg = 2;
+//  int64 MaxSeq = 3;
+//  int64 MinSeq = 4;
+//  repeated GatherFormat SingleUserMsg = 5;
+//  repeated GatherFormat GroupUserMsg = 6;
+//}
+//message PullMessageBySeqListReq{
+//  string UserID = 1;
+//  string OperationID = 2;
+//  repeated int64 seqList =3;
+//}
+message GetMaxAndMinSeqReq {
+  string UserID = 1;
+  string OperationID = 2;
+}
+message GetMaxAndMinSeqResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  uint32 MaxSeq = 3;
+  uint32 MinSeq = 4;
+}
+
+message SendMsgReq {
+
+string token =1;
+string operationID = 2;
+server_api_params.MsgData msgData = 3;
+
+
+}
+
+message SendMsgResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  string serverMsgID = 4;
+  string clientMsgID = 5;
+  int64  sendTime = 6;
+
+}
+
+
+
+service Chat {
+  rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
+  rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
+  rpc SendMsg(SendMsgReq) returns(SendMsgResp);
+  rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
+}

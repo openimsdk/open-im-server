@@ -1,0 +1,38 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./push;pbPush";
+package push;
+
+message PushMsgReq {
+  string operationID = 1;
+  server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
+}
+message PushMsgResp{
+  int32   ResultCode = 1;
+}
+//message InternalPushMsgReq{
+//  int32 ReqIdentifier = 1;
+//  string Token = 2;
+//  string SendID = 3;
+//  string OperationID = 4;
+//  int32 MsgIncr = 5;
+//  int32 PlatformID = 6;
+//  int32 SessionType = 7;
+//  int32 MsgFrom = 8;
+//  int32 ContentType = 9;
+//  string RecvID = 10;
+//  repeated string ForceList = 11;
+//  string Content = 12;
+//  string Options = 13;
+//  string ClientMsgID = 14;
+//  string OffLineInfo = 15;
+//  string Ex = 16;
+//
+//}
+
+service PushMsgService {
+  rpc PushMsg(PushMsgReq) returns(PushMsgResp);
+//  rpc InternalPushMsg(InternalPushMsgReq)returns(PushMsgResp);
+}
+

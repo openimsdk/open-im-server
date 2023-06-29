@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = "./admin_cms;admin_cms";
+package admin_cms;
+
+message AdminLoginReq  {
+    string OperationID = 1;
+    string AdminID = 2;
+    string Secret = 3;
+}
+
+
+message AdminLoginResp {
+    string token = 1;
+}
+
+service adminCMS {
+    rpc AdminLogin(AdminLoginReq) returns(AdminLoginResp);
+}

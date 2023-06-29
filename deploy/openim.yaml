@@ -1,0 +1,223 @@
+version: "3.7"
+networks: 
+  openim:
+    external: true
+ 
+services:
+  api:
+    networks: 
+      - openim
+    image: openim/api
+    container_name: openim_api
+    ports:
+      - 10000:10000 # API，必须开
+    volumes:
+      - ./logs:/app/logs
+      # Dockerfile 里定义了配置文件的路径环境变量，CONFIG_NAME，默认指向了 /app/config/config.yaml
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+
+  msg_gateway:
+    networks: 
+      - openim
+    image: openim/msg_gateway
+    container_name: openim_msg_gateway
+    ports:
+      - 17778:17778 # 消息，必须开
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+        
+  msg_transfer:
+    networks: 
+      - openim
+    image: openim/msg_transfer
+    container_name: openim_msg_transfer
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+  
+  push:
+    networks: 
+      - openim
+    image: openim/push
+    container_name: openim_push
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+
+  timer_task:
+    networks: 
+      - openim
+    image: openim/timer_task
+    container_name: openim_timer_task
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+
+  rpc_user:
+    networks: 
+      - openim
+    image: openim/rpc_user
+    container_name: openim_rpc_user
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+
+  rpc_friend:
+    networks: 
+      - openim
+    image: openim/rpc_friend
+    container_name: openim_rpc_friend
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+
+  rpc_group:
+    networks: 
+      - openim
+    image: openim/rpc_group
+    container_name: openim_rpc_group
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+
+  rpc_auth:
+    networks: 
+      - openim
+    image: openim/rpc_auth
+    container_name: openim_rpc_auth
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+
+  rpc_msg:
+    networks: 
+      - openim
+    image: openim/rpc_msg
+    container_name: openim_rpc_msg
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
+    # depends_on:
+    #   - kafka
+    #   # - mysql
+    #   # - mongodb
+    #   - redis
+    #   - etcd
+
+  demo:
+    networks: 
+      - openim
+    image: openim/demo
+    container_name: openim_demo
+    ports:
+      - 42233:42233
+    volumes:
+      - ./logs:/app/logs
+      - ./config/config.yaml:/app/config/config.yaml
+      - ./db/sdk:/app/db/sdk
+    restart: always
