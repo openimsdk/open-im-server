@@ -59,7 +59,7 @@ func run(port int) error {
 	}
 	fmt.Println("api init discov client success")
 	fmt.Println("api register public config to discov")
-	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
+	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov success")

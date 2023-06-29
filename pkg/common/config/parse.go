@@ -87,7 +87,7 @@ func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegi
 }
 
 func InitConfig(configFolderPath string) error {
-	err := Config.initConfig(&Config.config, FileName, configFolderPath)
+	err := Config.initConfig(&Config, FileName, configFolderPath)
 	if err != nil {
 		return err
 	}
@@ -98,9 +98,9 @@ func InitConfig(configFolderPath string) error {
 	return nil
 }
 
-func EncodeConfig() []byte {
+func (c *config) EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(Config); err != nil {
+	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
 		panic(err)
 	}
 	return buf.Bytes()

@@ -7,10 +7,7 @@ import (
 //go:embed version
 var Version string
 
-var Config struct {
-	config
-	Notification notification
-}
+var Config config
 
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
@@ -268,6 +265,7 @@ type config struct {
 		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
 		ThirdPrometheusPort           []int `yaml:"thirdPrometheusPort"`
 	} `yaml:"prometheus"`
+	Notification notification `yaml:"notification"`
 }
 
 type notification struct {
