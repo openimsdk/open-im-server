@@ -25,6 +25,10 @@ func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
 		return
 	}
 	r.addrs = newConns
+	if len(newConns) == 0 {
+		log.ZError(context.Background(), "conn is nil", nil)
+		return
+	}
 	if err := r.cc.UpdateState(resolver.State{Addresses: newConns}); err != nil {
 		log.ZError(context.Background(), "UpdateState error, conns is nil from svr", err, "conns", newConns, "zk path", r.target.URL.Path)
 		return

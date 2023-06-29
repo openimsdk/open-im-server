@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -53,6 +54,7 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 }
 
 func getRpcContext(ctx context.Context, method string) (context.Context, error) {
+	ctx, _ = context.WithTimeout(ctx, time.Second*5)
 	md := metadata.Pairs()
 	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
 		for _, key := range keys {
