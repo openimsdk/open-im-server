@@ -12,7 +12,7 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	longServer, err := NewWsServer(
 		WithPort(wsPort),
 		WithMaxConnNum(int64(config.Config.LongConnSvr.WebsocketMaxConnNum)),
-		WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeOut)*time.Second),
+		WithHandshakeTimeout(time.Duration(config.Config.LongConnSvr.WebsocketTimeout)*time.Second),
 		WithMessageMaxMsgLength(config.Config.LongConnSvr.WebsocketMaxMsgLen))
 	if err != nil {
 		return err

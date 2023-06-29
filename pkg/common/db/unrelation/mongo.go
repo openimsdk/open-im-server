@@ -23,27 +23,27 @@ type Mongo struct {
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	if config.Config.Mongo.DBUri != "" {
+	if config.Config.Mongo.Uri != "" {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
-		uri = config.Config.Mongo.DBUri
+		uri = config.Config.Mongo.Uri
 	} else {
 		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
 		mongodbHosts := ""
-		for i, v := range config.Config.Mongo.DBAddress {
-			if i == len(config.Config.Mongo.DBAddress)-1 {
+		for i, v := range config.Config.Mongo.Address {
+			if i == len(config.Config.Mongo.Address)-1 {
 				mongodbHosts += v
 			} else {
 				mongodbHosts += v + ","
 			}
 		}
-		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
+		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
 			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
-				config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, mongodbHosts,
-				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
+				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
+				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
 		} else {
 			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
-				mongodbHosts, config.Config.Mongo.DBDatabase,
-				config.Config.Mongo.DBMaxPoolSize)
+				mongodbHosts, config.Config.Mongo.Database,
+				config.Config.Mongo.MaxPoolSize)
 		}
 	}
 	fmt.Println("mongo:", uri)
@@ -61,7 +61,7 @@ func (m *Mongo) GetClient() *mongo.Client {
 }
 
 func (m *Mongo) GetDatabase() *mongo.Database {
-	return m.db.Database(config.Config.Mongo.DBDatabase)
+	return m.db.Database(config.Config.Mongo.Database)
 }
 
 func (m *Mongo) CreateMsgIndex() error {
@@ -83,7 +83,7 @@ func (m *Mongo) CreateExtendMsgSetIndex() error {
 }
 
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.db.Database(config.Config.Mongo.DBDatabase).Collection(collection)
+	db := m.db.Database(config.Config.Mongo.Database).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 	keysDoc := bsonx.Doc{}

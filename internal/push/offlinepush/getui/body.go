@@ -124,8 +124,8 @@ func newPushReq(title, content string) PushReq {
 		Title:       title,
 		Body:        content,
 		ClickType:   "startapp",
-		ChannelID:   config.Config.Push.Getui.ChannelID,
-		ChannelName: config.Config.Push.Getui.ChannelName,
+		ChannelID:   config.Config.Push.GeTui.ChannelID,
+		ChannelName: config.Config.Push.GeTui.ChannelName,
 	}}}
 	return pushReq
 }

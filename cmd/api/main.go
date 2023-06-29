@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -9,8 +8,6 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-
-	"gopkg.in/yaml.v3"
 
 	"net/http"
 	_ "net/http/pprof"
@@ -55,7 +52,7 @@ func run(port int) error {
 	fmt.Println("api start init discov client")
 	var client discoveryregistry.SvcDiscoveryRegistry
 	client, err = openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.UserName,
+		openKeeper.WithFreq(time.Hour), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
 			config.Config.Zookeeper.Password), openKeeper.WithRoundRobin(), openKeeper.WithTimeout(10), openKeeper.WithLogger(log.NewZkLogger()))
 	if err != nil {
 		return err
@@ -64,12 +61,8 @@ func run(port int) error {
 		return err
 	}
 	fmt.Println("api init discov client success")
-	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(config.Config); err != nil {
-		return err
-	}
 	fmt.Println("api register public config to discov")
-	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, buf.Bytes()); err != nil {
+	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov success")

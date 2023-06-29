@@ -26,7 +26,7 @@ func init() {
 
 func initAesKey() {
 	once.Do(func() {
-		key := md5.Sum([]byte("openim:" + config.Config.Secret))
+		key := md5.Sum([]byte("openim:" + config.Config.TokenPolicy.AccessSecret))
 		var err error
 		block, err = aes.NewCipher(key[:])
 		if err != nil {

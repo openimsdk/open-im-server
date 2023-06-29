@@ -18,15 +18,15 @@ import (
 )
 
 func Test_BatchInsertChat2DB(t *testing.T) {
-	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
-	config.Config.Mongo.DBTimeout = 60
-	config.Config.Mongo.DBDatabase = "openIM"
-	config.Config.Mongo.DBSource = "admin"
-	config.Config.Mongo.DBUserName = "root"
-	config.Config.Mongo.DBPassword = "openIM123"
-	config.Config.Mongo.DBMaxPoolSize = 100
-	config.Config.Mongo.DBRetainChatRecords = 3650
-	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
+	config.Config.Mongo.Address = []string{"192.168.44.128:37017"}
+	config.Config.Mongo.Timeout = 60
+	config.Config.Mongo.Database = "openIM"
+	config.Config.Mongo.Source = "admin"
+	config.Config.Mongo.Username = "root"
+	config.Config.Mongo.Password = "openIM123"
+	config.Config.Mongo.MaxPoolSize = 100
+	config.Config.RetainChatRecords = 3650
+	config.Config.ChatRecordsClearTime = "0 2 * * 3"
 
 	mongo, err := unrelation.NewMongo()
 	if err != nil {
@@ -129,15 +129,15 @@ func Test_BatchInsertChat2DB(t *testing.T) {
 }
 
 func GetDB() *commonMsgDatabase {
-	config.Config.Mongo.DBAddress = []string{"192.168.44.128:37017"}
-	config.Config.Mongo.DBTimeout = 60
-	config.Config.Mongo.DBDatabase = "openIM"
-	config.Config.Mongo.DBSource = "admin"
-	config.Config.Mongo.DBUserName = "root"
-	config.Config.Mongo.DBPassword = "openIM123"
-	config.Config.Mongo.DBMaxPoolSize = 100
-	config.Config.Mongo.DBRetainChatRecords = 3650
-	config.Config.Mongo.ChatRecordsClearTime = "0 2 * * 3"
+	config.Config.Mongo.Address = []string{"192.168.44.128:37017"}
+	config.Config.Mongo.Timeout = 60
+	config.Config.Mongo.Database = "openIM"
+	config.Config.Mongo.Source = "admin"
+	config.Config.Mongo.Username = "root"
+	config.Config.Mongo.Password = "openIM123"
+	config.Config.Mongo.MaxPoolSize = 100
+	config.Config.RetainChatRecords = 3650
+	config.Config.ChatRecordsClearTime = "0 2 * * 3"
 
 	mongo, err := unrelation.NewMongo()
 	if err != nil {

@@ -21,7 +21,7 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase)
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToMongo.Topic},
-			config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
+			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
 		msgDatabase: database,
 	}
 	return mc
