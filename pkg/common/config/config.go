@@ -36,7 +36,7 @@ type config struct {
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
 		ZkAddr   []string `yaml:"address"`
-		UserName string   `yaml:"userName"`
+		Username string   `yaml:"username"`
 		Password string   `yaml:"password"`
 	} `yaml:"zookeeper"`
 
@@ -68,7 +68,7 @@ type config struct {
 	Redis struct {
 		Address  []string `yaml:"address"`
 		Username string   `yaml:"username"`
-		Password string   `yaml:"passWord"`
+		Password string   `yaml:"password"`
 	} `yaml:"redis"`
 
 	Kafka struct {
@@ -80,7 +80,7 @@ type config struct {
 		} `yaml:"latestMsgToRedis"`
 		MsgToMongo struct {
 			Topic string `yaml:"topic"`
-		} `yaml:"offlineMsgToMongoMysql"`
+		} `yaml:"offlineMsgToMongo"`
 		MsgToPush struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"msgToPush"`
@@ -102,7 +102,8 @@ type config struct {
 	} `yaml:"rpc"`
 
 	Api struct {
-		ListenIP string `yaml:"listenIP"`
+		OpenImApiPort []int  `yaml:"openImApiPort"`
+		ListenIP      string `yaml:"listenIP"`
 	} `yaml:"api"`
 
 	Object struct {
@@ -156,7 +157,6 @@ type config struct {
 		OpenImAuthPort           []int `yaml:"openImAuthPort"`
 		OpenImPushPort           []int `yaml:"openImPushPort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
-		OpenImCachePort          []int `yaml:"openImCachePort"`
 		OpenImRtcPort            []int `yaml:"openImRtcPort"`
 		OpenImThirdPort          []int `yaml:"openImThirdPort"`
 	} `yaml:"rpcPort"`
@@ -212,8 +212,8 @@ type config struct {
 		} `yaml:"jpns"`
 	}
 	Manager struct {
-		AppManagerUserID []string `yaml:"appManagerUserID"`
-		Nickname         []string `yaml:"nickname"`
+		UserID   []string `yaml:"userID"`
+		Nickname []string `yaml:"nickname"`
 	} `yaml:"manager"`
 
 	MultiLoginPolicy                  int  `yaml:"multiLoginPolicy"`

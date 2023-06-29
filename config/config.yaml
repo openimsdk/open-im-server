@@ -5,7 +5,7 @@
 zookeeper:
   schema: openim                          #默认即可
   address: [ 127.0.0.1:2181 ]             #
-  userName:
+  username:
   password:
 
 mysql:
@@ -42,9 +42,9 @@ kafka:
   addr: [ 127.0.0.1:9092 ]                #kafka配置，默认即可
   latestMsgToRedis:
     topic: "latestMsgToRedis"             #
-  offlineMsgToMongoMysql:
+  offlineMsgToMongo:
     topic: "offlineMsgToMongoMysql"       #用于mongo和mysql保存消息
-  msqToPush:
+  msgToPush:
     topic: "msqToPush"                    #消息push
   msgToModify:
     topic: "msgToModify"                  #消息push
@@ -167,8 +167,8 @@ push:
     
 manager:
   #app管理员userID和nickename，  用于管理后台登录
-  appManagerUserID: [ "openIM123456","openIM654321","openIMAdmin" ]
-  appManagerNickname: [ "system1","system2", "system3" ]
+  userID: [ "openIM123456","openIM654321","openIMAdmin" ]
+  nickname: [ "system1","system2", "system3" ]
 
 
 
@@ -275,5 +275,6 @@ prometheus:
   pushPrometheusPort: [ 20170 ]
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
+  thirdPrometheusPort: [ 21301 ]
   messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # 端口数量和 script/path_info.cfg  msg_transfer_service_num保持一致
 
