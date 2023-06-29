@@ -107,8 +107,7 @@ rpcPort:                              #rpc服务端口，不建议修改，端�
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
   openImConversationPort: [ 10180 ]
-  openImRtcPort: [ 10190 ]
-  openImThirdPort: [ 10200 ]
+  openImThirdPort: [ 10190 ]
 
 rpcRegisterName:                      #rpc注册服务名，不建议修改
   openImUserName: User
