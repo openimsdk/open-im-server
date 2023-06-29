@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,9 +13,12 @@ import (
 )
 
 func NewRedis() (redis.UniversalClient, error) {
+	if len(config.Config.Redis.Address) == 0 {
+		return nil, errors.New("redis address is empty")
+	}
 	specialerror.AddReplace(redis.Nil, errs.ErrRecordNotFound)
 	var rdb redis.UniversalClient
-	if len(config.Config.Redis.Address) > 0 {
+	if len(config.Config.Redis.Address) > 1 {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    config.Config.Redis.Address,
 			Username: config.Config.Redis.Username,
