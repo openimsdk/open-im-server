@@ -91,6 +91,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		timeout:    timeout,
 		localConns: make(map[string][]resolver.Address),
 		resolvers:  make(map[string]*Resolver),
+		lock:       &sync.Mutex{},
 	}
 	client.ticker = time.NewTicker(defaultFreq)
 	for _, option := range options {
