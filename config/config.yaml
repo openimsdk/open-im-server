@@ -1,118 +1,104 @@
-# The class cannot be named by Pascal or camel case.
-# If it is not used, the corresponding structure will not be set,
-# and it will not be read naturally.
-serverversion: 2.3.0-rc1
-#---------------Infrastructure configuration---------------------#
-etcd:
-  etcdSchema: openIM  #默认即可
-  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+#OpenIM config
 
-k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
+
+#---------------Infrastructure configuration---------------------#
+zookeeper:
+  schema: openim                          #不建议修改
+  address: [ 127.0.0.1:2181 ]             #
+  username:                               #用户名
+  password:                               #密码
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
-  dbMysqlUserName: root #mysql用户名，建议修改
-  dbMysqlPassword: openIM # mysql密码，建议修改
-  dbMysqlDatabaseName: openIM_v2 #默认即可
-  dbTableName: eMsg #默认即可
-  dbMsgTableNum: 1
-  dbMaxOpenConns: 2000
-  dbMaxIdleConns: 100
-  dbMaxLifeTime: 3600
+  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
+  username: root                          #用户名
+  password: openIM123                     #密码
+  database: openIM_v2                     #不建议修改
+  maxOpenConn: 1000                       #最大连接数
+  maxIdleConn: 100                        #最大空闲连接数
+  maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
+  logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
+  slowThreshold: 500                      #慢语句阈值 （毫秒）
 
 mongo:
-  dbUri: ""#当dbUri值不为空则直接使用该值
-  dbAddress: [ 127.0.0.1:37017 ] #mongo地址 目前仅支持单机，默认即可
-  dbDirect: false
-  dbTimeout: 10
-  dbDatabase: openIM  #mongo db 默认即可
-  dbSource: admin
-  dbUserName: #mongo用户名，建议先不设置
-  dbPassword: #mongo密码，建议先不设置
-  dbMaxPoolSize: 20
-  dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
+  uri:                                    #不为空则直接使用该值
+  address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
+  database: openIM                        #mongo db 默认即可
+  username: root                          #用户名
+  password: openIM123                     #密码
+  maxPoolSize: 100
 
 redis:
-  dbAddress: 127.0.0.1:16379 #redis地址 目前仅支持单机，默认即可
-  dbMaxIdle: 128
-  dbMaxActive: 0
-  dbIdleTimeout: 120
-  dbPassWord: openIM #redis密码 建议修改
+  address: [ 127.0.0.1:16379 ]            #
+  username:                               #only redis version 6.0+ need username
+  password: openIM123                     #密码
 
 kafka:
-  ws2mschat:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ws2ms_chat"
-  ms2pschat:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ms2ps_chat"
-  consumergroupid:
-    msgToMongo: mongo
-    msgToMySql: mysql
-    msgToPush: push
+  username:                               #用户名
+  password:                               #密码
+  addr: [ 127.0.0.1:9092 ]                #
+  latestMsgToRedis:
+    topic: "latestMsgToRedis"             #不建议修改
+  offlineMsgToMongo:
+    topic: "offlineMsgToMongoMysql"       #不建议修改
+  msgToPush:
+    topic: "msqToPush"                    #不建议修改
+  msgToModify:
+    topic: "msgToModify"                  #不建议修改
+  consumerGroupID:                        #消费者组，不建议修改
+    msgToRedis: redis                     #
+    msgToMongo: mongo                     #
+    msgToMySql: mysql                     #
+    msgToPush: push                       #
+    msgToModify: modify                   #
 
 
+rpc:
+  registerIP:                             #作为rpc启动时，注册到zookeeper的IP，api/gateway能访问到此ip和对应的rpcPort中的端口
+  listenIP:                               #默认为0.0.0.0
 
-#---------------Internal service configuration---------------------#
-
-# The service ip default is empty,
-# automatically obtain the machine's valid network card ip as the service ip,
-# otherwise the configuration ip is preferred
-#如果是单机模式，用0.0.0.0或者不填，默认即可
-serverip: 0.0.0.0
-
-# endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
-endpoints:
-  api: openim_api
-  cmsapi: openim_cms_api
-  push: openim_push
-  msg_gateway: openim_msg_gateway
-  rpc_auth: openim_rpc_auth
-  rpc_friend: openim_rpc_friend
-  rpc_group: openim_rpc_group
-  rpc_msg: openim_rpc_msg
-  rpc_user: openim_rpc_user
-  rpc_statistic: openim_rpc_statistic
-  rpc_admin_cms: openim_rpc_admin_cms
-  rpc_message_cms: openim_rpc_admin_cms
-  rpc_office: openim_rpc_office
 
 api:
-  openImApiPort: [ 10000 ] #api服务端口，默认即可，需要开放此端口或做nginx转发
-cmsapi:
-  openImCmsApiPort: [ 8000 ] #管理后台api服务端口，默认即可，需要开放此端口或做nginx转发
-sdk:
-  openImSdkWsPort: [ 30000 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
-#对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
-credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
-  tencent:
-    appID:  
-    region:  
-    bucket:  
-    secretID:  
-    secretKey:  
-  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
-    bucket: openim
-    location: us-east-1
-    endpoint: http://127.0.0.1:9000 #minio外网ip 这个ip是给客户端访问的
-    endpointInner: http://127.0.0.1:9000 #minio内网地址 如果im server 可以通过内网访问到 minio就可以填写
-    endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
-    accessKeyID: user12345
-    secretAccessKey: key12345
-  ali: # ali oss
-    regionID: "oss-cn-beijing"
-    accessKeyID: ""
-    accessKeySecret: ""
-    stsEndpoint: "sts.cn-beijing.aliyun.com"
-    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
-    bucket: "bucket1"
-    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
-    stsDurationSeconds: 3600
-    OssRoleArn: "acs:ram::xxx:role/xxx"
+  openImApiPort: [ 10002 ]                #api服务端口
+  listenIP:                               #默认为0.0.0.0
 
+object:
+  enable: minio                           #使用minio
+  apiURL: http://127.0.0.1:10002/third/object
+  minio:
+    tempBucket: "openim"                  #不建议修改
+    dataBucket: "openim"                  #不建议修改
+    location: us-east-1                   #不建议修改
+    endpoint: http://127.0.0.1:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
+    accessKeyID: root                     #ID
+    secretAccessKey: openIM123            #秘钥
+    isDistributedMod: false               #是否分布式多硬盘部署，如果是多硬盘部署，需要修改为true
+  tencent:                                #tencent cos
+    appID:
+    region:
+    bucket:
+    secretID:
+    secretKey:
+  ali:                                    #ali oss
+    regionID:
+    accessKeyID:
+    accessKeySecret:
+    stsEndpoint:
+    ossEndpoint:
+    bucket:
+    finalHost:
+    stsDurationSeconds:
+    OssRoleArn:
+  aws:
+    accessKeyID:
+    accessKeySecret:
+    region:
+    bucket:
+    finalHost:
+    roleArn:
+    externalId:
+    roleSessionName:
 
-
-rpcport: #rpc服务端口 默认即可
+rpcPort:                              #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如 openImUserPort: [10110, 10111]
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -120,564 +106,160 @@ rpcport: #rpc服务端口 默认即可
   openImGroupPort: [ 10150 ]
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
-  openImStatisticsPort: [ 10180 ]
-  openImMessageCmsPort: [ 10190 ]
-  openImAdminCmsPort: [ 10200 ]
-  openImOfficePort: [ 10210 ]
-  openImOrganizationPort: [ 10220 ]
-  openImConversationPort: [ 10230 ]
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
+  openImConversationPort: [ 10180 ]
+  openImThirdPort: [ 10190 ]
 
-rpcregistername: #rpc注册服务名，默认即可
+rpcRegisterName:                      #rpc注册服务名，不建议修改
   openImUserName: User
   openImFriendName: Friend
   openImMsgName: Msg
   openImPushName: Push
-  openImRelayName: Relay
+  openImMessageGatewayName: MessageGateway
   openImGroupName: Group
   openImAuthName: Auth
-  OpenImStatisticsName: Statistics
-  OpenImMessageCMSName: MessageCMS
-  openImAdminCMSName: AdminCMS
-  openImOfficeName: Office
-  openImOrganizationName: Organization
   openImConversationName: Conversation
+  openImThirdName: Third
 
 log:
-  storageLocation: ../logs/
-  rotationTime: 24
-  remainRotationCount: 2 #日志数量
-  #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: 6
-  elasticSearchSwitch: false
-  elasticSearchAddr: [ 127.0.0.1:9201 ]
-  elasticSearchUser: ""
-  elasticSearchPassword: ""
+  storageLocation: ../logs/           #存放目录
+  rotationTime: 24                    #日志旋转时间
+  remainRotationCount: 2              #日志数量
+  remainLogLevel: 6                   #日志级别 6表示全都打印，
+  isStdout: false
+  isJson: false
+  withStack: false
 
-modulename: #日志文件按模块命名，默认即可
-  longConnSvrName: msg_gateway
-  msgTransferName: msg_transfer
-  pushName: push
+longConnSvr:
+  openImWsPort: [ 10001 ]             #msg_gateway的websocket端口
+  websocketMaxConnNum: 100000         #websocket最大连接数
+  websocketMaxMsgLen: 4096            #websocket请求包最大长度
+  websocketTimeout: 10                #websocket连接握手超时时间
 
-longconnsvr:
-  openImWsPort: [ 17778 ] # ws服务端口，默认即可，要开放此端口或做nginx转发
-  websocketMaxConnNum: 10000
-  websocketMaxMsgLen: 4096
-  websocketTimeOut: 10
-
-## 推送只能开启一个 enable代表开启
 push:
-  tpns: #腾讯推送，暂未测试 暂不要使用
-    ios:
-      accessID: 1600018281
-      secretKey: 3cd68a77a95b89e5089a1aca523f318f
-    android:
-      accessID: 111
-      secretKey: 111
-    enable: false
-  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
-    appKey: cf47465a368f24c659608e7e
-    masterSecret: 02204efe3f3832947a236ee5
-    pushUrl: "https://api.jpush.cn/v3/push"
-    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
-    enable: true
-  getui:  #个推推送，暂未测试 暂不要使用
+  enable: getui
+  geTui:                              #个推离线推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
-    enable: false
-
-
-
+    channelID: ""
+    channelName: ""
+  fcm:                                #fcm离线推送
+    serviceAccount: "x.json"          #帐号文件，并放在 config目录下
+  jpns:                               #极光推送 在极光后台申请后，修改以下四项
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
+    
 manager:
-  #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
-  appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
-  secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
-  appSysNotificationName: "系统通知"
+  userID: [ "openIM123456","openIM654321","openIMAdmin" ]   #内置的app管理员userID
+  nickname: [ "system1","system2", "system3" ]              #内置的app管理员nickname
 
-secret: tuoyun
-# 多端互踢策略
-# 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
-multiloginpolicy: 1
 
-#chat log insert to db
-chatPersistenceMysql: true
 
-#token config
-tokenpolicy:
-  accessSecret: "open_im_server" #token生成相关，默认即可
-  # Token effective time day as a unit
-  accessExpire: 90 #token过期时间（天） 默认即可
-messageverify:
-  friendVerify: false
 
-#  c2c:
-#    callbackBeforeSendMsg:
-#      switch: false
-#      timeoutStrategy: 1 #1:send
-#    callbackAfterSendMsg:
-#      switch: false
-#  state:
-#    stateChange:
-#      switch: false
+multiLoginPolicy: 1                                     #多平台登录：Android、iOS、Windows、Mac、web 每种平台只能有一个在线
+
+
+chatPersistenceMysql: true                              #消息是否存入mysql，mysql中的消息仅用于管理后台使用
+msgCacheTimeout: 86400                                  #信消息缓存时间秒，不建议修改
+groupMessageHasReadReceiptEnable: true                  #群聊已读是否开启
+singleMessageHasReadReceiptEnable: true                 #单聊已读是否开启
+
+retainChatRecords: 365                                  #mongo保存离线消息时间（天）
+chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息
+
+
+
+tokenPolicy:
+  accessSecret: openIM123                              #秘钥，获取token时校验
+  accessExpire: 90                                     #过期时间（天）
+
+messageVerify:
+  friendVerify: false                                  #发送消息时是否验证好友关系
+
 #ios系统推送声音以及标记计数
-iospush:
+iosPush:
   pushSound: "xxx"
   badgeCount: true
   production: false
 
 callback:
-  # callback url 需要自行更换callback url
-  callbackUrl : "http://127.0.0.1:8080/callback"
-  # 开启关闭操作前后回调的配置
-  callbackBeforeSendSingleMsg:
-    enable: false # 回调是否启用
-    callbackTimeOut: 2 # 回调超时时间
-    callbackFailedContinue: true # 回调超时是否继续执行代码
-  callbackAfterSendSingleMsg:
+  # 回调callback
+  url:
+  beforeSendSingleMsg:
+    enable: false                                     #是否启用此回调事件
+    timeout: 5                                        #超时时间（秒）
+    failedContinue: true                              #如回调失败是否继续往后执行
+  afterSendSingleMsg:
     enable: false
-    callbackTimeOut: 2
-  callbackBeforeSendGroupMsg:
+    timeout: 5
+  beforeSendGroupMsg:
     enable: false
-    callbackTimeOut: 2
-    callbackFailedContinue: true
-  callbackAfterSendGroupMsg:
+    timeout: 5
+    failedContinue: true
+  afterSendGroupMsg:
     enable: false
-    callbackTimeOut: 2
-  callbackWordFilter:
+    timeout: 5
+  msgModify:
     enable: false
-    callbackTimeOut: 2
-    callbackFailedContinue: true
-  callbackUserOnline:
+    timeout: 5
+    failedContinue: true
+  userOnline:
     enable: false
-    callbackTimeOut: 2
-  callbackUserOffline:
+    timeout: 5
+  userOffline:
     enable: false
-    callbackTimeOut: 2
-  callbackOfflinePush:
-    enable: true
-    callbackTimeOut: 2
-    callbackFailedContinue: true # 回调超时是否继续离线推送
-
-notification:
-  groupCreated:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: true
-      title: "create group title" # xx create the group
-      desc: "create group desc"
-      ext: "create group ext"
-    defaultTips:
-      tips: "create the group"  # xx create the group
-
-  groupInfoSet:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupInfoSet title"
-      desc: "groupInfoSet desc"
-      ext: "groupInfoSet ext"
-    defaultTips:
-      tips: "modified the group profile"  # group info changed by xx
-
-  joinGroupApplication:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: false
-      title: "joinGroupApplication title"
-      desc: "joinGroupApplication desc"
-      ext: "joinGroupApplication ext"
-    defaultTips:
-      tips: "apply to join the group"  # group info changed by xx
-
-  memberQuit:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "memberQuit title"
-      desc: "memberQuit desc"
-      ext: "memberQuit ext"
-    defaultTips:
-      tips: "quit group chat"  # group info changed by xx
-
-  groupApplicationAccepted:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupApplicationAccepted title"
-      desc: "groupApplicationAccepted desc"
-      ext: "groupApplicationAccepted ext"
-    defaultTips:
-      tips: "was allowed to join the group"  # group info changed by xx
-
-  groupApplicationRejected:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: false
-      title: " title"
-      desc: " desc"
-      ext: " ext"
-    defaultTips:
-      tips: "was rejected into the group"  # group info changed by xx
-
-  groupOwnerTransferred:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupOwnerTransferred title"
-      desc: "groupOwnerTransferred desc"
-      ext: "groupOwnerTransferred ext"
-    defaultTips:
-      tips: "become a new group owner"  # group info changed by xx
-
-  memberKicked:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "memberKicked title"
-      desc: "memberKicked desc"
-      ext: "memberKicked ext"
-    defaultTips:
-      tips: "was kicked out of the group"  # group info changed by xx
-
-  memberInvited:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "memberInvited title"
-      desc: "memberInvited desc"
-      ext: "memberInvited ext"
-    defaultTips:
-      tips: "was invited into the group"  # group info changed by xx
-
-  memberEnter:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "memberEnter title"
-      desc: "memberEnter desc"
-      ext: "memberEnter ext"
-    defaultTips:
-      tips: "entered the group"  # group info changed by xx
-
-  groupDismissed:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupDismissed title"
-      desc: "groupDismissed desc"
-      ext: "groupDismissed ext"
-    defaultTips:
-      tips: "group dismissed"
+    timeout: 5
+  userKickOff:
+    enable: false
+    timeout: 5
+  offlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  onlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  superGroupOnlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeAddFriend:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeCreateGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeMemberJoinGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeSetGroupMemberInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  setMessageReactionExtensions:
+    enable: false
+    timeout: 5
+    failedContinue: true
 
 
-  groupMuted:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupMuted title"
-      desc: "groupMuted desc"
-      ext: "groupMuted ext"
-    defaultTips:
-      tips: "group Muted"
+prometheus:                                                   #prometheus每个服务的端口数量需要和rpcPort保持对应
+  enable: false
+  userPrometheusPort: [ 20110 ]
+  friendPrometheusPort: [ 20120 ]
+  messagePrometheusPort: [ 20130 ]
+  messageGatewayPrometheusPort: [ 20140 ]
+  groupPrometheusPort: [ 20150 ]
+  authPrometheusPort: [ 20160 ]
+  pushPrometheusPort: [ 20170 ]
+  conversationPrometheusPort: [ 20230 ]
+  rtcPrometheusPort: [ 21300 ]
+  thirdPrometheusPort: [ 21301 ]
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.cfg中的msg_transfer_service_num保持一致
 
-  groupCancelMuted:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupCancelMuted title"
-      desc: "groupCancelMuted desc"
-      ext: "groupCancelMuted ext"
-    defaultTips:
-      tips: "group Cancel Muted"
-
-
-  groupMemberMuted:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupMemberMuted title"
-      desc: "groupMemberMuted desc"
-      ext: "groupMemberMuted ext"
-    defaultTips:
-      tips: "group Member Muted"
-
-  groupMemberCancelMuted:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: false
-      title: "groupMemberCancelMuted title"
-      desc: "groupMemberCancelMuted desc"
-      ext: "groupMemberCancelMuted ext"
-    defaultTips:
-      tips: "group Member Cancel Muted"
-
-  groupMemberInfoSet:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: false
-      title: "groupMemberInfoSet title"
-      desc: "groupMemberInfoSet desc"
-      ext: "groupMemberInfoSet ext"
-    defaultTips:
-      tips: "group member info set"
-
-
-  organizationChanged:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: false
-      title: "organizationChanged title"
-      desc: "organizationChanged desc"
-      ext: "organizationChanged ext"
-    defaultTips:
-      tips: "organization changed"
-
-
-
-  #############################friend#################################
-
-  friendApplicationAdded:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Somebody applies to add you as a friend"
-      desc: "Somebody applies to add you as a friend"
-      ext: "Somebody applies to add you as a friend"
-    defaultTips:
-      tips: "I applies to add you as a friend"  #
-
-  friendApplicationApproved:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Someone applies to add your friend application"
-      desc: "Someone applies to add your friend application"
-      ext: "Someone applies to add your friend application"
-    defaultTips:
-      tips: "I applies to add your friend application"  #
-
-
-  friendApplicationRejected:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Someone rejected your friend application"
-      desc: "Someone rejected your friend application"
-      ext: "Someone rejected your friend application"
-    defaultTips:
-      tips: "I rejected your friend application"  #
-
-
-
-
-
-  friendAdded:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: true
-      title: "We have become friends"
-      desc: "We have become friends"
-      ext: "We have become friends"
-    defaultTips:
-      tips: "We have become friends"  #
-
-
-
-  friendDeleted:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "deleted a friend"
-      desc: "deleted a friend"
-      ext: "deleted a friend"
-    defaultTips:
-      tips: "deleted a friend"  #
-
-
-  friendRemarkSet:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Your friend's profile has been changed"
-      desc: "Your friend's profile has been changed"
-      ext: "Your friend's profile has been changed"
-    defaultTips:
-      tips: "Your friend's profile has been changed"  #
-
-
-
-  blackAdded:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "blocked a user"
-      desc: "blocked a user"
-      ext: "blocked a user"
-    defaultTips:
-      tips: "blocked a user"  #
-
-
-  blackDeleted:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Remove a blocked user"
-      desc: "Remove a blocked user"
-      ext: "Remove a blocked user"
-    defaultTips:
-      tips: "Remove a blocked user"
-
-  #####################user#########################
-  userInfoUpdated:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: false
-    offlinePush:
-      switch: true
-      title: "Remove a blocked user"
-      desc: "Remove a blocked user"
-      ext: "Remove a blocked user"
-    defaultTips:
-      tips: "remove a blocked user"
-
-  #####################conversation#########################
-  conversationOptUpdate:
-    conversation:
-      reliabilityLevel: 1
-      unreadCount: false
-      offlinePush:
-        switch: true
-        title: "conversation opt update"
-        desc: "conversation opt update"
-        ext: "conversation opt update"
-      defaultTips:
-        tips: "conversation opt update"
-
-  conversationSetPrivate:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-    offlinePush:
-      switch: true
-      title: "burn after reading"
-      desc: "burn after reading"
-      ext: "burn after reading"
-    defaultTips:
-      openTips: "burn after reading was opened"
-      closeTips: "burn after reading was closed"
-
-  ###################workMoments################
-  workMomentsNotification:
-    conversation:
-      reliabilityLevel: 2
-      unreadCount: true
-      offlinePush:
-        switch: true
-        title: "burn after reading"
-        desc: "burn after reading"
-        ext: "burn after reading"
-      defaultTips:
-        openTips: "burn after reading was opened"
-        closeTips: "burn after reading was closed"
-
-  ###################organization################
-  joinDepartmentNotification:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: true
-      offlinePush:
-        switch: false
-        title: "welcome user join department"
-        desc: "welcome user join department"
-        ext: "welcome user join department"
-      defaultTips:
-        tips: "welcome user join department"
-
-
-#---------------demo configuration---------------------#
-#The following configuration items are applied to openIM Demo configuration
-#是否启动demo，如果自身没有账号体系，设置为true
-demoswitch: true
-demo:
-  #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
-  openImDemoPort: [ 42233 ]
-  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
-    signName: 托云信息技术
-    verificationCodeTemplateCode: SMS_226810164
-  superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
-  #  second
-  codeTTL: 300
-  mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
-    title: "openIM"
-    senderMail: "765567899@qq.com"
-    senderAuthorizationCode: "gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25   #需开放此端口 出口方向
-  testDepartMentID: 001
-  imAPIURL: http://127.0.0.1:10002
-
-rtc:
-  port: 11300
-  address: 127.0.0.1

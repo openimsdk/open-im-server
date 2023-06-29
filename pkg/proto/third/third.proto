@@ -1,0 +1,113 @@
+syntax = "proto3";
+package OpenIMServer.third;
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third";
+
+message ApplyPutReq {
+  string putID = 1;
+  string name = 2;
+  int64 size = 3;
+  string hash = 4;
+  string contentType = 5;
+  int64 fragmentSize = 6;
+  int64 validTime = 7; // 文件有效时间
+}
+
+message ApplyPutResp {
+  string url = 1;
+  string putID = 2;
+  int64 fragmentSize = 3;
+  int64 validTime = 4;// 上传地址的有效时间
+  string putURLsHash = 5;
+  repeated string putURLs = 6;
+}
+
+message ConfirmPutReq {
+  string putID = 1;
+}
+
+message ConfirmPutResp {
+  string url = 1;
+}
+
+message GetUrlReq {
+  string name = 1; // 文件名
+  int64 expires = 2; // url有效时间
+  bool attachment = 3;// 是否是附件
+}
+
+message GetUrlResp {
+  string url = 1;
+  int64 size = 2;
+  string hash = 3;
+}
+
+message GetPutReq {
+  string putID = 1;
+}
+
+message GetPutFragment{
+  int64 size = 1;
+  string hash = 2;
+  string url = 3;
+}
+
+message GetPutResp {
+  string name = 1;
+  int64 size = 2;
+  string hash = 3;
+  int64 fragmentSize = 4;
+  string contentType = 5;
+  int64 validTime = 6; // 上传地址的有效时间
+  //  repeated GetPutFragment fragments = 7;
+  //  string putURLsHash = 8;
+  //  string putID = 2;
+  //  int64 fragmentSize = 3;
+  //  int64 validTime = 4;// 上传地址的有效时间
+  string putURLsHash = 7;
+  repeated GetPutFragment fragments = 8;
+  //  repeated string putURLs = 6;
+  //  repeated GetPutFragment fragments = 7;
+}
+
+message GetHashInfoReq {
+  string hash = 1;
+}
+
+message GetHashInfoResp {
+  string hash = 1;
+  int64 size = 2;
+}
+
+message FcmUpdateTokenReq {
+  int32 platformID = 1;
+  string fcmToken = 2;
+  string account = 3;
+  int64 expireTime = 4;
+}
+
+message FcmUpdateTokenResp {
+}
+
+message SetAppBadgeReq {
+  string userID = 1;
+  int32 appUnreadCount = 2;
+}
+
+message SetAppBadgeResp {
+}
+
+service third {
+  rpc ApplyPut(ApplyPutReq) returns(ApplyPutResp);
+  rpc GetPut(GetPutReq) returns(GetPutResp);
+  rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
+  rpc GetUrl(GetUrlReq) returns(GetUrlResp);
+  rpc GetHashInfo(GetHashInfoReq) returns(GetHashInfoResp);
+  rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);
+  rpc SetAppBadge(SetAppBadgeReq) returns(SetAppBadgeResp);
+}
+
+
+
+
+
+

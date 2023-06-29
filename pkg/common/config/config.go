@@ -1,49 +1,123 @@
 package config
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"runtime"
-
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	_ "embed"
 )
 
-var (
-	_, b, _, _ = runtime.Caller(0)
-	// Root folder of this project
-	Root = filepath.Join(filepath.Dir(b), "../../..")
-)
+//go:embed version
+var Version string
 
 var Config config
 
-type callBackConfig struct {
-	Enable                 bool `yaml:"enable"`
-	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
-	CallbackFailedContinue bool `yaml:"callbackFailedContinue"`
+type CallBackConfig struct {
+	Enable                 bool  `yaml:"enable"`
+	CallbackTimeOut        int   `yaml:"timeout"`
+	CallbackFailedContinue *bool `yaml:"failedContinue"`
+}
+
+type NotificationConf struct {
+	IsSendMsg        bool         `yaml:"isSendMsg"`
+	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 presistent
+	UnreadCount      bool         `yaml:"unreadCount"`
+	OfflinePush      POfflinePush `yaml:"offlinePush"`
+}
+
+type POfflinePush struct {
+	Enable bool   `yaml:"enable"`
+	Title  string `yaml:"title"`
+	Desc   string `yaml:"desc"`
+	Ext    string `yaml:"ext"`
 }
 
 type config struct {
-	ServerIP      string `yaml:"serverip"`
-	ServerVersion string `yaml:"serverversion"`
-	Api           struct {
-		GinPort []int `yaml:"openImApiPort"`
-	}
-	CmsApi struct {
-		GinPort []int `yaml:"openImCmsApiPort"`
-	}
-	Sdk struct {
-		WsPort []int `yaml:"openImSdkWsPort"`
-	}
-	Credential struct {
+	Zookeeper struct {
+		Schema   string   `yaml:"schema"`
+		ZkAddr   []string `yaml:"address"`
+		Username string   `yaml:"username"`
+		Password string   `yaml:"password"`
+	} `yaml:"zookeeper"`
+
+	Mysql struct {
+		Address       []string `yaml:"address"`
+		Username      string   `yaml:"username"`
+		Password      string   `yaml:"password"`
+		Database      string   `yaml:"database"`
+		MaxOpenConn   int      `yaml:"maxOpenConn"`
+		MaxIdleConn   int      `yaml:"maxIdleConn"`
+		MaxLifeTime   int      `yaml:"maxLifeTime"`
+		LogLevel      int      `yaml:"logLevel"`
+		SlowThreshold int      `yaml:"slowThreshold"`
+	} `yaml:"mysql"`
+
+	Mongo struct {
+		Uri         string   `yaml:"uri"`
+		Address     []string `yaml:"address"`
+		Database    string   `yaml:"database"`
+		Username    string   `yaml:"username"`
+		Password    string   `yaml:"password"`
+		MaxPoolSize int      `yaml:"maxPoolSize"`
+	} `yaml:"mongo"`
+
+	Redis struct {
+		Address  []string `yaml:"address"`
+		Username string   `yaml:"username"`
+		Password string   `yaml:"password"`
+	} `yaml:"redis"`
+
+	Kafka struct {
+		Username         string   `yaml:"username"`
+		Password         string   `yaml:"password"`
+		Addr             []string `yaml:"addr"`
+		LatestMsgToRedis struct {
+			Topic string `yaml:"topic"`
+		} `yaml:"latestMsgToRedis"`
+		MsgToMongo struct {
+			Topic string `yaml:"topic"`
+		} `yaml:"offlineMsgToMongo"`
+		MsgToPush struct {
+			Topic string `yaml:"topic"`
+		} `yaml:"msgToPush"`
+		MsgToModify struct {
+			Topic string `yaml:"topic"`
+		} `yaml:"msgToModify"`
+		ConsumerGroupID struct {
+			MsgToRedis  string `yaml:"msgToRedis"`
+			MsgToMongo  string `yaml:"msgToMongo"`
+			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToPush   string `yaml:"msgToPush"`
+			MsgToModify string `yaml:"msgToModify"`
+		} `yaml:"consumerGroupID"`
+	} `yaml:"kafka"`
+
+	Rpc struct {
+		RegisterIP string `yaml:"registerIP"`
+		ListenIP   string `yaml:"listenIP"`
+	} `yaml:"rpc"`
+
+	Api struct {
+		OpenImApiPort []int  `yaml:"openImApiPort"`
+		ListenIP      string `yaml:"listenIP"`
+	} `yaml:"api"`
+
+	Object struct {
+		Enable string `yaml:"enable"`
+		ApiURL string `yaml:"apiURL"`
+		Minio  struct {
+			TempBucket       string `yaml:"tempBucket"`
+			DataBucket       string `yaml:"dataBucket"`
+			Location         string `yaml:"location"`
+			Endpoint         string `yaml:"endpoint"`
+			AccessKeyID      string `yaml:"accessKeyID"`
+			SecretAccessKey  string `yaml:"secretAccessKey"`
+			IsDistributedMod bool   `yaml:"isDistributedMod"`
+		} `yaml:"minio"`
 		Tencent struct {
 			AppID     string `yaml:"appID"`
 			Region    string `yaml:"region"`
 			Bucket    string `yaml:"bucket"`
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
-		}
+		} `yaml:"tencent"`
 		Ali struct {
 			RegionID           string `yaml:"regionID"`
 			AccessKeyID        string `yaml:"accessKeyID"`
@@ -54,409 +128,176 @@ type config struct {
 			FinalHost          string `yaml:"finalHost"`
 			StsDurationSeconds int64  `yaml:"stsDurationSeconds"`
 			OssRoleArn         string `yaml:"OssRoleArn"`
-		}
-		Minio struct {
-			Bucket              string `yaml:"bucket"`
-			Location            string `yaml:"location"`
-			Endpoint            string `yaml:"endpoint"`
-			AccessKeyID         string `yaml:"accessKeyID"`
-			SecretAccessKey     string `yaml:"secretAccessKey"`
-			EndpointInner       string `yaml:"endpointInner"`
-			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
-		} `yaml:"minio"`
-	}
+		} `yaml:"ali"`
+		Aws struct {
+			AccessKeyID     string `yaml:"accessKeyID"`
+			AccessKeySecret string `yaml:"accessKeySecret"`
+			Region          string `yaml:"region"`
+			Bucket          string `yaml:"bucket"`
+			FinalHost       string `yaml:"finalHost"`
+			RoleArn         string `yaml:"roleArn"`
+			ExternalId      string `yaml:"externalId"`
+			RoleSessionName string `yaml:"roleSessionName"`
+		} `yaml:"aws"`
+	} `yaml:"object"`
 
-	Mysql struct {
-		DBAddress      []string `yaml:"dbMysqlAddress"`
-		DBUserName     string   `yaml:"dbMysqlUserName"`
-		DBPassword     string   `yaml:"dbMysqlPassword"`
-		DBDatabaseName string   `yaml:"dbMysqlDatabaseName"`
-		DBTableName    string   `yaml:"DBTableName"`
-		DBMsgTableNum  int      `yaml:"dbMsgTableNum"`
-		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
-		DBMaxIdleConns int      `yaml:"dbMaxIdleConns"`
-		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
-	}
-	Mongo struct {
-		DBUri               string   `yaml:"dbUri"` // 当dbUri值不为空则直接使用该值
-		DBAddress           []string `yaml:"dbAddress"`
-		DBDirect            bool     `yaml:"dbDirect"`
-		DBTimeout           int      `yaml:"dbTimeout"`
-		DBDatabase          string   `yaml:"dbDatabase"`
-		DBSource            string   `yaml:"dbSource"`
-		DBUserName          string   `yaml:"dbUserName"`
-		DBPassword          string   `yaml:"dbPassword"`
-		DBMaxPoolSize       int      `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords int      `yaml:"dbRetainChatRecords"`
-	}
-	Redis struct {
-		DBAddress     string `yaml:"dbAddress"`
-		DBMaxIdle     int    `yaml:"dbMaxIdle"`
-		DBMaxActive   int    `yaml:"dbMaxActive"`
-		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
-		DBPassWord    string `yaml:"dbPassWord"`
-	}
 	RpcPort struct {
-		OpenImUserPort        []int `yaml:"openImUserPort"`
-		openImFriendPort      []int `yaml:"openImFriendPort"`
-		RpcMessagePort        []int `yaml:"rpcMessagePort"`
-		RpcPushMessagePort    []int `yaml:"rpcPushMessagePort"`
-		OpenImGroupPort       []int `yaml:"openImGroupPort"`
-		RpcModifyUserInfoPort []int `yaml:"rpcModifyUserInfoPort"`
-		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
-	}
+		OpenImUserPort           []int `yaml:"openImUserPort"`
+		OpenImFriendPort         []int `yaml:"openImFriendPort"`
+		OpenImMessagePort        []int `yaml:"openImMessagePort"`
+		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+		OpenImGroupPort          []int `yaml:"openImGroupPort"`
+		OpenImAuthPort           []int `yaml:"openImAuthPort"`
+		OpenImPushPort           []int `yaml:"openImPushPort"`
+		OpenImConversationPort   []int `yaml:"openImConversationPort"`
+		OpenImRtcPort            []int `yaml:"openImRtcPort"`
+		OpenImThirdPort          []int `yaml:"openImThirdPort"`
+	} `yaml:"rpcPort"`
+
 	RpcRegisterName struct {
-		OpenImStatisticsName         string `yaml:"OpenImStatisticsName"`
-		OpenImUserName               string `yaml:"openImUserName"`
-		OpenImFriendName             string `yaml:"openImFriendName"`
-		OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
-		OpenImPushName               string `yaml:"openImPushName"`
-		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
-		OpenImGroupName              string `yaml:"openImGroupName"`
-		OpenImAuthName               string `yaml:"openImAuthName"`
-		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
-		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
-		OpenImOfficeName             string `yaml:"openImOfficeName"`
-		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
-		OpenImConversationName       string `yaml:"openImConversationName"`
-	}
-	Etcd struct {
-		EtcdSchema string   `yaml:"etcdSchema"`
-		EtcdAddr   []string `yaml:"etcdAddr"`
-	}
+		OpenImUserName           string `yaml:"openImUserName"`
+		OpenImFriendName         string `yaml:"openImFriendName"`
+		OpenImMsgName            string `yaml:"openImMsgName"`
+		OpenImPushName           string `yaml:"openImPushName"`
+		OpenImMessageGatewayName string `yaml:"openImMessageGatewayName"`
+		OpenImGroupName          string `yaml:"openImGroupName"`
+		OpenImAuthName           string `yaml:"openImAuthName"`
+		OpenImConversationName   string `yaml:"openImConversationName"`
+		OpenImThirdName          string `yaml:"openImThirdName"`
+	} `yaml:"rpcRegisterName"`
+
 	Log struct {
-		StorageLocation       string   `yaml:"storageLocation"`
-		RotationTime          int      `yaml:"rotationTime"`
-		RemainRotationCount   uint     `yaml:"remainRotationCount"`
-		RemainLogLevel        uint     `yaml:"remainLogLevel"`
-		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
-		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
-		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
-		ElasticSearchPassword string   `yaml:"elasticSearchPassword"`
-	}
-	ModuleName struct {
-		LongConnSvrName string `yaml:"longConnSvrName"`
-		MsgTransferName string `yaml:"msgTransferName"`
-		PushName        string `yaml:"pushName"`
-	}
+		StorageLocation     string `yaml:"storageLocation"`
+		RotationTime        int    `yaml:"rotationTime"`
+		RemainRotationCount uint   `yaml:"remainRotationCount"`
+		RemainLogLevel      int    `yaml:"remainLogLevel"`
+		IsStdout            bool   `yaml:"isStdout"`
+		IsJson              bool   `yaml:"isJson"`
+		WithStack           bool   `yaml:"withStack"`
+	} `yaml:"log"`
+
 	LongConnSvr struct {
-		WebsocketPort       []int `yaml:"openImWsPort"`
+		OpenImWsPort        []int `yaml:"openImWsPort"`
 		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeOut    int   `yaml:"websocketTimeOut"`
-	}
+		WebsocketTimeout    int   `yaml:"websocketTimeout"`
+	} `yaml:"longConnSvr"`
 
 	Push struct {
-		Tpns struct {
-			Ios struct {
-				AccessID  string `yaml:"accessID"`
-				SecretKey string `yaml:"secretKey"`
-			}
-			Android struct {
-				AccessID  string `yaml:"accessID"`
-				SecretKey string `yaml:"secretKey"`
-			}
-			Enable bool `yaml:"enable"`
-		}
+		Enable string `yaml:"enable"`
+		GeTui  struct {
+			PushUrl      string `yaml:"pushUrl"`
+			AppKey       string `yaml:"appKey"`
+			Intent       string `yaml:"intent"`
+			MasterSecret string `yaml:"masterSecret"`
+			ChannelID    string `yaml:"channelID"`
+			ChannelName  string `yaml:"channelName"`
+		} `yaml:"geTui"`
+		Fcm struct {
+			ServiceAccount string `yaml:"serviceAccount"`
+		} `yaml:"fcm"`
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
 			PushUrl      string `yaml:"pushUrl"`
 			PushIntent   string `yaml:"pushIntent"`
-			Enable       bool   `yaml:"enable"`
-		}
-		Getui struct {
-			PushUrl      string `yaml:"pushUrl"`
-			AppKey       string `yaml:"appKey"`
-			Enable       bool   `yaml:"enable"`
-			Intent       string `yaml:"intent"`
-			MasterSecret string `yaml:"masterSecret"`
-		}
+		} `yaml:"jpns"`
 	}
 	Manager struct {
-		AppManagerUid          []string `yaml:"appManagerUid"`
-		Secrets                []string `yaml:"secrets"`
-		AppSysNotificationName string   `yaml:"appSysNotificationName"`
-	}
+		UserID   []string `yaml:"userID"`
+		Nickname []string `yaml:"nickname"`
+	} `yaml:"manager"`
 
-	Kafka struct {
-		Ws2mschat struct {
-			Addr  []string `yaml:"addr"`
-			Topic string   `yaml:"topic"`
-		}
-		Ms2pschat struct {
-			Addr  []string `yaml:"addr"`
-			Topic string   `yaml:"topic"`
-		}
-		ConsumerGroupID struct {
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
-		}
-	}
-	Secret               string `yaml:"secret"`
-	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
-	ChatPersistenceMysql bool   `yaml:"chatPersistenceMysql"`
-
-	TokenPolicy struct {
+	MultiLoginPolicy                  int    `yaml:"multiLoginPolicy"`
+	ChatPersistenceMysql              bool   `yaml:"chatPersistenceMysql"`
+	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
+	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
+	RetainChatRecords                 int    `yaml:"retainChatRecords"`
+	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
+	TokenPolicy                       struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
-	}
+	} `yaml:"tokenPolicy"`
 	MessageVerify struct {
-		FriendVerify bool `yaml:"friendVerify"`
-	}
+		FriendVerify *bool `yaml:"friendVerify"`
+	} `yaml:"messageVerify"`
+
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
 		Production bool   `yaml:"production"`
-	}
-
+	} `yaml:"iosPush"`
 	Callback struct {
-		CallbackUrl                 string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
-		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
+		CallbackUrl                        string         `yaml:"url"`
+		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
+		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"afterSendGroupMsg"`
+		CallbackMsgModify                  CallBackConfig `yaml:"msgModify"`
+		CallbackUserOnline                 CallBackConfig `yaml:"userOnline"`
+		CallbackUserOffline                CallBackConfig `yaml:"userOffline"`
+		CallbackUserKickOff                CallBackConfig `yaml:"userKickOff"`
+		CallbackOfflinePush                CallBackConfig `yaml:"offlinePush"`
+		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
+		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
+		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
+		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
-	Notification struct {
-		///////////////////////group/////////////////////////////
-		GroupCreated struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupCreated"`
 
-		GroupInfoSet struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupInfoSet"`
-
-		JoinGroupApplication struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"joinGroupApplication"`
-
-		MemberQuit struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"memberQuit"`
-
-		GroupApplicationAccepted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupApplicationAccepted"`
-
-		GroupApplicationRejected struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupApplicationRejected"`
-
-		GroupOwnerTransferred struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupOwnerTransferred"`
-
-		MemberKicked struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"memberKicked"`
-
-		MemberInvited struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"memberInvited"`
-
-		MemberEnter struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"memberEnter"`
-
-		GroupDismissed struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupDismissed"`
-
-		GroupMuted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupMuted"`
-
-		GroupCancelMuted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupCancelMuted"`
-
-		GroupMemberMuted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupMemberMuted"`
-
-		GroupMemberCancelMuted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupMemberCancelMuted"`
-		GroupMemberInfoSet struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"groupMemberInfoSet"`
-		OrganizationChanged struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"organizationChanged"`
-
-		////////////////////////user///////////////////////
-		UserInfoUpdated struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"userInfoUpdated"`
-
-		//////////////////////friend///////////////////////
-		FriendApplication struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendApplicationAdded"`
-		FriendApplicationApproved struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendApplicationApproved"`
-
-		FriendApplicationRejected struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendApplicationRejected"`
-
-		FriendAdded struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendAdded"`
-
-		FriendDeleted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendDeleted"`
-		FriendRemarkSet struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"friendRemarkSet"`
-		BlackAdded struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"blackAdded"`
-		BlackDeleted struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"blackDeleted"`
-		ConversationOptUpdate struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"conversationOptUpdate"`
-		ConversationSetPrivate struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  struct {
-				OpenTips  string `yaml:"openTips"`
-				CloseTips string `yaml:"closeTips"`
-			} `yaml:"defaultTips"`
-		} `yaml:"conversationSetPrivate"`
-		WorkMomentsNotification struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"workMomentsNotification"`
-		JoinDepartmentNotification struct {
-			Conversation PConversation `yaml:"conversation"`
-			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		} `yaml:"joinDepartmentNotification"`
-	}
-	Demo struct {
-		Port         []int `yaml:"openImDemoPort"`
-		AliSMSVerify struct {
-			AccessKeyID                  string `yaml:"accessKeyId"`
-			AccessKeySecret              string `yaml:"accessKeySecret"`
-			SignName                     string `yaml:"signName"`
-			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
-		}
-		SuperCode string `yaml:"superCode"`
-		CodeTTL   int    `yaml:"codeTTL"`
-		Mail      struct {
-			Title                   string `yaml:"title"`
-			SenderMail              string `yaml:"senderMail"`
-			SenderAuthorizationCode string `yaml:"senderAuthorizationCode"`
-			SmtpAddr                string `yaml:"smtpAddr"`
-			SmtpPort                int    `yaml:"smtpPort"`
-		}
-		TestDepartMentID string `yaml:"testDepartMentID"`
-		ImAPIURL         string `yaml:"imAPIURL"`
-	}
-	Rtc struct {
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
-	} `yaml:"rtc"`
-}
-type PConversation struct {
-	ReliabilityLevel int  `yaml:"reliabilityLevel"`
-	UnreadCount      bool `yaml:"unreadCount"`
+	Prometheus struct {
+		Enable                        bool  `yaml:"enable"`
+		UserPrometheusPort            []int `yaml:"userPrometheusPort"`
+		FriendPrometheusPort          []int `yaml:"friendPrometheusPort"`
+		MessagePrometheusPort         []int `yaml:"messagePrometheusPort"`
+		MessageGatewayPrometheusPort  []int `yaml:"messageGatewayPrometheusPort"`
+		GroupPrometheusPort           []int `yaml:"groupPrometheusPort"`
+		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
+		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
+		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
+		RtcPrometheusPort             []int `yaml:"rtcPrometheusPort"`
+		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
+		ThirdPrometheusPort           []int `yaml:"thirdPrometheusPort"`
+	} `yaml:"prometheus"`
+	Notification notification `yaml:"notification"`
 }
 
-type POfflinePush struct {
-	PushSwitch bool   `yaml:"switch"`
-	Title      string `yaml:"title"`
-	Desc       string `yaml:"desc"`
-	Ext        string `yaml:"ext"`
-}
-type PDefaultTips struct {
-	Tips string `yaml:"tips"`
-}
-
-func init() {
-	//path, _ := os.Getwd()
-	//bytes, err := ioutil.ReadFile(path + "/config/config.yaml")
-	// if we cd Open-IM-Server/src/utils and run go test
-	// it will panic cannot find config/config.yaml
-
-	cfgName := os.Getenv("CONFIG_NAME")
-	if len(cfgName) == 0 {
-		cfgName = Root + "/config/config.yaml"
-	}
-
-	viper.SetConfigFile(cfgName)
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err.Error())
-	}
-	bytes, err := ioutil.ReadFile(cfgName)
-	if err != nil {
-		panic(err.Error())
-	}
-	if err = yaml.Unmarshal(bytes, &Config); err != nil {
-		panic(err.Error())
-	}
+type notification struct {
+	GroupCreated             NotificationConf `yaml:"groupCreated"`
+	GroupInfoSet             NotificationConf `yaml:"groupInfoSet"`
+	JoinGroupApplication     NotificationConf `yaml:"joinGroupApplication"`
+	MemberQuit               NotificationConf `yaml:"memberQuit"`
+	GroupApplicationAccepted NotificationConf `yaml:"groupApplicationAccepted"`
+	GroupApplicationRejected NotificationConf `yaml:"groupApplicationRejected"`
+	GroupOwnerTransferred    NotificationConf `yaml:"groupOwnerTransferred"`
+	MemberKicked             NotificationConf `yaml:"memberKicked"`
+	MemberInvited            NotificationConf `yaml:"memberInvited"`
+	MemberEnter              NotificationConf `yaml:"memberEnter"`
+	GroupDismissed           NotificationConf `yaml:"groupDismissed"`
+	GroupMuted               NotificationConf `yaml:"groupMuted"`
+	GroupCancelMuted         NotificationConf `yaml:"groupCancelMuted"`
+	GroupMemberMuted         NotificationConf `yaml:"groupMemberMuted"`
+	GroupMemberCancelMuted   NotificationConf `yaml:"groupMemberCancelMuted"`
+	GroupMemberInfoSet       NotificationConf `yaml:"groupMemberInfoSet"`
+	GroupMemberSetToAdmin    NotificationConf `yaml:"groupMemberSetToAdmin"`
+	GroupMemberSetToOrdinary NotificationConf `yaml:"groupMemberSetToOrdinaryUser"`
+	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
+	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
+	////////////////////////user///////////////////////
+	UserInfoUpdated NotificationConf `yaml:"userInfoUpdated"`
+	//////////////////////friend///////////////////////
+	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
+	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
+	FriendApplicationRejected NotificationConf `yaml:"friendApplicationRejected"`
+	FriendAdded               NotificationConf `yaml:"friendAdded"`
+	FriendDeleted             NotificationConf `yaml:"friendDeleted"`
+	FriendRemarkSet           NotificationConf `yaml:"friendRemarkSet"`
+	BlackAdded                NotificationConf `yaml:"blackAdded"`
+	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
+	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
+	//////////////////////conversation///////////////////////
+	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
+	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }

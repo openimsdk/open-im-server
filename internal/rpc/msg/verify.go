@@ -1,0 +1,203 @@
+package msg
+
+import (
+	"context"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+)
+
+var (
+	ExcludeContentType = []int{constant.HasReadReceipt}
+)
+
+type Validator interface {
+	validate(pb *msg.SendMsgReq) (bool, int32, string)
+}
+
+type MessageRevoked struct {
+	RevokerID                   string `json:"revokerID"`
+	RevokerRole                 int32  `json:"revokerRole"`
+	ClientMsgID                 string `json:"clientMsgID"`
+	RevokerNickname             string `json:"revokerNickname"`
+	RevokeTime                  int64  `json:"revokeTime"`
+	SourceMessageSendTime       int64  `json:"sourceMessageSendTime"`
+	SourceMessageSendID         string `json:"sourceMessageSendID"`
+	SourceMessageSenderNickname string `json:"sourceMessageSenderNickname"`
+	SessionType                 int32  `json:"sessionType"`
+	Seq                         uint32 `json:"seq"`
+}
+
+func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgReq) error {
+	switch data.MsgData.SessionType {
+	case constant.SingleChatType:
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+			return nil
+		}
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+			return nil
+		}
+		black, err := m.friend.IsBlocked(ctx, data.MsgData.SendID, data.MsgData.RecvID)
+		if err != nil {
+			return err
+		}
+		if black {
+			return errs.ErrBlockedByPeer.Wrap()
+		}
+		if *config.Config.MessageVerify.FriendVerify {
+			friend, err := m.friend.IsFriend(ctx, data.MsgData.SendID, data.MsgData.RecvID)
+			if err != nil {
+				return err
+			}
+			if !friend {
+				return errs.ErrNotPeersFriend.Wrap()
+			}
+			return nil
+		}
+		return nil
+	case constant.SuperGroupChatType:
+		groupInfo, err := m.Group.GetGroupInfoCache(ctx, data.MsgData.GroupID)
+		if err != nil {
+			return err
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed && data.MsgData.ContentType != constant.GroupDismissedNotification {
+			return errs.ErrDismissedAlready.Wrap()
+		}
+		if groupInfo.GroupType == constant.SuperGroup {
+			return nil
+		}
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
+			return nil
+		}
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+			return nil
+		}
+		// memberIDs, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
+		// if err != nil {
+		// 	return err
+		// }
+		// if !utils.IsContain(data.MsgData.SendID, memberIDs) {
+		// 	return errs.ErrNotInGroupYet.Wrap()
+		// }
+
+		groupMemberInfo, err := m.Group.GetGroupMemberCache(ctx, data.MsgData.GroupID, data.MsgData.SendID)
+		if err != nil {
+			if err == errs.ErrRecordNotFound {
+				return errs.ErrNotInGroupYet.Wrap(err.Error())
+			}
+			return err
+		}
+		if groupMemberInfo.RoleLevel == constant.GroupOwner {
+			return nil
+		} else {
+			if groupMemberInfo.MuteEndTime >= time.Now().Unix() {
+				return errs.ErrMutedInGroup.Wrap()
+			}
+			if groupInfo.Status == constant.GroupStatusMuted && groupMemberInfo.RoleLevel != constant.GroupAdmin {
+				return errs.ErrMutedGroup.Wrap()
+			}
+		}
+		return nil
+	default:
+		return nil
+	}
+}
+func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
+	msg.ServerMsgID = GetMsgID(msg.SendID)
+	msg.SendTime = utils.GetCurrentTimestampByMill()
+	switch msg.ContentType {
+	case constant.Text:
+		fallthrough
+	case constant.Picture:
+		fallthrough
+	case constant.Voice:
+		fallthrough
+	case constant.Video:
+		fallthrough
+	case constant.File:
+		fallthrough
+	case constant.AtText:
+		fallthrough
+	case constant.Merger:
+		fallthrough
+	case constant.Card:
+		fallthrough
+	case constant.Location:
+		fallthrough
+	case constant.Custom:
+		fallthrough
+	case constant.Quote:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, true)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, true)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, true)
+	case constant.Revoke:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+	case constant.HasReadReceipt:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+	case constant.Typing:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+	}
+}
+
+func GetMsgID(sendID string) string {
+	t := time.Now().Format("2006-01-02 15:04:05")
+	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
+}
+
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
+	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+	switch opt {
+	case constant.ReceiveMessage:
+	case constant.NotReceiveMessage:
+		return false, nil
+	case constant.ReceiveNotNotifyMessage:
+		if pb.MsgData.Options == nil {
+			pb.MsgData.Options = make(map[string]bool, 10)
+		}
+		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		return true, nil
+	}
+	// conversationID := utils.GetConversationIDBySessionType(conversationID, sessionType)
+	singleOpt, err := m.Conversation.GetSingleConversationRecvMsgOpt(ctx, userID, conversationID)
+	if errs.ErrRecordNotFound.Is(err) {
+		return true, nil
+	} else if err != nil {
+		return false, err
+	}
+	switch singleOpt {
+	case constant.ReceiveMessage:
+		return true, nil
+	case constant.NotReceiveMessage:
+		if utils.IsContainInt(int(pb.MsgData.ContentType), ExcludeContentType) {
+			return true, nil
+		}
+		return false, nil
+	case constant.ReceiveNotNotifyMessage:
+		if pb.MsgData.Options == nil {
+			pb.MsgData.Options = make(map[string]bool, 10)
+		}
+		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		return true, nil
+	}
+	return true, nil
+}

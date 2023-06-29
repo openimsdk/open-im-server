@@ -1,0 +1,305 @@
+syntax = "proto3";
+package OpenIMServer.msg;
+import "sdkws/sdkws.proto";
+import "wrapperspb/wrapperspb.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg";
+
+message MsgDataToMQ{
+  string token = 1;
+  sdkws.MsgData msgData = 2;
+}
+
+
+message MsgDataToDB {
+  sdkws.MsgData msgData = 1;
+}
+
+message PushMsgDataToMQ{
+  sdkws.MsgData msgData = 1;
+  string conversationID = 2;
+}
+
+message MsgDataToMongoByMQ{
+  int64 lastSeq = 1;
+  string conversationID = 2;
+  repeated sdkws.MsgData msgData = 3;
+}
+
+message GetMaxAndMinSeqReq {
+  string UserID = 1;
+}
+message GetMaxAndMinSeqResp {
+  int64 MaxSeq = 1;
+  int64 MinSeq = 2;
+}
+
+message SendMsgReq {
+  sdkws.MsgData msgData = 3;
+}
+
+message SendMsgResp {
+  string serverMsgID = 1;
+  string clientMsgID = 2;
+  int64  sendTime = 3;
+}
+
+
+
+message SetSendMsgStatusReq{
+  int32 status = 1;
+}
+
+message SetSendMsgStatusResp{
+}
+
+message GetSendMsgStatusReq{
+}
+
+message GetSendMsgStatusResp{
+  int32 status = 1;
+}
+
+
+message ModifyMessageReactionExtensionsReq {
+  string conversationID = 1;
+  int32 sessionType = 2;
+  map <string, sdkws.KeyValue>reactionExtensions = 3;
+  string clientMsgID = 4;
+  OpenIMServer.protobuf.StringValue ex = 5;
+  OpenIMServer.protobuf.StringValue attachedInfo = 6;
+  bool isReact = 7;
+  bool isExternalExtensions = 8;
+  int64 msgFirstModifyTime = 9;
+}
+message SetMessageReactionExtensionsReq {
+  string conversationID = 1;
+  int32 sessionType = 2;
+  map <string, sdkws.KeyValue>reactionExtensions = 3;
+  string clientMsgID = 4;
+  OpenIMServer.protobuf.StringValue ex = 5;
+  OpenIMServer.protobuf.StringValue attachedInfo = 6;
+  bool isReact = 7;
+  bool isExternalExtensions = 8;
+  int64 msgFirstModifyTime = 9;
+}
+message SetMessageReactionExtensionsResp {
+  string clientMsgID = 1;
+  int64 msgFirstModifyTime = 2;
+  bool isReact = 3;
+  repeated KeyValueResp result = 4;
+}
+
+message GetMessagesReactionExtensionsReq {
+  string conversationID = 1;
+  int32 sessionType = 2;
+  message MessageReactionKey {
+    string clientMsgID = 1;
+    int64 msgFirstModifyTime = 2;
+  }
+  repeated MessageReactionKey messageReactionKeys = 3;
+  repeated string TypeKeys = 4;
+}
+message GetMessagesReactionExtensionsResp{
+  repeated SingleMessageExtensionResult singleMessageResult = 1;
+
+}
+message SingleMessageExtensionResult {
+  map <string, sdkws.KeyValue>reactionExtensions = 1;
+  string clientMsgID = 2;
+}
+
+
+message ModifyMessageReactionExtensionsResp {
+  repeated ExtendMsgResp successList = 1;
+  repeated ExtendMsgResp failedList = 2;
+}
+
+message DeleteMessagesReactionExtensionsReq {
+  string operationID = 1;
+  string opUserID = 2;
+  string conversationID = 3;
+  int32 sessionType = 4;
+  string clientMsgID = 5;
+  bool isExternalExtensions = 6;
+  int64 msgFirstModifyTime = 7;
+  repeated sdkws.KeyValue reactionExtensions = 8;
+}
+
+message DeleteMessagesReactionExtensionsResp {
+  repeated KeyValueResp result = 1;
+}
+
+message ExtendMsgResp {
+  ExtendMsg extendMsg = 1;
+}
+
+message ExtendMsg {
+  map <string, KeyValueResp>reactionExtensions = 1;
+  string clientMsgID = 2;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+}
+
+message KeyValueResp {
+  sdkws.KeyValue keyValue = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
+}
+
+message MsgDataToModifyByMQ{
+  repeated sdkws.MsgData messages = 1;
+  string conversationID = 2;
+}
+
+message DelMsgsReq{
+}
+
+message DelMsgsResp{
+}
+
+message RevokeMsgReq {
+  string conversationID = 1;
+  int64 seq = 2;
+  string userID = 3;
+}
+
+message RevokeMsgResp {
+}
+
+message MarkMsgsAsReadReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+  string userID = 3;
+}
+
+message MarkMsgsAsReadResp {
+}
+
+message MarkConversationAsReadReq {
+  string conversationID = 1;
+  string userID = 2;
+  int64 hasReadSeq = 3;
+  repeated int64 seqs = 4;
+}
+
+message MarkConversationAsReadResp {
+}
+
+message SetConversationHasReadSeqReq {
+  string conversationID = 1;
+  string userID = 2;
+  int64 hasReadSeq = 3;
+}
+
+message SetConversationHasReadSeqResp {
+}
+
+message DeleteSyncOpt {
+  bool IsSyncSelf = 3;
+  bool IsSyncOther = 4;
+}
+
+message ClearConversationsMsgReq {
+  repeated string conversationIDs = 1;
+  string userID = 2;
+  DeleteSyncOpt deleteSyncOpt = 3;
+}
+
+message ClearConversationsMsgResp {
+}
+
+message UserClearAllMsgReq {
+  string userID = 1;
+  DeleteSyncOpt deleteSyncOpt = 3;
+}
+
+message UserClearAllMsgResp {
+}
+
+message DeleteMsgsReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+  string userID = 3;
+  DeleteSyncOpt deleteSyncOpt = 4;
+}
+
+message DeleteMsgsResp {
+}
+
+message DeleteMsgPhysicalReq {
+  repeated string conversationIDs = 1;
+  int64 timestamp = 2;
+}
+
+message DeleteMsgPhysicalResp {
+}
+
+message DeleteMsgPhysicalBySeqReq {
+  string conversationID = 1;
+  repeated int64 seqs = 2;
+}
+
+message DeleteMsgPhysicalBySeqResp {
+  
+}
+
+message GetConversationMaxSeqReq {
+  string conversationID = 1;
+}
+
+message GetConversationMaxSeqResp {
+  int64 maxSeq = 1;
+}
+
+
+message GetConversationsHasReadAndMaxSeqReq {
+  string userID = 1;
+}
+
+message Seqs {
+  int64 maxSeq = 1;
+  int64 hasReadSeq = 2;
+}
+
+message GetConversationsHasReadAndMaxSeqResp {
+  map<string, Seqs> seqs = 1;
+}
+
+service msg {
+  //获取最小最大seq（包括用户的，以及指定群组的）
+  rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
+  rpc GetConversationMaxSeq(GetConversationMaxSeqReq) returns(GetConversationMaxSeqResp);
+  //拉取历史消息（包括用户的，以及指定群组的）
+  rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
+  //发送消息
+  rpc SendMsg(SendMsgReq) returns(SendMsgResp);
+
+  // 全量清空指定会话消息 重置min seq 比最大seq大1
+  rpc ClearConversationsMsg(ClearConversationsMsgReq) returns(ClearConversationsMsgResp);
+  // 删除用户全部消息 重置min seq 比最大seq大1
+  rpc UserClearAllMsg(UserClearAllMsgReq) returns(UserClearAllMsgResp);
+  // 用户标记删除部分消息by Seq
+  rpc DeleteMsgs(DeleteMsgsReq) returns(DeleteMsgsResp);
+  // seq物理删除消息
+  rpc DeleteMsgPhysicalBySeq(DeleteMsgPhysicalBySeqReq) returns(DeleteMsgPhysicalBySeqResp);
+  // 物理删除消息by 时间
+  rpc DeleteMsgPhysical(DeleteMsgPhysicalReq) returns(DeleteMsgPhysicalResp);
+
+  //设置消息是否发送成功-针对api发送的消息
+  rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
+  //获取消息发送状态
+  rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
+  rpc RevokeMsg(RevokeMsgReq) returns(RevokeMsgResp);
+  // mark as read
+  rpc MarkMsgsAsRead(MarkMsgsAsReadReq) returns(MarkMsgsAsReadResp);
+  rpc MarkConversationAsRead(MarkConversationAsReadReq) returns(MarkConversationAsReadResp);
+  rpc SetConversationHasReadSeq(SetConversationHasReadSeqReq) returns(SetConversationHasReadSeqResp);
+  // 修改消息
+  rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
+  rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
+  rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
+  rpc DeleteMessageReactionExtensions(DeleteMessagesReactionExtensionsReq) returns(DeleteMessagesReactionExtensionsResp);
+
+  rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
+}

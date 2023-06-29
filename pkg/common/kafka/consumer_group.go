@@ -8,7 +8,8 @@ package kafka
 
 import (
 	"context"
-	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+
 	"github.com/Shopify/sarama"
 )
 
@@ -29,7 +30,6 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	config.Version = consumerConfig.KafkaVersion
 	config.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
 	config.Consumer.Return.Errors = consumerConfig.IsReturnErr
-	fmt.Println("init address is ", addrs, "topics is ", topics)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, config)
 	if err != nil {
 		panic(err.Error())
@@ -40,7 +40,14 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 		topics,
 	}
 }
+
+func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) context.Context {
+	return GetContextWithMQHeader(cMsg.Headers)
+
+}
+
 func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {
+	log.ZDebug(context.Background(), "register consumer group", "groupID", mc.groupID)
 	ctx := context.Background()
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)

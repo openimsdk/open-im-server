@@ -1,0 +1,545 @@
+syntax = "proto3";
+package OpenIMServer.sdkws;
+import "wrapperspb/wrapperspb.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws";
+
+////////////////////////////////base///////////////////////////////
+
+message GroupInfo{
+  string groupID = 1;
+  string groupName = 2;
+  string notification = 3;
+  string introduction = 4;
+  string faceURL = 5;
+  string ownerUserID = 6;
+  int64 createTime = 7;
+  uint32 memberCount = 8;
+  string ex = 9;
+  int32 status = 10;
+  string creatorUserID = 11;
+  int32 groupType = 12;
+  int32 needVerification = 13;
+  int32 lookMemberInfo = 14;
+  int32 applyMemberFriend = 15;
+  int64 notificationUpdateTime = 16;
+  string notificationUserID = 17;
+}
+
+message GroupInfoForSet{
+  string groupID = 1;
+  string groupName = 2;
+  string notification = 3;
+  string introduction = 4;
+  string faceURL = 5;
+  string ex = 6;
+  OpenIMServer.protobuf.Int32Value needVerification = 7;
+  OpenIMServer.protobuf.Int32Value lookMemberInfo = 8;
+  OpenIMServer.protobuf.Int32Value applyMemberFriend = 9;
+}
+
+
+message GroupMemberFullInfo {
+  string groupID = 1 ;
+  string userID = 2 ;
+  int32 roleLevel = 3;
+  int64 joinTime = 4;
+  string nickname = 5;
+  string faceURL = 6;
+  int32 appMangerLevel = 7; //if >0
+  int32 joinSource = 8;
+  string operatorUserID = 9;
+  string ex = 10;
+  int64 muteEndTime = 11;
+  string inviterUserID = 12;
+}
+
+message PublicUserInfo{
+  string userID = 1;
+  string nickname = 2;
+  string faceURL = 3;
+  string ex = 4;
+}
+
+message UserInfo{
+  string userID = 1;
+  string nickname = 2;
+  string faceURL = 3;
+  string ex = 4;
+  int64 createTime = 5;
+  int32 appMangerLevel = 6;
+  int32 globalRecvMsgOpt = 7;
+}
+
+message FriendInfo{
+  string ownerUserID = 1;
+  string remark = 2;
+  int64 createTime = 3;
+  UserInfo friendUser = 4;
+  int32 addSource = 5;
+  string operatorUserID = 6;
+  string ex = 7;
+}
+
+message BlackInfo{
+  string ownerUserID = 1;
+  int64 createTime = 2;
+  PublicUserInfo blackUserInfo = 3;
+  int32 addSource = 4;
+  string operatorUserID = 5;
+  string ex = 6;
+}
+
+message GroupRequest{
+  PublicUserInfo userInfo = 1;
+  GroupInfo groupInfo = 2;
+  int32 handleResult = 3;
+  string reqMsg = 4;
+  string  handleMsg = 5;
+  int64 reqTime = 6;
+  string handleUserID = 7;
+  int64 handleTime = 8;
+  string ex = 9;
+  int32 joinSource = 10;
+  string inviterUserID = 11;
+}
+
+message FriendRequest{
+  string fromUserID = 1;
+  string fromNickname = 2;
+  string fromFaceURL = 3;
+  string toUserID = 4;
+  string toNickname = 5;
+  string toFaceURL = 6;
+  int32 handleResult = 7;
+  string reqMsg = 8;
+  int64 createTime = 9;
+  string handlerUserID = 10;
+  string handleMsg = 11;
+  int64 handleTime = 12;
+  string ex = 13;
+}
+
+
+///////////////////////////////////base end/////////////////////////////////////
+enum PullOrder{
+  PullOrderAsc = 0;
+  PullOrderDesc = 1;
+
+}
+message PullMessageBySeqsReq{
+  string userID = 1;
+  repeated SeqRange seqRanges = 2;
+  PullOrder order = 3;
+}
+
+message SeqRange {
+  string conversationID = 1;
+  int64 begin = 2;
+  int64 end = 3;
+  int64 num = 4;
+}
+
+message PullMsgs {
+  repeated MsgData Msgs = 1;
+  bool isEnd = 2;
+}
+
+message PullMessageBySeqsResp {
+  map<string, PullMsgs> msgs = 1;
+  map<string, PullMsgs> notificationMsgs = 2;
+}
+
+message GetMaxSeqReq {
+  string userID = 1;
+}
+
+message GetMaxSeqResp {
+  map<string, int64> maxSeqs = 1;
+  map<string, int64> minSeqs = 2;
+}
+
+message UserSendMsgResp {
+  string serverMsgID = 1;
+  string clientMsgID = 2;
+  int64  sendTime = 3;
+}
+
+message MsgData {
+  string  sendID = 1;
+  string  recvID = 2;
+  string groupID = 3;
+  string clientMsgID = 4;
+  string serverMsgID = 5;
+  int32 senderPlatformID = 6;
+  string  senderNickname = 7;
+  string  senderFaceURL = 8;
+  int32   sessionType = 9;
+  int32 msgFrom = 10;
+  int32 contentType = 11;
+  bytes content = 12;
+  int64 seq = 14;
+  int64 sendTime = 15;
+  int64 createTime = 16;
+  int32 status = 17;
+  bool isRead = 18;
+  map<string, bool> options = 19;
+  OfflinePushInfo offlinePushInfo = 20;
+  repeated string atUserIDList = 21;
+  string attachedInfo = 22;
+  string ex = 23;
+}
+message PushMessages{
+  map<string, PullMsgs> msgs = 1;
+  map<string, PullMsgs> notificationMsgs = 2;
+}
+message OfflinePushInfo{
+  string title = 1;
+  string desc = 2;
+  string ex = 3;
+  string iOSPushSound = 4;
+  bool iOSBadgeCount = 5;
+  string signalInfo = 6;
+}
+
+
+
+
+
+
+
+
+
+message TipsComm{
+  bytes detail = 1;
+  string defaultTips = 2;
+  string jsonDetail = 3;
+}
+
+//////////////////////group/////////////////////
+
+
+//	OnGroupCreated()
+message GroupCreatedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo memberList = 3;
+  int64 operationTime = 4;
+  GroupMemberFullInfo groupOwnerUser = 5;
+}
+
+//	OnGroupInfoSet()
+message GroupInfoSetTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  int64 muteTime = 2;
+  GroupInfo group = 3;
+}
+
+message GroupInfoSetNameTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  GroupInfo group = 2;
+}
+
+message GroupInfoSetAnnouncementTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  GroupInfo group = 2;
+}
+
+//	OnJoinGroupApplication()
+message JoinGroupApplicationTips{
+  GroupInfo group = 1;
+  PublicUserInfo applicant = 2;
+  string  reqMsg = 3;
+}
+
+//	OnQuitGroup()
+//Actively leave the group
+message MemberQuitTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo quitUser = 2;
+  int64 operationTime = 3;
+}
+
+
+//	OnApplicationGroupAccepted()
+message GroupApplicationAcceptedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
+}
+
+//	OnApplicationGroupRejected()
+message GroupApplicationRejectedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
+}
+
+//	OnTransferGroupOwner()
+message GroupOwnerTransferredTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  GroupMemberFullInfo newGroupOwner = 3;
+  int64 operationTime = 4;
+}
+
+
+//	OnMemberKicked()
+message MemberKickedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo kickedUserList = 3;
+  int64 operationTime = 4;
+}
+
+//	OnMemberInvited()
+message MemberInvitedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo invitedUserList = 3;
+  int64 operationTime = 4;
+}
+
+//Actively join the group
+message MemberEnterTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo entrantUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupDismissedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupMemberMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo mutedUser = 4;
+  uint32 mutedSeconds = 5;
+}
+
+message GroupMemberCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo mutedUser = 4;
+}
+
+message GroupMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupMemberInfoSetTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo changedUser = 4;
+}
+
+//////////////////////friend/////////////////////
+
+message FriendApplication{
+  int64 addTime = 1;
+  string addSource = 2;
+  string addWording = 3;
+}
+
+message FromToUserID{
+  string fromUserID = 1;
+  string toUserID = 2;
+}
+
+//FromUserID apply to add ToUserID
+message FriendApplicationTips{
+  FromToUserID fromToUserID = 1; //from：发起者； to：接收者
+}
+
+//FromUserID accept or reject ToUserID
+message FriendApplicationApprovedTips{
+  FromToUserID fromToUserID = 1; //from：同意者；to：请求发起者
+  string handleMsg = 2;
+}
+
+//FromUserID accept or reject ToUserID
+message FriendApplicationRejectedTips{
+  FromToUserID fromToUserID = 1; //from：拒绝者；to：请求发起者
+  string handleMsg = 2;
+}
+
+
+// FromUserID  Added a friend ToUserID
+message FriendAddedTips{
+  FriendInfo friend = 1;
+  int64 operationTime = 2;
+  PublicUserInfo     opUser = 3;  //who do this
+
+}
+
+// FromUserID  deleted a friend ToUserID
+message FriendDeletedTips{
+  FromToUserID fromToUserID = 1; //from：owner； to：friend
+}
+
+
+
+message BlackAddedTips{
+  FromToUserID fromToUserID = 1; //from：owner； to：black
+}
+
+message BlackDeletedTips{
+  FromToUserID fromToUserID = 1; //from：owner； to：black
+}
+
+message FriendInfoChangedTips{
+  FromToUserID fromToUserID = 1; //from：changed； to：friend
+}
+//////////////////////user/////////////////////
+message UserInfoUpdatedTips{
+  string userID = 1;
+}
+
+//////////////////////conversation/////////////////////
+message ConversationUpdateTips{
+  string userID = 1;
+  repeated string conversationIDList = 2;
+}
+
+message ConversationSetPrivateTips{
+  string recvID = 1;
+  string sendID = 2;
+  bool isPrivate = 3;
+}
+
+message ConversationHasReadTips {
+  string userID = 1;
+  string conversationID = 2;
+  int64 hasReadSeq = 3;
+  int64 unreadCountTime = 4;
+}
+
+message NotificationElem {
+  string detail = 1;
+}
+
+////////////////////message///////////////////////
+message seqs {
+  repeated int64 seqs = 1;
+}
+
+message DeleteMessageTips{
+  string opUserID = 1;
+  string userID = 2;
+  repeated int64 seqs = 3;
+}
+
+
+message RevokeMsgTips{
+  string revokerUserID = 1;
+  string clientMsgID = 2;
+  int64 revokeTime = 3;
+  int32 sesstionType = 5;
+  int64 seq = 6;
+  string conversationID = 7;
+}
+
+
+message MessageRevokedContent {
+	string revokerID = 1;          
+	int32 revokerRole = 2;             
+	string clientMsgID = 3;              
+	string revokerNickname = 4;             
+	int64 revokeTime = 5;         
+	int64 sourceMessageSendTime = 6;        
+	string sourceMessageSendID = 7;    
+	string sourceMessageSenderNickname = 8;  
+	int32 sessionType = 10;
+	int64 seq = 11;                         
+	string ex = 12;                        
+}
+
+message ClearConversationTips {
+  string userID = 1;
+  repeated string conversationIDs = 2;
+}
+
+message DeleteMsgsTips {
+  string userID  = 1;
+  string conversationID = 2;
+  repeated int64 seqs = 3;
+}
+
+message MarkAsReadTips {
+  string markAsReadUserID = 1;
+  string conversationID = 2;
+  repeated int64 seqs = 3;
+  int64 hasReadSeq = 4;
+}
+
+
+message SetAppBackgroundStatusReq {
+  string userID = 1;
+  bool isBackground = 2;
+}
+
+message SetAppBackgroundStatusResp {
+}
+
+message ExtendMsgSet {
+  string conversationID = 1;
+  int32 sessionType = 2;
+  map <string, ExtendMsg>extendMsgs = 3;
+  int64 MaxMsgUpdateTime = 4;
+  int32 extendMsgNum = 5;
+  int64 createTime = 6;
+}
+
+message ExtendMsg {
+  map <string, KeyValue>reactionExtensionList = 1;
+  string clientMsgID = 2;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+}
+
+message KeyValue {
+  string typeKey = 1;
+  string value = 2;
+  int64 latestUpdateTime = 3;
+}
+
+message ReactionMessageModifierNotification {
+  string conversationID = 1;
+  string opUserID = 2;
+  int32 sessionType = 3;
+  map <string, KeyValue>successReactionExtensions = 4;
+  string clientMsgID = 5;
+  bool isReact = 6;
+  bool isExternalExtensions = 7;
+  int64 msgFirstModifyTime = 8;
+}
+
+message ReactionMessageDeleteNotification {
+  string conversationID = 1;
+  string opUserID = 2;
+  int32 sessionType = 3;
+  map <string, KeyValue>successReactionExtensions = 4;
+  string clientMsgID = 5;
+  int64 msgFirstModifyTime = 6;
+}
+
+message RequestPagination {
+  int32 pageNumber = 1;
+  int32 showNumber = 2;
+}
