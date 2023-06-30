@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
@@ -13,7 +12,7 @@ type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	superGroupRecvMsgNotNotifyUserIDs map[string]Hash
 	conversationIDs                   map[string]Hash
-	client                            *rpcclient.Conversation
+	client                            *rpcclient.ConversationRpcClient
 }
 
 type Hash struct {
@@ -21,11 +20,11 @@ type Hash struct {
 	ids  []string
 }
 
-func NewConversationLocalCache(discov discoveryregistry.SvcDiscoveryRegistry) *ConversationLocalCache {
+func NewConversationLocalCache(client *rpcclient.ConversationRpcClient) *ConversationLocalCache {
 	return &ConversationLocalCache{
 		superGroupRecvMsgNotNotifyUserIDs: make(map[string]Hash),
 		conversationIDs:                   make(map[string]Hash),
-		client:                            rpcclient.NewConversation(discov),
+		client:                            client,
 	}
 }
 

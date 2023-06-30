@@ -3,6 +3,7 @@ package mw
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
 	"math"
 	"runtime"
 	"strings"
@@ -92,7 +93,12 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
-	resp, err = handler(ctx, req)
+	resp, err = func() (interface{}, error) {
+		if err := checker.Validate(req); err != nil {
+			return nil, err
+		}
+		return handler(ctx, req)
+	}()
 	if err == nil {
 		log.ZInfo(ctx, "rpc server resp", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
