@@ -171,6 +171,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		var conversationIDs []string
 		for _, conversation := range conversations {
 			conversationIDs = append(conversationIDs, conversation.ConversationID)
+			cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
 		}
 		conversationTx := c.conversationDB.NewTx(tx)
 		existConversations, err := conversationTx.Find(ctx, ownerUserID, conversationIDs)
@@ -194,7 +195,6 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		for _, conversation := range conversations {
 			if !utils.IsContain(conversation.ConversationID, existConversationIDs) {
 				notExistConversations = append(notExistConversations, conversation)
-				cache = cache.DelConvsersations(ownerUserID, conversation.ConversationID)
 			}
 		}
 		if len(notExistConversations) > 0 {
@@ -204,7 +204,6 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 			}
 			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
 		}
-		cache = cache.DelConvsersations(ownerUserID, existConversationIDs...)
 		return nil
 	}); err != nil {
 		return err
