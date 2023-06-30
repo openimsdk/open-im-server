@@ -3,6 +3,7 @@ package mw
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
 	"math"
 	"runtime"
 	"strings"
@@ -88,6 +89,11 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		return nil, status.New(codes.InvalidArgument, "check key empty").Err()
 	} else {
 		if err := verifyReqKey(args, opts[0]); err != nil {
+			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
+		}
+	}
+	if err := req.(checker.Checker); err != nil {
+		if err := err.Check(); err != nil {
 			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
 		}
 	}
