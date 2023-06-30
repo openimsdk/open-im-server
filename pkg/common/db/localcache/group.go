@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -13,7 +12,7 @@ import (
 type GroupLocalCache struct {
 	lock   sync.Mutex
 	cache  map[string]GroupMemberIDsHash
-	client *rpcclient.Group
+	client *rpcclient.GroupRpcClient
 }
 
 type GroupMemberIDsHash struct {
@@ -21,8 +20,7 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupLocalCache(discov discoveryregistry.SvcDiscoveryRegistry) *GroupLocalCache {
-	client := rpcclient.NewGroup(discov)
+func NewGroupLocalCache(client *rpcclient.GroupRpcClient) *GroupLocalCache {
 	return &GroupLocalCache{
 		cache:  make(map[string]GroupMemberIDsHash, 0),
 		client: client,
