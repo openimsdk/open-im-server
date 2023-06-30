@@ -867,19 +867,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		num++
 		s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
-		//args := &pbConversation.ModifyConversationFieldReq{
-		//	Conversation: &pbConversation.Conversation{
-		//		OwnerUserID:      mcontext.GetOpUserID(ctx),
-		//		ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
-		//		ConversationType: constant.SuperGroupChatType,
-		//		GroupID:          group.GroupID,
-		//	},
-		//	FieldType:  constant.FieldGroupAtType,
-		//	UserIDList: userIDs,
-		//}
-		//if err := s.conversationRpcClient.ModifyConversationField(ctx, args); err != nil {
-		//	log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
-		//}
+
 	}
 	switch len(data) - num {
 	case 0:
