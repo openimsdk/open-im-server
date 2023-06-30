@@ -102,6 +102,7 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 
 func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
 	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+	s.logger.Printf("get conn from client, serviceName: %s", serviceName)
 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }
 
