@@ -17,12 +17,12 @@
 #
 # Store this file as .git/hooks/commit-msg in your repository in order to
 # enforce checking for proper commit message format before actual commits.
-# You may need to make the script executable by 'chmod +x .git/hooks/commit-msg'.
+# You may need to make the scripts executable by 'chmod +x .git/hooks/commit-msg'.
 
 # commit-msg use go-gitlint tool, install go-gitlint via `go get github.com/llorllale/go-gitlint/cmd/go-gitlint`
 # go-gitlint --msg-file="$1"
 
-# An example hook script to check the commit log message.
+# An example hook scripts to check the commit log message.
 # Called by "git commit" with one argument, the name of the file
 # that has the commit message.  The hook should exit with non-zero
 # status after issuing an appropriate message if it wants to stop the

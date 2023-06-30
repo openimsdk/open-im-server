@@ -17,7 +17,7 @@
 # Makefile helper functions for copyright
 #
 
-LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE/LICENSE_TEMPLATES
+LICENSE_TEMPLATE ?= $(ROOT_DIR)/scripts/LICENSE/LICENSE_TEMPLATES
 
 ## copyright.verify: Validate boilerplate headers for assign files
 .PHONY: copyright.verify
@@ -53,5 +53,5 @@ copyright.add: tools.verify.addlicense
 
 ## copyright.help: Show copyright help
 .PHONY: copyright.help
-copyright.help: script/make-rules/copyright.mk
+copyright.help: scripts/make-rules/copyright.mk
 	$(call smallhelp)

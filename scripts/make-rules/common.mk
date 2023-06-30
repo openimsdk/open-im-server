@@ -116,7 +116,7 @@ FIND := find . ! -path './utils/*' ! -path './vendor/*'
 XARGS := xargs -r
 
 # Linux command settings-CODE DIRS Copyright
-CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/deploy $(ROOT_DIR)/deploy_k8s $(ROOT_DIR)/docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/script $(ROOT_DIR)/test
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/deploy $(ROOT_DIR)/deploy_k8s $(ROOT_DIR)/docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test
 FINDS := find $(CODE_DIRS)
 
 # Makefile settings: Select different behaviors by determining whether V option is set
@@ -126,7 +126,7 @@ endif
 
 # Copy githook scripts when execute makefile
 # TODO! GIT_FILE_SIZE_LIMIT=42000000 git commit -m "This commit is allowed file sizes up to 42MB"
-COPY_GITHOOK:=$(shell cp -f script/githooks/* .git/hooks/; chmod +x .git/hooks/*)
+COPY_GITHOOK:=$(shell cp -f scripts/githooks/* .git/hooks/; chmod +x .git/hooks/*)
 
 # COMMA: Concatenate multiple strings to form a list of strings
 COMMA := ,

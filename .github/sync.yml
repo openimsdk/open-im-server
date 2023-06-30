@@ -3,7 +3,7 @@
 OpenIMSDK/.github:
   - source: LICENSE
     dest: LICENSE 
-  - source: script/LICENSE/
+  - source: scripts/LICENSE/
     dest: scripts/LICENSE/
     replace: false
   - source: .github/
@@ -16,7 +16,7 @@ OpenIMSDK/.github:
 OpenIMSDK/community:
   - source: LICENSE
     dest: LICENSE
-  - source: script/LICENSE/
+  - source: scripts/LICENSE/
     dest: scripts/LICENSE/
     replace: false
   - source: .github/workflows/
@@ -33,7 +33,7 @@ OpenIMSDK/community:
 OpenIMSDK/openim-sdk-core:
   - source: LICENSE
     dest: LICENSE
-  - source: script/LICENSE/
+  - source: scripts/LICENSE/
     dest: scripts/LICENSE/
     replace: false
   - source: .github/workflows/issue-robot.yml
@@ -49,7 +49,7 @@ OpenIMSDK/OpenIM-Docs:
     exclude: |
       e2e-test.yml
       sync.yml
-  - source: script/githooks/
+  - source: scripts/githooks/
     dest: scripts/githooks/
     replace: true
 
@@ -77,6 +77,6 @@ group:
       - source: .github/workflows/help-comment-issue.yml
         dest: .github/workflows/help-comment-issue.yml
         replace: false
-      - source: ./script/githooks/
+      - source: ./scripts/githooks/
         dest: ./scripts/githooks/
         replace: true

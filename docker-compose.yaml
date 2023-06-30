@@ -1,6 +1,5 @@
-version: "3"
 #fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
-
+version: "3"
 services:
   mysql:
     image: mysql:5.7
@@ -9,10 +8,10 @@ services:
       - 23306:33060
     container_name: mysql
     volumes:
-      - ./components/mysql/data:/var/lib/mysql
+      - ${DATA_DIR}/components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
     environment:
-      MYSQL_ROOT_PASSWORD: openIM
+      MYSQL_ROOT_PASSWORD: ${PASSWORD}
     restart: always
 
   mongodb:
@@ -22,19 +21,19 @@ services:
     container_name: mongo
     command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
-      - ./components/mongodb/data/db:/data/db
-      - ./components/mongodb/data/logs:/data/logs
-      - ./components/mongodb/data/conf:/etc/mongo
+      - ${DATA_DIR}/components/mongodb/data/db:/data/db
+      - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
+      - ${DATA_DIR}/components/mongodb/data/conf:/etc/mongo
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
     environment:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-#    environment:
-#      - MONGO_INITDB_ROOT_USERNAME=openIM
-#      - MONGO_INITDB_ROOT_PASSWORD=openIM
-
-
-      #TZ: Asia/Shanghai
+      - MONGO_INITDB_ROOT_USERNAME=${USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${PASSWORD}
+      - MONGO_INITDB_DATABASE=openIM
+      - MONGO_USERNAME=${USER}
+      - MONGO_PASSWORD=${PASSWORD}
     restart: always
 
   redis:
@@ -43,19 +42,19 @@ services:
       - 16379:6379
     container_name: redis
     volumes:
-      - ./components/redis/data:/data
+      - ${DATA_DIR}/components/redis/data:/data
       #redis config file
-      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - ${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Asia/Shanghai
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server --requirepass openIM --appendonly yes
+    command: redis-server --requirepass ${PASSWORD} --appendonly yes
 
 
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper
     ports:
       - 2181:2181
     container_name: zookeeper
@@ -71,17 +70,16 @@ services:
     container_name: kafka
     restart: always
     ports:
-     - 9093:9093
+      - 9092:9092
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-      KAFKA_CREATE_TOPICS: "ws2ms_chat:2:1,ms2ps_chat:2:1"
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-    network_mode: "host"
     depends_on:
       - zookeeper
 
@@ -95,40 +93,27 @@ services:
       - /mnt/data:/data
       - /mnt/config:/root/.minio
     environment:
-      MINIO_ROOT_USER: user12345
-      MINIO_ROOT_PASSWORD: key12345
+      MINIO_ROOT_USER: ${USER}
+      MINIO_ROOT_PASSWORD: ${PASSWORD}
     restart: always
     command: minio server /data --console-address ':9090'
 
-  etcd:
-    image: quay.io/coreos/etcd
-    ports:
-      - 2379:2379
-      - 2380:2380
-    container_name: etcd
-    volumes:
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-    environment:
-      ETCDCTL_API: 3
-    restart: always
-    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   open_im_server:
-    image: openim/open_im_server:v2.3.0-rc1
+    image: openim/open_im_server:v3.0.0
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-      - ./db/sdk:/Open-IM-Server/db/sdk
-      - ./script:/Open-IM-Server/script
+      - ./config/notification.yaml:/Open-IM-Server/config/notification.yaml
+      - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
+      - ./scripts:/Open-IM-Server/scripts
     restart: always
     depends_on:
       - kafka
       - mysql
       - mongodb
       - redis
-      - etcd
       - minio
     network_mode: "host"
     logging:
@@ -136,3 +121,55 @@ services:
       options:
         max-size: "1g"
         max-file: "2"
+
+  open_im_chat:
+    image: openim/open_im_enterprise:v1.0.2
+    container_name: open_im_enterprise
+    volumes:
+      - ./logs:/Open-IM-chat/logs
+      - ./.docker-compose_cfg/config.yaml:/Open-IM-Enterprise/config/config.yaml
+    restart: always
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+      - minio
+      - open_im_server
+    network_mode: "host"
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+    environment:
+      CONFIG_NAME: "/Open-IM-Enterprise"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./.docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    #    ports:
+    #    - 9091:9091
+    depends_on:
+    - open_im_server
+    command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
+    network_mode: "host" 
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+    - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
+    - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
+    container_name: grafana
+    depends_on:
+    - prometheus
+    network_mode: "host" 
+
+  # node-exporter:
+  #   image: quay.io/prometheus/node-exporter
+  #   container_name: node-exporter
+  #   restart: always
+  #   ports:
+  #     - "9100:9100"

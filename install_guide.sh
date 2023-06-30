@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Welcome to the Open-IM-Server installation script."
+echo "Welcome to the Open-IM-Server installation scripts."
 echo "Please select an deploy option:"
 echo "1. docker-compose install"
 echo "2. exit"
@@ -145,13 +145,13 @@ EOF
     edit_config
     edit_enterprise_config
     
-    cd script;
+    cd scripts;
     chmod +x *.sh;
     ./init_pwd.sh;
     ./env_check.sh;
     cd ..;
     docker-compose up -d;
-    cd script;
+    cd scripts;
     ./docker_check_service.sh;
 }
 
@@ -167,11 +167,10 @@ case $choice in
   3)
     ;;
   4)
-    echo "Exiting installation script..."
+    echo "Exiting installation scripts..."
     exit 0
     ;;
   *)
     echo "Invalid option, please try again."
     ;;
 esac
-

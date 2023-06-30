@@ -78,5 +78,5 @@ gen.clean:
 
 ## gen.help: show help for gen
 .PHONY: gen.help
-gen.help: script/make-rules/gen.mk
+gen.help: scripts/make-rules/gen.mk
 	$(call smallhelp)

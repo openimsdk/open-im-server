@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-#fixme This script is the total startup script
-#fixme The full name of the shell script that needs to be started is placed in the need_to_start_server_shell array
+#fixme This scripts is the total startup scripts
+#fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
-#fixme Put the shell script name here
+#fixme Put the shell scripts name here
 need_to_start_server_shell=(
   start_rpc_service.sh
   push_start.sh

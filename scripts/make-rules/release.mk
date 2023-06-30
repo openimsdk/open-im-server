@@ -38,5 +38,5 @@ release.ensure-tag: tools.verify.gsemver
 
 ## release.help: Display help information about the release package
 .PHONY: release.help
-release.help: script/make-rules/release.mk
+release.help: scripts/make-rules/release.mk
 	$(call smallhelp)

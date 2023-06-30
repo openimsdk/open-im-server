@@ -78,7 +78,7 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
    3. 检查服务
 
       ```
-      cd script;
+      cd scripts;
       ./docker_check_service.sh
       ./check_all.sh
       ```
@@ -100,7 +100,7 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
 3. 设置可执行权限
 
    ```
-   cd ../../script/
+   cd ../../scripts/
    chmod +x *.sh
    ```
 

@@ -37,5 +37,5 @@ dependencies.tools.trivial: $(addprefix tools.verify., $(TRIVIAL_TOOLS))
 
 ## dependencies.help: Print help for dependencies targets
 .PHONY: dependencies.help
-dependencies.help: script/make-rules/dependencies.mk
+dependencies.help: scripts/make-rules/dependencies.mk
 	$(call smallhelp)

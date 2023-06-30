@@ -82,7 +82,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
     4. Check service
     
        ```
-       cd script;
+       cd scripts;
        ./docker_check_service.sh./check_all.sh
        ```
        
@@ -102,7 +102,7 @@ git checkout main
 1. Set executable permissions
 
 ```shell
-cd ../../script/
+cd ../../scripts/
 chmod +x *.sh
 ```
 
@@ -142,18 +142,18 @@ all services build success
 - multiloginpolicy&&tokenpolicy
     - Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
 
-### SCRIPT DESCRIPTION
+### scripts DESCRIPTION
 
-> Open-IM script provides service compilation, start, and stop script. There are four Open-IM script start modules, one is the http+rpc service start module, the second is the websocket service start module, then the msg_transfer module, and the last is the push module
+> Open-IM scripts provides service compilation, start, and stop scripts. There are four Open-IM scripts start modules, one is the http+rpc service start module, the second is the websocket service start module, then the msg_transfer module, and the last is the push module
 
 - path_info.cfg&&style_info.cfg&&functions.sh
     - Contains the path information of each module, including the path where the source code is located, the name of the service startup, the shell print font style, and some functions for processing shell strings
 - build_all_service.sh
     - Compile the module, compile all the source code of Open-IM into a binary file and put it into the bin directory
 - start_rpc_api_service.sh&&msg_gateway_start.sh&&msg_transfer_start.sh&&push_start.sh
-    - Independent script startup module, followed by api and rpc modules, message gateway module, message transfer module, and push module
+    - Independent scripts startup module, followed by api and rpc modules, message gateway module, message transfer module, and push module
 - start_all.sh&&stop_all.sh
-    - Total script, start all services and close all services
+    - Total scripts, start all services and close all services
 
 ## Authentication Clow Chart 
 

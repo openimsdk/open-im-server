@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script is used to check the environment and start the docker containers
+# This scripts is used to check the environment and start the docker containers
 
 # Define the directory path
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,7 +27,7 @@ check_command docker-compose
 # Check if Docker is running
 check_docker
 
-# Change to the script directory
+# Change to the scripts directory
 cd $SCRIPT_DIR
 
 # Set permissions for the scripts
