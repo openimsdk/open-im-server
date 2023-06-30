@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
 	"time"
 
@@ -166,6 +167,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 		return nil, errs.ErrArgs.Wrap("users is empty")
 	}
 	if req.Secret != config.Config.Secret {
+		log.ZDebug(ctx, "UserRegister", config.Config.Secret, req.Secret)
 		return nil, errs.ErrIdentity.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
