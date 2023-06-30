@@ -27,6 +27,7 @@ out-test
 tmp/
 bin/
 output/
+_output/
 
 ### OpenIM deploy ###
 deploy/open_im_demo
