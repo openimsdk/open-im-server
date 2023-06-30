@@ -28,12 +28,12 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure 
 
 
 #set directory to map logs,config file,scripts file.
-VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Serverscript","/Open-IM-Server/db/sdk"]
+VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/scripts","/Open-IM-Server/db/sdk"]
 
 #Copy scripts files and binary files to the blank image
-COPY --from=build /Open-IM-Serverscript /Open-IM-Serverscript
+COPY --from=build /Open-IM-Server/scripts /Open-IM-Serverscripts
 COPY --from=build /Open-IM-Server/bin /Open-IM-Server/bin
 
-WORKDIR /Open-IM-Serverscript
+WORKDIR /Open-IM-Server/scripts
 
 CMD ["./docker_start_all.sh"]
