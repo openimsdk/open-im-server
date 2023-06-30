@@ -87,7 +87,7 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConvsersations(conversation.ConversationID, NotUserIDs...)
 		}
 		return nil
 	}); err != nil {
@@ -194,6 +194,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		for _, conversation := range conversations {
 			if !utils.IsContain(conversation.ConversationID, existConversationIDs) {
 				notExistConversations = append(notExistConversations, conversation)
+				cache = cache.DelConvsersations(ownerUserID, conversation.ConversationID)
 			}
 		}
 		if len(notExistConversations) > 0 {
@@ -228,6 +229,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range notExistUserIDs {
 			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
+			cache = cache.DelConvsersations(v, conversationID)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
 		if len(conversations) > 0 {
