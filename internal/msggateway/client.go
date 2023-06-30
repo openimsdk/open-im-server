@@ -212,7 +212,7 @@ func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error 
 	} else {
 		msg.Msgs = m
 	}
-	log.ZDebug(ctx, "PushMessage", "msg", msg)
+	log.ZDebug(ctx, "PushMessage", "msg", &msg)
 	data, err := proto.Marshal(&msg)
 	if err != nil {
 		return err
