@@ -42,11 +42,11 @@ Options:
 
   BINS             Binaries to build. Default is all binaries under cmd.
                    This option is available when using: make {build}(.multiarch)
-                   Example: make build BINS="open_im_api open_im_cms_api"
+                   Example: make build BINS="open_im_api open_im_cms_api".
 
   PLATFORMS        Platform to build for. Default is linux_arm64 and linux_amd64.
                    This option is available when using: make {build}.multiarch
-                   Example: make build.multiarch PLATFORMS="linux_arm64 linux_amd64"
+                   Example: make build.multiarch PLATFORMS="linux_arm64 linux_amd64".
 
   V                Set to 1 enable verbose build. Default is 0.
 endef
@@ -60,7 +60,7 @@ export USAGE_OPTIONS
 build:
 	@$(MAKE) go.build
 
-## multiarch: Build binaries for multiple platforms. See option PLATFORMS.
+## build-multiarch: Build binaries for multiple platforms. See option PLATFORMS.
 .PHONY: build-multiarch
 build-multiarch:
 	@$(MAKE) go.build.multiarch
@@ -122,6 +122,26 @@ imports:
 .PHONY: clean
 clean:
 	@$(MAKE) go.clean
+
+## image: Build docker images for host arch.
+.PHONY: image
+image:
+	@$(MAKE) image.build
+
+## image.multiarch: Build docker images for multiple platforms. See option PLATFORMS.
+.PHONY: image.multiarch
+image.multiarch:
+	@$(MAKE) image.build.multiarch
+
+## push: Build docker images for host arch and push images to registry.
+.PHONY: push
+push:
+	@$(MAKE) image.push
+
+## push.multiarch: Build docker images for multiple platforms and push images to registry.
+.PHONY: push.multiarch
+push.multiarch:
+	@$(MAKE) image.push.multiarch
 
 ## tools: Install dependent tools.
 .PHONY: tools
