@@ -2,8 +2,6 @@ package api
 
 import (
 	"context"
-	"time"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
@@ -18,7 +16,7 @@ import (
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
-	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithTimeout(time.Second*3)) // 默认RPC中间件
+	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
 	//f, _ := os.Create("../logs/api.log")
 	//gin.DefaultWriter = io.MultiWriter(f)
