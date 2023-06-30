@@ -95,7 +95,7 @@ message GetAllConversationsResp{
 }
 
 message BatchSetConversationsReq{
-  repeated Conversation Conversations = 1;
+  repeated Conversation conversations = 1;
   string ownerUserID = 2;
 }
 
