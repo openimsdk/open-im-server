@@ -24,7 +24,7 @@ services:
       - ${DATA_DIR}/components/mongodb/data/db:/data/db
       - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
       - ${DATA_DIR}/components/mongodb/data/conf:/etc/mongo
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
+      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
     environment:
       - TZ=Asia/Shanghai
       # cache
@@ -37,11 +37,10 @@ services:
     restart: always
 
   redis:
-    image: redis
+    image: redis:6.2.5
     ports:
       - 16379:6379
-    # new image error
-    container_name: redis:7.0.0
+    container_name: redis
     volumes:
       - ${DATA_DIR}/components/redis/data:/data
       #redis config file
@@ -52,7 +51,6 @@ services:
     sysctls:
       net.core.somaxconn: 1024
     command: redis-server --requirepass ${PASSWORD} --appendonly yes
-
 
   zookeeper:
     image: zookeeper
@@ -103,7 +101,7 @@ services:
     image: openim/open_im_server:v3.0.0
     container_name: open_im_server
     volumes:
-      - ./logs:/Open-IM-Server/logs/open-im-server
+      - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
       - ./config/notification.yaml:/Open-IM-Server/config/notification.yaml
       - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
