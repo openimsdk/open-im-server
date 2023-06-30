@@ -23,7 +23,6 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
-	log.ZInfo(ctx, "rpc client req", "funcName", method, "req", rpcString(req), "invoker", invoker, "invoker_type", fmt.Sprintf("%T", invoker))
 	ctx, err = getRpcContext(ctx, method)
 	if err != nil {
 		return err
@@ -54,6 +53,7 @@ func RpcClientInterceptor(ctx context.Context, method string, req, resp interfac
 }
 
 func getRpcContext(ctx context.Context, method string) (context.Context, error) {
+	// ctx, _ = context.WithTimeout(ctx, time.Second*5)
 	md := metadata.Pairs()
 	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
 		for _, key := range keys {

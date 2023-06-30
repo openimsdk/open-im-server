@@ -20,6 +20,7 @@ type SvcDiscoveryRegistry interface {
 	Conn
 	Register(serviceName, host string, port int, opts ...grpc.DialOption) error
 	UnRegister() error
+	CreateRpcRootNodes(serviceNames []string) error
 	RegisterConf2Registry(key string, conf []byte) error
 	GetConfFromRegistry(key string) ([]byte, error)
 }

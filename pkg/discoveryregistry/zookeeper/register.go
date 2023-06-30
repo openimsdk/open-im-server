@@ -8,6 +8,15 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+func (s *ZkClient) CreateRpcRootNodes(serviceNames []string) error {
+	for _, serviceName := range serviceNames {
+		if err := s.ensureName(serviceName); err != nil && err != zk.ErrNodeExists {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc.DialOption) error {
 	if err := s.ensureName(rpcRegisterName); err != nil {
 		return err

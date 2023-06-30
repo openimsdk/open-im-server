@@ -10,18 +10,14 @@ message Conversation{
   int32 conversationType = 4;
   string userID = 5;
   string groupID = 6;
-  int32 unreadCount = 7;
-  int64 draftTextTime = 8;
-  bool isPinned = 9;
-  string attachedInfo = 10;
-  bool isPrivateChat = 11;
-  int32 groupAtType = 12;
-  string ex = 13;
-  int64  updateUnreadCountTime = 14;
-  int32 burnDuration = 15;
-  int64 minSeq = 16;
-  int64 maxSeq = 17;
-  int64 hasReadSeq = 18;
+  bool isPinned = 7;
+  string attachedInfo = 8;
+  bool isPrivateChat = 9;
+  int32 groupAtType = 10;
+  string ex = 11;
+  int32 burnDuration = 12;
+  int64 minSeq = 13;
+  int64 maxSeq = 14;
 }
 
 message ConversationReq{
@@ -30,17 +26,14 @@ message ConversationReq{
   string userID = 3;
   string groupID = 4;
   OpenIMServer.protobuf.Int32Value recvMsgOpt = 5;
-  OpenIMServer.protobuf.Int64Value draftTextTime = 6;
-  OpenIMServer.protobuf.BoolValue isPinned = 7;
-  OpenIMServer.protobuf.StringValue attachedInfo = 8;
-  OpenIMServer.protobuf.BoolValue isPrivateChat = 9;
-  OpenIMServer.protobuf.StringValue ex = 10;
-  OpenIMServer.protobuf.Int64Value updateUnreadCountTime = 11;
-  OpenIMServer.protobuf.Int32Value burnDuration = 12;
-  OpenIMServer.protobuf.Int64Value minSeq = 13;
-  OpenIMServer.protobuf.Int64Value maxSeq = 14;
-  OpenIMServer.protobuf.Int64Value hasReadSeq = 15;
-  OpenIMServer.protobuf.Int32Value groupAtType = 16;
+  OpenIMServer.protobuf.BoolValue isPinned = 6;
+  OpenIMServer.protobuf.StringValue attachedInfo = 7;
+  OpenIMServer.protobuf.BoolValue isPrivateChat = 8;
+  OpenIMServer.protobuf.StringValue ex = 9;
+  OpenIMServer.protobuf.Int32Value burnDuration = 10;
+  OpenIMServer.protobuf.Int64Value minSeq = 11;
+  OpenIMServer.protobuf.Int64Value maxSeq = 12;
+  OpenIMServer.protobuf.Int32Value groupAtType = 13;
 }
 
 message ModifyConversationFieldReq{
@@ -95,13 +88,11 @@ message GetAllConversationsResp{
 }
 
 message BatchSetConversationsReq{
-  repeated Conversation Conversations = 1;
+  repeated Conversation conversations = 1;
   string ownerUserID = 2;
 }
 
 message BatchSetConversationsResp{
-  repeated string success = 1;
-  repeated string failed = 2;
 }
 
 message GetRecvMsgNotNotifyUserIDsReq {

@@ -32,7 +32,7 @@ func BuildClaims(uid string, platformID int, ttl int64) Claims {
 
 func secret() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Config.TokenPolicy.AccessSecret), nil
+		return []byte(config.Config.Secret), nil
 	}
 }
 

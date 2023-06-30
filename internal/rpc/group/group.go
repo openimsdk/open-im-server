@@ -48,20 +48,22 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	user := rpcclient.NewUserRpcClient(client)
+	userRpcClient := rpcclient.NewUserRpcClient(client)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
-		User:          user,
-		Notification: notification.NewGroupNotificationSender(database, client, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-			users, err := user.GetUsersInfo(ctx, userIDs)
+		User:          userRpcClient,
+		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
 			}
 			return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
 		}),
-		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
-		msgRpcClient:          rpcclient.NewMessageRpcClient(client),
+		conversationRpcClient: conversationRpcClient,
+		msgRpcClient:          msgRpcClient,
 	})
 	return nil
 }
@@ -865,19 +867,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		num++
 		s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
-		//args := &pbConversation.ModifyConversationFieldReq{
-		//	Conversation: &pbConversation.Conversation{
-		//		OwnerUserID:      mcontext.GetOpUserID(ctx),
-		//		ConversationID:   utils.GetConversationIDBySessionType(constant.GroupChatType, group.GroupID),
-		//		ConversationType: constant.SuperGroupChatType,
-		//		GroupID:          group.GroupID,
-		//	},
-		//	FieldType:  constant.FieldGroupAtType,
-		//	UserIDList: userIDs,
-		//}
-		//if err := s.conversationRpcClient.ModifyConversationField(ctx, args); err != nil {
-		//	log.ZWarn(ctx, "modifyConversationField failed", err, "args", args)
-		//}
+
 	}
 	switch len(data) - num {
 	case 0:

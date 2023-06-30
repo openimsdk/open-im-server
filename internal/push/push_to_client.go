@@ -30,7 +30,7 @@ type Pusher struct {
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
-	msgClient              *rpcclient.MessageRpcClient
+	msgRpcClient           *rpcclient.MessageRpcClient
 	conversationRpcClient  *rpcclient.ConversationRpcClient
 	groupRpcClient         *rpcclient.GroupRpcClient
 	successCount           int
@@ -39,19 +39,17 @@ type Pusher struct {
 var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
 func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
-	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache) *Pusher {
-	msgClient := rpcclient.NewMessageRpcClient(discov)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(discov)
-	groupRpcClient := rpcclient.NewGroupRpcClient(discov)
+	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache,
+	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient, msgRpcClient *rpcclient.MessageRpcClient) *Pusher {
 	return &Pusher{
 		discov:                 discov,
 		database:               database,
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
-		msgClient:              &msgClient,
-		conversationRpcClient:  &conversationRpcClient,
-		groupRpcClient:         &groupRpcClient,
+		msgRpcClient:           msgRpcClient,
+		conversationRpcClient:  conversationRpcClient,
+		groupRpcClient:         groupRpcClient,
 	}
 }
 
@@ -70,7 +68,7 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	maxSeq, err := p.msgClient.GetConversationMaxSeq(ctx, conevrsationID)
+	maxSeq, err := p.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
 	}

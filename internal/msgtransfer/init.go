@@ -53,6 +53,9 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
+	if client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+		return err
+	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	msgModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())

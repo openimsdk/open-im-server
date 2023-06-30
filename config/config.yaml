@@ -12,7 +12,7 @@ mysql:
   address: [ 127.0.0.1:13306 ]            #目前仅支持单机
   username: root                          #用户名
   password: openIM123                     #密码
-  database: openIM_v2                     #不建议修改
+  database: openIM_v3                     #不建议修改
   maxOpenConn: 1000                       #最大连接数
   maxIdleConn: 100                        #最大空闲连接数
   maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
@@ -22,7 +22,7 @@ mysql:
 mongo:
   uri:                                    #不为空则直接使用该值
   address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
-  database: openIM                        #mongo db 默认即可
+  database: openIM_v3                      #mongo db 默认即可
   username: root                          #用户名
   password: openIM123                     #密码
   maxPoolSize: 100
@@ -41,10 +41,10 @@ kafka:
   offlineMsgToMongo:
     topic: "offlineMsgToMongoMysql"       #不建议修改
   msgToPush:
-    topic: "msqToPush"                    #不建议修改
+    topic: "msgToPush"                    #不建议修改
   msgToModify:
     topic: "msgToModify"                  #不建议修改
-  consumerGroupID:                        #消费者组，不建议修改
+  consumerGroupID: #消费者组，不建议修改
     msgToRedis: redis                     #
     msgToMongo: mongo                     #
     msgToMySql: mysql                     #
@@ -72,13 +72,13 @@ object:
     accessKeyID: root                     #ID
     secretAccessKey: openIM123            #秘钥
     isDistributedMod: false               #是否分布式多硬盘部署，如果是多硬盘部署，需要修改为true
-  tencent:                                #tencent cos
+  tencent: #tencent cos
     appID:
     region:
     bucket:
     secretID:
     secretKey:
-  ali:                                    #ali oss
+  ali: #ali oss
     regionID:
     accessKeyID:
     accessKeySecret:
@@ -98,7 +98,7 @@ object:
     externalId:
     roleSessionName:
 
-rpcPort:                              #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如 openImUserPort: [10110, 10111]
+rpcPort: #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如  [10110, 10111]
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -109,7 +109,7 @@ rpcPort:                              #rpc服务端口，不建议修改，端�
   openImConversationPort: [ 10180 ]
   openImThirdPort: [ 10190 ]
 
-rpcRegisterName:                      #rpc注册服务名，不建议修改
+rpcRegisterName: #rpc注册服务名，不建议修改
   openImUserName: User
   openImFriendName: Friend
   openImMsgName: Msg
@@ -136,22 +136,22 @@ longConnSvr:
   websocketTimeout: 10                #websocket连接握手超时时间
 
 push:
-  enable: getui                       #选择个推离线推送
-  geTui:                              #个推离线推送
+  enable: getui
+  geTui: #个推离线推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
     channelID: ""
     channelName: ""
-  fcm:                                #fcm离线推送
+  fcm: #fcm离线推送
     serviceAccount: "x.json"          #帐号文件，并放在 config目录下
-  jpns:                               #极光推送 在极光后台申请后，修改以下四项
+  jpns: #极光推送 在极光后台申请后，修改以下四项
     appKey:
     masterSecret:
     pushUrl:
     pushIntent:
-    
+
 manager:
   userID: [ "openIM123456","openIM654321","openIMAdmin" ]   #内置的app管理员userID
   nickname: [ "system1","system2", "system3" ]              #内置的app管理员nickname
@@ -170,11 +170,10 @@ singleMessageHasReadReceiptEnable: true                 #单聊已读是否开�
 retainChatRecords: 365                                  #mongo保存离线消息时间（天）
 chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息
 
-
+secret: tuoyun #秘钥，获取token时校验
 
 tokenPolicy:
-  accessSecret: openIM123                              #秘钥，获取token时校验
-  accessExpire: 90                                     #过期时间（天）
+  expire: 90                                     #过期时间（天）
 
 messageVerify:
   friendVerify: false                                  #发送消息时是否验证好友关系
@@ -249,7 +248,7 @@ callback:
     failedContinue: true
 
 
-prometheus:                                                   #prometheus每个服务的端口数量需要和rpcPort保持对应
+prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
   enable: false
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
@@ -261,5 +260,5 @@ prometheus:                                                   #prometheus每个�
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和scripts/path_info.cfg中的msg_transfer_service_num保持一致
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.cfg中的msg_transfer_service_num保持一致
 

@@ -7,13 +7,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"google.golang.org/grpc"
 )
 
 type Conversation struct {
-	Client conversation.ConversationClient
+	Client pbConversation.ConversationClient
 	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
@@ -23,7 +22,7 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversatio
 	if err != nil {
 		panic(err)
 	}
-	client := conversation.NewConversationClient(conn)
+	client := pbConversation.NewConversationClient(conn)
 	return &Conversation{discov: discov, conn: conn, Client: client}
 }
 

@@ -77,8 +77,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		MsgDatabase:            msgDatabase,
 		ExtendMsgDatabase:      extendMsgDatabase,
 		RegisterCenter:         client,
-		GroupLocalCache:        localcache.NewGroupLocalCache(client),
-		ConversationLocalCache: localcache.NewConversationLocalCache(client),
+		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
+		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
 		friend:                 &friendRpcClient,
 		MessageLocker:          NewLockerMessage(cacheModel),
 	}

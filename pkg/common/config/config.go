@@ -215,9 +215,9 @@ type config struct {
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
 	RetainChatRecords                 int    `yaml:"retainChatRecords"`
 	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
+	Secret                            string `yaml:"secret"`
 	TokenPolicy                       struct {
-		AccessSecret string `yaml:"accessSecret"`
-		AccessExpire int64  `yaml:"accessExpire"`
+		Expire int64 `yaml:"expire"`
 	} `yaml:"tokenPolicy"`
 	MessageVerify struct {
 		FriendVerify *bool `yaml:"friendVerify"`
@@ -300,4 +300,9 @@ type notification struct {
 	//////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
+}
+
+func GetServiceNames() []string {
+	return []string{Config.RpcRegisterName.OpenImUserName, Config.RpcRegisterName.OpenImFriendName, Config.RpcRegisterName.OpenImMsgName, Config.RpcRegisterName.OpenImPushName, Config.RpcRegisterName.OpenImMessageGatewayName,
+		Config.RpcRegisterName.OpenImGroupName, Config.RpcRegisterName.OpenImAuthName, Config.RpcRegisterName.OpenImConversationName, Config.RpcRegisterName.OpenImThirdName}
 }

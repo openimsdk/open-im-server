@@ -33,13 +33,16 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbAuth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
-		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.Secret, config.Config.TokenPolicy.Expire),
 	})
 	return nil
 }
 
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
+	if req.Secret != config.Config.Secret {
+		return nil, errs.ErrIdentity.Wrap("secret invalid")
+	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -48,7 +51,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*
 		return nil, err
 	}
 	resp.Token = token
-	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire * 24 * 60 * 60
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.Expire * 24 * 60 * 60
 	return &resp, nil
 }
 

@@ -19,15 +19,13 @@ import (
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
 	gin.SetMode(gin.ReleaseMode)
-	//f, _ := os.Create("../logs/api.log")
-	//gin.DefaultWriter = io.MultiWriter(f)
-	//gin.SetMode(gin.DebugMode)
 	r := gin.New()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("required_if", RequiredIf)
 	}
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
+	u := NewUserApi(discov)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -35,90 +33,77 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	userRouterGroup := r.Group("/user")
+	ParseToken := mw.GinParseToken(rdb)
+	userRouterGroup := r.Group("/user", ParseToken)
 	{
-		u := NewUserApi(discov)
-		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "")
-		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
-		userRouterGroupChild.POST("/user_register", u.UserRegister)
-		userRouterGroupChildToken.POST("/update_user_info", u.UpdateUserInfo) //1
-		userRouterGroupChildToken.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
-		userRouterGroupChildToken.POST("/get_users_info", u.GetUsersPublicInfo) //1
-		userRouterGroupChildToken.POST("/get_all_users_uid", u.GetAllUsersID)   // todo
-		userRouterGroupChildToken.POST("/account_check", u.AccountCheck)        // todo
-		userRouterGroupChildToken.POST("/get_users", u.GetUsers)
-		userRouterGroupChildToken.POST("/get_users_online_status", u.GetUsersOnlineStatus)
+		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo)
+		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
+		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)
+		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)
+		userRouterGroup.POST("/account_check", u.AccountCheck)
+		userRouterGroup.POST("/get_users", u.GetUsers)
+		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus)
 	}
 	//friend routing group
-	friendRouterGroup := r.Group("/friend")
+	friendRouterGroup := r.Group("/friend", ParseToken)
 	{
 		f := NewFriendApi(discov)
-		friendRouterGroup.Use(mw.GinParseToken(rdb))
-		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)                  //1
-		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)    //1
-		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList) //1
-		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)               //1
-		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)                 //1
-		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)      //1
-		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)           //1
-		friendRouterGroup.POST("/add_black", f.AddBlack)                          //1
-		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)          //1
-		friendRouterGroup.POST("/remove_black", f.RemoveBlack)                    //1
-		friendRouterGroup.POST("/import_friend", f.ImportFriends)                 //1
-		friendRouterGroup.POST("/is_friend", f.IsFriend)                          //1
+		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
+		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)
+		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
+		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)
+		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)
+		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)
+		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
+		friendRouterGroup.POST("/add_black", f.AddBlack)
+		friendRouterGroup.POST("/get_black_list", f.GetPaginationBlacks)
+		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
+		friendRouterGroup.POST("/import_friend", f.ImportFriends)
+		friendRouterGroup.POST("/is_friend", f.IsFriend)
 	}
 	g := NewGroupApi(discov)
-	groupRouterGroup := r.Group("/group")
+	groupRouterGroup := r.Group("/group", ParseToken)
 	{
-
-		groupRouterGroup.Use(mw.GinParseToken(rdb))
-		groupRouterGroup.POST("/create_group", g.CreateGroup)                                   //1
-		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)                                //1
-		groupRouterGroup.POST("/join_group", g.JoinGroup)                                       //1
-		groupRouterGroup.POST("/quit_group", g.QuitGroup)                                       //1
-		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)        //1
-		groupRouterGroup.POST("/transfer_group", g.TransferGroupOwner)                          //1
-		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList) //1
+		groupRouterGroup.POST("/create_group", g.CreateGroup)
+		groupRouterGroup.POST("/set_group_info", g.SetGroupInfo)
+		groupRouterGroup.POST("/join_group", g.JoinGroup)
+		groupRouterGroup.POST("/quit_group", g.QuitGroup)
+		groupRouterGroup.POST("/group_application_response", g.ApplicationGroupResponse)
+		groupRouterGroup.POST("/transfer_group", g.TransferGroupOwner)
+		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList)
 		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo) //1
-		groupRouterGroup.POST("/kick_group", g.KickGroupMember)    //1
-		// groupRouterGroup.POST("/get_group_all_member_list", g.GetGroupAllMemberList) //1
-		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo) //1
-		groupRouterGroup.POST("/get_group_member_list", g.GetGroupMemberList)   //1
-		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)     //1
+		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo)
+		groupRouterGroup.POST("/kick_group", g.KickGroupMember)
+		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)
+		groupRouterGroup.POST("/get_group_member_list", g.GetGroupMemberList)
+		groupRouterGroup.POST("/invite_user_to_group", g.InviteUserToGroup)
 		groupRouterGroup.POST("/get_joined_group_list", g.GetJoinedGroupList)
 		groupRouterGroup.POST("/dismiss_group", g.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", g.MuteGroupMember)
-		groupRouterGroup.POST("/cancel_mute_group_member", g.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/cancel_mute_group_member", g.CancelMuteGroupMember)
 		groupRouterGroup.POST("/mute_group", g.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", g.CancelMuteGroup)
-		//groupRouterGroup.POST("/set_group_member_nickname", g.SetGroupMemberNickname)
 		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 	}
-	superGroupRouterGroup := r.Group("/super_group")
+	superGroupRouterGroup := r.Group("/super_group", ParseToken)
 	{
-		superGroupRouterGroup.Use(mw.GinParseToken(rdb))
 		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
 		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
-	////certificate
+	//certificate
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
-		u := NewUserApi(discov)
-		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "")
-		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
-		authRouterGroupChild.POST("/user_register", u.UserRegister)    //1
-		authRouterGroupChild.POST("/user_token", a.UserToken)          //1
-		authRouterGroupChildToken.POST("/parse_token", a.ParseToken)   //1
-		authRouterGroupChildToken.POST("/force_logout", a.ForceLogout) //1
+		authRouterGroup.POST("/user_register", u.UserRegister)
+		authRouterGroup.POST("/user_token", a.UserToken)
+		authRouterGroup.POST("/parse_token", a.ParseToken)
+		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
 	}
-	////Third service
-	thirdGroup := r.Group("/third")
+	//Third service
+	thirdGroup := r.Group("/third", ParseToken)
 	{
 		t := NewThirdApi(discov)
-		thirdGroup.Use(mw.GinParseToken(rdb))
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
@@ -129,11 +114,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/object", t.GetURL)
 		thirdGroup.GET("/object", t.GetURL)
 	}
-	////Message
-	msgGroup := r.Group("/msg")
+	//Message
+	msgGroup := r.Group("/msg", ParseToken)
 	{
 		m := NewMessageApi(discov)
-		msgGroup.Use(mw.GinParseToken(rdb))
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
@@ -151,32 +135,23 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
-
-		//msgGroup.POST("/set_message_reaction_extensions", msg.SetMessageReactionExtensions)
-		//msgGroup.POST("/get_message_list_reaction_extensions", msg.GetMessageListReactionExtensions)
-		//msgGroup.POST("/add_message_reaction_extensions", msg.AddMessageReactionExtensions)
-		//msgGroup.POST("/delete_message_reaction_extensions", msg.DeleteMessageReactionExtensions)
 	}
-	////Conversation
-	conversationGroup := r.Group("/conversation")
+	//Conversation
+	conversationGroup := r.Group("/conversation", ParseToken)
 	{
 		c := NewConversationApi(discov)
-		conversationGroup.Use(mw.GinParseToken(rdb))
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
-		conversationGroup.POST("/set_conversation", c.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", c.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
 		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
 
-	statisticsGroup := r.Group("/statistics")
+	statisticsGroup := r.Group("/statistics", ParseToken)
 	{
-		s := NewStatisticsApi(discov)
-		conversationGroup.Use(mw.GinParseToken(rdb))
-		statisticsGroup.POST("/user_register", s.UserRegister)
+		statisticsGroup.POST("/user_register", u.UserRegisterCount)
 	}
 	return r
 }

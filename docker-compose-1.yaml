@@ -15,7 +15,7 @@ services:
     restart: always
 
   mongodb:
-    image: mongo:4.0
+    image: mongo:6.0
     ports:
       - 37017:27017
     container_name: mongo
@@ -24,7 +24,7 @@ services:
       - ${DATA_DIR}/components/mongodb/data/db:/data/db
       - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
       - ${DATA_DIR}/components/mongodb/data/conf:/etc/mongo
-      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
     environment:
       - TZ=Asia/Shanghai
       # cache
@@ -37,7 +37,7 @@ services:
     restart: always
 
   redis:
-    image: redis
+    image: redis:6.2.5
     ports:
       - 16379:6379
     container_name: redis
@@ -52,7 +52,6 @@ services:
       net.core.somaxconn: 1024
     command: redis-server --requirepass ${PASSWORD} --appendonly yes
 
-
   zookeeper:
     image: zookeeper
     ports:
@@ -63,7 +62,6 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
-
 
   kafka:
     image: wurstmeister/kafka
@@ -107,7 +105,7 @@ services:
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
       - ./config/notification.yaml:/Open-IM-Server/config/notification.yaml
       - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
-      - ./script:/Open-IM-Server/script
+      - ./scripts:/Open-IM-Server/scripts
     restart: always
     depends_on:
       - kafka
@@ -122,12 +120,12 @@ services:
         max-size: "1g"
         max-file: "2"
 
-  open_im_enterprise:
-    image: openim/open_im_enterprise:v1.0.2
-    container_name: open_im_enterprise
+  openim_chat:
+    image: openim/openim_chat:v1.0
+    container_name: openim_chat
     volumes:
-      - ./logs:/Open-IM-Enterprise/logs
-      - ./.docker-compose_cfg/config.yaml:/Open-IM-Enterprise/config/config.yaml
+      - ./logs:/openim-chat/logs
+      - ./openim-chat/config/config.yaml:/openim-chat/config/config.yaml
     restart: always
     depends_on:
       - mysql
@@ -142,7 +140,7 @@ services:
         max-size: "1g"
         max-file: "2"
     environment:
-      CONFIG_NAME: "/Open-IM-Enterprise"
+      CONFIG_NAME: "/openim-chat"
 
   prometheus:
     image: prom/prometheus
