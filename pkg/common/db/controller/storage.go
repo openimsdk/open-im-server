@@ -105,7 +105,6 @@ func (c *s3Database) urlName(name string) string {
 		Host:        c.url.Host,
 		Path:        c.url.Path,
 		RawPath:     c.url.RawPath,
-		OmitHost:    c.url.OmitHost,
 		ForceQuery:  c.url.ForceQuery,
 		RawQuery:    c.url.RawQuery,
 		Fragment:    c.url.Fragment,
