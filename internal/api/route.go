@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
@@ -27,6 +28,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
+	u := NewUserApi(discov)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -36,7 +38,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	userRouterGroup := r.Group("/user")
 	{
-		u := NewUserApi(discov)
 		userRouterGroupChild := mw.NewRouterGroup(userRouterGroup, "")
 		userRouterGroupChildToken := mw.NewRouterGroup(userRouterGroup, "", mw.WithGinParseToken(rdb))
 		userRouterGroupChild.POST("/user_register", u.UserRegister)
@@ -105,7 +106,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
-		u := NewUserApi(discov)
 		authRouterGroupChild := mw.NewRouterGroup(authRouterGroup, "")
 		authRouterGroupChildToken := mw.NewRouterGroup(authRouterGroup, "", mw.WithGinParseToken(rdb))
 		authRouterGroupChild.POST("/user_register", u.UserRegister)    //1
@@ -173,9 +173,9 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	statisticsGroup := r.Group("/statistics")
 	{
-		s := NewStatisticsApi(discov)
+		// s := NewStatisticsApi(discov)
 		conversationGroup.Use(mw.GinParseToken(rdb))
-		statisticsGroup.POST("/user_register", s.UserRegister)
+		statisticsGroup.POST("/user_register", u.UserRegisterCount)
 	}
 	return r
 }
