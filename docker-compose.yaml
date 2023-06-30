@@ -15,7 +15,7 @@ services:
     restart: always
 
   mongodb:
-    image: mongo:4.0
+    image: mongo:6.0
     ports:
       - 37017:27017
     container_name: mongo
@@ -40,7 +40,8 @@ services:
     image: redis
     ports:
       - 16379:6379
-    container_name: redis
+    # new image error
+    container_name: redis:7.0.0
     volumes:
       - ${DATA_DIR}/components/redis/data:/data
       #redis config file
@@ -63,7 +64,6 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
-
 
   kafka:
     image: wurstmeister/kafka
@@ -124,7 +124,7 @@ services:
 
   openim_chat:
     image: openim/openim-chat:v1.0
-    container_name: open_im_enterprise
+    container_name: openim_chat
     volumes:
       - ./logs:/Open-IM-Server/logs/openim-chat
       - ./openim-chat/config/config.yaml:/openim-chat/config/config.yaml
