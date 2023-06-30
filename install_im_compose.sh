@@ -9,7 +9,7 @@ if [ $MINIO_ENDPOINT == "http://127.0.0.1:10005" ]; then
 
 fi
 
-cd script ;
+cd scripts ;
 chmod +x *.sh ;
 ./init_pwd.sh
 ./env_check.sh;

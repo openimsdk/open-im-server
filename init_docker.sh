@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-cd script ;
+cd scripts ;
 chmod +x *.sh ;
 ./env_check.sh;
 cd .. ;
 docker-compose up -d;
-cd script ;
+cd scripts ;
 ./docker_check_service.sh
