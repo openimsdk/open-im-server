@@ -124,7 +124,7 @@ services:
     image: openim/openim_chat:v1.0
     container_name: openim_chat
     volumes:
-      - ./logs:/Open-IM-Server/logs/openim-chat
+      - ./logs:/openim-chat/logs
       - ./openim-chat/config/config.yaml:/openim-chat/config/config.yaml
     restart: always
     depends_on:
