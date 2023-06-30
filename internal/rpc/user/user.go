@@ -55,11 +55,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
 		UserDatabase:       database,
 		RegisterCenter:     client,
 		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(client, notification.WithDBFunc(database.FindWithError)),
+		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
