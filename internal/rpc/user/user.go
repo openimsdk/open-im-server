@@ -165,7 +165,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.Wrap("users is empty")
 	}
-	if req.Secret != config.Config.TokenPolicy.AccessSecret {
+	if req.Secret != config.Config.Secret {
 		return nil, errs.ErrIdentity.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {

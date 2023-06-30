@@ -52,7 +52,7 @@ func GinParseOperationID() gin.HandlerFunc {
 }
 
 func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
-	dataBase := controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire)
+	dataBase := controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.Secret, config.Config.TokenPolicy.Expire)
 	return func(c *gin.Context) {
 		switch c.Request.Method {
 		case http.MethodPost:

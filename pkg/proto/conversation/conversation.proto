@@ -100,8 +100,6 @@ message BatchSetConversationsReq{
 }
 
 message BatchSetConversationsResp{
-  repeated string success = 1;
-  repeated string failed = 2;
 }
 
 message GetRecvMsgNotNotifyUserIDsReq {

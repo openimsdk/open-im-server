@@ -9,10 +9,10 @@ import (
 )
 
 func Test_ParseToken(t *testing.T) {
-	config.Config.TokenPolicy.AccessSecret = "OpenIM_server"
+	config.Config.Secret = "OpenIM_server"
 	claims1 := BuildClaims("123456", constant.AndroidPadPlatformID, 10)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims1)
-	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
+	tokenString, err := token.SignedString([]byte(config.Config.Secret))
 	if err != nil {
 		t.Fatal(err)
 	}
