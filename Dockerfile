@@ -28,7 +28,7 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure 
 
 
 #set directory to map logs,config file,scripts file.
-VOLUME ["/Open-IM-Server/logs/open-im-server","/Open-IM-Server/config","/Open-IM-Server/scripts","/Open-IM-Server/db/sdk"]
+VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/scripts","/Open-IM-Server/db/sdk"]
 
 #Copy scriptss files and binary files to the blank image
 COPY --from=build /Open-IM-Server/scripts /Open-IM-Server/scripts
