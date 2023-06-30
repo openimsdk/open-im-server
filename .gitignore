@@ -24,7 +24,6 @@ components
 out-test
 
 ### Makefile ###
-tools/
 tmp/
 bin/
 output/
