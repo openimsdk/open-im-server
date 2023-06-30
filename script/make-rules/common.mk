@@ -48,13 +48,13 @@ endif
 
 # TOOLS_DIR: The directory where tools are stored for build and testing.
 ifeq ($(origin TOOLS_DIR),undefined)
-TOOLS_DIR := $(ROOT_DIR)/tools
+TOOLS_DIR := $(OUTPUT_DIR)/tools
 $(shell mkdir -p $(TOOLS_DIR))
 endif
 
 # TMP_DIR: directory where temporary files are stored.
 ifeq ($(origin TMP_DIR),undefined)
-TMP_DIR := $(ROOT_DIR)/tmp
+TMP_DIR := $(OUTPUT_DIR)/tmp
 $(shell mkdir -p $(TMP_DIR))
 endif
 
@@ -72,6 +72,7 @@ endif
 GIT_COMMIT:=$(shell git rev-parse HEAD)
 
 # Minimum test coverage
+# can u use make cover COVERAGE=90
 ifeq ($(origin COVERAGE),undefined)
 COVERAGE := 60
 endif
@@ -88,6 +89,8 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # The OS can be linux/windows/darwin when building binaries
 # PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
 
+# only support linux
+GOOS=linux
 
 # set a specific PLATFORM, defaults to the host platform
 ifeq ($(origin PLATFORM), undefined)

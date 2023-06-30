@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Copyright © 2023 OpenIMSDK.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,9 +55,12 @@ test "" = "$(grep '^Signed-off-by: ' "$1" |
 	exit 1
 }
 
-./tools/go-gitlint \
-	 --msg-file=$1 \
-	 --subject-regex="^(build|chore|ci|docs|feat|feature|fix|perf|refactor|revert|style|test)(.*)?:\s?.*" \
+# TODO: go-gitlint dir set
+GITLINT_DIR="./_output/tools/go-gitlint"
+
+$GITLINT_DIR \
+    --msg-file=$1 \
+    --subject-regex="^(build|chore|ci|docs|feat|feature|fix|perf|refactor|revert|style|test)(.*)?:\s?.*" \
     --subject-maxlen=150 \
     --subject-minlen=10 \
     --body-regex=".*" \
@@ -66,7 +68,10 @@ test "" = "$(grep '^Signed-off-by: ' "$1" |
 
 if [ $? -ne 0 ]
 then
-    printError "Please fix your commit message to match OpenIM coding standards"
-    printError "https://OpenIM.gitbook.io/docs/essential-documentation/contribute-to-OpenIM/software-contributions/submitting-code/code-submission-guidelines#commit-message-guidelines"
+    if ! command -v $GITLINT_DIR &>/dev/null; then
+        printError "$GITLINT_DIR not found. Please run 'make tools' OR 'make tools.verify.go-gitlint' make verto install it."
+    fi
+    printError "Please fix your commit message to match kubecub coding standards"
+    printError "https://gist.github.com/cubxxw/126b72104ac0b0ca484c9db09c3e5694#file-githook-md"
     exit 1
 fi

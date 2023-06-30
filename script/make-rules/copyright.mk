@@ -19,20 +19,18 @@
 
 LICENSE_TEMPLATE ?= $(ROOT_DIR)/script/LICENSE/LICENSE_TEMPLATES
 
-# TODO: GOBIN -> TOOLS_DIR
-# Questions about go mod instead of go path: https://github.com/kubernetes/kubernetes/issues/117181
 ## copyright.verify: Validate boilerplate headers for assign files
 .PHONY: copyright.verify
 copyright.verify: tools.verify.addlicense
 	@echo "===========> Validate boilerplate headers for assign files starting in the $(ROOT_DIR) directory"
-	@$(GOBIN)/addlicense -v -check -ignore **/test/** -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
+	@$(TOOLS_DIR)/addlicense -v -check -ignore **/test/** -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
 	@echo "===========> End of boilerplate headers check..."
 
 ## copyright.add: Add the boilerplate headers for all files
 .PHONY: copyright.add
 copyright.add: tools.verify.addlicense
 	@echo "===========> Adding $(LICENSE_TEMPLATE) the boilerplate headers for all files"
-	@$(GOBIN)/addlicense -y $(shell date +"%Y") -v -c "OpenIM." -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
+	@$(TOOLS_DIR)/addlicense -y $(shell date +"%Y") -v -c "OpenIM." -f $(LICENSE_TEMPLATE) $(CODE_DIRS)
 	@echo "===========> End the copyright is added..."
 
 # Addlicense Flags:
