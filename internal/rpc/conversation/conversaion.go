@@ -24,7 +24,6 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	msgRpcClient                   *rpcclient.MessageRpcClient
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -43,9 +42,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
-		conversationNotificationSender: notification.NewConversationNotificationSender(client),
+		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		msgRpcClient:                   &msgRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil

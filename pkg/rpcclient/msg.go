@@ -161,10 +161,9 @@ func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*m
 	}
 }
 
-func WithDiscov(discov discoveryregistry.SvcDiscoveryRegistry) NewNotificationSenderOptions {
+func WithRpcClient(msgRpcClient *MessageRpcClient) NewNotificationSenderOptions {
 	return func(s *NotificationSender) {
-		rpcClient := NewMessageRpcClient(discov)
-		s.sendMsg = rpcClient.SendMsg
+		s.sendMsg = msgRpcClient.SendMsg
 	}
 }
 
