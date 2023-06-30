@@ -1,108 +1,116 @@
 package auth
 
 import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbAuth "Open_IM/pkg/proto/auth"
-	"Open_IM/pkg/utils"
 	"context"
-	"net"
-	"strconv"
-	"strings"
 
-	"Open_IM/pkg/common/config"
-
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	pbAuth "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
 )
 
-func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	var user db.User
-	utils.CopyStructFields(&user, req.UserInfo)
-	if req.UserInfo.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
-	}
-	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
-	err := imdb.UserRegister(user)
-	if err != nil {
-		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
-		log.NewError(req.OperationID, errMsg, user)
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
-
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
-	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
+type authServer struct {
+	authDatabase   controller.AuthDatabase
+	userRpcClient  *rpcclient.UserRpcClient
+	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
-func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	_, err := imdb.GetUserByUserID(req.FromUserID)
+func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	rdb, err := cache.NewRedis()
 	if err != nil {
-		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+		return err
 	}
-
-	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, req.Platform)
-	if err != nil {
-		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
-
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
-	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
+	userRpcClient := rpcclient.NewUserRpcClient(client)
+	pbAuth.RegisterAuthServer(server, &authServer{
+		userRpcClient:  &userRpcClient,
+		RegisterCenter: client,
+		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.TokenPolicy.AccessSecret, config.Config.TokenPolicy.AccessExpire),
+	})
+	return nil
 }
 
-type rpcAuth struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
+	resp := pbAuth.UserTokenResp{}
+	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
+		return nil, err
+	}
+	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
+	if err != nil {
+		return nil, err
+	}
+	resp.Token = token
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire * 24 * 60 * 60
+	return &resp, nil
 }
 
-func NewRpcAuthServer(port int) *rpcAuth {
-	log.NewPrivateLog(constant.LogFileName)
-	return &rpcAuth{
-		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
-		etcdSchema:      config.Config.Etcd.EtcdSchema,
-		etcdAddr:        config.Config.Etcd.EtcdAddr,
+func (s *authServer) parseToken(ctx context.Context, tokensString string) (claims *tokenverify.Claims, err error) {
+	claims, err = tokenverify.GetClaimFromToken(tokensString)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
 	}
+	m, err := s.authDatabase.GetTokensWithoutError(ctx, claims.UserID, claims.PlatformID)
+	if err != nil {
+		return nil, err
+	}
+	if len(m) == 0 {
+		return nil, errs.ErrTokenNotExist.Wrap()
+	}
+	if v, ok := m[tokensString]; ok {
+		switch v {
+		case constant.NormalToken:
+			return claims, nil
+		case constant.KickedToken:
+			return nil, errs.ErrTokenKicked.Wrap()
+		default:
+			return nil, utils.Wrap(errs.ErrTokenUnknown, "")
+		}
+	}
+	return nil, errs.ErrTokenNotExist.Wrap()
 }
 
-func (rpc *rpcAuth) Run() {
-	operationID := utils.OperationIDGenerator()
-	log.NewInfo(operationID, "rpc auth start...")
+func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
+	resp = &pbAuth.ParseTokenResp{}
+	claims, err := s.parseToken(ctx, req.Token)
+	if err != nil {
+		return nil, err
+	}
+	resp.UserID = claims.UserID
+	resp.Platform = constant.PlatformIDToName(claims.PlatformID)
+	resp.ExpireTimeSeconds = claims.ExpiresAt.Unix()
+	return resp, nil
+}
 
-	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		log.NewError(operationID, "listen network failed ", err.Error(), address)
-		return
+func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
+	resp := pbAuth.ForceLogoutResp{}
+	if err := tokenverify.CheckAdmin(ctx); err != nil {
+		return nil, err
 	}
-	log.NewInfo(operationID, "listen network success, ", address, listener)
-	//grpc server
-	srv := grpc.NewServer()
-	defer srv.GracefulStop()
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
 
-	//service registers with etcd
-	pbAuth.RegisterAuthServer(srv, rpc)
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
+	conns, err := s.RegisterCenter.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	if err != nil {
-		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
-			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
-		return
+		return err
 	}
-	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
-	err = srv.Serve(listener)
-	if err != nil {
-		log.NewError(operationID, "Serve failed ", err.Error())
-		return
+	for _, v := range conns {
+		client := msggateway.NewMsgGatewayClient(v)
+		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
+		_, err := client.KickUserOffline(ctx, kickReq)
+		s.RegisterCenter.CloseConn(v)
+		return utils.Wrap(err, "")
 	}
-	log.NewInfo(operationID, "rpc auth ok")
+	return errs.ErrInternalServer.Wrap()
 }

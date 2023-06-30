@@ -7,7 +7,6 @@
 package utils
 
 import (
-	"Open_IM/pkg/common/constant"
 	"encoding/json"
 	"math/rand"
 	"strconv"
@@ -33,7 +32,11 @@ func Int32ToString(i int32) string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-//judge a string whether in the  string list
+func Uint32ToString(i uint32) string {
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
 	for _, element := range List {
 
@@ -51,7 +54,14 @@ func IsContainInt32(target int32, List []int32) bool {
 	}
 	return false
 }
-
+func IsContainInt(target int, List []int) bool {
+	for _, element := range List {
+		if target == element {
+			return true
+		}
+	}
+	return false
+}
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
 	for _, param := range data {
 		i = append(i, param.(string))
@@ -69,7 +79,7 @@ func StructToJsonBytes(param interface{}) []byte {
 	return dataType
 }
 
-//The incoming parameter must be a pointer
+// The incoming parameter must be a pointer
 func JsonStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)
 	return err
@@ -79,20 +89,45 @@ func GetMsgID(sendID string) string {
 	t := int64ToString(GetCurrentTimestampByNano())
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
 }
-func GetConversationIDBySessionType(sourceID string, sessionType int) string {
-	switch sessionType {
-	case constant.SingleChatType:
-		return "single_" + sourceID
-	case constant.GroupChatType:
-		return "group_" + sourceID
-	case constant.NotificationChatType:
-		return "notification_" + sourceID
-	}
-	return ""
-}
+
 func int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
 func Int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+func RemoveDuplicateElement(idList []string) []string {
+	result := make([]string, 0, len(idList))
+	temp := map[string]struct{}{}
+	for _, item := range idList {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func RemoveDuplicate[T comparable](arr []T) []T {
+	result := make([]T, 0, len(arr))
+	temp := map[T]struct{}{}
+	for _, item := range arr {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func IsDuplicateStringSlice(arr []string) bool {
+	t := make(map[string]struct{})
+	for _, s := range arr {
+		if _, ok := t[s]; ok {
+			return true
+		}
+		t[s] = struct{}{}
+	}
+	return false
 }

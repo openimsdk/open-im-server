@@ -9,7 +9,6 @@ need_to_start_server_shell=(
   push_start.sh
   msg_transfer_start.sh
   sdk_svr_start.sh
-  demo_svr_start.sh
   start_cron.sh
 )
 

@@ -2,14 +2,15 @@ package utils
 
 import (
 	"errors"
-	"github.com/nfnt/resize"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"io"
 	"os"
+
+	"github.com/nfnt/resize"
+	"golang.org/x/image/bmp"
 )
 
 func GenSmallImage(src, dst string) error {
@@ -51,6 +52,4 @@ func scale(in io.Reader, out io.Writer, width, height, quality int) error {
 	default:
 		return errors.New("ERROR FORMAT")
 	}
-
-	return nil
 }

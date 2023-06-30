@@ -1,0 +1,170 @@
+package cmd
+
+import (
+	"github.com/OpenIMSDK/Open-IM-Server/internal/tools"
+	"github.com/spf13/cobra"
+)
+
+type MsgUtilsCmd struct {
+	cobra.Command
+	msgTool *tools.MsgTool
+}
+
+func (m *MsgUtilsCmd) AddUserIDFlag() {
+	m.Command.PersistentFlags().StringP("userID", "u", "", "openIM userID")
+}
+
+func (m *MsgUtilsCmd) getUserIDFlag(cmdLines *cobra.Command) string {
+	userID, _ := cmdLines.Flags().GetString("userID")
+	return userID
+}
+
+func (m *MsgUtilsCmd) AddFixAllFlag() {
+	m.Command.PersistentFlags().BoolP("fixAll", "f", false, "openIM fix all seqs")
+}
+
+func (m *MsgUtilsCmd) getFixAllFlag(cmdLines *cobra.Command) bool {
+	fixAll, _ := cmdLines.Flags().GetBool("fixAll")
+	return fixAll
+}
+
+func (m *MsgUtilsCmd) AddClearAllFlag() {
+	m.Command.PersistentFlags().BoolP("clearAll", "c", false, "openIM clear all seqs")
+}
+
+func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
+	clearAll, _ := cmdLines.Flags().GetBool("clearAll")
+	return clearAll
+}
+
+func (m *MsgUtilsCmd) AddSuperGroupIDFlag() {
+	m.Command.PersistentFlags().StringP("superGroupID", "g", "", "openIM superGroupID")
+}
+
+func (m *MsgUtilsCmd) getSuperGroupIDFlag(cmdLines *cobra.Command) string {
+	superGroupID, _ := cmdLines.Flags().GetString("superGroupID")
+	return superGroupID
+}
+
+func (m *MsgUtilsCmd) AddBeginSeqFlag() {
+	m.Command.PersistentFlags().Int64P("beginSeq", "b", 0, "openIM beginSeq")
+}
+
+func (m *MsgUtilsCmd) getBeginSeqFlag(cmdLines *cobra.Command) int64 {
+	beginSeq, _ := cmdLines.Flags().GetInt64("beginSeq")
+	return beginSeq
+}
+
+func (m *MsgUtilsCmd) AddLimitFlag() {
+	m.Command.PersistentFlags().Int64P("limit", "l", 0, "openIM limit")
+}
+
+func (m *MsgUtilsCmd) getLimitFlag(cmdLines *cobra.Command) int64 {
+	limit, _ := cmdLines.Flags().GetInt64("limit")
+	return limit
+}
+
+func (m *MsgUtilsCmd) Execute() error {
+	return m.Command.Execute()
+}
+
+func NewMsgUtilsCmd(use, short string, args cobra.PositionalArgs) *MsgUtilsCmd {
+	return &MsgUtilsCmd{
+		Command: cobra.Command{
+			Use:   use,
+			Short: short,
+			Args:  args,
+		},
+	}
+}
+
+type GetCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewGetCmd() *GetCmd {
+	return &GetCmd{
+		NewMsgUtilsCmd("get [resource]", "get action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
+}
+
+type FixCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewFixCmd() *FixCmd {
+	return &FixCmd{
+		NewMsgUtilsCmd("fix [resource]", "fix action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
+}
+
+type ClearCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewClearCmd() *ClearCmd {
+	return &ClearCmd{
+		NewMsgUtilsCmd("clear [resource]", "clear action", cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs)),
+	}
+}
+
+type SeqCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewSeqCmd() *SeqCmd {
+	seqCmd := &SeqCmd{
+		NewMsgUtilsCmd("seq", "seq", nil),
+	}
+	return seqCmd
+}
+
+func (s *SeqCmd) GetSeqCmd() *cobra.Command {
+	s.Command.Run = func(cmdLines *cobra.Command, args []string) {
+		_, err := tools.InitMsgTool()
+		if err != nil {
+			panic(err)
+		}
+		userID := s.getUserIDFlag(cmdLines)
+		superGroupID := s.getSuperGroupIDFlag(cmdLines)
+		// beginSeq := s.getBeginSeqFlag(cmdLines)
+		// limit := s.getLimitFlag(cmdLines)
+		if userID != "" {
+			// seq, err := msgTool.s(context.Background(), userID)
+			if err != nil {
+				panic(err)
+			}
+			// println(seq)
+		} else if superGroupID != "" {
+			// seq, err := msgTool.GetSuperGroupSeq(context.Background(), superGroupID)
+			if err != nil {
+				panic(err)
+			}
+			// println(seq)
+		}
+	}
+	return &s.Command
+}
+
+func (s *SeqCmd) FixSeqCmd() *cobra.Command {
+	return &s.Command
+}
+
+type MsgCmd struct {
+	*MsgUtilsCmd
+}
+
+func NewMsgCmd() *MsgCmd {
+	msgCmd := &MsgCmd{
+		NewMsgUtilsCmd("msg", "msg", nil),
+	}
+	return msgCmd
+}
+
+func (m *MsgCmd) GetMsgCmd() *cobra.Command {
+	return &m.Command
+}
+
+func (m *MsgCmd) ClearMsgCmd() *cobra.Command {
+	return &m.Command
+}

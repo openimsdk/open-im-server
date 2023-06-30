@@ -1,36 +1,40 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-package pbAuth;
-option go_package = "./auth;pbAuth";
-
-message CommonResp{
-    int32   errCode = 1;
-    string  errMsg = 2;
-}
-
-message UserRegisterReq {
-    server_api_params.UserInfo UserInfo = 1;
-    string OperationID = 2;
-}
-message UserRegisterResp {
-    CommonResp CommonResp = 1;
-}
+package OpenIMServer.auth;
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth";
 
 
-message UserTokenReq {
-    int32  Platform = 1;
-    string FromUserID = 2;
-    string OpUserID = 3;
-    string OperationID = 4;
+message userTokenReq {
+    int32  platformID = 1;
+    string userID = 2;
 }
-message UserTokenResp {
-    CommonResp CommonResp = 1;
-    string Token = 2;
-    int64  ExpiredTime = 3;
+message userTokenResp {
+    string token = 2;
+    int64  expireTimeSeconds = 3;
 }
 
+message forceLogoutReq {
+    int32  platformID = 1;
+    string userID = 2;
+}
+message forceLogoutResp {
+}
+
+message parseTokenReq{
+    string token = 1;
+}
+message parseTokenResp{
+    string userID = 1;
+    string platform = 2;
+    int64 expireTimeSeconds = 4;
+}
 
 service Auth {
-    rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
-    rpc UserToken(UserTokenReq) returns(UserTokenResp);
+    //生成token
+    rpc userToken(userTokenReq) returns(userTokenResp);
+    //强制退出登录
+    rpc forceLogout(forceLogoutReq) returns(forceLogoutResp);
+    //解析token
+    rpc parseToken(parseTokenReq)returns(parseTokenResp);
 }
+
+

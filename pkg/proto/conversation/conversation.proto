@@ -1,11 +1,8 @@
 syntax = "proto3";
-option go_package = "./conversation;conversation";
-package conversation;
+package OpenIMServer.conversation;
+import "wrapperspb/wrapperspb.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation";
 
-message CommonResp{
-  int32  errCode = 1;
-  string errMsg = 2;
-}
 message Conversation{
   string ownerUserID = 1;
   string conversationID = 2;
@@ -19,20 +16,175 @@ message Conversation{
   string attachedInfo = 10;
   bool isPrivateChat = 11;
   int32 groupAtType = 12;
-  bool isNotInGroup = 13;
-  string ex = 14;
+  string ex = 13;
+  int64  updateUnreadCountTime = 14;
+  int32 burnDuration = 15;
+  int64 minSeq = 16;
+  int64 maxSeq = 17;
+  int64 hasReadSeq = 18;
 }
+
+message ConversationReq{
+  string conversationID = 1;
+  int32 conversationType = 2;
+  string userID = 3;
+  string groupID = 4;
+  OpenIMServer.protobuf.Int32Value recvMsgOpt = 5;
+  OpenIMServer.protobuf.Int64Value draftTextTime = 6;
+  OpenIMServer.protobuf.BoolValue isPinned = 7;
+  OpenIMServer.protobuf.StringValue attachedInfo = 8;
+  OpenIMServer.protobuf.BoolValue isPrivateChat = 9;
+  OpenIMServer.protobuf.StringValue ex = 10;
+  OpenIMServer.protobuf.Int64Value updateUnreadCountTime = 11;
+  OpenIMServer.protobuf.Int32Value burnDuration = 12;
+  OpenIMServer.protobuf.Int64Value minSeq = 13;
+  OpenIMServer.protobuf.Int64Value maxSeq = 14;
+  OpenIMServer.protobuf.Int64Value hasReadSeq = 15;
+  OpenIMServer.protobuf.Int32Value groupAtType = 16;
+}
+
 message ModifyConversationFieldReq{
-  Conversation conversation = 1;
-  int32 fieldType = 2;
-  repeated string userIDList = 3;
-  string operationID = 4;
+  repeated string userIDList = 1;
+  int32 FieldType = 2;
+  Conversation conversation = 3;
 }
 
 message ModifyConversationFieldResp{
-  CommonResp  commonResp = 1;
 }
+
+message SetConversationReq{
+  Conversation conversation = 1; 
+}
+
+message SetConversationResp{
+}
+
+message SetRecvMsgOptReq {
+  string ownerUserID = 1;
+  string conversationID = 2;
+  int32 recvMsgOpt = 3;
+}
+
+message SetRecvMsgOptResp {
+}
+
+message GetConversationReq{
+  string conversationID = 1;
+  string ownerUserID = 2;
+}
+
+message GetConversationResp{
+  Conversation conversation = 2;
+}
+
+message GetConversationsReq{
+  string ownerUserID = 1;
+  repeated string conversationIDs = 2;
+}
+
+message GetConversationsResp{
+  repeated Conversation conversations = 2;
+}
+
+message GetAllConversationsReq{
+  string ownerUserID = 1;
+}
+
+message GetAllConversationsResp{
+  repeated Conversation conversations = 2;
+}
+
+message BatchSetConversationsReq{
+  repeated Conversation Conversations = 1;
+  string ownerUserID = 2;
+}
+
+message BatchSetConversationsResp{
+  repeated string success = 1;
+  repeated string failed = 2;
+}
+
+message GetRecvMsgNotNotifyUserIDsReq {
+  string groupID = 1;
+}
+
+message GetRecvMsgNotNotifyUserIDsResp {
+  repeated string userIDs = 1;
+}
+
+message CreateSingleChatConversationsReq {
+  string recvID = 1;
+  string sendID = 2;
+}
+
+message CreateSingleChatConversationsResp {
+}
+
+message CreateGroupChatConversationsReq {
+  repeated string userIDs = 1;
+  string groupID = 2;
+}
+
+message CreateGroupChatConversationsResp {
+}
+
+message SetConversationMaxSeqReq {
+  string conversationID = 1;
+  repeated string ownerUserID = 2;
+  int64 maxSeq = 3;
+}
+
+message SetConversationMaxSeqResp {
+}
+
+message GetConversationIDsReq {
+  string userID = 1;
+}
+
+message GetConversationIDsResp {
+  repeated string conversationIDs = 1;
+}
+
+
+
+message SetConversationsReq {
+  repeated string userIDs = 1;
+  ConversationReq conversation = 2;
+}
+
+message SetConversationsResp {
+}
+
+message GetUserConversationIDsHashReq {
+  string ownerUserID = 1;
+}
+
+message GetUserConversationIDsHashResp {
+  uint64 hash = 1;
+}
+
+message GetConversationsByConversationIDReq {
+  repeated string conversationIDs = 1;
+}
+
+message GetConversationsByConversationIDResp {
+  repeated Conversation conversations = 1;
+}
+
 service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
-
+  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
+  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
+  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
+  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
+  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
+  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
+  rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
+  rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
+  rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);
+  rpc SetConversationMaxSeq(SetConversationMaxSeqReq) returns(SetConversationMaxSeqResp);
+  rpc GetConversationIDs(GetConversationIDsReq) returns(GetConversationIDsResp);
+  rpc SetConversations(SetConversationsReq) returns(SetConversationsResp);
+  rpc GetUserConversationIDsHash(GetUserConversationIDsHashReq) returns(GetUserConversationIDsHashResp);
+  rpc GetConversationsByConversationID(GetConversationsByConversationIDReq) returns(GetConversationsByConversationIDResp);
 }

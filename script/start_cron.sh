@@ -18,7 +18,8 @@ sleep 1
 
 cd ${cron_task_binary_root}
 #for ((i = 0; i < ${cron_task_service_num}; i++)); do
-      nohup ./${cron_task_name}  >>../logs/openIM.log 2>&1 &
+      echo "==========================start cron_task process===========================">>../logs/openIM.log
+nohup ./${cron_task_name}  >>../logs/openIM.log 2>&1 &
 #done
 
 #Check launched service process

@@ -1,333 +1,166 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
-option go_package = "./user;user";
-package user;
+package OpenIMServer.user;
+import "sdkws/sdkws.proto";
+import "conversation/conversation.proto";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user";
 
-message CommonResp{
-  int32  errCode = 1;
-  string errMsg = 2;
+message getAllUserIDReq{
+  sdkws.RequestPagination pagination = 1;
 }
-
-message DeleteUsersReq{
-  repeated string  DeleteUserIDList = 2;
-  string OpUserID = 3;
-  string OperationID = 4;
-}
-
-message DeleteUsersResp{
-  CommonResp  CommonResp = 1;
-  repeated string FailedUserIDList = 2;
+message getAllUserIDResp{
+  int32 total = 1;
+  repeated string userIDs = 2;
 }
 
 
-message GetAllUserIDReq{
-  string opUserID = 1;
-  string operationID = 2;
+message accountCheckReq{
+  repeated string checkUserIDs = 1;
 }
-message GetAllUserIDResp{
-  CommonResp  CommonResp = 1;
-  repeated string UserIDList = 2;
-}
-
-
-message AccountCheckReq{
-  repeated string CheckUserIDList = 1;
-  string OpUserID = 2;
-  string OperationID = 3;
-
-}
-message AccountCheckResp{
-  CommonResp  commonResp = 1;
-  message SingleUserStatus {
+message accountCheckResp{
+  message singleUserStatus {
     string userID = 1;
     string accountStatus = 2;
   }
-  repeated SingleUserStatus ResultList = 2;
+  repeated singleUserStatus results = 1;
 }
 
 
-message GetUserInfoReq{
-  repeated string userIDList = 1;
-  string OpUserID = 2;
-  string OperationID = 3;
+message getDesignateUsersReq{
+  repeated string userIDs = 1;
 }
-message GetUserInfoResp{
-  CommonResp  commonResp = 1;
-  repeated server_api_params.UserInfo UserInfoList = 3;
+message getDesignateUsersResp{
+  repeated sdkws.UserInfo usersInfo = 1;
 }
 
-
-
-message UpdateUserInfoReq{
-  server_api_params.UserInfo UserInfo = 1;
-  string OpUserID = 2;
-  string  operationID = 3;
-  google.protobuf.Int32Value globalRecvMsgOpt = 4;
+message updateUserInfoReq{
+  sdkws.UserInfo userInfo = 1;
 }
-message UpdateUserInfoResp{
-  CommonResp  commonResp = 1;
+message updateUserInfoResp{
 }
-message SetGlobalRecvMessageOptReq{
+
+message setGlobalRecvMessageOptReq{
   string userID = 1;
-  string  operationID = 2;
   int32 globalRecvMsgOpt = 3;
 }
-message SetGlobalRecvMessageOptResp{
-  CommonResp  commonResp = 1;
+message setGlobalRecvMessageOptResp{
 }
 
-message Conversation{
-  string OwnerUserID = 1;
-  string ConversationID = 2;
-  int32 RecvMsgOpt = 3;
-  int32 ConversationType = 4;
-  string UserID = 5;
-  string GroupID = 6;
-  int32 UnreadCount = 7;
-  int64 DraftTextTime = 8;
-  bool IsPinned = 9;
-  string AttachedInfo = 10;
-  bool IsPrivateChat = 11;
-  int32 GroupAtType = 12;
-  bool IsNotInGroup = 13;
-  string Ex = 14;
-}
-
-message SetConversationReq{
-  Conversation Conversation = 1;
+message setConversationReq{
+  OpenIMServer.conversation.Conversation conversation = 1;
   int32 notificationType = 2;
-  string OperationID = 3;
+  string operationID = 3;
 }
 
-message SetConversationResp{
-  CommonResp  commonResp = 1;
+message setConversationResp{
+
 }
 
-message SetRecvMsgOptReq {
-  string OwnerUserID = 1;
-  string ConversationID = 2;
-  int32 RecvMsgOpt = 3;
+message setRecvMsgOptReq {
+  string ownerUserID = 1;
+  string conversationID = 2;
+  int32 recvMsgOpt = 3;
   int32 notificationType = 4;
-  string OperationID = 5;
+  string operationID = 5;
 }
 
-message SetRecvMsgOptResp {
-  CommonResp  commonResp = 1;
+message setRecvMsgOptResp {
+
 }
 
-message GetConversationReq{
-  string ConversationID = 1;
-  string OwnerUserID = 2;
-  string OperationID = 3;
+message getConversationReq{
+  string conversationID = 1;
+  string ownerUserID = 2;
+  string operationID = 3;
 }
 
-message GetConversationResp{
-  CommonResp  commonResp = 1;
-  Conversation Conversation = 2;
+message getConversationResp{
+  OpenIMServer.conversation.Conversation conversation = 2;
 }
 
-message GetConversationsReq{
-  string OwnerUserID = 1;
-  repeated string ConversationIDs = 2;
-  string OperationID = 3;
+message getConversationsReq{
+  string ownerUserID = 1;
+  repeated string conversationIDs = 2;
+  string operationID = 3;
 }
 
-message GetConversationsResp{
-  CommonResp  commonResp = 1;
-  repeated Conversation Conversations = 2;
+message getConversationsResp{
+  repeated OpenIMServer.conversation.Conversation conversations = 2;
 }
 
-message GetAllConversationsReq{
-  string OwnerUserID = 1;
-  string OperationID = 2;
+message getAllConversationsReq{
+  string ownerUserID = 1;
+  string operationID = 2;
 }
 
-message GetAllConversationsResp{
-  CommonResp  commonResp = 1;
-  repeated Conversation Conversations = 2;
+message getAllConversationsResp{
+  repeated OpenIMServer.conversation.Conversation conversations = 2;
 }
 
-message BatchSetConversationsReq{
-  repeated Conversation Conversations = 1;
+message batchSetConversationsReq{
+  repeated OpenIMServer.conversation.Conversation conversations = 1;
   string OwnerUserID = 2;
   int32 notificationType = 3;
   string OperationID = 4;
 }
 
-message BatchSetConversationsResp{
-  CommonResp  commonResp = 1;
+message batchSetConversationsResp{
   repeated string Success = 2;
   repeated string Failed = 3;
 }
 
-message ResignUserReq{
-  string UserId = 1;
-  string OperationID = 2;
+
+message getPaginationUsersReq {
+  sdkws.RequestPagination pagination = 2;
 }
 
-message ResignUserResp{
-  CommonResp  commonResp = 1;
+message getPaginationUsersResp{
+  int32 total = 1;
+  repeated sdkws.UserInfo users = 2;
 }
 
-message GetUserByIdReq{
-  string UserId = 1;
-  string OperationID = 2;
+message userRegisterReq {
+  repeated sdkws.UserInfo users = 1;
 }
-
-message User{
-  string ProfilePhoto = 1;
-  string Nickname = 2;
-  string UserId = 3;
-  string CreateTime = 4;
-  bool IsBlock = 5;
-}
-
-message GetUserByIdResp{
-  CommonResp CommonResp = 1;
-  User user = 2;
-}
-
-message GetUsersByNameReq {
-  string UserName = 1;
-  server_api_params.RequestPagination Pagination = 2;
-  string OperationID = 3;
-}
-
-message GetUsersByNameResp {
-  repeated User users = 1;
-  server_api_params.ResponsePagination Pagination = 2;
-  int32 UserNums = 3;
-}
-
-message AlterUserReq{
-  string UserId = 1;
-  string OperationID = 2;
-  int64 PhoneNumber = 3;
-  string Nickname = 4;
-  string Email = 5;
-  string OpUserId = 6;
-}
-
-message AlterUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-message GetUsersReq {
-  string OperationID = 1;
-  server_api_params.RequestPagination Pagination = 2;
-  string UserName = 3;
-}
-
-message GetUsersResp{
-  CommonResp  CommonResp = 1;
-  repeated User user = 2;
-  server_api_params.ResponsePagination Pagination = 3;
-  int32 UserNums = 4;
-}
-
-message AddUserReq{
-  string OperationID = 1;
-  string PhoneNumber = 2;
-  string UserId = 3;
-  string name = 4;
-  string OpUserId = 5;
-}
-
-message AddUserResp{
-  CommonResp  CommonResp = 1;
+message userRegisterResp {
 }
 
 
-message BlockUserReq{
-  string UserId = 1;
-  string EndDisableTime = 2;
-  string OperationID = 3;
-  string OpUserId = 4;
+message getGlobalRecvMessageOptReq{
+  string userID = 1;
 }
 
-message BlockUserResp{
-  CommonResp  CommonResp = 1;
+message getGlobalRecvMessageOptResp{
+  int32 globalRecvMsgOpt = 1;
 }
 
-message UnBlockUserReq{
-  string UserId = 1;
-  string OperationID = 2;
-  string OpUserId = 3;
+message userRegisterCountReq {
+  int64 start = 1;
+  int64 end = 2;
 }
 
-message UnBlockUserResp{
-  CommonResp  CommonResp = 1;
+message userRegisterCountResp {
+  int64 total = 1;
+  map<string, int64> count = 2;
 }
-
-message GetBlockUsersReq{
-  server_api_params.RequestPagination Pagination = 1;
-  string OperationID = 2;
-  int32 BlockUserNum = 3;
-}
-
-message BlockUser {
-  User User = 1;
-  string BeginDisableTime = 2;
-  string EndDisableTime = 3;
-}
-
-message GetBlockUsersResp{
-  CommonResp  CommonResp = 1;
-  repeated BlockUser BlockUsers = 2;
-  server_api_params.ResponsePagination Pagination = 3;
-  int32 UserNums = 4;
-}
-
-message GetBlockUserByIdReq {
-  string User_id = 1;
-  string OperationID = 2;
-}
-
-message GetBlockUserByIdResp {
-  BlockUser BlockUser = 2;
-}
-
-message DeleteUserReq {
-  string User_id = 1;
-  string OperationID = 2;
-  string OpUserId = 3;
-}
-
-message DeleteUserResp {
-  CommonResp  CommonResp = 1;
-}
-
-
 
 service user {
-  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
-  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
-  rpc SetGlobalRecvMessageOpt(SetGlobalRecvMessageOptReq) returns(SetGlobalRecvMessageOptResp);
-  rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
-  rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
-
-  rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
-  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
-  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
-  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
-  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
-  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
-  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
-
-  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
-  rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);
-  rpc ResignUser(ResignUserReq) returns (ResignUserResp);
-  rpc AlterUser(AlterUserReq) returns (AlterUserResp);
-  rpc GetUsers(GetUsersReq) returns (GetUsersResp);
-  rpc AddUser(AddUserReq) returns (AddUserResp);
-  rpc BlockUser(BlockUserReq) returns (BlockUserResp);
-  rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
-  rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
-  rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
-  rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
-
-
-  rpc GetUserInfoFromCache(GetUserInfoReq) returns(GetUserInfoResp);
-
+  //获取指定的用户信息 全字段
+  rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
+  //更新用户信息
+  rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
+  //设置用户消息接收选项
+  rpc setGlobalRecvMessageOpt(setGlobalRecvMessageOptReq) returns(setGlobalRecvMessageOptResp);
+  //获取用户消息接收选项 没找到不返回错误
+  rpc getGlobalRecvMessageOpt(getGlobalRecvMessageOptReq) returns(getGlobalRecvMessageOptResp);
+  //检查userID是否存在
+  rpc accountCheck(accountCheckReq) returns (accountCheckResp);
+  //翻页（或指定userID，昵称）拉取用户信息 全字段
+  rpc getPaginationUsers(getPaginationUsersReq) returns (getPaginationUsersResp);
+  //用户注册
+  rpc userRegister(userRegisterReq) returns (userRegisterResp);
+  //获取所有用户ID
+  rpc getAllUserID(getAllUserIDReq) returns (getAllUserIDResp);
+  // 获取用户总数和指定时间段内的用户增量
+  rpc userRegisterCount(userRegisterCountReq)returns(userRegisterCountResp);
 }
+
