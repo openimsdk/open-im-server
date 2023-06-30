@@ -119,7 +119,8 @@ message getPaginationUsersResp{
 }
 
 message userRegisterReq {
-  repeated sdkws.UserInfo users = 1;
+  string secret = 1;
+  repeated sdkws.UserInfo users = 2;
 }
 message userRegisterResp {
 }
