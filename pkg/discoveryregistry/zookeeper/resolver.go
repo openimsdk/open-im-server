@@ -46,7 +46,7 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.resolvers[strings.TrimLeft(target.URL.Path, "/")] = r
-	s.logger.Printf("build resolver finished: %+v, cc: %+v", target, cc)
+	s.logger.Printf("build resolver finished: %+v, cc: %+v, key: ", target, cc, strings.TrimLeft(target.URL.Path, "/"))
 	return r, nil
 }
 
