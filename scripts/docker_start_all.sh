@@ -8,7 +8,6 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   push_start.sh
   msg_transfer_start.sh
-  sdk_svr_start.sh
   start_cron.sh
 )
 
