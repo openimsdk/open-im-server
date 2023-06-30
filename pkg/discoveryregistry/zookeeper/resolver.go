@@ -18,7 +18,7 @@ type Resolver struct {
 }
 
 func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
-	log.ZDebug(context.Background(), "start resolve now", "target", r.target, "cc", r.cc.UpdateState)
+	log.ZDebug(context.Background(), "start resolve now", "target", r.target, "cc", r.cc.UpdateState, "serviceName", strings.TrimLeft(r.target.URL.Path, "/"))
 	newConns, err := r.getConnsRemote(strings.TrimLeft(r.target.URL.Path, "/"))
 	if err != nil {
 		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
@@ -49,6 +49,7 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	serviceName := strings.TrimLeft(target.URL.Path, "/")
 	s.resolvers[serviceName] = r
 	s.logger.Printf("build resolver finished: %+v, cc: %+v, key: ", target, cc, serviceName)
+	log.ZDebug(context.Background(), "build resolver finished", "target", target, "cc", cc.UpdateState, "serviceName", serviceName)
 	return r, nil
 }
 
