@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
 	"time"
 
@@ -55,17 +56,17 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
 		UserDatabase:       database,
 		RegisterCenter:     client,
 		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(client, notification.WithDBFunc(database.FindWithError)),
+		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
 }
 
-// ok
 func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
 	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.FindWithError(ctx, req.UserIDs)
@@ -79,7 +80,6 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 	return resp, nil
 }
 
-// ok
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = tokenverify.CheckAccessV3(ctx, req.UserInfo.UserID)
@@ -105,7 +105,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	return resp, nil
 }
 
-// ok
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
@@ -120,7 +119,6 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	return resp, nil
 }
 
-// ok
 func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
 	resp = &pbuser.AccountCheckResp{}
 	if utils.Duplicate(req.CheckUserIDs) {
@@ -150,7 +148,6 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	return resp, nil
 }
 
-// ok
 func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
 	var pageNumber, showNumber int32
 	if req.Pagination != nil {
@@ -164,11 +161,14 @@ func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPagi
 	return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 }
 
-// ok
 func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.Wrap("users is empty")
+	}
+	if req.Secret != config.Config.Secret {
+		log.ZDebug(ctx, "UserRegister", config.Config.Secret, req.Secret)
+		return nil, errs.ErrIdentity.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")

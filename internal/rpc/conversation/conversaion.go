@@ -24,7 +24,6 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
-	msgRpcClient                   *rpcclient.MessageRpcClient
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -43,9 +42,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
-		conversationNotificationSender: notification.NewConversationNotificationSender(client),
+		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		msgRpcClient:                   &msgRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
@@ -120,7 +118,6 @@ func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversat
 func (c *conversationServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
 	resp := &pbConversation.ModifyConversationFieldResp{}
 	var err error
-	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
@@ -151,10 +148,6 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 		filedMap["ex"] = req.Conversation.Ex
 	case constant.FieldAttachedInfo:
 		filedMap["attached_info"] = req.Conversation.AttachedInfo
-	case constant.FieldUnread:
-		isSyncConversation = false
-		filedMap["update_unread_count_time"] = req.Conversation.UpdateUnreadCountTime
-		filedMap["has_read_seq"] = req.Conversation.HasReadSeq
 	case constant.FieldBurnDuration:
 		filedMap["burn_duration"] = req.Conversation.BurnDuration
 	}
@@ -162,15 +155,8 @@ func (c *conversationServer) ModifyConversationField(ctx context.Context, req *p
 	if err != nil {
 		return nil, err
 	}
-
-	if isSyncConversation {
-		for _, v := range req.UserIDList {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
-		}
-	} else {
-		for _, v := range req.UserIDList {
-			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime, req.Conversation.HasReadSeq)
-		}
+	for _, v := range req.UserIDList {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
 	}
 	return resp, nil
 }
@@ -179,7 +165,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
-	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
@@ -197,9 +182,6 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	m := make(map[string]interface{})
 	if req.Conversation.RecvMsgOpt != nil {
 		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
-	}
-	if req.Conversation.DraftTextTime != nil {
-		m["draft_text_time"] = req.Conversation.DraftTextTime.Value
 	}
 	if req.Conversation.AttachedInfo != nil {
 		m["attached_info"] = req.Conversation.AttachedInfo.Value
@@ -231,24 +213,12 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation.BurnDuration != nil {
 		m["burn_duration"] = req.Conversation.BurnDuration.Value
 	}
-	if req.Conversation.HasReadSeq != nil && req.Conversation.UpdateUnreadCountTime != nil {
-		isSyncConversation = false
-		m["has_read_seq"] = req.Conversation.HasReadSeq.Value
-		m["update_unread_count_time"] = req.Conversation.UpdateUnreadCountTime.Value
-	}
 	err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m)
 	if err != nil {
 		return nil, err
 	}
-
-	if isSyncConversation {
-		for _, v := range req.UserIDs {
-			c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
-		}
-	} else {
-		for _, v := range req.UserIDs {
-			c.conversationNotificationSender.ConversationUnreadChangeNotification(ctx, v, req.Conversation.ConversationID, req.Conversation.UpdateUnreadCountTime.Value, req.Conversation.HasReadSeq.Value)
-		}
+	for _, v := range req.UserIDs {
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
 	}
 	return &pbConversation.SetConversationsResp{}, nil
 }
