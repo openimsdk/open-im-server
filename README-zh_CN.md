@@ -186,18 +186,6 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
 
 [用户案例研究](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) 页面包括该项目的用户列表。您可以留下 [📝评论](https://github.com/OpenIMSDK/Open-IM-Server/issues/379) 让我们知道您的用例。
 
-## ⚠️公告
-
-尊敬的 OpenIM 存储库用户，我们很高兴地宣布，我们正在进行重大改进，以改善我们的服务质量和用户体验。我们将使用 [errcode](https://github.com/OpenIMSDK/Open-IM-Server/tree/errcode) 分支对主分支进行广泛的更新和改进，确保我们的代码存储库处于最佳状态。
-
-在此期间，我们需要暂停主分支上的 PR 和问题处理。我们理解这可能会给您带来一些不便，但我们相信它将为我们提供更好的服务和更可靠的代码存储库。如果您需要在此期间提交代码，请将其提交到 [errcode](https://github.com/OpenIMSDK/Open-IM-Server/tree/errcode) 分支，我们将尽快处理您的请求。
-
-我们感谢您的支持和信任，以及您在整个过程中的耐心和理解。我们重视您的贡献和建议，这是我们持续改进和成长的动力。
-
-我们预计这项工作将很快完成，并尽最大努力将对您的影响最小化。再次感谢您的支持和谅解。
-
-谢谢！
-
 ![https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg)
 
 ## 许可证
