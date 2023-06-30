@@ -103,7 +103,7 @@ services:
     image: openim/open_im_server:v3.0.0
     container_name: open_im_server
     volumes:
-      - ./logs:/Open-IM-Server/logs
+      - ./logs:/Open-IM-Server/logs/open-im-server
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
       - ./config/notification.yaml:/Open-IM-Server/config/notification.yaml
       - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
@@ -122,12 +122,12 @@ services:
         max-size: "1g"
         max-file: "2"
 
-  open_im_chat:
-    image: openim/open_im_enterprise:v1.0.2
+  openim_chat:
+    image: openim/openim-chat:v1.0
     container_name: open_im_enterprise
     volumes:
-      - ./logs:/Open-IM-chat/logs
-      - ./.docker-compose_cfg/config.yaml:/Open-IM-Enterprise/config/config.yaml
+      - ./logs:/Open-IM-Server/logs/openim-chat
+      - ./openim-chat/config/config.yaml:/openim-chat/config/config.yaml
     restart: always
     depends_on:
       - mysql
@@ -142,7 +142,7 @@ services:
         max-size: "1g"
         max-file: "2"
     environment:
-      CONFIG_NAME: "/Open-IM-Enterprise"
+      CONFIG_NAME: "/openim-chat"
 
   prometheus:
     image: prom/prometheus
