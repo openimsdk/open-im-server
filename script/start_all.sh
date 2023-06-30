@@ -7,7 +7,7 @@ need_to_start_server_shell=(
   start_rpc_service.sh
   push_start.sh
   msg_transfer_start.sh
-  sdk_svr_start.sh
+#  sdk_svr_start.sh
   msg_gateway_start.sh
   start_cron.sh
 )

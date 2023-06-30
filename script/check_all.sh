@@ -6,7 +6,6 @@ source ./function.sh
 service_port_name=(
   openImWsPort
   openImApiPort
-  #openImSdkWsPort
   openImUserPort
   openImFriendPort
   openImMessagePort
