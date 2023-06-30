@@ -98,7 +98,7 @@ object:
     externalId:
     roleSessionName:
 
-rpcPort:                              #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如 openImUserPort: [10110, 10111]
+rpcPort:                              #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如  [10110, 10111]
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
