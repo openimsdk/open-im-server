@@ -58,6 +58,6 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	}
 }
 
-func (s *UserApi) UserRegisterCount(c *gin.Context) {
-	a2r.Call(user.UserClient.UserRegisterCount, s.Client, c)
+func (u *UserApi) UserRegisterCount(c *gin.Context) {
+	a2r.Call(user.UserClient.UserRegisterCount, u.Client, c)
 }

@@ -26,12 +26,6 @@ func (o *ConversationApi) GetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversations, o.Client, c)
 }
 
-// deprecated
-func (o *ConversationApi) SetConversation(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.SetConversation, o.Client, c)
-}
-
-// deprecated
 func (o *ConversationApi) BatchSetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.Client, c)
 }
