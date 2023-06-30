@@ -45,7 +45,8 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	blackDB := relation.NewBlackGorm(db)
 	friendDB := relation.NewFriendGorm(db)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
-	notificationSender := notification.NewFriendNotificationSender(client, notification.WithRpcFunc(userRpcClient.GetUsersInfo))
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	notificationSender := notification.NewFriendNotificationSender(&msgRpcClient, notification.WithRpcFunc(userRpcClient.GetUsersInfo))
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase:     controller.NewFriendDatabase(friendDB, relation.NewFriendRequestGorm(db), cache.NewFriendCacheRedis(rdb, friendDB, cache.GetDefaultOpt()), tx.NewGorm(db)),
 		blackDatabase:      controller.NewBlackDatabase(blackDB, cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt())),

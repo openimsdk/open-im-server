@@ -2,13 +2,13 @@ package notification
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -62,9 +62,9 @@ func WithRpcFunc(fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserIn
 	}
 }
 
-func NewFriendNotificationSender(client discoveryregistry.SvcDiscoveryRegistry, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
+func NewFriendNotificationSender(msgRpcClient *rpcclient.MessageRpcClient, opts ...friendNotificationSenderOptions) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithDiscov(client)),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)
