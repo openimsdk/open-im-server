@@ -162,7 +162,6 @@ func (s *ZkClient) flushResolver(serviceName string) {
 	r, ok := s.resolvers[serviceName]
 	if ok {
 		r.ResolveNowZK(resolver.ResolveNowOptions{})
-		s.resolvers[serviceName] = r
 	}
 }
 
