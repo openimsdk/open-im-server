@@ -92,13 +92,13 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
 		}
 	}
-	if err := req.(checker.Checker); err != nil {
-		if err := err.Check(); err != nil {
-			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
-		}
-	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
-	resp, err = handler(ctx, req)
+	resp, err = func() (interface{}, error) {
+		if err := checker.Validate(req); err != nil {
+			return nil, err
+		}
+		return handler(ctx, req)
+	}()
 	if err == nil {
 		log.ZInfo(ctx, "rpc server resp", "funcName", funcName, "resp", rpcString(resp))
 		return resp, nil
