@@ -100,7 +100,7 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v3.0.0
+    image: openim/open_im_server:v3.0.1
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
@@ -123,7 +123,7 @@ services:
         max-file: "2"
 
   openim_chat:
-    image: openim/openim_chat:v1.0
+    image: openim/openim_chat:v1.1
     container_name: openim_chat
     volumes:
       - ./logs:/openim-chat/logs
