@@ -11,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"google.golang.org/grpc"
 )
 
@@ -26,7 +27,10 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	offlinePusher := NewOfflinePusher(cacheModel)
 	database := controller.NewPushDatabase(cacheModel)
-	pusher := NewPusher(client, offlinePusher, database, localcache.NewGroupLocalCache(client), localcache.NewConversationLocalCache(client))
+	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
+	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	pusher := NewPusher(client, offlinePusher, database, localcache.NewGroupLocalCache(&groupRpcClient), localcache.NewConversationLocalCache(&conversationRpcClient), &conversationRpcClient, &groupRpcClient, &msgRpcClient)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
