@@ -1,4 +1,16 @@
 source ../.env
+
+
+# Check if PASSWORD only contains letters and numbers
+if [[ "$PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]
+then
+    echo "PASSWORD is valid."
+else
+    echo "ERR: PASSWORD should only contain letters and numbers. " $PASSWORD
+    exit
+fi
+
+
 echo "your user is:$USER"
 echo "your password is:$PASSWORD"
 echo "your minio endPoint is:$MINIO_ENDPOINT"
@@ -28,4 +40,3 @@ sed -i '/redis:/,/password:/s/password: .*/password: '${PASSWORD}'/' $config_fil
 sed -i "/minio:/,/isDistributedMod:/ s/accessKeyID:.*/accessKeyID: $USER/" $config_file
 sed -i "/minio:/,/isDistributedMod:/ s/secretAccessKey:.*/secretAccessKey: $PASSWORD/" $config_file
 sed -i '/minio:/,/endpoint:/s|endpoint: .*|endpoint: '${MINIO_ENDPOINT}'|' $config_file
-
