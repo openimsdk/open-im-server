@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 echo "docker-compose ps..........................."
 cd ..
-docker-compose ps
+
+if command -v docker-compose &> /dev/null
+then
+    docker-compose ps
+else
+    docker compose ps
+fi
+
 
 
 cd scripts
