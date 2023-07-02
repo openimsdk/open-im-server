@@ -34,7 +34,7 @@ func StartTransfer(prometheusPort int) error {
 		return err
 	}
 	if err := db.AutoMigrate(&relationTb.ChatLogModel{}); err != nil {
-		return err
+		fmt.Printf("gorm: AutoMigrate ChatLogModel err: %v\n", err)
 	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
