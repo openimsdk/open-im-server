@@ -14,6 +14,14 @@ chmod +x *.sh ;
 ./init_pwd.sh
 ./env_check.sh;
 cd .. ;
-docker-compose up -d;
+
+if command -v docker-compose &> /dev/null
+then
+    docker-compose up -d ;
+else
+    docker compose up -d ;
+fi
+
+
 cd scripts ;
 ./docker_check_service.sh
