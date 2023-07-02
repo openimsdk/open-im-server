@@ -1,11 +1,31 @@
+source ../.env
 echo "your user is:$USER"
 echo "your password is:$PASSWORD"
 echo "your minio endPoint is:$MINIO_ENDPOINT"
 echo "your data dir is $DATA_DIR"
 
-sed -i "/^\([[:space:]]*dbMysqlUserName: *\).*/s//\1$USER/;0,/\([[:space:]]*dbUserName: *\).*/s//\1 $USER/;/\([[:space:]]*accessKeyID: *\).*/s//\1 $USER/;/\([[:space:]]*endpoint: *\).*/s//\1\"abc\"/;" ../config/config.yaml
-sed -i "/^\([[:space:]]*dbMysqlPassword: *\).*/s//\1$PASSWORD/;/\([[:space:]]*dbPassword: *\).*/s//\1$PASSWORD/;/\([[:space:]]*secret: *\).*/s//\1$PASSWORD/;/\([[:space:]]*secretAccessKey: *\).*/s//\1$PASSWORD/;" ../config/config.yaml
 
-sed -i "/\([[:space:]]*endpoint: *\).*/s##\1$MINIO_ENDPOINT#;" ../config/config.yaml
-sed -i "/\([[:space:]]*dbPassWord: *\).*/s//\1$PASSWORD/;" ../config/config.yaml
-sed -i "/\([[:space:]]*secret: *\).*/s//\1$PASSWORD/;" ../.docker-compose_cfg/config.yaml
+#!/bin/bash
+
+# Specify the config file
+config_file='../config/config.yaml'
+
+# Load variables from .env file
+source ../.env
+
+# Replace the password and username field for mysql
+sed -i "/mysql:/,/database:/ s/password:.*/password: $PASSWORD/" $config_file
+sed -i "/mysql:/,/database:/ s/username:.*/username: $USER/" $config_file
+
+# Replace the password and username field for mongo
+sed -i "/mongo:/,/maxPoolSize:/ s/password:.*/password: $PASSWORD/" $config_file
+sed -i "/mongo:/,/maxPoolSize:/ s/username:.*/username: $USER/" $config_file
+
+# Replace the password field for redis
+sed -i '/redis:/,/password:/s/password: .*/password: '${PASSWORD}'/' $config_file
+
+# Replace accessKeyID and secretAccessKey for minio
+sed -i "/minio:/,/isDistributedMod:/ s/accessKeyID:.*/accessKeyID: $USER/" $config_file
+sed -i "/minio:/,/isDistributedMod:/ s/secretAccessKey:.*/secretAccessKey: $PASSWORD/" $config_file
+sed -i '/minio:/,/endpoint:/s|endpoint: .*|endpoint: '${MINIO_ENDPOINT}'|' $config_file
+
