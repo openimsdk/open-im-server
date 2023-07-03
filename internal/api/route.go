@@ -26,6 +26,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	u := NewUserApi(discov)
+	m := NewMessageApi(discov)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -117,7 +118,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
-		m := NewMessageApi(discov)
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
@@ -151,7 +151,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	statisticsGroup := r.Group("/statistics", ParseToken)
 	{
-		statisticsGroup.POST("/user_register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/active", m.GetActiveUser)
 	}
 	return r
 }

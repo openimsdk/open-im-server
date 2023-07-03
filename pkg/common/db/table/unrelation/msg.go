@@ -3,6 +3,7 @@ package unrelation
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -87,6 +88,7 @@ type MsgDocModelInterface interface {
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
+	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*UserCount, err error)
 }
 
 func (MsgDocModel) TableName() string {
