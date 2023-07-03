@@ -25,7 +25,14 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	o, err := obj.NewMinioInterface()
+	// 根据配置文件策略选择 oss 方式
+	enable := config.Config.Object.Enable
+	var o obj.Interface
+	if enable == "minio" {
+		o, err = obj.NewMinioInterface()
+	} else if enable == "tencent" {
+		o, err = obj.NewCosClient()
+	}
 	if err != nil {
 		return err
 	}
