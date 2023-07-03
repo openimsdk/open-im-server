@@ -2,6 +2,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"

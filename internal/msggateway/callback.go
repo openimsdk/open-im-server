@@ -2,12 +2,13 @@ package msggateway
 
 import (
 	"context"
+	"time"
+
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"time"
 )
 
 func url() string {

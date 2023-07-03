@@ -2,8 +2,9 @@ package relation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"

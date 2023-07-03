@@ -3,8 +3,9 @@ package msg
 import (
 	"context"
 	"encoding/json"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"

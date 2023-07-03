@@ -8,6 +8,9 @@ package user
 
 import (
 	context "context"
+	reflect "reflect"
+	sync "sync"
+
 	conversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	grpc "google.golang.org/grpc"
@@ -15,8 +18,6 @@ import (
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (

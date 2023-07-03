@@ -1,13 +1,17 @@
 package getui
 
 import (
-	"github.com/go-redis/redis"
 	"sync"
+
+	"github.com/go-redis/redis"
 
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -16,8 +20,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
-	"strconv"
-	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )

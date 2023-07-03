@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
-	"time"
 )
 
 func (s *userServer) UserRegisterCount(ctx context.Context, req *pbuser.UserRegisterCountReq) (*pbuser.UserRegisterCountResp, error) {

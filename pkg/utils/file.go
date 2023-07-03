@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"math/rand"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 const (
