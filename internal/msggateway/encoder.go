@@ -3,6 +3,7 @@ package msggateway
 import (
 	"bytes"
 	"encoding/gob"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 

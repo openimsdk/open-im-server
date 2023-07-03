@@ -3,10 +3,11 @@ package mw
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
 	"math"
 	"runtime"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 

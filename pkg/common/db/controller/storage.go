@@ -9,6 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/url"
+	"path"
+	"strconv"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -16,11 +22,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/google/uuid"
-	"io"
-	"net/url"
-	"path"
-	"strconv"
-	"time"
 )
 
 const (

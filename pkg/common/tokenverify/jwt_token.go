@@ -3,12 +3,13 @@ package tokenverify
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
-	"time"
 )
 
 type Claims struct {

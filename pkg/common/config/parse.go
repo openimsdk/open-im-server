@@ -3,13 +3,14 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path/filepath"
-	"runtime"
 )
 
 var (

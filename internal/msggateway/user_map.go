@@ -2,9 +2,10 @@ package msggateway
 
 import (
 	"context"
+	"sync"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"sync"
 )
 
 type UserMap struct {

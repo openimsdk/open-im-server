@@ -2,9 +2,10 @@ package ormutil
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func GormPage[E any](db *gorm.DB, pageNumber, showNumber int32) (uint32, []*E, error) {

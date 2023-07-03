@@ -1,8 +1,9 @@
 package apiresp
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GinError(c *gin.Context, err error) {

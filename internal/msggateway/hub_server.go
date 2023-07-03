@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
