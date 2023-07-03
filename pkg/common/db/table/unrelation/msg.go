@@ -21,7 +21,6 @@ type MsgDocModel struct {
 }
 
 type RevokeModel struct {
-	ID       string `bson:"id"`
 	Role     int32  `bson:"role"`
 	UserID   string `bson:"user_id"`
 	Nickname string `bson:"nickname"`
@@ -66,6 +65,11 @@ type MsgInfoModel struct {
 	Revoke  *RevokeModel  `bson:"revoke"`
 	DelList []string      `bson:"del_list"`
 	IsRead  bool          `bson:"is_read"`
+}
+
+type UserCount struct {
+	UserID string `bson:"user_id"`
+	Count  int64  `bson:"count"`
 }
 
 type MsgDocModelInterface interface {
