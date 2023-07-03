@@ -168,7 +168,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	}
 	if req.Secret != config.Config.Secret {
 		log.ZDebug(ctx, "UserRegister", config.Config.Secret, req.Secret)
-		return nil, errs.ErrIdentity.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")

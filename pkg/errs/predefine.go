@@ -2,11 +2,10 @@ package errs
 
 var (
 	ErrArgs             = NewCodeError(ArgsError, "ArgsError")
+	ErrNoPermission     = NewCodeError(NoPermissionError, "NoPermissionError")
 	ErrDatabase         = NewCodeError(DatabaseError, "DatabaseError")
 	ErrInternalServer   = NewCodeError(ServerInternalError, "ServerInternalError")
 	ErrNetwork          = NewCodeError(NetworkError, "NetworkError")
-	ErrNoPermission     = NewCodeError(NoPermissionError, "NoPermissionError")
-	ErrIdentity         = NewCodeError(IdentityError, "IdentityError")
 	ErrCallback         = NewCodeError(CallbackError, "CallbackError")
 	ErrCallbackContinue = NewCodeError(CallbackError, "ErrCallbackContinue")
 
@@ -17,10 +16,6 @@ var (
 
 	ErrRecordNotFound = NewCodeError(RecordNotFoundError, "RecordNotFoundError")
 
-	ErrRelationshipAlready = NewCodeError(RelationshipAlreadyError, "RelationshipAlreadyError")
-	ErrNotRelationshipYet  = NewCodeError(NotRelationshipYetError, "NotRelationshipYetError")
-	ErrCanNotAddYourself   = NewCodeError(CanNotAddYourselfError, "CanNotAddYourselfError")
-
 	ErrOnlyOneOwner        = NewCodeError(OnlyOneOwnerError, "OnlyOneOwnerError")
 	ErrInGroupAlready      = NewCodeError(InGroupAlreadyError, "InGroupAlreadyError")
 	ErrNotInGroupYet       = NewCodeError(NotInGroupYetError, "NotInGroupYetError")
@@ -30,7 +25,6 @@ var (
 	ErrGroupTypeNotSupport = NewCodeError(GroupTypeNotSupport, "")
 	ErrGroupNoOwner        = NewCodeError(GroupNoOwner, "ErrGroupNoOwner")
 
-	ErrDefaultOther             = NewCodeError(DefaultOtherError, "DefaultOtherError")
 	ErrData                     = NewCodeError(DataError, "DataError")
 	ErrTokenExpired             = NewCodeError(TokenExpiredError, "TokenExpiredError")
 	ErrTokenInvalid             = NewCodeError(TokenInvalidError, "TokenInvalidError")         //
@@ -45,9 +39,10 @@ var (
 
 	ErrMessageHasReadDisable = NewCodeError(MessageHasReadDisable, "MessageHasReadDisable")
 
-	ErrBlockedByPeer = NewCodeError(BlockedByPeer, "BlockedByPeer")
-	//不是对方的好友
-	ErrNotPeersFriend = NewCodeError(NotPeersFriend, "NotPeersFriend")
+	ErrRelationshipAlready = NewCodeError(RelationshipAlreadyError, "RelationshipAlreadyError")
+	ErrCanNotAddYourself   = NewCodeError(CanNotAddYourselfError, "CanNotAddYourselfError")
+	ErrBlockedByPeer       = NewCodeError(BlockedByPeer, "BlockedByPeer")
+	ErrNotPeersFriend      = NewCodeError(NotPeersFriend, "NotPeersFriend")
 
 	ErrMutedInGroup     = NewCodeError(MutedInGroup, "MutedInGroup")
 	ErrMutedGroup       = NewCodeError(MutedGroup, "MutedGroup")
