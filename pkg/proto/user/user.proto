@@ -142,7 +142,8 @@ message userRegisterCountReq {
 
 message userRegisterCountResp {
   int64 total = 1;
-  map<string, int64> count = 2;
+  int64 before = 2;
+  map<string, int64> count = 3;
 }
 
 service user {
