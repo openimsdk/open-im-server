@@ -68,6 +68,11 @@ type MsgInfoModel struct {
 	IsRead  bool          `bson:"is_read"`
 }
 
+type UserCount struct {
+	UserID string `bson:"user_id"`
+	Count  int64  `bson:"count"`
+}
+
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
