@@ -372,7 +372,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 			"$sortByCount": "$msgs",
 		},
 		bson.M{
-			"sort": bson.M{
+			"$sort": bson.M{
 				"count": sort,
 			},
 		},
@@ -385,12 +385,12 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 			},
 		},
 		bson.M{
-			"addFields": bson.M{
+			"$addFields": bson.M{
 				"user_count": bson.M{
 					"$size": "$result",
 				},
 				"msg_count": bson.M{
-					"sum": "$result.count",
+					"$sum": "$result.count",
 				},
 			},
 		},
