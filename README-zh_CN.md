@@ -19,7 +19,7 @@
 
 <p align="center">
     <a href="./README.md"><b>English</b></a> •
-    <a href="./README_zh.md"><b>中文</b></a>
+    <a href="./README_zh-CN.md"><b>中文</b></a>
 </p>
 
 </p>
