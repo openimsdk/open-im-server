@@ -349,7 +349,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 			},
 		},
 		bson.M{
-			"project": bson.M{
+			"$project": bson.M{
 				"_id":    0,
 				"doc_id": 0,
 			},
