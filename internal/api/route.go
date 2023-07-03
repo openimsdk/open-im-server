@@ -96,7 +96,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
-		authRouterGroup.POST("/user_register", u.UserRegister)
 		authRouterGroup.POST("/user_token", a.UserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)

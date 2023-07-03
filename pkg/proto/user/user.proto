@@ -2,6 +2,7 @@ syntax = "proto3";
 package OpenIMServer.user;
 import "sdkws/sdkws.proto";
 import "conversation/conversation.proto";
+import "wrapperspb/wrapperspb.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user";
 
 message getAllUserIDReq{
@@ -40,7 +41,7 @@ message updateUserInfoResp{
 
 message setGlobalRecvMessageOptReq{
   string userID = 1;
-  int32 globalRecvMsgOpt = 3;
+  OpenIMServer.protobuf.Int32Value globalRecvMsgOpt = 3;
 }
 message setGlobalRecvMessageOptResp{
 }
