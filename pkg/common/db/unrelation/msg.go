@@ -248,7 +248,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID stri
 		}
 		if msg.Revoke != nil {
 			revokeContent := sdkws.MessageRevokedContent{
-				RevokerID:                   msg.Revoke.ID,
+				RevokerID:                   msg.Revoke.UserID,
 				RevokerRole:                 msg.Revoke.Role,
 				ClientMsgID:                 msg.Msg.ClientMsgID,
 				RevokerNickname:             msg.Revoke.Nickname,
