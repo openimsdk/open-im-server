@@ -17,7 +17,12 @@ func url() string {
 	return config.Config.Callback.CallbackUrl
 }
 
-func callbackOfflinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgData, offlinePushUserIDs *[]string) error {
+func callbackOfflinePush(
+	ctx context.Context,
+	userIDs []string,
+	msg *sdkws.MsgData,
+	offlinePushUserIDs *[]string,
+) error {
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return nil
 	}
@@ -82,7 +87,12 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
 }
 
-func callbackBeforeSuperGroupOnlinePush(ctx context.Context, groupID string, msg *sdkws.MsgData, pushToUserIDs *[]string) error {
+func callbackBeforeSuperGroupOnlinePush(
+	ctx context.Context,
+	groupID string,
+	msg *sdkws.MsgData,
+	pushToUserIDs *[]string,
+) error {
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		return nil
 	}

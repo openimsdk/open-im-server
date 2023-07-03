@@ -10,7 +10,7 @@ const (
 )
 
 type SuperGroupModel struct {
-	GroupID   string   `bson:"group_id" json:"groupID"`
+	GroupID   string   `bson:"group_id"       json:"groupID"`
 	MemberIDs []string `bson:"member_id_list" json:"memberIDList"`
 }
 
@@ -19,7 +19,7 @@ func (SuperGroupModel) TableName() string {
 }
 
 type UserToSuperGroupModel struct {
-	UserID   string   `bson:"user_id" json:"userID"`
+	UserID   string   `bson:"user_id"       json:"userID"`
 	GroupIDs []string `bson:"group_id_list" json:"groupIDList"`
 }
 

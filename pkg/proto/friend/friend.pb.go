@@ -11,12 +11,13 @@ import (
 	reflect "reflect"
 	sync "sync"
 
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (

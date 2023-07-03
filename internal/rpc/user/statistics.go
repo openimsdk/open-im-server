@@ -8,7 +8,10 @@ import (
 	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 )
 
-func (s *userServer) UserRegisterCount(ctx context.Context, req *pbuser.UserRegisterCountReq) (*pbuser.UserRegisterCountResp, error) {
+func (s *userServer) UserRegisterCount(
+	ctx context.Context,
+	req *pbuser.UserRegisterCountReq,
+) (*pbuser.UserRegisterCountResp, error) {
 	if req.Start > req.End {
 		return nil, errs.ErrArgs.Wrap("start > end")
 	}

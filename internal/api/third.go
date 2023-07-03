@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -12,7 +14,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/gin-gonic/gin"
 )
 
 type ThirdApi rpcclient.Third
@@ -65,7 +66,10 @@ func (o *ThirdApi) GetURL(c *gin.Context) {
 	}
 	attachment, _ := strconv.ParseBool(c.Query("attachment"))
 	c.Set(constant.OperationID, operationID)
-	resp, err := o.Client.GetUrl(mcontext.SetOperationID(c, operationID), &third.GetUrlReq{Name: name, Expires: expires, Attachment: attachment})
+	resp, err := o.Client.GetUrl(
+		mcontext.SetOperationID(c, operationID),
+		&third.GetUrlReq{Name: name, Expires: expires, Attachment: attachment},
+	)
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())

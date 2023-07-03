@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/Shopify/sarama"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -14,7 +16,6 @@ import (
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/Shopify/sarama"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -41,7 +42,18 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		ctx := mmc.modifyMsgConsumerGroup.GetContextFromMsg(msg)
-		log.ZDebug(ctx, "kafka get info to mysql", "ModifyMsgConsumerHandler", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		log.ZDebug(
+			ctx,
+			"kafka get info to mysql",
+			"ModifyMsgConsumerHandler",
+			msg.Topic,
+			"msgPartition",
+			msg.Partition,
+			"msg",
+			string(msg.Value),
+			"key",
+			string(msg.Key),
+		)
 		if len(msg.Value) != 0 {
 			mmc.ModifyMsg(ctx, msg, string(msg.Key), sess)
 		} else {
@@ -52,7 +64,12 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	return nil
 }
 
-func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
+func (mmc *ModifyMsgConsumerHandler) ModifyMsg(
+	ctx context.Context,
+	cMsg *sarama.ConsumerMessage,
+	msgKey string,
+	_ sarama.ConsumerGroupSession,
+) {
 	msgFromMQ := pbMsg.MsgDataToModifyByMQ{}
 	operationID := mcontext.GetOperationID(ctx)
 	err := proto.Unmarshal(cMsg.Value, &msgFromMQ)
@@ -92,7 +109,8 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(ctx context.Context, cMsg *sarama
 				}
 
 				if err := mmc.extendMsgDatabase.InsertExtendMsg(ctx, notification.ConversationID, notification.SessionType, &extendMsg); err != nil {
-					// log.ZError(ctx, "MsgFirstModify InsertExtendMsg failed",  notification.ConversationID, notification.SessionType, extendMsg, err.Error())
+					// log.ZError(ctx, "MsgFirstModify InsertExtendMsg failed",  notification.ConversationID,
+					// notification.SessionType, extendMsg, err.Error())
 					continue
 				}
 			} else {

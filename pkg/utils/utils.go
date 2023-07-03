@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 // copy a by b  b->a

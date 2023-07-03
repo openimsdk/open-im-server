@@ -7,10 +7,11 @@ import (
 	"path/filepath"
 	"time"
 
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -31,7 +32,14 @@ var (
 )
 
 // InitFromConfig initializes a Zap-based logger
-func InitFromConfig(loggerPrefixName, moduleName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) error {
+func InitFromConfig(
+	loggerPrefixName, moduleName string,
+	logLevel int,
+	isStdout bool,
+	isJson bool,
+	logLocation string,
+	rotateCount uint,
+) error {
 	l, err := NewZapLogger(loggerPrefixName, moduleName, logLevel, isStdout, isJson, logLocation, rotateCount)
 	if err != nil {
 		return err
@@ -78,7 +86,14 @@ type ZapLogger struct {
 	loggerPrefixName string
 }
 
-func NewZapLogger(loggerPrefixName, loggerName string, logLevel int, isStdout bool, isJson bool, logLocation string, rotateCount uint) (*ZapLogger, error) {
+func NewZapLogger(
+	loggerPrefixName, loggerName string,
+	logLevel int,
+	isStdout bool,
+	isJson bool,
+	logLocation string,
+	rotateCount uint,
+) (*ZapLogger, error) {
 	zapConfig := zap.Config{
 		Level: zap.NewAtomicLevelAt(logLevelMap[logLevel]),
 		// EncoderConfig: zap.NewProductionEncoderConfig(),

@@ -114,7 +114,10 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // 获取，如果没找到，不返回错误
-func (u *userDatabase) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error) {
+func (u *userDatabase) Page(
+	ctx context.Context,
+	pageNumber, showNumber int32,
+) (users []*relation.UserModel, count int64, err error) {
 	return u.userDB.Page(ctx, pageNumber, showNumber)
 }
 
@@ -138,6 +141,10 @@ func (u *userDatabase) CountTotal(ctx context.Context) (count int64, err error) 
 	return u.userDB.CountTotal(ctx)
 }
 
-func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+func (u *userDatabase) CountRangeEverydayTotal(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+) (map[string]int64, error) {
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }

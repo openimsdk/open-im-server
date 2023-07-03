@@ -8,7 +8,11 @@ import (
 	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
-func BlackDB2Pb(ctx context.Context, blackDBs []*relation.BlackModel, f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (blackPbs []*sdk.BlackInfo, err error) {
+func BlackDB2Pb(
+	ctx context.Context,
+	blackDBs []*relation.BlackModel,
+	f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
+) (blackPbs []*sdk.BlackInfo, err error) {
 	var userIDs []string
 	for _, blackDB := range blackDBs {
 		userIDs = append(userIDs, blackDB.BlockUserID)

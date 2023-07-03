@@ -41,11 +41,23 @@ type FriendModelInterface interface {
 	// 获取 owner指定的好友列表 如果有friendUserIDs不存在，也不返回错误
 	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*FriendModel, err error)
 	// 获取哪些人添加了friendUserID 如果有ownerUserIDs不存在，也不返回错误
-	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) (friends []*FriendModel, err error)
+	FindReversalFriends(
+		ctx context.Context,
+		friendUserID string,
+		ownerUserIDs []string,
+	) (friends []*FriendModel, err error)
 	// 获取ownerUserID好友列表 支持翻页
-	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindOwnerFriends(
+		ctx context.Context,
+		ownerUserID string,
+		pageNumber, showNumber int32,
+	) (friends []*FriendModel, total int64, err error)
 	// 获取哪些人添加了friendUserID 支持翻页
-	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindInWhoseFriends(
+		ctx context.Context,
+		friendUserID string,
+		pageNumber, showNumber int32,
+	) (friends []*FriendModel, total int64, err error)
 	// 获取好友UserID列表
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	NewTx(tx any) FriendModelInterface

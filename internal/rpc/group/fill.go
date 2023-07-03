@@ -7,7 +7,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
+func (s *groupServer) FindGroupMember(
+	ctx context.Context,
+	groupIDs []string,
+	userIDs []string,
+	roleLevels []int32,
+) ([]*relationTb.GroupMemberModel, error) {
 	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, userIDs, roleLevels)
 	if err != nil {
 		return nil, err
@@ -39,7 +44,11 @@ func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, us
 	return members, nil
 }
 
-func (s *groupServer) TakeGroupMember(ctx context.Context, groupID string, userID string) (*relationTb.GroupMemberModel, error) {
+func (s *groupServer) TakeGroupMember(
+	ctx context.Context,
+	groupID string,
+	userID string,
+) (*relationTb.GroupMemberModel, error) {
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, userID)
 	if err != nil {
 		return nil, err
@@ -79,7 +88,11 @@ func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*rela
 	return owner, nil
 }
 
-func (s *groupServer) PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
+func (s *groupServer) PageGetGroupMember(
+	ctx context.Context,
+	groupID string,
+	pageNumber, showNumber int32,
+) (uint32, []*relationTb.GroupMemberModel, error) {
 	total, members, err := s.GroupDatabase.PageGetGroupMember(ctx, groupID, pageNumber, showNumber)
 	if err != nil {
 		return 0, nil, err

@@ -21,6 +21,7 @@ func (c *Consumer) initPrometheus() {
 }
 
 func (c *Consumer) Start() {
-	//statistics.NewStatistics(&c.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	// statistics.NewStatistics(&c.successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to
+	// msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	go c.pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&c.pushCh)
 }

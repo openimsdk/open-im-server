@@ -11,16 +11,17 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
 )
 
 func rpcString(v interface{}) string {
@@ -30,12 +31,17 @@ func rpcString(v interface{}) string {
 	return fmt.Sprintf("%+v", v)
 }
 
-func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func RpcServerInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
 	log.ZDebug(ctx, "rpc server req", "req", rpcString(req))
 
 	//defer func() {
 	//	if r := recover(); r != nil {
-	//		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
+	// 		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
 	//		fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
 	//		pc, file, line, ok := runtime.Caller(4)
 	//		if !ok {
@@ -48,7 +54,8 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	//			Cause: fmt.Sprintf("%s", r),
 	//			Warp:  nil,
 	//		}
-	//		sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
+	// 		sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()),
+	// errs.ErrInternalServer.Msg()).WithDetails(errInfo)
 	//		if err_ != nil {
 	//			panic(err_)
 	//		}
@@ -122,7 +129,17 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		if unwrap != err {
 			sti, ok := err.(interface{ StackTrace() errors.StackTrace })
 			if ok {
-				log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName, "unwrap", unwrap.Error(), "stack", fmt.Sprintf("%+v", err))
+				log.ZWarn(
+					ctx,
+					"rpc server resp",
+					err,
+					"funcName",
+					funcName,
+					"unwrap",
+					unwrap.Error(),
+					"stack",
+					fmt.Sprintf("%+v", err),
+				)
 				if fs := sti.StackTrace(); len(fs) > 0 {
 					pc := uintptr(fs[0])
 					fn := runtime.FuncForPC(pc)

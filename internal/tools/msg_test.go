@@ -4,11 +4,12 @@ import (
 	"context"
 	"strconv"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"go.mongodb.org/mongo-driver/bson"
 
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
@@ -89,7 +90,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		return
 	}
 	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err := msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -132,7 +136,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	}
 
 	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -164,7 +171,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	}
 
 	msgTools.ClearConversationsMsg(ctx, []string{conversationID})
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -214,7 +224,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -255,7 +268,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
 	}
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return
@@ -305,7 +321,10 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	if _, err := mongoClient.InsertOne(ctx, msgDoc4); err != nil {
 		t.Error("InsertOne failed", testUID4)
 	}
-	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache, err = msgTools.msgDatabase.GetConversationMinMaxSeqInMongoAndCache(
+		ctx,
+		conversationID,
+	)
 	if err != nil {
 		t.Error("GetSuperGroupMinMaxSeqInMongoAndCache failed")
 		return

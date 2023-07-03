@@ -7,7 +7,10 @@ import (
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 )
 
-func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbGroup.GetGroupInfoCacheReq) (resp *pbGroup.GetGroupInfoCacheResp, err error) {
+func (s *groupServer) GetGroupInfoCache(
+	ctx context.Context,
+	req *pbGroup.GetGroupInfoCacheReq,
+) (resp *pbGroup.GetGroupInfoCacheResp, err error) {
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -16,7 +19,10 @@ func (s *groupServer) GetGroupInfoCache(ctx context.Context, req *pbGroup.GetGro
 	return resp, nil
 }
 
-func (s *groupServer) GetGroupMemberCache(ctx context.Context, req *pbGroup.GetGroupMemberCacheReq) (resp *pbGroup.GetGroupMemberCacheResp, err error) {
+func (s *groupServer) GetGroupMemberCache(
+	ctx context.Context,
+	req *pbGroup.GetGroupMemberCacheReq,
+) (resp *pbGroup.GetGroupMemberCacheResp, err error) {
 	members, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err

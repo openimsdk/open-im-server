@@ -3,9 +3,10 @@ package tokenverify
 import (
 	"testing"
 
+	"github.com/golang-jwt/jwt/v4"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 func Test_ParseToken(t *testing.T) {

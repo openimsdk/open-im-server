@@ -303,6 +303,15 @@ type notification struct {
 }
 
 func GetServiceNames() []string {
-	return []string{Config.RpcRegisterName.OpenImUserName, Config.RpcRegisterName.OpenImFriendName, Config.RpcRegisterName.OpenImMsgName, Config.RpcRegisterName.OpenImPushName, Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName, Config.RpcRegisterName.OpenImAuthName, Config.RpcRegisterName.OpenImConversationName, Config.RpcRegisterName.OpenImThirdName}
+	return []string{
+		Config.RpcRegisterName.OpenImUserName,
+		Config.RpcRegisterName.OpenImFriendName,
+		Config.RpcRegisterName.OpenImMsgName,
+		Config.RpcRegisterName.OpenImPushName,
+		Config.RpcRegisterName.OpenImMessageGatewayName,
+		Config.RpcRegisterName.OpenImGroupName,
+		Config.RpcRegisterName.OpenImAuthName,
+		Config.RpcRegisterName.OpenImConversationName,
+		Config.RpcRegisterName.OpenImThirdName,
+	}
 }

@@ -3,6 +3,8 @@ package msg
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -14,7 +16,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"google.golang.org/grpc"
 )
 
 type MessageInterceptorChain []MessageInterceptorFunc
@@ -64,7 +65,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
 	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
-	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
+	extendMsgDatabase := controller.NewExtendMsgDatabase(
+		extendMsgModel,
+		extendMsgCacheModel,
+		tx.NewMongo(mongo.GetClient()),
+	)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 	conversationClient := rpcclient.NewConversationRpcClient(client)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
@@ -106,7 +111,8 @@ func (m *msgServer) initPrometheus() {
 }
 
 func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
-	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+	if conversation.ConversationType == constant.SingleChatType ||
+		conversation.ConversationType == constant.NotificationChatType {
 		if userID == conversation.OwnerUserID {
 			recvID = conversation.UserID
 		} else {

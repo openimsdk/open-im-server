@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
+
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 const (
@@ -31,7 +32,11 @@ type BlackCacheRedis struct {
 	blackDB    relationTb.BlackModelInterface
 }
 
-func NewBlackCacheRedis(rdb redis.UniversalClient, blackDB relationTb.BlackModelInterface, options rockscache.Options) BlackCache {
+func NewBlackCacheRedis(
+	rdb redis.UniversalClient,
+	blackDB relationTb.BlackModelInterface,
+	options rockscache.Options,
+) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	return &BlackCacheRedis{
 		expireTime: blackExpireTime,
@@ -55,9 +60,15 @@ func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {
-	return getCache(ctx, b.rcClient, b.getBlackIDsKey(userID), b.expireTime, func(ctx context.Context) ([]string, error) {
-		return b.blackDB.FindBlackUserIDs(ctx, userID)
-	})
+	return getCache(
+		ctx,
+		b.rcClient,
+		b.getBlackIDsKey(userID),
+		b.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			return b.blackDB.FindBlackUserIDs(ctx, userID)
+		},
+	)
 }
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) BlackCache {

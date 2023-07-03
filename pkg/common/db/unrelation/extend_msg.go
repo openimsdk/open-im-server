@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type ExtendMsgSetMongoDriver struct {
@@ -27,7 +28,11 @@ func (e *ExtendMsgSetMongoDriver) CreateExtendMsgSet(ctx context.Context, set *u
 	return err
 }
 
-func (e *ExtendMsgSetMongoDriver) GetAllExtendMsgSet(ctx context.Context, ID string, opts *unRelationTb.GetAllExtendMsgSetOpts) (sets []*unRelationTb.ExtendMsgSetModel, err error) {
+func (e *ExtendMsgSetMongoDriver) GetAllExtendMsgSet(
+	ctx context.Context,
+	ID string,
+	opts *unRelationTb.GetAllExtendMsgSetOpts,
+) (sets []*unRelationTb.ExtendMsgSetModel, err error) {
 	regex := fmt.Sprintf("^%s", ID)
 	var findOpts *options.FindOptions
 	if opts != nil {
@@ -47,11 +52,23 @@ func (e *ExtendMsgSetMongoDriver) GetAllExtendMsgSet(ctx context.Context, ID str
 	return sets, nil
 }
 
-func (e *ExtendMsgSetMongoDriver) GetExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, maxMsgUpdateTime int64) (*unRelationTb.ExtendMsgSetModel, error) {
+func (e *ExtendMsgSetMongoDriver) GetExtendMsgSet(
+	ctx context.Context,
+	conversationID string,
+	sessionType int32,
+	maxMsgUpdateTime int64,
+) (*unRelationTb.ExtendMsgSetModel, error) {
 	var err error
-	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{"extend_msgs": 0})
+	findOpts := options.Find().
+		SetLimit(1).
+		SetSkip(0).
+		SetSort(bson.M{"source_id": -1}).
+		SetProjection(bson.M{"extend_msgs": 0})
 	// update newest
-	find := bson.M{"source_id": primitive.Regex{Pattern: fmt.Sprintf("^%s", conversationID)}, "session_type": sessionType}
+	find := bson.M{
+		"source_id":    primitive.Regex{Pattern: fmt.Sprintf("^%s", conversationID)},
+		"session_type": sessionType,
+	}
 	if maxMsgUpdateTime > 0 {
 		find["max_msg_update_time"] = maxMsgUpdateTime
 	}
@@ -70,7 +87,12 @@ func (e *ExtendMsgSetMongoDriver) GetExtendMsgSet(ctx context.Context, conversat
 }
 
 // first modify msg
-func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(ctx context.Context, conversationID string, sessionType int32, msg *unRelationTb.ExtendMsgModel) error {
+func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(
+	ctx context.Context,
+	conversationID string,
+	sessionType int32,
+	msg *unRelationTb.ExtendMsgModel,
+) error {
 	set, err := e.GetExtendMsgSet(ctx, conversationID, sessionType, 0)
 	if err != nil {
 		return utils.Wrap(err, "")
@@ -95,7 +117,14 @@ func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(ctx context.Context, conversat
 }
 
 // insert or update
-func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
+func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(
+	ctx context.Context,
+	conversationID string,
+	sessionType int32,
+	clientMsgID string,
+	msgFirstModifyTime int64,
+	reactionExtensionList map[string]*unRelationTb.KeyValueModel,
+) error {
 	var updateBson = bson.M{}
 	for _, v := range reactionExtensionList {
 		updateBson[fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, v.TypeKey)] = v
@@ -111,12 +140,24 @@ func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context
 	if set == nil {
 		return errors.New(fmt.Sprintf("conversationID %s has no set", conversationID))
 	}
-	_, err = e.ExtendMsgSetCollection.UpdateOne(ctx, bson.M{"source_id": set.ConversationID, "session_type": sessionType}, bson.M{"$set": updateBson}, opt)
+	_, err = e.ExtendMsgSetCollection.UpdateOne(
+		ctx,
+		bson.M{"source_id": set.ConversationID, "session_type": sessionType},
+		bson.M{"$set": updateBson},
+		opt,
+	)
 	return utils.Wrap(err, "")
 }
 
 // delete TypeKey
-func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*unRelationTb.KeyValueModel) error {
+func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(
+	ctx context.Context,
+	conversationID string,
+	sessionType int32,
+	clientMsgID string,
+	msgFirstModifyTime int64,
+	reactionExtensionList map[string]*unRelationTb.KeyValueModel,
+) error {
 	var updateBson = bson.M{}
 	for _, v := range reactionExtensionList {
 		updateBson[fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, v.TypeKey)] = ""
@@ -128,14 +169,36 @@ func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context
 	if set == nil {
 		return errors.New(fmt.Sprintf("conversationID %s has no set", conversationID))
 	}
-	_, err = e.ExtendMsgSetCollection.UpdateOne(ctx, bson.M{"source_id": set.ConversationID, "session_type": sessionType}, bson.M{"$unset": updateBson})
+	_, err = e.ExtendMsgSetCollection.UpdateOne(
+		ctx,
+		bson.M{"source_id": set.ConversationID, "session_type": sessionType},
+		bson.M{"$unset": updateBson},
+	)
 	return err
 }
 
-func (e *ExtendMsgSetMongoDriver) TakeExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *unRelationTb.ExtendMsgModel, err error) {
-	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{fmt.Sprintf("extend_msgs.%s", clientMsgID): 1})
+func (e *ExtendMsgSetMongoDriver) TakeExtendMsg(
+	ctx context.Context,
+	conversationID string,
+	sessionType int32,
+	clientMsgID string,
+	maxMsgUpdateTime int64,
+) (extendMsg *unRelationTb.ExtendMsgModel, err error) {
+	findOpts := options.Find().
+		SetLimit(1).
+		SetSkip(0).
+		SetSort(bson.M{"source_id": -1}).
+		SetProjection(bson.M{fmt.Sprintf("extend_msgs.%s", clientMsgID): 1})
 	regex := fmt.Sprintf("^%s", conversationID)
-	result, err := e.ExtendMsgSetCollection.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "max_msg_update_time": bson.M{"$lte": maxMsgUpdateTime}}, findOpts)
+	result, err := e.ExtendMsgSetCollection.Find(
+		ctx,
+		bson.M{
+			"source_id":           primitive.Regex{Pattern: regex},
+			"session_type":        sessionType,
+			"max_msg_update_time": bson.M{"$lte": maxMsgUpdateTime},
+		},
+		findOpts,
+	)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}

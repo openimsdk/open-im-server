@@ -3,11 +3,12 @@ package relation
 import (
 	"context"
 
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"gorm.io/gorm"
 )
 
 var _ relation.GroupMemberModelInterface = (*GroupMemberGorm)(nil)
@@ -29,7 +30,10 @@ func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*relatio
 }
 
 func (g *GroupMemberGorm) Delete(ctx context.Context, groupID string, userIDs []string) (err error) {
-	return utils.Wrap(g.db(ctx).Where("group_id = ? and user_id in (?)", groupID, userIDs).Delete(&relation.GroupMemberModel{}).Error, "")
+	return utils.Wrap(
+		g.db(ctx).Where("group_id = ? and user_id in (?)", groupID, userIDs).Delete(&relation.GroupMemberModel{}).Error,
+		"",
+	)
 }
 
 func (g *GroupMemberGorm) DeleteGroup(ctx context.Context, groupIDs []string) (err error) {
@@ -40,14 +44,24 @@ func (g *GroupMemberGorm) Update(ctx context.Context, groupID string, userID str
 	return utils.Wrap(g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Updates(data).Error, "")
 }
 
-func (g *GroupMemberGorm) UpdateRoleLevel(ctx context.Context, groupID string, userID string, roleLevel int32) (rowsAffected int64, err error) {
+func (g *GroupMemberGorm) UpdateRoleLevel(
+	ctx context.Context,
+	groupID string,
+	userID string,
+	roleLevel int32,
+) (rowsAffected int64, err error) {
 	db := g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Updates(map[string]any{
 		"role_level": roleLevel,
 	})
 	return db.RowsAffected, utils.Wrap(db.Error, "")
 }
 
-func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) (groupMembers []*relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) Find(
+	ctx context.Context,
+	groupIDs []string,
+	userIDs []string,
+	roleLevels []int32,
+) (groupMembers []*relation.GroupMemberModel, err error) {
 	db := g.db(ctx)
 	if len(groupIDs) > 0 {
 		db = db.Where("group_id in (?)", groupIDs)
@@ -61,17 +75,37 @@ func (g *GroupMemberGorm) Find(ctx context.Context, groupIDs []string, userIDs [
 	return groupMembers, utils.Wrap(db.Find(&groupMembers).Error, "")
 }
 
-func (g *GroupMemberGorm) Take(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) Take(
+	ctx context.Context,
+	groupID string,
+	userID string,
+) (groupMember *relation.GroupMemberModel, err error) {
 	groupMember = &relation.GroupMemberModel{}
-	return groupMember, utils.Wrap(g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(
+		g.db(ctx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error,
+		"",
+	)
 }
 
-func (g *GroupMemberGorm) TakeOwner(ctx context.Context, groupID string) (groupMember *relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) TakeOwner(
+	ctx context.Context,
+	groupID string,
+) (groupMember *relation.GroupMemberModel, err error) {
 	groupMember = &relation.GroupMemberModel{}
-	return groupMember, utils.Wrap(g.db(ctx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(
+		g.db(ctx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error,
+		"",
+	)
 }
 
-func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, groupIDs []string, userIDs []string, roleLevels []int32, pageNumber, showNumber int32) (total uint32, groupList []*relation.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) SearchMember(
+	ctx context.Context,
+	keyword string,
+	groupIDs []string,
+	userIDs []string,
+	roleLevels []int32,
+	pageNumber, showNumber int32,
+) (total uint32, groupList []*relation.GroupMemberModel, err error) {
 	db := g.db(ctx)
 	ormutil.GormIn(&db, "group_id", groupIDs)
 	ormutil.GormIn(&db, "user_id", userIDs)
@@ -79,11 +113,17 @@ func (g *GroupMemberGorm) SearchMember(ctx context.Context, keyword string, grou
 	return ormutil.GormSearch[relation.GroupMemberModel](db, []string{"nickname"}, keyword, pageNumber, showNumber)
 }
 
-func (g *GroupMemberGorm) MapGroupMemberNum(ctx context.Context, groupIDs []string) (count map[string]uint32, err error) {
+func (g *GroupMemberGorm) MapGroupMemberNum(
+	ctx context.Context,
+	groupIDs []string,
+) (count map[string]uint32, err error) {
 	return ormutil.MapCount(g.db(ctx).Where("group_id in (?)", groupIDs), "group_id")
 }
 
-func (g *GroupMemberGorm) FindJoinUserID(ctx context.Context, groupIDs []string) (groupUsers map[string][]string, err error) {
+func (g *GroupMemberGorm) FindJoinUserID(
+	ctx context.Context,
+	groupIDs []string,
+) (groupUsers map[string][]string, err error) {
 	var groupMembers []*relation.GroupMemberModel
 	if err := g.db(ctx).Select("group_id, user_id").Where("group_id in (?)", groupIDs).Find(&groupMembers).Error; err != nil {
 		return nil, utils.Wrap(err, "")
@@ -131,5 +171,12 @@ func (g *GroupMemberGorm) FindUsersJoinedGroupID(ctx context.Context, userIDs []
 }
 
 func (g *GroupMemberGorm) FindUserManagedGroupID(ctx context.Context, userID string) (groupIDs []string, err error) {
-	return groupIDs, utils.Wrap(g.db(ctx).Model(&relation.GroupMemberModel{}).Where("user_id = ? and (role_level = ? or role_level = ?)", userID, constant.GroupOwner, constant.GroupAdmin).Pluck("group_id", &groupIDs).Error, "")
+	return groupIDs, utils.Wrap(
+		g.db(ctx).
+			Model(&relation.GroupMemberModel{}).
+			Where("user_id = ? and (role_level = ? or role_level = ?)", userID, constant.GroupOwner, constant.GroupAdmin).
+			Pluck("group_id", &groupIDs).
+			Error,
+		"",
+	)
 }

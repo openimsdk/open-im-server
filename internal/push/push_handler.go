@@ -3,6 +3,9 @@ package push
 import (
 	"context"
 
+	"github.com/Shopify/sarama"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
@@ -10,8 +13,6 @@ import (
 	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/Shopify/sarama"
-	"google.golang.org/protobuf/proto"
 )
 
 type ConsumerHandler struct {

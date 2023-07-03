@@ -11,10 +11,11 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Test_BatchInsertChat2DB(t *testing.T) {
@@ -193,7 +194,9 @@ func Test_FindBySeq(t *testing.T) {
 	}
 	db := GetDB()
 	ctx := context.Background()
-	fmt.Println(db.msgDocDatabase.(*unrelation.MsgMongoDriver).GetMsgBySeqIndexIn1Doc(ctx, "100", "si_100_101:0", []int64{1}))
+	fmt.Println(
+		db.msgDocDatabase.(*unrelation.MsgMongoDriver).GetMsgBySeqIndexIn1Doc(ctx, "100", "si_100_101:0", []int64{1}),
+	)
 	//res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
 	//if err != nil {
 	//	t.Fatal(err)

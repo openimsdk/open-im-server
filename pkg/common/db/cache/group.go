@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dtm-labs/rockscache"
+	"github.com/redis/go-redis/v9"
+
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	unrelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/dtm-labs/rockscache"
-	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -49,10 +50,22 @@ type GroupCache interface {
 	GetJoinedGroupIDs(ctx context.Context, userID string) (joinedGroupIDs []string, err error)
 	DelJoinedGroupID(userID ...string) GroupCache
 
-	GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error)
-	GetGroupMembersInfo(ctx context.Context, groupID string, userID []string) (groupMembers []*relationTb.GroupMemberModel, err error)
+	GetGroupMemberInfo(
+		ctx context.Context,
+		groupID, userID string,
+	) (groupMember *relationTb.GroupMemberModel, err error)
+	GetGroupMembersInfo(
+		ctx context.Context,
+		groupID string,
+		userID []string,
+	) (groupMembers []*relationTb.GroupMemberModel, err error)
 	GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error)
-	GetGroupMembersPage(ctx context.Context, groupID string, userID []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error)
+	GetGroupMembersPage(
+		ctx context.Context,
+		groupID string,
+		userID []string,
+		showNumber, pageNumber int32,
+	) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error)
 
 	DelGroupMembersInfo(groupID string, userID ...string) GroupCache
 
@@ -70,7 +83,14 @@ type GroupCacheRedis struct {
 	rcClient       *rockscache.Client
 }
 
-func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModelInterface, groupMemberDB relationTb.GroupMemberModelInterface, groupRequestDB relationTb.GroupRequestModelInterface, mongoClient unrelationTb.SuperGroupModelInterface, opts rockscache.Options) GroupCache {
+func NewGroupCacheRedis(
+	rdb redis.UniversalClient,
+	groupDB relationTb.GroupModelInterface,
+	groupMemberDB relationTb.GroupMemberModelInterface,
+	groupRequestDB relationTb.GroupRequestModelInterface,
+	mongoClient unrelationTb.SuperGroupModelInterface,
+	opts rockscache.Options,
+) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	return &GroupCacheRedis{rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
@@ -79,7 +99,15 @@ func NewGroupCacheRedis(rdb redis.UniversalClient, groupDB relationTb.GroupModel
 }
 
 func (g *GroupCacheRedis) NewCache() GroupCache {
-	return &GroupCacheRedis{rcClient: g.rcClient, expireTime: g.expireTime, groupDB: g.groupDB, groupMemberDB: g.groupMemberDB, groupRequestDB: g.groupRequestDB, mongoDB: g.mongoDB, metaCache: NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...)}
+	return &GroupCacheRedis{
+		rcClient:       g.rcClient,
+		expireTime:     g.expireTime,
+		groupDB:        g.groupDB,
+		groupMemberDB:  g.groupMemberDB,
+		groupRequestDB: g.groupRequestDB,
+		mongoDB:        g.mongoDB,
+		metaCache:      NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...),
+	}
 }
 
 func (g *GroupCacheRedis) getGroupInfoKey(groupID string) string {
@@ -135,20 +163,36 @@ func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *relationTb.GroupMembe
 }
 
 // / groupInfo
-func (g *GroupCacheRedis) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
+func (g *GroupCacheRedis) GetGroupsInfo(
+	ctx context.Context,
+	groupIDs []string,
+) (groups []*relationTb.GroupModel, err error) {
 	var keys []string
 	for _, group := range groupIDs {
 		keys = append(keys, g.getGroupInfoKey(group))
 	}
-	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, g.GetGroupIndex, func(ctx context.Context) ([]*relationTb.GroupModel, error) {
-		return g.groupDB.Find(ctx, groupIDs)
-	})
+	return batchGetCache(
+		ctx,
+		g.rcClient,
+		keys,
+		g.expireTime,
+		g.GetGroupIndex,
+		func(ctx context.Context) ([]*relationTb.GroupModel, error) {
+			return g.groupDB.Find(ctx, groupIDs)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error) {
-	return getCache(ctx, g.rcClient, g.getGroupInfoKey(groupID), g.expireTime, func(ctx context.Context) (*relationTb.GroupModel, error) {
-		return g.groupDB.Take(ctx, groupID)
-	})
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getGroupInfoKey(groupID),
+		g.expireTime,
+		func(ctx context.Context) (*relationTb.GroupModel, error) {
+			return g.groupDB.Take(ctx, groupID)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) GroupCache {
@@ -161,31 +205,50 @@ func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) GroupCache {
 	return new
 }
 
-func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error) {
-	return getCache(ctx, g.rcClient, g.getJoinedSuperGroupsIDKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		userGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-		return userGroup.GroupIDs, nil
-	})
+func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(
+	ctx context.Context,
+	userID string,
+) (joinedSuperGroupIDs []string, err error) {
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getJoinedSuperGroupsIDKey(userID),
+		g.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			userGroup, err := g.mongoDB.GetSuperGroupByUserID(ctx, userID)
+			if err != nil {
+				return nil, err
+			}
+			return userGroup.GroupIDs, nil
+		},
+	)
 }
 
-func (g *GroupCacheRedis) GetSuperGroupMemberIDs(ctx context.Context, groupIDs ...string) (models []*unrelationTb.SuperGroupModel, err error) {
+func (g *GroupCacheRedis) GetSuperGroupMemberIDs(
+	ctx context.Context,
+	groupIDs ...string,
+) (models []*unrelationTb.SuperGroupModel, err error) {
 	var keys []string
 	for _, group := range groupIDs {
 		keys = append(keys, g.getSuperGroupMemberIDsKey(group))
 	}
-	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, func(model *unrelationTb.SuperGroupModel, keys []string) (int, error) {
-		for i, key := range keys {
-			if g.getSuperGroupMemberIDsKey(model.GroupID) == key {
-				return i, nil
+	return batchGetCache(
+		ctx,
+		g.rcClient,
+		keys,
+		g.expireTime,
+		func(model *unrelationTb.SuperGroupModel, keys []string) (int, error) {
+			for i, key := range keys {
+				if g.getSuperGroupMemberIDsKey(model.GroupID) == key {
+					return i, nil
+				}
 			}
-		}
-		return 0, errIndex
-	}, func(ctx context.Context) ([]*unrelationTb.SuperGroupModel, error) {
-		return g.mongoDB.FindSuperGroup(ctx, groupIDs)
-	})
+			return 0, errIndex
+		},
+		func(ctx context.Context) ([]*unrelationTb.SuperGroupModel, error) {
+			return g.mongoDB.FindSuperGroup(ctx, groupIDs)
+		},
+	)
 }
 
 // userJoinSuperGroup
@@ -211,19 +274,28 @@ func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache 
 
 // groupMembersHash
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
-	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
-		userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
-		if err != nil {
-			return 0, err
-		}
-		utils.Sort(userIDs, true)
-		bi := big.NewInt(0)
-		bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
-		return bi.Uint64(), nil
-	})
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getGroupMembersHashKey(groupID),
+		g.expireTime,
+		func(ctx context.Context) (uint64, error) {
+			userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+			if err != nil {
+				return 0, err
+			}
+			utils.Sort(userIDs, true)
+			bi := big.NewInt(0)
+			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
+			return bi.Uint64(), nil
+		},
+	)
 }
 
-func (g *GroupCacheRedis) GetGroupMemberHashMap(ctx context.Context, groupIDs []string) (map[string]*relationTb.GroupSimpleUserID, error) {
+func (g *GroupCacheRedis) GetGroupMemberHashMap(
+	ctx context.Context,
+	groupIDs []string,
+) (map[string]*relationTb.GroupSimpleUserID, error) {
 	res := make(map[string]*relationTb.GroupSimpleUserID)
 	for _, groupID := range groupIDs {
 		hash, err := g.GetGroupMembersHash(ctx, groupID)
@@ -247,9 +319,15 @@ func (g *GroupCacheRedis) DelGroupMembersHash(groupID string) GroupCache {
 
 // groupMemberIDs
 func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-	return getCache(ctx, g.rcClient, g.getGroupMemberIDsKey(groupID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		return g.groupMemberDB.FindMemberUserID(ctx, groupID)
-	})
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getGroupMemberIDsKey(groupID),
+		g.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			return g.groupMemberDB.FindMemberUserID(ctx, groupID)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) GetGroupsMemberIDs(ctx context.Context, groupIDs []string) (map[string][]string, error) {
@@ -271,9 +349,15 @@ func (g *GroupCacheRedis) DelGroupMemberIDs(groupID string) GroupCache {
 }
 
 func (g *GroupCacheRedis) GetJoinedGroupIDs(ctx context.Context, userID string) (joinedGroupIDs []string, err error) {
-	return getCache(ctx, g.rcClient, g.getJoinedGroupsKey(userID), g.expireTime, func(ctx context.Context) ([]string, error) {
-		return g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
-	})
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getJoinedGroupsKey(userID),
+		g.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			return g.groupMemberDB.FindUserJoinedGroupID(ctx, userID)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) DelJoinedGroupID(userIDs ...string) GroupCache {
@@ -286,23 +370,48 @@ func (g *GroupCacheRedis) DelJoinedGroupID(userIDs ...string) GroupCache {
 	return cache
 }
 
-func (g *GroupCacheRedis) GetGroupMemberInfo(ctx context.Context, groupID, userID string) (groupMember *relationTb.GroupMemberModel, err error) {
-	return getCache(ctx, g.rcClient, g.getGroupMemberInfoKey(groupID, userID), g.expireTime, func(ctx context.Context) (*relationTb.GroupMemberModel, error) {
-		return g.groupMemberDB.Take(ctx, groupID, userID)
-	})
+func (g *GroupCacheRedis) GetGroupMemberInfo(
+	ctx context.Context,
+	groupID, userID string,
+) (groupMember *relationTb.GroupMemberModel, err error) {
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getGroupMemberInfoKey(groupID, userID),
+		g.expireTime,
+		func(ctx context.Context) (*relationTb.GroupMemberModel, error) {
+			return g.groupMemberDB.Take(ctx, groupID, userID)
+		},
+	)
 }
 
-func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID string, userIDs []string) ([]*relationTb.GroupMemberModel, error) {
+func (g *GroupCacheRedis) GetGroupMembersInfo(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+) ([]*relationTb.GroupMemberModel, error) {
 	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, g.getGroupMemberInfoKey(groupID, userID))
 	}
-	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, g.GetGroupMemberIndex, func(ctx context.Context) ([]*relationTb.GroupMemberModel, error) {
-		return g.groupMemberDB.Find(ctx, []string{groupID}, userIDs, nil)
-	})
+	return batchGetCache(
+		ctx,
+		g.rcClient,
+		keys,
+		g.expireTime,
+		g.GetGroupMemberIndex,
+		func(ctx context.Context) ([]*relationTb.GroupMemberModel, error) {
+			return g.groupMemberDB.Find(ctx, []string{groupID}, userIDs, nil)
+		},
+	)
 }
 
-func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, userIDs []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error) {
+func (g *GroupCacheRedis) GetGroupMembersPage(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+	showNumber, pageNumber int32,
+) (total uint32, groupMembers []*relationTb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return 0, nil, err
@@ -316,7 +425,10 @@ func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID strin
 	return uint32(len(userIDs)), groupMembers, err
 }
 
-func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID string) (groupMembers []*relationTb.GroupMemberModel, err error) {
+func (g *GroupCacheRedis) GetAllGroupMembersInfo(
+	ctx context.Context,
+	groupID string,
+) (groupMembers []*relationTb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return nil, err
@@ -324,7 +436,10 @@ func (g *GroupCacheRedis) GetAllGroupMembersInfo(ctx context.Context, groupID st
 	return g.GetGroupMembersInfo(ctx, groupID, groupMemberIDs)
 }
 
-func (g *GroupCacheRedis) GetAllGroupMemberInfo(ctx context.Context, groupID string) ([]*relationTb.GroupMemberModel, error) {
+func (g *GroupCacheRedis) GetAllGroupMemberInfo(
+	ctx context.Context,
+	groupID string,
+) ([]*relationTb.GroupMemberModel, error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return nil, err
@@ -333,9 +448,16 @@ func (g *GroupCacheRedis) GetAllGroupMemberInfo(ctx context.Context, groupID str
 	for _, groupMemberID := range groupMemberIDs {
 		keys = append(keys, g.getGroupMemberInfoKey(groupID, groupMemberID))
 	}
-	return batchGetCache(ctx, g.rcClient, keys, g.expireTime, g.GetGroupMemberIndex, func(ctx context.Context) ([]*relationTb.GroupMemberModel, error) {
-		return g.groupMemberDB.Find(ctx, []string{groupID}, groupMemberIDs, nil)
-	})
+	return batchGetCache(
+		ctx,
+		g.rcClient,
+		keys,
+		g.expireTime,
+		g.GetGroupMemberIndex,
+		func(ctx context.Context) ([]*relationTb.GroupMemberModel, error) {
+			return g.groupMemberDB.Find(ctx, []string{groupID}, groupMemberIDs, nil)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) DelGroupMembersInfo(groupID string, userIDs ...string) GroupCache {
@@ -349,9 +471,15 @@ func (g *GroupCacheRedis) DelGroupMembersInfo(groupID string, userIDs ...string)
 }
 
 func (g *GroupCacheRedis) GetGroupMemberNum(ctx context.Context, groupID string) (memberNum int64, err error) {
-	return getCache(ctx, g.rcClient, g.getGroupMemberNumKey(groupID), g.expireTime, func(ctx context.Context) (int64, error) {
-		return g.groupMemberDB.TakeGroupMemberNum(ctx, groupID)
-	})
+	return getCache(
+		ctx,
+		g.rcClient,
+		g.getGroupMemberNumKey(groupID),
+		g.expireTime,
+		func(ctx context.Context) (int64, error) {
+			return g.groupMemberDB.TakeGroupMemberNum(ctx, groupID)
+		},
+	)
 }
 
 func (g *GroupCacheRedis) DelGroupsMemberNum(groupID ...string) GroupCache {

@@ -27,7 +27,10 @@ func (s *groupServer) groupDB2PB(group *relation.GroupModel, ownerUserID string,
 	}
 }
 
-func (s *groupServer) groupMemberDB2PB(member *relation.GroupMemberModel, appMangerLevel int32) *sdkws.GroupMemberFullInfo {
+func (s *groupServer) groupMemberDB2PB(
+	member *relation.GroupMemberModel,
+	appMangerLevel int32,
+) *sdkws.GroupMemberFullInfo {
 	return &sdkws.GroupMemberFullInfo{
 		GroupID:        member.GroupID,
 		UserID:         member.UserID,

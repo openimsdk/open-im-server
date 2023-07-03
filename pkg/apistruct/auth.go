@@ -1,8 +1,8 @@
 package apistruct
 
 type UserRegisterReq struct {
-	Secret   string `json:"secret" binding:"required,max=32"`
-	Platform int32  `json:"platform" binding:"required,min=1,max=12"`
+	Secret   string `json:"secret"      binding:"required,max=32"`
+	Platform int32  `json:"platform"    binding:"required,min=1,max=12"`
 	ApiUserInfo
 	OperationID string `json:"operationID" binding:"required"`
 }
@@ -17,9 +17,9 @@ type UserRegisterResp struct {
 }
 
 type UserTokenReq struct {
-	Secret      string `json:"secret" binding:"required,max=32"`
-	Platform    int32  `json:"platform" binding:"required,min=1,max=12"`
-	UserID      string `json:"userID" binding:"required,min=1,max=64"`
+	Secret      string `json:"secret"      binding:"required,max=32"`
+	Platform    int32  `json:"platform"    binding:"required,min=1,max=12"`
+	UserID      string `json:"userID"      binding:"required,min=1,max=64"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
@@ -28,8 +28,8 @@ type UserTokenResp struct {
 }
 
 type ForceLogoutReq struct {
-	Platform    int32  `json:"platform" binding:"required,min=1,max=12"`
-	FromUserID  string `json:"fromUserID" binding:"required,min=1,max=64"`
+	Platform    int32  `json:"platform"    binding:"required,min=1,max=12"`
+	FromUserID  string `json:"fromUserID"  binding:"required,min=1,max=64"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
@@ -46,7 +46,7 @@ type ParseTokenReq struct {
 //}
 
 type ExpireTime struct {
-	ExpireTimeSeconds uint32 `json:"expireTimeSeconds" `
+	ExpireTimeSeconds uint32 `json:"expireTimeSeconds"`
 }
 
 type ParseTokenResp struct {

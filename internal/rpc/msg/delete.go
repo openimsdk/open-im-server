@@ -27,7 +27,10 @@ func (m *msgServer) validateDeleteSyncOpt(opt *msg.DeleteSyncOpt) (isSyncSelf, i
 	return opt.IsSyncSelf, opt.IsSyncOther
 }
 
-func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearConversationsMsgReq) (*msg.ClearConversationsMsgResp, error) {
+func (m *msgServer) ClearConversationsMsg(
+	ctx context.Context,
+	req *msg.ClearConversationsMsgReq,
+) (*msg.ClearConversationsMsgResp, error) {
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -37,7 +40,10 @@ func (m *msgServer) ClearConversationsMsg(ctx context.Context, req *msg.ClearCon
 	return &msg.ClearConversationsMsgResp{}, nil
 }
 
-func (m *msgServer) UserClearAllMsg(ctx context.Context, req *msg.UserClearAllMsgReq) (*msg.UserClearAllMsgResp, error) {
+func (m *msgServer) UserClearAllMsg(
+	ctx context.Context,
+	req *msg.UserClearAllMsgReq,
+) (*msg.UserClearAllMsgResp, error) {
 	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -66,7 +72,14 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 			return nil, err
 		}
 		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-		m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, m.conversationAndGetRecvID(conversations[0], req.UserID), constant.DeleteMsgsNotification, conversations[0].ConversationType, tips)
+		m.notificationSender.NotificationWithSesstionType(
+			ctx,
+			req.UserID,
+			m.conversationAndGetRecvID(conversations[0], req.UserID),
+			constant.DeleteMsgsNotification,
+			conversations[0].ConversationType,
+			tips,
+		)
 	} else {
 		if err := m.MsgDatabase.DeleteUserMsgsBySeqs(ctx, req.UserID, req.ConversationID, req.Seqs); err != nil {
 			return nil, err
@@ -79,7 +92,10 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 	return &msg.DeleteMsgsResp{}, nil
 }
 
-func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteMsgPhysicalBySeqReq) (*msg.DeleteMsgPhysicalBySeqResp, error) {
+func (m *msgServer) DeleteMsgPhysicalBySeq(
+	ctx context.Context,
+	req *msg.DeleteMsgPhysicalBySeqReq,
+) (*msg.DeleteMsgPhysicalBySeqResp, error) {
 	err := m.MsgDatabase.DeleteMsgsPhysicalBySeqs(ctx, req.ConversationID, req.Seqs)
 	if err != nil {
 		return nil, err
@@ -87,20 +103,36 @@ func (m *msgServer) DeleteMsgPhysicalBySeq(ctx context.Context, req *msg.DeleteM
 	return &msg.DeleteMsgPhysicalBySeqResp{}, nil
 }
 
-func (m *msgServer) DeleteMsgPhysical(ctx context.Context, req *msg.DeleteMsgPhysicalReq) (*msg.DeleteMsgPhysicalResp, error) {
+func (m *msgServer) DeleteMsgPhysical(
+	ctx context.Context,
+	req *msg.DeleteMsgPhysicalReq,
+) (*msg.DeleteMsgPhysicalResp, error) {
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp
 	for _, conversationID := range req.ConversationIDs {
 		if err := m.MsgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, remainTime); err != nil {
-			log.ZWarn(ctx, "DeleteConversationMsgsAndSetMinSeq error", err, "conversationID", conversationID, "err", err)
+			log.ZWarn(
+				ctx,
+				"DeleteConversationMsgsAndSetMinSeq error",
+				err,
+				"conversationID",
+				conversationID,
+				"err",
+				err,
+			)
 		}
 	}
 	return &msg.DeleteMsgPhysicalResp{}, nil
 }
 
-func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []string, userID string, deleteSyncOpt *msg.DeleteSyncOpt) error {
+func (m *msgServer) clearConversation(
+	ctx context.Context,
+	conversationIDs []string,
+	userID string,
+	deleteSyncOpt *msg.DeleteSyncOpt,
+) error {
 	defer log.ZDebug(ctx, "clearConversation return line")
 	conversations, err := m.Conversation.GetConversationsByConversationID(ctx, conversationIDs)
 	if err != nil {
@@ -125,7 +157,14 @@ func (m *msgServer) clearConversation(ctx context.Context, conversationIDs []str
 		// notification 2 self
 		if isSyncSelf {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: existConversationIDs}
-			m.notificationSender.NotificationWithSesstionType(ctx, userID, userID, constant.ClearConversationNotification, constant.SingleChatType, tips)
+			m.notificationSender.NotificationWithSesstionType(
+				ctx,
+				userID,
+				userID,
+				constant.ClearConversationNotification,
+				constant.SingleChatType,
+				tips,
+			)
 		}
 	} else {
 		if err := m.MsgDatabase.SetMinSeqs(ctx, m.getMinSeqs(maxSeqs)); err != nil {

@@ -35,7 +35,10 @@ func callbackSetMessageReactionExtensions(ctx context.Context, setReq *msg.SetMe
 	return nil
 }
 
-func callbackDeleteMessageReactionExtensions(ctx context.Context, setReq *msg.DeleteMessagesReactionExtensionsReq) error {
+func callbackDeleteMessageReactionExtensions(
+	ctx context.Context,
+	setReq *msg.DeleteMessagesReactionExtensionsReq,
+) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}

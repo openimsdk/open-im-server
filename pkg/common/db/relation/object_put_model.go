@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"gorm.io/gorm"
 )
 
 type ObjectPutGorm struct {
@@ -38,7 +39,11 @@ func (o *ObjectPutGorm) SetCompleted(ctx context.Context, putID string) (err err
 	return utils.Wrap1(o.DB.Model(&relation.ObjectPutModel{}).Where("put_id = ?", putID).Update("complete", true).Error)
 }
 
-func (o *ObjectPutGorm) FindExpirationPut(ctx context.Context, expirationTime time.Time, num int) (list []*relation.ObjectPutModel, err error) {
+func (o *ObjectPutGorm) FindExpirationPut(
+	ctx context.Context,
+	expirationTime time.Time,
+	num int,
+) (list []*relation.ObjectPutModel, err error) {
 	err = o.DB.Where("effective_time <= ?", expirationTime).Limit(num).Find(&list).Error
 	return list, utils.Wrap1(err)
 }

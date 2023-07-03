@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	mysqlDriver "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	mysqlDriver "github.com/go-sql-driver/mysql"
-	"gorm.io/driver/mysql"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,14 +32,26 @@ func newMysqlGormDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	defer sqlDB.Close()
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8mb4 COLLATE utf8mb4_unicode_ci;", config.Config.Mysql.Database)
+	sql := fmt.Sprintf(
+		"CREATE DATABASE IF NOT EXISTS %s default charset utf8mb4 COLLATE utf8mb4_unicode_ci;",
+		config.Config.Mysql.Database,
+	)
 	err = db.Exec(sql).Error
 	if err != nil {
 		return nil, fmt.Errorf("init db %w", err)
 	}
-	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
-		config.Config.Mysql.Username, config.Config.Mysql.Password, config.Config.Mysql.Address[0], config.Config.Mysql.Database)
-	sqlLogger := log.NewSqlLogger(logger.LogLevel(config.Config.Mysql.LogLevel), true, time.Duration(config.Config.Mysql.SlowThreshold)*time.Millisecond)
+	dsn = fmt.Sprintf(
+		"%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+		config.Config.Mysql.Username,
+		config.Config.Mysql.Password,
+		config.Config.Mysql.Address[0],
+		config.Config.Mysql.Database,
+	)
+	sqlLogger := log.NewSqlLogger(
+		logger.LogLevel(config.Config.Mysql.LogLevel),
+		true,
+		time.Duration(config.Config.Mysql.SlowThreshold)*time.Millisecond,
+	)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: sqlLogger,
 	})

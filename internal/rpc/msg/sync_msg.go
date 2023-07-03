@@ -9,7 +9,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+func (m *msgServer) PullMessageBySeqs(
+	ctx context.Context,
+	req *sdkws.PullMessageBySeqsReq,
+) (*sdkws.PullMessageBySeqsResp, error) {
 	resp := &sdkws.PullMessageBySeqsResp{}
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
@@ -20,7 +23,15 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 				log.ZError(ctx, "GetConversation error", err, "conversationID", seq.ConversationID)
 				continue
 			}
-			minSeq, maxSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(ctx, req.UserID, seq.ConversationID, seq.Begin, seq.End, seq.Num, conversation.MaxSeq)
+			minSeq, maxSeq, msgs, err := m.MsgDatabase.GetMsgBySeqsRange(
+				ctx,
+				req.UserID,
+				seq.ConversationID,
+				seq.Begin,
+				seq.End,
+				seq.Num,
+				conversation.MaxSeq,
+			)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqsRange error", err, "conversationID", seq.ConversationID, "seq", seq)
 				continue

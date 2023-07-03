@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -15,7 +17,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type authServer struct {
@@ -33,7 +34,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbAuth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
-		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.Secret, config.Config.TokenPolicy.Expire),
+		authDatabase: controller.NewAuthDatabase(
+			cache.NewMsgCacheModel(rdb),
+			config.Config.Secret,
+			config.Config.TokenPolicy.Expire,
+		),
 	})
 	return nil
 }
@@ -80,7 +85,10 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	return nil, errs.ErrTokenNotExist.Wrap()
 }
 
-func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
+func (s *authServer) ParseToken(
+	ctx context.Context,
+	req *pbAuth.ParseTokenReq,
+) (resp *pbAuth.ParseTokenResp, err error) {
 	resp = &pbAuth.ParseTokenResp{}
 	claims, err := s.parseToken(ctx, req.Token)
 	if err != nil {

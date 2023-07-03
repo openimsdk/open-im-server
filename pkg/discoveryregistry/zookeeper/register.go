@@ -26,7 +26,11 @@ func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc
 	if err != nil {
 		return err
 	}
-	node, err := s.conn.CreateProtectedEphemeralSequential(s.getPath(rpcRegisterName)+"/"+addr+"_", []byte(addr), zk.WorldACL(zk.PermAll))
+	node, err := s.conn.CreateProtectedEphemeralSequential(
+		s.getPath(rpcRegisterName)+"/"+addr+"_",
+		[]byte(addr),
+		zk.WorldACL(zk.PermAll),
+	)
 	if err != nil {
 		return err
 	}

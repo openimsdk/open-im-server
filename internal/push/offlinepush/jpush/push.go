@@ -60,5 +60,14 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 }
 
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp interface{}, timeout int) error {
-	return http2.PostReturn(ctx, config.Config.Push.Jpns.PushUrl, map[string]string{"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret)}, po, resp, timeout)
+	return http2.PostReturn(
+		ctx,
+		config.Config.Push.Jpns.PushUrl,
+		map[string]string{
+			"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret),
+		},
+		po,
+		resp,
+		timeout,
+	)
 }

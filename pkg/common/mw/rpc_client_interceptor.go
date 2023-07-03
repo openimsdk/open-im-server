@@ -6,20 +6,28 @@ import (
 	"fmt"
 	"strings"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 func GrpcClient() grpc.DialOption {
 	return grpc.WithUnaryInterceptor(RpcClientInterceptor)
 }
 
-func RpcClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
+func RpcClientInterceptor(
+	ctx context.Context,
+	method string,
+	req, resp interface{},
+	cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker,
+	opts ...grpc.CallOption,
+) (err error) {
 	if ctx == nil {
 		return errs.ErrInternalServer.Wrap("call rpc request context is nil")
 	}
