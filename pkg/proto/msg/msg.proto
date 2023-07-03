@@ -241,7 +241,7 @@ message DeleteMsgPhysicalBySeqReq {
 }
 
 message DeleteMsgPhysicalBySeqResp {
-  
+
 }
 
 message GetConversationMaxSeqReq {
@@ -264,6 +264,24 @@ message Seqs {
 
 message GetConversationsHasReadAndMaxSeqResp {
   map<string, Seqs> seqs = 1;
+}
+
+message GetActiveUserReq {
+  int64 start = 1;
+  int64 end = 2;
+  bool ase = 3;
+  sdkws.RequestPagination pagination = 4;
+}
+
+message ActiveUser {
+  sdkws.UserInfo user = 1;
+  int64 count = 2;
+}
+
+message GetActiveUserResp {
+  int64 msgCount = 1;
+  int64 userCount = 2;
+  repeated ActiveUser users = 3;
 }
 
 service msg {
@@ -302,4 +320,6 @@ service msg {
   rpc DeleteMessageReactionExtensions(DeleteMessagesReactionExtensionsReq) returns(DeleteMessagesReactionExtensionsResp);
 
   rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
+
+  rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
 }

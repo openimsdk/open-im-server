@@ -310,60 +310,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 	return err
 }
 
-func (m *MsgMongoDriver) RangeCount(ctx context.Context, start time.Time, end time.Time) (int64, error) {
-	type Total struct {
-		Total int64 `bson:"total"`
-	}
-	pipeline := bson.A{
-		bson.M{
-			"$addFields": bson.M{
-				"msgs": bson.M{
-					"$filter": bson.M{
-						"input": "$msgs",
-						"as":    "item",
-						"cond": bson.M{
-							"$and": bson.A{
-								bson.M{
-									"$gte": bson.A{
-										"$$item.msg.send_time", start.UnixMilli(),
-									},
-									"$lt": bson.A{
-										"$$item.msg.send_time", end.UnixMilli(),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		bson.M{
-			"$group": bson.M{
-				"_id": nil,
-				"total": bson.M{
-					"$sum": bson.M{
-						"$size": "$msgs",
-					},
-				},
-			},
-		},
-	}
-	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
-	if err != nil {
-		return 0, errs.Wrap(err)
-	}
-	defer cur.Close(ctx)
-	var total []Total
-	if err := cur.All(ctx, &total); err != nil {
-		return 0, err
-	}
-	if len(total) == 0 {
-		return 0, nil
-	}
-	return total[0].Total, nil
-}
-
-func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start time.Time, end time.Time) (int64, []*table.UserCount, error) {
+func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, err error) {
 	var sort int
 	if ase {
 		sort = -1
@@ -371,8 +318,9 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start
 		sort = 1
 	}
 	type Result struct {
-		Total  int64 `bson:"result"`
-		Result []struct {
+		MsgCount  int64 `bson:"msg_count"`
+		UserCount int64 `bson:"user_count"`
+		Result    []struct {
 			UserID string `bson:"_id"`
 			Count  int64  `bson:"count"`
 		}
@@ -438,8 +386,11 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start
 		},
 		bson.M{
 			"addFields": bson.M{
-				"result": bson.M{
+				"user_count": bson.M{
 					"$size": "$result",
+				},
+				"msg_count": bson.M{
+					"sum": "$result.count",
 				},
 			},
 		},
@@ -447,7 +398,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start
 			"$addFields": bson.M{
 				"result": bson.M{
 					"$slice": bson.A{
-						"$result", 0, 10,
+						"$result", pageNumber - 1, showNumber,
 					},
 				},
 			},
@@ -455,15 +406,15 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start
 	}
 	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
 	if err != nil {
-		return 0, nil, errs.Wrap(err)
+		return 0, 0, nil, errs.Wrap(err)
 	}
 	defer cur.Close(ctx)
 	var result []Result
 	if err := cur.All(ctx, &result); err != nil {
-		return 0, nil, err
+		return 0, 0, nil, err
 	}
 	if len(result) == 0 {
-		return 0, nil, nil
+		return 0, 0, nil, nil
 	}
 	res := make([]*table.UserCount, len(result[0].Result))
 	for i, r := range result[0].Result {
@@ -472,5 +423,5 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, ase bool, start
 			Count:  r.Count,
 		}
 	}
-	return result[0].Total, res, nil
+	return result[0].MsgCount, result[0].UserCount, res, nil
 }
