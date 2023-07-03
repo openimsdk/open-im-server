@@ -131,8 +131,7 @@ go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.buil
 .PHONY: go.lint
 go.lint: tools.verify.golangci-lint
 	@echo "===========> Run golangci to lint source codes"
-	@$(TOOLS_BIN)/golangci-lint run -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/...
-
+	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/... 
 ## go.test: Run unit test
 .PHONY: go.test
 go.test:

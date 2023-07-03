@@ -5,6 +5,8 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -15,7 +17,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -31,7 +32,12 @@ func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, serve
 }
 
 func (s *Server) Start() error {
-	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, s.InitServer)
+	return startrpc.Start(
+		s.rpcPort,
+		config.Config.RpcRegisterName.OpenImMessageGatewayName,
+		s.prometheusPort,
+		s.InitServer,
+	)
 }
 
 type Server struct {
@@ -46,14 +52,24 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 }
 
 func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
-	return &Server{rpcPort: rpcPort, LongConnServer: longConnServer, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
+	return &Server{
+		rpcPort:        rpcPort,
+		LongConnServer: longConnServer,
+		pushTerminal:   []int{constant.IOSPlatformID, constant.AndroidPlatformID},
+	}
 }
 
-func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
+func (s *Server) OnlinePushMsg(
+	context context.Context,
+	req *msggateway.OnlinePushMsgReq,
+) (*msggateway.OnlinePushMsgResp, error) {
 	panic("implement me")
 }
 
-func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
+func (s *Server) GetUsersOnlineStatus(
+	ctx context.Context,
+	req *msggateway.GetUsersOnlineStatusReq,
+) (*msggateway.GetUsersOnlineStatusResp, error) {
 	if !tokenverify.IsAppManagerUid(ctx) {
 		return nil, errs.ErrNoPermission.Wrap("only app manager")
 	}
@@ -83,11 +99,17 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 	return &resp, nil
 }
 
-func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+func (s *Server) OnlineBatchPushOneMsg(
+	ctx context.Context,
+	req *msggateway.OnlineBatchPushOneMsgReq,
+) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	panic("implement me")
 }
 
-func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+func (s *Server) SuperGroupOnlineBatchPushOneMsg(
+	ctx context.Context,
+	req *msggateway.OnlineBatchPushOneMsgReq,
+) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	var singleUserResult []*msggateway.SingleMsgToUserResults
 	for _, v := range req.PushToUserIDs {
 		var resp []*msggateway.SingleMsgToUserPlatform
@@ -108,7 +130,8 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 					RecvID:         v,
 					RecvPlatFormID: int32(client.PlatformID),
 				}
-				if !client.IsBackground || (client.IsBackground == true && client.PlatformID != constant.IOSPlatformID) {
+				if !client.IsBackground ||
+					(client.IsBackground == true && client.PlatformID != constant.IOSPlatformID) {
 					err := client.PushMessage(ctx, req.MsgData)
 					if err != nil {
 						temp.ResultCode = -2
@@ -135,7 +158,10 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 	}, nil
 }
 
-func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOfflineReq) (*msggateway.KickUserOfflineResp, error) {
+func (s *Server) KickUserOffline(
+	ctx context.Context,
+	req *msggateway.KickUserOfflineReq,
+) (*msggateway.KickUserOfflineResp, error) {
 	for _, v := range req.KickUserIDList {
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
@@ -149,7 +175,10 @@ func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOf
 	return &msggateway.KickUserOfflineResp{}, nil
 }
 
-func (s *Server) MultiTerminalLoginCheck(ctx context.Context, req *msggateway.MultiTerminalLoginCheckReq) (*msggateway.MultiTerminalLoginCheckResp, error) {
+func (s *Server) MultiTerminalLoginCheck(
+	ctx context.Context,
+	req *msggateway.MultiTerminalLoginCheckReq,
+) (*msggateway.MultiTerminalLoginCheckResp, error) {
 	//TODO implement me
 	panic("implement me")
 }

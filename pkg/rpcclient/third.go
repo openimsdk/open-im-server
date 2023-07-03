@@ -3,10 +3,11 @@ package rpcclient
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
-	"google.golang.org/grpc"
 )
 
 type Third struct {

@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"gorm.io/gorm"
 )
 
 type ObjectInfoGorm struct {
@@ -45,5 +46,10 @@ func (o *ObjectInfoGorm) Take(ctx context.Context, name string) (info *relation.
 }
 
 func (o *ObjectInfoGorm) DeleteExpiration(ctx context.Context, expiration time.Time) (err error) {
-	return utils.Wrap1(o.DB.WithContext(ctx).Where("expiration_time IS NOT NULL AND expiration_time <= ?", expiration).Delete(&relation.ObjectInfoModel{}).Error)
+	return utils.Wrap1(
+		o.DB.WithContext(ctx).
+			Where("expiration_time IS NOT NULL AND expiration_time <= ?", expiration).
+			Delete(&relation.ObjectInfoModel{}).
+			Error,
+	)
 }

@@ -125,7 +125,8 @@ const (
 	SingleTerminalLogin = 2
 	//The web side can be online at the same time, and the other side can only log in at one end
 	WebAndOther = 3
-	//The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at the same time
+	// The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at
+	// the same time
 	PcMobileAndWeb = 4
 	//The PC terminal can be online at the same time,but other terminal only one of the endpoints can login
 	PCAndOther = 5

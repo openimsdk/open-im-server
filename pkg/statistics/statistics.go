@@ -31,7 +31,21 @@ func (s *Statistics) output() {
 			intervalCount = *s.AllCount - sum
 		}
 		timeIntervalNum++
-		log.ZWarn(context.Background(), " system stat ", nil, "args", s.PrintArgs, "intervalCount", intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum, "avg", (*s.AllCount)/(timeIntervalNum)/s.SleepTime)
+		log.ZWarn(
+			context.Background(),
+			" system stat ",
+			nil,
+			"args",
+			s.PrintArgs,
+			"intervalCount",
+			intervalCount,
+			"total:",
+			*s.AllCount,
+			"intervalNum",
+			timeIntervalNum,
+			"avg",
+			(*s.AllCount)/(timeIntervalNum)/s.SleepTime,
+		)
 	}
 }
 

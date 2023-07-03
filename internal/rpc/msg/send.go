@@ -34,7 +34,10 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 	}
 }
 
-func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgSuperGroupChat(
+	ctx context.Context,
+	req *pbMsg.SendMsgReq,
+) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
@@ -105,7 +108,10 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 }
 
-func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgNotification(
+	ctx context.Context,
+	req *pbMsg.SendMsgReq,
+) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
@@ -127,7 +133,13 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	var isSend bool = true
 	isNotification := utils.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
-		isSend, err = m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, utils.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID), constant.SingleChatType, req)
+		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
+			ctx,
+			req.MsgData.RecvID,
+			utils.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
+			constant.SingleChatType,
+			req,
+		)
 		if err != nil {
 			return nil, err
 		}

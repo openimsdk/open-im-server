@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/robfig/cron/v3"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/robfig/cron/v3"
 )
 
 func StartCronTask() error {

@@ -3,11 +3,12 @@ package rpcclient
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"google.golang.org/grpc"
 )
 
 type Friend struct {
@@ -31,8 +32,14 @@ func NewFriendRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) FriendRpc
 	return FriendRpcClient(*NewFriend(discov))
 }
 
-func (f *FriendRpcClient) GetFriendsInfo(ctx context.Context, ownerUserID, friendUserID string) (resp *sdkws.FriendInfo, err error) {
-	r, err := f.Client.GetDesignatedFriends(ctx, &friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}})
+func (f *FriendRpcClient) GetFriendsInfo(
+	ctx context.Context,
+	ownerUserID, friendUserID string,
+) (resp *sdkws.FriendInfo, err error) {
+	r, err := f.Client.GetDesignatedFriends(
+		ctx,
+		&friend.GetDesignatedFriendsReq{OwnerUserID: ownerUserID, FriendUserIDs: []string{friendUserID}},
+	)
 	if err != nil {
 		return nil, err
 	}

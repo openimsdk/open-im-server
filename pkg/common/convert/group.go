@@ -41,7 +41,12 @@ func Pb2DbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID st
 	}
 }
 
-func Db2PbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbGroup.CMSGroup {
+func Db2PbCMSGroup(
+	m *relation.GroupModel,
+	ownerUserID string,
+	ownerUserName string,
+	memberCount uint32,
+) *pbGroup.CMSGroup {
 	return &pbGroup.CMSGroup{
 		GroupInfo:          Db2PbGroupInfo(m, ownerUserID, memberCount),
 		GroupOwnerUserID:   ownerUserID,
@@ -66,7 +71,11 @@ func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 	}
 }
 
-func Db2PbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+func Db2PbGroupRequest(
+	m *relation.GroupRequestModel,
+	user *sdkws.PublicUserInfo,
+	group *sdkws.GroupInfo,
+) *sdkws.GroupRequest {
 	return &sdkws.GroupRequest{
 		UserInfo:      user,
 		GroupInfo:     group,
@@ -82,7 +91,11 @@ func Db2PbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo
 	}
 }
 
-func Db2PbGroupAbstractInfo(groupID string, groupMemberNumber uint32, groupMemberListHash uint64) *pbGroup.GroupAbstractInfo {
+func Db2PbGroupAbstractInfo(
+	groupID string,
+	groupMemberNumber uint32,
+	groupMemberListHash uint64,
+) *pbGroup.GroupAbstractInfo {
 	return &pbGroup.GroupAbstractInfo{
 		GroupID:             groupID,
 		GroupMemberNumber:   groupMemberNumber,

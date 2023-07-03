@@ -1,11 +1,12 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/gin-gonic/gin"
 )
 
 type StatisticsApi rpcclient.User

@@ -3,10 +3,11 @@ package rpcclient
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
-	"google.golang.org/grpc"
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {

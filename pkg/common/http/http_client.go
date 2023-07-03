@@ -3,8 +3,7 @@
 ** copyright('open-im,www.open-im.io').
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/5/27 10:31).
- */
-package http
+ */package http
 
 import (
 	"bytes"
@@ -39,7 +38,13 @@ func Get(url string) (response []byte, err error) {
 	return body, nil
 }
 
-func Post(ctx context.Context, url string, header map[string]string, data interface{}, timeout int) (content []byte, err error) {
+func Post(
+	ctx context.Context,
+	url string,
+	header map[string]string,
+	data interface{},
+	timeout int,
+) (content []byte, err error) {
 	if timeout > 0 {
 		var cancel func()
 		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(timeout))
@@ -72,7 +77,13 @@ func Post(ctx context.Context, url string, header map[string]string, data interf
 	return result, nil
 }
 
-func PostReturn(ctx context.Context, url string, header map[string]string, input, output interface{}, timeOutSecond int) error {
+func PostReturn(
+	ctx context.Context,
+	url string,
+	header map[string]string,
+	input, output interface{},
+	timeOutSecond int,
+) error {
 	b, err := Post(ctx, url, header, input, timeOutSecond)
 	if err != nil {
 		return err
@@ -81,7 +92,13 @@ func PostReturn(ctx context.Context, url string, header map[string]string, input
 	return err
 }
 
-func callBackPostReturn(ctx context.Context, url, command string, input interface{}, output callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+func callBackPostReturn(
+	ctx context.Context,
+	url, command string,
+	input interface{},
+	output callbackstruct.CallbackResp,
+	callbackConfig config.CallBackConfig,
+) error {
 	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
 	v := urlLib.Values{}
 	v.Set(constant.CallbackCommand, command)
@@ -104,6 +121,12 @@ func callBackPostReturn(ctx context.Context, url, command string, input interfac
 	return output.Parse()
 }
 
-func CallBackPostReturn(ctx context.Context, url string, req callbackstruct.CallbackReq, resp callbackstruct.CallbackResp, callbackConfig config.CallBackConfig) error {
+func CallBackPostReturn(
+	ctx context.Context,
+	url string,
+	req callbackstruct.CallbackReq,
+	resp callbackstruct.CallbackResp,
+	callbackConfig config.CallBackConfig,
+) error {
 	return callBackPostReturn(ctx, url, req.GetCallbackCommand(), req, resp, callbackConfig)
 }

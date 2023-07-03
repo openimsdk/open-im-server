@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 )
 
 func RequiredIf(fl validator.FieldLevel) bool {

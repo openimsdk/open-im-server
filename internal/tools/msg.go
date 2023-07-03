@@ -26,7 +26,12 @@ type MsgTool struct {
 
 var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
 
-func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase, groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase) *MsgTool {
+func NewMsgTool(
+	msgDatabase controller.CommonMsgDatabase,
+	userDatabase controller.UserDatabase,
+	groupDatabase controller.GroupDatabase,
+	conversationDatabase controller.ConversationDatabase,
+) *MsgTool {
 	return &MsgTool{
 		msgDatabase:          msgDatabase,
 		userDatabase:         userDatabase,
@@ -50,9 +55,17 @@ func InitMsgTool() (*MsgTool, error) {
 	}
 	userDB := relation.NewUserGorm(db)
 	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
-	userDatabase := controller.NewUserDatabase(userDB, cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()), tx.NewGorm(db))
+	userDatabase := controller.NewUserDatabase(
+		userDB,
+		cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()),
+		tx.NewGorm(db),
+	)
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
-	conversationDatabase := controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)), tx.NewGorm(db))
+	conversationDatabase := controller.NewConversationDatabase(
+		relation.NewConversationGorm(db),
+		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)),
+		tx.NewGorm(db),
+	)
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase)
 	return msgTool, nil
 }
@@ -75,7 +88,15 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
 		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(config.Config.RetainChatRecords*24*60*60)); err != nil {
-			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", config.Config.RetainChatRecords)
+			log.ZError(
+				ctx,
+				"DeleteUserSuperGroupMsgsAndSetMinSeq failed",
+				err,
+				"conversationID",
+				conversationID,
+				"DBRetainChatRecords",
+				config.Config.RetainChatRecords,
+			)
 		}
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)

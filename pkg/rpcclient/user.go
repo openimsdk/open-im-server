@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -12,7 +14,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type User struct {
@@ -70,7 +71,11 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	}), nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfos(
+	ctx context.Context,
+	userIDs []string,
+	complete bool,
+) ([]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -93,7 +98,11 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 	return users[0], nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfoMap(
+	ctx context.Context,
+	userIDs []string,
+	complete bool,
+) (map[string]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, userIDs, complete)
 	if err != nil {
 		return nil, err

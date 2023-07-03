@@ -6,8 +6,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/pkg/errors"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
@@ -68,7 +69,11 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 	return conns, nil
 }
 
-func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
+func (s *ZkClient) GetConns(
+	ctx context.Context,
+	serviceName string,
+	opts ...grpc.DialOption,
+) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
 	s.lock.Lock()
 	opts = append(s.options, opts...)
@@ -82,7 +87,13 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 			return nil, err
 		}
 		if len(conns) == 0 {
-			return nil, fmt.Errorf("no conn for service %s, grpc server may not exist, local conn is %v, please check zookeeper server %v, path: %s", serviceName, s.localConns, s.zkServers, s.zkRoot)
+			return nil, fmt.Errorf(
+				"no conn for service %s, grpc server may not exist, local conn is %v, please check zookeeper server %v, path: %s",
+				serviceName,
+				s.localConns,
+				s.zkServers,
+				s.zkRoot,
+			)
 		}
 		s.localConns[serviceName] = conns
 	}
@@ -100,8 +111,15 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 	return ret, nil
 }
 
-func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
-	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+func (s *ZkClient) GetConn(
+	ctx context.Context,
+	serviceName string,
+	opts ...grpc.DialOption,
+) (grpc.ClientConnInterface, error) {
+	newOpts := append(
+		s.options,
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)),
+	)
 	s.logger.Printf("get conn from client, serviceName: %s", serviceName)
 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }

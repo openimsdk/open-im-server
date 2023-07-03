@@ -4,8 +4,9 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (

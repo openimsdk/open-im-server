@@ -17,7 +17,11 @@ func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient)
 }
 
 // SetPrivate调用
-func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) error {
+func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
+	ctx context.Context,
+	sendID, recvID string,
+	isPrivateChat bool,
+) error {
 	tips := &sdkws.ConversationSetPrivateTips{
 		RecvID:    recvID,
 		SendID:    sendID,
@@ -35,7 +39,11 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 }
 
 // 会话未读数同步
-func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, unreadCountTime, hasReadSeq int64) error {
+func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
+	ctx context.Context,
+	userID, conversationID string,
+	unreadCountTime, hasReadSeq int64,
+) error {
 	tips := &sdkws.ConversationHasReadTips{
 		UserID:          userID,
 		ConversationID:  conversationID,

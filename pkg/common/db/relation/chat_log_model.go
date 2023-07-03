@@ -3,15 +3,16 @@ package relation
 import (
 	"fmt"
 
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/jinzhu/copier"
+	"google.golang.org/protobuf/proto"
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/jinzhu/copier"
-	"google.golang.org/protobuf/proto"
-	"gorm.io/gorm"
 )
 
 type ChatLogGorm struct {
@@ -48,7 +49,11 @@ func (c *ChatLogGorm) Create(msg *pbMsg.MsgDataToMQ) error {
 	return c.DB.Create(chatLog).Error
 }
 
-func (c *ChatLogGorm) GetChatLog(chatLog *relation.ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []relation.ChatLogModel, error) {
+func (c *ChatLogGorm) GetChatLog(
+	chatLog *relation.ChatLogModel,
+	pageNumber, showNumber int32,
+	contentTypeList []int32,
+) (int64, []relation.ChatLogModel, error) {
 	mdb := c.DB.Model(chatLog)
 	if chatLog.SendTime.Unix() > 0 {
 		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))

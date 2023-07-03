@@ -97,7 +97,12 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	for _, option := range options {
 		option(client)
 	}
-	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(true), zk.WithLogger(client.logger))
+	conn, eventChan, err := zk.Connect(
+		zkServers,
+		time.Duration(client.timeout)*time.Second,
+		zk.WithLogInfo(true),
+		zk.WithLogger(client.logger),
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -1,12 +1,13 @@
 package msg
 
 import (
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {

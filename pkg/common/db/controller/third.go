@@ -19,7 +19,13 @@ func NewThirdDatabase(cache cache.MsgModel) ThirdDatabase {
 	return &thirdDatabase{cache: cache}
 }
 
-func (t *thirdDatabase) FcmUpdateToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) error {
+func (t *thirdDatabase) FcmUpdateToken(
+	ctx context.Context,
+	account string,
+	platformID int,
+	fcmToken string,
+	expireTime int64,
+) error {
 	return t.cache.SetFcmToken(ctx, account, platformID, fcmToken, expireTime)
 }
 

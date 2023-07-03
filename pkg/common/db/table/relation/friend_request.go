@@ -36,9 +36,17 @@ type FriendRequestModelInterface interface {
 	Find(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	Take(ctx context.Context, fromUserID, toUserID string) (friendRequest *FriendRequestModel, err error)
 	// 获取toUserID收到的好友申请列表
-	FindToUserID(ctx context.Context, toUserID string, pageNumber, showNumber int32) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindToUserID(
+		ctx context.Context,
+		toUserID string,
+		pageNumber, showNumber int32,
+	) (friendRequests []*FriendRequestModel, total int64, err error)
 	// 获取fromUserID发出去的好友申请列表
-	FindFromUserID(ctx context.Context, fromUserID string, pageNumber, showNumber int32) (friendRequests []*FriendRequestModel, total int64, err error)
+	FindFromUserID(
+		ctx context.Context,
+		fromUserID string,
+		pageNumber, showNumber int32,
+	) (friendRequests []*FriendRequestModel, total int64, err error)
 
 	NewTx(tx any) FriendRequestModelInterface
 }

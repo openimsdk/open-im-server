@@ -4,6 +4,9 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -12,8 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 func CorsHandler() gin.HandlerFunc {
@@ -21,10 +22,22 @@ func CorsHandler() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "*")
 		c.Header("Access-Control-Allow-Headers", "*")
-		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma,FooBar") // 跨域关键设置 让浏览器可以解析
-		c.Header("Access-Control-Max-Age", "172800")                                                                                                                                                           // 缓存请求信息 单位为秒
-		c.Header("Access-Control-Allow-Credentials", "false")                                                                                                                                                  //  跨域请求是否需要带cookie信息 默认设置为true
-		c.Header("content-type", "application/json")                                                                                                                                                           // 设置返回格式是json
+		c.Header(
+			"Access-Control-Expose-Headers",
+			"Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma,FooBar",
+		) // 跨域关键设置 让浏览器可以解析
+		c.Header(
+			"Access-Control-Max-Age",
+			"172800",
+		) // 缓存请求信息 单位为秒
+		c.Header(
+			"Access-Control-Allow-Credentials",
+			"false",
+		) //  跨域请求是否需要带cookie信息 默认设置为true
+		c.Header(
+			"content-type",
+			"application/json",
+		) // 设置返回格式是json
 		//Release all option pre-requests
 		if c.Request.Method == http.MethodOptions {
 			c.JSON(http.StatusOK, "Options Request!")
@@ -52,7 +65,11 @@ func GinParseOperationID() gin.HandlerFunc {
 }
 
 func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
-	dataBase := controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.Secret, config.Config.TokenPolicy.Expire)
+	dataBase := controller.NewAuthDatabase(
+		cache.NewMsgCacheModel(rdb),
+		config.Config.Secret,
+		config.Config.TokenPolicy.Expire,
+	)
 	return func(c *gin.Context) {
 		switch c.Request.Method {
 		case http.MethodPost:

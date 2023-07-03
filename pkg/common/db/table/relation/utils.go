@@ -1,8 +1,9 @@
 package relation
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type BatchUpdateGroupMember struct {

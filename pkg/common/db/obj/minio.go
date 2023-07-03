@@ -9,11 +9,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/s3utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 func NewMinioInterface() (Interface, error) {
@@ -94,7 +95,13 @@ func (m *minioImpl) DataBucket() string {
 	return m.dataBucket
 }
 
-func (m *minioImpl) PresignedGetURL(ctx context.Context, bucket string, name string, expires time.Duration, opt *HeaderOption) (string, error) {
+func (m *minioImpl) PresignedGetURL(
+	ctx context.Context,
+	bucket string,
+	name string,
+	expires time.Duration,
+	opt *HeaderOption,
+) (string, error) {
 	var reqParams url.Values
 	if opt != nil {
 		reqParams = make(url.Values)
@@ -204,7 +211,12 @@ func (m *minioImpl) IsNotFound(err error) bool {
 	}
 }
 
-func (m *minioImpl) PutObject(ctx context.Context, info *BucketObject, reader io.Reader, size int64) (*ObjectInfo, error) {
+func (m *minioImpl) PutObject(
+	ctx context.Context,
+	info *BucketObject,
+	reader io.Reader,
+	size int64,
+) (*ObjectInfo, error) {
 	update, err := m.client.PutObject(ctx, info.Bucket, info.Name, reader, size, minio.PutObjectOptions{})
 	if err != nil {
 		return nil, err

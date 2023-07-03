@@ -99,7 +99,9 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
-	h.Write([]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret))
+	h.Write(
+		[]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret),
+	)
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
@@ -150,7 +152,14 @@ func (g *Client) request(ctx context.Context, url string, input interface{}, tok
 	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
-func (g *Client) postReturn(ctx context.Context, url string, header map[string]string, input interface{}, output RespI, timeout int) error {
+func (g *Client) postReturn(
+	ctx context.Context,
+	url string,
+	header map[string]string,
+	input interface{},
+	output RespI,
+	timeout int,
+) error {
 	err := http2.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err

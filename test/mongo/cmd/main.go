@@ -28,7 +28,8 @@ import (
 func init() {
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.DBUri != "" {
-		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
+		// example:
+		// mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
 		uri = config.Config.Mongo.DBUri
 	} else {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
