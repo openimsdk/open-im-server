@@ -40,3 +40,7 @@ sed -i '/redis:/,/password:/s/password: .*/password: '${PASSWORD}'/' $config_fil
 sed -i "/minio:/,/isDistributedMod:/ s/accessKeyID:.*/accessKeyID: $USER/" $config_file
 sed -i "/minio:/,/isDistributedMod:/ s/secretAccessKey:.*/secretAccessKey: $PASSWORD/" $config_file
 sed -i '/minio:/,/endpoint:/s|endpoint: .*|endpoint: '${MINIO_ENDPOINT}'|' $config_file
+
+# Replace secret for token
+sed -i "s/secret: .*/secret: $PASSWORD/" $config_file
+
