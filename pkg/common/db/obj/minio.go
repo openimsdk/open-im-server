@@ -33,21 +33,27 @@ func NewMinioInterface() (Interface, error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
-	for _, bucket := range utils.Distinct([]string{conf.TempBucket, conf.DataBucket}) {
-		exists, err := client.BucketExists(ctx, bucket)
-		if err != nil {
-			return nil, fmt.Errorf("minio bucket %s exists %w", bucket, err)
+	initBucket := func(ctx context.Context) error {
+		for _, bucket := range utils.Distinct([]string{conf.TempBucket, conf.DataBucket}) {
+			exists, err := client.BucketExists(ctx, bucket)
+			if err != nil {
+				return fmt.Errorf("minio bucket %s exists %w", bucket, err)
+			}
+			if exists {
+				continue
+			}
+			opt := minio.MakeBucketOptions{
+				Region:        conf.Location,
+				ObjectLocking: conf.IsDistributedMod,
+			}
+			if err := client.MakeBucket(ctx, bucket, opt); err != nil {
+				return fmt.Errorf("minio make bucket %s %w", bucket, err)
+			}
 		}
-		if exists {
-			continue
-		}
-		opt := minio.MakeBucketOptions{
-			Region:        conf.Location,
-			ObjectLocking: conf.IsDistributedMod,
-		}
-		if err := client.MakeBucket(ctx, bucket, opt); err != nil {
-			return nil, fmt.Errorf("minio make bucket %s %w", bucket, err)
-		}
+		return nil
+	}
+	if err := initBucket(ctx); err != nil {
+		fmt.Println("minio init error:", err)
 	}
 	return &minioImpl{
 		client:     client,
