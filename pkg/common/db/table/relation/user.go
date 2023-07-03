@@ -52,7 +52,7 @@ type UserModelInterface interface {
 	GetAllUserID(ctx context.Context) (userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	// 获取用户总数
-	CountTotal(ctx context.Context) (count int64, err error)
+	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// 获取范围内用户增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }
