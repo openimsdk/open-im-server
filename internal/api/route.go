@@ -34,15 +34,16 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
 	ParseToken := mw.GinParseToken(rdb)
-	userRouterGroup := r.Group("/user", ParseToken)
+	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", u.UpdateUserInfo)
-		userRouterGroup.POST("/set_global_msg_recv_opt", u.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", u.GetUsersPublicInfo)
-		userRouterGroup.POST("/get_all_users_uid", u.GetAllUsersID)
-		userRouterGroup.POST("/account_check", u.AccountCheck)
-		userRouterGroup.POST("/get_users", u.GetUsers)
-		userRouterGroup.POST("/get_users_online_status", u.GetUsersOnlineStatus)
+		userRouterGroup.POST("/user_register", u.UserRegister)
+		userRouterGroup.POST("/update_user_info", ParseToken, u.UpdateUserInfo)
+		userRouterGroup.POST("/set_global_msg_recv_opt", ParseToken, u.SetGlobalRecvMessageOpt)
+		userRouterGroup.POST("/get_users_info", ParseToken, u.GetUsersPublicInfo)
+		userRouterGroup.POST("/get_all_users_uid", ParseToken, u.GetAllUsersID)
+		userRouterGroup.POST("/account_check", ParseToken, u.AccountCheck)
+		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
+		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
