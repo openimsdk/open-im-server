@@ -22,17 +22,12 @@ const (
 
 // 通用错误码
 const (
-	NoError                  = 0     //无错误
-	DatabaseError            = 90002 //redis/mysql等db错误
-	NetworkError             = 90004 //网络错误
-	IdentityError            = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
-	GRPCConnIsNil            = 90006 //grpc连接空
-	DefaultOtherError        = 90006 //其他错误
-	DataError                = 90007 //数据错误
-	ConfigError              = 90009
-	CallbackError            = 80000
-	RelationshipAlreadyError = 92001 //已经是好友关系（或者黑名单）
-	NotRelationshipYetError  = 92002 //不是好友关系（或者黑名单）
+	NoError       = 0     //无错误
+	DatabaseError = 90002 //redis/mysql等db错误
+	NetworkError  = 90004 //网络错误
+	DataError     = 90007 //数据错误
+	ConfigError   = 90009
+	CallbackError = 80000
 
 	//通用错误码
 	ServerInternalError = 500  //服务器内部错误
@@ -59,9 +54,10 @@ const (
 	GroupRequestHandled      = 1210
 
 	// 关系链错误码
-	CanNotAddYourselfError = 1301 //不能添加自己为好友
-	BlockedByPeer          = 1302 //被对方拉黑
-	NotPeersFriend         = 1303 //不是对方的好友
+	CanNotAddYourselfError   = 1301 //不能添加自己为好友
+	BlockedByPeer            = 1302 //被对方拉黑
+	NotPeersFriend           = 1303 //不是对方的好友
+	RelationshipAlreadyError = 1304 //已经是好友关系（或者黑名单）
 
 	// 消息错误码
 	MessageHasReadDisable = 1401
