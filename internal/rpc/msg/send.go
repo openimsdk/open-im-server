@@ -133,7 +133,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	}
 	if !isSend {
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
-		return nil, errs.ErrUserNotRecvMsg
+		return nil, nil
 	} else {
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
 			return nil, err
