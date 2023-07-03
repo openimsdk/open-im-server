@@ -1,9 +1,3 @@
-
-# TODO: 参考我对 horizon 的 Makefile 设计： 
-# TODO: https://github.com/horizoncd/horizon/pull/141
-# TODO: 设计稿：代写~
-# TODO：请在 issue 关闭之前不要使用 Makefile 中的 targe(尤其是重构前）
-
 # ==============================================================================
 # define the default goal
 #
