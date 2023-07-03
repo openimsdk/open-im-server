@@ -67,9 +67,15 @@ func (u *UserGorm) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (
 	return opt, err
 }
 
-func (u *UserGorm) CountTotal(ctx context.Context) (count int64, err error) {
-	err = u.db(ctx).Model(&relation.UserModel{}).Count(&count).Error
-	return count, errs.Wrap(err)
+func (u *UserGorm) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
+	db := u.db(ctx).Model(&relation.UserModel{})
+	if before != nil {
+		db = db.Where("create_time < ?", before)
+	}
+	if err := db.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (u *UserGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
