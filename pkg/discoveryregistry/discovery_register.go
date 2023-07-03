@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
 )
 
 type Conn interface {
@@ -13,7 +12,7 @@ type Conn interface {
 	AddOption(opts ...grpc.DialOption)
 	CloseConn(conn grpc.ClientConnInterface)
 	// do not use this method for call rpc
-	GetClientLocalConns() map[string][]resolver.Address
+	GetClientLocalConns() map[string][]grpc.ClientConnInterface
 }
 
 type SvcDiscoveryRegistry interface {
