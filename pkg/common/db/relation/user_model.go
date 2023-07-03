@@ -74,8 +74,8 @@ func (u *UserGorm) CountTotal(ctx context.Context) (count int64, err error) {
 
 func (u *UserGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	var res []struct {
-		Date  string `gorm:"column:date"`
-		Count int64  `gorm:"column:count"`
+		Date  time.Time `gorm:"column:date"`
+		Count int64     `gorm:"column:count"`
 	}
 	err := u.db(ctx).Model(&relation.UserModel{}).Select("DATE(create_time) AS date, count(1) AS count").Where("create_time >= ? and create_time < ?", start, end).Group("date").Find(&res).Error
 	if err != nil {
@@ -83,7 +83,7 @@ func (u *UserGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time,
 	}
 	v := make(map[string]int64)
 	for _, r := range res {
-		v[r.Date] = r.Count
+		v[r.Date.Format("2006-01-02")] = r.Count
 	}
 	return v, nil
 }
