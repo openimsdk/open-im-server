@@ -1,4 +1,4 @@
-name: IamCI
+name: OpenIMCI
 
 on:
 # main branch
@@ -11,11 +11,11 @@ on:
 
 jobs:
 
-  iamci:
+  openimci:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     environment:
-      name: iamci
+      name: openimci
 
     strategy:
       matrix:
