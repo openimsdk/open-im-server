@@ -53,6 +53,7 @@ type Client struct {
 	longConnServer LongConnServer
 	closed         bool
 	closedErr      error
+	token          string
 }
 
 func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
@@ -65,7 +66,7 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		ctx:        ctx,
 	}
 }
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer) {
+func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer, token string) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
@@ -77,6 +78,7 @@ func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, 
 	c.IsBackground = false
 	c.closed = false
 	c.closedErr = nil
+	c.token = token
 }
 func (c *Client) pongHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
