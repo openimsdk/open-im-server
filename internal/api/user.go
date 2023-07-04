@@ -91,9 +91,9 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
 	}
-	m := make(map[string][]string, 10)
 
 	for _, v1 := range req.UserIDs {
+		m := make(map[string][]string, 10)
 		flag = false
 		temp := new(msggateway.SingleDetail)
 		for _, v2 := range wsResult {
