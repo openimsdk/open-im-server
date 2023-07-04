@@ -554,7 +554,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 		},
 		bson.M{
 			"$project": bson.M{
-				"msgs": bson.M{
+				"result": bson.M{
 					"$map": bson.M{
 						"input": "$msgs",
 						"as":    "item",
@@ -691,7 +691,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 			},
 		},
 	}
-	cur, err := m.MsgCollection.Aggregate(ctx, pipeline)
+	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
 	if err != nil {
 		return 0, 0, nil, nil, errs.Wrap(err)
 	}
