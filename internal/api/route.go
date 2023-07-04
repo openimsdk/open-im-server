@@ -154,6 +154,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	{
 		statisticsGroup.POST("/user/register", u.UserRegisterCount)
 		statisticsGroup.POST("/user/active", m.GetActiveUser)
+		statisticsGroup.POST("/group/create", g.GroupCreateCount)
 	}
 	return r
 }
