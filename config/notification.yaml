@@ -1,3 +1,17 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 groupCreated:
   isSendMsg: true #是否发送消息，false不发消息为无声的触发同步。true发消息需要触发会话，rpc notification直接发两次，一次消息一次通知, options字段isNotification是否为通知
   reliabilityLevel: 1 # 1为online才发送 2为必达

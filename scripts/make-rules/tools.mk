@@ -189,7 +189,7 @@ install.protoc-gen-go:
 ## install.cfssl: Install cfssl, used to generate certificates
 .PHONY: install.cfssl
 install.cfssl:
-	@$(ROOT_DIR)/scripts/install/install.sh iam::install::install_cfssl
+	@$(ROOT_DIR)/scripts/install/install.sh openim::install::install_cfssl
 
 ## install.depth: Install depth, used to check dependency tree
 .PHONY: install.depth

@@ -1,15 +1,25 @@
 #!/usr/bin/env bash
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
 
 # Controls verbosity of the script output and logging.
-IAM_VERBOSE="${IAM_VERBOSE:-5}"
+OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
 
 # Handler for when we exit automatically on an error.
 # Borrowed from https://gist.github.com/ahendrix/7030300
-iam::log::errexit() {
+openim::log::errexit() {
   local err="${PIPESTATUS[*]}"
 
   # If the shell we are in doesn't have errexit set (common in subshells) then
@@ -21,19 +31,19 @@ iam::log::errexit() {
   # Print out the stack trace described by $function_stack
   if [ ${#FUNCNAME[@]} -gt 2 ]
   then
-    iam::log::error "Call tree:"
+    openim::log::error "Call tree:"
     for ((i=1;i<${#FUNCNAME[@]}-1;i++))
     do
-      iam::log::error " ${i}: ${BASH_SOURCE[${i}+1]}:${BASH_LINENO[${i}]} ${FUNCNAME[${i}]}(...)"
+      openim::log::error " ${i}: ${BASH_SOURCE[${i}+1]}:${BASH_LINENO[${i}]} ${FUNCNAME[${i}]}(...)"
     done
   fi
-  iam::log::error_exit "Error in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}. '${BASH_COMMAND}' exited with status ${err}" "${1:-1}" 1
+  openim::log::error_exit "Error in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}. '${BASH_COMMAND}' exited with status ${err}" "${1:-1}" 1
 }
 
-iam::log::install_errexit() {
+openim::log::install_errexit() {
   # trap ERR to provide an error handler whenever a command exits nonzero  this
   # is a more verbose version of set -o errexit
-  trap 'iam::log::errexit' ERR
+  trap 'openim::log::errexit' ERR
 
   # setting errtrace allows our ERR trap handler to be propagated to functions,
   # expansions and subshells
@@ -44,7 +54,7 @@ iam::log::install_errexit() {
 #
 # Args:
 #   $1 The number of stack frames to skip when printing.
-iam::log::stack() {
+openim::log::stack() {
   local stack_skip=${1:-0}
   stack_skip=$((stack_skip + 1))
   if [[ ${#FUNCNAME[@]} -gt ${stack_skip} ]]; then
@@ -66,13 +76,13 @@ iam::log::stack() {
 #   $1 Message to log with the error
 #   $2 The error code to return
 #   $3 The number of stack frames to skip when printing.
-iam::log::error_exit() {
+openim::log::error_exit() {
   local message="${1:-}"
   local code="${2:-1}"
   local stack_skip="${3:-0}"
   stack_skip=$((stack_skip + 1))
 
-  if [[ ${IAM_VERBOSE} -ge 4 ]]; then
+  if [[ ${OPENIM_VERBOSE} -ge 4 ]]; then
     local source_file=${BASH_SOURCE[${stack_skip}]}
     local source_line=${BASH_LINENO[$((stack_skip - 1))]}
     echo "!!! Error in ${source_file}:${source_line}" >&2
@@ -80,7 +90,7 @@ iam::log::error_exit() {
       echo "  ${1}" >&2
     }
 
-    iam::log::stack ${stack_skip}
+    openim::log::stack ${stack_skip}
 
     echo "Exiting with status ${code}" >&2
   fi
@@ -89,7 +99,7 @@ iam::log::error_exit() {
 }
 
 # Log an error but keep going.  Don't dump the stack or exit.
-iam::log::error() {
+openim::log::error() {
   timestamp=$(date +"[%m%d %H:%M:%S]")
   echo "!!! ${timestamp} ${1-}" >&2
   shift
@@ -99,7 +109,7 @@ iam::log::error() {
 }
 
 # Print an usage message to stderr.  The arguments are printed directly.
-iam::log::usage() {
+openim::log::usage() {
   echo >&2
   local message
   for message; do
@@ -108,19 +118,19 @@ iam::log::usage() {
   echo >&2
 }
 
-iam::log::usage_from_stdin() {
+openim::log::usage_from_stdin() {
   local messages=()
   while read -r line; do
     messages+=("${line}")
   done
 
-  iam::log::usage "${messages[@]}"
+  openim::log::usage "${messages[@]}"
 }
 
 # Print out some info that isn't a top level status line
-iam::log::info() {
+openim::log::info() {
   local V="${V:-0}"
-  if [[ ${IAM_VERBOSE} < ${V} ]]; then
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
 
@@ -129,26 +139,26 @@ iam::log::info() {
   done
 }
 
-# Just like iam::log::info, but no \n, so you can make a progress bar
-iam::log::progress() {
+# Just like openim::log::info, but no \n, so you can make a progress bar
+openim::log::progress() {
   for message; do
     echo -e -n "${message}"
   done
 }
 
-iam::log::info_from_stdin() {
+openim::log::info_from_stdin() {
   local messages=()
   while read -r line; do
     messages+=("${line}")
   done
 
-  iam::log::info "${messages[@]}"
+  openim::log::info "${messages[@]}"
 }
 
 # Print a status line.  Formatted to show up in a stream of output.
-iam::log::status() {
+openim::log::status() {
   local V="${V:-0}"
-  if [[ ${IAM_VERBOSE} < ${V} ]]; then
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
     return
   fi
 
