@@ -14,7 +14,6 @@
 
 package controller
 
-import "C"
 import (
 	"bytes"
 	"context"
