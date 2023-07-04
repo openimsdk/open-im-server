@@ -27,8 +27,8 @@ readonly BUCKET="openim-1306374445"
 readonly REGION="ap-beijing"
 readonly COS_RELEASE_DIR="openim-release"
 
-# default cos command tool
-readonly COSTOOL="coscmd"
+# default cos command tool coscli or coscmd
+readonly COSTOOL="coscli"
 
 # This is where the final release artifacts are created locally
 readonly RELEASE_STAGE="${LOCAL_OUTPUT_ROOT}/release-stage"
@@ -37,7 +37,7 @@ readonly RELEASE_IMAGES="${LOCAL_OUTPUT_ROOT}/release-images"
 
 # OpenIM github account info
 readonly OPENIM_GITHUB_ORG=OpenIMSDK
-readonly OPENIM_GITHUB_REPO=openim
+readonly OPENIM_GITHUB_REPO=Open-IM-Server
 
 readonly ARTIFACT=openim.tar.gz
 readonly CHECKSUM=${ARTIFACT}.sha1sum

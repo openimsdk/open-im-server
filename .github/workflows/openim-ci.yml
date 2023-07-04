@@ -1,4 +1,4 @@
-name: OpenIMCI
+name: OpenIM CI
 
 on:
 # main branch
@@ -64,7 +64,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build docker images for host arch and push images to registry
