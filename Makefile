@@ -25,6 +25,7 @@ include scripts/make-rules/gen.mk
 include scripts/make-rules/dependencies.mk
 include scripts/make-rules/tools.mk
 include scripts/make-rules/release.mk
+include scripts/make-rules/swagger.mk
 
 # ==============================================================================
 # Usage
@@ -147,6 +148,16 @@ tools:
 .PHONY: gen
 gen:
 	@$(MAKE) gen.run
+
+## swagger: Generate swagger document.
+.PHONY: swagger
+swagger:
+	@$(MAKE) swagger.run
+
+## serve-swagger: Serve swagger spec and docs.
+.PHONY: swagger.serve
+serve-swagger:
+	@$(MAKE) swagger.serve
 
 ## verify-copyright: Verify the license headers for all files.
 .PHONY: verify-copyright

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#fixme This scripts is the total startup scripts
-#fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
+#FIXME This script is the startup script for multiple servers.
+#FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-#fixme Put the shell scripts name here
+#FIXME Put the shell script names here
 need_to_start_server_shell=(
   start_rpc_service.sh
   push_start.sh
@@ -25,20 +25,21 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   start_cron.sh
 )
+
 time=`date +"%Y-%m-%d %H:%M:%S"`
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========server start time:${time}===========">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
+echo "==========server start time:${time}===========" >> ../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
+echo "==========================================================" >> ../logs/openIM.log 2>&1 &
 
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
-  echo "=====================exec ${i}======================">>../logs/openIM.log
+  echo "=====================exec ${i}======================" >> ../logs/openIM.log
   ./$i
-    if [ $? -ne 0 ]; then
-        exit -1
+  if [ $? -ne 0 ]; then
+    exit -1
   fi
 done

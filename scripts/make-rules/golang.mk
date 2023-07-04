@@ -141,6 +141,7 @@ go.test:
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report
+	@touch $(TMP_DIR)/coverage.out
 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
 # 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
@@ -151,7 +152,6 @@ go.test.junit-report: tools.verify.go-junit-report
 ## go.test.cover: Run unit test with coverage
 .PHONY: go.test.cover
 go.test.cover: go.test.junit-report
-	@touch $(TMP_DIR)/coverage.out
 	@$(GO) tool cover -func=$(TMP_DIR)/coverage.out | \
 		awk -v target=$(COVERAGE) -f $(ROOT_DIR)/scripts/coverage.awk
 
