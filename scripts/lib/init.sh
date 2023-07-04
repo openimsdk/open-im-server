@@ -19,7 +19,6 @@ set +o nounset
 set -o pipefail
 
 # Unset CDPATH so that path interpolation can work correctly
-# https://github.com/iamrnetes/iamrnetes/issues/52255
 unset CDPATH
 
 # Default use go modules
