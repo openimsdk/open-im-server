@@ -24,7 +24,7 @@ release.run: release.verify release.ensure-tag
 
 ## release.verify: Check if a tool is installed and install it
 .PHONY: release.verify
-release.verify: tools.verify.git-chglog tools.verify.github-release tools.verify.coscmd
+release.verify: tools.verify.git-chglog tools.verify.github-release tools.verify.coscmd tools.verify.coscli
 
 ## release.tag: release the project
 .PHONY: release.tag
