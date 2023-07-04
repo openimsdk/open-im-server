@@ -285,6 +285,25 @@ message GetActiveUserResp {
   repeated ActiveUser users = 4;
 }
 
+message GetActiveGroupReq {
+  int64 start = 1;
+  int64 end = 2;
+  bool ase = 3;
+  sdkws.RequestPagination pagination = 4;
+}
+
+message ActiveGroup {
+  sdkws.GroupInfo group = 1;
+  int64 count = 2;
+}
+
+message GetActiveGroupResp {
+  int64 msgCount = 1;
+  int64 groupCount = 2;
+  map<string, int64> dateCount = 3;
+  repeated ActiveGroup groups = 4;
+}
+
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
@@ -323,4 +342,5 @@ service msg {
   rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
 
   rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
+  rpc GetActiveGroup(GetActiveGroupReq) returns(GetActiveGroupResp);
 }

@@ -43,3 +43,42 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 		Users:     pbUsers,
 	}, nil
 }
+
+func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupReq) (*msg.GetActiveGroupResp, error) {
+	msgCount, groupCount, groups, dateCount, err := m.MsgDatabase.RangeGroupSendCount(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End), req.Ase, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	if err != nil {
+		return nil, err
+	}
+	var pbGroups []*msg.ActiveGroup
+	if len(groups) > 0 {
+		groupIDs := utils.Slice(groups, func(e *unrelation.GroupCount) string { return e.GroupID })
+		resp, err := m.Group.GetGroupInfos(ctx, groupIDs, false)
+		if err != nil {
+			return nil, err
+		}
+		groupMap := make(map[string]*sdkws.GroupInfo, len(groups))
+		for i, group := range groups {
+			groupMap[group.GroupID] = resp[i]
+		}
+		pbGroups = make([]*msg.ActiveGroup, 0, len(groups))
+		for _, group := range groups {
+			pbGroup := groupMap[group.GroupID]
+			if pbGroup == nil {
+				pbGroup = &sdkws.GroupInfo{
+					GroupID:   group.GroupID,
+					GroupName: group.GroupID,
+				}
+			}
+			pbGroups = append(pbGroups, &msg.ActiveGroup{
+				Group: pbGroup,
+				Count: group.Count,
+			})
+		}
+	}
+	return &msg.GetActiveGroupResp{
+		MsgCount:   msgCount,
+		GroupCount: groupCount,
+		DateCount:  dateCount,
+		Groups:     pbGroups,
+	}, nil
+}

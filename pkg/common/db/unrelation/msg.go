@@ -517,9 +517,29 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{
-				"msgs.msg.send_time": bson.M{
-					"$gte": start.UnixMilli(),
-					"$lt":  end.UnixMilli(),
+				"$and": bson.A{
+					bson.M{
+						"msgs.msg.send_time": bson.M{
+							"$gte": start.UnixMilli(),
+							"$lt":  end.UnixMilli(),
+						},
+					},
+					bson.M{
+						"$or": bson.A{
+							bson.M{
+								"doc_id": bson.M{
+									"$regex":   "^g_",
+									"$options": "i",
+								},
+							},
+							bson.M{
+								"doc_id": bson.M{
+									"$regex":   "^si_",
+									"$options": "i",
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -715,4 +735,246 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 		dateCount[r.Date] = r.Count
 	}
 	return result[0].MsgCount, result[0].UserCount, users, dateCount, nil
+}
+
+func (m *MsgMongoDriver) RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*table.GroupCount, dateCount map[string]int64, err error) {
+	var sort int
+	if ase {
+		sort = 1
+	} else {
+		sort = -1
+	}
+	type Result struct {
+		MsgCount  int64 `bson:"msg_count"`
+		UserCount int64 `bson:"user_count"`
+		Groups    []struct {
+			GroupID string `bson:"_id"`
+			Count   int64  `bson:"count"`
+		} `bson:"groups"`
+		Dates []struct {
+			Date  string `bson:"_id"`
+			Count int64  `bson:"count"`
+		} `bson:"dates"`
+	}
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"$and": bson.A{
+					bson.M{
+						"msgs.msg.send_time": bson.M{
+							"$gte": start.UnixMilli(),
+							"$lt":  end.UnixMilli(),
+						},
+					},
+					bson.M{
+						"$or": bson.A{
+							bson.M{
+								"doc_id": bson.M{
+									"$regex":   "^g_",
+									"$options": "i",
+								},
+							},
+							bson.M{
+								"doc_id": bson.M{
+									"$regex":   "^sg_",
+									"$options": "i",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"msgs": bson.M{
+					"$filter": bson.M{
+						"input": "$msgs",
+						"as":    "item",
+						"cond": bson.M{
+							"$and": bson.A{
+								bson.M{
+									"$gte": bson.A{
+										"$$item.msg.send_time", start.UnixMilli(),
+									},
+								},
+								bson.M{
+									"$lt": bson.A{
+										"$$item.msg.send_time", end.UnixMilli(),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"_id": 0,
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"result": bson.M{
+					"$map": bson.M{
+						"input": "$msgs",
+						"as":    "item",
+						"in": bson.M{
+							"group_id": "$$item.msg.group_id",
+							"send_date": bson.M{
+								"$dateToString": bson.M{
+									"format": "%Y-%m-%d",
+									"date": bson.M{
+										"$toDate": "$$item.msg.send_time", // 毫秒时间戳
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.M{
+			"$unwind": "$result",
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": "$result.send_date",
+				"count": bson.M{
+					"$sum": 1,
+				},
+				"original": bson.M{
+					"$push": "$$ROOT",
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"dates": "$$ROOT",
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"_id":            0,
+				"count":          0,
+				"dates.original": 0,
+			},
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": nil,
+				"count": bson.M{
+					"$sum": 1,
+				},
+				"dates": bson.M{
+					"$push": "$dates",
+				},
+				"original": bson.M{
+					"$push": "$original",
+				},
+			},
+		},
+		bson.M{
+			"$unwind": "$original",
+		},
+		bson.M{
+			"$unwind": "$original",
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": "$original.result.group_id",
+				"count": bson.M{
+					"$sum": 1,
+				},
+				"original": bson.M{
+					"$push": "$dates",
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"dates": bson.M{
+					"$arrayElemAt": bson.A{"$original", 0},
+				},
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"original": 0,
+			},
+		},
+		bson.M{
+			"$sort": bson.M{
+				"count": sort,
+			},
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": nil,
+				"user_count": bson.M{
+					"$sum": 1,
+				},
+				"groups": bson.M{
+					"$push": "$$ROOT",
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"dates": bson.M{
+					"$arrayElemAt": bson.A{"$groups", 0},
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"dates": "$dates.dates",
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"_id":          0,
+				"groups.dates": 0,
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"msg_count": bson.M{
+					"$sum": "$groups.count",
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"groups": bson.M{
+					"$slice": bson.A{"$groups", pageNumber - 1, showNumber},
+				},
+			},
+		},
+	}
+	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
+	if err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	defer cur.Close(ctx)
+	var result []Result
+	if err := cur.All(ctx, &result); err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	if len(result) == 0 {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	groups = make([]*table.GroupCount, len(result[0].Groups))
+	for i, r := range result[0].Groups {
+		groups[i] = &table.GroupCount{
+			GroupID: r.GroupID,
+			Count:   r.Count,
+		}
+	}
+	dateCount = make(map[string]int64)
+	for _, r := range result[0].Dates {
+		dateCount[r.Date] = r.Count
+	}
+	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
