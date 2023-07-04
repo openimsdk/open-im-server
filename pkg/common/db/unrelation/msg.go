@@ -338,6 +338,8 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 									"$gte": bson.A{
 										"$$item.msg.send_time", start.UnixMilli(),
 									},
+								},
+								bson.M{
 									"$lt": bson.A{
 										"$$item.msg.send_time", end.UnixMilli(),
 									},
