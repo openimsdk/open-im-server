@@ -70,6 +70,7 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 				ps.Platform = constant.PlatformIDToName(client.PlatformID)
 				ps.Status = constant.OnlineStatus
 				ps.ConnID = client.ctx.GetConnID()
+				ps.Token = client.token
 				ps.IsBackground = client.IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
