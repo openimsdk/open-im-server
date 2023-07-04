@@ -313,9 +313,9 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, err error) {
 	var sort int
 	if ase {
-		sort = -1
-	} else {
 		sort = 1
+	} else {
+		sort = -1
 	}
 	type Result struct {
 		MsgCount  int64 `bson:"msg_count"`
