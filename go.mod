@@ -44,7 +44,6 @@ require (
 	github.com/go-zookeeper/zk v1.0.3
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )
 
 require (

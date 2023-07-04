@@ -281,7 +281,8 @@ message ActiveUser {
 message GetActiveUserResp {
   int64 msgCount = 1;
   int64 userCount = 2;
-  repeated ActiveUser users = 3;
+  map<string, int64> dateCount = 3;
+  repeated ActiveUser users = 4;
 }
 
 service msg {
