@@ -846,7 +846,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	data := UpdateGroupInfoMap(req.GroupInfoForSet)
+	data := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
 	if len(data) == 0 {
 		return resp, nil
 	}
