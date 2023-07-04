@@ -495,7 +495,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID st
 //	}
 //
 // ])
-func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
+func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
 	var sort int
 	if ase {
 		sort = 1
@@ -514,6 +514,30 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 			Count int64  `bson:"count"`
 		} `bson:"dates"`
 	}
+	or := bson.A{
+		bson.M{
+			"doc_id": bson.M{
+				"$regex":   "^si_",
+				"$options": "i",
+			},
+		},
+	}
+	if group {
+		or = append(or,
+			bson.M{
+				"doc_id": bson.M{
+					"$regex":   "^g_",
+					"$options": "i",
+				},
+			},
+			bson.M{
+				"doc_id": bson.M{
+					"$regex":   "^sg_",
+					"$options": "i",
+				},
+			},
+		)
+	}
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{
@@ -525,20 +549,7 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 						},
 					},
 					bson.M{
-						"$or": bson.A{
-							bson.M{
-								"doc_id": bson.M{
-									"$regex":   "^g_",
-									"$options": "i",
-								},
-							},
-							bson.M{
-								"doc_id": bson.M{
-									"$regex":   "^si_",
-									"$options": "i",
-								},
-							},
-						},
+						"$or": or,
 					},
 				},
 			},

@@ -270,7 +270,8 @@ message GetActiveUserReq {
   int64 start = 1;
   int64 end = 2;
   bool ase = 3;
-  sdkws.RequestPagination pagination = 4;
+  bool group = 4;
+  sdkws.RequestPagination pagination = 5;
 }
 
 message ActiveUser {
