@@ -96,7 +96,6 @@ openim::version::get_version_vars() {
         :
       fi
 
-
       # Try to match the "git describe" output to a regex to try to extract
       # the "major" and "minor" versions and whether this is the exact tagged
       # version or whether the tree is between two tagged versions.

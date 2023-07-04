@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # http://stackoverflow.com/a/21142256/2055281
 
 echo "mode: atomic" > coverage.txt
@@ -27,4 +26,3 @@ for d in $(find ./* -maxdepth 10 -type d); do
         fi
     fi
 done
-

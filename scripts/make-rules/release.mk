@@ -17,7 +17,7 @@
 # Versions are used after merging
 #
 
-## release: release the project
+## release.run: release the project
 .PHONY: release.run
 release.run: release.verify release.ensure-tag
 	@scripts/release.sh
