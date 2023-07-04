@@ -2949,9 +2949,10 @@ type GetActiveUserResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgCount  int64         `protobuf:"varint,1,opt,name=msgCount,proto3" json:"msgCount"`
-	UserCount int64         `protobuf:"varint,2,opt,name=userCount,proto3" json:"userCount"`
-	Users     []*ActiveUser `protobuf:"bytes,3,rep,name=users,proto3" json:"users"`
+	MsgCount  int64            `protobuf:"varint,1,opt,name=msgCount,proto3" json:"msgCount"`
+	UserCount int64            `protobuf:"varint,2,opt,name=userCount,proto3" json:"userCount"`
+	DateCount map[string]int64 `protobuf:"bytes,3,rep,name=dateCount,proto3" json:"dateCount" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	Users     []*ActiveUser    `protobuf:"bytes,4,rep,name=users,proto3" json:"users"`
 }
 
 func (x *GetActiveUserResp) Reset() {
@@ -2998,6 +2999,13 @@ func (x *GetActiveUserResp) GetUserCount() int64 {
 		return x.UserCount
 	}
 	return 0
+}
+
+func (x *GetActiveUserResp) GetDateCount() map[string]int64 {
+	if x != nil {
+		return x.DateCount
+	}
+	return nil
 }
 
 func (x *GetActiveUserResp) GetUsers() []*ActiveUser {
@@ -3480,15 +3488,24 @@ var file_msg_msg_proto_rawDesc = []byte{
 	0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x73, 0x64,
 	0x6b, 0x77, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x75, 0x73,
 	0x65, 0x72, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x81, 0x01, 0x0a, 0x11, 0x47, 0x65, 0x74,
+	0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x91, 0x02, 0x0a, 0x11, 0x47, 0x65, 0x74,
 	0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1a,
 	0x0a, 0x08, 0x6d, 0x73, 0x67, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
 	0x52, 0x08, 0x6d, 0x73, 0x67, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x75, 0x73,
 	0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75,
-	0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x32, 0x0a, 0x05, 0x75, 0x73, 0x65, 0x72,
-	0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d,
-	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x6d, 0x73, 0x67, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x76,
-	0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x32, 0xff, 0x11, 0x0a,
+	0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x50, 0x0a, 0x09, 0x64, 0x61, 0x74, 0x65,
+	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x4f, 0x70,
+	0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x6d, 0x73, 0x67, 0x2e, 0x47,
+	0x65, 0x74, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
+	0x2e, 0x44, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52,
+	0x09, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x32, 0x0a, 0x05, 0x75, 0x73,
+	0x65, 0x72, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x4f, 0x70, 0x65, 0x6e,
+	0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x6d, 0x73, 0x67, 0x2e, 0x41, 0x63, 0x74,
+	0x69, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x1a, 0x3c,
+	0x0a, 0x0e, 0x44, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x45, 0x6e, 0x74, 0x72, 0x79,
+	0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b,
+	0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x32, 0xff, 0x11, 0x0a,
 	0x03, 0x6d, 0x73, 0x67, 0x12, 0x50, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x78, 0x53, 0x65,
 	0x71, 0x12, 0x20, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72,
 	0x2e, 0x73, 0x64, 0x6b, 0x77, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x78, 0x53, 0x65, 0x71,
@@ -3651,7 +3668,7 @@ func file_msg_msg_proto_rawDescGZIP() []byte {
 	return file_msg_msg_proto_rawDescData
 }
 
-var file_msg_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 60)
+var file_msg_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 61)
 var file_msg_msg_proto_goTypes = []interface{}{
 	(*MsgDataToMQ)(nil),                                         // 0: OpenIMServer.msg.MsgDataToMQ
 	(*MsgDataToDB)(nil),                                         // 1: OpenIMServer.msg.MsgDataToDB
@@ -3713,99 +3730,101 @@ var file_msg_msg_proto_goTypes = []interface{}{
 	nil,                                 // 57: OpenIMServer.msg.SingleMessageExtensionResult.ReactionExtensionsEntry
 	nil,                                 // 58: OpenIMServer.msg.ExtendMsg.ReactionExtensionsEntry
 	nil,                                 // 59: OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp.SeqsEntry
-	(*sdkws.MsgData)(nil),               // 60: OpenIMServer.sdkws.MsgData
-	(*wrapperspb.StringValue)(nil),      // 61: OpenIMServer.protobuf.StringValue
-	(*sdkws.KeyValue)(nil),              // 62: OpenIMServer.sdkws.KeyValue
-	(*sdkws.RequestPagination)(nil),     // 63: OpenIMServer.sdkws.RequestPagination
-	(*sdkws.UserInfo)(nil),              // 64: OpenIMServer.sdkws.UserInfo
-	(*sdkws.GetMaxSeqReq)(nil),          // 65: OpenIMServer.sdkws.GetMaxSeqReq
-	(*sdkws.PullMessageBySeqsReq)(nil),  // 66: OpenIMServer.sdkws.PullMessageBySeqsReq
-	(*sdkws.GetMaxSeqResp)(nil),         // 67: OpenIMServer.sdkws.GetMaxSeqResp
-	(*sdkws.PullMessageBySeqsResp)(nil), // 68: OpenIMServer.sdkws.PullMessageBySeqsResp
+	nil,                                 // 60: OpenIMServer.msg.GetActiveUserResp.DateCountEntry
+	(*sdkws.MsgData)(nil),               // 61: OpenIMServer.sdkws.MsgData
+	(*wrapperspb.StringValue)(nil),      // 62: OpenIMServer.protobuf.StringValue
+	(*sdkws.KeyValue)(nil),              // 63: OpenIMServer.sdkws.KeyValue
+	(*sdkws.RequestPagination)(nil),     // 64: OpenIMServer.sdkws.RequestPagination
+	(*sdkws.UserInfo)(nil),              // 65: OpenIMServer.sdkws.UserInfo
+	(*sdkws.GetMaxSeqReq)(nil),          // 66: OpenIMServer.sdkws.GetMaxSeqReq
+	(*sdkws.PullMessageBySeqsReq)(nil),  // 67: OpenIMServer.sdkws.PullMessageBySeqsReq
+	(*sdkws.GetMaxSeqResp)(nil),         // 68: OpenIMServer.sdkws.GetMaxSeqResp
+	(*sdkws.PullMessageBySeqsResp)(nil), // 69: OpenIMServer.sdkws.PullMessageBySeqsResp
 }
 var file_msg_msg_proto_depIdxs = []int32{
-	60, // 0: OpenIMServer.msg.MsgDataToMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
-	60, // 1: OpenIMServer.msg.MsgDataToDB.msgData:type_name -> OpenIMServer.sdkws.MsgData
-	60, // 2: OpenIMServer.msg.PushMsgDataToMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
-	60, // 3: OpenIMServer.msg.MsgDataToMongoByMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
-	60, // 4: OpenIMServer.msg.SendMsgReq.msgData:type_name -> OpenIMServer.sdkws.MsgData
+	61, // 0: OpenIMServer.msg.MsgDataToMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
+	61, // 1: OpenIMServer.msg.MsgDataToDB.msgData:type_name -> OpenIMServer.sdkws.MsgData
+	61, // 2: OpenIMServer.msg.PushMsgDataToMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
+	61, // 3: OpenIMServer.msg.MsgDataToMongoByMQ.msgData:type_name -> OpenIMServer.sdkws.MsgData
+	61, // 4: OpenIMServer.msg.SendMsgReq.msgData:type_name -> OpenIMServer.sdkws.MsgData
 	54, // 5: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.reactionExtensions:type_name -> OpenIMServer.msg.ModifyMessageReactionExtensionsReq.ReactionExtensionsEntry
-	61, // 6: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.ex:type_name -> OpenIMServer.protobuf.StringValue
-	61, // 7: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.attachedInfo:type_name -> OpenIMServer.protobuf.StringValue
+	62, // 6: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.ex:type_name -> OpenIMServer.protobuf.StringValue
+	62, // 7: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.attachedInfo:type_name -> OpenIMServer.protobuf.StringValue
 	55, // 8: OpenIMServer.msg.SetMessageReactionExtensionsReq.reactionExtensions:type_name -> OpenIMServer.msg.SetMessageReactionExtensionsReq.ReactionExtensionsEntry
-	61, // 9: OpenIMServer.msg.SetMessageReactionExtensionsReq.ex:type_name -> OpenIMServer.protobuf.StringValue
-	61, // 10: OpenIMServer.msg.SetMessageReactionExtensionsReq.attachedInfo:type_name -> OpenIMServer.protobuf.StringValue
+	62, // 9: OpenIMServer.msg.SetMessageReactionExtensionsReq.ex:type_name -> OpenIMServer.protobuf.StringValue
+	62, // 10: OpenIMServer.msg.SetMessageReactionExtensionsReq.attachedInfo:type_name -> OpenIMServer.protobuf.StringValue
 	23, // 11: OpenIMServer.msg.SetMessageReactionExtensionsResp.result:type_name -> OpenIMServer.msg.KeyValueResp
 	56, // 12: OpenIMServer.msg.GetMessagesReactionExtensionsReq.messageReactionKeys:type_name -> OpenIMServer.msg.GetMessagesReactionExtensionsReq.MessageReactionKey
 	17, // 13: OpenIMServer.msg.GetMessagesReactionExtensionsResp.singleMessageResult:type_name -> OpenIMServer.msg.SingleMessageExtensionResult
 	57, // 14: OpenIMServer.msg.SingleMessageExtensionResult.reactionExtensions:type_name -> OpenIMServer.msg.SingleMessageExtensionResult.ReactionExtensionsEntry
 	21, // 15: OpenIMServer.msg.ModifyMessageReactionExtensionsResp.successList:type_name -> OpenIMServer.msg.ExtendMsgResp
 	21, // 16: OpenIMServer.msg.ModifyMessageReactionExtensionsResp.failedList:type_name -> OpenIMServer.msg.ExtendMsgResp
-	62, // 17: OpenIMServer.msg.DeleteMessagesReactionExtensionsReq.reactionExtensions:type_name -> OpenIMServer.sdkws.KeyValue
+	63, // 17: OpenIMServer.msg.DeleteMessagesReactionExtensionsReq.reactionExtensions:type_name -> OpenIMServer.sdkws.KeyValue
 	23, // 18: OpenIMServer.msg.DeleteMessagesReactionExtensionsResp.result:type_name -> OpenIMServer.msg.KeyValueResp
 	22, // 19: OpenIMServer.msg.ExtendMsgResp.extendMsg:type_name -> OpenIMServer.msg.ExtendMsg
 	58, // 20: OpenIMServer.msg.ExtendMsg.reactionExtensions:type_name -> OpenIMServer.msg.ExtendMsg.ReactionExtensionsEntry
-	62, // 21: OpenIMServer.msg.KeyValueResp.keyValue:type_name -> OpenIMServer.sdkws.KeyValue
-	60, // 22: OpenIMServer.msg.MsgDataToModifyByMQ.messages:type_name -> OpenIMServer.sdkws.MsgData
+	63, // 21: OpenIMServer.msg.KeyValueResp.keyValue:type_name -> OpenIMServer.sdkws.KeyValue
+	61, // 22: OpenIMServer.msg.MsgDataToModifyByMQ.messages:type_name -> OpenIMServer.sdkws.MsgData
 	35, // 23: OpenIMServer.msg.ClearConversationsMsgReq.deleteSyncOpt:type_name -> OpenIMServer.msg.DeleteSyncOpt
 	35, // 24: OpenIMServer.msg.UserClearAllMsgReq.deleteSyncOpt:type_name -> OpenIMServer.msg.DeleteSyncOpt
 	35, // 25: OpenIMServer.msg.DeleteMsgsReq.deleteSyncOpt:type_name -> OpenIMServer.msg.DeleteSyncOpt
 	59, // 26: OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp.seqs:type_name -> OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp.SeqsEntry
-	63, // 27: OpenIMServer.msg.GetActiveUserReq.pagination:type_name -> OpenIMServer.sdkws.RequestPagination
-	64, // 28: OpenIMServer.msg.ActiveUser.user:type_name -> OpenIMServer.sdkws.UserInfo
-	52, // 29: OpenIMServer.msg.GetActiveUserResp.users:type_name -> OpenIMServer.msg.ActiveUser
-	62, // 30: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
-	62, // 31: OpenIMServer.msg.SetMessageReactionExtensionsReq.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
-	62, // 32: OpenIMServer.msg.SingleMessageExtensionResult.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
-	23, // 33: OpenIMServer.msg.ExtendMsg.ReactionExtensionsEntry.value:type_name -> OpenIMServer.msg.KeyValueResp
-	49, // 34: OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp.SeqsEntry.value:type_name -> OpenIMServer.msg.Seqs
-	65, // 35: OpenIMServer.msg.msg.GetMaxSeq:input_type -> OpenIMServer.sdkws.GetMaxSeqReq
-	46, // 36: OpenIMServer.msg.msg.GetConversationMaxSeq:input_type -> OpenIMServer.msg.GetConversationMaxSeqReq
-	66, // 37: OpenIMServer.msg.msg.PullMessageBySeqs:input_type -> OpenIMServer.sdkws.PullMessageBySeqsReq
-	6,  // 38: OpenIMServer.msg.msg.SendMsg:input_type -> OpenIMServer.msg.SendMsgReq
-	36, // 39: OpenIMServer.msg.msg.ClearConversationsMsg:input_type -> OpenIMServer.msg.ClearConversationsMsgReq
-	38, // 40: OpenIMServer.msg.msg.UserClearAllMsg:input_type -> OpenIMServer.msg.UserClearAllMsgReq
-	40, // 41: OpenIMServer.msg.msg.DeleteMsgs:input_type -> OpenIMServer.msg.DeleteMsgsReq
-	44, // 42: OpenIMServer.msg.msg.DeleteMsgPhysicalBySeq:input_type -> OpenIMServer.msg.DeleteMsgPhysicalBySeqReq
-	42, // 43: OpenIMServer.msg.msg.DeleteMsgPhysical:input_type -> OpenIMServer.msg.DeleteMsgPhysicalReq
-	8,  // 44: OpenIMServer.msg.msg.SetSendMsgStatus:input_type -> OpenIMServer.msg.SetSendMsgStatusReq
-	10, // 45: OpenIMServer.msg.msg.GetSendMsgStatus:input_type -> OpenIMServer.msg.GetSendMsgStatusReq
-	27, // 46: OpenIMServer.msg.msg.RevokeMsg:input_type -> OpenIMServer.msg.RevokeMsgReq
-	29, // 47: OpenIMServer.msg.msg.MarkMsgsAsRead:input_type -> OpenIMServer.msg.MarkMsgsAsReadReq
-	31, // 48: OpenIMServer.msg.msg.MarkConversationAsRead:input_type -> OpenIMServer.msg.MarkConversationAsReadReq
-	33, // 49: OpenIMServer.msg.msg.SetConversationHasReadSeq:input_type -> OpenIMServer.msg.SetConversationHasReadSeqReq
-	13, // 50: OpenIMServer.msg.msg.SetMessageReactionExtensions:input_type -> OpenIMServer.msg.SetMessageReactionExtensionsReq
-	15, // 51: OpenIMServer.msg.msg.GetMessagesReactionExtensions:input_type -> OpenIMServer.msg.GetMessagesReactionExtensionsReq
-	12, // 52: OpenIMServer.msg.msg.AddMessageReactionExtensions:input_type -> OpenIMServer.msg.ModifyMessageReactionExtensionsReq
-	19, // 53: OpenIMServer.msg.msg.DeleteMessageReactionExtensions:input_type -> OpenIMServer.msg.DeleteMessagesReactionExtensionsReq
-	48, // 54: OpenIMServer.msg.msg.GetConversationsHasReadAndMaxSeq:input_type -> OpenIMServer.msg.GetConversationsHasReadAndMaxSeqReq
-	51, // 55: OpenIMServer.msg.msg.GetActiveUser:input_type -> OpenIMServer.msg.GetActiveUserReq
-	67, // 56: OpenIMServer.msg.msg.GetMaxSeq:output_type -> OpenIMServer.sdkws.GetMaxSeqResp
-	47, // 57: OpenIMServer.msg.msg.GetConversationMaxSeq:output_type -> OpenIMServer.msg.GetConversationMaxSeqResp
-	68, // 58: OpenIMServer.msg.msg.PullMessageBySeqs:output_type -> OpenIMServer.sdkws.PullMessageBySeqsResp
-	7,  // 59: OpenIMServer.msg.msg.SendMsg:output_type -> OpenIMServer.msg.SendMsgResp
-	37, // 60: OpenIMServer.msg.msg.ClearConversationsMsg:output_type -> OpenIMServer.msg.ClearConversationsMsgResp
-	39, // 61: OpenIMServer.msg.msg.UserClearAllMsg:output_type -> OpenIMServer.msg.UserClearAllMsgResp
-	41, // 62: OpenIMServer.msg.msg.DeleteMsgs:output_type -> OpenIMServer.msg.DeleteMsgsResp
-	45, // 63: OpenIMServer.msg.msg.DeleteMsgPhysicalBySeq:output_type -> OpenIMServer.msg.DeleteMsgPhysicalBySeqResp
-	43, // 64: OpenIMServer.msg.msg.DeleteMsgPhysical:output_type -> OpenIMServer.msg.DeleteMsgPhysicalResp
-	9,  // 65: OpenIMServer.msg.msg.SetSendMsgStatus:output_type -> OpenIMServer.msg.SetSendMsgStatusResp
-	11, // 66: OpenIMServer.msg.msg.GetSendMsgStatus:output_type -> OpenIMServer.msg.GetSendMsgStatusResp
-	28, // 67: OpenIMServer.msg.msg.RevokeMsg:output_type -> OpenIMServer.msg.RevokeMsgResp
-	30, // 68: OpenIMServer.msg.msg.MarkMsgsAsRead:output_type -> OpenIMServer.msg.MarkMsgsAsReadResp
-	32, // 69: OpenIMServer.msg.msg.MarkConversationAsRead:output_type -> OpenIMServer.msg.MarkConversationAsReadResp
-	34, // 70: OpenIMServer.msg.msg.SetConversationHasReadSeq:output_type -> OpenIMServer.msg.SetConversationHasReadSeqResp
-	14, // 71: OpenIMServer.msg.msg.SetMessageReactionExtensions:output_type -> OpenIMServer.msg.SetMessageReactionExtensionsResp
-	16, // 72: OpenIMServer.msg.msg.GetMessagesReactionExtensions:output_type -> OpenIMServer.msg.GetMessagesReactionExtensionsResp
-	18, // 73: OpenIMServer.msg.msg.AddMessageReactionExtensions:output_type -> OpenIMServer.msg.ModifyMessageReactionExtensionsResp
-	20, // 74: OpenIMServer.msg.msg.DeleteMessageReactionExtensions:output_type -> OpenIMServer.msg.DeleteMessagesReactionExtensionsResp
-	50, // 75: OpenIMServer.msg.msg.GetConversationsHasReadAndMaxSeq:output_type -> OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp
-	53, // 76: OpenIMServer.msg.msg.GetActiveUser:output_type -> OpenIMServer.msg.GetActiveUserResp
-	56, // [56:77] is the sub-list for method output_type
-	35, // [35:56] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	64, // 27: OpenIMServer.msg.GetActiveUserReq.pagination:type_name -> OpenIMServer.sdkws.RequestPagination
+	65, // 28: OpenIMServer.msg.ActiveUser.user:type_name -> OpenIMServer.sdkws.UserInfo
+	60, // 29: OpenIMServer.msg.GetActiveUserResp.dateCount:type_name -> OpenIMServer.msg.GetActiveUserResp.DateCountEntry
+	52, // 30: OpenIMServer.msg.GetActiveUserResp.users:type_name -> OpenIMServer.msg.ActiveUser
+	63, // 31: OpenIMServer.msg.ModifyMessageReactionExtensionsReq.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
+	63, // 32: OpenIMServer.msg.SetMessageReactionExtensionsReq.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
+	63, // 33: OpenIMServer.msg.SingleMessageExtensionResult.ReactionExtensionsEntry.value:type_name -> OpenIMServer.sdkws.KeyValue
+	23, // 34: OpenIMServer.msg.ExtendMsg.ReactionExtensionsEntry.value:type_name -> OpenIMServer.msg.KeyValueResp
+	49, // 35: OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp.SeqsEntry.value:type_name -> OpenIMServer.msg.Seqs
+	66, // 36: OpenIMServer.msg.msg.GetMaxSeq:input_type -> OpenIMServer.sdkws.GetMaxSeqReq
+	46, // 37: OpenIMServer.msg.msg.GetConversationMaxSeq:input_type -> OpenIMServer.msg.GetConversationMaxSeqReq
+	67, // 38: OpenIMServer.msg.msg.PullMessageBySeqs:input_type -> OpenIMServer.sdkws.PullMessageBySeqsReq
+	6,  // 39: OpenIMServer.msg.msg.SendMsg:input_type -> OpenIMServer.msg.SendMsgReq
+	36, // 40: OpenIMServer.msg.msg.ClearConversationsMsg:input_type -> OpenIMServer.msg.ClearConversationsMsgReq
+	38, // 41: OpenIMServer.msg.msg.UserClearAllMsg:input_type -> OpenIMServer.msg.UserClearAllMsgReq
+	40, // 42: OpenIMServer.msg.msg.DeleteMsgs:input_type -> OpenIMServer.msg.DeleteMsgsReq
+	44, // 43: OpenIMServer.msg.msg.DeleteMsgPhysicalBySeq:input_type -> OpenIMServer.msg.DeleteMsgPhysicalBySeqReq
+	42, // 44: OpenIMServer.msg.msg.DeleteMsgPhysical:input_type -> OpenIMServer.msg.DeleteMsgPhysicalReq
+	8,  // 45: OpenIMServer.msg.msg.SetSendMsgStatus:input_type -> OpenIMServer.msg.SetSendMsgStatusReq
+	10, // 46: OpenIMServer.msg.msg.GetSendMsgStatus:input_type -> OpenIMServer.msg.GetSendMsgStatusReq
+	27, // 47: OpenIMServer.msg.msg.RevokeMsg:input_type -> OpenIMServer.msg.RevokeMsgReq
+	29, // 48: OpenIMServer.msg.msg.MarkMsgsAsRead:input_type -> OpenIMServer.msg.MarkMsgsAsReadReq
+	31, // 49: OpenIMServer.msg.msg.MarkConversationAsRead:input_type -> OpenIMServer.msg.MarkConversationAsReadReq
+	33, // 50: OpenIMServer.msg.msg.SetConversationHasReadSeq:input_type -> OpenIMServer.msg.SetConversationHasReadSeqReq
+	13, // 51: OpenIMServer.msg.msg.SetMessageReactionExtensions:input_type -> OpenIMServer.msg.SetMessageReactionExtensionsReq
+	15, // 52: OpenIMServer.msg.msg.GetMessagesReactionExtensions:input_type -> OpenIMServer.msg.GetMessagesReactionExtensionsReq
+	12, // 53: OpenIMServer.msg.msg.AddMessageReactionExtensions:input_type -> OpenIMServer.msg.ModifyMessageReactionExtensionsReq
+	19, // 54: OpenIMServer.msg.msg.DeleteMessageReactionExtensions:input_type -> OpenIMServer.msg.DeleteMessagesReactionExtensionsReq
+	48, // 55: OpenIMServer.msg.msg.GetConversationsHasReadAndMaxSeq:input_type -> OpenIMServer.msg.GetConversationsHasReadAndMaxSeqReq
+	51, // 56: OpenIMServer.msg.msg.GetActiveUser:input_type -> OpenIMServer.msg.GetActiveUserReq
+	68, // 57: OpenIMServer.msg.msg.GetMaxSeq:output_type -> OpenIMServer.sdkws.GetMaxSeqResp
+	47, // 58: OpenIMServer.msg.msg.GetConversationMaxSeq:output_type -> OpenIMServer.msg.GetConversationMaxSeqResp
+	69, // 59: OpenIMServer.msg.msg.PullMessageBySeqs:output_type -> OpenIMServer.sdkws.PullMessageBySeqsResp
+	7,  // 60: OpenIMServer.msg.msg.SendMsg:output_type -> OpenIMServer.msg.SendMsgResp
+	37, // 61: OpenIMServer.msg.msg.ClearConversationsMsg:output_type -> OpenIMServer.msg.ClearConversationsMsgResp
+	39, // 62: OpenIMServer.msg.msg.UserClearAllMsg:output_type -> OpenIMServer.msg.UserClearAllMsgResp
+	41, // 63: OpenIMServer.msg.msg.DeleteMsgs:output_type -> OpenIMServer.msg.DeleteMsgsResp
+	45, // 64: OpenIMServer.msg.msg.DeleteMsgPhysicalBySeq:output_type -> OpenIMServer.msg.DeleteMsgPhysicalBySeqResp
+	43, // 65: OpenIMServer.msg.msg.DeleteMsgPhysical:output_type -> OpenIMServer.msg.DeleteMsgPhysicalResp
+	9,  // 66: OpenIMServer.msg.msg.SetSendMsgStatus:output_type -> OpenIMServer.msg.SetSendMsgStatusResp
+	11, // 67: OpenIMServer.msg.msg.GetSendMsgStatus:output_type -> OpenIMServer.msg.GetSendMsgStatusResp
+	28, // 68: OpenIMServer.msg.msg.RevokeMsg:output_type -> OpenIMServer.msg.RevokeMsgResp
+	30, // 69: OpenIMServer.msg.msg.MarkMsgsAsRead:output_type -> OpenIMServer.msg.MarkMsgsAsReadResp
+	32, // 70: OpenIMServer.msg.msg.MarkConversationAsRead:output_type -> OpenIMServer.msg.MarkConversationAsReadResp
+	34, // 71: OpenIMServer.msg.msg.SetConversationHasReadSeq:output_type -> OpenIMServer.msg.SetConversationHasReadSeqResp
+	14, // 72: OpenIMServer.msg.msg.SetMessageReactionExtensions:output_type -> OpenIMServer.msg.SetMessageReactionExtensionsResp
+	16, // 73: OpenIMServer.msg.msg.GetMessagesReactionExtensions:output_type -> OpenIMServer.msg.GetMessagesReactionExtensionsResp
+	18, // 74: OpenIMServer.msg.msg.AddMessageReactionExtensions:output_type -> OpenIMServer.msg.ModifyMessageReactionExtensionsResp
+	20, // 75: OpenIMServer.msg.msg.DeleteMessageReactionExtensions:output_type -> OpenIMServer.msg.DeleteMessagesReactionExtensionsResp
+	50, // 76: OpenIMServer.msg.msg.GetConversationsHasReadAndMaxSeq:output_type -> OpenIMServer.msg.GetConversationsHasReadAndMaxSeqResp
+	53, // 77: OpenIMServer.msg.msg.GetActiveUser:output_type -> OpenIMServer.msg.GetActiveUserResp
+	57, // [57:78] is the sub-list for method output_type
+	36, // [36:57] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_msg_msg_proto_init() }
@@ -4481,7 +4500,7 @@ func file_msg_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_msg_msg_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   60,
+			NumMessages:   61,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
