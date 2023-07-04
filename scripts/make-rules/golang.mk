@@ -114,9 +114,9 @@ go.build.%:
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> DEBUG: Compilation is not yet supported $(COMMAND)"; \
 	elif [ "$(COMMAND)" == "rpc" ]; then \
-		for d in $(wildcard $(ROOT_DIR)/cmd/rpc/*/); do \
-			cd $$d && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o\
-			 $(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $$d)$(GO_OUT_EXT) .; \
+		for d in $(wildcard $(ROOT_DIR)/cmd/rpc/*); do \
+			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
 		done; \
 	else \
 		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
