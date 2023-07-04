@@ -1,23 +1,33 @@
 #!/usr/bin/env bash
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
 
-function iam::util::sourced_variable {
+function openim::util::sourced_variable {
   # Call this function to tell shellcheck that a variable is supposed to
   # be used from other calling context. This helps quiet an "unused
   # variable" warning from shellcheck and also document your code.
   true
 }
 
-iam::util::sortable_date() {
+openim::util::sortable_date() {
   date "+%Y%m%d-%H%M%S"
 }
 
 # arguments: target, item1, item2, item3, ...
 # returns 0 if target is in the given items, 1 otherwise.
-iam::util::array_contains() {
+openim::util::array_contains() {
   local search="$1"
   local element
   shift
@@ -29,7 +39,7 @@ iam::util::array_contains() {
   return 1
 }
 
-iam::util::wait_for_url() {
+openim::util::wait_for_url() {
   local url=$1
   local prefix=${2:-}
   local wait=${3:-1}
@@ -37,7 +47,7 @@ iam::util::wait_for_url() {
   local maxtime=${5:-1}
 
   command -v curl >/dev/null || {
-    iam::log::usage "curl must be installed"
+    openim::log::usage "curl must be installed"
     exit 1
   }
 
@@ -45,19 +55,19 @@ iam::util::wait_for_url() {
   for i in $(seq 1 "${times}"); do
     local out
     if out=$(curl --max-time "${maxtime}" -gkfs "${url}" 2>/dev/null); then
-      iam::log::status "On try ${i}, ${prefix}: ${out}"
+      openim::log::status "On try ${i}, ${prefix}: ${out}"
       return 0
     fi
     sleep "${wait}"
   done
-  iam::log::error "Timed out waiting for ${prefix} to answer at ${url}; tried ${times} waiting ${wait} between each"
+  openim::log::error "Timed out waiting for ${prefix} to answer at ${url}; tried ${times} waiting ${wait} between each"
   return 1
 }
 
-# Example:  iam::util::wait_for_success 120 5 "iamctl get nodes|grep localhost"
+# Example:  openim::util::wait_for_success 120 5 "iamctl get nodes|grep localhost"
 # arguments: wait time, sleep time, shell command
 # returns 0 if the shell command get output, 1 otherwise.
-iam::util::wait_for_success(){
+openim::util::wait_for_success(){
   local wait_time="$1"
   local sleep_time="$2"
   local cmd="$3"
@@ -72,9 +82,9 @@ iam::util::wait_for_success(){
   return 1
 }
 
-# Example:  iam::util::trap_add 'echo "in trap DEBUG"' DEBUG
+# Example:  openim::util::trap_add 'echo "in trap DEBUG"' DEBUG
 # See: http://stackoverflow.com/questions/3338030/multiple-bash-traps-for-the-same-signal
-iam::util::trap_add() {
+openim::util::trap_add() {
   local trap_add_cmd
   trap_add_cmd=$1
   shift
@@ -101,23 +111,23 @@ iam::util::trap_add() {
   done
 }
 
-# Opposite of iam::util::ensure-temp-dir()
-iam::util::cleanup-temp-dir() {
-  rm -rf "${IAM_TEMP}"
+# Opposite of openim::util::ensure-temp-dir()
+openim::util::cleanup-temp-dir() {
+  rm -rf "${OPENIM_TEMP}"
 }
 
 # Create a temp dir that'll be deleted at the end of this bash session.
 #
 # Vars set:
-#   IAM_TEMP
-iam::util::ensure-temp-dir() {
-  if [[ -z ${IAM_TEMP-} ]]; then
-    IAM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t iamrnetes.XXXXXX)
-    iam::util::trap_add iam::util::cleanup-temp-dir EXIT
+#   OPENIM_TEMP
+openim::util::ensure-temp-dir() {
+  if [[ -z ${OPENIM_TEMP-} ]]; then
+    OPENIM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t iamrnetes.XXXXXX)
+    openim::util::trap_add openim::util::cleanup-temp-dir EXIT
   fi
 }
 
-iam::util::host_os() {
+openim::util::host_os() {
   local host_os
   case "$(uname -s)" in
     Darwin)
@@ -127,14 +137,14 @@ iam::util::host_os() {
       host_os=linux
       ;;
     *)
-      iam::log::error "Unsupported host OS.  Must be Linux or Mac OS X."
+      openim::log::error "Unsupported host OS.  Must be Linux or Mac OS X."
       exit 1
       ;;
   esac
   echo "${host_os}"
 }
 
-iam::util::host_arch() {
+openim::util::host_arch() {
   local host_arch
   case "$(uname -m)" in
     x86_64*)
@@ -165,7 +175,7 @@ iam::util::host_arch() {
       host_arch=ppc64le
       ;;
     *)
-      iam::log::error "Unsupported host arch. Must be x86_64, 386, arm, arm64, s390x or ppc64le."
+      openim::log::error "Unsupported host arch. Must be x86_64, 386, arm, arm64, s390x or ppc64le."
       exit 1
       ;;
   esac
@@ -175,20 +185,20 @@ iam::util::host_arch() {
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
 # this info to figure out where the final binaries are placed.
-iam::util::host_platform() {
-  echo "$(iam::util::host_os)/$(iam::util::host_arch)"
+openim::util::host_platform() {
+  echo "$(openim::util::host_os)/$(openim::util::host_arch)"
 }
 
 # looks for $1 in well-known output locations for the platform ($2)
-# $IAM_ROOT must be set
-iam::util::find-binary-for-platform() {
+# $OPENIM_ROOT must be set
+openim::util::find-binary-for-platform() {
   local -r lookfor="$1"
   local -r platform="$2"
   local locations=(
-    "${IAM_ROOT}/_output/bin/${lookfor}"
-    "${IAM_ROOT}/_output/${platform}/${lookfor}"
-    "${IAM_ROOT}/_output/local/bin/${platform}/${lookfor}"
-    "${IAM_ROOT}/_output/platforms/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/bin/${lookfor}"
+    "${OPENIM_ROOT}/_output/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/local/bin/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/${platform}/${lookfor}"
   )
 
   # List most recently-updated location.
@@ -197,42 +207,42 @@ iam::util::find-binary-for-platform() {
 }
 
 # looks for $1 in well-known output locations for the host platform
-# $IAM_ROOT must be set
-iam::util::find-binary() {
-  iam::util::find-binary-for-platform "$1" "$(iam::util::host_platform)"
+# $OPENIM_ROOT must be set
+openim::util::find-binary() {
+  openim::util::find-binary-for-platform "$1" "$(openim::util::host_platform)"
 }
 
 # Run all known doc generators (today gendocs and genman for iamctl)
 # $1 is the directory to put those generated documents
-iam::util::gen-docs() {
+openim::util::gen-docs() {
   local dest="$1"
 
   # Find binary
-  gendocs=$(iam::util::find-binary "gendocs")
-  geniamdocs=$(iam::util::find-binary "geniamdocs")
-  genman=$(iam::util::find-binary "genman")
-  genyaml=$(iam::util::find-binary "genyaml")
-  genfeddocs=$(iam::util::find-binary "genfeddocs")
+  gendocs=$(openim::util::find-binary "gendocs")
+  geniamdocs=$(openim::util::find-binary "geniamdocs")
+  genman=$(openim::util::find-binary "genman")
+  genyaml=$(openim::util::find-binary "genyaml")
+  genfeddocs=$(openim::util::find-binary "genfeddocs")
 
   # TODO: If ${genfeddocs} is not used from anywhere (it isn't used at
   # least from k/k tree), remove it completely.
-  iam::util::sourced_variable "${genfeddocs}"
+  openim::util::sourced_variable "${genfeddocs}"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/iamctl/"
   "${gendocs}" "${dest}/docs/guide/en-US/cmd/iamctl/"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "iam-apiserver"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "iam-authz-server"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "iam-pump"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "iam-watcher"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-apiserver"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-authz-server"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-pump"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-watcher"
   "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/iamctl" "iamctl"
 
   mkdir -p "${dest}/docs/man/man1/"
-  "${genman}" "${dest}/docs/man/man1/" "iam-apiserver"
-  "${genman}" "${dest}/docs/man/man1/" "iam-authz-server"
-  "${genman}" "${dest}/docs/man/man1/" "iam-pump"
-  "${genman}" "${dest}/docs/man/man1/" "iam-watcher"
+  "${genman}" "${dest}/docs/man/man1/" "openim-apiserver"
+  "${genman}" "${dest}/docs/man/man1/" "openim-authz-server"
+  "${genman}" "${dest}/docs/man/man1/" "openim-pump"
+  "${genman}" "${dest}/docs/man/man1/" "openim-watcher"
   "${genman}" "${dest}/docs/man/man1/" "iamctl"
 
   mkdir -p "${dest}/docs/guide/en-US/yaml/iamctl/"
@@ -245,14 +255,14 @@ iam::util::gen-docs() {
   popd > /dev/null || return 1
 }
 
-# Removes previously generated docs-- we don't want to check them in. $IAM_ROOT
+# Removes previously generated docs-- we don't want to check them in. $OPENIM_ROOT
 # must be set.
-iam::util::remove-gen-docs() {
-  if [ -e "${IAM_ROOT}/docs/.generated_docs" ]; then
+openim::util::remove-gen-docs() {
+  if [ -e "${OPENIM_ROOT}/docs/.generated_docs" ]; then
     # remove all of the old docs; we don't want to check them in.
     while read -r file; do
-      rm "${IAM_ROOT}/${file}" 2>/dev/null || true
-    done <"${IAM_ROOT}/docs/.generated_docs"
+      rm "${OPENIM_ROOT}/${file}" 2>/dev/null || true
+    done <"${OPENIM_ROOT}/docs/.generated_docs"
     # The docs/.generated_docs file lists itself, so we don't need to explicitly
     # delete it.
   fi
@@ -260,15 +270,15 @@ iam::util::remove-gen-docs() {
 
 # Returns the name of the upstream remote repository name for the local git
 # repo, e.g. "upstream" or "origin".
-iam::util::git_upstream_remote_name() {
+openim::util::git_upstream_remote_name() {
   git remote -v | grep fetch |\
-    grep -E 'github.com[/:]marmotedu/iam|marmotedu.io/iam' |\
+    grep -E 'github.com[/:]marmotedu/openim|marmotedu.io/openim' |\
     head -n 1 | awk '{print $1}'
 }
 
 # Exits script if working directory is dirty. If it's run interactively in the terminal
 # the user can commit changes in a second terminal. This script will wait.
-iam::util::ensure_clean_working_dir() {
+openim::util::ensure_clean_working_dir() {
   while ! git diff HEAD --exit-code &>/dev/null; do
     echo -e "\nUnexpected dirty working directory:\n"
     if tty -s; then
@@ -285,7 +295,7 @@ iam::util::ensure_clean_working_dir() {
 # Find the base commit using:
 # $PULL_BASE_SHA if set (from Prow)
 # current ref from the remote upstream branch
-iam::util::base_ref() {
+openim::util::base_ref() {
   local -r git_branch=$1
 
   if [[ -n ${PULL_BASE_SHA:-} ]]; then
@@ -293,7 +303,7 @@ iam::util::base_ref() {
     return
   fi
 
-  full_branch="$(iam::util::git_upstream_remote_name)/${git_branch}"
+  full_branch="$(openim::util::git_upstream_remote_name)/${git_branch}"
 
   # make sure the branch is valid, otherwise the check will pass erroneously.
   if ! git describe "${full_branch}" >/dev/null; then
@@ -308,13 +318,13 @@ iam::util::base_ref() {
 # current branch and upstream branch named by $1.
 # Returns 1 (false) if there are no changes
 #         0 (true) if there are changes detected.
-iam::util::has_changes() {
+openim::util::has_changes() {
   local -r git_branch=$1
   local -r pattern=$2
   local -r not_pattern=${3:-totallyimpossiblepattern}
 
   local base_ref
-  base_ref=$(iam::util::base_ref "${git_branch}")
+  base_ref=$(openim::util::base_ref "${git_branch}")
   echo "Checking for '${pattern}' changes against '${base_ref}'"
 
   # notice this uses ... to find the first shared ancestor
@@ -330,7 +340,7 @@ iam::util::has_changes() {
   return 1
 }
 
-iam::util::download_file() {
+openim::util::download_file() {
   local -r url=$1
   local -r destination_file=$2
 
@@ -352,7 +362,7 @@ iam::util::download_file() {
 # Test whether openssl is installed.
 # Sets:
 #  OPENSSL_BIN: The path to the openssl binary to use
-function iam::util::test_openssl_installed {
+function openim::util::test_openssl_installed {
     if ! openssl version >& /dev/null; then
       echo "Failed to run openssl. Please ensure openssl is installed"
       exit 1
@@ -366,7 +376,7 @@ function iam::util::test_openssl_installed {
 # '"client auth"'
 # '"server auth"'
 # '"client auth","server auth"'
-function iam::util::create_signing_certkey {
+function openim::util::create_signing_certkey {
     local sudo=$1
     local dest_dir=$2
     local id=$3
@@ -380,7 +390,7 @@ EOF
 }
 
 # signs a client certificate: args are sudo, dest-dir, CA, filename (roughly), username, groups...
-function iam::util::create_client_certkey {
+function openim::util::create_client_certkey {
     local sudo=$1
     local dest_dir=$2
     local ca=$3
@@ -404,7 +414,7 @@ EOF
 }
 
 # signs a serving certificate: args are sudo, dest-dir, ca, filename (roughly), subject, hosts...
-function iam::util::create_serving_certkey {
+function openim::util::create_serving_certkey {
     local sudo=$1
     local dest_dir=$2
     local ca=$3
@@ -428,7 +438,7 @@ EOF
 }
 
 # creates a self-contained iamconfig: args are sudo, dest-dir, ca file, host, port, client id, token(optional)
-function iam::util::write_client_iamconfig {
+function openim::util::write_client_iamconfig {
     local sudo=$1
     local dest_dir=$2
     local ca_file=$3
@@ -461,14 +471,14 @@ EOF
     # flatten the iamconfig files to make them self contained
     username=$(whoami)
     ${sudo} /usr/bin/env bash -e <<EOF
-    $(iam::util::find-binary iamctl) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
+    $(openim::util::find-binary iamctl) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
     mv -f "/tmp/${client_id}.iamconfig" "${dest_dir}/${client_id}.iamconfig"
     chown ${username} "${dest_dir}/${client_id}.iamconfig"
 EOF
 }
 
 # Determines if docker can be run, failures may simply require that the user be added to the docker group.
-function iam::util::ensure_docker_daemon_connectivity {
+function openim::util::ensure_docker_daemon_connectivity {
   IFS=" " read -ra DOCKER <<< "${DOCKER_OPTS}"
   # Expand ${DOCKER[@]} only if it's not unset. This is to work around
   # Bash 3 issue with unbound variable.
@@ -497,7 +507,7 @@ EOF
 
 # Wait for background jobs to finish. Return with
 # an error status if any of the jobs failed.
-iam::util::wait-for-jobs() {
+openim::util::wait-for-jobs() {
   local fail=0
   local job
   for job in $(jobs -p); do
@@ -506,12 +516,12 @@ iam::util::wait-for-jobs() {
   return ${fail}
 }
 
-# iam::util::join <delim> <list...>
+# openim::util::join <delim> <list...>
 # Concatenates the list elements with the delimiter passed as first parameter
 #
-# Ex: iam::util::join , a b c
+# Ex: openim::util::join , a b c
 #  -> a,b,c
-function iam::util::join {
+function openim::util::join {
   local IFS="$1"
   shift
   echo "$*"
@@ -527,7 +537,7 @@ function iam::util::join {
 #  CFSSLJSON_BIN: The path of the installed cfssljson binary
 #  CFSSLCERTINFO_BIN: The path of the installed cfssl-certinfo binary
 #
-function iam::util::ensure-cfssl {
+function openim::util::ensure-cfssl {
   if command -v cfssl &>/dev/null && command -v cfssljson &>/dev/null && command -v cfssl-certinfo &>/dev/null; then
     CFSSL_BIN=$(command -v cfssl)
     CFSSLJSON_BIN=$(command -v cfssljson)
@@ -535,7 +545,7 @@ function iam::util::ensure-cfssl {
     return 0
   fi
 
-  host_arch=$(iam::util::host_arch)
+  host_arch=$(openim::util::host_arch)
 
   if [[ "${host_arch}" != "amd64" ]]; then
     echo "Cannot download cfssl on non-amd64 hosts and cfssl does not appear to be installed."
@@ -588,13 +598,13 @@ function iam::util::ensure-cfssl {
   popd > /dev/null || return 1
 }
 
-# iam::util::ensure-gnu-sed
+# openim::util::ensure-gnu-sed
 # Determines which sed binary is gnu-sed on linux/darwin
 #
 # Sets:
 #  SED: The name of the gnu-sed binary
 #
-function iam::util::ensure-gnu-sed {
+function openim::util::ensure-gnu-sed {
   # NOTE: the echo below is a workaround to ensure sed is executed before the grep.
   # see: https://github.com/iamrnetes/iamrnetes/issues/87251
   sed_help="$(LANG=C sed --help 2>&1 || true)"
@@ -603,16 +613,16 @@ function iam::util::ensure-gnu-sed {
   elif command -v gsed &>/dev/null; then
     SED="gsed"
   else
-    iam::log::error "Failed to find GNU sed as sed or gsed. If you are on Mac: brew install gnu-sed." >&2
+    openim::log::error "Failed to find GNU sed as sed or gsed. If you are on Mac: brew install gnu-sed." >&2
     return 1
   fi
-  iam::util::sourced_variable "${SED}"
+  openim::util::sourced_variable "${SED}"
 }
 
-# iam::util::check-file-in-alphabetical-order <file>
+# openim::util::check-file-in-alphabetical-order <file>
 # Check that the file is in alphabetical order
 #
-function iam::util::check-file-in-alphabetical-order {
+function openim::util::check-file-in-alphabetical-order {
   local failure_file="$1"
   if ! diff -u "${failure_file}" <(LC_ALL=C sort "${failure_file}"); then
     {
@@ -626,9 +636,9 @@ function iam::util::check-file-in-alphabetical-order {
   fi
 }
 
-# iam::util::require-jq
+# openim::util::require-jq
 # Checks whether jq is installed.
-function iam::util::require-jq {
+function openim::util::require-jq {
   if ! command -v jq &>/dev/null; then
     echo "jq not found. Please install." 1>&2
     return 1
@@ -636,7 +646,7 @@ function iam::util::require-jq {
 }
 
 # outputs md5 hash of $1, works on macOS and Linux
-function iam::util::md5() {
+function openim::util::md5() {
   if which md5 >/dev/null 2>&1; then
     md5 -q "$1"
   else
@@ -644,7 +654,7 @@ function iam::util::md5() {
   fi
 }
 
-# iam::util::read-array
+# openim::util::read-array
 # Reads in stdin and adds it line by line to the array provided. This can be
 # used instead of "mapfile -t", and is bash 3 compatible.
 #
@@ -652,9 +662,9 @@ function iam::util::md5() {
 #   $1 (name of array to create/modify)
 #
 # Example usage:
-# iam::util::read-array files < <(ls -1)
+# openim::util::read-array files < <(ls -1)
 #
-function iam::util::read-array {
+function openim::util::read-array {
   local i=0
   unset -v "$1"
   while IFS= read -r "$1[i++]"; do :; done
@@ -671,13 +681,13 @@ if [[ -z "${color_start-}" ]]; then
   declare -r color_cyan="${color_start}1;36m"
   declare -r color_norm="${color_start}0m"
 
-  iam::util::sourced_variable "${color_start}"
-  iam::util::sourced_variable "${color_red}"
-  iam::util::sourced_variable "${color_yellow}"
-  iam::util::sourced_variable "${color_green}"
-  iam::util::sourced_variable "${color_blue}"
-  iam::util::sourced_variable "${color_cyan}"
-  iam::util::sourced_variable "${color_norm}"
+  openim::util::sourced_variable "${color_start}"
+  openim::util::sourced_variable "${color_red}"
+  openim::util::sourced_variable "${color_yellow}"
+  openim::util::sourced_variable "${color_green}"
+  openim::util::sourced_variable "${color_blue}"
+  openim::util::sourced_variable "${color_cyan}"
+  openim::util::sourced_variable "${color_norm}"
 fi
 
 # ex: ts=2 sw=2 et filetype=sh

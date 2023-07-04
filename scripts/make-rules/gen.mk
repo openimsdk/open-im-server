@@ -31,7 +31,7 @@ gen.errcode: gen.errcode.code gen.errcode.doc
 
 .PHONY: gen.errcode.code
 gen.errcode.code: tools.verify.codegen
-	@echo "===========> Generating iam error code go source files"
+	@echo "===========> Generating openim error code go source files"
 	@codegen -type=int ${ROOT_DIR}/internal/pkg/code
 
 .PHONY: gen.errcode.doc
@@ -44,7 +44,7 @@ gen.errcode.doc: tools.verify.codegen
 gen.ca.%:
 	$(eval CA := $(word 1,$(subst ., ,$*)))
 	@echo "===========> Generating CA files for $(CA)"
-	@${ROOT_DIR}/scripts/gencerts.sh generate-iam-cert $(OUTPUT_DIR)/cert $(CA)
+	@${ROOT_DIR}/scripts/gencerts.sh generate-openim-cert $(OUTPUT_DIR)/cert $(CA)
 
 .PHONY: gen.ca
 gen.ca: $(addprefix gen.ca., $(CERTIFICATES))
