@@ -150,7 +150,7 @@ go.test:
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report
 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
-	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(OUTPUT_DIR)/report.xml
+	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
