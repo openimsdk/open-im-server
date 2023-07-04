@@ -67,9 +67,9 @@ type Interface interface {
 	TempBucket() string
 	// DataBucket 永久存储的桶名
 	DataBucket() string
-	// PresignedGetURL 通过桶名和对象名返回URL
+	// PresignedGetURL 预签名授权 通过桶名和对象名返回URL
 	PresignedGetURL(ctx context.Context, bucket string, name string, expires time.Duration, opt *HeaderOption) (string, error)
-	// PresignedPutURL 申请上传,返回PUT的上传地址
+	// PresignedPutURL 预签名授权 申请上传,返回PUT的上传地址
 	PresignedPutURL(ctx context.Context, args *ApplyPutArgs) (string, error)
 	// GetObjectInfo 获取对象信息
 	GetObjectInfo(ctx context.Context, args *BucketObject) (*ObjectInfo, error)
