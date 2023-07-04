@@ -101,6 +101,11 @@ install.go-gitlint:
 install.go-junit-report:
 	@$(GO) install github.com/jstemmer/go-junit-report@latest
 
+## install.gotests: Install gotests, used to generate go tests
+.PHONY: install.swagger
+install.swagger:
+	@$(GO) install github.com/go-swagger/go-swagger/cmd/swagger@latest
+
 # ==============================================================================
 # Tools that might be used include go gvm
 #

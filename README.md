@@ -86,7 +86,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
        ./docker_check_service.sh./check_all.sh
        ```
        
-       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
+       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Open-IM-Servers-on-System.png)
 
 #### Deploy using source code
 
@@ -157,11 +157,11 @@ all services build success
 
 ## Authentication Clow Chart 
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
 
 ## Architecture
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
 
 ## To start developing OpenIM
 The [community repository](https://github.com/OpenIMSDK/community) hosts all information about building Kubernetes from source, how to contribute code and documentation, who to contact about what, etc.
