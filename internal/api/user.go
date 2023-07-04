@@ -68,7 +68,7 @@ func (u *UserApi) UserRegisterCount(c *gin.Context) {
 
 func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	var wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
-	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
+	var respResult []*msggateway.SingleDetail
 	flag := false
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
@@ -91,24 +91,37 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
 	}
+	m := make(map[string][]string, 10)
 
 	for _, v1 := range req.UserIDs {
 		flag = false
-		temp := new(msggateway.GetUsersOnlineStatusResp_SuccessResult)
+		temp := new(msggateway.SingleDetail)
 		for _, v2 := range wsResult {
 			if v2.UserID == v1 {
 				flag = true
 				temp.UserID = v1
 				temp.Status = constant.OnlineStatus
-				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, v2.DetailPlatformStatus...)
+				for _, status := range v2.DetailPlatformStatus {
+					if v, ok := m[status.Platform]; ok {
+						m[status.Platform] = append(v, status.Token)
+					} else {
+						m[status.Platform] = []string{status.Token}
+					}
+				}
 			}
 
 		}
-		if !flag {
-			temp.UserID = v1
-			temp.Status = constant.OfflineStatus
+		for p, tokens := range m {
+			t := new(msggateway.SinglePlatformToken)
+			t.Platform = p
+			t.Token = tokens
+			t.Total = int32(len(tokens))
+			temp.SinglePlatformToken = append(temp.SinglePlatformToken, t)
 		}
-		respResult = append(respResult, temp)
+
+		if flag {
+			respResult = append(respResult, temp)
+		}
 	}
 
 	apiresp.GinSuccess(c, respResult)
