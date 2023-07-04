@@ -132,24 +132,17 @@ go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.buil
 go.lint: tools.verify.golangci-lint
 	@echo "===========> Run golangci to lint source codes"
 	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/... 
+
 ## go.test: Run unit test
 .PHONY: go.test
 go.test:
 	@$(GO) test ./...
 
-# ## go.test.junit-report: Run unit test
-# .PHONY: go.test.junit-report
-# go.test.junit-report: tools.verify.go-junit-report
-# 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
-# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
-# 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
-# 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
-# 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
-
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report
 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
+# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
