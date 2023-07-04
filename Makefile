@@ -158,6 +158,11 @@ verify-copyright:
 add-copyright:
 	@$(MAKE) copyright.add
 
+## release: release the project
+.PHONY: release
+release: release.verify release.ensure-tag
+	@scripts/release.sh
+
 ## help: Show this help info.
 .PHONY: help
 help: Makefile
