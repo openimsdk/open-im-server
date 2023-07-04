@@ -24,6 +24,7 @@ include scripts/make-rules/copyright.mk
 include scripts/make-rules/gen.mk
 include scripts/make-rules/dependencies.mk
 include scripts/make-rules/tools.mk
+include scripts/make-rules/release.mk
 
 # ==============================================================================
 # Usage
@@ -54,9 +55,9 @@ export USAGE_OPTIONS
 build:
 	@$(MAKE) go.build
 
-## build-multiarch: Build binaries for multiple platforms. See option PLATFORMS.
-.PHONY: build-multiarch
-build-multiarch:
+## multiarch: Build binaries for multiple platforms. See option PLATFORMS.
+.PHONY: multiarch
+multiarch:
 	@$(MAKE) go.build.multiarch
 
 ## tidy: tidy go.mod
