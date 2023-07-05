@@ -203,9 +203,9 @@ function openim::build::prepare_docker_machine() {
     openim::log::status "Creating a machine to build OPENIM"
     docker-machine create --driver "${DOCKER_MACHINE_DRIVER}" \
       --virtualbox-memory "${virtualbox_memory_mb}" \
-      --engine-env HTTP_PROXY="${IAMRNETES_HTTP_PROXY:-}" \
-      --engine-env HTTPS_PROXY="${IAMRNETES_HTTPS_PROXY:-}" \
-      --engine-env NO_PROXY="${IAMRNETES_NO_PROXY:-127.0.0.1}" \
+      --engine-env HTTP_PROXY="${OPENIMRNETES_HTTP_PROXY:-}" \
+      --engine-env HTTPS_PROXY="${OPENIMRNETES_HTTPS_PROXY:-}" \
+      --engine-env NO_PROXY="${OPENIMRNETES_NO_PROXY:-127.0.0.1}" \
       "${DOCKER_MACHINE_NAME}" > /dev/null || {
       openim::log::error "Something went wrong creating a machine."
       openim::log::error "Try the following: "
@@ -250,14 +250,14 @@ function openim::build::update_dockerfile() {
 }
 
 function  openim::build::set_proxy() {
-  if [[ -n "${IAMRNETES_HTTPS_PROXY:-}" ]]; then
-    echo "ENV https_proxy $IAMRNETES_HTTPS_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
+  if [[ -n "${OPENIMRNETES_HTTPS_PROXY:-}" ]]; then
+    echo "ENV https_proxy $OPENIMRNETES_HTTPS_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
   fi
-  if [[ -n "${IAMRNETES_HTTP_PROXY:-}" ]]; then
-    echo "ENV http_proxy $IAMRNETES_HTTP_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
+  if [[ -n "${OPENIMRNETES_HTTP_PROXY:-}" ]]; then
+    echo "ENV http_proxy $OPENIMRNETES_HTTP_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
   fi
-  if [[ -n "${IAMRNETES_NO_PROXY:-}" ]]; then
-    echo "ENV no_proxy $IAMRNETES_NO_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
+  if [[ -n "${OPENIMRNETES_NO_PROXY:-}" ]]; then
+    echo "ENV no_proxy $OPENIMRNETES_NO_PROXY" >> "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
   fi
 }
 

@@ -24,7 +24,7 @@
 
 # Tencent cos configuration
 readonly BUCKET="openim-1306374445"
-readonly REGION="ap-beijing"
+readonly REGION="ap-guangzhou"
 readonly COS_RELEASE_DIR="openim-release"
 
 # default cos command tool coscli or coscmd
@@ -178,7 +178,7 @@ function openim::release::package_server_tarballs() {
       # This fancy expression will expand to prepend a path
       # (${LOCAL_OUTPUT_BINPATH}/${platform}/) to every item in the
       # server_bins array.
-      cp "${server_bins[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+      cp "${server_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/server/bin/"
 
       openim::release::clean_cruft
@@ -218,7 +218,7 @@ function openim::release::package_client_tarballs() {
       # This fancy expression will expand to prepend a path
       # (${LOCAL_OUTPUT_BINPATH}/${platform}/) to every item in the
       # client_bins array.
-      cp "${client_bins[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+      cp "${client_bins[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
         "${release_stage}/client/bin/"
 
       openim::release::clean_cruft
@@ -252,7 +252,7 @@ function openim::release::build_server_images() {
     # This fancy expression will expand to prepend a path
     # (${LOCAL_OUTPUT_BINPATH}/${platform}/) to every item in the
     # OPENIM_SERVER_IMAGE_BINARIES array.
-    cp "${OPENIM_SERVER_IMAGE_BINARIES[@]/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
+    cp "${OPENIM_SERVER_IMAGE_BINARIES[@]/bin/#/${LOCAL_OUTPUT_BINPATH}/${platform}/}" \
       "${release_stage}/server/bin/"
 
     openim::release::create_docker_images_for_server "${release_stage}/server/bin" "${arch}"
