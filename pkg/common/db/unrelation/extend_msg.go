@@ -109,7 +109,7 @@ func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(ctx context
 		return utils.Wrap(err, "")
 	}
 	if set == nil {
-		return errors.New(fmt.Sprintf("conversationID %s has no set", conversationID))
+		return fmt.Errorf("conversationID %s has no set", conversationID)
 	}
 	_, err = e.ExtendMsgSetCollection.UpdateOne(ctx, bson.M{"source_id": set.ConversationID, "session_type": sessionType}, bson.M{"$set": updateBson}, opt)
 	return utils.Wrap(err, "")
@@ -126,7 +126,7 @@ func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(ctx context.Context
 		return utils.Wrap(err, "")
 	}
 	if set == nil {
-		return errors.New(fmt.Sprintf("conversationID %s has no set", conversationID))
+		return fmt.Errorf("conversationID %s has no set", conversationID)
 	}
 	_, err = e.ExtendMsgSetCollection.UpdateOne(ctx, bson.M{"source_id": set.ConversationID, "session_type": sessionType}, bson.M{"$unset": updateBson})
 	return err
@@ -149,5 +149,5 @@ func (e *ExtendMsgSetMongoDriver) TakeExtendMsg(ctx context.Context, conversatio
 	if v, ok := setList[0].ExtendMsgs[clientMsgID]; ok {
 		return &v, nil
 	}
-	return nil, errors.New(fmt.Sprintf("cant find client msg id: %s", clientMsgID))
+	return nil, fmt.Errorf("cant find client msg id: %s", clientMsgID)
 }
