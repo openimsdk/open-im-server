@@ -29,4 +29,4 @@ COPY ./openim_msg_gateway ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
-CMD ["./openim_msg_gateway","--port", "10140" "--ws_port", "10001"， "--prometheus_port", "20240"]
+CMD ["./openim_msg_gateway","--port", "10140" "--ws_port", "10001", "--prometheus_port", "20240"]
