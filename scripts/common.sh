@@ -89,11 +89,22 @@ openim::build::get_docker_wrapped_binaries() {
   local debian_iptables_version=v12.1.0
   ### If you change any of these lists, please also update DOCKERIZED_BINARIES
   ### in build/BUILD. And openim::golang::server_image_targets
+
   local targets=(
-    "openim-apiserver,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
-    "openim-controller-manager,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
-    "openim-scheduler,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
-    "openim-proxy,${OPENIM_BASE_IMAGE_REGISTRY}/debian-iptables-${arch}:${debian_iptables_version}"
+    "openim-api,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-cmdutils,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-crontask,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-msggateway,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-msgtransfer,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-push,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-auth,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-conversation,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-friend,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-group,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-msg,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-third,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+    "openim-rpc-user,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
+
   )
 
   echo "${targets[@]}"
@@ -189,7 +200,7 @@ function openim::build::prepare_docker_machine() {
   local virtualbox_memory_mb=$(( available_memory_bytes / (bytes_in_mb * memory_divisor) ))
 
   docker-machine inspect "${DOCKER_MACHINE_NAME}" &> /dev/null || {
-    openim::log::status "Creating a machine to build IAM"
+    openim::log::status "Creating a machine to build OPENIM"
     docker-machine create --driver "${DOCKER_MACHINE_DRIVER}" \
       --virtualbox-memory "${virtualbox_memory_mb}" \
       --engine-env HTTP_PROXY="${IAMRNETES_HTTP_PROXY:-}" \
@@ -503,5 +514,5 @@ function openim::build::ensure_data_container() {
 # Build all openim commands.
 function openim::build::build_command() {
   openim::log::status "Running build command..."
-  make -C "${OPENIM_ROOT}" build.multiarch BINS="openimctl openim-apiserver openim-authz-server openim-pump openim-watcher"
+  make -C "${OPENIM_ROOT}" multiarch
 }

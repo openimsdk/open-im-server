@@ -137,12 +137,13 @@ function openim::release::package_src_tarball() {
       ! \( \
       \( -path "${OPENIM_ROOT}"/_\* -o \
       -path "${OPENIM_ROOT}"/.git\* -o \
+      -path "${OPENIM_ROOT}"/.github\* -o \
       -path "${OPENIM_ROOT}"/.gitignore\* -o \
-      -path "${OPENIM_ROOT}"/.gsemver.yaml\* -o \
+      -path "${OPENIM_ROOT}"/.gsemver.yml\* -o \
       -path "${OPENIM_ROOT}"/.config\* -o \
       -path "${OPENIM_ROOT}"/.chglog\* -o \
       -path "${OPENIM_ROOT}"/.gitlint -o \
-      -path "${OPENIM_ROOT}"/.golangci.yaml -o \
+      -path "${OPENIM_ROOT}"/.golangci.yml -o \
       -path "${OPENIM_ROOT}"/.goreleaser.yml -o \
       -path "${OPENIM_ROOT}"/.note.md -o \
       -path "${OPENIM_ROOT}"/.todo.md \
@@ -274,6 +275,15 @@ function openim::release::sha1() {
   fi
 }
 
+function openim::release::sha256() {
+  if which sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{ print $1 }'
+  else
+    shasum -a256 "$1" | awk '{ print $1 }'
+  fi
+}
+
+
 function openim::release::build_conformance_image() {
   local -r arch="$1"
   local -r registry="$2"
@@ -396,10 +406,19 @@ function openim::release::package_iam_manifests_tarball() {
   local dst_dir="${release_stage}"
   mkdir -p "${dst_dir}"
   cp -r ${src_dir}/* "${dst_dir}"
-  #cp "${src_dir}/openim-apiserver.yaml" "${dst_dir}"
-  #cp "${src_dir}/openim-authz-server.yaml" "${dst_dir}"
-  #cp "${src_dir}/openim-pump.yaml" "${dst_dir}"
-  #cp "${src_dir}/openim-watcher.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim-api.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_cmdutils.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_crontask.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_msggateway.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_msgtransfer.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_push.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_auth.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_conversation.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_friend.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_group.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_msg.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_third.yaml" "${dst_dir}"
+  #cp "${src_dir}/openim_rpc_user.yaml" "${dst_dir}"
   #cp "${OPENIM_ROOT}/cluster/gce/gci/health-monitor.sh" "${dst_dir}/health-monitor.sh"
 
   openim::release::clean_cruft
@@ -603,5 +622,5 @@ function openim::release::generate_changelog() {
   set +o errexit
   git add ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
   git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
-  git push -f origin master # 最后将 CHANGELOG 也 push 上去
+  git push -f origin main # 最后将 CHANGELOG 也 push 上去
 }
