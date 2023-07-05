@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -73,12 +74,14 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
 		var conversations []*relationTb.ConversationModel
+		now := time.Now()
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)
 			if err := utils.CopyStructFields(temp, conversation); err != nil {
 				return err
 			}
 			temp.OwnerUserID = v
+			temp.CreateTime = now
 			conversations = append(conversations, temp)
 
 		}
@@ -123,26 +126,28 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 		conversationTx := c.conversationDB.NewTx(tx)
 		for _, conversation := range conversations {
 			for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
-				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
+				ownerUserID := v[0]
+				userID := v[1]
+				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{ownerUserID}, []string{conversation.ConversationID})
 				if err != nil {
 					return err
 				}
 				if len(haveUserIDs) > 0 {
-					_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+					_, err := conversationTx.UpdateByMap(ctx, []string{ownerUserID}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
 					if err != nil {
 						return err
 					}
-					cache = cache.DelUsersConversation(conversation.ConversationID, v[0])
+					cache = cache.DelUsersConversation(conversation.ConversationID, ownerUserID)
 				} else {
 					newConversation := *conversation
-					newConversation.OwnerUserID = v[0]
-					newConversation.UserID = v[1]
+					newConversation.OwnerUserID = ownerUserID
+					newConversation.UserID = userID
 					newConversation.ConversationID = conversation.ConversationID
 					newConversation.IsPrivateChat = conversation.IsPrivateChat
 					if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 						return err
 					}
-					cache = cache.DelConversationIDs(v[0]).DelUserConversationIDsHash(v[0])
+					cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
 				}
 			}
 		}
