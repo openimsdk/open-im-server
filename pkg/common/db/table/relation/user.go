@@ -14,7 +14,7 @@ type UserModel struct {
 	Nickname         string    `gorm:"column:name;size:255"`
 	FaceURL          string    `gorm:"column:face_url;size:255"`
 	Ex               string    `gorm:"column:ex;size:1024"`
-	CreateTime       time.Time `gorm:"column:create_time;index:create_time; autoCreateTime"`
+	CreateTime       time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:18"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }

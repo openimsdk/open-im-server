@@ -40,4 +40,8 @@ type GroupModelInterface interface {
 	Take(ctx context.Context, groupID string) (group *GroupModel, err error)
 	Search(ctx context.Context, keyword string, pageNumber, showNumber int32) (total uint32, groups []*GroupModel, err error)
 	GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error)
+	// 获取群总数
+	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
+	// 获取范围内群增量
+	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }

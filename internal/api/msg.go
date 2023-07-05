@@ -238,3 +238,11 @@ func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
 func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }
+
+func (m *MessageApi) GetActiveUser(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveUser, m.Client, c)
+}
+
+func (m *MessageApi) GetActiveGroup(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveGroup, m.Client, c)
+}

@@ -26,6 +26,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	u := NewUserApi(discov)
+	m := NewMessageApi(discov)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -44,6 +45,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/account_check", ParseToken, u.AccountCheck)
 		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
+		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
@@ -96,7 +98,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
-		authRouterGroup.POST("/user_register", u.UserRegister)
 		authRouterGroup.POST("/user_token", a.UserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
@@ -118,7 +119,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
-		m := NewMessageApi(discov)
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
@@ -152,7 +152,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	statisticsGroup := r.Group("/statistics", ParseToken)
 	{
-		statisticsGroup.POST("/user_register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/active", m.GetActiveUser)
+		statisticsGroup.POST("/group/create", g.GroupCreateCount)
+		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
 	return r
 }

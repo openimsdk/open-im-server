@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
 	"time"
@@ -47,7 +48,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	users := make([]*tablerelation.UserModel, 0)
 	if len(config.Config.Manager.UserID) != len(config.Config.Manager.Nickname) {
-		return errs.ErrConfig.Wrap("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
+		return errors.New("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
 	}
 	for k, v := range config.Config.Manager.UserID {
 		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
@@ -168,7 +169,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	}
 	if req.Secret != config.Config.Secret {
 		log.ZDebug(ctx, "UserRegister", config.Config.Secret, req.Secret)
-		return nil, errs.ErrIdentity.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if utils.DuplicateAny(req.Users, func(e *sdkws.UserInfo) string { return e.UserID }) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")

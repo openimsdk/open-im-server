@@ -18,7 +18,7 @@ import (
 type User struct {
 	conn   grpc.ClientConnInterface
 	Client user.UserClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	Discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
@@ -28,7 +28,7 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
-	return &User{discov: discov, Client: client, conn: conn}
+	return &User{Discov: discov, Client: client, conn: conn}
 }
 
 type UserRpcClient User

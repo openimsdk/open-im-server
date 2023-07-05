@@ -41,7 +41,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
 	if req.Secret != config.Config.Secret {
-		return nil, errs.ErrIdentity.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err

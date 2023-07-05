@@ -40,7 +40,7 @@ message updateUserInfoResp{
 
 message setGlobalRecvMessageOptReq{
   string userID = 1;
-  int32 globalRecvMsgOpt = 3;
+ int32 globalRecvMsgOpt = 3;
 }
 message setGlobalRecvMessageOptResp{
 }

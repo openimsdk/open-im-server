@@ -3,7 +3,6 @@ package msg
 import (
 	"context"
 	"encoding/json"
-	"github.com/google/uuid"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -79,7 +78,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	now := time.Now().UnixMilli()
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
-		ID:       uuid.New().String(),
 		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,
