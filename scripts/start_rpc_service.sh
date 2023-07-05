@@ -21,15 +21,15 @@ source ./function.sh
 #service filename
 service_filename=(
   #api
-  open_im_api
+  openim_api
   #rpc
-  open_im_user
-  open_im_friend
-  open_im_group
-  open_im_auth
+  openim_user
+  openim_friend
+  openim_group
+  openim_auth
   ${msg_name}
-  open_im_conversation
-  open_im_third
+  openim_conversation
+  openim_third
 )
 
 #service config port name

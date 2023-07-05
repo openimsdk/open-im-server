@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=open_im_third
+NAME=openim_third
 BIN_DIR=../../../bin/
 
 OS:= $(or $(os),linux)
@@ -32,8 +32,3 @@ install:build
 
 clean:
 	@if [ -f ${BINARY_NAME} ] ; then rm ${BINARY_NAME} ; fi
-
-
-
-
-

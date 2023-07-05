@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=open_im_msg_transfer
+NAME=openim_msg_transfer
 BIN_DIR=../../bin/
 
 OS:= $(or $(os),linux)

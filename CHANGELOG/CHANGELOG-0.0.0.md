@@ -142,7 +142,7 @@
 
 ### Pb
 
-* open_im_sdk.OfflinePushInfo
+* openim_sdk.OfflinePushInfo
 
 ### Pull Requests
 
@@ -162,7 +162,7 @@
 
 ### Pb
 
-* open_im_sdk.OfflinePushInfo
+* openim_sdk.OfflinePushInfo
 
 
 <a name="v1.0.5"></a>
@@ -225,4 +225,3 @@
 
 * Merge pull request [#7](https://github.com/OpenIMSDK/Open-IM-Server/issues/7) from memory-qianxiao/docker-compose_update
 * Merge pull request [#4](https://github.com/OpenIMSDK/Open-IM-Server/issues/4) from wujingke/patch-1
-

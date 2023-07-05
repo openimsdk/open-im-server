@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-image=openim/open_im_server:v1.0.5
+image=openim/openim_server:v1.0.5
 rm Open-IM-Server -rf
 git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
 cd Open-IM-Server

@@ -71,20 +71,20 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # ❯ tree -L 1 cmd
 # cmd
 # ├── openim-sdk-core/ - main.go
-# ├── open_im_api	
-# ├── open_im_cms_api
-# ├── open_im_cron_task
-# ├── open_im_demo
-# ├── open_im_msg_gateway
-# ├── open_im_msg_transfer
-# ├── open_im_push
-# ├── rpc/open_im_admin_cms/ - main.go
+# ├── openim_api	
+# ├── openim_cms_api
+# ├── openim_cron_task
+# ├── openim_demo
+# ├── openim_msg_gateway
+# ├── openim_msg_transfer
+# ├── openim_push
+# ├── rpc/openim_admin_cms/ - main.go
 # └── test/ - main.go
 # COMMAND=openim
 # PLATFORM=linux_amd64
 # OS=linux
 # ARCH=amd64
-# BINS=open_im_api open_im_cms_api open_im_cron_task open_im_demo open_im_msg_gateway open_im_msg_transfer open_im_push 
+# BINS=openim_api openim_cms_api openim_cron_task openim_demo openim_msg_gateway openim_msg_transfer openim_push 
 # BIN_DIR=/root/workspaces/OpenIM/_output/bin
 # ==============================================================================
 
