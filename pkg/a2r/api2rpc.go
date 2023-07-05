@@ -11,10 +11,17 @@ import (
 	"google.golang.org/grpc"
 )
 
+func List[T any](val *[]T) {
+	if val != nil && *val == nil {
+		*val = []T{}
+	}
+}
+
 func Call[A, B, C any](
 	rpc func(client C, ctx context.Context, req *A, options ...grpc.CallOption) (*B, error),
 	client C,
 	c *gin.Context,
+	after ...func(resp *B),
 ) {
 	var req A
 	if err := c.BindJSON(&req); err != nil {
@@ -30,6 +37,9 @@ func Call[A, B, C any](
 	if err != nil {
 		apiresp.GinError(c, err) // RPC调用失败
 		return
+	}
+	for _, fn := range after {
+		fn(data)
 	}
 	apiresp.GinSuccess(c, data) // 成功
 }
