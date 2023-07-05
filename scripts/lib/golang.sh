@@ -33,10 +33,20 @@ readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
 # If you update this list, please also update build/BUILD.
 openim::golang::server_targets() {
   local targets=(
-    openim-apiserver
-    openim-authz-server
-    openim-pump
-    openim-watcher
+    openim_api
+    openim_cmdutils
+    openim_cmdutils
+    openim_crontask
+    openim_msggateway
+    openim_msgtransfer
+    openim_push
+    openim_rpc_auth
+    openim_rpc_conversation
+    openim_rpc_friend
+    openim_rpc_group
+    openim_rpc_msg
+    openim_rpc_third
+    openim_rpc_user
   )
   echo "${targets[@]}"
 }
@@ -137,7 +147,7 @@ openim::golang::setup_platforms
 # The set of client targets that we are building for all platforms
 # If you update this list, please also update build/BUILD.
 readonly OPENIM_CLIENT_TARGETS=(
-  iamctl
+  imctl
 )
 readonly OPENIM_CLIENT_BINARIES=("${OPENIM_CLIENT_TARGETS[@]##*/}")
 

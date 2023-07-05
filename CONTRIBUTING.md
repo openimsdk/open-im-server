@@ -89,7 +89,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
 
 1. Fork the repository(Open-IM-Server)
 
-2. **CLONE** your own repository to master locally. Use `git clone https://github.com/<your-username>/Open-IM-Server.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
+2. **CLONE** your own repository to main locally. Use `git clone https://github.com/<your-username>/Open-IM-Server.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
 
 3. **Set Remote** upstream to be `https://github.com/OpenIMSDK/Open-IM-Server.git` using the following two commands:
 

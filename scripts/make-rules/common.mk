@@ -147,18 +147,18 @@ endef
 
 # Here are some examples of builds
 define MAKEFILE_EXAMPLE
-# make build BINS=imctl                                          Only a single imctl binary is built.
+# make build BINS=openim_api                                     Only a single openim_api binary is built.
 # make -j (nproc) all                                            Run tidy gen add-copyright format lint cover build concurrently.
 # make gen                                                       Generate all necessary files.
-# make linux.arm64                                               imctl is compiled on arm64 platform.
+# make release                                                   Build release binaries for all platforms.
 # make verify-copyright                                          Verify the license headers for all files.
 # make install-deepcopy-gen                                      Install deepcopy-gen tools if the license is missing.
-# make build BINS=imctl V=1 DEBUG=1                              Build debug binaries for only imctl.
-# make multiarch PLATFORMS="linux_arm64 linux_amd64" V=1         Build binaries for both platforms.
+# make build BINS=openim_api V=1 DEBUG=1                         Build debug binaries for only openim_api.
+# make multiarch -j PLATFORMS="linux_arm64 linux_amd64" V=1      Build binaries for both platforms.
 endef
 export MAKEFILE_EXAMPLE
 
-# Define all help functions	@printf "\n\033[1mCurrent imctl version information: $(shell imctl version):\033[0m\n\n"
+# Define all help functions	@printf "\n\033[1mCurrent openim_api version information: $(shell openim_api version):\033[0m\n\n"
 define makeallhelp
 	@printf "\n\033[1mMake example:\033[0m\n\n"
 	$(call MAKEFILE_EXAMPLE)

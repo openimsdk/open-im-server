@@ -64,7 +64,7 @@ openim::util::wait_for_url() {
   return 1
 }
 
-# Example:  openim::util::wait_for_success 120 5 "iamctl get nodes|grep localhost"
+# Example:  openim::util::wait_for_success 120 5 "imctl get nodes|grep localhost"
 # arguments: wait time, sleep time, shell command
 # returns 0 if the shell command get output, 1 otherwise.
 openim::util::wait_for_success(){
@@ -212,7 +212,7 @@ openim::util::find-binary() {
   openim::util::find-binary-for-platform "$1" "$(openim::util::host_platform)"
 }
 
-# Run all known doc generators (today gendocs and genman for iamctl)
+# Run all known doc generators (today gendocs and genman for imctl)
 # $1 is the directory to put those generated documents
 openim::util::gen-docs() {
   local dest="$1"
@@ -228,25 +228,42 @@ openim::util::gen-docs() {
   # least from k/k tree), remove it completely.
   openim::util::sourced_variable "${genfeddocs}"
 
-  mkdir -p "${dest}/docs/guide/en-US/cmd/iamctl/"
-  "${gendocs}" "${dest}/docs/guide/en-US/cmd/iamctl/"
+  mkdir -p "${dest}/docs/guide/en-US/cmd/imctl/"
+  "${gendocs}" "${dest}/docs/guide/en-US/cmd/imctl/"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-apiserver"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-authz-server"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-pump"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-watcher"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/iamctl" "iamctl"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_api"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_cmdutils"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_crontask"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_msggateway"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_msgtransfer"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_push"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_auth"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_conversation"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_friend"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_group"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_msg"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_third"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim_rpc_user"
+  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/imctl" "imctl"
 
   mkdir -p "${dest}/docs/man/man1/"
-  "${genman}" "${dest}/docs/man/man1/" "openim-apiserver"
-  "${genman}" "${dest}/docs/man/man1/" "openim-authz-server"
-  "${genman}" "${dest}/docs/man/man1/" "openim-pump"
-  "${genman}" "${dest}/docs/man/man1/" "openim-watcher"
-  "${genman}" "${dest}/docs/man/man1/" "iamctl"
+"${genman}" "${dest}/docs/man/man1/" "openim_api"
+"${genman}" "${dest}/docs/man/man1/" "openim_cmdutils"
+"${genman}" "${dest}/docs/man/man1/" "openim_crontask"
+"${genman}" "${dest}/docs/man/man1/" "openim_msggateway"
+"${genman}" "${dest}/docs/man/man1/" "openim_msgtransfer"
+"${genman}" "${dest}/docs/man/man1/" "openim_push"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_auth"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_conversation"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_friend"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_group"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_msg"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_third"
+"${genman}" "${dest}/docs/man/man1/" "openim_rpc_user"
 
-  mkdir -p "${dest}/docs/guide/en-US/yaml/iamctl/"
-  "${genyaml}" "${dest}/docs/guide/en-US/yaml/iamctl/"
+  mkdir -p "${dest}/docs/guide/en-US/yaml/imctl/"
+  "${genyaml}" "${dest}/docs/guide/en-US/yaml/imct/"
 
   # create the list of generated files
   pushd "${dest}" > /dev/null || return 1
@@ -471,7 +488,7 @@ EOF
     # flatten the iamconfig files to make them self contained
     username=$(whoami)
     ${sudo} /usr/bin/env bash -e <<EOF
-    $(openim::util::find-binary iamctl) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
+    $(openim::util::find-binary imct) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
     mv -f "/tmp/${client_id}.iamconfig" "${dest_dir}/${client_id}.iamconfig"
     chown ${username} "${dest_dir}/${client_id}.iamconfig"
 EOF
