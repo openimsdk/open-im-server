@@ -199,6 +199,7 @@ openim::util::find-binary-for-platform() {
     "${OPENIM_ROOT}/_output/${platform}/${lookfor}"
     "${OPENIM_ROOT}/_output/local/bin/${platform}/${lookfor}"
     "${OPENIM_ROOT}/_output/platforms/${platform}/${lookfor}"
+    "${OPENIM_ROOT}/_output/platforms/bin/${platform}/${lookfor}"
   )
 
   # List most recently-updated location.

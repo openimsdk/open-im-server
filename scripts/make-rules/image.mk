@@ -98,6 +98,13 @@ image.build.%: go.build.%
 	fi
 	@rm -rf $(TMP_DIR)/$(IMAGE)
 
+## image.buildx.%: Build docker images with buildx
+.PHONY: image.buildx.%
+image.buildx.%:
+	$(eval IMAGE := $(word 1,$(subst ., ,$*)))
+	echo "===========> Building docker image $(IMAGE) $(VERSION)"
+	$(DOCKER) buildx build -f $(ROOT_DIR)/Dockerfile --pull --no-cache --platform=$(PLATFORMS) --push . -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION)
+
 ## image.push: Push docker images
 .PHONY: image.push
 image.push: image.verify go.build.verify $(addprefix image.push., $(addprefix $(IMAGE_PLAT)., $(IMAGES)))

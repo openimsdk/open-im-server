@@ -28,6 +28,9 @@ OpenIMSDK/openim-sdk-core:
   - source: .github/workflows/stale.yml
     dest: .github/workflows/stale.yml
     replace: false
+  - source: .github/.codecov.yml
+    dest: .github/.codecov.yml
+    replace: false
 
 OpenIMSDK/OpenIM-Docs:
   - source: .github/workflows/
@@ -38,6 +41,9 @@ OpenIMSDK/OpenIM-Docs:
   - source: scripts/githooks/
     dest: scripts/githooks/
     replace: true
+  - source: .github/.codecov.yml
+    dest: .github/.codecov.yml
+    replace: false
 
 OpenIMSDK/OpenKF:
   - source: LICENSE
@@ -50,6 +56,9 @@ OpenIMSDK/OpenKF:
     replace: false
   - source: .github/workflows/stale.yml
     dest: .github/workflows/stale.yml
+    replace: false
+  - source: .github/.codecov.yml
+    dest: .github/.codecov.yml
     replace: false
 
 group:
@@ -74,6 +83,9 @@ group:
         replace: false
       - source: .github/workflows/help-comment-issue.yml
         dest: .github/workflows/help-comment-issue.yml
+        replace: false
+      - source: .github/.codecov.yml
+        dest: .github/.codecov.yml
         replace: false
       - source: ./scripts/githooks/
         dest: ./scripts/githooks/
