@@ -1,6 +1,6 @@
 # Continuous Integration and Automation
 
-Every change on the K3s repository, either made through a pull request or direct push, triggers the continuous integration pipelines defined within the same repository. Needless to say, all the K3s contributions can be merged until all the checks pass (AKA having green builds).
+Every change on the OpenIM repository, either made through a pull request or direct push, triggers the continuous integration pipelines defined within the same repository. Needless to say, all the OpenIM contributions can be merged until all the checks pass (AKA having green builds).
 
 - [Continuous Integration and Automation](#continuous-integration-and-automation)
   - [CI Platforms](#ci-platforms)
@@ -80,13 +80,15 @@ linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64".
 
 V                Set to 1 enable verbose build. Default is 0. 📝
 ```
+
+
 How to Use Makefile to Help Contributors Build Projects Quickly 😊
 
 The `make help` command is a handy tool that provides useful information on how to utilize the Makefile effectively. By running this command, contributors will gain insights into various targets and options available for building projects swiftly.
 
 Here's a breakdown of the targets and options provided by the Makefile:
 
-Targets 😃
+**Targets 😃**
 
 1. `all`: This target runs multiple tasks like `tidy`, `gen`, `add-copyright`, `format`, `lint`, `cover`, and `build`. It ensures comprehensive project building.
 2. `build`: The primary target that compiles binaries by default. It is particularly useful for creating the necessary executable files.
@@ -117,7 +119,7 @@ Targets 😃
 27. `help`: Displays information about available targets and options.
 28. `help-all`: Shows detailed information about all available targets and options.
 
-Options 😄
+**Options 😄**
 
 1. `DEBUG`: A boolean option that determines whether or not to generate debug symbols. The default value is 0 (false).
 2. `BINS`: Specifies the binaries to build. By default, it builds all binaries under the `cmd` directory. Contributors can provide a list of specific binaries using this option.
