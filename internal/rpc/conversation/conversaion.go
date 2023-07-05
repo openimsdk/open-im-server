@@ -114,7 +114,6 @@ func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversat
 	return &pbConversation.SetRecvMsgOptResp{}, nil
 }
 
-// deprecated
 func (c *conversationServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
 	resp := &pbConversation.ModifyConversationFieldResp{}
 	var err error
@@ -199,15 +198,15 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		var conversations []*tableRelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
-			conversation.OwnerUserID = ownerUserID
-			conversation.IsPrivateChat = req.Conversation.IsPrivateChat.Value
+			conversation2.OwnerUserID = ownerUserID
+			conversation2.IsPrivateChat = req.Conversation.IsPrivateChat.Value
 			conversations = append(conversations, &conversation2)
 		}
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
-		for _, ownerUserID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, ownerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
+		for _, userID := range req.UserIDs {
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
