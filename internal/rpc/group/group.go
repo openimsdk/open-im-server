@@ -55,7 +55,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
 		User:          userRpcClient,
-		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
 			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
