@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=open_im_push
+NAME=openim_push
 BIN_DIR=../../bin/
 
 OS:= $(or $(os),linux)

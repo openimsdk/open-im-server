@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=open_im_friend
+NAME=openim_friend
 BIN_DIR=../../../bin/
 
 OS:= $(or $(os),linux)
@@ -32,5 +32,3 @@ install:build
 
 clean:
 	@if [ -f ${BINARY_NAME} ] ; then rm ${BINARY_NAME} ; fi
-
-
