@@ -153,5 +153,5 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 }
 
 func GrpcServer() grpc.ServerOption {
-	return grpc.UnaryInterceptor(RpcServerInterceptor)
+	return grpc.ChainUnaryInterceptor(RpcServerInterceptor)
 }

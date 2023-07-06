@@ -16,7 +16,7 @@ import (
 )
 
 func GrpcClient() grpc.DialOption {
-	return grpc.WithUnaryInterceptor(RpcClientInterceptor)
+	return grpc.WithChainUnaryInterceptor(RpcClientInterceptor)
 }
 
 func RpcClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
