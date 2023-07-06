@@ -15,7 +15,7 @@ services:
     restart: always
 
   mongodb:
-    image: mongo:6.0
+    image: mongo:6.0.2
     ports:
       - 37017:27017
     container_name: mongo
@@ -24,7 +24,7 @@ services:
       - ${DATA_DIR}/components/mongodb/data/db:/data/db
       - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
       - ${DATA_DIR}/components/mongodb/data/conf:/etc/mongo
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro 
+      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
     environment:
       - TZ=Asia/Shanghai
       # cache
@@ -37,7 +37,7 @@ services:
     restart: always
 
   redis:
-    image: redis:6.2.5
+    image: redis:7.0.0
     ports:
       - 16379:6379
     container_name: redis
@@ -54,7 +54,7 @@ services:
 
 
   zookeeper:
-    image: zookeeper
+    image: wurstmeister/zookeeper
     ports:
       - 2181:2181
     container_name: zookeeper
@@ -147,20 +147,20 @@ services:
     #    ports:
     #    - 9091:9091
     depends_on:
-    - open_im_server
+      - open_im_server
     command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
-    network_mode: "host" 
+    network_mode: "host"
 
   grafana:
     image: grafana/grafana
     volumes:
-    - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-    - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
-    - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
+      - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
+      - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
     container_name: grafana
     depends_on:
-    - prometheus
-    network_mode: "host" 
+      - prometheus
+    network_mode: "host"
 
   # node-exporter:
   #   image: quay.io/prometheus/node-exporter
