@@ -155,7 +155,7 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 	}); err != nil {
 		return err
 	}
-	return c.cache.ExecDel(ctx)
+	return cache.ExecDel(ctx)
 }
 
 func (c *conversationDatabase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
