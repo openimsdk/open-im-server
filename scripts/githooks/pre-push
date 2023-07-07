@@ -40,21 +40,48 @@ if [[ `git status --porcelain` ]]; then
   exit 1
 fi
 
-COLOR_SUFFIX="\033[0m"  # End all colors and special effects
-PURPLE_PREFIX="\033[35m"  # Purple prefix
-BOLD_PREFIX="\033[1m"  # Bold prefix
+COLOR_SUFFIX="\033[0m"
+
+BLACK_PREFIX="\033[30m"
+RED_PREFIX="\033[31m"
+GREEN_PREFIX="\033[32m"
+YELLOW_PREFIX="\033[33m"
+BLUE_PREFIX="\033[34m"
+PURPLE_PREFIX="\033[35m"
+SKY_BLUE_PREFIX="\033[36m"
+WHITE_PREFIX="\033[37m"
+BOLD_PREFIX="\033[1m"
+UNDERLINE_PREFIX="\033[4m"
+ITALIC_PREFIX="\033[3m"
+
+# Function to print colored text
+print_color() {
+  local text=$1
+  local color=$2
+  echo -e "${color}${text}${COLOR_SUFFIX}"
+}
+
+# Function to print section separator
+print_separator() {
+  print_color "==========================================================" ${PURPLE_PREFIX}
+}
 
 # Get current time
 time=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Print section separator
-echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+print_separator
 
 # Print time of submission
-echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Time of submission: ${time}${COLOR_SUFFIX}"
+print_color "Time of submission: ${time}" "${BOLD_PREFIX}${CYAN_PREFIX}"
+
+# Print additional information if needed
+print_color "Repository: ${repository}" "${YELLOW_PREFIX}"
+print_color "Author: ${author}" "${YELLOW_PREFIX}"
 
 # Print section separator
-echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+print_separator
+
 
 #
 #printMessage "Running the Flutter analyzer"
