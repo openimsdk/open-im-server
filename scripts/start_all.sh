@@ -20,6 +20,8 @@
 source ./style_info.cfg
 source ./path_info.cfg
 
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
 # Print title
 echo -e "${BOLD_PREFIX}${BLUE_PREFIX}OpenIM Server Start${COLOR_SUFFIX}"
 
@@ -35,6 +37,7 @@ echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Server Start Time: ${time}${COLOR_SUFFIX}"
 # Print section separator
 echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
 
+cd $OPENIM_ROOT/scripts
 # FIXME Put the shell script names here
 need_to_start_server_shell=(
   start_rpc_service.sh
@@ -65,7 +68,7 @@ for i in ${need_to_start_server_shell[*]}; do
 done
 
 # Print section separator
-echo "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
 
 # Print completion message
-echo "${GREEN_PREFIX}${BOLD_PREFIX}OpenIM Server has been started successfully!${COLOR_SUFFIX}"
+echo -e "${GREEN_PREFIX}${BOLD_PREFIX}OpenIM Server has been started successfully!${COLOR_SUFFIX}"

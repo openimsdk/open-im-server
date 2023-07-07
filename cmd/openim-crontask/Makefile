@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=openim_cron_task
+NAME=openim-crontask
 BIN_DIR=../../bin/
 
 OS:= $(or $(os),linux)

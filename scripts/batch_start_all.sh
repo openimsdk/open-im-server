@@ -16,21 +16,28 @@
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
-#fixme Put the shell scripts name here
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+cd "$OPENIM_ROOT/scripts/"
+
 need_to_start_server_shell=(
-  start_rpc_service.sh
-  msg_gateway_start.sh
-  push_start.sh
-  msg_transfer_start.sh
+  "start_rpc_service.sh"
+  "msg_gateway_start.sh"
+  "push_start.sh"
+  "msg_transfer_start.sh"
 )
-time=`date +"%Y-%m-%d %H:%M:%S"`
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========server start time:${time}===========">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
+
+time=$(date +"%Y-%m-%d %H:%M:%S")
+
+for _ in {1..3}; do
+  echo "==========================================================" >> ../logs/openIM.log 2>&1
+done
+
+echo "==========server start time:${time}===========" >> ../logs/openIM.log 2>&1
+
+for _ in {1..3}; do
+  echo "==========================================================" >> ../logs/openIM.log 2>&1
+done
 
 build_pid_array=()
 idx=0

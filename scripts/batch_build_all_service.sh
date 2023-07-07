@@ -13,14 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Include shell font styles and some basic information
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+# Include necessary files
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/function"
 
-bin_dir="../bin"
-logs_dir="../logs"
-sdk_db_dir="../db/sdk/"
+# Include specific functions and variables
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.cfg" \
+  "$OPENIM_ROOT/scripts/path_info.cfg"
+
+bin_dir="$OPENIM_ROOT/bin"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
+
 #Automatically created when there is no bin, logs folder
 if [ ! -d $bin_dir ]; then
   mkdir -p $bin_dir

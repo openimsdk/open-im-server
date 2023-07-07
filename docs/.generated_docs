@@ -26,12 +26,12 @@ docs/guide/en-US/cmd/openim/openim_secret_get.md
 docs/guide/en-US/cmd/openim/openim_secret_list.md
 docs/guide/en-US/cmd/openim/openim_secret_update.md
 docs/guide/en-US/cmd/openim/openim_set.md
-docs/guide/en-US/cmd/openim/openim_user.md
-docs/guide/en-US/cmd/openim/openim_user_create.md
-docs/guide/en-US/cmd/openim/openim_user_delete.md
-docs/guide/en-US/cmd/openim/openim_user_get.md
-docs/guide/en-US/cmd/openim/openim_user_list.md
-docs/guide/en-US/cmd/openim/openim_user_update.md
+docs/guide/en-US/cmd/openim/openim-rpc-user.md
+docs/guide/en-US/cmd/openim/openim-rpc-user_create.md
+docs/guide/en-US/cmd/openim/openim-rpc-user_delete.md
+docs/guide/en-US/cmd/openim/openim-rpc-user_get.md
+docs/guide/en-US/cmd/openim/openim-rpc-user_list.md
+docs/guide/en-US/cmd/openim/openim-rpc-user_update.md
 docs/guide/en-US/cmd/openim/openim_validate.md
 docs/guide/en-US/cmd/openim/openim_version.md
 docs/guide/en-US/yaml/openim/openim.yaml
@@ -44,7 +44,7 @@ docs/guide/en-US/yaml/openim/openim_options.yaml
 docs/guide/en-US/yaml/openim/openim_policy.yaml
 docs/guide/en-US/yaml/openim/openim_secret.yaml
 docs/guide/en-US/yaml/openim/openim_set.yaml
-docs/guide/en-US/yaml/openim/openim_user.yaml
+docs/guide/en-US/yaml/openim/openim-rpc-user.yaml
 docs/guide/en-US/yaml/openim/openim_validate.yaml
 docs/guide/en-US/yaml/openim/openim_version.yaml
 docs/man/man1/iam-apiserver.1

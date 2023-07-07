@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=openim_group
+NAME=openim-rpc-group
 BIN_DIR=../../../bin/
 
 OS:= $(or $(os),linux)

@@ -25,8 +25,8 @@ RUN apt-get install -y vim curl tzdata gawk
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
-COPY ./openim_user ./
+COPY ./openim-rpc-user ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
-CMD ["./openim_user", "--port", "10110"]
+CMD ["./openim-rpc-user", "--port", "10110"]
