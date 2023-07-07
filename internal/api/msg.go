@@ -6,6 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -169,11 +170,10 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	// todo
-	//if !tokenverify.IsAppManagerUid(c) {
-	//	apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
-	//	return
-	//}
+	if !tokenverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
 
 	var data interface{}
 	switch params.ContentType {
