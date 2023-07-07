@@ -172,6 +172,12 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		if groupInfo.Status == constant.GroupStatusDismissed {
 			return nil, err
 		}
+		for _, userID := range req.UserIDs {
+			if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
+				log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
+				return nil, err
+			}
+		}
 	}
 	var conversation tableRelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
