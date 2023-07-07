@@ -25,7 +25,7 @@ echo -e  "\n"
 echo -e "${BOLD_PREFIX}_____  _   _  _____  _____  _____  _____  _____  _____  _____  _____  _____ ${COLOR_SUFFIX}"
 
 
-bin_dir="../bin"
+bin_dir="$BIN_DIR"
 logs_dir="../logs"
 sdk_db_dir="../db/sdk/"
 # Automatically created when there is no bin, logs folder

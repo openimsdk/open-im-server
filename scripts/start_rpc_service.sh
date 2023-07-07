@@ -20,7 +20,7 @@ source $OPENIM_ROOT/scripts/style_info.cfg
 source $OPENIM_ROOT/scripts/path_info.cfg
 source $OPENIM_ROOT/scripts/function
 
-bin_dir="$OPENIM_ROOT/bin"
+bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
@@ -80,7 +80,7 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
     kill -9 $(eval $pid)
     sleep 0.5
   fi
-  cd ../bin
+  cd $
   #Get the rpc port in the configuration file
   portList=$(cat $config_path | grep ${service_port_name[$i]} | awk -F '[:]' '{print $NF}')
   list_to_string ${portList}
