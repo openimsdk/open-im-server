@@ -36,29 +36,11 @@ message ConversationReq{
   OpenIMServer.protobuf.Int32Value groupAtType = 13;
 }
 
-message ModifyConversationFieldReq{
-  repeated string userIDList = 1;
-  int32 FieldType = 2;
-  Conversation conversation = 3;
-}
-
-message ModifyConversationFieldResp{
-}
-
 message SetConversationReq{
   Conversation conversation = 1; 
 }
 
 message SetConversationResp{
-}
-
-message SetRecvMsgOptReq {
-  string ownerUserID = 1;
-  string conversationID = 2;
-  int32 recvMsgOpt = 3;
-}
-
-message SetRecvMsgOptResp {
 }
 
 message GetConversationReq{
@@ -87,13 +69,6 @@ message GetAllConversationsResp{
   repeated Conversation conversations = 2;
 }
 
-message BatchSetConversationsReq{
-  repeated Conversation conversations = 1;
-  string ownerUserID = 2;
-}
-
-message BatchSetConversationsResp{
-}
 
 message GetRecvMsgNotNotifyUserIDsReq {
   string groupID = 1;
@@ -163,13 +138,10 @@ message GetConversationsByConversationIDResp {
 }
 
 service conversation {
-  rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
   rpc GetConversation(GetConversationReq)returns(GetConversationResp);
   rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
   rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
-  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
-  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
   rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
   rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
   rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);

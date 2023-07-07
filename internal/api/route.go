@@ -144,9 +144,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
-		conversationGroup.POST("/batch_set_conversation", c.BatchSetConversations)
-		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
-		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
 
