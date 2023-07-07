@@ -33,20 +33,20 @@ readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
 # If you update this list, please also update build/BUILD.
 openim::golang::server_targets() {
   local targets=(
-    openim_api
-    openim_cmdutils
-    openim_cmdutils
-    openim_crontask
-    openim_msggateway
-    openim_msgtransfer
-    openim_push
-    openim_rpc_auth
-    openim_rpc_conversation
-    openim_rpc_friend
-    openim_rpc_group
-    openim_rpc_msg
-    openim_rpc_third
-    openim_rpc_user
+    openim-api
+    openim-cmdutils
+    openim-cmdutils
+    openim-crontask
+    openim-msggateway
+    openim-msgtransfer
+    openim-push
+    openim-rpc-auth
+    openim-rpc-conversation
+    openim-rpc-friend
+    openim-rpc-group
+    openim-rpc-msg
+    openim-rpc-third
+    openim-rpc-user
   )
   echo "${targets[@]}"
 }
