@@ -39,11 +39,11 @@ Options:
 
   BINS             Binaries to build. Default is all binaries under cmd.
                    This option is available when using: make {build}(.multiarch)
-                   Example: make build BINS="openim_api openim_cms_api".
+                   Example: make build BINS="openim_api openim_cmdutils".
 
   PLATFORMS        Platform to build for. Default is linux_arm64 and linux_amd64.
                    This option is available when using: make {build}.multiarch
-                   Example: make multiarch PLATFORMS="linux_s390x linux_mips64 
+                   Example: make multiarch PLATFORMS="linux_s390x linux_mips64
                    linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64".
 
   V                Set to 1 enable verbose build. Default is 0.
@@ -107,11 +107,11 @@ test:
 cover:
 	@$(MAKE) go.test.cover
 
-## updates: Check for updates to go.mod dependencies ✨
+## updates: Check for updates to go.mod dependencies. ✨
 .PHONY: updates
 	@$(MAKE) go.updates
 
-## imports: task to automatically handle import packages in Go files using goimports tool ✨
+## imports: task to automatically handle import packages in Go files using goimports tool. ✨
 .PHONY: imports
 imports:
 	@$(MAKE) go.imports

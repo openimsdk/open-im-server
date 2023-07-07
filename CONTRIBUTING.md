@@ -305,7 +305,6 @@ The documentation for Open-IM-Server includes:
 
 + [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md): This file includes the basic information and instructions for getting started with Open-IM-Server.
 + [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to Open-IM-Server's codebase, such as how to submit issues, pull requests, and code reviews.
-+ [DEVELOPGUIDE.md](https://github.com/OpenIMSDK/.github/blob/main/DEVELOPGUIDE.md): This file provides a more in-depth guide to developing Open-IM-Server, including information on the project's architecture, coding conventions, and testing practices.
 + [Official Documentation](https://doc.rentsoft.cn/): This is the official documentation for Open-IM-Server, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
 
 Please obey the following rules to better format the docs, which would greatly improve the reading experience.
