@@ -40,6 +40,7 @@ if [[ `git status --porcelain` ]]; then
   exit 1
 fi
 
+COLOR_SUFFIX="\033[0m"  # End all colors and special effects
 PURPLE_PREFIX="\033[35m"  # Purple prefix
 BOLD_PREFIX="\033[1m"  # Bold prefix
 
