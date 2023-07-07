@@ -22,7 +22,6 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   push_start.sh
   msg_transfer_start.sh
-  sdk_svr_start.sh
 )
 time=`date +"%Y-%m-%d %H:%M:%S"`
 echo "==========================================================">>../logs/openIM.log 2>&1 &
@@ -70,5 +69,3 @@ if [ $success_num == ${#need_to_start_server_shell[*]} ]
 then
   echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
 fi
-
-

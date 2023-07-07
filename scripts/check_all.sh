@@ -17,6 +17,7 @@
 source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
+
 service_port_name=(
   openImWsPort
   openImApiPort
