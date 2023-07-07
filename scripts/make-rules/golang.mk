@@ -73,10 +73,10 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # ├── openim-sdk-core/ - main.go
 # ├── openim-api	
 # ├── openim_cms_api
-# ├── openim_cron_task
+# ├── openim-crontask
 # ├── openim_demo
-# ├── openim_msg_gateway
-# ├── openim_msg_transfer
+# ├── openim-rpc-msg_gateway
+# ├── openim-rpc-msg_transfer
 # ├── openim-push
 # ├── rpc/openim_admin_cms/ - main.go
 # └── test/ - main.go
@@ -84,7 +84,7 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # PLATFORM=linux_amd64
 # OS=linux
 # ARCH=amd64
-# BINS=openim-api openim_cms_api openim_cron_task openim_demo openim_msg_gateway openim_msg_transfer openim-push 
+# BINS=openim-api openim_cms_api openim-crontask openim_demo openim-rpc-msg_gateway openim-rpc-msg_transfer openim-push 
 # BIN_DIR=/root/workspaces/OpenIM/_output/bin
 # ==============================================================================
 
@@ -113,8 +113,8 @@ go.build.%:
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> DEBUG: Compilation is not yet supported $(COMMAND)"; \
-	elif [ "$(COMMAND)" == "openim_rpc" ]; then \
-		for d in $(wildcard $(ROOT_DIR)/cmd/openim_rpc/*); do \
+	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
+		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
 			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
 		done; \

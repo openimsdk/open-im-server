@@ -47,7 +47,7 @@ for i in ${service_port_name[*]}; do
 done
 
 #Check launched service process
-check=$(ps aux | grep -w ./${msg_transfer_name} | grep -v grep | wc -l)
+check=$(ps aux | grep -w ./${openim-msgtransfer} | grep -v grep | wc -l)
 if [ $check -eq ${msg_transfer_service_num} ]; then
   echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImMsgTransfer"${COLOR_SUFFIX}
 else

@@ -13,23 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+#Include shell font styles and some basic information
+source $OPENIM_ROOT/scripts/style_info.cfg
+source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/function
+
+bin_dir="$OPENIM_ROOT/bin"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
+
+cd $OPENIM_ROOT
 
 #service filename
 service_filename=(
   #api
   openim-api
   #rpc
-  openim_user
-  openim_friend
-  openim_group
-  openim_auth
+  openim-rpc-user
+  openim-rpc-friend
+  openim-rpc-group
+  openim-rpc-auth
   ${msg_name}
-  openim_conversation
-  openim_third
+  openim-rpc-conversation
+  openim-rpc-third
 )
 
 #service config port name
