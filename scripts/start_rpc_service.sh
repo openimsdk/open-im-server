@@ -21,7 +21,7 @@ source ./function.sh
 #service filename
 service_filename=(
   #api
-  openim_api
+  openim-api
   #rpc
   openim_user
   openim_friend

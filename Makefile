@@ -39,7 +39,7 @@ Options:
 
   BINS             Binaries to build. Default is all binaries under cmd.
                    This option is available when using: make {build}(.multiarch)
-                   Example: make build BINS="openim_api openim_cmdutils".
+                   Example: make build BINS="openim-api openim-cmdutils".
 
   PLATFORMS        Platform to build for. Default is linux_arm64 and linux_amd64.
                    This option is available when using: make {build}.multiarch
