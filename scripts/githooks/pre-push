@@ -87,22 +87,14 @@ print_color "Author: ${author}" "${PURPLE_PREFIX}"
 # Print section separator
 print_separator
 
-# 获取变更的文件列表
 file_list=$(git diff --name-status HEAD @{u})
 added_files=$(grep -c '^A' <<< "$file_list")
 modified_files=$(grep -c '^M' <<< "$file_list")
 deleted_files=$(grep -c '^D' <<< "$file_list")
 
-# 打印变更的文件统计
 print_color "Added Files: ${added_files}" "${YELLOW_PREFIX}"
 print_color "Modified Files: ${modified_files}" "${YELLOW_PREFIX}"
 print_color "Deleted Files: ${deleted_files}" "${YELLOW_PREFIX}"
-
-# 获取最近一次提交的摘要信息
-commit_message=$(git log -1 --pretty=format:"%s")
-
-# 打印提交的摘要信息
-print_color "Commit Message: ${commit_message}" "${YELLOW_PREFIX}"
 
 #
 #printMessage "Running the Flutter analyzer"
