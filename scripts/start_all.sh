@@ -16,30 +16,56 @@
 #FIXME This script is the startup script for multiple servers.
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-#FIXME Put the shell script names here
+#Include shell font styles and some basic information
+source ./style_info.cfg
+source ./path_info.cfg
+
+# Print title
+echo -e "${BOLD_PREFIX}${BLUE_PREFIX}OpenIM Server Start${COLOR_SUFFIX}"
+
+# Get current time
+time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Print section separator
+echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+
+# Print server start time
+echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Server Start Time: ${time}${COLOR_SUFFIX}"
+
+# Print section separator
+echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+
+# FIXME Put the shell script names here
 need_to_start_server_shell=(
   start_rpc_service.sh
   push_start.sh
   msg_transfer_start.sh
-#  sdk_svr_start.sh
   msg_gateway_start.sh
   start_cron.sh
 )
 
-time=`date +"%Y-%m-%d %H:%M:%S"`
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
-echo "==========server start time:${time}===========" >> ../logs/openIM.log 2>&1 &
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
-echo "==========================================================" >> ../logs/openIM.log 2>&1 &
 
+# Loop through the script names and execute them
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
-  echo "=====================exec ${i}======================" >> ../logs/openIM.log
+
+  echo -e ""
+  # Print script execution message
+  echo -e "=========> ${YELLOW_PREFIX}Executing ${i}...${COLOR_SUFFIX}"
+  echo -e ""
+
   ./$i
+
+  # Check if the script executed successfully
   if [ $? -ne 0 ]; then
+    # Print error message and exit
+    echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${i}. Exiting...${COLOR_SUFFIX}"
     exit -1
   fi
 done
+
+# Print section separator
+echo "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+
+# Print completion message
+echo "${GREEN_PREFIX}${BOLD_PREFIX}OpenIM Server has been started successfully!${COLOR_SUFFIX}"

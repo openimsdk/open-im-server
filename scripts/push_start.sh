@@ -18,8 +18,6 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 
-
-
 list1=$(cat $config_path | grep openImPushPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep pushPrometheusPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
