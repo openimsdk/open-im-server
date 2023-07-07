@@ -17,10 +17,18 @@
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
 #Include shell font styles and some basic information
-source ./style_info.cfg
-source ./path_info.cfg
-
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+#Include shell font styles and some basic information
+source $OPENIM_ROOT/scripts/style_info.cfg
+source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/function
+
+bin_dir="$OPENIM_ROOT/bin"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
+
+cd "$OPENIM_ROOT/scripts/"
 
 # Print title
 echo -e "${BOLD_PREFIX}${BLUE_PREFIX}OpenIM Server Start${COLOR_SUFFIX}"

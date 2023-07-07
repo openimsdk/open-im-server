@@ -13,11 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Include shell font styles and some basic information
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
 source $OPENIM_ROOT/scripts/style_info.cfg
 source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/function
+
+bin_dir="$OPENIM_ROOT/bin"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
+
+cd "$OPENIM_ROOT/scripts/"
 
 #Check if the service exists
 #If it is exists,kill this process

@@ -40,6 +40,21 @@ if [[ `git status --porcelain` ]]; then
   exit 1
 fi
 
+PURPLE_PREFIX="\033[35m"  # Purple prefix
+BOLD_PREFIX="\033[1m"  # Bold prefix
+
+# Get current time
+time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Print section separator
+echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+
+# Print time of submission
+echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Time of submission: ${time}${COLOR_SUFFIX}"
+
+# Print section separator
+echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
+
 #
 #printMessage "Running the Flutter analyzer"
 #flutter analyze
