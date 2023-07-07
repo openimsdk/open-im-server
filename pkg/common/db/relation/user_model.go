@@ -25,7 +25,7 @@ func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel) (err
 
 // 更新用户信息 零值
 func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return utils.Wrap(u.db(ctx).Where("user_id = ?", userID).Updates(args).Error, "")
+	return utils.Wrap(u.db(ctx).Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
 // 更新多个用户信息 非零值
