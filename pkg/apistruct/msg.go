@@ -171,7 +171,7 @@ type CustomElem struct {
 	Extension   string `mapstructure:"extension"`
 }
 type TextElem struct {
-	Text string `mapstructure:"text" validate:"required"`
+	Content string `mapstructure:"content" validate:"required"`
 }
 
 type RevokeElem struct {
