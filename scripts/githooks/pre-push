@@ -75,9 +75,12 @@ print_separator
 # Print time of submission
 print_color "Time of submission: ${time}" "${BOLD_PREFIX}${CYAN_PREFIX}"
 
+author=$(git config user.name)
+repository=$(basename -s .git $(git config --get remote.origin.url))
+
 # Print additional information if needed
-print_color "Repository: ${repository}" "${YELLOW_PREFIX}"
-print_color "Author: ${author}" "${YELLOW_PREFIX}"
+print_color "Repository: ${repository}" "${BLUE_PREFIX}"
+print_color "Author: ${author}" "${PURPLE_PREFIX}"
 
 # Print section separator
 print_separator
