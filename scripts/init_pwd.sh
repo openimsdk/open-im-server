@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +16,6 @@
 
 source ../.env
 
-
 # Check if PASSWORD only contains letters and numbers
 if [[ "$PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]
 then
@@ -24,14 +25,10 @@ else
     exit
 fi
 
-
 echo "your user is:$USER"
 echo "your password is:$PASSWORD"
 echo "your minio endPoint is:$MINIO_ENDPOINT"
 echo "your data dir is $DATA_DIR"
-
-
-#!/bin/bash
 
 # Specify the config file
 config_file='../config/config.yaml'
@@ -57,4 +54,3 @@ sed -i '/minio:/,/endpoint:/s|endpoint: .*|endpoint: '${MINIO_ENDPOINT}'|' $conf
 
 # Replace secret for token
 sed -i "s/secret: .*/secret: $PASSWORD/" $config_file
-

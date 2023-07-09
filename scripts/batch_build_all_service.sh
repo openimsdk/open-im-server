@@ -23,7 +23,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../scripts.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.cfg" \
   "$OPENIM_ROOT/scripts/path_info.cfg"
 
-bin_dir="$OPENIM_ROOT/bin"
+bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 

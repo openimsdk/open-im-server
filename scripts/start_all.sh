@@ -17,21 +17,26 @@
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
 #Include shell font styles and some basic information
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
-source $OPENIM_ROOT/scripts/function.sh
+source $SCRIPTS_ROOT/style_info.cfg
+source $SCRIPTS_ROOT/path_info.cfg
+source $SCRIPTS_ROOT/function.sh
 
-bin_dir="$OPENIM_ROOT/bin"
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_YELLOW}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_YELLOW}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_YELLOW}=======>pwd=$PWD${COLOR_SUFFIX}"
+
+bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
-cd "$OPENIM_ROOT/scripts/"
-
 # Print title
-echo -e "${BOLD_PREFIX}${BLUE_PREFIX}OpenIM Server Start${COLOR_SUFFIX}"
+echo -e "${BOLD_PREFIX}${BLUE_PREFIX}================> OpenIM Server Start${COLOR_SUFFIX}"
 
 # Get current time
 time=$(date +"%Y-%m-%d %H:%M:%S")
@@ -45,7 +50,6 @@ echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Server Start Time: ${time}${COLOR_SUFFIX}"
 # Print section separator
 echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
 
-cd $OPENIM_ROOT/scripts
 # FIXME Put the shell script names here
 need_to_start_server_shell=(
   start_rpc_service.sh
@@ -54,7 +58,6 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   start_cron.sh
 )
-
 
 # Loop through the script names and execute them
 for i in ${need_to_start_server_shell[*]}; do

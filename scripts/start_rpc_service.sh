@@ -13,12 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
-source $OPENIM_ROOT/scripts/function.sh
+source $SCRIPTS_ROOT/style_info.cfg
+source $SCRIPTS_ROOT/path_info.cfg
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_YELLOW}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_YELLOW}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_YELLOW}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"

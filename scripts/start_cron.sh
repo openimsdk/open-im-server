@@ -21,7 +21,7 @@ source $OPENIM_ROOT/scripts/style_info.cfg
 source $OPENIM_ROOT/scripts/path_info.cfg
 source $OPENIM_ROOT/scripts/function.sh
 
-bin_dir="$OPENIM_ROOT/bin"
+bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
