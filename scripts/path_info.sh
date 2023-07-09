@@ -42,17 +42,17 @@ echo "================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR"
 # Don't put the space between "="
 openim_msggateway="openim-msggateway"
 msg_gateway_binary_root="$OPENIM_ROOT/$BIN_DIR"
-msg_gateway_source_root="$OPENIM_ROOT/cmd/msggateway/"
+msg_gateway_source_root="$OPENIM_ROOT/cmd/openim-msggateway/"
 
 msg_name="openim-rpc-msg"
 msg_binary_root="$OPENIM_ROOT/$BIN_DIR"
-msg_source_root="$OPENIM_ROOT/cmd/openim-rpc/msg/"
+msg_source_root="$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-msg/"
 
 push_name="openim-push"
 push_binary_root="$OPENIM_ROOT/$BIN_DIR"
-push_source_root="$OPENIM_ROOT/cmd/push/"
+push_source_root="$OPENIM_ROOT/cmd/openim-push/"
 
-openim_msgtransfer="openim-rpc-msg_transfer"
+openim_msgtransfer="openim-msgtransfer"
 msg_transfer_binary_root="$OPENIM_ROOT/$BIN_DIR"
 msg_transfer_source_root="$OPENIM_ROOT/cmd/openim-msgtransfer/"
 msg_transfer_service_num=4

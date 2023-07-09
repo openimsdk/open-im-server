@@ -20,6 +20,7 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 #Include shell font styles and some basic information
 source $SCRIPTS_ROOT/style_info.sh
 source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 

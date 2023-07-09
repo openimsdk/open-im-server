@@ -76,7 +76,7 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # ├── openim-crontask
 # ├── openim_demo
 # ├── openim-rpc-msg_gateway
-# ├── openim-rpc-msg_transfer
+# ├── openim-msgtransfer
 # ├── openim-push
 # ├── rpc/openim_admin_cms/ - main.go
 # └── test/ - main.go
@@ -84,7 +84,7 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 # PLATFORM=linux_amd64
 # OS=linux
 # ARCH=amd64
-# BINS=openim-api openim_cms_api openim-crontask openim_demo openim-rpc-msg_gateway openim-rpc-msg_transfer openim-push 
+# BINS=openim-api openim_cms_api openim-crontask openim_demo openim-rpc-msg_gateway openim-msgtransfer openim-push 
 # BIN_DIR=/root/workspaces/OpenIM/_output/bin
 # ==============================================================================
 

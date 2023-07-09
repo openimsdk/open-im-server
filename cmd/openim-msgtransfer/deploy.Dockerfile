@@ -25,8 +25,8 @@ RUN apt-get install -y vim curl tzdata gawk
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
-COPY ./openim-rpc-msg_transfer ./
+COPY ./openim-msgtransfer ./
 
 VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
 
-CMD ["./openim-rpc-msg_transfer","--prometheus_port", "21400"]
+CMD ["./openim-msgtransfer","--prometheus_port", "21400"]

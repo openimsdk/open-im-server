@@ -33,7 +33,7 @@ _output/
 deploy/openim_demo
 deploy/openim-api
 deploy/openim-rpc-msg_gateway
-deploy/openim-rpc-msg_transfer
+deploy/openim-msgtransfer
 deploy/openim-push
 deploy/openim_timer_task
 deploy/openim-rpc-user
