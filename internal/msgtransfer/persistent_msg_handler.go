@@ -1,9 +1,4 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/5/11 15:37).
- */package msgtransfer
+package msgtransfer
 
 import (
 	"context"

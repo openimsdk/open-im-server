@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/2/22 11:52).
- */
 package utils
 
 import (
