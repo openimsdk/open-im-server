@@ -142,7 +142,7 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
 
 > Open-IM 脚本提供服务编译、启动和停止脚本。有四个 Open-IM 脚本启动模块，一个是 http+rpc 服务启动模块，第二个是 WebSocket 服务启动模块，然后是 msg_transfer 模块，最后是 push 模块。
 
-+ path_info.cfg&&style_info.cfg&&
++ path_info.sh&&style_info.sh&&
 
   functions.sh
 

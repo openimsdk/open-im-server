@@ -45,7 +45,7 @@ COLOR_SUFFIX="\033[0m"
 BLACK_PREFIX="\033[30m"
 RED_PREFIX="\033[31m"
 GREEN_PREFIX="\033[32m"
-YELLOW_PREFIX="\033[33m"
+BACKGROUND_GREEN="\033[33m"
 BLUE_PREFIX="\033[34m"
 PURPLE_PREFIX="\033[35m"
 SKY_BLUE_PREFIX="\033[36m"
@@ -92,9 +92,9 @@ added_files=$(grep -c '^A' <<< "$file_list")
 modified_files=$(grep -c '^M' <<< "$file_list")
 deleted_files=$(grep -c '^D' <<< "$file_list")
 
-print_color "Added Files: ${added_files}" "${YELLOW_PREFIX}"
-print_color "Modified Files: ${modified_files}" "${YELLOW_PREFIX}"
-print_color "Deleted Files: ${deleted_files}" "${YELLOW_PREFIX}"
+print_color "Added Files: ${added_files}" "${BACKGROUND_GREEN}"
+print_color "Modified Files: ${modified_files}" "${BACKGROUND_GREEN}"
+print_color "Deleted Files: ${deleted_files}" "${BACKGROUND_GREEN}"
 
 #
 #printMessage "Running the Flutter analyzer"

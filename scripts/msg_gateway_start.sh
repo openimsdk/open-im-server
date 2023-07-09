@@ -14,12 +14,19 @@
 # limitations under the License.
 
 #Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
-source $OPENIM_ROOT/scripts/function.sh
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
@@ -53,8 +60,8 @@ fi
 sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
-  echo "==========================start msg_gateway server===========================">>../logs/openIM.log
-  nohup ./${openim-msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
+  echo "==========================start msg_gateway server===========================">>$OPENIM_ROOT/logs/openIM.log
+  nohup ./${openim-msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 done
 
 #Check launched service process
@@ -68,9 +75,9 @@ if [ $check -ge 1 ]; then
       allPorts=${allPorts}"$ports "
   done
   echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS"${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${YELLOW_PREFIX}${openim-msggateway}${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allNewPid}${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allPorts}${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${openim-msggateway}${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allNewPid}${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
 else
-  echo -e ${YELLOW_PREFIX}${openim-msggateway}${COLOR_SUFFIX}${RED_PREFIX}"SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
+  echo -e ${BACKGROUND_GREEN}${openim-msggateway}${COLOR_SUFFIX}${RED_PREFIX}"SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
 fi

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 COLOR_SUFFIX="\033[0m"  # End all colors and special effects
 
 BLACK_PREFIX="\033[30m"  # Black prefix

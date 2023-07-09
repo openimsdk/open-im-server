@@ -14,14 +14,19 @@
 # limitations under the License.
 
 #Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
-source $OPENIM_ROOT/scripts/function.sh
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
 
-cd "$OPENIM_ROOT/scripts/"
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 service_port_name=(
  openImChatApiPort
@@ -37,8 +42,8 @@ for i in ${service_port_name[*]}; do
   for j in ${ports_array}; do
     port=$(ss -tunlp| grep openim | awk '{print $5}' | grep -w ${j} | awk -F '[:]' '{print $NF}')
     if [[ ${port} -ne ${j} ]]; then
-      echo -e ${YELLOW_PREFIX}${i}${COLOR_SUFFIX}${RED_PREFIX}" service does not start normally,not initiated port is "${COLOR_SUFFIX}${YELLOW_PREFIX}${j}${COLOR_SUFFIX}
-      echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+      echo -e ${BACKGROUND_GREEN}${i}${COLOR_SUFFIX}${RED_PREFIX}" service does not start normally,not initiated port is "${COLOR_SUFFIX}${BACKGROUND_GREEN}${j}${COLOR_SUFFIX}
+      echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log "${COLOR_SUFFIX}
       exit -1
     else
       echo -e ${j}${GREEN_PREFIX}" port has been listening,belongs service is "${i}${COLOR_SUFFIX}

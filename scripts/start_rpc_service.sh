@@ -15,24 +15,21 @@
 
 #Include shell font styles and some basic information
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.cfg
-source $SCRIPTS_ROOT/path_info.cfg
-source $SCRIPTS_ROOT/function.sh
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
 
 cd $SCRIPTS_ROOT
 
-echo -e "${BACKGROUND_YELLOW}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>pwd=$PWD${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
-
-cd $OPENIM_ROOT
 
 #service filename
 service_filename=(
@@ -88,8 +85,9 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
     kill -9 $(eval $pid)
     sleep 0.5
   fi
-  cd $
-  #Get the rpc port in the configuration file
+  cd $OPENIM_ROOT
+  cd $BIN_DIR
+  # Get the rpc port in the configuration file
   portList=$(cat $config_path | grep ${service_port_name[$i]} | awk -F '[:]' '{print $NF}')
   list_to_string ${portList}
   service_ports=($ports_array)
@@ -109,8 +107,8 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
     fi
     echo $cmd
-    echo "=====================start ${service_filename[$i]}======================">>../logs/openIM.log
-    nohup $cmd >>../logs/openIM.log 2>&1 &
+    echo "=====================start ${service_filename[$i]}======================">>$OPENIM_ROOT/logs/openIM.log
+    nohup $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
     echo -e "${GREEN_PREFIX}${service_filename[$i]} start success,port number:${service_ports[$j]} pid:$(eval $pid)$COLOR_SUFFIX"

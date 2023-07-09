@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-NAME=openim_cmd_utils
+NAME=openim-cmdutils
 BIN_DIR=../../bin/
 
 OS:= $(or $(os),linux)

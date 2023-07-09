@@ -20,8 +20,8 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "$(dirname "${BASH_SOURCE[0]}")/../scripts.sh"
 
 # Include specific functions and variables
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.cfg" \
-  "$OPENIM_ROOT/scripts/path_info.cfg"
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.sh" \
+  "$OPENIM_ROOT/scripts/path_info.sh"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
@@ -76,5 +76,5 @@ done
 echo "success_num" $success_num  "service num:" ${#service_source_root[*]}
 if [ $success_num == ${#service_source_root[*]} ]
 then
-  echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
+  echo -e ${BACKGROUND_GREEN}"all services build success"${COLOR_SUFFIX}
 fi

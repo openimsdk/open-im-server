@@ -13,10 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+#Include shell font styles and some basic information
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 service_port_name=(
   openImWsPort
@@ -37,8 +47,8 @@ for i in ${service_port_name[*]}; do
   for j in ${ports_array}; do
     port=$(ss -tunlp| grep openim | awk '{print $5}' | grep -w ${j} | awk -F '[:]' '{print $NF}')
     if [[ ${port} -ne ${j} ]]; then
-      echo -e ${YELLOW_PREFIX}${i}${COLOR_SUFFIX}${RED_PREFIX}" service does not start normally,not initiated port is "${COLOR_SUFFIX}${YELLOW_PREFIX}${j}${COLOR_SUFFIX}
-      echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+      echo -e ${BACKGROUND_GREEN}${i}${COLOR_SUFFIX}${RED_PREFIX}" service does not start normally,not initiated port is "${COLOR_SUFFIX}${BACKGROUND_GREEN}${j}${COLOR_SUFFIX}
+      echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log "${COLOR_SUFFIX}
       exit -1
     else
       echo -e ${j}${GREEN_PREFIX}" port has been listening,belongs service is "${i}${COLOR_SUFFIX}
@@ -52,7 +62,7 @@ if [ $check -eq ${msg_transfer_service_num} ]; then
   echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImMsgTransfer"${COLOR_SUFFIX}
 else
   echo -e ${RED_PREFIX}"openImMsgTransfer service does not start normally, num err"${COLOR_SUFFIX}
-        echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+        echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log "${COLOR_SUFFIX}
       exit -1
 fi
 
@@ -62,8 +72,8 @@ if [ $check -ge 1 ]; then
   echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImCronTask"${COLOR_SUFFIX}
 else
   echo -e ${RED_PREFIX}"cron_task_name service does not start normally"${COLOR_SUFFIX}
-        echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+        echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log "${COLOR_SUFFIX}
       exit -1
 fi
 
-echo -e ${YELLOW_PREFIX}"all services launch success"${COLOR_SUFFIX}
+echo -e ${BACKGROUND_GREEN}"all services launch success"${COLOR_SUFFIX}

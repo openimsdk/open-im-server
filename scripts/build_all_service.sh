@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-source ./style_info.cfg
-source ./path_info.cfg
+source ./style_info.sh
+source ./path_info.sh
 source ./function.sh
 echo -e  ""
 
@@ -43,8 +43,8 @@ fi
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/style_info.sh
+source $OPENIM_ROOT/scripts/path_info.sh
 source $OPENIM_ROOT/scripts/function.sh
 
 cd $OPENIM_ROOT

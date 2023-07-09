@@ -16,9 +16,20 @@
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-cd "$OPENIM_ROOT/scripts/"
+#Include shell font styles and some basic information
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 need_to_start_server_shell=(
   "start_rpc_service.sh"
@@ -30,13 +41,13 @@ need_to_start_server_shell=(
 time=$(date +"%Y-%m-%d %H:%M:%S")
 
 for _ in {1..3}; do
-  echo "==========================================================" >> ../logs/openIM.log 2>&1
+  echo "==========================================================" >> $OPENIM_ROOT/logs/openIM.log 2>&1
 done
 
-echo "==========server start time:${time}===========" >> ../logs/openIM.log 2>&1
+echo "==========server start time:${time}===========" >> $OPENIM_ROOT/logs/openIM.log 2>&1
 
 for _ in {1..3}; do
-  echo "==========================================================" >> ../logs/openIM.log 2>&1
+  echo "==========================================================" >> $OPENIM_ROOT/logs/openIM.log 2>&1
 done
 
 build_pid_array=()
@@ -74,5 +85,5 @@ done
 echo "success_num" $success_num  "service num:" ${#need_to_start_server_shell[*]}
 if [ $success_num == ${#need_to_start_server_shell[*]} ]
 then
-  echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
+  echo -e ${BACKGROUND_GREEN}"all services build success"${COLOR_SUFFIX}
 fi

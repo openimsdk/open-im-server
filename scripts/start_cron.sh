@@ -14,18 +14,23 @@
 # limitations under the License.
 
 #Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.cfg
-source $OPENIM_ROOT/scripts/path_info.cfg
-source $OPENIM_ROOT/scripts/function.sh
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
-
-cd "$OPENIM_ROOT/scripts/"
 
 #Check if the service exists
 #If it is exists,kill this process
@@ -40,8 +45,8 @@ sleep 1
 
 cd ${cron_task_binary_root}
 #for ((i = 0; i < ${cron_task_service_num}; i++)); do
-      echo "==========================start cron_task process===========================">>../logs/openIM.log
-nohup ./${cron_task_name}  >>../logs/openIM.log 2>&1 &
+      echo "==========================start cron_task process===========================">>$OPENIM_ROOT/logs/openIM.log
+nohup ./${cron_task_name}  >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 #done
 
 #Check launched service process
@@ -51,9 +56,9 @@ then
 newPid=`ps aux | grep -w ./${cron_task_name} | grep -v grep|awk '{print $2}'`
 allPorts=""
     echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS "${COLOR_SUFFIX}
-    echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${YELLOW_PREFIX}${cron_task_name}${COLOR_SUFFIX}
-    echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${YELLOW_PREFIX}${newPid}${COLOR_SUFFIX}
-    echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allPorts}${COLOR_SUFFIX}
+    echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${cron_task_name}${COLOR_SUFFIX}
+    echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${newPid}${COLOR_SUFFIX}
+    echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
 else
-    echo -e ${YELLOW_PREFIX}${cron_task_name}${COLOR_SUFFIX}${RED_PREFIX}"SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
+    echo -e ${BACKGROUND_GREEN}${cron_task_name}${COLOR_SUFFIX}${RED_PREFIX}"SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
 fi

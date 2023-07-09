@@ -23,7 +23,7 @@ fi
 
 set +e
 echo "repository: ${repository}"
-source ./path_info.cfg
+source ./path_info.sh
 echo "start to build docker images"
 currentPwd=`pwd`
 echo ${currentPwd}

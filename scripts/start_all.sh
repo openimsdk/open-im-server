@@ -21,15 +21,15 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.cfg
-source $SCRIPTS_ROOT/path_info.cfg
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
 source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
-echo -e "${BACKGROUND_YELLOW}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>pwd=$PWD${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
@@ -65,7 +65,7 @@ for i in ${need_to_start_server_shell[*]}; do
 
   echo -e ""
   # Print script execution message
-  echo -e "=========> ${YELLOW_PREFIX}Executing ${i}...${COLOR_SUFFIX}"
+  echo -e "=========> ${BACKGROUND_GREEN}Executing ${i}...${COLOR_SUFFIX}"
   echo -e ""
 
   ./$i

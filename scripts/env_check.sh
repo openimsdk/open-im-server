@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-source ./style_info.cfg
+source ./style_info.sh
 
 echo -e "check time synchronize.................................."
 t=`curl http://time.akamai.com/?iso -s`

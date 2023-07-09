@@ -146,7 +146,7 @@ all services build success
 
 > Open-IM scripts provides service compilation, start, and stop scripts. There are four Open-IM scripts start modules, one is the http+rpc service start module, the second is the websocket service start module, then the msg_transfer module, and the last is the push module
 
-- path_info.cfg&&style_info.cfg&&functions.sh
+- path_info.sh&&style_info.sh&&functions.sh
     - Contains the path information of each module, including the path where the source code is located, the name of the service startup, the shell print font style, and some functions for processing shell strings
 - build_all_service.sh
     - Compile the module, compile all the source code of Open-IM into a binary file and put it into the bin directory

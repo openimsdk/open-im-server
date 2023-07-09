@@ -13,17 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#input:[10023,2323,3434]
-#output:10023 2323 3434
-list_to_string(){
-ports_list=$*
-sub_s1=`echo $ports_list | sed 's/ //g'`
-sub_s2=${sub_s1//,/ }
-sub_s3=${sub_s2#*[}
-sub_s4=${sub_s3%]*}
-ports_array=$sub_s4
+# input: [10023, 2323, 3434]
+# output: 10023 2323 3434
+
+# 函数功能：将列表转换为字符串，去除空格和括号
+list_to_string() {
+    ports_list=$*  # 获取传入的参数列表
+    sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
+    sub_s2=${sub_s1//,/ }  # 将逗号替换为空格
+    sub_s3=${sub_s2#*[}  # 去除左括号及其之前的内容
+    sub_s4=${sub_s3%]*}  # 去除右括号及其之后的内容
+    ports_array=$sub_s4  # 将处理后的字符串赋值给变量 ports_array
 }
-remove_space(){
-  value=$*
-  result=`echo $value | sed 's/ //g'`
+
+# 函数功能：去除字符串中的空格
+remove_space() {
+    value=$*  # 获取传入的参数
+    result=$(echo $value | sed 's/ //g')  # 去除空格
 }

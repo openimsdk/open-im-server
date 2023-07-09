@@ -274,5 +274,4 @@ prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.cfg中的msg_transfer_service_num保持一致
-
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.sh中的msg_transfer_service_num保持一致

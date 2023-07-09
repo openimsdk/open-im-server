@@ -1,21 +1,16 @@
+#!/usr/bin/env bash
 # Determine the architecture and version
 architecture=$(uname -m)
 version=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 #Include shell font styles and some basic information
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.cfg
-source $SCRIPTS_ROOT/path_info.cfg
-source $SCRIPTS_ROOT/function.sh
+source $SCRIPTS_ROOT/style_info.sh
 
 cd $SCRIPTS_ROOT
-
-echo -e "${BACKGROUND_YELLOW}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_YELLOW}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 # Define the supported architectures and corresponding bin directories
 declare -A supported_architectures=(
@@ -47,29 +42,28 @@ echo "================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR"
 # Don't put the space between "="
 openim_msggateway="openim-msggateway"
 msg_gateway_binary_root="$OPENIM_ROOT/$BIN_DIR"
-msg_gateway_source_root="../cmd/msggateway/"
+msg_gateway_source_root="$OPENIM_ROOT/cmd/msggateway/"
 
 msg_name="openim-rpc-msg"
 msg_binary_root="$OPENIM_ROOT/$BIN_DIR"
-msg_source_root="../cmd/openim-rpc/msg/"
+msg_source_root="$OPENIM_ROOT/cmd/openim-rpc/msg/"
 
 push_name="openim-push"
 push_binary_root="$OPENIM_ROOT/$BIN_DIR"
-push_source_root="../cmd/push/"
+push_source_root="$OPENIM_ROOT/cmd/push/"
 
 openim_msgtransfer="openim-rpc-msg_transfer"
 msg_transfer_binary_root="$OPENIM_ROOT/$BIN_DIR"
-msg_transfer_source_root="$OPENIM_ROOT/cmd/msgtransfer/"
+msg_transfer_source_root="$OPENIM_ROOT/cmd/openim-msgtransfer/"
 msg_transfer_service_num=4
 
 cron_task_name="openim-crontask"
 cron_task_binary_root="$OPENIM_ROOT/$BIN_DIR"
-cron_task_source_root="$OPENIM_ROOT/cmd/crontask/"
+cron_task_source_root="$OPENIM_ROOT/cmd/openim-crontask/"
 
-
-cmd_utils_name="openim_cmd_utils"
+cmd_utils_name="openim-cmdutils"
 cmd_utils_binary_root="$OPENIM_ROOT/$BIN_DIR"
-cmd_utils_source_root="$OPENIM_ROOT/cmd/cmduitls/"
+cmd_utils_source_root="$OPENIM_ROOT/cmd/openim-cmdutils/"
 
 # Global configuration file default dir
 config_path="$OPENIM_ROOT/config/config.yaml"
@@ -77,15 +71,15 @@ config_path="$OPENIM_ROOT/config/config.yaml"
 # servicefile dir path
 service_source_root=(
   # api service file
-  "../cmd/api/"
+  "$OPENIM_ROOT/cmd/api/"
   # rpc service file
-  "../cmd/openim-rpc/openim-rpc-user/"
-  "../cmd/openim-rpc/openim-rpc-friend/"
-  "../cmd/openim-rpc/openim-rpc-group/"
-  "../cmd/openim-rpc/openim-rpc-auth/"
-  "../cmd/openim-rpc/openim-rpc-conversation/"
-  "../cmd/openim-rpc/openim-rpc-third/"
-  "../cmd/openim-crontask"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-user/"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-friend/"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-group/"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-auth/"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-conversation/"
+  "$OPENIM_ROOT/cmd/openim-rpc/openim-rpc-third/"
+  "$OPENIM_ROOT/cmd/openim-crontask"
   "${msg_gateway_source_root}"
   "${msg_transfer_source_root}"
   "${msg_source_root}"
