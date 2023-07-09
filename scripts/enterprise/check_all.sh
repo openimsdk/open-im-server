@@ -13,10 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#Include shell font styles and some basic information
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-source ./style_info.cfg
-source ./enterprise/path_info.cfg
-source ./enterprise/function.sh
+#Include shell font styles and some basic information
+source $OPENIM_ROOT/scripts/style_info.cfg
+source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/function.sh
+
+cd "$OPENIM_ROOT/scripts/"
+
 service_port_name=(
  openImChatApiPort
  openImAdminApiPort

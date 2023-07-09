@@ -17,7 +17,7 @@
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 # Include necessary files
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/function"
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts.sh"
 
 # Include specific functions and variables
 source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.cfg" \

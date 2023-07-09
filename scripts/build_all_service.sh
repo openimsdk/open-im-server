@@ -17,12 +17,12 @@
 source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
-echo -e  "\n"
+echo -e  ""
 
 echo -e "${BACKGROUND_BLUE}===============> Building all using make build binary files ${COLOR_SUFFIX}" 
 
-echo -e  "\n"
-echo -e "${BOLD_PREFIX}_____  _   _  _____  _____  _____  _____  _____  _____  _____  _____  _____ ${COLOR_SUFFIX}"
+echo -e  ""
+echo -e "${BOLD_PREFIX}____________________________________________________________ ${COLOR_SUFFIX}"
 
 
 bin_dir="$BIN_DIR"
@@ -39,14 +39,13 @@ if [ ! -d $sdk_db_dir ]; then
   mkdir -p $sdk_db_dir
 fi
 
-# OpenIM root path
+#Include shell font styles and some basic information
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
-
-#!/bin/bash
+#Include shell font styles and some basic information
+source $OPENIM_ROOT/scripts/style_info.cfg
+source $OPENIM_ROOT/scripts/path_info.cfg
+source $OPENIM_ROOT/scripts/function.sh
 
 cd $OPENIM_ROOT
 
@@ -102,11 +101,11 @@ for binary in $(find _output/bin/platforms/$REPO_DIR -type f); do
     fi
 done
 
-echo -e " \n"
+echo -e " "
 
 echo -e "${BOLD_PREFIX}=====================>  Build Results <=====================${COLOR_SUFFIX}"
 
-echo -e " \n"
+echo -e " "
 
 if [[ "$BUILD_SUCCESS" == true ]]; then
     echo -e "${GREEN_PREFIX}All binaries built successfully.${COLOR_SUFFIX}"
@@ -117,8 +116,8 @@ else
     done
 fi
 
-echo -e " \n"
+echo -e " "
 
 echo -e "${BOLD_PREFIX}============================================================${COLOR_SUFFIX}"
 
-echo -e " \n"
+echo -e " "
