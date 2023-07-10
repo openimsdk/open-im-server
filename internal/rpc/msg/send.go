@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -16,20 +17,24 @@ import (
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
 	resp = &pbMsg.SendMsgResp{}
-	flag := isMessageHasReadEnabled(req.MsgData)
-	if !flag {
-		return nil, errs.ErrMessageHasReadDisable.Wrap()
-	}
-	m.encapsulateMsgData(req.MsgData)
-	switch req.MsgData.SessionType {
-	case constant.SingleChatType:
-		return m.sendMsgSingleChat(ctx, req)
-	case constant.NotificationChatType:
-		return m.sendMsgNotification(ctx, req)
-	case constant.SuperGroupChatType:
-		return m.sendMsgSuperGroupChat(ctx, req)
-	default:
-		return nil, errs.ErrArgs.Wrap("unknown sessionType")
+	if req.MsgData != nil {
+		flag := isMessageHasReadEnabled(req.MsgData)
+		if !flag {
+			return nil, errs.ErrMessageHasReadDisable.Wrap()
+		}
+		m.encapsulateMsgData(req.MsgData)
+		switch req.MsgData.SessionType {
+		case constant.SingleChatType:
+			return m.sendMsgSingleChat(ctx, req)
+		case constant.NotificationChatType:
+			return m.sendMsgNotification(ctx, req)
+		case constant.SuperGroupChatType:
+			return m.sendMsgSuperGroupChat(ctx, req)
+		default:
+			return nil, errs.ErrArgs.Wrap("unknown sessionType")
+		}
+	} else {
+		return nil, errs.ErrArgs.Wrap("msgData is nil")
 	}
 }
 
