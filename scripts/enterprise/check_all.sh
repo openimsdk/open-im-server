@@ -24,9 +24,9 @@ source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
-echo -e "${BACKGROUND_GREEN}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_GREEN}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_GREEN}=======>pwd=$PWD${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 service_port_name=(
  openImChatApiPort

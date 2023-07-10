@@ -28,16 +28,16 @@ declare -A supported_architectures=(
 
 # Check if the architecture and version are supported
 if [[ -z ${supported_architectures["$version-$architecture"]} ]]; then
-    echo "================> Unsupported architecture: $architecture or version: $version"
+    echo -e "${BLUE_PREFIX}================> Unsupported architecture: $architecture or version: $version${COLOR_SUFFIX}"
     exit 1
 fi
 
-echo "================> Architecture: $architecture"
+echo -e "${BLUE_PREFIX}================> Architecture: $architecture${COLOR_SUFFIX}"
 
 # Set the BIN_DIR based on the architecture and version
 BIN_DIR=${supported_architectures["$version-$architecture"]}
 
-echo "================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR"
+echo -e "${BLUE_PREFIX}================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR${COLOR_SUFFIX}"
 
 # Don't put the space between "="
 openim_msggateway="openim-msggateway"
