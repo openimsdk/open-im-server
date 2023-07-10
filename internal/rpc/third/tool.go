@@ -12,12 +12,13 @@ import (
 	"unicode/utf8"
 )
 
-func toPbMapArray(m map[string][]string) map[string]*third.MapValues {
-	res := make(map[string]*third.MapValues)
+func toPbMapArray(m map[string][]string) []*third.KeyValues {
+	res := make([]*third.KeyValues, 0, len(m))
 	for key := range m {
-		res[key] = &third.MapValues{
+		res = append(res, &third.KeyValues{
+			Key:    key,
 			Values: m[key],
-		}
+		})
 	}
 	return res
 }

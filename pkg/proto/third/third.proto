@@ -2,21 +2,22 @@ syntax = "proto3";
 package OpenIMServer.third;
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third";
 
-message MapValues {
-  repeated string values = 1;
+message KeyValues {
+  string key = 1;
+  repeated string values = 2;
 }
 
 message SignPart {
   int32 partNumber = 1;
   string url = 2;
-  map<string, MapValues> query = 3;
-  map<string, MapValues> header = 4;
+  repeated KeyValues query = 3;
+  repeated KeyValues header = 4;
 }
 
 message AuthSignParts {
   string url = 1;
-  map<string, MapValues> query = 2;
-  map<string, MapValues> header = 3;
+  repeated KeyValues query = 2;
+  repeated KeyValues header = 3;
   repeated SignPart parts = 4;
 }
 
@@ -65,8 +66,8 @@ message AuthSignReq {
 
 message AuthSignResp {
   string url = 1;
-  map<string, MapValues> query = 2;
-  map<string, MapValues> header = 3;
+  repeated KeyValues query = 2;
+  repeated KeyValues header = 3;
   repeated SignPart parts = 4;
 }
 
