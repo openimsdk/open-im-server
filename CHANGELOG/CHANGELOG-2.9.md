@@ -2,6 +2,18 @@
 
 <!-- BEGIN MUNGE: GENERATED_TOC -->
 
+- [Version logging for OpenIM](#version-logging-for-openim)
+  - [Unreleased](#unreleased)
+  - [v2.9.0+1.839643f - 2023-07-07](#v2901839643f---2023-07-07)
+  - [v2.9.0+2.35f07fe - 2023-07-06](#v290235f07fe---2023-07-06)
+  - [v2.9.0+1.b5072b1 - 2023-07-05](#v2901b5072b1---2023-07-05)
+  - [v2.9.0+3.2667a3a - 2023-07-05](#v29032667a3a---2023-07-05)
+  - [v2.9.0+7.04818ca - 2023-07-05](#v290704818ca---2023-07-05)
+  - [v2.9.0 - 2023-07-04](#v290---2023-07-04)
+    - [Reverts](#reverts)
+    - [Pull Requests](#pull-requests)
+
+
 <!-- END MUNGE: GENERATED_TOC -->
 
 <a name="unreleased"></a>
