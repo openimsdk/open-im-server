@@ -55,6 +55,13 @@ func (o *ThirdApi) AccessURL(c *gin.Context) {
 
 func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 	name := c.Param("name")
+	if name == "" {
+		c.String(http.StatusBadRequest, "name is empty")
+		return
+	}
+	if name[0] == '/' {
+		name = name[1:]
+	}
 	operationID := c.Query("operationID")
 	if operationID == "" {
 		operationID = strconv.Itoa(rand.Int())
