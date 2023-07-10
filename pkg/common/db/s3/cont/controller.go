@@ -187,7 +187,8 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if uploadInfo.Size != upload.Size {
 			return nil, errors.New("upload size mismatching")
 		}
-		if uploadInfo.ETag != upload.Hash {
+		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, ",")))
+		if hex.EncodeToString(md5Sum[:]) != upload.Hash {
 			return nil, errors.New("upload md5 mismatching")
 		}
 		// 防止在这个时候，并发操作，导致文件被覆盖
