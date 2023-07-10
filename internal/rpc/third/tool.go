@@ -37,8 +37,8 @@ func checkUploadName(ctx context.Context, name string) error {
 		return errs.ErrNoPermission.Wrap("opUserID is empty")
 	}
 	if !tokenverify.IsManagerUserID(opUserID) {
-		if !strings.HasPrefix(name, opUserID+"_") {
-			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s_`", opUserID))
+		if !strings.HasPrefix(name, opUserID+"/") {
+			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}
 	}
 	return nil
