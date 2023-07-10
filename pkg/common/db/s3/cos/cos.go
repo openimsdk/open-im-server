@@ -50,6 +50,14 @@ func (c *Cos) Engine() string {
 	return "tencent-cos"
 }
 
+func (c *Cos) PartLimit() *s3.PartLimit {
+	return &s3.PartLimit{
+		MinPartSize: minPartSize,
+		MaxPartSize: maxPartSize,
+		MaxNumSize:  maxNumSize,
+	}
+}
+
 func (c *Cos) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
 	result, _, err := c.client.Object.InitiateMultipartUpload(ctx, name, nil)
 	if err != nil {

@@ -20,6 +20,15 @@ message AuthSignParts {
   repeated SignPart parts = 4;
 }
 
+message PartLimitReq {
+}
+
+message PartLimitResp {
+  int64 minPartSize = 1;
+  int64 maxPartSize = 2;
+  int32 maxNumSize = 3;
+}
+
 message PartSizeReq {
   int64 size = 1;
 }
@@ -100,6 +109,7 @@ message SetAppBadgeResp {
 }
 
 service third {
+  rpc PartLimit(PartLimitReq) returns(PartLimitResp);
   rpc PartSize(PartSizeReq) returns(PartSizeResp);
   rpc InitiateMultipartUpload(InitiateMultipartUploadReq) returns(InitiateMultipartUploadResp);
   rpc AuthSign(AuthSignReq) returns(AuthSignResp);

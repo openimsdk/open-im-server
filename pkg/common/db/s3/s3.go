@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type PartLimit struct {
+	MinPartSize int64 `json:"minPartSize"`
+	MaxPartSize int64 `json:"maxPartSize"`
+	MaxNumSize  int   `json:"maxNumSize"`
+}
+
 type InitiateMultipartUploadResult struct {
 	Bucket   string `json:"bucket"`
 	Key      string `json:"key"`
@@ -103,6 +109,7 @@ type AccessURLOption struct {
 
 type Interface interface {
 	Engine() string
+	PartLimit() *PartLimit
 
 	InitiateMultipartUpload(ctx context.Context, name string) (*InitiateMultipartUploadResult, error)
 	CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []Part) (*CompleteMultipartUploadResult, error)

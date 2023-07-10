@@ -29,6 +29,10 @@ func (o *ThirdApi) SetAppBadge(c *gin.Context) {
 
 // #################### s3 ####################
 
+func (o *ThirdApi) PartLimit(c *gin.Context) {
+	a2r.Call(third.ThirdClient.PartLimit, o.Client, c)
+}
+
 func (o *ThirdApi) PartSize(c *gin.Context) {
 	a2r.Call(third.ThirdClient.PartSize, o.Client, c)
 }

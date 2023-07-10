@@ -11,6 +11,15 @@ import (
 	"time"
 )
 
+func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {
+	limit := t.s3dataBase.PartLimit()
+	return &third.PartLimitResp{
+		MinPartSize: limit.MinPartSize,
+		MaxPartSize: limit.MaxPartSize,
+		MaxNumSize:  int32(limit.MaxNumSize),
+	}, nil
+}
+
 func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*third.PartSizeResp, error) {
 	size, err := t.s3dataBase.PartSize(ctx, req.Size)
 	if err != nil {

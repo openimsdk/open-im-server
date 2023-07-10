@@ -10,6 +10,7 @@ import (
 )
 
 type S3Database interface {
+	PartLimit() *s3.PartLimit
 	PartSize(ctx context.Context, size int64) (int64, error)
 	AuthSign(ctx context.Context, uploadID string, partNumbers []int) (*s3.AuthSignResult, error)
 	InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error)
@@ -32,6 +33,10 @@ type s3Database struct {
 
 func (s *s3Database) PartSize(ctx context.Context, size int64) (int64, error) {
 	return s.s3.PartSize(ctx, size)
+}
+
+func (s *s3Database) PartLimit() *s3.PartLimit {
+	return s.s3.PartLimit()
 }
 
 func (s *s3Database) AuthSign(ctx context.Context, uploadID string, partNumbers []int) (*s3.AuthSignResult, error) {

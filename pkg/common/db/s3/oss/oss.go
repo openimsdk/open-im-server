@@ -53,6 +53,14 @@ func (o *OSS) Engine() string {
 	return "ali-oss"
 }
 
+func (o *OSS) PartLimit() *s3.PartLimit {
+	return &s3.PartLimit{
+		MinPartSize: minPartSize,
+		MaxPartSize: maxPartSize,
+		MaxNumSize:  maxNumSize,
+	}
+}
+
 func (o *OSS) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
 	result, err := o.bucket.InitiateMultipartUpload(name)
 	if err != nil {

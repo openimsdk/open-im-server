@@ -46,6 +46,10 @@ func (c *Controller) PartSize(ctx context.Context, size int64) (int64, error) {
 	return c.impl.PartSize(ctx, size)
 }
 
+func (c *Controller) PartLimit() *s3.PartLimit {
+	return c.impl.PartLimit()
+}
+
 func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.ObjectInfo, error) {
 	return c.impl.StatObject(ctx, c.HashPath(hash))
 }

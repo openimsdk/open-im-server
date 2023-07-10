@@ -59,6 +59,14 @@ func (m *Minio) Engine() string {
 	return "minio"
 }
 
+func (m *Minio) PartLimit() *s3.PartLimit {
+	return &s3.PartLimit{
+		MinPartSize: minPartSize,
+		MaxPartSize: maxPartSize,
+		MaxNumSize:  maxNumSize,
+	}
+}
+
 func (m *Minio) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
 	uploadID, err := m.core.NewMultipartUpload(ctx, m.bucket, name, minio.PutObjectOptions{})
 	if err != nil {
