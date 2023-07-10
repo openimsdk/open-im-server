@@ -38,7 +38,7 @@ message ConversationReq{
   OpenIMServer.protobuf.Int64Value maxSeq = 12;
   OpenIMServer.protobuf.Int32Value groupAtType = 13;
   OpenIMServer.protobuf.Int64Value msgDestructTime = 14;
-  OpenIMServer.protobuf.Int64Value isMsgDestruct = 15;
+  OpenIMServer.protobuf.BoolValue isMsgDestruct = 15;
 }
 
 message SetConversationReq{
