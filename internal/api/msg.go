@@ -148,22 +148,6 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
-func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
-}
-
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
