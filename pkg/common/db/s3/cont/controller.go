@@ -191,7 +191,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, partSeparator)))
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
 			log.ZInfo(ctx, "CompleteUpload UploadTypePresigned", "getEtag", uploadInfo.ETag, "upload", upload, "etag[]", md5val, "upload hash:", upload.Hash, "key:", upload.Key)
-			return nil, errors.New("upload md5 mismatching")
+			return nil, fmt.Errorf("md5 mismatching %s != %s -> StatObject ETag %s", md5val, upload.Hash, uploadInfo.ETag)
 		}
 		// 防止在这个时候，并发操作，导致文件被覆盖
 		copyInfo, err := c.impl.CopyObject(ctx, targetKey, upload.Key+"."+c.UUID())
