@@ -203,10 +203,11 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if copyInfo.ETag != uploadInfo.ETag {
 			return nil, errors.New("[concurrency]copy md5 mismatching")
 		}
-		if _, err := c.impl.CopyObject(ctx, copyInfo.Key, c.HashPath(upload.Hash)); err != nil {
+		hashCopyInfo, err := c.impl.CopyObject(ctx, copyInfo.Key, c.HashPath(upload.Hash))
+		if err != nil {
 			return nil, err
 		}
-		targetKey = copyInfo.Key
+		targetKey = hashCopyInfo.Key
 	default:
 		return nil, errors.New("invalid upload id type")
 	}
