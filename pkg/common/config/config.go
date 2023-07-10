@@ -77,15 +77,11 @@ type config struct {
 		MsgToPush struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"msgToPush"`
-		MsgToModify struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"msgToModify"`
 		ConsumerGroupID struct {
-			MsgToRedis  string `yaml:"msgToRedis"`
-			MsgToMongo  string `yaml:"msgToMongo"`
-			MsgToMySql  string `yaml:"msgToMySql"`
-			MsgToPush   string `yaml:"msgToPush"`
-			MsgToModify string `yaml:"msgToModify"`
+			MsgToRedis string `yaml:"msgToRedis"`
+			MsgToMongo string `yaml:"msgToMongo"`
+			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToPush  string `yaml:"msgToPush"`
 		} `yaml:"consumerGroupID"`
 	} `yaml:"kafka"`
 

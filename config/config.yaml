@@ -42,14 +42,11 @@ kafka:
     topic: "offlineMsgToMongoMysql"       #不建议修改
   msgToPush:
     topic: "msgToPush"                    #不建议修改
-  msgToModify:
-    topic: "msgToModify"                  #不建议修改
   consumerGroupID: #消费者组，不建议修改
     msgToRedis: redis                     #
     msgToMongo: mongo                     #
     msgToMySql: mysql                     #
     msgToPush: push                       #
-    msgToModify: modify                   #
 
 
 rpc:
