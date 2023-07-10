@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/google/uuid"
 	"path"
 	"strings"
@@ -191,7 +192,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		}
 		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, partSeparator)))
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
-			return nil, fmt.Errorf("md5 mismatching %s != %s", md5val, upload.Hash)
+			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
 		}
 		// 防止在这个时候，并发操作，导致文件被覆盖
 		copyInfo, err := c.impl.CopyObject(ctx, uploadInfo.Key, upload.Key+"."+c.UUID())
@@ -199,8 +200,8 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 			return nil, err
 		}
 		cleanObject[copyInfo.Key] = struct{}{}
-		if copyInfo.ETag != upload.Hash {
-			return nil, errors.New("copy md5 mismatching")
+		if copyInfo.ETag != uploadInfo.ETag {
+			return nil, errors.New("[concurrency]copy md5 mismatching")
 		}
 		if _, err := c.impl.CopyObject(ctx, copyInfo.Key, c.HashPath(upload.Hash)); err != nil {
 			return nil, err
