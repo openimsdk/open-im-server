@@ -140,6 +140,7 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 }
 
 func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHashs []string) (*UploadResult, error) {
+	defer log.ZDebug(ctx, "return")
 	upload, err := parseMultipartUploadID(uploadID)
 	if err != nil {
 		return nil, err
