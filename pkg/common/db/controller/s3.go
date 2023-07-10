@@ -6,6 +6,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"path/filepath"
 	"time"
 )
 
@@ -61,8 +62,10 @@ func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Dur
 		return time.Time{}, "", err
 	}
 	opt := &s3.AccessURLOption{
-		ContentType:        obj.ContentType,
-		ContentDisposition: `attachment; filename=` + obj.Name,
+		ContentType: obj.ContentType,
+	}
+	if filename := filepath.Base(obj.Name); filename != "" {
+		opt.ContentDisposition = `attachment; filename=` + filename
 	}
 	expireTime := time.Now().Add(expire)
 	rawURL, err := s.s3.AccessURL(ctx, obj.Key, expire, opt)
