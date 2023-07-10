@@ -113,10 +113,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 		objectGroup.POST("/part_limit", t.PartLimit)
 		objectGroup.POST("/part_size", t.PartSize)
-		objectGroup.POST("/initiateMultipartUpload", t.InitiateMultipartUpload)
-		objectGroup.POST("/authSign", t.AuthSign)
-		objectGroup.POST("/completeMultipartUpload", t.CompleteMultipartUpload)
-		objectGroup.POST("/accessURL", t.AccessURL)
+		objectGroup.POST("/initiate_multipart_upload", t.InitiateMultipartUpload)
+		objectGroup.POST("/auth_sign", t.AuthSign)
+		objectGroup.POST("/complete_multipart_upload", t.CompleteMultipartUpload)
+		objectGroup.POST("/access_url", t.AccessURL)
 		objectGroup.GET("/object/*name", t.ObjectRedirect)
 	}
 	//Message
