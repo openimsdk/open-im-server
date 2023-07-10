@@ -1,3 +1,9 @@
+# Version logging for OpenIM
+
+<!-- BEGIN MUNGE: GENERATED_TOC -->
+
+<!-- END MUNGE: GENERATED_TOC -->
+
 {{ if .Versions -}}
 <a name="unreleased"></a>
 ## [Unreleased]

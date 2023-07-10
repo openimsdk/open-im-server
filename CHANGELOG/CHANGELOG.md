@@ -6,9 +6,8 @@ All notable changes to this project will be documented in this file.
 ## command
 
 ```bash
-git-chglog --tag-filter-pattern 'v3.0.0'  -o CHANGELOG-3.0.1.md
+git-chglog --tag-filter-pattern 'v2.0.*'  -o CHANGELOG-2.0.md
 ```
-
 
 ## create next tag
 
