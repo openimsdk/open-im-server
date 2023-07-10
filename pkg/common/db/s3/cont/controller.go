@@ -207,6 +207,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if err != nil {
 			return nil, err
 		}
+		log.ZInfo(ctx, "hashCopyInfo", "value", fmt.Sprintf("%+v", hashCopyInfo))
 		targetKey = hashCopyInfo.Key
 	default:
 		return nil, errors.New("invalid upload id type")
