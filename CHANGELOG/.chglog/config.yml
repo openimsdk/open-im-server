@@ -1,3 +1,4 @@
+bin: git
 style: github
 template: CHANGELOG.tpl.md
 info:

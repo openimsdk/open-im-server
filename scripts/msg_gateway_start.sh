@@ -51,9 +51,9 @@ if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 fi
 #Check if the service exists
 #If it is exists,kill this process
-check=$(ps aux | grep -w ./${openim-msggateway} | grep -v grep | wc -l)
+check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
 if [ $check -ge 1 ]; then
-  oldPid=$(ps aux | grep -w ./${openim-msggateway} | grep -v grep | awk '{print $2}')
+  oldPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
     kill -9 ${oldPid}
 fi
 #Waiting port recycling
@@ -61,23 +61,23 @@ sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
   echo "==========================start msg_gateway server===========================">>$OPENIM_ROOT/logs/openIM.log
-  nohup ./${openim-msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
+  nohup ./${openim_msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 done
 
 #Check launched service process
 sleep 3
-check=$(ps aux | grep -w ./${openim-msggateway} | grep -v grep | wc -l)
+check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
 allPorts=""
 if [ $check -ge 1 ]; then
-  allNewPid=$(ps aux | grep -w ./${openim-msggateway} | grep -v grep | awk '{print $2}')
+  allNewPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
   for i in $allNewPid; do
     ports=$(netstat -netulp | grep -w ${i} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
       allPorts=${allPorts}"$ports "
   done
   echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS"${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${openim-msggateway}${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${openim_msggateway}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allNewPid}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
 else
-  echo -e ${BACKGROUND_GREEN}${openim-msggateway}${COLOR_SUFFIX}${RED_PREFIX}"\n SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
+  echo -e ${BACKGROUND_GREEN}${openim_msggateway}${COLOR_SUFFIX}${RED_PREFIX}"\n SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
 fi
