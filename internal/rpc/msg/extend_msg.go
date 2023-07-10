@@ -8,130 +8,128 @@ import (
 )
 
 func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
-	//resp = &msg.SetMessageReactionExtensionsResp{}
-	////resp.ClientMsgID = req.ClientMsgID
-	////resp.MsgFirstModifyTime = req.MsgFirstModifyTime
+	resp = &msg.SetMessageReactionExtensionsResp{}
+	resp.ClientMsgID = req.ClientMsgID
+	resp.MsgFirstModifyTime = req.MsgFirstModifyTime
+	if err := callbackSetMessageReactionExtensions(ctx, req); err != nil {
+		return nil, err
+	}
+	if req.IsExternalExtensions {
+		resp.MsgFirstModifyTime = req.MsgFirstModifyTime
+		// notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, !req.IsReact, false)
+		return resp, nil
+	}
+	// isExists, err := m.MsgDatabase.JudgeMessageReactionExist(ctx, req.ClientMsgID, req.SessionType)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	//
-	//if err := CallbackSetMessageReactionExtensions(ctx, req); err != nil {
-	//	return nil, err
-	//}
-	////if ExternalExtension
-	//if req.IsExternalExtensions {
-	//	resp.MsgFirstModifyTime = req.MsgFirstModifyTime
-	//	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, !req.IsReact, false)
-	//	return resp, nil
-	//}
-	//isExists, err := m.MsgDatabase.JudgeMessageReactionExist(ctx, req.ClientMsgID, req.SessionType)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if !isExists {
-	//	if !req.IsReact {
-	//		resp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
-	//		for k, v := range req.ReactionExtensions {
-	//			err := m.MessageLocker.LockMessageTypeKey(ctx, req.ClientMsgID, k)
-	//			if err != nil {
-	//				return nil, err
-	//			}
-	//			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//			if err := m.MsgDatabase.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
-	//				return nil, err
-	//			}
-	//		}
-	//		resp.IsReact = true
-	//		_, err := m.MsgDatabase.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	} else {
-	//		err := m.MessageLocker.LockGlobalMessage(ctx, req.ClientMsgID)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		mongoValue, err := m.MsgDatabase.GetExtendMsg(ctx, req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		setValue := make(map[string]*sdkws.KeyValue)
-	//		for k, v := range req.ReactionExtensions {
-	//
-	//			temp := new(sdkws.KeyValue)
-	//			if vv, ok := mongoValue.ReactionExtensions[k]; ok {
-	//				utils.CopyStructFields(temp, &vv)
-	//				if v.LatestUpdateTime != vv.LatestUpdateTime {
-	//					setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
-	//					continue
-	//				}
-	//			}
-	//			temp.TypeKey = k
-	//			temp.Value = v.Value
-	//			temp.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//			setValue[k] = temp
-	//		}
-	//		err = db.DB.InsertOrUpdateReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime, setValue)
-	//		if err != nil {
-	//			for _, value := range setValue {
-	//				temp := new(msg.KeyValueResp)
-	//				temp.KeyValue = value
-	//				temp.ErrMsg = err.Error()
-	//				temp.ErrCode = 100
-	//				resp.Result = append(resp.Result, temp)
-	//			}
-	//		} else {
-	//			for _, value := range setValue {
-	//				temp := new(msg.KeyValueResp)
-	//				temp.KeyValue = value
-	//				resp.Result = append(resp.Result, temp)
-	//			}
-	//		}
-	//		lockErr := m.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
-	//		if lockErr != nil {
-	//			log.Error(req.OperationID, "UnLockGlobalMessage err:", lockErr.Error())
-	//		}
-	//	}
-	//
-	//} else {
-	//	log.Debug(req.OperationID, "redis handle secondly", req.String())
-	//
-	//	for k, v := range req.Pb2Model {
-	//		err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
-	//		if err != nil {
-	//			setKeyResultInfo(&resp, 100, err.Error(), req.ClientMsgID, k, v)
-	//			continue
-	//		}
-	//		redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k)
-	//		if err != nil && err != go_redis.Nil {
-	//			setKeyResultInfo(&resp, 200, err.Error(), req.ClientMsgID, k, v)
-	//			continue
-	//		}
-	//		temp := new(sdkws.KeyValue)
-	//		utils.JsonStringToStruct(redisValue, temp)
-	//		if v.LatestUpdateTime != temp.LatestUpdateTime {
-	//			setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
-	//			continue
-	//		} else {
-	//			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//			newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
-	//			if newerr != nil {
-	//				setKeyResultInfo(&resp, 201, newerr.Error(), req.ClientMsgID, k, temp)
-	//				continue
-	//			}
-	//			setKeyResultInfo(&resp, 0, "", req.ClientMsgID, k, v)
-	//		}
-	//
-	//	}
-	//}
-	//if !isExists {
-	//	if !req.IsReact {
-	//		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, true, true)
-	//	} else {
-	//		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, false)
-	//	}
-	//} else {
-	//	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, true)
-	//}
-	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", resp.String())
+	// if !isExists {
+	// 	if !req.IsReact {
+	// 		resp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
+	// 		for k, v := range req.ReactionExtensions {
+	// 			err := m.MessageLocker.LockMessageTypeKey(ctx, req.ClientMsgID, k)
+	// 			if err != nil {
+	// 				return nil, err
+	// 			}
+	// 			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
+	// 			if err := m.MsgDatabase.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
+	// 				return nil, err
+	// 			}
+	// 		}
+	// 		resp.IsReact = true
+	// 		_, err := m.MsgDatabase.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 	} else {
+	// 		err := m.MessageLocker.LockGlobalMessage(ctx, req.ClientMsgID)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		mongoValue, err := m.MsgDatabase.GetExtendMsg(ctx, req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		setValue := make(map[string]*sdkws.KeyValue)
+	// 		for k, v := range req.ReactionExtensions {
+
+	// 			temp := new(sdkws.KeyValue)
+	// 			if vv, ok := mongoValue.ReactionExtensions[k]; ok {
+	// 				utils.CopyStructFields(temp, &vv)
+	// 				if v.LatestUpdateTime != vv.LatestUpdateTime {
+	// 					setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
+	// 					continue
+	// 				}
+	// 			}
+	// 			temp.TypeKey = k
+	// 			temp.Value = v.Value
+	// 			temp.LatestUpdateTime = utils.GetCurrentTimestampByMill()
+	// 			setValue[k] = temp
+	// 		}
+	// 		err = db.DB.InsertOrUpdateReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime, setValue)
+	// 		if err != nil {
+	// 			for _, value := range setValue {
+	// 				temp := new(msg.KeyValueResp)
+	// 				temp.KeyValue = value
+	// 				temp.ErrMsg = err.Error()
+	// 				temp.ErrCode = 100
+	// 				resp.Result = append(resp.Result, temp)
+	// 			}
+	// 		} else {
+	// 			for _, value := range setValue {
+	// 				temp := new(msg.KeyValueResp)
+	// 				temp.KeyValue = value
+	// 				resp.Result = append(resp.Result, temp)
+	// 			}
+	// 		}
+	// 		lockErr := m.dMessageLocker.UnLockGlobalMessage(req.ClientMsgID)
+	// 		if lockErr != nil {
+	// 			log.Error(req.OperationID, "UnLockGlobalMessage err:", lockErr.Error())
+	// 		}
+	// 	}
+
+	// } else {
+	// 	log.Debug(req.OperationID, "redis handle secondly", req.String())
+
+	// 	for k, v := range req.Pb2Model {
+	// 		err := m.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
+	// 		if err != nil {
+	// 			setKeyResultInfo(&resp, 100, err.Error(), req.ClientMsgID, k, v)
+	// 			continue
+	// 		}
+	// 		redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k)
+	// 		if err != nil && err != go_redis.Nil {
+	// 			setKeyResultInfo(&resp, 200, err.Error(), req.ClientMsgID, k, v)
+	// 			continue
+	// 		}
+	// 		temp := new(sdkws.KeyValue)
+	// 		utils.JsonStringToStruct(redisValue, temp)
+	// 		if v.LatestUpdateTime != temp.LatestUpdateTime {
+	// 			setKeyResultInfo(&resp, 300, "message have update", req.ClientMsgID, k, temp)
+	// 			continue
+	// 		} else {
+	// 			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
+	// 			newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
+	// 			if newerr != nil {
+	// 				setKeyResultInfo(&resp, 201, newerr.Error(), req.ClientMsgID, k, temp)
+	// 				continue
+	// 			}
+	// 			setKeyResultInfo(&resp, 0, "", req.ClientMsgID, k, v)
+	// 		}
+
+	// 	}
+	// }
+	// if !isExists {
+	// 	if !req.IsReact {
+	// 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, true, true)
+	// 	} else {
+	// 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, false)
+	// 	}
+	// } else {
+	// 	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, true)
+	// }
+	// log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", resp.String())
 	return resp, nil
 
 }

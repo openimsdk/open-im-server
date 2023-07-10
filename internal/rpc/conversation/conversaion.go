@@ -108,12 +108,12 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		if groupInfo.Status == constant.GroupStatusDismissed {
 			return nil, err
 		}
-		for _, userID := range req.UserIDs {
-			if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
-				log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
-				return nil, err
-			}
-		}
+		// for _, userID := range req.UserIDs {
+		// 	if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
+		// 		log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
+		// 		return nil, err
+		// 	}
+		// }
 	}
 	var conversation tableRelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
@@ -138,6 +138,9 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	}
 	if req.Conversation.MsgDestructTime != nil {
 		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+	}
+	if req.Conversation.IsMsgDestruct != nil {
+		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
 		var conversations []*tableRelation.ConversationModel

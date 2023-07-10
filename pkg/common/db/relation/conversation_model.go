@@ -93,5 +93,5 @@ func (c *ConversationGorm) GetConversationsByConversationID(ctx context.Context,
 }
 
 func (c *ConversationGorm) GetConversationIDsNeedDestruct(ctx context.Context) (conversations []*relation.ConversationModel, err error) {
-	return conversations, utils.Wrap(c.db(ctx).Where("UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) && msg_destruct_time != 0").Error, "")
+	return conversations, utils.Wrap(c.db(ctx).Where("is_msg_destruct = 1 && UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) && msg_destruct_time != 0").Error, "")
 }

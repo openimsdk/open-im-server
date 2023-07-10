@@ -25,7 +25,8 @@ type ConversationModel struct {
 	MaxSeq                int64     `gorm:"column:max_seq" json:"maxSeq"`
 	MinSeq                int64     `gorm:"column:min_seq" json:"minSeq"`
 	CreateTime            time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
-	MsgDestructTime       int64     `gorm:"column:msg_destruct_time;default:0"`
+	IsMsgDestruct         bool      `gorm:"column:is_msg_destruct;default:false"`
+	MsgDestructTime       int64     `gorm:"column:msg_destruct_time;default:604800"`
 	LatestMsgDestructTime time.Time `gorm:"column:latest_msg_destruct_time;autoCreateTime"`
 }
 
