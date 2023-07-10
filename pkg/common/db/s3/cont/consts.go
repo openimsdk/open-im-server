@@ -5,4 +5,5 @@ const (
 	tempPath            = "openim/temp/"
 	UploadTypeMultipart = 1 // 分片上传
 	UploadTypePresigned = 2 // 预签名上传
+	partSeparator       = ","
 )

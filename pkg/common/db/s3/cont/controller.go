@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/google/uuid"
 	"path"
 	"strings"
@@ -143,7 +144,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 	if err != nil {
 		return nil, err
 	}
-	if md5Sum := md5.Sum([]byte(strings.Join(partHashs, ","))); hex.EncodeToString(md5Sum[:]) != upload.Hash {
+	if md5Sum := md5.Sum([]byte(strings.Join(partHashs, partSeparator))); hex.EncodeToString(md5Sum[:]) != upload.Hash {
 		fmt.Println("CompleteUpload sum:", hex.EncodeToString(md5Sum[:]), "upload hash:", upload.Hash)
 		return nil, errors.New("md5 mismatching")
 	}
@@ -187,8 +188,9 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if uploadInfo.Size != upload.Size {
 			return nil, errors.New("upload size mismatching")
 		}
-		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, ",")))
-		if hex.EncodeToString(md5Sum[:]) != upload.Hash {
+		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, partSeparator)))
+		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
+			log.ZInfo(ctx, "CompleteUpload UploadTypePresigned", "getEtag", uploadInfo.ETag, "upload", upload, "etag[]", md5val, "upload hash:", upload.Hash, "key:", upload.Key)
 			return nil, errors.New("upload md5 mismatching")
 		}
 		// 防止在这个时候，并发操作，导致文件被覆盖
