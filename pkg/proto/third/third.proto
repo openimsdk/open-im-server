@@ -40,10 +40,11 @@ message PartSizeResp {
 message InitiateMultipartUploadReq {
   string hash = 1;
   int64 size = 2;
-  int32 maxParts = 3;
-  string cause = 4;
-  string name = 5;
-  string contentType = 6;
+  int64 partSize = 3;
+  int32 maxParts = 4;
+  string cause = 5;
+  string name = 6;
+  string contentType = 7;
 }
 
 message UploadInfo {
