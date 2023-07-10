@@ -154,27 +154,27 @@ type NotificationSender struct {
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
 }
 
-type NewNotificationSenderOptions func(*NotificationSender)
+type NotificationSenderOptions func(*NotificationSender)
 
-func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NewNotificationSenderOptions {
+func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
 }
 
-func WithRpcClient(msgRpcClient *MessageRpcClient) NewNotificationSenderOptions {
+func WithRpcClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = msgRpcClient.SendMsg
 	}
 }
 
-func WithUserRpcClient(userRpcClient *UserRpcClient) NewNotificationSenderOptions {
+func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.getUserInfo = userRpcClient.GetUserInfo
 	}
 }
 
-func NewNotificationSender(opts ...NewNotificationSenderOptions) *NotificationSender {
+func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
 	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)

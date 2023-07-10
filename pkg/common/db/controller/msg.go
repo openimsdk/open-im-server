@@ -2,8 +2,9 @@ package controller
 
 import (
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -48,6 +49,9 @@ type CommonMsgDatabase interface {
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
 	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
+	// 用户标记删除过期消息返回标记删除的seq列表
+	UserMsgsDestruct(cte context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
+
 	// 用户根据seq删除消息
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// 物理删除消息置空
@@ -391,44 +395,6 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 	return totalMsgs, nil
 }
 
-// func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*unRelationTb.MsgDataModel, err error) {
-// 	var reFetchSeqs []int64
-// 	if delNums > 0 {
-// 		newBeginSeq := rangeBegin - delNums
-// 		if newBeginSeq >= begin {
-// 			newEndSeq := rangeBegin - 1
-// 			for i := newBeginSeq; i <= newEndSeq; i++ {
-// 				reFetchSeqs = append(reFetchSeqs, i)
-// 			}
-// 		}
-// 	}
-// 	if len(reFetchSeqs) == 0 {
-// 		return
-// 	}
-// 	if len(reFetchSeqs) > 0 {
-// 		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-// 		for docID, seqs := range m {
-// 			msgs, _, err := db.findMsgInfoBySeq(ctx, docID, seqs)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			for _, msg := range msgs {
-// 				if msg.Status != constant.MsgDeleted {
-// 					seqMsgs = append(seqMsgs, msg)
-// 				}
-// 			}
-// 		}
-// 	}
-// 	if len(seqMsgs) < int(delNums) {
-// 		seqMsgs2, err := db.refetchDelSeqsMsgs(ctx, conversationID, delNums-int64(len(seqMsgs)), rangeBegin-1, begin)
-// 		if err != nil {
-// 			return seqMsgs, err
-// 		}
-// 		seqMsgs = append(seqMsgs, seqMsgs2...)
-// 	}
-// 	return seqMsgs, nil
-// }
-
 func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, err error) {
 	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	for _, msg := range msgs {
@@ -634,6 +600,40 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 		}
 	}
 	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
+}
+
+func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error) {
+	var index int64
+	for {
+		// from oldest 2 newest
+		msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
+		if err != nil || msgDocModel.DocID == "" {
+			if err != nil {
+				if err == unrelation.ErrMsgListNotExist {
+					log.ZDebug(ctx, "deleteMsgRecursion finished", "conversationID", conversationID, "userID", userID, "index", index)
+				} else {
+					log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
+				}
+			}
+			// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
+			break
+		}
+		//&& msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
+		if len(msgDocModel.Msg) > 0 {
+			for _, msg := range msgDocModel.Msg {
+				if msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
+					if msg.Msg.SendTime > lastMsgDestructTime.UnixMilli() && !utils.Contain(userID, msg.DelList...) {
+						seqs = append(seqs, msg.Msg.Seq)
+					}
+				} else {
+					log.ZDebug(ctx, "deleteMsgRecursion finished", "conversationID", conversationID, "userID", userID, "index", index)
+					break
+				}
+
+			}
+		}
+	}
+	return seqs, db.DeleteUserMsgsBySeqs(ctx, userID, conversationID, seqs)
 }
 
 // this is struct for recursion

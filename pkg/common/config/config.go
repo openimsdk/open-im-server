@@ -215,6 +215,7 @@ type config struct {
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
 	RetainChatRecords                 int    `yaml:"retainChatRecords"`
 	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
+	MsgDestructTime                   string `yaml:"msgDestructTime"`
 	Secret                            string `yaml:"secret"`
 	TokenPolicy                       struct {
 		Expire int64 `yaml:"expire"`

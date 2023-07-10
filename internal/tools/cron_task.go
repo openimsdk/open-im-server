@@ -22,8 +22,13 @@ func StartCronTask() error {
 	wg.Add(1)
 	_, err = c.AddFunc(config.Config.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
 	if err != nil {
-		fmt.Println("start cron failed", err.Error(), config.Config.ChatRecordsClearTime)
-		return err
+		fmt.Println("start allConversationClearMsgAndFixSeq cron failed", err.Error(), config.Config.ChatRecordsClearTime)
+		panic(err)
+	}
+	_, err = c.AddFunc(config.Config.MsgDestructTime, msgTool.ConversationsDestructMsgs)
+	if err != nil {
+		fmt.Println("start conversationsDestructMsgs cron failed", err.Error(), config.Config.ChatRecordsClearTime)
+		panic(err)
 	}
 	c.Start()
 	wg.Wait()

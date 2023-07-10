@@ -136,6 +136,9 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation.GroupAtType != nil {
 		m["group_at_type"] = req.Conversation.GroupAtType.Value
 	}
+	if req.Conversation.MsgDestructTime != nil {
+		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
 		var conversations []*tableRelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
