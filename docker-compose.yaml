@@ -100,8 +100,8 @@ services:
 
 
   openim_server:
-    image: openim/openim_server:v3.0.1
-    container_name: openim_server
+    image: openim/open_im_server:v3.0.1
+    container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
