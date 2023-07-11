@@ -88,6 +88,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		groupRouterGroup.POST("/cancel_mute_group", g.CancelMuteGroup)
 		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
+		groupRouterGroup.POST("/get_groups", g.GetGroups)
 	}
 	superGroupRouterGroup := r.Group("/super_group", ParseToken)
 	{
@@ -115,6 +116,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/get_hash", t.GetHash)
 		thirdGroup.POST("/object", t.GetURL)
 		thirdGroup.GET("/object", t.GetURL)
+
+		thirdGroup.POST("/minio_upload", t.MinioUploadFile)
 	}
 	//Message
 	msgGroup := r.Group("/msg", ParseToken)
@@ -136,6 +139,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
+		msgGroup.POST("/search_msg", m.SearchMsg)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)

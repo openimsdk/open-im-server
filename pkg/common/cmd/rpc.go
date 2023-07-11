@@ -27,6 +27,7 @@ func (a *RpcCmd) Exec() error {
 }
 
 func (a *RpcCmd) StartSvr(name string, rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+	a.port = 10050
 	if a.GetPortFlag() == 0 {
 		return errors.New("port is required")
 	}

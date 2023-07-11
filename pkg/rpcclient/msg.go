@@ -3,6 +3,7 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -116,6 +117,19 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 	}
 	client := msg.NewMsgClient(conn)
 	return &Message{discov: discov, conn: conn, Client: client}
+}
+
+func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
+	conn, err := m.discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	client := user.NewUserClient(conn)
+	resp, err := client.GetAllUserID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 type MessageRpcClient Message

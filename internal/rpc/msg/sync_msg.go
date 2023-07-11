@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -53,6 +54,16 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, IsEnd: isEnd}
 		}
 	}
+	return resp, nil
+}
+
+func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
+	var msgs []*sdkws.MsgData
+	resp = &msg.SearchMessageResp{}
+	if msgs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
+		return nil, err
+	}
+	resp.Msgs = msgs
 	return resp, nil
 }
 

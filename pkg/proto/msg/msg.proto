@@ -305,12 +305,26 @@ message GetActiveGroupResp {
   repeated ActiveGroup groups = 4;
 }
 
+message SearchMessageReq{
+  string keyword1=1;//发送者ID
+  string keyword2=2;//接收者ID
+  int32 msgType=3;
+  int64 startTime=4;
+  int64 endTime=5;
+  sdkws.RequestPagination pagination = 6;
+}
+
+message SearchMessageResp{
+  repeated sdkws.MsgData msgs=1;
+}
+
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）
   rpc GetMaxSeq(sdkws.GetMaxSeqReq) returns(sdkws.GetMaxSeqResp);
   rpc GetConversationMaxSeq(GetConversationMaxSeqReq) returns(GetConversationMaxSeqResp);
   //拉取历史消息（包括用户的，以及指定群组的）
   rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
+  rpc SearchMessage(SearchMessageReq) returns(SearchMessageResp);
   //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
 

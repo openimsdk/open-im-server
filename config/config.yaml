@@ -9,9 +9,9 @@ zookeeper:
   password:                               #密码
 
 mysql:
-  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
+  address: [ 127.0.0.1:3306 ]            #目前仅支持单机
   username: root                          #用户名
-  password: openIM123                     #密码
+  password:                     #密码
   database: openIM_v3                     #不建议修改
   maxOpenConn: 1000                       #最大连接数
   maxIdleConn: 100                        #最大空闲连接数
@@ -28,7 +28,7 @@ mongo:
   maxPoolSize: 100
 
 redis:
-  address: [ 127.0.0.1:16379 ]            #
+  address: [ 127.0.0.1:6379 ]            #
   username:                               #only redis version 6.0+ need username
   password: openIM123                     #密码
 
@@ -68,7 +68,7 @@ object:
     tempBucket: "openim"                  #不建议修改
     dataBucket: "openim"                  #不建议修改
     location: us-east-1                   #不建议修改
-    endpoint: http://127.0.0.1:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
+    endpoint: http://192.168.245.231:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
     accessKeyID: root                     #ID
     secretAccessKey: openIM123            #秘钥
     isDistributedMod: false               #是否分布式多硬盘部署，如果是多硬盘部署，需要修改为true

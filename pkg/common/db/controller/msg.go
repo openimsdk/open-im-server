@@ -94,6 +94,7 @@ type CommonMsgDatabase interface {
 	DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
+	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error)
 }
 
 func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) CommonMsgDatabase {
@@ -124,6 +125,18 @@ type commonMsgDatabase struct {
 	producerToMongo   *kafka.Producer
 	producerToModify  *kafka.Producer
 	producerToPush    *kafka.Producer
+}
+
+func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error) {
+	var totalMsgs []*sdkws.MsgData
+	msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	for _, msg := range msgs {
+		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
+	}
+	return totalMsgs, nil
 }
 
 func (db *commonMsgDatabase) MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error {
