@@ -1,17 +1,35 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import (
 	"context"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/redis/go-redis/v9"
 )
 
-func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
+func (m *msgServer) GetConversationsHasReadAndMaxSeq(
+	ctx context.Context,
+	req *msg.GetConversationsHasReadAndMaxSeqReq,
+) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -47,7 +65,10 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	return resp, nil
 }
 
-func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetConversationHasReadSeqReq) (resp *msg.SetConversationHasReadSeqResp, err error) {
+func (m *msgServer) SetConversationHasReadSeq(
+	ctx context.Context,
+	req *msg.SetConversationHasReadSeqReq,
+) (resp *msg.SetConversationHasReadSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return
@@ -64,7 +85,10 @@ func (m *msgServer) SetConversationHasReadSeq(ctx context.Context, req *msg.SetC
 	return &msg.SetConversationHasReadSeqResp{}, nil
 }
 
-func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadReq) (resp *msg.MarkMsgsAsReadResp, err error) {
+func (m *msgServer) MarkMsgsAsRead(
+	ctx context.Context,
+	req *msg.MarkMsgsAsReadReq,
+) (resp *msg.MarkMsgsAsReadResp, err error) {
 	if len(req.Seqs) < 1 {
 		return nil, errs.ErrArgs.Wrap("seqs must not be empty")
 	}
@@ -99,7 +123,10 @@ func (m *msgServer) MarkMsgsAsRead(ctx context.Context, req *msg.MarkMsgsAsReadR
 	return &msg.MarkMsgsAsReadResp{}, nil
 }
 
-func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkConversationAsReadReq) (resp *msg.MarkConversationAsReadResp, err error) {
+func (m *msgServer) MarkConversationAsRead(
+	ctx context.Context,
+	req *msg.MarkConversationAsReadReq,
+) (resp *msg.MarkConversationAsReadResp, err error) {
 	conversation, err := m.Conversation.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
 		return
@@ -136,7 +163,14 @@ func (m *msgServer) MarkConversationAsRead(ctx context.Context, req *msg.MarkCon
 	return &msg.MarkConversationAsReadResp{}, nil
 }
 
-func (m *msgServer) sendMarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
+func (m *msgServer) sendMarkAsReadNotification(
+	ctx context.Context,
+	conversationID string,
+	sesstionType int32,
+	sendID, recvID string,
+	seqs []int64,
+	hasReadSeq int64,
+) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
 		ConversationID:   conversationID,

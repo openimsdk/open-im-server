@@ -99,9 +99,9 @@ services:
     command: minio server /data --console-address ':9090'
 
 
-  open_im_server:
-    image: openim/open_im_server:v3.0.1
-    container_name: open_im_server
+  openim_server:
+    image: openim/openim_server:v3.0.1
+    container_name: openim_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
@@ -131,7 +131,7 @@ services:
       - mongodb
       - redis
       - minio
-      - open_im_server
+      - openim_server
     network_mode: "host"
     logging:
       driver: json-file
@@ -147,7 +147,7 @@ services:
     #    ports:
     #    - 9091:9091
     depends_on:
-      - open_im_server
+    - openim_server
     command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
     network_mode: "host"
 

@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
@@ -13,13 +27,22 @@ import (
 
 type ConversationDatabase interface {
 	//UpdateUserConversationFiled 更新用户该会话的属性信息
-	UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error
+	UpdateUsersConversationFiled(
+		ctx context.Context,
+		userIDs []string,
+		conversationID string,
+		args map[string]interface{},
+	) error
 	//CreateConversation 创建一批新的会话
 	CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error
 	//SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
 	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation []*relationTb.ConversationModel) error
 	//FindConversations 根据会话ID获取某个用户的多个会话
-	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
+	FindConversations(
+		ctx context.Context,
+		ownerUserID string,
+		conversationIDs []string,
+	) ([]*relationTb.ConversationModel, error)
 	//FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
 	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	//GetUserAllConversation 获取一个用户在服务器上所有的会话
@@ -27,16 +50,28 @@ type ConversationDatabase interface {
 	//SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
 	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
-	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
+	SetUsersConversationFiledTx(
+		ctx context.Context,
+		userIDs []string,
+		conversation *relationTb.ConversationModel,
+		filedMap map[string]interface{},
+	) error
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
-	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error)
+	GetConversationsByConversationID(
+		ctx context.Context,
+		conversationIDs []string,
+	) ([]*relationTb.ConversationModel, error)
 }
 
-func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
+func NewConversationDatabase(
+	conversation relationTb.ConversationModelInterface,
+	cache cache.ConversationCache,
+	tx tx.Tx,
+) ConversationDatabase {
 	return &conversationDatabase{
 		conversationDB: conversation,
 		cache:          cache,
@@ -50,7 +85,12 @@ type conversationDatabase struct {
 	tx             tx.Tx
 }
 
-func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) (err error) {
+func (c *conversationDatabase) SetUsersConversationFiledTx(
+	ctx context.Context,
+	userIDs []string,
+	conversation *relationTb.ConversationModel,
+	filedMap map[string]interface{},
+) (err error) {
 	cache := c.cache.NewCache()
 	if err := c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
@@ -96,7 +136,12 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 	return cache.ExecDel(ctx)
 }
 
-func (c *conversationDatabase) UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error {
+func (c *conversationDatabase) UpdateUsersConversationFiled(
+	ctx context.Context,
+	userIDs []string,
+	conversationID string,
+	args map[string]interface{},
+) error {
 	_, err := c.conversationDB.UpdateByMap(ctx, userIDs, conversationID, args)
 	if err != nil {
 		return err
@@ -104,7 +149,10 @@ func (c *conversationDatabase) UpdateUsersConversationFiled(ctx context.Context,
 	return c.cache.DelUsersConversation(conversationID, userIDs...).ExecDel(ctx)
 }
 
-func (c *conversationDatabase) CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error {
+func (c *conversationDatabase) CreateConversation(
+	ctx context.Context,
+	conversations []*relationTb.ConversationModel,
+) error {
 	if err := c.conversationDB.Create(ctx, conversations); err != nil {
 		return err
 	}
@@ -117,7 +165,10 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
 }
 
-func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Context, conversations []*relationTb.ConversationModel) error {
+func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(
+	ctx context.Context,
+	conversations []*relationTb.ConversationModel,
+) error {
 	cache := c.cache.NewCache()
 	if err := c.tx.Transaction(func(tx any) error {
 		conversationTx := c.conversationDB.NewTx(tx)
@@ -153,19 +204,34 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 	return c.cache.ExecDel(ctx)
 }
 
-func (c *conversationDatabase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
+func (c *conversationDatabase) FindConversations(
+	ctx context.Context,
+	ownerUserID string,
+	conversationIDs []string,
+) ([]*relationTb.ConversationModel, error) {
 	return c.cache.GetConversations(ctx, ownerUserID, conversationIDs)
 }
 
-func (c *conversationDatabase) GetConversation(ctx context.Context, ownerUserID string, conversationID string) (*relationTb.ConversationModel, error) {
+func (c *conversationDatabase) GetConversation(
+	ctx context.Context,
+	ownerUserID string,
+	conversationID string,
+) (*relationTb.ConversationModel, error) {
 	return c.cache.GetConversation(ctx, ownerUserID, conversationID)
 }
 
-func (c *conversationDatabase) GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error) {
+func (c *conversationDatabase) GetUserAllConversation(
+	ctx context.Context,
+	ownerUserID string,
+) ([]*relationTb.ConversationModel, error) {
 	return c.cache.GetUserAllConversations(ctx, ownerUserID)
 }
 
-func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error {
+func (c *conversationDatabase) SetUserConversations(
+	ctx context.Context,
+	ownerUserID string,
+	conversations []*relationTb.ConversationModel,
+) error {
 	cache := c.cache.NewCache()
 	if err := c.tx.Transaction(func(tx any) error {
 		var conversationIDs []string
@@ -215,7 +281,11 @@ func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, 
 	return c.cache.GetSuperGroupRecvMsgNotNotifyUserIDs(ctx, groupID)
 }
 
-func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
+func (c *conversationDatabase) CreateGroupChatConversation(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+) error {
 	cache := c.cache.NewCache()
 	conversationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	if err := c.tx.Transaction(func(tx any) error {
@@ -255,7 +325,10 @@ func (c *conversationDatabase) GetConversationIDs(ctx context.Context, userID st
 	return c.cache.GetUserConversationIDs(ctx, userID)
 }
 
-func (c *conversationDatabase) GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error) {
+func (c *conversationDatabase) GetUserConversationIDsHash(
+	ctx context.Context,
+	ownerUserID string,
+) (hash uint64, err error) {
 	return c.cache.GetUserConversationIDsHash(ctx, ownerUserID)
 }
 
@@ -263,10 +336,16 @@ func (c *conversationDatabase) GetAllConversationIDs(ctx context.Context) ([]str
 	return c.conversationDB.GetAllConversationIDs(ctx)
 }
 
-func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
+func (c *conversationDatabase) GetUserAllHasReadSeqs(
+	ctx context.Context,
+	ownerUserID string,
+) (map[string]int64, error) {
 	return c.cache.GetUserAllHasReadSeqs(ctx, ownerUserID)
 }
 
-func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
+func (c *conversationDatabase) GetConversationsByConversationID(
+	ctx context.Context,
+	conversationIDs []string,
+) ([]*relationTb.ConversationModel, error) {
 	return c.conversationDB.GetConversationsByConversationID(ctx, conversationIDs)
 }

@@ -1,8 +1,25 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpcclient
 
 import (
 	"context"
 	"encoding/json"
+
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -11,8 +28,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
 
@@ -134,7 +149,10 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 	return resp, err
 }
 
-func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+func (m *MessageRpcClient) PullMessageBySeqList(
+	ctx context.Context,
+	req *sdkws.PullMessageBySeqsReq,
+) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
 	return resp, err
 }
@@ -155,7 +173,9 @@ type NotificationSender struct {
 
 type NewNotificationSenderOptions func(*NotificationSender)
 
-func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NewNotificationSenderOptions {
+func WithLocalSendMsg(
+	sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error),
+) NewNotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
@@ -168,18 +188,39 @@ func WithRpcClient(msgRpcClient *MessageRpcClient) NewNotificationSenderOptions 
 }
 
 func NewNotificationSender(opts ...NewNotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+	notificationSender := &NotificationSender{
+		contentTypeConf: newContentTypeConf(),
+		sessionTypeConf: newSessionTypeConf(),
+	}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
 	return notificationSender
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...utils.OptionsOpt) (err error) {
+func (s *NotificationSender) NotificationWithSesstionType(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType, sesstionType int32,
+	m proto.Message,
+	opts ...utils.OptionsOpt,
+) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
+		log.ZError(
+			ctx,
+			"MsgClient Notification json.Marshal failed",
+			err,
+			"sendID",
+			sendID,
+			"recvID",
+			recvID,
+			"contentType",
+			contentType,
+			"msg",
+			m,
+		)
 		return err
 	}
 	var req msg.SendMsgReq
@@ -214,6 +255,12 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	return err
 }
 
-func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+func (s *NotificationSender) Notification(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType int32,
+	m proto.Message,
+	opts ...utils.OptionsOpt,
+) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }

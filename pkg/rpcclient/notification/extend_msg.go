@@ -1,8 +1,24 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package notification
 
 import (
 	"context"
 	"encoding/json"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -12,7 +28,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/protobuf/proto"
 )
 
 type ExtendMsgNotificationSender struct {
@@ -23,8 +38,16 @@ func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistr
 	return &ExtendMsgNotificationSender{}
 }
 
-func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx context.Context, sendID string, conversationID string, sessionType int32,
-	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(
+	ctx context.Context,
+	sendID string,
+	conversationID string,
+	sessionType int32,
+	req *msg.SetMessageReactionExtensionsReq,
+	resp *msg.SetMessageReactionExtensionsResp,
+	isHistory bool,
+	isReactionFromCache bool,
+) {
 	var content sdkws.ReactionMessageModifierNotification
 	content.ConversationID = req.ConversationID
 	content.OpUserID = mcontext.GetOpUserID(ctx)
@@ -43,10 +66,28 @@ func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(ctx conte
 	content.IsReact = resp.IsReact
 	content.IsExternalExtensions = req.IsExternalExtensions
 	content.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, conversationID, sessionType, constant.ReactionMessageModifier, &content, isHistory, isReactionFromCache)
+	e.messageReactionSender(
+		ctx,
+		sendID,
+		conversationID,
+		sessionType,
+		constant.ReactionMessageModifier,
+		&content,
+		isHistory,
+		isReactionFromCache,
+	)
 }
-func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx context.Context, sendID string, conversationID string, sessionType int32,
-	req *msg.DeleteMessagesReactionExtensionsReq, resp *msg.DeleteMessagesReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
+
+func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(
+	ctx context.Context,
+	sendID string,
+	conversationID string,
+	sessionType int32,
+	req *msg.DeleteMessagesReactionExtensionsReq,
+	resp *msg.DeleteMessagesReactionExtensionsResp,
+	isHistory bool,
+	isReactionFromCache bool,
+) {
 	var content sdkws.ReactionMessageDeleteNotification
 	content.ConversationID = req.ConversationID
 	content.OpUserID = req.OpUserID
@@ -63,9 +104,27 @@ func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(ctx contex
 	content.SuccessReactionExtensions = keyMap
 	content.ClientMsgID = req.ClientMsgID
 	content.MsgFirstModifyTime = req.MsgFirstModifyTime
-	e.messageReactionSender(ctx, sendID, conversationID, sessionType, constant.ReactionMessageDeleter, &content, isHistory, isReactionFromCache)
+	e.messageReactionSender(
+		ctx,
+		sendID,
+		conversationID,
+		sessionType,
+		constant.ReactionMessageDeleter,
+		&content,
+		isHistory,
+		isReactionFromCache,
+	)
 }
-func (e *ExtendMsgNotificationSender) messageReactionSender(ctx context.Context, sendID string, conversationID string, sessionType, contentType int32, m proto.Message, isHistory bool, isReactionFromCache bool) error {
+
+func (e *ExtendMsgNotificationSender) messageReactionSender(
+	ctx context.Context,
+	sendID string,
+	conversationID string,
+	sessionType, contentType int32,
+	m proto.Message,
+	isHistory bool,
+	isReactionFromCache bool,
+) error {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)

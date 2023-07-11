@@ -1,3 +1,17 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #OpenIM config
 
 
@@ -260,5 +274,4 @@ prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.cfg中的msg_transfer_service_num保持一致
-
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.sh中的msg_transfer_service_num保持一致

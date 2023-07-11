@@ -1,11 +1,27 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package relation
 
 import (
 	"context"
+
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"gorm.io/gorm"
 )
 
 var _ relation.GroupModelInterface = (*GroupGorm)(nil)
@@ -31,7 +47,13 @@ func (g *GroupGorm) UpdateMap(ctx context.Context, groupID string, args map[stri
 }
 
 func (g *GroupGorm) UpdateStatus(ctx context.Context, groupID string, status int32) (err error) {
-	return utils.Wrap(g.DB.Where("group_id = ?", groupID).Model(&relation.GroupModel{}).Updates(map[string]any{"status": status}).Error, "")
+	return utils.Wrap(
+		g.DB.Where("group_id = ?", groupID).
+			Model(&relation.GroupModel{}).
+			Updates(map[string]any{"status": status}).
+			Error,
+		"",
+	)
 }
 
 func (g *GroupGorm) Find(ctx context.Context, groupIDs []string) (groups []*relation.GroupModel, err error) {
@@ -43,10 +65,17 @@ func (g *GroupGorm) Take(ctx context.Context, groupID string) (group *relation.G
 	return group, utils.Wrap(g.DB.Where("group_id = ?", groupID).Take(group).Error, "")
 }
 
-func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, showNumber int32) (total uint32, groups []*relation.GroupModel, err error) {
+func (g *GroupGorm) Search(
+	ctx context.Context,
+	keyword string,
+	pageNumber, showNumber int32,
+) (total uint32, groups []*relation.GroupModel, err error) {
 	return ormutil.GormSearch[relation.GroupModel](g.DB, []string{"name"}, keyword, pageNumber, showNumber)
 }
 
 func (g *GroupGorm) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
-	return groupIDs, utils.Wrap(g.DB.Model(&relation.GroupModel{}).Where("group_type = ? ", groupType).Pluck("group_id", &groupIDs).Error, "")
+	return groupIDs, utils.Wrap(
+		g.DB.Model(&relation.GroupModel{}).Where("group_type = ? ", groupType).Pluck("group_id", &groupIDs).Error,
+		"",
+	)
 }

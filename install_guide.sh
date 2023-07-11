@@ -43,7 +43,7 @@ edit_config() {
       vi config/config.yaml
     ;;
     2)
-      echo "do not edit config"    
+      echo "do not edit config"
     ;;
     esac
 }
@@ -174,4 +174,3 @@ case $choice in
     echo "Invalid option, please try again."
     ;;
 esac
-

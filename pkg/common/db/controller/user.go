@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
@@ -114,7 +128,10 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 }
 
 // 获取，如果没找到，不返回错误
-func (u *userDatabase) Page(ctx context.Context, pageNumber, showNumber int32) (users []*relation.UserModel, count int64, err error) {
+func (u *userDatabase) Page(
+	ctx context.Context,
+	pageNumber, showNumber int32,
+) (users []*relation.UserModel, count int64, err error) {
 	return u.userDB.Page(ctx, pageNumber, showNumber)
 }
 
@@ -138,6 +155,10 @@ func (u *userDatabase) CountTotal(ctx context.Context) (count int64, err error) 
 	return u.userDB.CountTotal(ctx)
 }
 
-func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+func (u *userDatabase) CountRangeEverydayTotal(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+) (map[string]int64, error) {
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }

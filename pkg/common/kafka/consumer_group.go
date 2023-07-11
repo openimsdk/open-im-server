@@ -1,13 +1,8 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/5/11 9:36).
- */
 package kafka
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/Shopify/sarama"

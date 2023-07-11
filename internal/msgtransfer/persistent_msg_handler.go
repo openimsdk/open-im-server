@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/5/11 15:37).
- */
 package msgtransfer
 
 import (
@@ -35,7 +29,12 @@ func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *Persiste
 	}
 }
 
-func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
+func (pc *PersistentConsumerHandler) handleChatWs2Mysql(
+	ctx context.Context,
+	cMsg *sarama.ConsumerMessage,
+	msgKey string,
+	_ sarama.ConsumerGroupSession,
+) {
 	msg := cMsg.Value
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
@@ -73,10 +72,25 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMs
 }
 func (PersistentConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+func (pc *PersistentConsumerHandler) ConsumeClaim(
+	sess sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim,
+) error {
 	for msg := range claim.Messages() {
 		ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg)
-		log.ZDebug(ctx, "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		log.ZDebug(
+			ctx,
+			"kafka get info to mysql",
+			"msgTopic",
+			msg.Topic,
+			"msgPartition",
+			msg.Partition,
+			"msg",
+			string(msg.Value),
+			"key",
+			string(msg.Key),
+		)
 		if len(msg.Value) != 0 {
 			pc.handleChatWs2Mysql(ctx, msg, string(msg.Key), sess)
 		} else {

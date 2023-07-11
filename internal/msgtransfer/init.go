@@ -1,9 +1,26 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msgtransfer
 
 import (
 	"fmt"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -17,8 +34,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	openKeeper "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTransfer struct {
@@ -47,9 +62,18 @@ func StartTransfer(prometheusPort int) error {
 	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-		openKeeper.WithFreq(time.Hour), openKeeper.WithRoundRobin(), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-			config.Config.Zookeeper.Password), openKeeper.WithTimeout(10), openKeeper.WithLogger(log.NewZkLogger()))
+	client, err := openKeeper.NewClient(
+		config.Config.Zookeeper.ZkAddr,
+		config.Config.Zookeeper.Schema,
+		openKeeper.WithFreq(
+			time.Hour,
+		),
+		openKeeper.WithRoundRobin(),
+		openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
+			config.Config.Zookeeper.Password),
+		openKeeper.WithTimeout(10),
+		openKeeper.WithLogger(log.NewZkLogger()),
+	)
 	if err != nil {
 		return err
 	}
@@ -66,7 +90,13 @@ func StartTransfer(prometheusPort int) error {
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
-	msgTransfer := NewMsgTransfer(chatLogDatabase, extendMsgDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)
+	msgTransfer := NewMsgTransfer(
+		chatLogDatabase,
+		extendMsgDatabase,
+		msgDatabase,
+		&conversationRpcClient,
+		&groupRpcClient,
+	)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
@@ -74,8 +104,14 @@ func StartTransfer(prometheusPort int) error {
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 	extendMsgDatabase controller.ExtendMsgDatabase, msgDatabase controller.CommonMsgDatabase,
 	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
-	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase), modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase)}
+	return &MsgTransfer{
+		persistentCH: NewPersistentConsumerHandler(chatLogDatabase),
+		historyCH:    NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(
+			msgDatabase,
+		),
+		modifyCH: NewModifyMsgConsumerHandler(extendMsgDatabase),
+	}
 }
 
 func (m *MsgTransfer) initPrometheus() {

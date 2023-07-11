@@ -1,18 +1,34 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package obj
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/s3utils"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/s3utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 func NewMinioInterface() (Interface, error) {
@@ -93,7 +109,13 @@ func (m *minioImpl) DataBucket() string {
 	return m.dataBucket
 }
 
-func (m *minioImpl) PresignedGetURL(ctx context.Context, bucket string, name string, expires time.Duration, opt *HeaderOption) (string, error) {
+func (m *minioImpl) PresignedGetURL(
+	ctx context.Context,
+	bucket string,
+	name string,
+	expires time.Duration,
+	opt *HeaderOption,
+) (string, error) {
 	var reqParams url.Values
 	if opt != nil {
 		reqParams = make(url.Values)
@@ -203,7 +225,12 @@ func (m *minioImpl) IsNotFound(err error) bool {
 	}
 }
 
-func (m *minioImpl) PutObject(ctx context.Context, info *BucketObject, reader io.Reader, size int64) (*ObjectInfo, error) {
+func (m *minioImpl) PutObject(
+	ctx context.Context,
+	info *BucketObject,
+	reader io.Reader,
+	size int64,
+) (*ObjectInfo, error) {
 	update, err := m.client.PutObject(ctx, info.Bucket, info.Name, reader, size, minio.PutObjectOptions{})
 	if err != nil {
 		return nil, err

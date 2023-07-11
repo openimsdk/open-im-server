@@ -1,6 +1,19 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
-import "C"
 import (
 	"bytes"
 	"context"
@@ -9,18 +22,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/url"
+	"path"
+	"strconv"
+	"time"
+
+	"github.com/google/uuid"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/obj"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/google/uuid"
-	"io"
-	"net/url"
-	"path"
-	"strconv"
-	"time"
 )
 
 const (
@@ -39,7 +54,13 @@ type S3Database interface {
 	CleanExpirationObject(ctx context.Context, t time.Time)
 }
 
-func NewS3Database(obj obj.Interface, hash relation.ObjectHashModelInterface, info relation.ObjectInfoModelInterface, put relation.ObjectPutModelInterface, url *url.URL) S3Database {
+func NewS3Database(
+	obj obj.Interface,
+	hash relation.ObjectHashModelInterface,
+	info relation.ObjectInfoModelInterface,
+	put relation.ObjectPutModelInterface,
+	url *url.URL,
+) S3Database {
 	return &s3Database{
 		url:  url,
 		obj:  obj,
@@ -206,7 +227,12 @@ func (c *s3Database) ApplyPut(ctx context.Context, req *third.ApplyPutReq) (*thi
 	}
 	t := md5.Sum(urlsJsonData)
 	put.PutURLsHash = hex.EncodeToString(t[:])
-	_, err = c.obj.PutObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(put.Path, urlsName)}, bytes.NewReader(urlsJsonData), int64(len(urlsJsonData)))
+	_, err = c.obj.PutObject(
+		ctx,
+		&obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(put.Path, urlsName)},
+		bytes.NewReader(urlsJsonData),
+		int64(len(urlsJsonData)),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +253,10 @@ func (c *s3Database) GetPut(ctx context.Context, req *third.GetPutReq) (*third.G
 	if err != nil {
 		return nil, err
 	}
-	reader, err := c.obj.GetObject(ctx, &obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)})
+	reader, err := c.obj.GetObject(
+		ctx,
+		&obj.BucketObject{Bucket: c.obj.TempBucket(), Name: path.Join(up.Path, urlsName)},
+	)
 	if err != nil {
 		return nil, err
 	}

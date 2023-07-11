@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package group
 
 import (
@@ -15,7 +29,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
+func (s *groupServer) GetJoinedSuperGroupList(
+	ctx context.Context,
+	req *pbGroup.GetJoinedSuperGroupListReq,
+) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	resp := &pbGroup.GetJoinedSuperGroupListResp{}
 	groupIDs, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
 	if err != nil {
@@ -48,16 +65,22 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	superGroupMemberMap := utils.SliceToMapAny(superGroupMembers, func(e *unrelation.SuperGroupModel) (string, []string) {
-		return e.GroupID, e.MemberIDs
-	})
+	superGroupMemberMap := utils.SliceToMapAny(
+		superGroupMembers,
+		func(e *unrelation.SuperGroupModel) (string, []string) {
+			return e.GroupID, e.MemberIDs
+		},
+	)
 	resp.Groups = utils.Slice(groupIDs, func(groupID string) *sdkws.GroupInfo {
 		return convert.Db2PbGroupInfo(groupMap[groupID], ownerMap[groupID].UserID, uint32(len(superGroupMemberMap)))
 	})
 	return resp, nil
 }
 
-func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSuperGroupsInfoReq) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
+func (s *groupServer) GetSuperGroupsInfo(
+	ctx context.Context,
+	req *pbGroup.GetSuperGroupsInfoReq,
+) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
 	resp = &pbGroup.GetSuperGroupsInfoResp{}
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("groupIDs empty")
@@ -70,9 +93,12 @@ func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSu
 	if err != nil {
 		return nil, err
 	}
-	superGroupMemberMap := utils.SliceToMapAny(superGroupMembers, func(e *unrelation.SuperGroupModel) (string, []string) {
-		return e.GroupID, e.MemberIDs
-	})
+	superGroupMemberMap := utils.SliceToMapAny(
+		superGroupMembers,
+		func(e *unrelation.SuperGroupModel) (string, []string) {
+			return e.GroupID, e.MemberIDs
+		},
+	)
 	owners, err := s.FindGroupMember(ctx, req.GroupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err

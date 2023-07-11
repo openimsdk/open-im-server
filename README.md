@@ -86,7 +86,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
        ./docker_check_service.sh./check_all.sh
        ```
        
-       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
+       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Open-IM-Servers-on-System.png)
 
 #### Deploy using source code
 
@@ -146,7 +146,7 @@ all services build success
 
 > Open-IM scripts provides service compilation, start, and stop scripts. There are four Open-IM scripts start modules, one is the http+rpc service start module, the second is the websocket service start module, then the msg_transfer module, and the last is the push module
 
-- path_info.cfg&&style_info.cfg&&functions.sh
+- path_info.sh&&style_info.sh&&functions.sh
     - Contains the path information of each module, including the path where the source code is located, the name of the service startup, the shell print font style, and some functions for processing shell strings
 - build_all_service.sh
     - Compile the module, compile all the source code of Open-IM into a binary file and put it into the bin directory
@@ -157,11 +157,11 @@ all services build success
 
 ## Authentication Clow Chart 
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
 
 ## Architecture
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
 
 ## To start developing OpenIM
 The [community repository](https://github.com/OpenIMSDK/community) hosts all information about building Kubernetes from source, how to contribute code and documentation, who to contact about what, etc.

@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msggateway
 
 import (
@@ -7,13 +21,14 @@ import (
 	"runtime/debug"
 	"sync"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/protobuf/proto"
 )
 
 var ErrConnClosed = errors.New("conn has closed")
@@ -65,7 +80,13 @@ func newClient(ctx *UserConnContext, conn LongConn, isCompress bool) *Client {
 		ctx:        ctx,
 	}
 }
-func (c *Client) ResetClient(ctx *UserConnContext, conn LongConn, isBackground, isCompress bool, longConnServer LongConnServer) {
+
+func (c *Client) ResetClient(
+	ctx *UserConnContext,
+	conn LongConn,
+	isBackground, isCompress bool,
+	longConnServer LongConnServer,
+) {
 	c.w = new(sync.Mutex)
 	c.conn = conn
 	c.PlatformID = utils.StringToInt(ctx.GetPlatformID())
@@ -145,7 +166,9 @@ func (c *Client) handleMessage(message []byte) error {
 	if binaryReq.SendID != c.UserID {
 		return utils.Wrap(errors.New("exception conn userID not same to req userID"), binaryReq.String())
 	}
-	ctx := mcontext.WithMustInfoCtx([]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.PlatformID), c.ctx.GetConnID()})
+	ctx := mcontext.WithMustInfoCtx(
+		[]string{binaryReq.OperationID, binaryReq.SendID, constant.PlatformIDToName(c.PlatformID), c.ctx.GetConnID()},
+	)
 	log.ZDebug(ctx, "gateway req message", "req", binaryReq.String())
 	var messageErr error
 	var resp []byte
@@ -163,7 +186,12 @@ func (c *Client) handleMessage(message []byte) error {
 	case WsSetBackgroundStatus:
 		resp, messageErr = c.setAppBackgroundStatus(ctx, binaryReq)
 	default:
-		return fmt.Errorf("ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d", binaryReq.SendID, binaryReq.MsgIncr, binaryReq.ReqIdentifier)
+		return fmt.Errorf(
+			"ReqIdentifier failed,sendID:%s,msgIncr:%s,reqIdentifier:%d",
+			binaryReq.SendID,
+			binaryReq.MsgIncr,
+			binaryReq.ReqIdentifier,
+		)
 	}
 	c.replyMessage(ctx, &binaryReq, messageErr, resp)
 	return nil

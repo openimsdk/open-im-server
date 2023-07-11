@@ -1,0 +1,7 @@
+# https://github.com/apps/weekly-digest/installations/new
+publishDay: sun
+canPublishIssues: true
+canPublishPullRequests: true
+canPublishContributors: true
+canPublishStargazers: true
+canPublishCommits: true

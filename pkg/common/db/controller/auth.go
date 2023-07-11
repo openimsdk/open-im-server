@@ -1,13 +1,28 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
 	"context"
 
+	"github.com/golang-jwt/jwt/v4"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type AuthDatabase interface {
@@ -29,7 +44,11 @@ func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int
 }
 
 // 结果为空 不返回错误
-func (a *authDatabase) GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error) {
+func (a *authDatabase) GetTokensWithoutError(
+	ctx context.Context,
+	userID string,
+	platformID int,
+) (map[string]int, error) {
 	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
 }
 

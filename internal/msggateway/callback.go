@@ -1,13 +1,28 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msggateway
 
 import (
 	"context"
+	"time"
+
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"time"
 )
 
 func url() string {
@@ -77,7 +92,8 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackUserOffline)
 }
 
-//func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackground bool, connID string) cbApi.CommonCallbackResp {
+// func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackground bool, connID
+// string) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 //	if !config.Config.Callback.CallbackUserOnline.Enable {
 //		return callbackResp
@@ -98,7 +114,9 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		ConnID:          connID,
 //	}
 //	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: &callbackResp}
-//	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOnlineCommand, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOnlineCommand,
+// callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil
+// {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}
@@ -123,7 +141,9 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		ConnID: connID,
 //	}
 //	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: &callbackResp}
-//	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOfflineCommand, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOfflineCommand,
+// callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil
+// {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}
@@ -147,7 +167,9 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		Seq: int(time.Now().UnixNano() / 1e6),
 //	}
 //	callbackUserKickOffResp := &cbApi.CallbackUserKickOffResp{CommonCallbackResp: &callbackResp}
-//	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserKickOffCommand, callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserKickOffCommand,
+// callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err !=
+// nil {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}

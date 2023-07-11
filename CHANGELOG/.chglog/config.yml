@@ -1,28 +1,67 @@
+bin: git
 style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
   repository_url: https://github.com/OpenIMSDK/Open-IM-Server
 options:
+  tag_filter_pattern: '^v'
+  sort: "date"
+
   commits:
-    # filters:
-    #   Type:
-    #     - feat
-    #     - fix
-    #     - perf
-    #     - refactor
+    filters:
+      Type:
+        - feat
+        - fix
+        - perf
+        - refactor
+        - docs
+        - test
+        - chore
+        - ci
+        - build
+    sort_by: Scope
+
   commit_groups:
-    # title_maps:
-    #   feat: Features
-    #   fix: Bug Fixes
-    #   perf: Performance Improvements
-    #   refactor: Code Refactoring
+    group_by: Type
+    sort_by: Title
+    title_order:
+      - feat
+      - fix
+      - perf
+      - refactor
+      - docs
+      - test
+      - chore
+      - ci
+      - build
+    title_maps:
+      feat: Features
+
   header:
-    pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
+    pattern: "<regexp>"
     pattern_maps:
-      - Type
-      - Scope
-      - Subject
+      - PropName
+
+  issues:
+    prefix:
+      - #
+
+  refs:
+    actions:
+      - Closes
+      - Fixes
+
+  merges:
+    pattern: "^Merge branch '(\\w+)'$"
+    pattern_maps:
+      - Source
+
+  reverts:
+    pattern: "^Revert \"([\\s\\S]*)\"$"
+    pattern_maps:
+      - Header
+
   notes:
     keywords:
       - BREAKING CHANGE

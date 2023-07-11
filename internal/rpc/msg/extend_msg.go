@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import (
@@ -7,7 +21,10 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
-func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.SetMessageReactionExtensionsReq) (resp *msg.SetMessageReactionExtensionsResp, err error) {
+func (m *msgServer) SetMessageReactionExtensions(
+	ctx context.Context,
+	req *msg.SetMessageReactionExtensionsReq,
+) (resp *msg.SetMessageReactionExtensionsResp, err error) {
 	//resp = &msg.SetMessageReactionExtensionsResp{}
 	////resp.ClientMsgID = req.ClientMsgID
 	////resp.MsgFirstModifyTime = req.MsgFirstModifyTime
@@ -18,7 +35,8 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	////if ExternalExtension
 	//if req.IsExternalExtensions {
 	//	resp.MsgFirstModifyTime = req.MsgFirstModifyTime
-	//	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, !req.IsReact, false)
+	// 	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID,
+	// req.SessionType, req, &resp, !req.IsReact, false)
 	//	return resp, nil
 	//}
 	//isExists, err := m.MsgDatabase.JudgeMessageReactionExist(ctx, req.ClientMsgID, req.SessionType)
@@ -35,12 +53,14 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//				return nil, err
 	//			}
 	//			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//			if err := m.MsgDatabase.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v)); err != nil {
+	// 			if err := m.MsgDatabase.SetMessageTypeKeyValue(ctx, req.ClientMsgID, req.SessionType, k,
+	// utils.StructToJsonString(v)); err != nil {
 	//				return nil, err
 	//			}
 	//		}
 	//		resp.IsReact = true
-	//		_, err := m.MsgDatabase.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
+	// 		_, err := m.MsgDatabase.SetMessageReactionExpire(ctx, req.ClientMsgID, req.SessionType,
+	// time.Duration(24*3)*time.Hour)
 	//		if err != nil {
 	//			return nil, err
 	//		}
@@ -49,7 +69,8 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//		if err != nil {
 	//			return nil, err
 	//		}
-	//		mongoValue, err := m.MsgDatabase.GetExtendMsg(ctx, req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
+	// 		mongoValue, err := m.MsgDatabase.GetExtendMsg(ctx, req.conversationID, req.SessionType, req.ClientMsgID,
+	// req.MsgFirstModifyTime)
 	//		if err != nil {
 	//			return nil, err
 	//		}
@@ -69,7 +90,8 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//			temp.LatestUpdateTime = utils.GetCurrentTimestampByMill()
 	//			setValue[k] = temp
 	//		}
-	//		err = db.DB.InsertOrUpdateReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime, setValue)
+	// 		err = db.DB.InsertOrUpdateReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID,
+	// req.MsgFirstModifyTime, setValue)
 	//		if err != nil {
 	//			for _, value := range setValue {
 	//				temp := new(msg.KeyValueResp)
@@ -112,7 +134,7 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//			continue
 	//		} else {
 	//			v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//			newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
+	// 			newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
 	//			if newerr != nil {
 	//				setKeyResultInfo(&resp, 201, newerr.Error(), req.ClientMsgID, k, temp)
 	//				continue
@@ -124,26 +146,28 @@ func (m *msgServer) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	//}
 	//if !isExists {
 	//	if !req.IsReact {
-	//		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, true, true)
+	// 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID,
+	// req.SessionType, req, &resp, true, true)
 	//	} else {
-	//		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, false)
+	// 		notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID,
+	// req.SessionType, req, &resp, false, false)
 	//	}
 	//} else {
-	//	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &resp, false, true)
+	// 	notification.ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.conversationID,
+	// req.SessionType, req, &resp, false, true)
 	//}
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", resp.String())
 	return resp, nil
 
 }
-func (m *msgServer) setKeyResultInfo(ctx context.Context, r *msg.SetMessageReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *sdkws.KeyValue) {
-	temp := new(msg.KeyValueResp)
-	temp.KeyValue = keyValue
-	temp.ErrCode = errCode
-	temp.ErrMsg = errMsg
-	r.Result = append(r.Result, temp)
-	_ = m.MessageLocker.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)
-}
-func (m *msgServer) setDeleteKeyResultInfo(ctx context.Context, r *msg.DeleteMessagesReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *sdkws.KeyValue) {
+
+func (m *msgServer) setKeyResultInfo(
+	ctx context.Context,
+	r *msg.SetMessageReactionExtensionsResp,
+	errCode int32,
+	errMsg, clientMsgID, typeKey string,
+	keyValue *sdkws.KeyValue,
+) {
 	temp := new(msg.KeyValueResp)
 	temp.KeyValue = keyValue
 	temp.ErrCode = errCode
@@ -152,7 +176,25 @@ func (m *msgServer) setDeleteKeyResultInfo(ctx context.Context, r *msg.DeleteMes
 	_ = m.MessageLocker.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)
 }
 
-func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.GetMessagesReactionExtensionsReq) (resp *msg.GetMessagesReactionExtensionsResp, err error) {
+func (m *msgServer) setDeleteKeyResultInfo(
+	ctx context.Context,
+	r *msg.DeleteMessagesReactionExtensionsResp,
+	errCode int32,
+	errMsg, clientMsgID, typeKey string,
+	keyValue *sdkws.KeyValue,
+) {
+	temp := new(msg.KeyValueResp)
+	temp.KeyValue = keyValue
+	temp.ErrCode = errCode
+	temp.ErrMsg = errMsg
+	r.Result = append(r.Result, temp)
+	_ = m.MessageLocker.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)
+}
+
+func (m *msgServer) GetMessagesReactionExtensions(
+	ctx context.Context,
+	req *msg.GetMessagesReactionExtensionsReq,
+) (resp *msg.GetMessagesReactionExtensionsResp, err error) {
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	//var rResp msg.GetMessageListReactionExtensionsResp
 	//for _, messageValue := range req.MessageReactionKeyList {
@@ -183,7 +225,8 @@ func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.
 	//		oneMessage.Pb2Model = keyMap
 	//
 	//	} else {
-	//		mongoValue, err := db.DB.GetExtendMsg(req.conversationID, req.SessionType, messageValue.ClientMsgID, messageValue.MsgFirstModifyTime)
+	// 		mongoValue, err := db.DB.GetExtendMsg(req.conversationID, req.SessionType, messageValue.ClientMsgID,
+	// messageValue.MsgFirstModifyTime)
 	//		if err != nil {
 	//			oneMessage.ErrCode = 100
 	//			oneMessage.ErrMsg = err.Error()
@@ -208,11 +251,17 @@ func (m *msgServer) GetMessagesReactionExtensions(ctx context.Context, req *msg.
 
 }
 
-func (m *msgServer) AddMessageReactionExtensions(ctx context.Context, req *msg.ModifyMessageReactionExtensionsReq) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
+func (m *msgServer) AddMessageReactionExtensions(
+	ctx context.Context,
+	req *msg.ModifyMessageReactionExtensionsReq,
+) (resp *msg.ModifyMessageReactionExtensionsResp, err error) {
 	return
 }
 
-func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessagesReactionExtensionsReq) (resp *msg.DeleteMessagesReactionExtensionsResp, err error) {
+func (m *msgServer) DeleteMessageReactionExtensions(
+	ctx context.Context,
+	req *msg.DeleteMessagesReactionExtensionsReq,
+) (resp *msg.DeleteMessagesReactionExtensionsResp, err error) {
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
 	//var rResp msg.DeleteMessagesReactionExtensionsResp
 	//callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
@@ -231,7 +280,8 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	////if ExternalExtension
 	//if req.IsExternalExtensions {
 	//	rResp.Result = callbackResp.ResultReactionExtensionList
-	//	notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &rResp, false, false)
+	// 	notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType,
+	// req, &rResp, false, false)
 	//	return &rResp, nil
 	//
 	//}
@@ -303,7 +353,8 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//		}
 	//		return &rResp, nil
 	//	}
-	//	mongoValue, err := db.DB.GetExtendMsg(req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime)
+	// 	mongoValue, err := db.DB.GetExtendMsg(req.conversationID, req.SessionType, req.ClientMsgID,
+	// req.MsgFirstModifyTime)
 	//	if err != nil {
 	//		rResp.ErrCode = 200
 	//		rResp.ErrMsg = err.Error()
@@ -333,7 +384,8 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//		temp.TypeKey = v.TypeKey
 	//		setValue[v.TypeKey] = temp
 	//	}
-	//	err = db.DB.DeleteReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime, setValue)
+	// 	err = db.DB.DeleteReactionExtendMsgSet(req.conversationID, req.SessionType, req.ClientMsgID,
+	// req.MsgFirstModifyTime, setValue)
 	//	if err != nil {
 	//		for _, value := range setValue {
 	//			temp := new(msg.KeyValueResp)
@@ -355,7 +407,8 @@ func (m *msgServer) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	//	}
 	//
 	//}
-	//notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType, req, &rResp, false, isExists)
+	// notification.ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.conversationID, req.SessionType,
+	// req, &rResp, false, isExists)
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
 	return resp, nil
 }

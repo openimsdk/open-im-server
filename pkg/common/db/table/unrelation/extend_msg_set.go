@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package unrelation
 
 import (
@@ -15,36 +29,65 @@ const (
 )
 
 type ExtendMsgSetModel struct {
-	ConversationID   string                    `bson:"source_id" json:"conversationID"`
-	SessionType      int32                     `bson:"session_type" json:"sessionType"`
-	ExtendMsgs       map[string]ExtendMsgModel `bson:"extend_msgs" json:"extendMsgs"`
-	ExtendMsgNum     int32                     `bson:"extend_msg_num" json:"extendMsgNum"`
-	CreateTime       int64                     `bson:"create_time" json:"createTime"`               // this block's create time
+	ConversationID   string                    `bson:"source_id"           json:"conversationID"`
+	SessionType      int32                     `bson:"session_type"        json:"sessionType"`
+	ExtendMsgs       map[string]ExtendMsgModel `bson:"extend_msgs"         json:"extendMsgs"`
+	ExtendMsgNum     int32                     `bson:"extend_msg_num"      json:"extendMsgNum"`
+	CreateTime       int64                     `bson:"create_time"         json:"createTime"`       // this block's create time
 	MaxMsgUpdateTime int64                     `bson:"max_msg_update_time" json:"maxMsgUpdateTime"` // index find msg
 }
 
 type KeyValueModel struct {
-	TypeKey          string `bson:"type_key" json:"typeKey"`
-	Value            string `bson:"value" json:"value"`
+	TypeKey          string `bson:"type_key"           json:"typeKey"`
+	Value            string `bson:"value"              json:"value"`
 	LatestUpdateTime int64  `bson:"latest_update_time" json:"latestUpdateTime"`
 }
 
 type ExtendMsgModel struct {
 	ReactionExtensionList map[string]KeyValueModel `bson:"reaction_extension_list" json:"reactionExtensionList"`
-	ClientMsgID           string                   `bson:"client_msg_id" json:"clientMsgID"`
-	MsgFirstModifyTime    int64                    `bson:"msg_first_modify_time" json:"msgFirstModifyTime"` // this extendMsg create time
-	AttachedInfo          string                   `bson:"attached_info" json:"attachedInfo"`
-	Ex                    string                   `bson:"ex" json:"ex"`
+	ClientMsgID           string                   `bson:"client_msg_id"           json:"clientMsgID"`
+	MsgFirstModifyTime    int64                    `bson:"msg_first_modify_time"   json:"msgFirstModifyTime"` // this extendMsg create time
+	AttachedInfo          string                   `bson:"attached_info"           json:"attachedInfo"`
+	Ex                    string                   `bson:"ex"                      json:"ex"`
 }
 
 type ExtendMsgSetModelInterface interface {
 	CreateExtendMsgSet(ctx context.Context, set *ExtendMsgSetModel) error
-	GetAllExtendMsgSet(ctx context.Context, conversationID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSetModel, err error)
-	GetExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, maxMsgUpdateTime int64) (*ExtendMsgSetModel, error)
+	GetAllExtendMsgSet(
+		ctx context.Context,
+		conversationID string,
+		opts *GetAllExtendMsgSetOpts,
+	) (sets []*ExtendMsgSetModel, err error)
+	GetExtendMsgSet(
+		ctx context.Context,
+		conversationID string,
+		sessionType int32,
+		maxMsgUpdateTime int64,
+	) (*ExtendMsgSetModel, error)
 	InsertExtendMsg(ctx context.Context, conversationID string, sessionType int32, msg *ExtendMsgModel) error
-	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
-	DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*KeyValueModel) error
-	TakeExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *ExtendMsgModel, err error)
+	InsertOrUpdateReactionExtendMsgSet(
+		ctx context.Context,
+		conversationID string,
+		sessionType int32,
+		clientMsgID string,
+		msgFirstModifyTime int64,
+		reactionExtensionList map[string]*KeyValueModel,
+	) error
+	DeleteReactionExtendMsgSet(
+		ctx context.Context,
+		conversationID string,
+		sessionType int32,
+		clientMsgID string,
+		msgFirstModifyTime int64,
+		reactionExtensionList map[string]*KeyValueModel,
+	) error
+	TakeExtendMsg(
+		ctx context.Context,
+		conversationID string,
+		sessionType int32,
+		clientMsgID string,
+		maxMsgUpdateTime int64,
+	) (extendMsg *ExtendMsgModel, err error)
 }
 
 func (ExtendMsgSetModel) TableName() string {

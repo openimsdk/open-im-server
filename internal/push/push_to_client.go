@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package push
 
 import (
@@ -38,9 +52,16 @@ type Pusher struct {
 
 var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
-func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
-	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient, msgRpcClient *rpcclient.MessageRpcClient) *Pusher {
+func NewPusher(
+	discov discoveryregistry.SvcDiscoveryRegistry,
+	offlinePusher offlinepush.OfflinePusher,
+	database controller.PushDatabase,
+	groupLocalCache *localcache.GroupLocalCache,
+	conversationLocalCache *localcache.ConversationLocalCache,
+	conversationRpcClient *rpcclient.ConversationRpcClient,
+	groupRpcClient *rpcclient.GroupRpcClient,
+	msgRpcClient *rpcclient.MessageRpcClient,
+) *Pusher {
 	return &Pusher{
 		discov:                 discov,
 		database:               database,
@@ -87,7 +108,18 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 		return err
 	}
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
-	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userIDs)
+	log.ZDebug(
+		ctx,
+		"push_result",
+		"ws push result",
+		wsResults,
+		"sendData",
+		msg,
+		"isOfflinePush",
+		isOfflinePush,
+		"push_to_userID",
+		userIDs,
+	)
 	p.successCount++
 	for _, userID := range userIDs {
 		if isOfflinePush && userID != msg.SendID {
@@ -138,7 +170,15 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}
 			defer func(groupID string, userIDs []string) {
 				if err := p.DeleteMemberAndSetConversationSeq(ctx, groupID, userIDs); err != nil {
-					log.ZError(ctx, "MemberQuitNotification DeleteMemberAndSetConversationSeq", err, "groupID", groupID, "userIDs", userIDs)
+					log.ZError(
+						ctx,
+						"MemberQuitNotification DeleteMemberAndSetConversationSeq",
+						err,
+						"groupID",
+						groupID,
+						"userIDs",
+						userIDs,
+					)
 				}
 			}(groupID, []string{tips.QuitUser.UserID})
 			pushToUserIDs = append(pushToUserIDs, tips.QuitUser.UserID)
@@ -147,10 +187,21 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 				return err
 			}
-			kickedUsers := utils.Slice(tips.KickedUserList, func(e *sdkws.GroupMemberFullInfo) string { return e.UserID })
+			kickedUsers := utils.Slice(
+				tips.KickedUserList,
+				func(e *sdkws.GroupMemberFullInfo) string { return e.UserID },
+			)
 			defer func(groupID string, userIDs []string) {
 				if err := p.DeleteMemberAndSetConversationSeq(ctx, groupID, userIDs); err != nil {
-					log.ZError(ctx, "MemberKickedNotification DeleteMemberAndSetConversationSeq", err, "groupID", groupID, "userIDs", userIDs)
+					log.ZError(
+						ctx,
+						"MemberKickedNotification DeleteMemberAndSetConversationSeq",
+						err,
+						"groupID",
+						groupID,
+						"userIDs",
+						userIDs,
+					)
 				}
 			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
@@ -160,7 +211,16 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err
 				}
-				log.ZInfo(ctx, "GroupDismissedNotificationInfo****", "groupID", groupID, "num", len(pushToUserIDs), "list", pushToUserIDs)
+				log.ZInfo(
+					ctx,
+					"GroupDismissedNotificationInfo****",
+					"groupID",
+					groupID,
+					"num",
+					len(pushToUserIDs),
+					"list",
+					pushToUserIDs,
+				)
 				if len(config.Config.Manager.UserID) > 0 {
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.UserID[0])
 				}
@@ -224,9 +284,23 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 				return err
 			}
-			_, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
+			_, err := p.GetConnsAndOnlinePush(
+				ctx,
+				msg,
+				utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs),
+			)
 			if err != nil {
-				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
+				log.ZError(
+					ctx,
+					"offlinePushMsg failed",
+					err,
+					"groupID",
+					groupID,
+					"msg",
+					msg,
+					"userIDs",
+					utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs),
+				)
 				return err
 			}
 		}
@@ -234,7 +308,11 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 	return nil
 }
 
-func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
+func (p *Pusher) GetConnsAndOnlinePush(
+	ctx context.Context,
+	msg *sdkws.MsgData,
+	pushToUserIDs []string,
+) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
 	conns, err := p.discov.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
 	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
@@ -243,7 +321,10 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	//Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
+		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(
+			ctx,
+			&msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs},
+		)
 		p.discov.CloseConn(v)
 		if err != nil {
 			continue
@@ -257,7 +338,12 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	return wsResults, nil
 }
 
-func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg *sdkws.MsgData, offlinePushUserIDs []string) error {
+func (p *Pusher) offlinePushMsg(
+	ctx context.Context,
+	conversationID string,
+	msg *sdkws.MsgData,
+	offlinePushUserIDs []string,
+) error {
 	title, content, opts, err := p.getOfflinePushInfos(conversationID, msg)
 	if err != nil {
 		return err
@@ -291,7 +377,10 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts,
 	return opts, nil
 }
 
-func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
+func (p *Pusher) getOfflinePushInfos(
+	conversationID string,
+	msg *sdkws.MsgData,
+) (title, content string, opts *offlinepush.Opts, err error) {
 	if p.offlinePusher == nil {
 		err = errNoOfflinePusher
 		return

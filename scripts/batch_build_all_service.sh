@@ -1,12 +1,32 @@
 #!/usr/bin/env bash
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+#Include shell font styles and some basic information
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-bin_dir="../bin"
-logs_dir="../logs"
-sdk_db_dir="../db/sdk/"
+# Include necessary files
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts.sh"
+
+# Include specific functions and variables
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/style_info.sh" \
+  "$OPENIM_ROOT/scripts/path_info.sh"
+
+bin_dir="$BIN_DIR"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
+
 #Automatically created when there is no bin, logs folder
 if [ ! -d $bin_dir ]; then
   mkdir -p $bin_dir
@@ -56,5 +76,5 @@ done
 echo "success_num" $success_num  "service num:" ${#service_source_root[*]}
 if [ $success_num == ${#service_source_root[*]} ]
 then
-  echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
+  echo -e ${BACKGROUND_GREEN}"all services build success"${COLOR_SUFFIX}
 fi

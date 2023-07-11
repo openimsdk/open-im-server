@@ -40,6 +40,62 @@ if [[ `git status --porcelain` ]]; then
   exit 1
 fi
 
+COLOR_SUFFIX="\033[0m"
+
+BLACK_PREFIX="\033[30m"
+RED_PREFIX="\033[31m"
+GREEN_PREFIX="\033[32m"
+BACKGROUND_GREEN="\033[33m"
+BLUE_PREFIX="\033[34m"
+PURPLE_PREFIX="\033[35m"
+SKY_BLUE_PREFIX="\033[36m"
+WHITE_PREFIX="\033[37m"
+BOLD_PREFIX="\033[1m"
+UNDERLINE_PREFIX="\033[4m"
+ITALIC_PREFIX="\033[3m"
+
+# Function to print colored text
+print_color() {
+  local text=$1
+  local color=$2
+  echo -e "${color}${text}${COLOR_SUFFIX}"
+}
+
+# Function to print section separator
+print_separator() {
+  print_color "==========================================================" ${PURPLE_PREFIX}
+}
+
+# Get current time
+time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Print section separator
+print_separator
+
+# Print time of submission
+print_color "PTIME: ${time}" "${BOLD_PREFIX}${CYAN_PREFIX}"
+echo ""
+author=$(git config user.name)
+repository=$(basename -s .git $(git config --get remote.origin.url))
+
+# Print additional information if needed
+print_color "Repository: ${repository}" "${BLUE_PREFIX}"
+echo ""
+
+print_color "Author: ${author}" "${PURPLE_PREFIX}"
+
+# Print section separator
+print_separator
+
+file_list=$(git diff --name-status HEAD @{u})
+added_files=$(grep -c '^A' <<< "$file_list")
+modified_files=$(grep -c '^M' <<< "$file_list")
+deleted_files=$(grep -c '^D' <<< "$file_list")
+
+print_color "Added Files: ${added_files}" "${BACKGROUND_GREEN}"
+print_color "Modified Files: ${modified_files}" "${BACKGROUND_GREEN}"
+print_color "Deleted Files: ${deleted_files}" "${BACKGROUND_GREEN}"
+
 #
 #printMessage "Running the Flutter analyzer"
 #flutter analyze

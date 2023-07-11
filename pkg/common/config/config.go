@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package config
 
 import (
@@ -303,6 +317,15 @@ type notification struct {
 }
 
 func GetServiceNames() []string {
-	return []string{Config.RpcRegisterName.OpenImUserName, Config.RpcRegisterName.OpenImFriendName, Config.RpcRegisterName.OpenImMsgName, Config.RpcRegisterName.OpenImPushName, Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName, Config.RpcRegisterName.OpenImAuthName, Config.RpcRegisterName.OpenImConversationName, Config.RpcRegisterName.OpenImThirdName}
+	return []string{
+		Config.RpcRegisterName.OpenImUserName,
+		Config.RpcRegisterName.OpenImFriendName,
+		Config.RpcRegisterName.OpenImMsgName,
+		Config.RpcRegisterName.OpenImPushName,
+		Config.RpcRegisterName.OpenImMessageGatewayName,
+		Config.RpcRegisterName.OpenImGroupName,
+		Config.RpcRegisterName.OpenImAuthName,
+		Config.RpcRegisterName.OpenImConversationName,
+		Config.RpcRegisterName.OpenImThirdName,
+	}
 }

@@ -1,11 +1,27 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package relation
 
 import (
 	"context"
+	"time"
+
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"gorm.io/gorm"
-	"time"
 )
 
 type ObjectPutGorm struct {
@@ -37,7 +53,11 @@ func (o *ObjectPutGorm) SetCompleted(ctx context.Context, putID string) (err err
 	return utils.Wrap1(o.DB.Model(&relation.ObjectPutModel{}).Where("put_id = ?", putID).Update("complete", true).Error)
 }
 
-func (o *ObjectPutGorm) FindExpirationPut(ctx context.Context, expirationTime time.Time, num int) (list []*relation.ObjectPutModel, err error) {
+func (o *ObjectPutGorm) FindExpirationPut(
+	ctx context.Context,
+	expirationTime time.Time,
+	num int,
+) (list []*relation.ObjectPutModel, err error) {
 	err = o.DB.Where("effective_time <= ?", expirationTime).Limit(num).Find(&list).Error
 	return list, utils.Wrap1(err)
 }

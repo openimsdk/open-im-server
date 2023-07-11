@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package unrelation
 
 import (
@@ -8,15 +22,16 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
-	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/protobuf/proto"
+
+	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
@@ -32,7 +47,8 @@ func NewMsgMongoDriver(database *mongo.Database) table.MsgDocModelInterface {
 }
 
 func (m *MsgMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []table.MsgInfoModel) error {
-	return m.MsgCollection.FindOneAndUpdate(ctx, bson.M{"doc_id": docID}, bson.M{"$push": bson.M{"msgs": bson.M{"$each": msgsToMongo}}}).Err()
+	return m.MsgCollection.FindOneAndUpdate(ctx, bson.M{"doc_id": docID}, bson.M{"$push": bson.M{"msgs": bson.M{"$each": msgsToMongo}}}).
+		Err()
 }
 
 func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) error {
@@ -40,7 +56,13 @@ func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) e
 	return err
 }
 
-func (m *MsgMongoDriver) UpdateMsg(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error) {
+func (m *MsgMongoDriver) UpdateMsg(
+	ctx context.Context,
+	docID string,
+	index int64,
+	key string,
+	value any,
+) (*mongo.UpdateResult, error) {
 	var field string
 	if key == "" {
 		field = fmt.Sprintf("msgs.%d", index)
@@ -57,7 +79,13 @@ func (m *MsgMongoDriver) UpdateMsg(ctx context.Context, docID string, index int6
 }
 
 // PushUnique value must slice
-func (m *MsgMongoDriver) PushUnique(ctx context.Context, docID string, index int64, key string, value any) (*mongo.UpdateResult, error) {
+func (m *MsgMongoDriver) PushUnique(
+	ctx context.Context,
+	docID string,
+	index int64,
+	key string,
+	value any,
+) (*mongo.UpdateResult, error) {
 	var field string
 	if key == "" {
 		field = fmt.Sprintf("msgs.%d", index)
@@ -78,20 +106,34 @@ func (m *MsgMongoDriver) PushUnique(ctx context.Context, docID string, index int
 }
 
 func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, index int64, msg []byte) error {
-	_, err := m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}})
+	_, err := m.MsgCollection.UpdateOne(
+		ctx,
+		bson.M{"doc_id": docID},
+		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", index): msg}},
+	)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	return nil
 }
 
-func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(ctx context.Context, docID string, msg *sdkws.MsgData, seqIndex int, status int32) error {
+func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
+	ctx context.Context,
+	docID string,
+	msg *sdkws.MsgData,
+	seqIndex int,
+	status int32,
+) error {
 	msg.Status = status
 	bytes, err := proto.Marshal(msg)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	_, err = m.MsgCollection.UpdateOne(ctx, bson.M{"doc_id": docID}, bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}})
+	_, err = m.MsgCollection.UpdateOne(
+		ctx,
+		bson.M{"doc_id": docID},
+		bson.M{"$set": bson.M{fmt.Sprintf("msgs.%d.msg", seqIndex): bytes}},
+	)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
@@ -104,12 +146,20 @@ func (m *MsgMongoDriver) FindOneByDocID(ctx context.Context, docID string) (*tab
 	return doc, err
 }
 
-func (m *MsgMongoDriver) GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*table.MsgDocModel, error) {
+func (m *MsgMongoDriver) GetMsgDocModelByIndex(
+	ctx context.Context,
+	conversationID string,
+	index, sort int64,
+) (*table.MsgDocModel, error) {
 	if sort != 1 && sort != -1 {
 		return nil, errs.ErrArgs.Wrap("mongo sort must be 1 or -1")
 	}
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"doc_id": sort})
-	cursor, err := m.MsgCollection.Find(ctx, bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}}, findOpts)
+	cursor, err := m.MsgCollection.Find(
+		ctx,
+		bson.M{"doc_id": primitive.Regex{Pattern: fmt.Sprintf("^%s:", conversationID)}},
+		findOpts,
+	)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -180,7 +230,12 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 	return err
 }
 
-func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(ctx context.Context, userID string, docID string, seqs []int64) (msgs []*table.MsgInfoModel, err error) {
+func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
+	ctx context.Context,
+	userID string,
+	docID string,
+	seqs []int64,
+) (msgs []*table.MsgInfoModel, err error) {
 	indexs := make([]int64, 0, len(seqs))
 	for _, seq := range seqs {
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
@@ -286,7 +341,12 @@ func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, 
 	return count > 0, nil
 }
 
-func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error {
+func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
+	ctx context.Context,
+	userID string,
+	docID string,
+	indexes []int64,
+) error {
 	updates := []mongo.WriteModel{}
 	for _, index := range indexes {
 		filter := bson.M{
