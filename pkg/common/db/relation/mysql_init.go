@@ -41,7 +41,7 @@ func newMysqlGormDB() (*gorm.DB, error) {
 
 	db, err := connectToDatabase(dsn, maxRetry)
 	if err != nil {
-		panic(err.Error() + " Open failed " + dsn)
+		panic(err.Error() + " Open failed " + dsn) 
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
