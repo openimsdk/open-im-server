@@ -87,7 +87,7 @@ fmt:
 vet:
 	@$(GO) vet ./...
 
-lint: Check syntax and styling of go sources. ✨
+## lint: Check syntax and styling of go sources. ✨
 .PHONY: lint
 lint:
 	@$(MAKE) go.lint
