@@ -32,7 +32,7 @@ VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/scripts
 
 #Copy scripts files and binary files to the blank image
 COPY --from=build /Open-IM-Server/scripts /Open-IM-Server/scripts
-COPY --from=build /Open-IM-Server/bin /Open-IM-Server/bin
+COPY --from=build /Open-IM-Server/bin /Open-IM-Server/_output/bin/platforms/linux/amd64/
 
 WORKDIR /Open-IM-Server/scripts
 
