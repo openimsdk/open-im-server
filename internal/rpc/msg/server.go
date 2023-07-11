@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -57,15 +58,17 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	mysql, err := relation.NewGormDB()
 	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
+	msgMysModel := relation.NewChatLogGorm(mysql)
 	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
 	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
 	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, msgMysModel)
 	conversationClient := rpcclient.NewConversationRpcClient(client)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)

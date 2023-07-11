@@ -2,6 +2,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -86,5 +87,60 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	}
 	resp := new(sdkws.GetMaxSeqResp)
 	resp.MaxSeqs = maxSeqs
+	return resp, nil
+}
+
+func (m *msgServer) GetChatLogs(ctx context.Context, req *msg.GetChatLogsReq) (*msg.GetChatLogsResp, error) {
+	resp := &msg.GetChatLogsResp{}
+	num, chatLogs, err := m.MsgDatabase.GetChatLog(ctx, req, req.Pagination.PageNumber, req.Pagination.ShowNumber, []int32{
+		constant.Text,
+		constant.Picture,
+		constant.Voice,
+		constant.Video,
+		constant.File,
+		constant.AtText,
+		constant.Merger,
+		constant.Card,
+		constant.Location,
+		constant.Custom,
+		constant.Revoke,
+		constant.Quote,
+		constant.AdvancedText,
+		constant.CustomNotTriggerConversation,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp.ChatLogsNum = int32(num)
+	for _, chatLog := range chatLogs {
+		pbChatLog := &msg.ChatLog{}
+		utils.CopyStructFields(pbChatLog, chatLog)
+		pbChatLog.SendTime = chatLog.SendTime.Unix()
+		pbChatLog.CreateTime = chatLog.CreateTime.Unix()
+		if chatLog.SenderNickname == "" {
+			sendUser, err := m.User.GetUserInfo(ctx, chatLog.SendID)
+			if err != nil {
+				return nil, err
+			}
+			pbChatLog.SenderNickname = sendUser.Nickname
+		}
+		switch chatLog.SessionType {
+		case constant.SingleChatType:
+			recvUser, err := m.User.GetUserInfo(ctx, chatLog.RecvID)
+			if err != nil {
+				return nil, err
+			}
+			pbChatLog.SenderNickname = recvUser.Nickname
+
+		case constant.GroupChatType, constant.SuperGroupChatType:
+			group, err := m.Group.GetGroupInfo(ctx, chatLog.RecvID)
+			if err != nil {
+				continue
+			}
+			pbChatLog.RecvID = group.GroupID
+			pbChatLog.GroupName = group.GroupName
+		}
+		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
+	}
 	return resp, nil
 }

@@ -1,6 +1,7 @@
 package relation
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -48,30 +49,30 @@ func (c *ChatLogGorm) Create(msg *pbMsg.MsgDataToMQ) error {
 	return c.DB.Create(chatLog).Error
 }
 
-func (c *ChatLogGorm) GetChatLog(chatLog *relation.ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []relation.ChatLogModel, error) {
+func (c *ChatLogGorm) GetChatLog(ctx context.Context, chatLog *relation.ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []relation.ChatLogModel, error) {
 	mdb := c.DB.Model(chatLog)
 	if chatLog.SendTime.Unix() > 0 {
-		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
+		mdb = mdb.WithContext(ctx).Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}
 	if chatLog.Content != "" {
-		mdb = mdb.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+		mdb = mdb.WithContext(ctx).Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
 	if chatLog.SessionType == 1 {
-		mdb = mdb.Where("session_type = ?", chatLog.SessionType)
+		mdb = mdb.WithContext(ctx).Where("session_type = ?", chatLog.SessionType)
 	} else if chatLog.SessionType == 2 {
-		mdb = mdb.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+		mdb = mdb.WithContext(ctx).Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.ContentType != 0 {
-		mdb = mdb.Where("content_type = ?", chatLog.ContentType)
+		mdb = mdb.WithContext(ctx).Where("content_type = ?", chatLog.ContentType)
 	}
 	if chatLog.SendID != "" {
-		mdb = mdb.Where("send_id = ?", chatLog.SendID)
+		mdb = mdb.WithContext(ctx).Where("send_id = ?", chatLog.SendID)
 	}
 	if chatLog.RecvID != "" {
-		mdb = mdb.Where("recv_id = ?", chatLog.RecvID)
+		mdb = mdb.WithContext(ctx).Where("recv_id = ?", chatLog.RecvID)
 	}
 	if len(contentTypeList) > 0 {
-		mdb = mdb.Where("content_type in (?)", contentTypeList)
+		mdb = mdb.WithContext(ctx).Where("content_type in (?)", contentTypeList)
 	}
 	var count int64
 	if err := mdb.Count(&count).Error; err != nil {

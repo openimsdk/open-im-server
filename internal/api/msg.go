@@ -350,3 +350,7 @@ func (m *MessageApi) GetActiveGroup(c *gin.Context) {
 func (m *MessageApi) SearchMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SearchMessage, m.Client, c)
 }
+
+func (m MessageApi) GetChatLogs(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetChatLogs, m.Client, c)
+}

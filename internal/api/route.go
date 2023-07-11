@@ -140,6 +140,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 		msgGroup.POST("/search_msg", m.SearchMsg)
+		msgGroup.POST("/get_chat_logs", m.GetChatLogs)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)

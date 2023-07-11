@@ -1,6 +1,7 @@
 package relation
 
 import (
+	"context"
 	"time"
 
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -34,5 +35,5 @@ func (ChatLogModel) TableName() string {
 
 type ChatLogModelInterface interface {
 	Create(msg *pbMsg.MsgDataToMQ) error
-	GetChatLog(chatLog *ChatLogModel, pageNumber, showNumber int32, contentTypes []int32) (int64, []ChatLogModel, error)
+	GetChatLog(ctx context.Context, chatLog *ChatLogModel, pageNumber, showNumber int32, contentTypes []int32) (int64, []ChatLogModel, error)
 }
