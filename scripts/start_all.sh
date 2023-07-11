@@ -50,6 +50,8 @@ echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Server Start Time: ${time}${COLOR_SUFFIX}"
 # Print section separator
 echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
 
+cd  $SCRIPTS_ROOT
+
 # FIXME Put the shell script names here
 need_to_start_server_shell=(
   start_rpc_service.sh

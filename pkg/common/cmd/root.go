@@ -84,6 +84,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
+	fmt.Println("configFolderPath:", configFolderPath)
 	return config.InitConfig(configFolderPath)
 }
 
