@@ -30,7 +30,7 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 }
 
 func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
-	log.ZDebug(ctx, "return")
+	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 }
 
 func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*third.AuthSignResp, error) {
-	log.ZDebug(ctx, "return")
+	defer log.ZDebug(ctx, "return")
 	partNumbers := utils.Slice(req.PartNumbers, func(partNumber int32) int { return int(partNumber) })
 	result, err := t.s3dataBase.AuthSign(ctx, req.UploadID, partNumbers)
 	if err != nil {
@@ -107,7 +107,7 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 }
 
 func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
-	log.ZDebug(ctx, "return")
+	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
