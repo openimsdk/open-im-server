@@ -24,6 +24,7 @@ import (
 func TestNewGormDB(t *testing.T) {
 	err := config.InitConfig("config_folder_path")
 	if err != nil {
+		fmt.Println("config load error")
 		return
 	}
 	db, err := newMysqlGormDB()
