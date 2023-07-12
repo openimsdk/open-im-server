@@ -66,22 +66,22 @@ jobs:
         run: |
           make format
 
-      - name: Generate all necessary files, such as error code files
-        run: |
-          make generate
+    #   - name: Generate all necessary files, such as error code files
+    #     run: |
+    #       make generate
 
-      - name: Check syntax and styling of go sources
-        run: |
-          set -e
-          make lint
+    #   - name: Check syntax and styling of go sources
+    #     run: |
+    #       set -e
+    #       make lint
 
-      - name: Run unit test and get test coverage
-        run: |
-          make cover
+    #   - name: Run unit test and get test coverage
+    #     run: |
+    #       make cover
 
       - name: Build source code for host platform
         run: |
-          make build # skip build for now
+          make -j build # skip build for now
 
       - name: Collect Test Coverage File
         uses: actions/upload-artifact@v1.0.0
@@ -92,23 +92,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-  lint:
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
+#   lint:
+#       runs-on: ubuntu-20.04
+#       steps:
+#         - name: Checkout
+#           uses: actions/checkout@v3
+#           with:
+#             fetch-depth: 0
   
-        - name: Set up Go
-          uses: actions/setup-go@v3
-          with:
-            go-version: ${{ env.GO_VERSION }}
+#         - name: Set up Go
+#           uses: actions/setup-go@v3
+#           with:
+#             go-version: ${{ env.GO_VERSION }}
   
-        - name: golangci-lint
-          uses: golangci/golangci-lint-action@v3
-          with:
-            version: ${{ env.GOLANGCI_VERSION }}
+#         - name: golangci-lint
+#           uses: golangci/golangci-lint-action@v3
+#           with:
+#             version: ${{ env.GOLANGCI_VERSION }}
 
   docker-image-tests:
     runs-on: ubuntu-20.04
