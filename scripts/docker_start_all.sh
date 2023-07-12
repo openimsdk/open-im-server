@@ -16,6 +16,10 @@
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
 #fixme Put the shell scripts name here
 need_to_start_server_shell=(
   start_rpc_service.sh

@@ -65,8 +65,12 @@ cmd_utils_name="openim-cmdutils"
 cmd_utils_binary_root="$OPENIM_ROOT/$BIN_DIR"
 cmd_utils_source_root="$OPENIM_ROOT/cmd/openim-cmdutils/"
 
+echo "debug========> config_path=$config_path"
 # Global configuration file default dir
 config_path="$OPENIM_ROOT/config/config.yaml"
+configfile_path="$OPENIM_ROOT/config"
+
+echo "BUG: debug========> config_path=$config_path"
 
 # servicefile dir path
 service_source_root=(
