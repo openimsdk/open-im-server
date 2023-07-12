@@ -30,13 +30,11 @@ jobs:
       run: | 
         docker-compose stop
         docker-compose up -d
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
 
     - name: Stop all services
       run: |
         chmod +x ./scripts/stop_all.sh
         ./scripts/stop_all.sh
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
 
     - name: Build all services
       run: |
