@@ -60,7 +60,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
 	if req.Secret != config.Config.Secret {
-		return nil, errs.ErrIdentity.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
@@ -115,14 +115,13 @@ func (s *authServer) ParseToken(
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
-	resp := pbAuth.ForceLogoutResp{}
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return &pbAuth.ForceLogoutResp{}, nil
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
@@ -134,8 +133,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
-		s.RegisterCenter.CloseConn(v)
 		return utils.Wrap(err, "")
 	}
-	return errs.ErrInternalServer.Wrap()
+	return nil
 }

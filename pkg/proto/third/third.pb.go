@@ -25,22 +25,17 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ApplyPutReq struct {
+type KeyValues struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PutID        string `protobuf:"bytes,1,opt,name=putID,proto3" json:"putID"`
-	Name         string `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
-	Size         int64  `protobuf:"varint,3,opt,name=size,proto3" json:"size"`
-	Hash         string `protobuf:"bytes,4,opt,name=hash,proto3" json:"hash"`
-	ContentType  string `protobuf:"bytes,5,opt,name=contentType,proto3" json:"contentType"`
-	FragmentSize int64  `protobuf:"varint,6,opt,name=fragmentSize,proto3" json:"fragmentSize"`
-	ValidTime    int64  `protobuf:"varint,7,opt,name=validTime,proto3" json:"validTime"` // 文件有效时间
+	Key    string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
+	Values []string `protobuf:"bytes,2,rep,name=values,proto3" json:"values"`
 }
 
-func (x *ApplyPutReq) Reset() {
-	*x = ApplyPutReq{}
+func (x *KeyValues) Reset() {
+	*x = KeyValues{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -48,13 +43,13 @@ func (x *ApplyPutReq) Reset() {
 	}
 }
 
-func (x *ApplyPutReq) String() string {
+func (x *KeyValues) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApplyPutReq) ProtoMessage() {}
+func (*KeyValues) ProtoMessage() {}
 
-func (x *ApplyPutReq) ProtoReflect() protoreflect.Message {
+func (x *KeyValues) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -66,75 +61,38 @@ func (x *ApplyPutReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApplyPutReq.ProtoReflect.Descriptor instead.
-func (*ApplyPutReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use KeyValues.ProtoReflect.Descriptor instead.
+func (*KeyValues) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApplyPutReq) GetPutID() string {
+func (x *KeyValues) GetKey() string {
 	if x != nil {
-		return x.PutID
+		return x.Key
 	}
 	return ""
 }
 
-func (x *ApplyPutReq) GetName() string {
+func (x *KeyValues) GetValues() []string {
 	if x != nil {
-		return x.Name
+		return x.Values
 	}
-	return ""
+	return nil
 }
 
-func (x *ApplyPutReq) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-func (x *ApplyPutReq) GetHash() string {
-	if x != nil {
-		return x.Hash
-	}
-	return ""
-}
-
-func (x *ApplyPutReq) GetContentType() string {
-	if x != nil {
-		return x.ContentType
-	}
-	return ""
-}
-
-func (x *ApplyPutReq) GetFragmentSize() int64 {
-	if x != nil {
-		return x.FragmentSize
-	}
-	return 0
-}
-
-func (x *ApplyPutReq) GetValidTime() int64 {
-	if x != nil {
-		return x.ValidTime
-	}
-	return 0
-}
-
-type ApplyPutResp struct {
+type SignPart struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url          string   `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	PutID        string   `protobuf:"bytes,2,opt,name=putID,proto3" json:"putID"`
-	FragmentSize int64    `protobuf:"varint,3,opt,name=fragmentSize,proto3" json:"fragmentSize"`
-	ValidTime    int64    `protobuf:"varint,4,opt,name=validTime,proto3" json:"validTime"` // 上传地址的有效时间
-	PutURLsHash  string   `protobuf:"bytes,5,opt,name=putURLsHash,proto3" json:"putURLsHash"`
-	PutURLs      []string `protobuf:"bytes,6,rep,name=putURLs,proto3" json:"putURLs"`
+	PartNumber int32        `protobuf:"varint,1,opt,name=partNumber,proto3" json:"partNumber"`
+	Url        string       `protobuf:"bytes,2,opt,name=url,proto3" json:"url"`
+	Query      []*KeyValues `protobuf:"bytes,3,rep,name=query,proto3" json:"query"`
+	Header     []*KeyValues `protobuf:"bytes,4,rep,name=header,proto3" json:"header"`
 }
 
-func (x *ApplyPutResp) Reset() {
-	*x = ApplyPutResp{}
+func (x *SignPart) Reset() {
+	*x = SignPart{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -142,13 +100,13 @@ func (x *ApplyPutResp) Reset() {
 	}
 }
 
-func (x *ApplyPutResp) String() string {
+func (x *SignPart) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApplyPutResp) ProtoMessage() {}
+func (*SignPart) ProtoMessage() {}
 
-func (x *ApplyPutResp) ProtoReflect() protoreflect.Message {
+func (x *SignPart) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -160,63 +118,52 @@ func (x *ApplyPutResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApplyPutResp.ProtoReflect.Descriptor instead.
-func (*ApplyPutResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use SignPart.ProtoReflect.Descriptor instead.
+func (*SignPart) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ApplyPutResp) GetUrl() string {
+func (x *SignPart) GetPartNumber() int32 {
+	if x != nil {
+		return x.PartNumber
+	}
+	return 0
+}
+
+func (x *SignPart) GetUrl() string {
 	if x != nil {
 		return x.Url
 	}
 	return ""
 }
 
-func (x *ApplyPutResp) GetPutID() string {
+func (x *SignPart) GetQuery() []*KeyValues {
 	if x != nil {
-		return x.PutID
-	}
-	return ""
-}
-
-func (x *ApplyPutResp) GetFragmentSize() int64 {
-	if x != nil {
-		return x.FragmentSize
-	}
-	return 0
-}
-
-func (x *ApplyPutResp) GetValidTime() int64 {
-	if x != nil {
-		return x.ValidTime
-	}
-	return 0
-}
-
-func (x *ApplyPutResp) GetPutURLsHash() string {
-	if x != nil {
-		return x.PutURLsHash
-	}
-	return ""
-}
-
-func (x *ApplyPutResp) GetPutURLs() []string {
-	if x != nil {
-		return x.PutURLs
+		return x.Query
 	}
 	return nil
 }
 
-type ConfirmPutReq struct {
+func (x *SignPart) GetHeader() []*KeyValues {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+type AuthSignParts struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PutID string `protobuf:"bytes,1,opt,name=putID,proto3" json:"putID"`
+	Url    string       `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3" json:"query"`
+	Header []*KeyValues `protobuf:"bytes,3,rep,name=header,proto3" json:"header"`
+	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3" json:"parts"`
 }
 
-func (x *ConfirmPutReq) Reset() {
-	*x = ConfirmPutReq{}
+func (x *AuthSignParts) Reset() {
+	*x = AuthSignParts{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -224,13 +171,13 @@ func (x *ConfirmPutReq) Reset() {
 	}
 }
 
-func (x *ConfirmPutReq) String() string {
+func (x *AuthSignParts) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConfirmPutReq) ProtoMessage() {}
+func (*AuthSignParts) ProtoMessage() {}
 
-func (x *ConfirmPutReq) ProtoReflect() protoreflect.Message {
+func (x *AuthSignParts) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -242,28 +189,47 @@ func (x *ConfirmPutReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConfirmPutReq.ProtoReflect.Descriptor instead.
-func (*ConfirmPutReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use AuthSignParts.ProtoReflect.Descriptor instead.
+func (*AuthSignParts) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ConfirmPutReq) GetPutID() string {
+func (x *AuthSignParts) GetUrl() string {
 	if x != nil {
-		return x.PutID
+		return x.Url
 	}
 	return ""
 }
 
-type ConfirmPutResp struct {
+func (x *AuthSignParts) GetQuery() []*KeyValues {
+	if x != nil {
+		return x.Query
+	}
+	return nil
+}
+
+func (x *AuthSignParts) GetHeader() []*KeyValues {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+func (x *AuthSignParts) GetParts() []*SignPart {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+type PartLimitReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
 }
 
-func (x *ConfirmPutResp) Reset() {
-	*x = ConfirmPutResp{}
+func (x *PartLimitReq) Reset() {
+	*x = PartLimitReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -271,13 +237,13 @@ func (x *ConfirmPutResp) Reset() {
 	}
 }
 
-func (x *ConfirmPutResp) String() string {
+func (x *PartLimitReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConfirmPutResp) ProtoMessage() {}
+func (*PartLimitReq) ProtoMessage() {}
 
-func (x *ConfirmPutResp) ProtoReflect() protoreflect.Message {
+func (x *PartLimitReq) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -289,30 +255,23 @@ func (x *ConfirmPutResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConfirmPutResp.ProtoReflect.Descriptor instead.
-func (*ConfirmPutResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use PartLimitReq.ProtoReflect.Descriptor instead.
+func (*PartLimitReq) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ConfirmPutResp) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-type GetUrlReq struct {
+type PartLimitResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name       string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`              // 文件名
-	Expires    int64  `protobuf:"varint,2,opt,name=expires,proto3" json:"expires"`       // url有效时间
-	Attachment bool   `protobuf:"varint,3,opt,name=attachment,proto3" json:"attachment"` // 是否是附件
+	MinPartSize int64 `protobuf:"varint,1,opt,name=minPartSize,proto3" json:"minPartSize"`
+	MaxPartSize int64 `protobuf:"varint,2,opt,name=maxPartSize,proto3" json:"maxPartSize"`
+	MaxNumSize  int32 `protobuf:"varint,3,opt,name=maxNumSize,proto3" json:"maxNumSize"`
 }
 
-func (x *GetUrlReq) Reset() {
-	*x = GetUrlReq{}
+func (x *PartLimitResp) Reset() {
+	*x = PartLimitResp{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -320,13 +279,13 @@ func (x *GetUrlReq) Reset() {
 	}
 }
 
-func (x *GetUrlReq) String() string {
+func (x *PartLimitResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUrlReq) ProtoMessage() {}
+func (*PartLimitResp) ProtoMessage() {}
 
-func (x *GetUrlReq) ProtoReflect() protoreflect.Message {
+func (x *PartLimitResp) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -338,44 +297,42 @@ func (x *GetUrlReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUrlReq.ProtoReflect.Descriptor instead.
-func (*GetUrlReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use PartLimitResp.ProtoReflect.Descriptor instead.
+func (*PartLimitResp) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetUrlReq) GetName() string {
+func (x *PartLimitResp) GetMinPartSize() int64 {
 	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *GetUrlReq) GetExpires() int64 {
-	if x != nil {
-		return x.Expires
+		return x.MinPartSize
 	}
 	return 0
 }
 
-func (x *GetUrlReq) GetAttachment() bool {
+func (x *PartLimitResp) GetMaxPartSize() int64 {
 	if x != nil {
-		return x.Attachment
+		return x.MaxPartSize
 	}
-	return false
+	return 0
 }
 
-type GetUrlResp struct {
+func (x *PartLimitResp) GetMaxNumSize() int32 {
+	if x != nil {
+		return x.MaxNumSize
+	}
+	return 0
+}
+
+type PartSizeReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url  string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	Size int64  `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
-	Hash string `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash"`
+	Size int64 `protobuf:"varint,1,opt,name=size,proto3" json:"size"`
 }
 
-func (x *GetUrlResp) Reset() {
-	*x = GetUrlResp{}
+func (x *PartSizeReq) Reset() {
+	*x = PartSizeReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -383,13 +340,13 @@ func (x *GetUrlResp) Reset() {
 	}
 }
 
-func (x *GetUrlResp) String() string {
+func (x *PartSizeReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUrlResp) ProtoMessage() {}
+func (*PartSizeReq) ProtoMessage() {}
 
-func (x *GetUrlResp) ProtoReflect() protoreflect.Message {
+func (x *PartSizeReq) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -401,42 +358,28 @@ func (x *GetUrlResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUrlResp.ProtoReflect.Descriptor instead.
-func (*GetUrlResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use PartSizeReq.ProtoReflect.Descriptor instead.
+func (*PartSizeReq) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetUrlResp) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *GetUrlResp) GetSize() int64 {
+func (x *PartSizeReq) GetSize() int64 {
 	if x != nil {
 		return x.Size
 	}
 	return 0
 }
 
-func (x *GetUrlResp) GetHash() string {
-	if x != nil {
-		return x.Hash
-	}
-	return ""
-}
-
-type GetPutReq struct {
+type PartSizeResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PutID string `protobuf:"bytes,1,opt,name=putID,proto3" json:"putID"`
+	Size int64 `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
 }
 
-func (x *GetPutReq) Reset() {
-	*x = GetPutReq{}
+func (x *PartSizeResp) Reset() {
+	*x = PartSizeResp{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -444,13 +387,13 @@ func (x *GetPutReq) Reset() {
 	}
 }
 
-func (x *GetPutReq) String() string {
+func (x *PartSizeResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetPutReq) ProtoMessage() {}
+func (*PartSizeResp) ProtoMessage() {}
 
-func (x *GetPutReq) ProtoReflect() protoreflect.Message {
+func (x *PartSizeResp) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -462,30 +405,34 @@ func (x *GetPutReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetPutReq.ProtoReflect.Descriptor instead.
-func (*GetPutReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use PartSizeResp.ProtoReflect.Descriptor instead.
+func (*PartSizeResp) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetPutReq) GetPutID() string {
+func (x *PartSizeResp) GetSize() int64 {
 	if x != nil {
-		return x.PutID
+		return x.Size
 	}
-	return ""
+	return 0
 }
 
-type GetPutFragment struct {
+type InitiateMultipartUploadReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Size int64  `protobuf:"varint,1,opt,name=size,proto3" json:"size"`
-	Hash string `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash"`
-	Url  string `protobuf:"bytes,3,opt,name=url,proto3" json:"url"`
+	Hash        string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
+	Size        int64  `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
+	PartSize    int64  `protobuf:"varint,3,opt,name=partSize,proto3" json:"partSize"`
+	MaxParts    int32  `protobuf:"varint,4,opt,name=maxParts,proto3" json:"maxParts"`
+	Cause       string `protobuf:"bytes,5,opt,name=cause,proto3" json:"cause"`
+	Name        string `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
+	ContentType string `protobuf:"bytes,7,opt,name=contentType,proto3" json:"contentType"`
 }
 
-func (x *GetPutFragment) Reset() {
-	*x = GetPutFragment{}
+func (x *InitiateMultipartUploadReq) Reset() {
+	*x = InitiateMultipartUploadReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -493,13 +440,13 @@ func (x *GetPutFragment) Reset() {
 	}
 }
 
-func (x *GetPutFragment) String() string {
+func (x *InitiateMultipartUploadReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetPutFragment) ProtoMessage() {}
+func (*InitiateMultipartUploadReq) ProtoMessage() {}
 
-func (x *GetPutFragment) ProtoReflect() protoreflect.Message {
+func (x *InitiateMultipartUploadReq) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -511,54 +458,73 @@ func (x *GetPutFragment) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetPutFragment.ProtoReflect.Descriptor instead.
-func (*GetPutFragment) Descriptor() ([]byte, []int) {
+// Deprecated: Use InitiateMultipartUploadReq.ProtoReflect.Descriptor instead.
+func (*InitiateMultipartUploadReq) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetPutFragment) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-func (x *GetPutFragment) GetHash() string {
+func (x *InitiateMultipartUploadReq) GetHash() string {
 	if x != nil {
 		return x.Hash
 	}
 	return ""
 }
 
-func (x *GetPutFragment) GetUrl() string {
+func (x *InitiateMultipartUploadReq) GetSize() int64 {
 	if x != nil {
-		return x.Url
+		return x.Size
+	}
+	return 0
+}
+
+func (x *InitiateMultipartUploadReq) GetPartSize() int64 {
+	if x != nil {
+		return x.PartSize
+	}
+	return 0
+}
+
+func (x *InitiateMultipartUploadReq) GetMaxParts() int32 {
+	if x != nil {
+		return x.MaxParts
+	}
+	return 0
+}
+
+func (x *InitiateMultipartUploadReq) GetCause() string {
+	if x != nil {
+		return x.Cause
 	}
 	return ""
 }
 
-type GetPutResp struct {
+func (x *InitiateMultipartUploadReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *InitiateMultipartUploadReq) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+type UploadInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name         string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
-	Size         int64  `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
-	Hash         string `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash"`
-	FragmentSize int64  `protobuf:"varint,4,opt,name=fragmentSize,proto3" json:"fragmentSize"`
-	ContentType  string `protobuf:"bytes,5,opt,name=contentType,proto3" json:"contentType"`
-	ValidTime    int64  `protobuf:"varint,6,opt,name=validTime,proto3" json:"validTime"` // 上传地址的有效时间
-	// repeated GetPutFragment fragments = 7;
-	// string putURLsHash = 8;
-	// string putID = 2;
-	// int64 fragmentSize = 3;
-	// int64 validTime = 4;// 上传地址的有效时间
-	PutURLsHash string            `protobuf:"bytes,7,opt,name=putURLsHash,proto3" json:"putURLsHash"`
-	Fragments   []*GetPutFragment `protobuf:"bytes,8,rep,name=fragments,proto3" json:"fragments"`
+	UploadID   string         `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
+	PartSize   int64          `protobuf:"varint,2,opt,name=partSize,proto3" json:"partSize"`
+	Sign       *AuthSignParts `protobuf:"bytes,3,opt,name=sign,proto3" json:"sign"`
+	ExpireTime int64          `protobuf:"varint,4,opt,name=expireTime,proto3" json:"expireTime"`
 }
 
-func (x *GetPutResp) Reset() {
-	*x = GetPutResp{}
+func (x *UploadInfo) Reset() {
+	*x = UploadInfo{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -566,13 +532,13 @@ func (x *GetPutResp) Reset() {
 	}
 }
 
-func (x *GetPutResp) String() string {
+func (x *UploadInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetPutResp) ProtoMessage() {}
+func (*UploadInfo) ProtoMessage() {}
 
-func (x *GetPutResp) ProtoReflect() protoreflect.Message {
+func (x *UploadInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -584,77 +550,50 @@ func (x *GetPutResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetPutResp.ProtoReflect.Descriptor instead.
-func (*GetPutResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use UploadInfo.ProtoReflect.Descriptor instead.
+func (*UploadInfo) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *GetPutResp) GetName() string {
+func (x *UploadInfo) GetUploadID() string {
 	if x != nil {
-		return x.Name
+		return x.UploadID
 	}
 	return ""
 }
 
-func (x *GetPutResp) GetSize() int64 {
+func (x *UploadInfo) GetPartSize() int64 {
 	if x != nil {
-		return x.Size
+		return x.PartSize
 	}
 	return 0
 }
 
-func (x *GetPutResp) GetHash() string {
+func (x *UploadInfo) GetSign() *AuthSignParts {
 	if x != nil {
-		return x.Hash
-	}
-	return ""
-}
-
-func (x *GetPutResp) GetFragmentSize() int64 {
-	if x != nil {
-		return x.FragmentSize
-	}
-	return 0
-}
-
-func (x *GetPutResp) GetContentType() string {
-	if x != nil {
-		return x.ContentType
-	}
-	return ""
-}
-
-func (x *GetPutResp) GetValidTime() int64 {
-	if x != nil {
-		return x.ValidTime
-	}
-	return 0
-}
-
-func (x *GetPutResp) GetPutURLsHash() string {
-	if x != nil {
-		return x.PutURLsHash
-	}
-	return ""
-}
-
-func (x *GetPutResp) GetFragments() []*GetPutFragment {
-	if x != nil {
-		return x.Fragments
+		return x.Sign
 	}
 	return nil
 }
 
-type GetHashInfoReq struct {
+func (x *UploadInfo) GetExpireTime() int64 {
+	if x != nil {
+		return x.ExpireTime
+	}
+	return 0
+}
+
+type InitiateMultipartUploadResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hash string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
+	Url    string      `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	Upload *UploadInfo `protobuf:"bytes,2,opt,name=upload,proto3" json:"upload"`
 }
 
-func (x *GetHashInfoReq) Reset() {
-	*x = GetHashInfoReq{}
+func (x *InitiateMultipartUploadResp) Reset() {
+	*x = InitiateMultipartUploadResp{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -662,13 +601,13 @@ func (x *GetHashInfoReq) Reset() {
 	}
 }
 
-func (x *GetHashInfoReq) String() string {
+func (x *InitiateMultipartUploadResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetHashInfoReq) ProtoMessage() {}
+func (*InitiateMultipartUploadResp) ProtoMessage() {}
 
-func (x *GetHashInfoReq) ProtoReflect() protoreflect.Message {
+func (x *InitiateMultipartUploadResp) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -680,29 +619,36 @@ func (x *GetHashInfoReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetHashInfoReq.ProtoReflect.Descriptor instead.
-func (*GetHashInfoReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use InitiateMultipartUploadResp.ProtoReflect.Descriptor instead.
+func (*InitiateMultipartUploadResp) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *GetHashInfoReq) GetHash() string {
+func (x *InitiateMultipartUploadResp) GetUrl() string {
 	if x != nil {
-		return x.Hash
+		return x.Url
 	}
 	return ""
 }
 
-type GetHashInfoResp struct {
+func (x *InitiateMultipartUploadResp) GetUpload() *UploadInfo {
+	if x != nil {
+		return x.Upload
+	}
+	return nil
+}
+
+type AuthSignReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hash string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
-	Size int64  `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
+	UploadID    string  `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
+	PartNumbers []int32 `protobuf:"varint,2,rep,packed,name=partNumbers,proto3" json:"partNumbers"`
 }
 
-func (x *GetHashInfoResp) Reset() {
-	*x = GetHashInfoResp{}
+func (x *AuthSignReq) Reset() {
+	*x = AuthSignReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_third_third_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -710,13 +656,13 @@ func (x *GetHashInfoResp) Reset() {
 	}
 }
 
-func (x *GetHashInfoResp) String() string {
+func (x *AuthSignReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetHashInfoResp) ProtoMessage() {}
+func (*AuthSignReq) ProtoMessage() {}
 
-func (x *GetHashInfoResp) ProtoReflect() protoreflect.Message {
+func (x *AuthSignReq) ProtoReflect() protoreflect.Message {
 	mi := &file_third_third_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -728,21 +674,320 @@ func (x *GetHashInfoResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetHashInfoResp.ProtoReflect.Descriptor instead.
-func (*GetHashInfoResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use AuthSignReq.ProtoReflect.Descriptor instead.
+func (*AuthSignReq) Descriptor() ([]byte, []int) {
 	return file_third_third_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *GetHashInfoResp) GetHash() string {
+func (x *AuthSignReq) GetUploadID() string {
 	if x != nil {
-		return x.Hash
+		return x.UploadID
 	}
 	return ""
 }
 
-func (x *GetHashInfoResp) GetSize() int64 {
+func (x *AuthSignReq) GetPartNumbers() []int32 {
 	if x != nil {
-		return x.Size
+		return x.PartNumbers
+	}
+	return nil
+}
+
+type AuthSignResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Url    string       `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3" json:"query"`
+	Header []*KeyValues `protobuf:"bytes,3,rep,name=header,proto3" json:"header"`
+	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3" json:"parts"`
+}
+
+func (x *AuthSignResp) Reset() {
+	*x = AuthSignResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_third_third_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AuthSignResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthSignResp) ProtoMessage() {}
+
+func (x *AuthSignResp) ProtoReflect() protoreflect.Message {
+	mi := &file_third_third_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthSignResp.ProtoReflect.Descriptor instead.
+func (*AuthSignResp) Descriptor() ([]byte, []int) {
+	return file_third_third_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AuthSignResp) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *AuthSignResp) GetQuery() []*KeyValues {
+	if x != nil {
+		return x.Query
+	}
+	return nil
+}
+
+func (x *AuthSignResp) GetHeader() []*KeyValues {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+func (x *AuthSignResp) GetParts() []*SignPart {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+type CompleteMultipartUploadReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UploadID    string   `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
+	Parts       []string `protobuf:"bytes,2,rep,name=parts,proto3" json:"parts"`
+	Name        string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	ContentType string   `protobuf:"bytes,4,opt,name=contentType,proto3" json:"contentType"`
+	Cause       string   `protobuf:"bytes,5,opt,name=cause,proto3" json:"cause"`
+}
+
+func (x *CompleteMultipartUploadReq) Reset() {
+	*x = CompleteMultipartUploadReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_third_third_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CompleteMultipartUploadReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteMultipartUploadReq) ProtoMessage() {}
+
+func (x *CompleteMultipartUploadReq) ProtoReflect() protoreflect.Message {
+	mi := &file_third_third_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteMultipartUploadReq.ProtoReflect.Descriptor instead.
+func (*CompleteMultipartUploadReq) Descriptor() ([]byte, []int) {
+	return file_third_third_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CompleteMultipartUploadReq) GetUploadID() string {
+	if x != nil {
+		return x.UploadID
+	}
+	return ""
+}
+
+func (x *CompleteMultipartUploadReq) GetParts() []string {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+func (x *CompleteMultipartUploadReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CompleteMultipartUploadReq) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *CompleteMultipartUploadReq) GetCause() string {
+	if x != nil {
+		return x.Cause
+	}
+	return ""
+}
+
+type CompleteMultipartUploadResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+}
+
+func (x *CompleteMultipartUploadResp) Reset() {
+	*x = CompleteMultipartUploadResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_third_third_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CompleteMultipartUploadResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteMultipartUploadResp) ProtoMessage() {}
+
+func (x *CompleteMultipartUploadResp) ProtoReflect() protoreflect.Message {
+	mi := &file_third_third_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteMultipartUploadResp.ProtoReflect.Descriptor instead.
+func (*CompleteMultipartUploadResp) Descriptor() ([]byte, []int) {
+	return file_third_third_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CompleteMultipartUploadResp) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+type AccessURLReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name"`
+}
+
+func (x *AccessURLReq) Reset() {
+	*x = AccessURLReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_third_third_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AccessURLReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessURLReq) ProtoMessage() {}
+
+func (x *AccessURLReq) ProtoReflect() protoreflect.Message {
+	mi := &file_third_third_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessURLReq.ProtoReflect.Descriptor instead.
+func (*AccessURLReq) Descriptor() ([]byte, []int) {
+	return file_third_third_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *AccessURLReq) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type AccessURLResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Url        string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	ExpireTime int64  `protobuf:"varint,2,opt,name=expireTime,proto3" json:"expireTime"`
+}
+
+func (x *AccessURLResp) Reset() {
+	*x = AccessURLResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_third_third_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AccessURLResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessURLResp) ProtoMessage() {}
+
+func (x *AccessURLResp) ProtoReflect() protoreflect.Message {
+	mi := &file_third_third_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessURLResp.ProtoReflect.Descriptor instead.
+func (*AccessURLResp) Descriptor() ([]byte, []int) {
+	return file_third_third_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AccessURLResp) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *AccessURLResp) GetExpireTime() int64 {
+	if x != nil {
+		return x.ExpireTime
 	}
 	return 0
 }
@@ -761,7 +1006,7 @@ type FcmUpdateTokenReq struct {
 func (x *FcmUpdateTokenReq) Reset() {
 	*x = FcmUpdateTokenReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_third_third_proto_msgTypes[11]
+		mi := &file_third_third_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -774,7 +1019,7 @@ func (x *FcmUpdateTokenReq) String() string {
 func (*FcmUpdateTokenReq) ProtoMessage() {}
 
 func (x *FcmUpdateTokenReq) ProtoReflect() protoreflect.Message {
-	mi := &file_third_third_proto_msgTypes[11]
+	mi := &file_third_third_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -787,7 +1032,7 @@ func (x *FcmUpdateTokenReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FcmUpdateTokenReq.ProtoReflect.Descriptor instead.
 func (*FcmUpdateTokenReq) Descriptor() ([]byte, []int) {
-	return file_third_third_proto_rawDescGZIP(), []int{11}
+	return file_third_third_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *FcmUpdateTokenReq) GetPlatformID() int32 {
@@ -827,7 +1072,7 @@ type FcmUpdateTokenResp struct {
 func (x *FcmUpdateTokenResp) Reset() {
 	*x = FcmUpdateTokenResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_third_third_proto_msgTypes[12]
+		mi := &file_third_third_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -840,7 +1085,7 @@ func (x *FcmUpdateTokenResp) String() string {
 func (*FcmUpdateTokenResp) ProtoMessage() {}
 
 func (x *FcmUpdateTokenResp) ProtoReflect() protoreflect.Message {
-	mi := &file_third_third_proto_msgTypes[12]
+	mi := &file_third_third_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -853,7 +1098,7 @@ func (x *FcmUpdateTokenResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FcmUpdateTokenResp.ProtoReflect.Descriptor instead.
 func (*FcmUpdateTokenResp) Descriptor() ([]byte, []int) {
-	return file_third_third_proto_rawDescGZIP(), []int{12}
+	return file_third_third_proto_rawDescGZIP(), []int{17}
 }
 
 type SetAppBadgeReq struct {
@@ -868,7 +1113,7 @@ type SetAppBadgeReq struct {
 func (x *SetAppBadgeReq) Reset() {
 	*x = SetAppBadgeReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_third_third_proto_msgTypes[13]
+		mi := &file_third_third_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -881,7 +1126,7 @@ func (x *SetAppBadgeReq) String() string {
 func (*SetAppBadgeReq) ProtoMessage() {}
 
 func (x *SetAppBadgeReq) ProtoReflect() protoreflect.Message {
-	mi := &file_third_third_proto_msgTypes[13]
+	mi := &file_third_third_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -894,7 +1139,7 @@ func (x *SetAppBadgeReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetAppBadgeReq.ProtoReflect.Descriptor instead.
 func (*SetAppBadgeReq) Descriptor() ([]byte, []int) {
-	return file_third_third_proto_rawDescGZIP(), []int{13}
+	return file_third_third_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SetAppBadgeReq) GetUserID() string {
@@ -920,7 +1165,7 @@ type SetAppBadgeResp struct {
 func (x *SetAppBadgeResp) Reset() {
 	*x = SetAppBadgeResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_third_third_proto_msgTypes[14]
+		mi := &file_third_third_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -933,7 +1178,7 @@ func (x *SetAppBadgeResp) String() string {
 func (*SetAppBadgeResp) ProtoMessage() {}
 
 func (x *SetAppBadgeResp) ProtoReflect() protoreflect.Message {
-	mi := &file_third_third_proto_msgTypes[14]
+	mi := &file_third_third_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -946,7 +1191,7 @@ func (x *SetAppBadgeResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetAppBadgeResp.ProtoReflect.Descriptor instead.
 func (*SetAppBadgeResp) Descriptor() ([]byte, []int) {
-	return file_third_third_proto_rawDescGZIP(), []int{14}
+	return file_third_third_proto_rawDescGZIP(), []int{19}
 }
 
 var File_third_third_proto protoreflect.FileDescriptor
@@ -954,133 +1199,180 @@ var File_third_third_proto protoreflect.FileDescriptor
 var file_third_third_proto_rawDesc = []byte{
 	0x0a, 0x11, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2f, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x12, 0x12, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x22, 0xc3, 0x01, 0x0a, 0x0b, 0x41, 0x70, 0x70, 0x6c,
-	0x79, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x12, 0x12, 0x0a,
-	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d,
-	0x65, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x04, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f, 0x6e,
-	0x74, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b,
-	0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70, 0x65, 0x12, 0x22, 0x0a, 0x0c, 0x66,
-	0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x0c, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x12,
-	0x1c, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x07, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x22, 0xb4, 0x01,
-	0x0a, 0x0c, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x50, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10,
-	0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c,
-	0x12, 0x14, 0x0a, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x12, 0x22, 0x0a, 0x0c, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65,
-	0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0c, 0x66, 0x72,
-	0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x76, 0x61,
-	0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x76,
-	0x61, 0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x70, 0x75, 0x74, 0x55,
-	0x52, 0x4c, 0x73, 0x48, 0x61, 0x73, 0x68, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70,
-	0x75, 0x74, 0x55, 0x52, 0x4c, 0x73, 0x48, 0x61, 0x73, 0x68, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x75,
-	0x74, 0x55, 0x52, 0x4c, 0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07, 0x70, 0x75, 0x74,
-	0x55, 0x52, 0x4c, 0x73, 0x22, 0x25, 0x0a, 0x0d, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x50,
-	0x75, 0x74, 0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x22, 0x22, 0x0a, 0x0e, 0x43,
-	0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x50, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10, 0x0a,
-	0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22,
-	0x59, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x55, 0x72, 0x6c, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
-	0x12, 0x18, 0x0a, 0x07, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x07, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x74,
-	0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0a,
-	0x61, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x22, 0x46, 0x0a, 0x0a, 0x47, 0x65,
-	0x74, 0x55, 0x72, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69,
-	0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x12,
-	0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61,
-	0x73, 0x68, 0x22, 0x21, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x12,
-	0x14, 0x0a, 0x05, 0x70, 0x75, 0x74, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
-	0x70, 0x75, 0x74, 0x49, 0x44, 0x22, 0x4a, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x46,
-	0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x68,
-	0x61, 0x73, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12,
-	0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72,
-	0x6c, 0x22, 0x90, 0x02, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70,
-	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x22, 0x0a, 0x0c,
-	0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x04, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x0c, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x69, 0x7a, 0x65,
+	0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x22, 0x35, 0x0a, 0x09, 0x4b, 0x65, 0x79, 0x56, 0x61,
+	0x6c, 0x75, 0x65, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x73,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x22, 0xa8,
+	0x01, 0x0a, 0x08, 0x53, 0x69, 0x67, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x70,
+	0x61, 0x72, 0x74, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0a, 0x70, 0x61, 0x72, 0x74, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x75,
+	0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x33, 0x0a,
+	0x05, 0x71, 0x75, 0x65, 0x72, 0x79, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x4f,
+	0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72,
+	0x64, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x52, 0x05, 0x71, 0x75, 0x65,
+	0x72, 0x79, 0x12, 0x35, 0x0a, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x18, 0x04, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65,
+	0x73, 0x52, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x22, 0xc1, 0x01, 0x0a, 0x0d, 0x41, 0x75,
+	0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x73, 0x12, 0x10, 0x0a, 0x03, 0x75,
+	0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x33, 0x0a,
+	0x05, 0x71, 0x75, 0x65, 0x72, 0x79, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x4f,
+	0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72,
+	0x64, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x52, 0x05, 0x71, 0x75, 0x65,
+	0x72, 0x79, 0x12, 0x35, 0x0a, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x18, 0x03, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65,
+	0x73, 0x52, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x32, 0x0a, 0x05, 0x70, 0x61, 0x72,
+	0x74, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49,
+	0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x53, 0x69,
+	0x67, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x52, 0x05, 0x70, 0x61, 0x72, 0x74, 0x73, 0x22, 0x0e, 0x0a,
+	0x0c, 0x50, 0x61, 0x72, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x71, 0x22, 0x73, 0x0a,
+	0x0d, 0x50, 0x61, 0x72, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x20,
+	0x0a, 0x0b, 0x6d, 0x69, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x0b, 0x6d, 0x69, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65,
+	0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x61, 0x78, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x6d, 0x61, 0x78, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69,
+	0x7a, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x6d, 0x61, 0x78, 0x4e, 0x75, 0x6d, 0x53, 0x69, 0x7a, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x6d, 0x61, 0x78, 0x4e, 0x75, 0x6d, 0x53, 0x69,
+	0x7a, 0x65, 0x22, 0x21, 0x0a, 0x0b, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65,
+	0x71, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x04, 0x73, 0x69, 0x7a, 0x65, 0x22, 0x22, 0x0a, 0x0c, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x22, 0xc8, 0x01, 0x0a, 0x1a, 0x49, 0x6e,
+	0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55,
+	0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x12, 0x0a, 0x04,
+	0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x73, 0x69, 0x7a, 0x65,
+	0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x08, 0x70, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x1a, 0x0a, 0x08,
+	0x6d, 0x61, 0x78, 0x50, 0x61, 0x72, 0x74, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08,
+	0x6d, 0x61, 0x78, 0x50, 0x61, 0x72, 0x74, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x61, 0x75, 0x73,
+	0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x63, 0x61, 0x75, 0x73, 0x65, 0x12, 0x12,
+	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70,
+	0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74,
+	0x54, 0x79, 0x70, 0x65, 0x22, 0x9b, 0x01, 0x0a, 0x0a, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49,
+	0x6e, 0x66, 0x6f, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x12,
+	0x1a, 0x0a, 0x08, 0x70, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x08, 0x70, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x35, 0x0a, 0x04, 0x73,
+	0x69, 0x67, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x4f, 0x70, 0x65, 0x6e,
+	0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x41,
+	0x75, 0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x73, 0x52, 0x04, 0x73, 0x69,
+	0x67, 0x6e, 0x12, 0x1e, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69,
+	0x6d, 0x65, 0x22, 0x67, 0x0a, 0x1b, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x4d, 0x75,
+	0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03,
+	0x75, 0x72, 0x6c, 0x12, 0x36, 0x0a, 0x06, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1e, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49,
+	0x6e, 0x66, 0x6f, 0x52, 0x06, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x22, 0x4b, 0x0a, 0x0b, 0x41,
+	0x75, 0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x70,
+	0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x70,
+	0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x12, 0x20, 0x0a, 0x0b, 0x70, 0x61, 0x72, 0x74, 0x4e, 0x75,
+	0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x05, 0x52, 0x0b, 0x70, 0x61, 0x72,
+	0x74, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0xc0, 0x01, 0x0a, 0x0c, 0x41, 0x75, 0x74,
+	0x68, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x33, 0x0a, 0x05, 0x71,
+	0x75, 0x65, 0x72, 0x79, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x4f, 0x70, 0x65,
+	0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e,
+	0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x52, 0x05, 0x71, 0x75, 0x65, 0x72, 0x79,
+	0x12, 0x35, 0x0a, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x1d, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x52,
+	0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x32, 0x0a, 0x05, 0x70, 0x61, 0x72, 0x74, 0x73,
+	0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x53, 0x69, 0x67, 0x6e,
+	0x50, 0x61, 0x72, 0x74, 0x52, 0x05, 0x70, 0x61, 0x72, 0x74, 0x73, 0x22, 0x9a, 0x01, 0x0a, 0x1a,
+	0x43, 0x6f, 0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61, 0x72,
+	0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x70,
+	0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x70,
+	0x6c, 0x6f, 0x61, 0x64, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x61, 0x72, 0x74, 0x73, 0x18,
+	0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x70, 0x61, 0x72, 0x74, 0x73, 0x12, 0x12, 0x0a, 0x04,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
 	0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x54, 0x79, 0x70, 0x65, 0x18,
-	0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x54, 0x79,
-	0x70, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x54, 0x69, 0x6d, 0x65,
-	0x12, 0x20, 0x0a, 0x0b, 0x70, 0x75, 0x74, 0x55, 0x52, 0x4c, 0x73, 0x48, 0x61, 0x73, 0x68, 0x18,
-	0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x75, 0x74, 0x55, 0x52, 0x4c, 0x73, 0x48, 0x61,
-	0x73, 0x68, 0x12, 0x40, 0x0a, 0x09, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x18,
-	0x08, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x75,
-	0x74, 0x46, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x09, 0x66, 0x72, 0x61, 0x67, 0x6d,
-	0x65, 0x6e, 0x74, 0x73, 0x22, 0x24, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x48, 0x61, 0x73, 0x68, 0x49,
-	0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x22, 0x39, 0x0a, 0x0f, 0x47, 0x65,
-	0x74, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x12, 0x12, 0x0a,
-	0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73,
-	0x68, 0x12, 0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x04, 0x73, 0x69, 0x7a, 0x65, 0x22, 0x89, 0x01, 0x0a, 0x11, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64,
-	0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x1e, 0x0a, 0x0a, 0x70,
-	0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
-	0x0a, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x49, 0x44, 0x12, 0x1a, 0x0a, 0x08, 0x66,
-	0x63, 0x6d, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66,
-	0x63, 0x6d, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75,
-	0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e,
-	0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x18,
-	0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d,
-	0x65, 0x22, 0x14, 0x0a, 0x12, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f,
-	0x6b, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x22, 0x50, 0x0a, 0x0e, 0x53, 0x65, 0x74, 0x41, 0x70,
-	0x70, 0x42, 0x61, 0x64, 0x67, 0x65, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
-	0x44, 0x12, 0x26, 0x0a, 0x0e, 0x61, 0x70, 0x70, 0x55, 0x6e, 0x72, 0x65, 0x61, 0x64, 0x43, 0x6f,
-	0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0e, 0x61, 0x70, 0x70, 0x55, 0x6e,
-	0x72, 0x65, 0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x53, 0x65, 0x74,
-	0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x32, 0xce, 0x04, 0x0a,
-	0x05, 0x74, 0x68, 0x69, 0x72, 0x64, 0x12, 0x4d, 0x0a, 0x08, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x50,
-	0x75, 0x74, 0x12, 0x1f, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x50, 0x75, 0x74,
-	0x52, 0x65, 0x71, 0x1a, 0x20, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76,
-	0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x50, 0x75,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x47, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x12,
-	0x1d, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74,
-	0x68, 0x69, 0x72, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x1e,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x54, 0x79,
+	0x70, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x61, 0x75, 0x73, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x63, 0x61, 0x75, 0x73, 0x65, 0x22, 0x2f, 0x0a, 0x1b, 0x43, 0x6f, 0x6d, 0x70,
+	0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55, 0x70, 0x6c,
+	0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x22, 0x0a, 0x0c, 0x41, 0x63, 0x63,
+	0x65, 0x73, 0x73, 0x55, 0x52, 0x4c, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x41, 0x0a,
+	0x0d, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x55, 0x52, 0x4c, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10,
+	0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c,
+	0x12, 0x1e, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65,
+	0x22, 0x89, 0x01, 0x0a, 0x11, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
+	0x72, 0x6d, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x70, 0x6c, 0x61, 0x74,
+	0x66, 0x6f, 0x72, 0x6d, 0x49, 0x44, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x63, 0x6d, 0x54, 0x6f, 0x6b,
+	0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x63, 0x6d, 0x54, 0x6f, 0x6b,
+	0x65, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1e, 0x0a, 0x0a,
+	0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x14, 0x0a, 0x12,
+	0x46, 0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65,
+	0x73, 0x70, 0x22, 0x50, 0x0a, 0x0e, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67,
+	0x65, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x26, 0x0a, 0x0e,
+	0x61, 0x70, 0x70, 0x55, 0x6e, 0x72, 0x65, 0x61, 0x64, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x0e, 0x61, 0x70, 0x70, 0x55, 0x6e, 0x72, 0x65, 0x61, 0x64, 0x43,
+	0x6f, 0x75, 0x6e, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42, 0x61,
+	0x64, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x32, 0xfa, 0x05, 0x0a, 0x05, 0x74, 0x68, 0x69, 0x72,
+	0x64, 0x12, 0x50, 0x0a, 0x09, 0x50, 0x61, 0x72, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x20,
 	0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68,
-	0x69, 0x72, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x53,
-	0x0a, 0x0a, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x50, 0x75, 0x74, 0x12, 0x21, 0x2e, 0x4f,
-	0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72,
-	0x64, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x1a,
-	0x22, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74,
-	0x68, 0x69, 0x72, 0x64, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x50, 0x75, 0x74, 0x52,
-	0x65, 0x73, 0x70, 0x12, 0x47, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x55, 0x72, 0x6c, 0x12, 0x1d, 0x2e,
+	0x69, 0x72, 0x64, 0x2e, 0x50, 0x61, 0x72, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x65, 0x71,
+	0x1a, 0x21, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x50, 0x61, 0x72, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52,
+	0x65, 0x73, 0x70, 0x12, 0x4d, 0x0a, 0x08, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x12,
+	0x1f, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74,
+	0x68, 0x69, 0x72, 0x64, 0x2e, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71,
+	0x1a, 0x20, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e,
+	0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x50, 0x61, 0x72, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x7a, 0x0a, 0x17, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x4d, 0x75,
+	0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x2e, 0x2e,
 	0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69,
-	0x72, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x72, 0x6c, 0x52, 0x65, 0x71, 0x1a, 0x1e, 0x2e, 0x4f,
-	0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72,
-	0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x72, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x12, 0x56, 0x0a, 0x0b,
-	0x47, 0x65, 0x74, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x22, 0x2e, 0x4f, 0x70,
+	0x72, 0x64, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69,
+	0x70, 0x61, 0x72, 0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x1a, 0x2f, 0x2e,
+	0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69,
+	0x72, 0x64, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69,
+	0x70, 0x61, 0x72, 0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4d,
+	0x0a, 0x08, 0x41, 0x75, 0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x12, 0x1f, 0x2e, 0x4f, 0x70, 0x65,
+	0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e,
+	0x41, 0x75, 0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x20, 0x2e, 0x4f, 0x70,
 	0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64,
-	0x2e, 0x47, 0x65, 0x74, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x1a,
-	0x23, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74,
-	0x68, 0x69, 0x72, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x48, 0x61, 0x73, 0x68, 0x49, 0x6e, 0x66, 0x6f,
-	0x52, 0x65, 0x73, 0x70, 0x12, 0x5f, 0x0a, 0x0e, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74,
-	0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x25, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x46, 0x63, 0x6d, 0x55,
-	0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x26, 0x2e,
+	0x2e, 0x41, 0x75, 0x74, 0x68, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x7a, 0x0a,
+	0x17, 0x43, 0x6f, 0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61,
+	0x72, 0x74, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x2e, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49,
+	0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x43, 0x6f,
+	0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55,
+	0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x1a, 0x2f, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49,
+	0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x43, 0x6f,
+	0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x61, 0x72, 0x74, 0x55,
+	0x70, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x50, 0x0a, 0x09, 0x41, 0x63, 0x63,
+	0x65, 0x73, 0x73, 0x55, 0x52, 0x4c, 0x12, 0x20, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x41, 0x63, 0x63, 0x65,
+	0x73, 0x73, 0x55, 0x52, 0x4c, 0x52, 0x65, 0x71, 0x1a, 0x21, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49,
+	0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x41, 0x63,
+	0x63, 0x65, 0x73, 0x73, 0x55, 0x52, 0x4c, 0x52, 0x65, 0x73, 0x70, 0x12, 0x5f, 0x0a, 0x0e, 0x46,
+	0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x25, 0x2e,
 	0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69,
 	0x72, 0x64, 0x2e, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65,
-	0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x56, 0x0a, 0x0b, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42,
-	0x61, 0x64, 0x67, 0x65, 0x12, 0x22, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70,
-	0x42, 0x61, 0x64, 0x67, 0x65, 0x52, 0x65, 0x71, 0x1a, 0x23, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49,
-	0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x53, 0x65,
-	0x74, 0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x42, 0x35, 0x5a,
-	0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x4f, 0x70, 0x65, 0x6e,
-	0x49, 0x4d, 0x53, 0x44, 0x4b, 0x2f, 0x4f, 0x70, 0x65, 0x6e, 0x2d, 0x49, 0x4d, 0x2d, 0x53, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x74,
-	0x68, 0x69, 0x72, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x52, 0x65, 0x71, 0x1a, 0x26, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64, 0x2e, 0x46, 0x63, 0x6d, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x56, 0x0a, 0x0b,
+	0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67, 0x65, 0x12, 0x22, 0x2e, 0x4f, 0x70,
+	0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74, 0x68, 0x69, 0x72, 0x64,
+	0x2e, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67, 0x65, 0x52, 0x65, 0x71, 0x1a,
+	0x23, 0x2e, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x74,
+	0x68, 0x69, 0x72, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x41, 0x70, 0x70, 0x42, 0x61, 0x64, 0x67, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x42, 0x35, 0x5a, 0x33, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x4d, 0x53, 0x44, 0x4b, 0x2f, 0x4f, 0x70, 0x65,
+	0x6e, 0x2d, 0x49, 0x4d, 0x2d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2f, 0x70, 0x6b, 0x67, 0x2f,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x74, 0x68, 0x69, 0x72, 0x64, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1095,45 +1387,61 @@ func file_third_third_proto_rawDescGZIP() []byte {
 	return file_third_third_proto_rawDescData
 }
 
-var file_third_third_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_third_third_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_third_third_proto_goTypes = []interface{}{
-	(*ApplyPutReq)(nil),        // 0: OpenIMServer.third.ApplyPutReq
-	(*ApplyPutResp)(nil),       // 1: OpenIMServer.third.ApplyPutResp
-	(*ConfirmPutReq)(nil),      // 2: OpenIMServer.third.ConfirmPutReq
-	(*ConfirmPutResp)(nil),     // 3: OpenIMServer.third.ConfirmPutResp
-	(*GetUrlReq)(nil),          // 4: OpenIMServer.third.GetUrlReq
-	(*GetUrlResp)(nil),         // 5: OpenIMServer.third.GetUrlResp
-	(*GetPutReq)(nil),          // 6: OpenIMServer.third.GetPutReq
-	(*GetPutFragment)(nil),     // 7: OpenIMServer.third.GetPutFragment
-	(*GetPutResp)(nil),         // 8: OpenIMServer.third.GetPutResp
-	(*GetHashInfoReq)(nil),     // 9: OpenIMServer.third.GetHashInfoReq
-	(*GetHashInfoResp)(nil),    // 10: OpenIMServer.third.GetHashInfoResp
-	(*FcmUpdateTokenReq)(nil),  // 11: OpenIMServer.third.FcmUpdateTokenReq
-	(*FcmUpdateTokenResp)(nil), // 12: OpenIMServer.third.FcmUpdateTokenResp
-	(*SetAppBadgeReq)(nil),     // 13: OpenIMServer.third.SetAppBadgeReq
-	(*SetAppBadgeResp)(nil),    // 14: OpenIMServer.third.SetAppBadgeResp
+	(*KeyValues)(nil),                   // 0: OpenIMServer.third.KeyValues
+	(*SignPart)(nil),                    // 1: OpenIMServer.third.SignPart
+	(*AuthSignParts)(nil),               // 2: OpenIMServer.third.AuthSignParts
+	(*PartLimitReq)(nil),                // 3: OpenIMServer.third.PartLimitReq
+	(*PartLimitResp)(nil),               // 4: OpenIMServer.third.PartLimitResp
+	(*PartSizeReq)(nil),                 // 5: OpenIMServer.third.PartSizeReq
+	(*PartSizeResp)(nil),                // 6: OpenIMServer.third.PartSizeResp
+	(*InitiateMultipartUploadReq)(nil),  // 7: OpenIMServer.third.InitiateMultipartUploadReq
+	(*UploadInfo)(nil),                  // 8: OpenIMServer.third.UploadInfo
+	(*InitiateMultipartUploadResp)(nil), // 9: OpenIMServer.third.InitiateMultipartUploadResp
+	(*AuthSignReq)(nil),                 // 10: OpenIMServer.third.AuthSignReq
+	(*AuthSignResp)(nil),                // 11: OpenIMServer.third.AuthSignResp
+	(*CompleteMultipartUploadReq)(nil),  // 12: OpenIMServer.third.CompleteMultipartUploadReq
+	(*CompleteMultipartUploadResp)(nil), // 13: OpenIMServer.third.CompleteMultipartUploadResp
+	(*AccessURLReq)(nil),                // 14: OpenIMServer.third.AccessURLReq
+	(*AccessURLResp)(nil),               // 15: OpenIMServer.third.AccessURLResp
+	(*FcmUpdateTokenReq)(nil),           // 16: OpenIMServer.third.FcmUpdateTokenReq
+	(*FcmUpdateTokenResp)(nil),          // 17: OpenIMServer.third.FcmUpdateTokenResp
+	(*SetAppBadgeReq)(nil),              // 18: OpenIMServer.third.SetAppBadgeReq
+	(*SetAppBadgeResp)(nil),             // 19: OpenIMServer.third.SetAppBadgeResp
 }
 var file_third_third_proto_depIdxs = []int32{
-	7,  // 0: OpenIMServer.third.GetPutResp.fragments:type_name -> OpenIMServer.third.GetPutFragment
-	0,  // 1: OpenIMServer.third.third.ApplyPut:input_type -> OpenIMServer.third.ApplyPutReq
-	6,  // 2: OpenIMServer.third.third.GetPut:input_type -> OpenIMServer.third.GetPutReq
-	2,  // 3: OpenIMServer.third.third.ConfirmPut:input_type -> OpenIMServer.third.ConfirmPutReq
-	4,  // 4: OpenIMServer.third.third.GetUrl:input_type -> OpenIMServer.third.GetUrlReq
-	9,  // 5: OpenIMServer.third.third.GetHashInfo:input_type -> OpenIMServer.third.GetHashInfoReq
-	11, // 6: OpenIMServer.third.third.FcmUpdateToken:input_type -> OpenIMServer.third.FcmUpdateTokenReq
-	13, // 7: OpenIMServer.third.third.SetAppBadge:input_type -> OpenIMServer.third.SetAppBadgeReq
-	1,  // 8: OpenIMServer.third.third.ApplyPut:output_type -> OpenIMServer.third.ApplyPutResp
-	8,  // 9: OpenIMServer.third.third.GetPut:output_type -> OpenIMServer.third.GetPutResp
-	3,  // 10: OpenIMServer.third.third.ConfirmPut:output_type -> OpenIMServer.third.ConfirmPutResp
-	5,  // 11: OpenIMServer.third.third.GetUrl:output_type -> OpenIMServer.third.GetUrlResp
-	10, // 12: OpenIMServer.third.third.GetHashInfo:output_type -> OpenIMServer.third.GetHashInfoResp
-	12, // 13: OpenIMServer.third.third.FcmUpdateToken:output_type -> OpenIMServer.third.FcmUpdateTokenResp
-	14, // 14: OpenIMServer.third.third.SetAppBadge:output_type -> OpenIMServer.third.SetAppBadgeResp
-	8,  // [8:15] is the sub-list for method output_type
-	1,  // [1:8] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	0,  // 0: OpenIMServer.third.SignPart.query:type_name -> OpenIMServer.third.KeyValues
+	0,  // 1: OpenIMServer.third.SignPart.header:type_name -> OpenIMServer.third.KeyValues
+	0,  // 2: OpenIMServer.third.AuthSignParts.query:type_name -> OpenIMServer.third.KeyValues
+	0,  // 3: OpenIMServer.third.AuthSignParts.header:type_name -> OpenIMServer.third.KeyValues
+	1,  // 4: OpenIMServer.third.AuthSignParts.parts:type_name -> OpenIMServer.third.SignPart
+	2,  // 5: OpenIMServer.third.UploadInfo.sign:type_name -> OpenIMServer.third.AuthSignParts
+	8,  // 6: OpenIMServer.third.InitiateMultipartUploadResp.upload:type_name -> OpenIMServer.third.UploadInfo
+	0,  // 7: OpenIMServer.third.AuthSignResp.query:type_name -> OpenIMServer.third.KeyValues
+	0,  // 8: OpenIMServer.third.AuthSignResp.header:type_name -> OpenIMServer.third.KeyValues
+	1,  // 9: OpenIMServer.third.AuthSignResp.parts:type_name -> OpenIMServer.third.SignPart
+	3,  // 10: OpenIMServer.third.third.PartLimit:input_type -> OpenIMServer.third.PartLimitReq
+	5,  // 11: OpenIMServer.third.third.PartSize:input_type -> OpenIMServer.third.PartSizeReq
+	7,  // 12: OpenIMServer.third.third.InitiateMultipartUpload:input_type -> OpenIMServer.third.InitiateMultipartUploadReq
+	10, // 13: OpenIMServer.third.third.AuthSign:input_type -> OpenIMServer.third.AuthSignReq
+	12, // 14: OpenIMServer.third.third.CompleteMultipartUpload:input_type -> OpenIMServer.third.CompleteMultipartUploadReq
+	14, // 15: OpenIMServer.third.third.AccessURL:input_type -> OpenIMServer.third.AccessURLReq
+	16, // 16: OpenIMServer.third.third.FcmUpdateToken:input_type -> OpenIMServer.third.FcmUpdateTokenReq
+	18, // 17: OpenIMServer.third.third.SetAppBadge:input_type -> OpenIMServer.third.SetAppBadgeReq
+	4,  // 18: OpenIMServer.third.third.PartLimit:output_type -> OpenIMServer.third.PartLimitResp
+	6,  // 19: OpenIMServer.third.third.PartSize:output_type -> OpenIMServer.third.PartSizeResp
+	9,  // 20: OpenIMServer.third.third.InitiateMultipartUpload:output_type -> OpenIMServer.third.InitiateMultipartUploadResp
+	11, // 21: OpenIMServer.third.third.AuthSign:output_type -> OpenIMServer.third.AuthSignResp
+	13, // 22: OpenIMServer.third.third.CompleteMultipartUpload:output_type -> OpenIMServer.third.CompleteMultipartUploadResp
+	15, // 23: OpenIMServer.third.third.AccessURL:output_type -> OpenIMServer.third.AccessURLResp
+	17, // 24: OpenIMServer.third.third.FcmUpdateToken:output_type -> OpenIMServer.third.FcmUpdateTokenResp
+	19, // 25: OpenIMServer.third.third.SetAppBadge:output_type -> OpenIMServer.third.SetAppBadgeResp
+	18, // [18:26] is the sub-list for method output_type
+	10, // [10:18] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_third_third_proto_init() }
@@ -1143,7 +1451,7 @@ func file_third_third_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_third_third_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyPutReq); i {
+			switch v := v.(*KeyValues); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1155,7 +1463,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyPutResp); i {
+			switch v := v.(*SignPart); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1167,7 +1475,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConfirmPutReq); i {
+			switch v := v.(*AuthSignParts); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1179,7 +1487,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConfirmPutResp); i {
+			switch v := v.(*PartLimitReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1191,7 +1499,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUrlReq); i {
+			switch v := v.(*PartLimitResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1203,7 +1511,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUrlResp); i {
+			switch v := v.(*PartSizeReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1215,7 +1523,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetPutReq); i {
+			switch v := v.(*PartSizeResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1227,7 +1535,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetPutFragment); i {
+			switch v := v.(*InitiateMultipartUploadReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1239,7 +1547,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetPutResp); i {
+			switch v := v.(*UploadInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1251,7 +1559,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetHashInfoReq); i {
+			switch v := v.(*InitiateMultipartUploadResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1263,7 +1571,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetHashInfoResp); i {
+			switch v := v.(*AuthSignReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1275,7 +1583,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FcmUpdateTokenReq); i {
+			switch v := v.(*AuthSignResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1287,7 +1595,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FcmUpdateTokenResp); i {
+			switch v := v.(*CompleteMultipartUploadReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1299,7 +1607,7 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SetAppBadgeReq); i {
+			switch v := v.(*CompleteMultipartUploadResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1311,6 +1619,66 @@ func file_third_third_proto_init() {
 			}
 		}
 		file_third_third_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AccessURLReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_third_third_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AccessURLResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_third_third_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FcmUpdateTokenReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_third_third_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FcmUpdateTokenResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_third_third_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetAppBadgeReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_third_third_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SetAppBadgeResp); i {
 			case 0:
 				return &v.state
@@ -1329,7 +1697,7 @@ func file_third_third_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_third_third_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1355,11 +1723,12 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ThirdClient interface {
-	ApplyPut(ctx context.Context, in *ApplyPutReq, opts ...grpc.CallOption) (*ApplyPutResp, error)
-	GetPut(ctx context.Context, in *GetPutReq, opts ...grpc.CallOption) (*GetPutResp, error)
-	ConfirmPut(ctx context.Context, in *ConfirmPutReq, opts ...grpc.CallOption) (*ConfirmPutResp, error)
-	GetUrl(ctx context.Context, in *GetUrlReq, opts ...grpc.CallOption) (*GetUrlResp, error)
-	GetHashInfo(ctx context.Context, in *GetHashInfoReq, opts ...grpc.CallOption) (*GetHashInfoResp, error)
+	PartLimit(ctx context.Context, in *PartLimitReq, opts ...grpc.CallOption) (*PartLimitResp, error)
+	PartSize(ctx context.Context, in *PartSizeReq, opts ...grpc.CallOption) (*PartSizeResp, error)
+	InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadReq, opts ...grpc.CallOption) (*InitiateMultipartUploadResp, error)
+	AuthSign(ctx context.Context, in *AuthSignReq, opts ...grpc.CallOption) (*AuthSignResp, error)
+	CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadReq, opts ...grpc.CallOption) (*CompleteMultipartUploadResp, error)
+	AccessURL(ctx context.Context, in *AccessURLReq, opts ...grpc.CallOption) (*AccessURLResp, error)
 	FcmUpdateToken(ctx context.Context, in *FcmUpdateTokenReq, opts ...grpc.CallOption) (*FcmUpdateTokenResp, error)
 	SetAppBadge(ctx context.Context, in *SetAppBadgeReq, opts ...grpc.CallOption) (*SetAppBadgeResp, error)
 }
@@ -1372,45 +1741,54 @@ func NewThirdClient(cc grpc.ClientConnInterface) ThirdClient {
 	return &thirdClient{cc}
 }
 
-func (c *thirdClient) ApplyPut(ctx context.Context, in *ApplyPutReq, opts ...grpc.CallOption) (*ApplyPutResp, error) {
-	out := new(ApplyPutResp)
-	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/ApplyPut", in, out, opts...)
+func (c *thirdClient) PartLimit(ctx context.Context, in *PartLimitReq, opts ...grpc.CallOption) (*PartLimitResp, error) {
+	out := new(PartLimitResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/PartLimit", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *thirdClient) GetPut(ctx context.Context, in *GetPutReq, opts ...grpc.CallOption) (*GetPutResp, error) {
-	out := new(GetPutResp)
-	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/GetPut", in, out, opts...)
+func (c *thirdClient) PartSize(ctx context.Context, in *PartSizeReq, opts ...grpc.CallOption) (*PartSizeResp, error) {
+	out := new(PartSizeResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/PartSize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *thirdClient) ConfirmPut(ctx context.Context, in *ConfirmPutReq, opts ...grpc.CallOption) (*ConfirmPutResp, error) {
-	out := new(ConfirmPutResp)
-	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/ConfirmPut", in, out, opts...)
+func (c *thirdClient) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadReq, opts ...grpc.CallOption) (*InitiateMultipartUploadResp, error) {
+	out := new(InitiateMultipartUploadResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/InitiateMultipartUpload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *thirdClient) GetUrl(ctx context.Context, in *GetUrlReq, opts ...grpc.CallOption) (*GetUrlResp, error) {
-	out := new(GetUrlResp)
-	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/GetUrl", in, out, opts...)
+func (c *thirdClient) AuthSign(ctx context.Context, in *AuthSignReq, opts ...grpc.CallOption) (*AuthSignResp, error) {
+	out := new(AuthSignResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/AuthSign", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *thirdClient) GetHashInfo(ctx context.Context, in *GetHashInfoReq, opts ...grpc.CallOption) (*GetHashInfoResp, error) {
-	out := new(GetHashInfoResp)
-	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/GetHashInfo", in, out, opts...)
+func (c *thirdClient) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadReq, opts ...grpc.CallOption) (*CompleteMultipartUploadResp, error) {
+	out := new(CompleteMultipartUploadResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/CompleteMultipartUpload", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *thirdClient) AccessURL(ctx context.Context, in *AccessURLReq, opts ...grpc.CallOption) (*AccessURLResp, error) {
+	out := new(AccessURLResp)
+	err := c.cc.Invoke(ctx, "/OpenIMServer.third.third/AccessURL", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1437,11 +1815,12 @@ func (c *thirdClient) SetAppBadge(ctx context.Context, in *SetAppBadgeReq, opts 
 
 // ThirdServer is the server API for Third service.
 type ThirdServer interface {
-	ApplyPut(context.Context, *ApplyPutReq) (*ApplyPutResp, error)
-	GetPut(context.Context, *GetPutReq) (*GetPutResp, error)
-	ConfirmPut(context.Context, *ConfirmPutReq) (*ConfirmPutResp, error)
-	GetUrl(context.Context, *GetUrlReq) (*GetUrlResp, error)
-	GetHashInfo(context.Context, *GetHashInfoReq) (*GetHashInfoResp, error)
+	PartLimit(context.Context, *PartLimitReq) (*PartLimitResp, error)
+	PartSize(context.Context, *PartSizeReq) (*PartSizeResp, error)
+	InitiateMultipartUpload(context.Context, *InitiateMultipartUploadReq) (*InitiateMultipartUploadResp, error)
+	AuthSign(context.Context, *AuthSignReq) (*AuthSignResp, error)
+	CompleteMultipartUpload(context.Context, *CompleteMultipartUploadReq) (*CompleteMultipartUploadResp, error)
+	AccessURL(context.Context, *AccessURLReq) (*AccessURLResp, error)
 	FcmUpdateToken(context.Context, *FcmUpdateTokenReq) (*FcmUpdateTokenResp, error)
 	SetAppBadge(context.Context, *SetAppBadgeReq) (*SetAppBadgeResp, error)
 }
@@ -1450,20 +1829,23 @@ type ThirdServer interface {
 type UnimplementedThirdServer struct {
 }
 
-func (*UnimplementedThirdServer) ApplyPut(context.Context, *ApplyPutReq) (*ApplyPutResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ApplyPut not implemented")
+func (*UnimplementedThirdServer) PartLimit(context.Context, *PartLimitReq) (*PartLimitResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PartLimit not implemented")
 }
-func (*UnimplementedThirdServer) GetPut(context.Context, *GetPutReq) (*GetPutResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPut not implemented")
+func (*UnimplementedThirdServer) PartSize(context.Context, *PartSizeReq) (*PartSizeResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PartSize not implemented")
 }
-func (*UnimplementedThirdServer) ConfirmPut(context.Context, *ConfirmPutReq) (*ConfirmPutResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfirmPut not implemented")
+func (*UnimplementedThirdServer) InitiateMultipartUpload(context.Context, *InitiateMultipartUploadReq) (*InitiateMultipartUploadResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitiateMultipartUpload not implemented")
 }
-func (*UnimplementedThirdServer) GetUrl(context.Context, *GetUrlReq) (*GetUrlResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUrl not implemented")
+func (*UnimplementedThirdServer) AuthSign(context.Context, *AuthSignReq) (*AuthSignResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AuthSign not implemented")
 }
-func (*UnimplementedThirdServer) GetHashInfo(context.Context, *GetHashInfoReq) (*GetHashInfoResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetHashInfo not implemented")
+func (*UnimplementedThirdServer) CompleteMultipartUpload(context.Context, *CompleteMultipartUploadReq) (*CompleteMultipartUploadResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteMultipartUpload not implemented")
+}
+func (*UnimplementedThirdServer) AccessURL(context.Context, *AccessURLReq) (*AccessURLResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccessURL not implemented")
 }
 func (*UnimplementedThirdServer) FcmUpdateToken(context.Context, *FcmUpdateTokenReq) (*FcmUpdateTokenResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FcmUpdateToken not implemented")
@@ -1476,92 +1858,110 @@ func RegisterThirdServer(s *grpc.Server, srv ThirdServer) {
 	s.RegisterService(&_Third_serviceDesc, srv)
 }
 
-func _Third_ApplyPut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ApplyPutReq)
+func _Third_PartLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PartLimitReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).ApplyPut(ctx, in)
+		return srv.(ThirdServer).PartLimit(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/OpenIMServer.third.third/ApplyPut",
+		FullMethod: "/OpenIMServer.third.third/PartLimit",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).ApplyPut(ctx, req.(*ApplyPutReq))
+		return srv.(ThirdServer).PartLimit(ctx, req.(*PartLimitReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_GetPut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPutReq)
+func _Third_PartSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PartSizeReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).GetPut(ctx, in)
+		return srv.(ThirdServer).PartSize(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/OpenIMServer.third.third/GetPut",
+		FullMethod: "/OpenIMServer.third.third/PartSize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).GetPut(ctx, req.(*GetPutReq))
+		return srv.(ThirdServer).PartSize(ctx, req.(*PartSizeReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_ConfirmPut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfirmPutReq)
+func _Third_InitiateMultipartUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitiateMultipartUploadReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).ConfirmPut(ctx, in)
+		return srv.(ThirdServer).InitiateMultipartUpload(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/OpenIMServer.third.third/ConfirmPut",
+		FullMethod: "/OpenIMServer.third.third/InitiateMultipartUpload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).ConfirmPut(ctx, req.(*ConfirmPutReq))
+		return srv.(ThirdServer).InitiateMultipartUpload(ctx, req.(*InitiateMultipartUploadReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_GetUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUrlReq)
+func _Third_AuthSign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthSignReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).GetUrl(ctx, in)
+		return srv.(ThirdServer).AuthSign(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/OpenIMServer.third.third/GetUrl",
+		FullMethod: "/OpenIMServer.third.third/AuthSign",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).GetUrl(ctx, req.(*GetUrlReq))
+		return srv.(ThirdServer).AuthSign(ctx, req.(*AuthSignReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Third_GetHashInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetHashInfoReq)
+func _Third_CompleteMultipartUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteMultipartUploadReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ThirdServer).GetHashInfo(ctx, in)
+		return srv.(ThirdServer).CompleteMultipartUpload(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/OpenIMServer.third.third/GetHashInfo",
+		FullMethod: "/OpenIMServer.third.third/CompleteMultipartUpload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThirdServer).GetHashInfo(ctx, req.(*GetHashInfoReq))
+		return srv.(ThirdServer).CompleteMultipartUpload(ctx, req.(*CompleteMultipartUploadReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Third_AccessURL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AccessURLReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThirdServer).AccessURL(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/OpenIMServer.third.third/AccessURL",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThirdServer).AccessURL(ctx, req.(*AccessURLReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1607,24 +2007,28 @@ var _Third_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ThirdServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ApplyPut",
-			Handler:    _Third_ApplyPut_Handler,
+			MethodName: "PartLimit",
+			Handler:    _Third_PartLimit_Handler,
 		},
 		{
-			MethodName: "GetPut",
-			Handler:    _Third_GetPut_Handler,
+			MethodName: "PartSize",
+			Handler:    _Third_PartSize_Handler,
 		},
 		{
-			MethodName: "ConfirmPut",
-			Handler:    _Third_ConfirmPut_Handler,
+			MethodName: "InitiateMultipartUpload",
+			Handler:    _Third_InitiateMultipartUpload_Handler,
 		},
 		{
-			MethodName: "GetUrl",
-			Handler:    _Third_GetUrl_Handler,
+			MethodName: "AuthSign",
+			Handler:    _Third_AuthSign_Handler,
 		},
 		{
-			MethodName: "GetHashInfo",
-			Handler:    _Third_GetHashInfo_Handler,
+			MethodName: "CompleteMultipartUpload",
+			Handler:    _Third_CompleteMultipartUpload_Handler,
+		},
+		{
+			MethodName: "AccessURL",
+			Handler:    _Third_AccessURL_Handler,
 		},
 		{
 			MethodName: "FcmUpdateToken",

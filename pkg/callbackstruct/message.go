@@ -15,7 +15,6 @@
 package callbackstruct
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
@@ -79,72 +78,4 @@ type CallbackMsgModifyCommandResp struct {
 	MsgDataList      *[]byte                `json:"msgDataList"`
 	AttachedInfo     *string                `json:"attachedInfo"`
 	Ex               *string                `json:"ex"`
-}
-type CallbackBeforeSetMessageReactionExtReq struct {
-	OperationID           string `json:"operationID"`
-	CallbackCommand       `json:"callbackCommand"`
-	ConversationID        string                     `json:"conversationID"`
-	OpUserID              string                     `json:"opUserID"`
-	SessionType           int32                      `json:"sessionType"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList"`
-	ClientMsgID           string                     `json:"clientMsgID"`
-	IsReact               bool                       `json:"isReact"`
-	IsExternalExtensions  bool                       `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
-}
-type CallbackBeforeSetMessageReactionExtResp struct {
-	CommonCallbackResp
-	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
-	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
-}
-type CallbackDeleteMessageReactionExtReq struct {
-	CallbackCommand       `json:"callbackCommand"`
-	OperationID           string            `json:"operationID"`
-	ConversationID        string            `json:"conversationID"`
-	OpUserID              string            `json:"opUserID"`
-	SessionType           int32             `json:"sessionType"`
-	ReactionExtensionList []*sdkws.KeyValue `json:"reactionExtensionList"`
-	ClientMsgID           string            `json:"clientMsgID"`
-	IsExternalExtensions  bool              `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64             `json:"msgFirstModifyTime"`
-}
-type CallbackDeleteMessageReactionExtResp struct {
-	CommonCallbackResp
-	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
-	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
-}
-
-type CallbackGetMessageListReactionExtReq struct {
-	OperationID     string `json:"operationID"`
-	CallbackCommand `json:"callbackCommand"`
-	ConversationID  string   `json:"conversationID"`
-	OpUserID        string   `json:"opUserID"`
-	SessionType     int32    `json:"sessionType"`
-	TypeKeyList     []string `json:"typeKeyList"`
-	//MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
-}
-
-type CallbackGetMessageListReactionExtResp struct {
-	CommonCallbackResp
-	MessageResultList []*msg.SingleMessageExtensionResult `json:"messageResultList"`
-}
-
-type CallbackAddMessageReactionExtReq struct {
-	OperationID           string `json:"operationID"`
-	CallbackCommand       `json:"callbackCommand"`
-	ConversationID        string                     `json:"conversationID"`
-	OpUserID              string                     `json:"opUserID"`
-	SessionType           int32                      `json:"sessionType"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList"`
-	ClientMsgID           string                     `json:"clientMsgID"`
-	IsReact               bool                       `json:"isReact"`
-	IsExternalExtensions  bool                       `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
-}
-
-type CallbackAddMessageReactionExtResp struct {
-	CommonCallbackResp
-	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
-	IsReact                     bool                `json:"isReact"`
-	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }

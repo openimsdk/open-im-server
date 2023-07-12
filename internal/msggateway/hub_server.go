@@ -101,6 +101,7 @@ func (s *Server) GetUsersOnlineStatus(
 				ps.Platform = constant.PlatformIDToName(client.PlatformID)
 				ps.Status = constant.OnlineStatus
 				ps.ConnID = client.ctx.GetConnID()
+				ps.Token = client.token
 				ps.IsBackground = client.IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
@@ -179,11 +180,14 @@ func (s *Server) KickUserOffline(
 	for _, v := range req.KickUserIDList {
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
+				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
 				err := client.KickOnlineMessage()
 				if err != nil {
 					return nil, err
 				}
 			}
+		} else {
+			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil
