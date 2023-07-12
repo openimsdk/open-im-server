@@ -34,7 +34,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
 	}
-	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, time.Hour*24, int(req.MaxParts))
+	result, err := t.s3dataBase.InitiateMultipartUpload(ctx, req.Hash, req.Size, time.Hour*24*7, int(req.MaxParts))
 	if err != nil {
 		if haErr, ok := errs.Unwrap(err).(*cont.HashAlreadyExistsError); ok {
 			obj := &relation.ObjectModel{
@@ -51,7 +51,7 @@ func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.In
 				return nil, err
 			}
 			return &third.InitiateMultipartUploadResp{
-				Url: t.apiAddress(obj.Key),
+				Url: t.apiAddress(obj.Name),
 			}, nil
 		}
 		return nil, err
