@@ -201,7 +201,7 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 }
 
 func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyObjectInfo, error) {
-	result, _, err := c.client.Object.Copy(ctx, src, c.copyURL+dst, &cos.ObjectCopyOptions{})
+	result, _, err := c.client.Object.Copy(ctx, dst, c.copyURL+src, &cos.ObjectCopyOptions{})
 	if err != nil {
 		return nil, err
 	}
