@@ -77,7 +77,7 @@ func (c *Cos) CompleteMultipartUpload(ctx context.Context, uploadID string, name
 	for i, part := range parts {
 		opts.Parts[i] = cos.Object{
 			PartNumber: part.PartNumber,
-			ETag:       strings.ToLower(part.ETag),
+			ETag:       strings.ReplaceAll(part.ETag, `"`, ``),
 		}
 	}
 	result, _, err := c.client.Object.CompleteMultipartUpload(ctx, name, uploadID, opts)
@@ -107,27 +107,6 @@ func (c *Cos) PartSize(ctx context.Context, size int64) (int64, error) {
 		partSize++
 	}
 	return partSize, nil
-}
-
-func (c *Cos) ClientUploadPart(ctx context.Context, partSize int64, expire time.Duration, upload *s3.InitiateMultipartUploadResult) (*s3.MultipartUploadRequest, error) {
-	uri := c.client.BaseURL.BucketURL.String() + "/" + cos.EncodeURIComponent(upload.Key)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	cos.AddAuthorizationHeader(c.credential.SecretID, c.credential.SecretKey, c.credential.SessionToken, req, cos.NewAuthTime(expire))
-	return &s3.MultipartUploadRequest{
-		UploadID:  upload.UploadID,
-		Bucket:    upload.Bucket,
-		Key:       upload.Key,
-		Method:    req.Method,
-		URL:       uri,
-		Query:     url.Values{"uploadId": {upload.UploadID}},
-		Header:    req.Header,
-		PartKey:   "partNumber",
-		PartSize:  partSize,
-		FirstPart: 1,
-	}, nil
 }
 
 func (c *Cos) AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*s3.AuthSignResult, error) {
@@ -200,13 +179,14 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 }
 
 func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyObjectInfo, error) {
-	result, _, err := c.client.Object.Copy(ctx, dst, c.copyURL+src, &cos.ObjectCopyOptions{})
+	sourceURL := c.copyURL + src
+	result, _, err := c.client.Object.Copy(ctx, dst, sourceURL, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &s3.CopyObjectInfo{
 		Key:  dst,
-		ETag: result.ETag,
+		ETag: strings.ReplaceAll(result.ETag, `""`, ""),
 	}, nil
 }
 
