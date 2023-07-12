@@ -146,6 +146,8 @@ func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOf
 					return nil, err
 				}
 			}
+		} else {
+			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil

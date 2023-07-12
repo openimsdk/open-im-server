@@ -93,14 +93,13 @@ func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) 
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
-	resp := pbAuth.ForceLogoutResp{}
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return &pbAuth.ForceLogoutResp{}, nil
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
@@ -114,5 +113,5 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")
 	}
-	return errs.ErrInternalServer.Wrap()
+	return nil
 }
