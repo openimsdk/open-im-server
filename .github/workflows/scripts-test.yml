@@ -27,7 +27,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Start Docker Compose
-      run: docker-compose up -d
+      run: | 
+        docker-compose stop
+        docker-compose up -d
 
     - name: Stop all services
       run: |
@@ -48,3 +50,8 @@ jobs:
       run: |
         chmod +x ./scripts/check_all.sh
         ./scripts/check_all.sh
+    - name: Print openIM.log
+      run: |
+        cat -n logs/openIM.log
+        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+
