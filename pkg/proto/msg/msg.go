@@ -44,60 +44,60 @@ func (x *GetSendMsgStatusReq) Check() error {
 	return nil
 }
 
-func (x *ModifyMessageReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("reactionExtensions is empty")
-	}
-	return nil
-}
-
-func (x *SetMessageReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("reactionExtensions is empty")
-	}
-	return nil
-}
-
-func (x *GetMessagesReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.MessageReactionKeys == nil {
-		return errs.ErrArgs.Wrap("MessageReactionKeys is empty")
-	}
-	if x.TypeKeys == nil {
-		return errs.ErrArgs.Wrap("TypeKeys is empty")
-	}
-	return nil
-}
-
-func (x *DeleteMessagesReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("ReactionExtensions is empty")
-	}
-	return nil
-}
+//func (x *ModifyMessageReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("reactionExtensions is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *SetMessageReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("reactionExtensions is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *GetMessagesReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.MessageReactionKeys == nil {
+//		return errs.ErrArgs.Wrap("MessageReactionKeys is empty")
+//	}
+//	if x.TypeKeys == nil {
+//		return errs.ErrArgs.Wrap("TypeKeys is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *DeleteMessagesReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("ReactionExtensions is empty")
+//	}
+//	return nil
+//}
 
 func (x *DelMsgsReq) Check() error {
 	return nil

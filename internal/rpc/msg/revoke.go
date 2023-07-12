@@ -19,8 +19,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
