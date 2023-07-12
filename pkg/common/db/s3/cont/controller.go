@@ -57,6 +57,7 @@ func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.Object
 }
 
 func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*InitiateUploadResult, error) {
+	log.ZDebug(ctx, "return")
 	if size < 0 {
 		return nil, errors.New("invalid size")
 	}
