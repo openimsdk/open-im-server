@@ -100,7 +100,7 @@ func (e *ExtendMsgSetMongoDriver) GetExtendMsgSet(
 	return &setList[0], nil
 }
 
-// first modify msg
+// InsertExtendMsg first modify msg.
 func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(
 	ctx context.Context,
 	conversationID string,
@@ -130,7 +130,7 @@ func (e *ExtendMsgSetMongoDriver) InsertExtendMsg(
 	return utils.Wrap(err, "")
 }
 
-// insert or update
+// InsertOrUpdateReactionExtendMsgSet insert or update.
 func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(
 	ctx context.Context,
 	conversationID string,
@@ -163,7 +163,7 @@ func (e *ExtendMsgSetMongoDriver) InsertOrUpdateReactionExtendMsgSet(
 	return utils.Wrap(err, "")
 }
 
-// delete TypeKey
+// DeleteReactionExtendMsgSet delete TypeKey.
 func (e *ExtendMsgSetMongoDriver) DeleteReactionExtendMsgSet(
 	ctx context.Context,
 	conversationID string,
