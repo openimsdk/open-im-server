@@ -9,6 +9,10 @@ source .env
 echo $MINIO_ENDPOINT
 
 # Replace local IP address with the public IP address in .env file
+if [ $API_URL == "http://127.0.0.1:10002/object/" ]; then
+    sed -i "s/127.0.0.1/${internet_ip}/" .env
+fi
+
 if [ $MINIO_ENDPOINT == "http://127.0.0.1:10005" ]; then
     sed -i "s/127.0.0.1/${internet_ip}/" .env
 fi
