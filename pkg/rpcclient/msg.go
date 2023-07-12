@@ -100,6 +100,8 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.ConversationChangeNotification:      constant.SingleChatType,
 		constant.ConversationUnreadNotification:      constant.SingleChatType,
 		constant.ConversationPrivateChatNotification: constant.SingleChatType,
+		// delete
+		constant.MsgDeleteNotification: constant.SingleChatType,
 	}
 }
 
