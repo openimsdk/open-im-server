@@ -43,7 +43,6 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-zookeeper/zk v1.0.3
 	github.com/redis/go-redis/v9 v9.0.5
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )
 
 require (

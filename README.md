@@ -1,9 +1,11 @@
-<h1 align="center" style="border-bottom: none">
-    <b>
-        <a href="https://doc.rentsoft.cn/">Open IM Server</a><br>
-    </b>
-    ⭐️  Open source Instant Messaging Server  ⭐️ <br>
-</h1>
+<p align="center">
+    <a href="https://www.openim.online">
+        <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
+    </a>
+</p>
+<h3 align="center" style="border-bottom: none">
+    ⭐️  Open source Instant Messaging Server ⭐️ <br>
+<h3>
 
 
 <p align=center>

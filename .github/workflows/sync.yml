@@ -8,9 +8,6 @@ on:
     push:
         branches:
           - main
-    pull_request:
-        branches:
-          - main
     workflow_dispatch:
 
 jobs:
@@ -25,7 +22,6 @@ jobs:
         with:
           GH_INSTALLATION_TOKEN: "${{ secrets.BOT_GITHUB_TOKEN }}"
           CONFIG_PATH: .github/sync.yml
-          GH_PAT: "${{ secrets.BOT_GITHUB_TOKEN }}"
           ORIGINAL_MESSAGE: true
           SKIP_PR: true
           COMMIT_EACH_FILE: false
