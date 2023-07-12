@@ -110,7 +110,7 @@ type config struct {
 			SecretID     string `yaml:"secretID"`
 			SecretKey    string `yaml:"secretKey"`
 			SessionToken string `yaml:"sessionToken"`
-		} `yaml:"tencent"`
+		} `yaml:"cos"`
 		Oss struct {
 			Endpoint        string `yaml:"endpoint"`
 			Bucket          string `yaml:"bucket"`
@@ -118,7 +118,7 @@ type config struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			AccessKeySecret string `yaml:"accessKeySecret"`
 			SessionToken    string `yaml:"sessionToken"`
-		} `yaml:"ali"`
+		} `yaml:"oss"`
 	} `yaml:"object"`
 
 	RpcPort struct {
