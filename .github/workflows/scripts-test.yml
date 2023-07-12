@@ -1,0 +1,63 @@
+name: Execute Scripts
+
+on: 
+    push:
+      branches:
+          - main
+      paths-ignore:
+          - "docs/**"
+          - "README.md"
+          - "README_zh-CN.md"
+          - "CONTRIBUTING.md"
+    pull_request:
+      branches:
+          - main
+      paths-ignore:
+          - "README.md"
+          - "README_zh-CN.md"
+          - "CONTRIBUTING.md"
+          - "docs/**"
+
+jobs:
+  execute-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Start Docker Compose
+      run: | 
+        docker-compose stop
+        docker-compose up -d
+
+    - name: Stop all services
+      run: |
+        chmod +x ./scripts/stop_all.sh
+        ./scripts/stop_all.sh
+
+    - name: Build all services
+      run: |
+        chmod +x ./scripts/build_all_service.sh
+        ./scripts/build_all_service.sh
+        cat logs/openIM.log
+
+    - name: Start all services
+      run: |
+        chmod +x ./scripts/start_all.sh
+        ./scripts/start_all.sh
+        cat logs/openIM.log
+      continue-on-error: true
+
+    - name: Check all services
+      run: |
+        chmod +x ./scripts/check_all.sh
+        ./scripts/check_all.sh
+        cat logs/openIM.log
+      continue-on-error: true
+
+    - name: Print openIM.log
+      run: |
+        cat -n logs/openIM.log
+        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+

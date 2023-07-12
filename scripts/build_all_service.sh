@@ -53,10 +53,12 @@ fi
 #Include shell font styles and some basic information
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
+echo "PWD=================>$PWD"
+
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.sh
-source $OPENIM_ROOT/scripts/path_info.sh
-source $OPENIM_ROOT/scripts/function.sh
+source ./style_info.sh
+source ./path_info.sh
+source ./function.sh
 
 cd $OPENIM_ROOT
 
