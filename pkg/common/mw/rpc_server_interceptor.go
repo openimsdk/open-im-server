@@ -52,7 +52,6 @@ func RpcServerInterceptor(
 	handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
 	log.ZDebug(ctx, "rpc server req", "req", rpcString(req))
-
 	//defer func() {
 	//	if r := recover(); r != nil {
 	// 		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
@@ -177,12 +176,13 @@ func RpcServerInterceptor(
 	}
 	details, err := grpcStatus.WithDetails(errInfo)
 	if err != nil {
-		panic(err)
+		log.ZWarn(ctx, "rpc server resp WithDetails error", err, "funcName", funcName)
+		return nil, errs.Wrap(err)
 	}
 	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
 	return nil, details.Err()
 }
 
 func GrpcServer() grpc.ServerOption {
-	return grpc.UnaryInterceptor(RpcServerInterceptor)
+	return grpc.ChainUnaryInterceptor(RpcServerInterceptor)
 }

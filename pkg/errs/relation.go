@@ -19,7 +19,6 @@ var Relation = &relation{m: make(map[int]map[int]struct{})}
 func init() {
 	Relation.Add(RecordNotFoundError, UserIDNotFoundError)
 	Relation.Add(RecordNotFoundError, GroupIDNotFoundError)
-	Relation.Add(DuplicateKeyError, UserIDExisted)
 	Relation.Add(DuplicateKeyError, GroupIDExisted)
 }
 

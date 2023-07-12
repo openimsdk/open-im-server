@@ -17,6 +17,7 @@ package unrelation
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -36,7 +37,6 @@ type MsgDocModel struct {
 }
 
 type RevokeModel struct {
-	ID       string `bson:"id"`
 	Role     int32  `bson:"role"`
 	UserID   string `bson:"user_id"`
 	Nickname string `bson:"nickname"`
@@ -83,6 +83,16 @@ type MsgInfoModel struct {
 	IsRead  bool          `bson:"is_read"`
 }
 
+type UserCount struct {
+	UserID string `bson:"user_id"`
+	Count  int64  `bson:"count"`
+}
+
+type GroupCount struct {
+	GroupID string `bson:"group_id"`
+	Count   int64  `bson:"count"`
+}
+
 type MsgDocModelInterface interface {
 	PushMsgsToDoc(ctx context.Context, docID string, msgsToMongo []MsgInfoModel) error
 	Create(ctx context.Context, model *MsgDocModel) error
@@ -98,6 +108,8 @@ type MsgDocModelInterface interface {
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
+	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
 }
 
 func (MsgDocModel) TableName() string {

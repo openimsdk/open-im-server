@@ -12,16 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package relation
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
+	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"testing"
 )
 
-func main() {
-	msgTransferCmd := cmd.NewMsgTransferCmd()
-	msgTransferCmd.AddPrometheusPortFlag()
-	if err := msgTransferCmd.Exec(); err != nil {
-		panic(err.Error())
+//TestNewGormDB Test the retry of sporadic errors and the direct exit of wrong password.
+func TestNewGormDB(t *testing.T) {
+	err := config.InitConfig("config_folder_path")
+	if err != nil {
+		fmt.Println("config load error")
+		return
+	}
+	db, err := newMysqlGormDB()
+	if err != nil {
+		fmt.Println("password error")
+		return
+	}
+	if db != nil {
+		fmt.Println("success connect")
 	}
 }

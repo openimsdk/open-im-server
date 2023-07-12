@@ -25,6 +25,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
@@ -162,33 +163,16 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
-func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
-}
-
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	// todo
-	//if !tokenverify.IsAppManagerUid(c) {
-	//	apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
-	//	return
-	//}
+	if !tokenverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
 
 	var data interface{}
 	switch params.ContentType {
@@ -252,4 +236,12 @@ func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
 
 func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
+}
+
+func (m *MessageApi) GetActiveUser(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveUser, m.Client, c)
+}
+
+func (m *MessageApi) GetActiveGroup(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveGroup, m.Client, c)
 }

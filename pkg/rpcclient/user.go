@@ -17,7 +17,6 @@ package rpcclient
 import (
 	"context"
 	"strings"
-	"time"
 
 	"google.golang.org/grpc"
 
@@ -33,17 +32,16 @@ import (
 type User struct {
 	conn   grpc.ClientConnInterface
 	Client user.UserClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	Discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
-	conn, err := discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
-	return &User{discov: discov, Client: client, conn: conn}
+	return &User{Discov: discov, Client: client, conn: conn}
 }
 
 type UserRpcClient User
