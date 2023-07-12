@@ -41,10 +41,9 @@ func NewCos() (s3.Interface, error) {
 }
 
 type Cos struct {
-	statObjectURL string
-	copyURL       string
-	client        *cos.Client
-	credential    *cos.Credential
+	copyURL    string
+	client     *cos.Client
+	credential *cos.Credential
 }
 
 func (c *Cos) Engine() string {
@@ -170,7 +169,7 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	if name != "" && name[0] == '/' {
 		name = name[1:]
 	}
-	info, err := c.client.Object.Head(ctx, c.statObjectURL+name, nil)
+	info, err := c.client.Object.Head(ctx, name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +200,7 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 }
 
 func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyObjectInfo, error) {
-	result, _, err := c.client.Object.Copy(ctx, src, c.copyURL+dst, &cos.ObjectCopyOptions{})
+	result, _, err := c.client.Object.Copy(ctx, dst, c.copyURL+src, &cos.ObjectCopyOptions{})
 	if err != nil {
 		return nil, err
 	}
