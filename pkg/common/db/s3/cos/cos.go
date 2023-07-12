@@ -186,7 +186,7 @@ func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 	}
 	return &s3.CopyObjectInfo{
 		Key:  dst,
-		ETag: strings.ReplaceAll(result.ETag, `""`, ""),
+		ETag: strings.ReplaceAll(result.ETag, `"`, ``),
 	}, nil
 }
 
