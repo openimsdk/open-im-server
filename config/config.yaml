@@ -59,14 +59,14 @@ api:
   listenIP:                               #默认为0.0.0.0
 
 object:
-  enable: minio                           #使用minio
-  apiURL: http://127.0.0.1:10002/object/
+  enable: "minio"                           #使用minio
+  apiURL: "http://127.0.0.1:10002/object/"
   minio:
     bucket: "openim"                      #不建议修改
-    endpoint: http://127.0.0.1:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
-    accessKeyID: root                     #ID
-    secretAccessKey: openIM123            #秘钥
-    sessionToken:             #token
+    endpoint: "http://127.0.0.1:10005"      #minio对外服务的ip和端口，app要能访问此ip和端口
+    accessKeyID: "root"                     #ID
+    secretAccessKey: "openIM123"            #秘钥
+    sessionToken: ""            #token
   cos: #tencent cos
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
     secretID: ""

@@ -33,17 +33,23 @@ func NewCos() (s3.Interface, error) {
 			SessionToken: conf.SessionToken,
 		},
 	})
+	statObjectURL := u.String()
+	if statObjectURL != "" && statObjectURL[len(statObjectURL)-1] != '/' {
+		statObjectURL += "/"
+	}
 	return &Cos{
-		copyURL:    u.Host + "/",
-		client:     client,
-		credential: client.GetCredential(),
+		statObjectURL: statObjectURL,
+		copyURL:       u.Host + "/",
+		client:        client,
+		credential:    client.GetCredential(),
 	}, nil
 }
 
 type Cos struct {
-	copyURL    string
-	client     *cos.Client
-	credential *cos.Credential
+	statObjectURL string
+	copyURL       string
+	client        *cos.Client
+	credential    *cos.Credential
 }
 
 func (c *Cos) Engine() string {
@@ -59,6 +65,7 @@ func (c *Cos) PartLimit() *s3.PartLimit {
 }
 
 func (c *Cos) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
+	name = c.client.BaseURL.BucketURL.String() + name
 	result, _, err := c.client.Object.InitiateMultipartUpload(ctx, name, nil)
 	if err != nil {
 		return nil, err
@@ -166,7 +173,10 @@ func (c *Cos) DeleteObject(ctx context.Context, name string) error {
 }
 
 func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, error) {
-	info, err := c.client.Object.Head(ctx, name, nil)
+	if name != "" && name[0] == '/' {
+		name = name[1:]
+	}
+	info, err := c.client.Object.Head(ctx, c.statObjectURL+name, nil)
 	if err != nil {
 		return nil, err
 	}
