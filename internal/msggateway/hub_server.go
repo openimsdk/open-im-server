@@ -2,6 +2,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -139,6 +140,7 @@ func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOf
 	for _, v := range req.KickUserIDList {
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
+				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
 				err := client.KickOnlineMessage()
 				if err != nil {
 					return nil, err
