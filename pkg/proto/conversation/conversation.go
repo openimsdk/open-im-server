@@ -39,15 +39,15 @@ func (x *Conversation) Check() error {
 	return nil
 }
 
-func (x *ModifyConversationFieldReq) Check() error {
-	if x.UserIDList == nil {
-		return errs.ErrArgs.Wrap("userIDList is empty")
-	}
-	if x.Conversation == nil {
-		return errs.ErrArgs.Wrap("conversation is empty")
-	}
-	return nil
-}
+//func (x *ModifyConversationFieldReq) Check() error {
+//	if x.UserIDList == nil {
+//		return errs.ErrArgs.Wrap("userIDList is empty")
+//	}
+//	if x.Conversation == nil {
+//		return errs.ErrArgs.Wrap("conversation is empty")
+//	}
+//	return nil
+//}
 
 func (x *SetConversationReq) Check() error {
 	if x.Conversation == nil {
@@ -59,18 +59,18 @@ func (x *SetConversationReq) Check() error {
 	return nil
 }
 
-func (x *SetRecvMsgOptReq) Check() error {
-	if x.OwnerUserID == "" {
-		return errs.ErrArgs.Wrap("ownerUserID is empty")
-	}
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.RecvMsgOpt > 2 || x.RecvMsgOpt < 0 {
-		return errs.ErrArgs.Wrap("MsgReceiveOpt is invalid")
-	}
-	return nil
-}
+//func (x *SetRecvMsgOptReq) Check() error {
+//	if x.OwnerUserID == "" {
+//		return errs.ErrArgs.Wrap("ownerUserID is empty")
+//	}
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.RecvMsgOpt > 2 || x.RecvMsgOpt < 0 {
+//		return errs.ErrArgs.Wrap("MsgReceiveOpt is invalid")
+//	}
+//	return nil
+//}
 
 func (x *GetConversationReq) Check() error {
 	if x.OwnerUserID == "" {
@@ -99,15 +99,16 @@ func (x *GetAllConversationsReq) Check() error {
 	return nil
 }
 
-func (x *BatchSetConversationsReq) Check() error {
-	if x.Conversations == nil {
-		return errs.ErrArgs.Wrap("conversations is empty")
-	}
-	if x.OwnerUserID == "" {
-		return errs.ErrArgs.Wrap("conversation is empty")
-	}
-	return nil
-}
+//
+//func (x *BatchSetConversationsReq) Check() error {
+//	if x.Conversations == nil {
+//		return errs.ErrArgs.Wrap("conversations is empty")
+//	}
+//	if x.OwnerUserID == "" {
+//		return errs.ErrArgs.Wrap("conversation is empty")
+//	}
+//	return nil
+//}
 
 func (x *GetRecvMsgNotNotifyUserIDsReq) Check() error {
 	if x.GroupID == "" {
