@@ -21,21 +21,28 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 )
 
+// type constant GLOBALLOCK
 const GlOBALLOCK = "GLOBAL_LOCK"
 
+// type interface messageLocker
 type MessageLocker interface {
 	LockMessageTypeKey(ctx context.Context, clientMsgID, typeKey string) (err error)
 	UnLockMessageTypeKey(ctx context.Context, clientMsgID string, typeKey string) error
 	LockGlobalMessage(ctx context.Context, clientMsgID string) (err error)
 	UnLockGlobalMessage(ctx context.Context, clientMsgID string) (err error)
 }
+
+// type lockmessage struct
 type LockerMessage struct {
 	cache cache.MsgModel
 }
 
+// create a new locker message
 func NewLockerMessage(cache cache.MsgModel) *LockerMessage {
 	return &LockerMessage{cache: cache}
 }
+
+// lock message type key
 func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typeKey string) (err error) {
 	for i := 0; i < 3; i++ {
 		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, typeKey)
@@ -47,8 +54,9 @@ func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typ
 		}
 	}
 	return err
-
 }
+
+// lock global message
 func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID string) (err error) {
 	for i := 0; i < 3; i++ {
 		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
@@ -60,11 +68,14 @@ func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID strin
 		}
 	}
 	return err
-
 }
+
+// unlock message type key
 func (l *LockerMessage) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, typeKey string) error {
 	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)
 }
+
+// unclock global message
 func (l *LockerMessage) UnLockGlobalMessage(ctx context.Context, clientMsgID string) error {
 	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
 }

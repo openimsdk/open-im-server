@@ -15,13 +15,12 @@
 package msg
 
 import (
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
@@ -42,6 +41,7 @@ func isMessageHasReadEnabled(msgData *sdkws.MsgData) bool {
 	return true
 }
 
+// define func is not found to used by redis.nil
 func IsNotFound(err error) bool {
 	switch utils.Unwrap(err) {
 	case redis.Nil, gorm.ErrRecordNotFound:

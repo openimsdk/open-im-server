@@ -158,7 +158,6 @@ func (m *msgServer) SetMessageReactionExtensions(
 	//}
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", resp.String())
 	return resp, nil
-
 }
 
 func (m *msgServer) setKeyResultInfo(
@@ -195,14 +194,14 @@ func (m *msgServer) GetMessagesReactionExtensions(
 	ctx context.Context,
 	req *msg.GetMessagesReactionExtensionsReq,
 ) (resp *msg.GetMessagesReactionExtensionsResp, err error) {
-	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
-	//var rResp msg.GetMessageListReactionExtensionsResp
-	//for _, messageValue := range req.MessageReactionKeyList {
-	//	var oneMessage msg.SingleMessageExtensionResult
-	//	oneMessage.ClientMsgID = messageValue.ClientMsgID
+	// log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
+	// var rResp msg.GetMessageListReactionExtensionsResp
+	// for _, messageValue := range req.MessageReactionKeyList {
+	// var oneMessage msg.SingleMessageExtensionResult
+	// oneMessage.ClientMsgID = messageValue.ClientMsgID
 	//
-	//	isExists, err := db.DB.JudgeMessageReactionExist(messageValue.ClientMsgID, req.SessionType)
-	//	if err != nil {
+	// isExists, err := db.DB.JudgeMessageReactionExist(messageValue.ClientMsgID, req.SessionType)
+	// if err != nil {
 	//		rResp.ErrCode = 100
 	//		rResp.ErrMsg = err.Error()
 	//		return &rResp, nil
@@ -248,7 +247,6 @@ func (m *msgServer) GetMessagesReactionExtensions(
 	//}
 	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m return is:", rResp.String())
 	return resp, nil
-
 }
 
 func (m *msgServer) AddMessageReactionExtensions(
@@ -262,13 +260,13 @@ func (m *msgServer) DeleteMessageReactionExtensions(
 	ctx context.Context,
 	req *msg.DeleteMessagesReactionExtensionsReq,
 ) (resp *msg.DeleteMessagesReactionExtensionsResp, err error) {
-	//log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
-	//var rResp msg.DeleteMessagesReactionExtensionsResp
-	//callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
-	//if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
-	//	rResp.ErrCode = int32(callbackResp.ErrCode)
-	//	rResp.ErrMsg = callbackResp.ErrMsg
-	//	for _, value := range req.Pb2Model {
+	// log.Debug(req.OperationID, utils.GetSelfFuncName(), "m args is:", req.String())
+	// var rResp msg.DeleteMessagesReactionExtensionsResp
+	// callbackResp := notification.callbackDeleteMessageReactionExtensions(req)
+	// if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
+	// rResp.ErrCode = int32(callbackResp.ErrCode)
+	// rResp.ErrMsg = callbackResp.ErrMsg
+	// for _, value := range req.Pb2Model {
 	//		temp := new(msg.KeyValueResp)
 	//		temp.KeyValue = value
 	//		temp.ErrMsg = callbackResp.ErrMsg

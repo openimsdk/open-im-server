@@ -25,12 +25,14 @@ import (
 	gormUtils "gorm.io/gorm/utils"
 )
 
+// type a sql logger struct
 type SqlLogger struct {
 	LogLevel                  gormLogger.LogLevel
 	IgnoreRecordNotFoundError bool
 	SlowThreshold             time.Duration
 }
 
+// create a new sql logger
 func NewSqlLogger(
 	logLevel gormLogger.LogLevel,
 	ignoreRecordNotFoundError bool,
@@ -43,31 +45,37 @@ func NewSqlLogger(
 	}
 }
 
+// type log mode
 func (l *SqlLogger) LogMode(logLevel gormLogger.LogLevel) gormLogger.Interface {
 	newLogger := *l
 	newLogger.LogLevel = logLevel
 	return &newLogger
 }
 
+// info
 func (SqlLogger) Info(ctx context.Context, msg string, args ...interface{}) {
 	ZInfo(ctx, msg, args)
 }
 
+// warn
 func (SqlLogger) Warn(ctx context.Context, msg string, args ...interface{}) {
 	ZWarn(ctx, msg, nil, args)
 }
 
+// error
 func (SqlLogger) Error(ctx context.Context, msg string, args ...interface{}) {
 	ZError(ctx, msg, nil, args)
 }
 
+// trace
 func (l *SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 	if l.LogLevel <= gormLogger.Silent {
 		return
 	}
 	elapsed := time.Since(begin)
 	switch {
-	case err != nil && l.LogLevel >= gormLogger.Error && (!errors.Is(err, gorm.ErrRecordNotFound) || !l.IgnoreRecordNotFoundError):
+	case err != nil && l.LogLevel >= gormLogger.Error && (!errors.Is(err, gorm.ErrRecordNotFound) ||
+		!l.IgnoreRecordNotFoundError):
 		sql, rows := fc()
 		if rows == -1 {
 			ZError(
@@ -82,7 +90,9 @@ func (l *SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql s
 				sql,
 			)
 		} else {
-			ZError(ctx, "sql exec detail", err, "gorm", gormUtils.FileWithLineNum(), "elapsed time", fmt.Sprintf("%f(ms)", float64(elapsed.Nanoseconds())/1e6), "rows", rows, "sql", sql)
+			ZError(ctx, "sql exec detail", err, "gorm",
+				gormUtils.FileWithLineNum(), "elapsed time",
+				fmt.Sprintf("%f(ms)", float64(elapsed.Nanoseconds())/1e6), "rows", rows, "sql", sql)
 		}
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= gormLogger.Warn:
 		sql, rows := fc()
@@ -103,7 +113,10 @@ func (l *SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql s
 				sql,
 			)
 		} else {
-			ZWarn(ctx, "sql exec detail", nil, "gorm", gormUtils.FileWithLineNum(), nil, "slow sql", slowLog, "elapsed time", fmt.Sprintf("%f(ms)", float64(elapsed.Nanoseconds())/1e6), "rows", rows, "sql", sql)
+			ZWarn(ctx, "sql exec detail", nil, "gorm",
+				gormUtils.FileWithLineNum(), nil, "slow sql",
+				slowLog, "elapsed time", fmt.Sprintf("%f(ms)",
+					float64(elapsed.Nanoseconds())/1e6), "rows", rows, "sql", sql)
 		}
 	case l.LogLevel == gormLogger.Info:
 		sql, rows := fc()
@@ -119,7 +132,9 @@ func (l *SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql s
 				sql,
 			)
 		} else {
-			ZDebug(ctx, "sql exec detail", "gorm", gormUtils.FileWithLineNum(), "elapsed time", fmt.Sprintf("%f(ms)", float64(elapsed.Nanoseconds())/1e6), "rows", rows, "sql", sql)
+			ZDebug(ctx, "sql exec detail", "gorm", gormUtils.FileWithLineNum(),
+				"elapsed time", fmt.Sprintf("%f(ms)", float64(elapsed.Nanoseconds())/1e6),
+				"rows", rows, "sql", sql)
 		}
 	}
 }

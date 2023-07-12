@@ -17,21 +17,22 @@ package msgtransfer
 import (
 	"context"
 
-	"github.com/Shopify/sarama"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/Shopify/sarama"
+	"google.golang.org/protobuf/proto"
 )
 
+// define a OnlineHistoryMongoConsumerHandler struct
 type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kfk.MConsumerGroup
 	msgDatabase          controller.CommonMsgDatabase
 }
 
+// create a NewOnlineHistoryMongoConsumerHandler
 func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) *OnlineHistoryMongoConsumerHandler {
 	mc := &OnlineHistoryMongoConsumerHandler{
 		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
@@ -42,6 +43,7 @@ func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase)
 	return mc
 }
 
+// create a handleChatWs2Mongo
 func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 	ctx context.Context,
 	cMsg *sarama.ConsumerMessage,
@@ -91,9 +93,13 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 	mc.msgDatabase.DelUserDeleteMsgsList(ctx, msgFromMQ.ConversationID, seqs)
 }
 
-func (OnlineHistoryMongoConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+// setup
+func (OnlineHistoryMongoConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error { return nil }
+
+// clean up
 func (OnlineHistoryMongoConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
+// consume claim
 func (mc *OnlineHistoryMongoConsumerHandler) ConsumeClaim(
 	sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim,

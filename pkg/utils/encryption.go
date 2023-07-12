@@ -23,6 +23,7 @@ import (
 	"errors"
 )
 
+// md5 encrypt
 func Md5(s string, salt ...string) string {
 	h := md5.New()
 	h.Write([]byte(s))
@@ -33,6 +34,7 @@ func Md5(s string, salt ...string) string {
 	return hex.EncodeToString(cipher)
 }
 
+// aes encrypt
 func AesEncrypt(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -46,6 +48,7 @@ func AesEncrypt(data []byte, key []byte) ([]byte, error) {
 	return crypted, nil
 }
 
+// aes decrypt
 func AesDecrypt(data []byte, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -62,12 +65,14 @@ func AesDecrypt(data []byte, key []byte) ([]byte, error) {
 	return crypted, nil
 }
 
+// PKCS7 padding on a byte array
 func pkcs7Padding(data []byte, blockSize int) []byte {
 	padding := blockSize - len(data)%blockSize
 	padText := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(data, padText...)
 }
 
+// PKCS7 padding removal on a byte array
 func pkcs7UnPadding(data []byte) ([]byte, error) {
 	length := len(data)
 	if length == 0 {

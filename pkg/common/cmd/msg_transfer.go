@@ -15,25 +15,28 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/OpenIMSDK/Open-IM-Server/internal/msgtransfer"
+	"github.com/spf13/cobra"
 )
 
+// define a message transfer command
 type MsgTransferCmd struct {
 	*RootCmd
 }
 
+// create a message transfer command
 func NewMsgTransferCmd() MsgTransferCmd {
 	return MsgTransferCmd{NewRootCmd("msgTransfer")}
 }
 
+// add rune
 func (m *MsgTransferCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return msgtransfer.StartTransfer(m.getPrometheusPortFlag(cmd))
 	}
 }
 
+// exec
 func (m *MsgTransferCmd) Exec() error {
 	m.addRunE()
 	return m.Execute()

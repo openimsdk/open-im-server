@@ -16,10 +16,12 @@ package utils
 
 import "encoding/base64"
 
+// base64 encode
 func Base64Encode(data string) string {
 	return base64.StdEncoding.EncodeToString([]byte(data))
 }
 
+// base64 decode
 func Base64Decode(data string) string {
 	decodedByte, _ := base64.StdEncoding.DecodeString(data)
 	return string(decodedByte)

@@ -21,12 +21,10 @@ import (
 	"path/filepath"
 	"time"
 
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -104,7 +102,7 @@ func NewZapLogger(
 	loggerPrefixName, loggerName string,
 	logLevel int,
 	isStdout bool,
-	isJson bool,
+	isJSON bool,
 	logLocation string,
 	rotateCount uint,
 ) (*ZapLogger, error) {
@@ -114,7 +112,7 @@ func NewZapLogger(
 		// InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	if isJson {
+	if isJSON {
 		zapConfig.Encoding = "json"
 	} else {
 		zapConfig.Encoding = "console"
@@ -123,7 +121,7 @@ func NewZapLogger(
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
 	zl := &ZapLogger{level: logLevelMap[logLevel], loggerName: loggerName, loggerPrefixName: loggerPrefixName}
-	opts, err := zl.cores(isStdout, isJson, logLocation, rotateCount)
+	opts, err := zl.cores(isStdout, isJSON, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
 	}
@@ -176,6 +174,7 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	}), nil
 }
 
+// customCallerEncoder
 func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 	s := "[" + caller.TrimmedPath() + "]"
 	// color, ok := _levelToColor[l.level]
@@ -186,6 +185,7 @@ func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.
 
 }
 
+// time encodor
 func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	layout := "2006-01-02 15:04:05.000"
 	type appendTimeEncoder interface {
@@ -198,6 +198,7 @@ func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) 
 	enc.AppendString(t.Format(layout))
 }
 
+// get writter
 func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.WriteSyncer, error) {
 	logf, err := rotatelogs.New(logLocation+sp+l.loggerPrefixName+".%Y-%m-%d",
 		rotatelogs.WithRotationCount(rorateCount),
@@ -209,6 +210,7 @@ func (l *ZapLogger) getWriter(logLocation string, rorateCount uint) (zapcore.Wri
 	return zapcore.AddSync(logf), nil
 }
 
+// capitalColorLevelEncoder
 func (l *ZapLogger) capitalColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 	s, ok := _levelToCapitalColorString[level]
 	if !ok {
@@ -223,20 +225,24 @@ func (l *ZapLogger) capitalColorLevelEncoder(level zapcore.Level, enc zapcore.Pr
 	}
 }
 
+// tozap
 func (l *ZapLogger) ToZap() *zap.SugaredLogger {
 	return l.zap
 }
 
+// debug
 func (l *ZapLogger) Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Debugw(msg, keysAndValues...)
 }
 
+// info
 func (l *ZapLogger) Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	keysAndValues = l.kvAppend(ctx, keysAndValues)
 	l.zap.Infow(msg, keysAndValues...)
 }
 
+// warn
 func (l *ZapLogger) Warn(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	if err != nil {
 		keysAndValues = append(keysAndValues, "error", err.Error())
@@ -245,6 +251,7 @@ func (l *ZapLogger) Warn(ctx context.Context, msg string, err error, keysAndValu
 	l.zap.Warnw(msg, keysAndValues...)
 }
 
+// error
 func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndValues ...interface{}) {
 	if err != nil {
 		keysAndValues = append(keysAndValues, "error", err.Error())
@@ -253,6 +260,7 @@ func (l *ZapLogger) Error(ctx context.Context, msg string, err error, keysAndVal
 	l.zap.Errorw(msg, keysAndValues...)
 }
 
+// kv append
 func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) []interface{} {
 	if ctx == nil {
 		return keysAndValues
@@ -284,18 +292,21 @@ func (l *ZapLogger) kvAppend(ctx context.Context, keysAndValues []interface{}) [
 	return keysAndValues
 }
 
+// with namevalues
 func (l *ZapLogger) WithValues(keysAndValues ...interface{}) Logger {
 	dup := *l
 	dup.zap = l.zap.With(keysAndValues...)
 	return &dup
 }
 
+// with name
 func (l *ZapLogger) WithName(name string) Logger {
 	dup := *l
 	dup.zap = l.zap.Named(name)
 	return &dup
 }
 
+// with call depth
 func (l *ZapLogger) WithCallDepth(depth int) Logger {
 	dup := *l
 	dup.zap = l.zap.WithOptions(zap.AddCallerSkip(depth))

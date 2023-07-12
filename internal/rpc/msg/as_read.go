@@ -17,13 +17,12 @@ package msg
 import (
 	"context"
 
-	"github.com/redis/go-redis/v9"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/redis/go-redis/v9"
 )
 
 func (m *msgServer) GetConversationsHasReadAndMaxSeq(
@@ -76,10 +75,11 @@ func (m *msgServer) SetConversationHasReadSeq(
 	if req.HasReadSeq > maxSeq {
 		return nil, errs.ErrArgs.Wrap("hasReadSeq must not be bigger than maxSeq")
 	}
-	if err := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
-		return nil, err
+	if err1 := m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq); err != nil {
+		return nil, err1
 	}
-	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID, req.UserID, nil, req.HasReadSeq); err != nil {
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType,
+		req.UserID, req.UserID, nil, req.HasReadSeq); err != nil {
 		return
 	}
 	return &msg.SetConversationHasReadSeqResp{}, nil
@@ -117,7 +117,8 @@ func (m *msgServer) MarkMsgsAsRead(
 			return
 		}
 	}
-	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID, m.conversationAndGetRecvID(conversation, req.UserID), req.Seqs, hasReadSeq); err != nil {
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
+		m.conversationAndGetRecvID(conversation, req.UserID), req.Seqs, hasReadSeq); err != nil {
 		return
 	}
 	return &msg.MarkMsgsAsReadResp{}, nil
@@ -147,17 +148,18 @@ func (m *msgServer) MarkConversationAsRead(
 	if len(seqs) > 0 {
 		log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
 		if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
-			return
+			return resp, err
 		}
 	}
 	if req.HasReadSeq > hasReadSeq {
 		err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 		if err != nil {
-			return
+			return resp, err
 		}
 		hasReadSeq = req.HasReadSeq
 	}
-	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID, m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
+	if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
+		m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
 		return
 	}
 	return &msg.MarkConversationAsReadResp{}, nil

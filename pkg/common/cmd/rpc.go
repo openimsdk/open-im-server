@@ -17,22 +17,24 @@ package cmd
 import (
 	"errors"
 
-	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
+	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 )
 
+// define a rpccmd struct
 type RpcCmd struct {
 	*RootCmd
 }
 
+// create a new rpc command
 func NewRpcCmd(name string) *RpcCmd {
 	authCmd := &RpcCmd{NewRootCmd(name)}
 	return authCmd
 }
 
+// exec
 func (a *RpcCmd) Exec() error {
 	a.Command.Run = func(cmd *cobra.Command, args []string) {
 		a.port = a.getPortFlag(cmd)
@@ -41,6 +43,7 @@ func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
+// start server
 func (a *RpcCmd) StartSvr(
 	name string,
 	rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,

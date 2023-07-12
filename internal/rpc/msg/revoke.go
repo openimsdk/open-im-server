@@ -19,8 +19,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -29,6 +27,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/google/uuid"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
@@ -65,19 +64,19 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if !tokenverify.IsAppManagerUid(ctx) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
-			if err := tokenverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
-				return nil, err
+			if err1 := tokenverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
+				return nil, err1
 			}
 			role = user.AppMangerLevel
 		case constant.SuperGroupChatType:
-			members, err := m.Group.GetGroupMemberInfoMap(
+			members, err2 := m.Group.GetGroupMemberInfoMap(
 				ctx,
 				msgs[0].GroupID,
 				utils.Distinct([]string{req.UserID, msgs[0].SendID}),
 				true,
 			)
-			if err != nil {
-				return nil, err
+			if err2 != nil {
+				return nil, err2
 			}
 			if req.UserID != msgs[0].SendID {
 				switch members[req.UserID].RoleLevel {
@@ -122,7 +121,8 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	} else {
 		recvID = msgs[0].RecvID
 	}
-	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
+	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID,
+		constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

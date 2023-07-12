@@ -30,7 +30,7 @@ import (
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
-	resp = &pbMsg.SendMsgResp{}
+	// resp = &pbMsg.SendMsgResp{}
 	flag := isMessageHasReadEnabled(req.MsgData)
 	if !flag {
 		return nil, errs.ErrMessageHasReadDisable.Wrap()
@@ -60,8 +60,8 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
 		return nil, err
 	}
-	if err := callbackMsgModify(ctx, req); err != nil {
-		return nil, err
+	if err1 := callbackMsgModify(ctx, req); err != nil {
+		return nil, err1
 	}
 	err = m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForGroup(req.MsgData.GroupID), req.MsgData)
 	if err != nil {
@@ -97,9 +97,11 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			return
 		}
 		atUserID = utils.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
-		if len(atUserID) == 0 { //just @everyone
+		if len(atUserID) == 0 {
+			// just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
-		} else { //@Everyone and @other people
+		} else {
+			// @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
 			err := m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {
@@ -119,7 +121,6 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 		}
 	}
-
 }
 
 func (m *msgServer) sendMsgNotification(
@@ -127,7 +128,8 @@ func (m *msgServer) sendMsgNotification(
 	req *pbMsg.SendMsgReq,
 ) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
-	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID,
+		req.MsgData.RecvID), req.MsgData); err != nil {
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
 		return nil, err
 	}
@@ -144,7 +146,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
-	var isSend bool = true
+	isSend := true
 	isNotification := utils.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
@@ -165,12 +167,13 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
 			return nil, err
 		}
-		if err := callbackMsgModify(ctx, req); err != nil {
-			return nil, err
+		if err1 := callbackMsgModify(ctx, req); err != nil {
+			return nil, err1
 		}
-		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
+		if err2 := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID),
+			req.MsgData); err != nil {
 			promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
-			return nil, err
+			return nil, err2
 		}
 		err = callbackAfterSendSingleMsg(ctx, req)
 		if err != nil {

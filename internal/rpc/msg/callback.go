@@ -63,7 +63,8 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) er
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackBeforeSendSingleMsgResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp,
+		config.Config.Callback.CallbackBeforeSendSingleMsg); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}
@@ -81,7 +82,8 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbapi.CallbackAfterSendSingleMsgResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp,
+		config.Config.Callback.CallbackAfterSendSingleMsg); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}
@@ -99,7 +101,8 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackBeforeSendGroupMsgResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp,
+		config.Config.Callback.CallbackBeforeSendGroupMsg); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}
@@ -117,7 +120,8 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) erro
 		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbapi.CallbackAfterSendGroupMsgResp{}
-	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp, config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
+	if err := http.CallBackPostReturn(ctx, cbURL(), req, resp,
+		config.Config.Callback.CallbackAfterSendGroupMsg); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}

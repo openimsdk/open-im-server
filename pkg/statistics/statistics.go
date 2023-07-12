@@ -21,6 +21,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 )
 
+// type a statistics struct
 type Statistics struct {
 	AllCount   *uint64
 	ModuleName string
@@ -28,6 +29,7 @@ type Statistics struct {
 	SleepTime  uint64
 }
 
+// output
 func (s *Statistics) output() {
 	var intervalCount uint64
 	t := time.NewTicker(time.Duration(s.SleepTime) * time.Second)
@@ -63,6 +65,7 @@ func (s *Statistics) output() {
 	}
 }
 
+// create a new statistics
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
 	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()

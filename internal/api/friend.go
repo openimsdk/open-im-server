@@ -19,60 +19,73 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-
 	"github.com/gin-gonic/gin"
 )
 
-type FriendApi rpcclient.Friend
+// type FriendAPI
+type FriendAPI rpcclient.Friend
 
-func NewFriendApi(discov discoveryregistry.SvcDiscoveryRegistry) FriendApi {
-	return FriendApi(*rpcclient.NewFriend(discov))
+// NewFriendAPI creates a new friend
+func NewFriendAPI(discov discoveryregistry.SvcDiscoveryRegistry) FriendAPI {
+	return FriendAPI(*rpcclient.NewFriend(discov))
 }
 
-func (o *FriendApi) ApplyToAddFriend(c *gin.Context) {
+// apply to add a friend
+func (o *FriendAPI) ApplyToAddFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.ApplyToAddFriend, o.Client, c)
 }
 
-func (o *FriendApi) RespondFriendApply(c *gin.Context) {
+// response Friend's apply
+func (o *FriendAPI) RespondFriendApply(c *gin.Context) {
 	a2r.Call(friend.FriendClient.RespondFriendApply, o.Client, c)
 }
 
-func (o *FriendApi) DeleteFriend(c *gin.Context) {
+// delete a friend
+func (o *FriendAPI) DeleteFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.DeleteFriend, o.Client, c)
 }
 
-func (o *FriendApi) GetFriendApplyList(c *gin.Context) {
+// get friend list
+func (o *FriendAPI) GetFriendApplyList(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyTo, o.Client, c)
 }
 
-func (o *FriendApi) GetSelfApplyList(c *gin.Context) {
+// get friend self list for apply
+func (o *FriendAPI) GetSelfApplyList(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetPaginationFriendsApplyFrom, o.Client, c)
 }
 
-func (o *FriendApi) GetFriendList(c *gin.Context) {
+// get friend list
+func (o *FriendAPI) GetFriendList(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetPaginationFriends, o.Client, c)
 }
 
-func (o *FriendApi) SetFriendRemark(c *gin.Context) {
+// set friend remark sign
+func (o *FriendAPI) SetFriendRemark(c *gin.Context) {
 	a2r.Call(friend.FriendClient.SetFriendRemark, o.Client, c)
 }
 
-func (o *FriendApi) AddBlack(c *gin.Context) {
+// add friend to blacklist
+func (o *FriendAPI) AddBlack(c *gin.Context) {
 	a2r.Call(friend.FriendClient.AddBlack, o.Client, c)
 }
 
-func (o *FriendApi) GetPaginationBlacks(c *gin.Context) {
+// get balck list with pagenation
+func (o *FriendAPI) GetPaginationBlacks(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetPaginationBlacks, o.Client, c)
 }
 
-func (o *FriendApi) RemoveBlack(c *gin.Context) {
+// remove friend from black
+func (o *FriendAPI) RemoveBlack(c *gin.Context) {
 	a2r.Call(friend.FriendClient.RemoveBlack, o.Client, c)
 }
 
-func (o *FriendApi) ImportFriends(c *gin.Context) {
+// import friends
+func (o *FriendAPI) ImportFriends(c *gin.Context) {
 	a2r.Call(friend.FriendClient.ImportFriends, o.Client, c)
 }
 
-func (o *FriendApi) IsFriend(c *gin.Context) {
+// judege friend is or not friend
+func (o *FriendAPI) IsFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.IsFriend, o.Client, c)
 }

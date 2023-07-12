@@ -24,12 +24,14 @@ type Map struct {
 	m map[interface{}]interface{}
 }
 
+// init map by make method
 func (m *Map) init() {
 	if m.m == nil {
 		m.m = make(map[interface{}]interface{})
 	}
 }
 
+// / get unsafe
 func (m *Map) UnsafeGet(key interface{}) interface{} {
 	if m.m == nil {
 		return nil
@@ -44,6 +46,7 @@ func (m *Map) Get(key interface{}) interface{} {
 	return m.UnsafeGet(key)
 }
 
+// set by unsafe
 func (m *Map) UnsafeSet(key interface{}, value interface{}) {
 	m.init()
 	m.m[key] = value
@@ -55,6 +58,7 @@ func (m *Map) Set(key interface{}, value interface{}) {
 	m.UnsafeSet(key, value)
 }
 
+// test and set
 func (m *Map) TestAndSet(key interface{}, value interface{}) interface{} {
 	m.Lock()
 	defer m.Unlock()
@@ -69,6 +73,7 @@ func (m *Map) TestAndSet(key interface{}, value interface{}) interface{} {
 	}
 }
 
+// dele by unsafe
 func (m *Map) UnsafeDel(key interface{}) {
 	m.init()
 	delete(m.m, key)
@@ -80,6 +85,7 @@ func (m *Map) Del(key interface{}) {
 	m.UnsafeDel(key)
 }
 
+// get unsafe length
 func (m *Map) UnsafeLen() int {
 	if m.m == nil {
 		return 0
@@ -88,12 +94,14 @@ func (m *Map) UnsafeLen() int {
 	}
 }
 
+// get length
 func (m *Map) Len() int {
 	m.RLock()
 	defer m.RUnlock()
 	return m.UnsafeLen()
 }
 
+// judege unsafe range
 func (m *Map) UnsafeRange(f func(interface{}, interface{})) {
 	if m.m == nil {
 		return

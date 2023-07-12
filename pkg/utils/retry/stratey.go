@@ -16,51 +16,65 @@ package retry
 
 import "time"
 
+// renamed int to backofstrategy
 type BackoffStrategy int
 
+// const a constant
 const (
 	StrategyConstant BackoffStrategy = iota
 	StrategyLinear
 	StrategyFibonacci
 )
 
+// define a interface of strategy
 type Strategy interface {
 	Sleep(times int) time.Duration
 }
+
+// define constant struct
 type Constant struct {
 	startInterval time.Duration
 }
 
+// define a new constant
 func NewConstant(d time.Duration) *Constant {
 	return &Constant{startInterval: d}
 }
 
+// define a linear struct
 type Linear struct {
 	startInterval time.Duration
 }
 
+// define a new linear function
 func NewLinear(d time.Duration) *Linear {
 	return &Linear{startInterval: d}
 }
 
+// define fibonacci struct
 type Fibonacci struct {
 	startInterval time.Duration
 }
 
+// new fibonacci function
 func NewFibonacci(d time.Duration) *Fibonacci {
 	return &Fibonacci{startInterval: d}
 }
 
+// sleep reload
 func (c *Constant) Sleep(_ int) time.Duration {
 	return c.startInterval
 }
+
+// sleep reload
 func (l *Linear) Sleep(times int) time.Duration {
 	return l.startInterval * time.Duration(times)
 
 }
+
+// sleep
 func (f *Fibonacci) Sleep(times int) time.Duration {
 	return f.startInterval * time.Duration(fibonacciNumber(times))
-
 }
 func fibonacciNumber(n int) int {
 	if n == 0 || n == 1 {

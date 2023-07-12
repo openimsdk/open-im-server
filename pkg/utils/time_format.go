@@ -1,9 +1,3 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/2/22 11:52).
- */
 package utils
 
 import (
@@ -74,16 +68,19 @@ func GetTimeStampByFormat(datetime string) string {
 	return strconv.FormatInt(timestamp, 10)
 }
 
+// time format from string to unix
 func TimeStringFormatTimeUnix(timeFormat string, timeSrc string) int64 {
 	tm, _ := time.Parse(timeFormat, timeSrc)
 	return tm.Unix()
 }
 
+// time string to time time
 func TimeStringToTime(timeString string) (time.Time, error) {
 	t, err := time.Parse("2006-01-02", timeString)
 	return t, err
 }
 
+// time to time string
 func TimeToString(t time.Time) string {
 	return t.Format("2006-01-02")
 }

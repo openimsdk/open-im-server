@@ -18,6 +18,7 @@ import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
 var handlers []func(err error) errs.CodeError
 
+// add error handler
 func AddErrHandler(h func(err error) errs.CodeError) {
 	if h == nil {
 		panic("nil handler")
@@ -25,6 +26,7 @@ func AddErrHandler(h func(err error) errs.CodeError) {
 	handlers = append(handlers, h)
 }
 
+// add replace
 func AddReplace(target error, codeErr errs.CodeError) {
 	AddErrHandler(func(err error) errs.CodeError {
 		if err == target {
@@ -34,6 +36,7 @@ func AddReplace(target error, codeErr errs.CodeError) {
 	})
 }
 
+// error code
 func ErrCode(err error) errs.CodeError {
 	if codeErr, ok := err.(errs.CodeError); ok {
 		return codeErr

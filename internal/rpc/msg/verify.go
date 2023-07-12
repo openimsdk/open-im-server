@@ -29,13 +29,16 @@ import (
 )
 
 var (
+	// define exclude content type
 	ExcludeContentType = []int{constant.HasReadReceipt}
 )
 
+// define validator
 type Validator interface {
 	validate(pb *msg.SendMsgReq) (bool, int32, string)
 }
 
+// define message revoked type
 type MessageRevoked struct {
 	RevokerID                   string `json:"revokerID"`
 	RevokerRole                 int32  `json:"revokerRole"`
@@ -173,6 +176,7 @@ func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	}
 }
 
+// get message Id
 func GetMsgID(sendID string) string {
 	t := time.Now().Format("2006-01-02 15:04:05")
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))

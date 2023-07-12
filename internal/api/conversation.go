@@ -15,44 +15,52 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/gin-gonic/gin"
 )
 
-type ConversationApi rpcclient.Conversation
+// export ConversationAPI
+type ConversationAPI rpcclient.Conversation
 
-func NewConversationApi(discov discoveryregistry.SvcDiscoveryRegistry) ConversationApi {
-	return ConversationApi(*rpcclient.NewConversation(discov))
+// NewConversationAPI creates a new Conversation
+func NewConversationAPI(discov discoveryregistry.SvcDiscoveryRegistry) ConversationAPI {
+	return ConversationAPI(*rpcclient.NewConversation(discov))
 }
 
-func (o *ConversationApi) GetAllConversations(c *gin.Context) {
+// get all conversation
+func (o *ConversationAPI) GetAllConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetAllConversations, o.Client, c)
 }
 
-func (o *ConversationApi) GetConversation(c *gin.Context) {
+// get conversation
+func (o *ConversationAPI) GetConversation(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversation, o.Client, c)
 }
 
-func (o *ConversationApi) GetConversations(c *gin.Context) {
+// getConversations returns a list of conversations.
+func (o *ConversationAPI) GetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversations, o.Client, c)
 }
 
-func (o *ConversationApi) BatchSetConversations(c *gin.Context) {
+// set list of conversations
+func (o *ConversationAPI) BatchSetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.Client, c)
 }
 
-func (o *ConversationApi) SetRecvMsgOpt(c *gin.Context) {
+// setRecvMsgOpt sets the option for receiving messages.
+func (o *ConversationAPI) SetRecvMsgOpt(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.SetRecvMsgOpt, o.Client, c)
 }
 
-func (o *ConversationApi) ModifyConversationField(c *gin.Context) {
+// modifyConversationField modifies the conversation field.
+func (o *ConversationAPI) ModifyConversationField(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.ModifyConversationField, o.Client, c)
 }
 
-func (o *ConversationApi) SetConversations(c *gin.Context) {
+// set conversations
+func (o *ConversationAPI) SetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.SetConversations, o.Client, c)
 }

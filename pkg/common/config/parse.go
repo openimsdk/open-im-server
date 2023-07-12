@@ -21,16 +21,15 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"gopkg.in/yaml.v3"
 )
 
 var (
 	_, b, _, _ = runtime.Caller(0)
-	// Root folder of this project
+	// Root folder of this project.
 	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
@@ -42,6 +41,7 @@ const (
 	ConfKey              = "conf"
 )
 
+// get options by notification
 func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	opts := utils.NewOptions()
 	if cfg.UnreadCount {
@@ -59,6 +59,7 @@ func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	return opts
 }
 
+// unmarshal config
 func (c *config) unmarshalConfig(config interface{}, configPath string) error {
 	bytes, err := os.ReadFile(configPath)
 	if err != nil {
@@ -70,6 +71,7 @@ func (c *config) unmarshalConfig(config interface{}, configPath string) error {
 	return nil
 }
 
+// init config
 func (c *config) initConfig(config interface{}, configName, configFolderPath string) error {
 	if configFolderPath == "" {
 		configFolderPath = DefaultFolderPath
@@ -90,6 +92,7 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 	return c.unmarshalConfig(config, configPath)
 }
 
+// register conf2
 func (c *config) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
 	bytes, err := yaml.Marshal(Config)
 	if err != nil {
@@ -98,10 +101,12 @@ func (c *config) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRe
 	return registry.RegisterConf2Registry(ConfKey, bytes)
 }
 
+// get conf from registry
 func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
 	return registry.GetConfFromRegistry(ConfKey)
 }
 
+// init config
 func InitConfig(configFolderPath string) error {
 	err := Config.initConfig(&Config, FileName, configFolderPath)
 	if err != nil {
@@ -114,6 +119,7 @@ func InitConfig(configFolderPath string) error {
 	return nil
 }
 
+// encode config
 func EncodeConfig() []byte {
 	buf := bytes.NewBuffer(nil)
 	if err := yaml.NewEncoder(buf).Encode(Config); err != nil {

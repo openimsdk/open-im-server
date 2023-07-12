@@ -19,6 +19,7 @@ import "github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 type Options map[string]bool
 type OptionsOpt func(Options)
 
+// new option
 func NewOptions(opts ...OptionsOpt) Options {
 	options := make(map[string]bool, 11)
 	options[constant.IsNotNotification] = false
@@ -39,12 +40,14 @@ func NewOptions(opts ...OptionsOpt) Options {
 	return options
 }
 
+// new message option
 func NewMsgOptions() Options {
 	options := make(map[string]bool, 11)
 	options[constant.IsOfflinePush] = false
 	return make(map[string]bool)
 }
 
+// WithOptions
 func WithOptions(options Options, opts ...OptionsOpt) Options {
 	for _, opt := range opts {
 		opt(options)
@@ -52,78 +55,91 @@ func WithOptions(options Options, opts ...OptionsOpt) Options {
 	return options
 }
 
+// WithNotNotification
 func WithNotNotification(b bool) OptionsOpt {
 	return func(options Options) {
 		options[constant.IsNotNotification] = b
 	}
 }
 
+// WithSendMsg
 func WithSendMsg(b bool) OptionsOpt {
 	return func(options Options) {
 		options[constant.IsSendMsg] = b
 	}
 }
 
+// WithHistory
 func WithHistory(b bool) OptionsOpt {
 	return func(options Options) {
 		options[constant.IsHistory] = b
 	}
 }
 
+// WithPersistent
 func WithPersistent() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsPersistent] = true
 	}
 }
 
+// WithOfflinePush
 func WithOfflinePush(b bool) OptionsOpt {
 	return func(options Options) {
 		options[constant.IsOfflinePush] = b
 	}
 }
 
+// unread count
 func WithUnreadCount(b bool) OptionsOpt {
 	return func(options Options) {
 		options[constant.IsUnreadCount] = b
 	}
 }
 
+// WithConversationUpdate
 func WithConversationUpdate() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsConversationUpdate] = true
 	}
 }
 
+// WithSenderSync
 func WithSenderSync() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsSenderSync] = true
 	}
 }
 
+// WithNotPrivate
 func WithNotPrivate() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsNotPrivate] = true
 	}
 }
 
+// WithSenderConversationUpdate
 func WithSenderConversationUpdate() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsSenderConversationUpdate] = true
 	}
 }
 
+// WithSenderNotificationPush
 func WithSenderNotificationPush() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsSenderNotificationPush] = true
 	}
 }
 
+// react from cache is or not
 func WithReactionFromCache() OptionsOpt {
 	return func(options Options) {
 		options[constant.IsReactionFromCache] = true
 	}
 }
 
+// is or not exit in map named o
 func (o Options) Is(notification string) bool {
 	v, ok := o[notification]
 	if !ok || v {
@@ -132,50 +148,62 @@ func (o Options) Is(notification string) bool {
 	return false
 }
 
+// is or nit notification
 func (o Options) IsNotNotification() bool {
 	return o.Is(constant.IsNotNotification)
 }
 
+// is or not send msg
 func (o Options) IsSendMsg() bool {
 	return o.Is(constant.IsSendMsg)
 }
 
+// is or not a history
 func (o Options) IsHistory() bool {
 	return o.Is(constant.IsHistory)
 }
 
+// is or not persistent
 func (o Options) IsPersistent() bool {
 	return o.Is(constant.IsPersistent)
 }
 
+// is oor not push offline
 func (o Options) IsOfflinePush() bool {
 	return o.Is(constant.IsOfflinePush)
 }
 
+// unread count
 func (o Options) IsUnreadCount() bool {
 	return o.Is(constant.IsUnreadCount)
 }
 
+// is or not conversation update
 func (o Options) IsConversationUpdate() bool {
 	return o.Is(constant.IsConversationUpdate)
 }
 
+// is or not send async
 func (o Options) IsSenderSync() bool {
 	return o.Is(constant.IsSenderSync)
 }
 
+// is or not private
 func (o Options) IsNotPrivate() bool {
 	return o.Is(constant.IsNotPrivate)
 }
 
+// is or not notification push update
 func (o Options) IsSenderConversationUpdate() bool {
 	return o.Is(constant.IsSenderConversationUpdate)
 }
 
+// is or not notification push sender
 func (o Options) IsSenderNotificationPush() bool {
 	return o.Is(constant.IsSenderNotificationPush)
 }
 
+// reaction is or not from cache
 func (o Options) IsReactionFromCache() bool {
 	return o.Is(constant.IsReactionFromCache)
 }

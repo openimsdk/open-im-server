@@ -19,8 +19,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -28,26 +26,32 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/gin-gonic/gin"
 )
 
 type ThirdApi rpcclient.Third
 
+// create a new third api
 func NewThirdApi(discov discoveryregistry.SvcDiscoveryRegistry) ThirdApi {
 	return ThirdApi(*rpcclient.NewThird(discov))
 }
 
+// apply put
 func (o *ThirdApi) ApplyPut(c *gin.Context) {
 	a2r.Call(third.ThirdClient.ApplyPut, o.Client, c)
 }
 
+// het put
 func (o *ThirdApi) GetPut(c *gin.Context) {
 	a2r.Call(third.ThirdClient.GetPut, o.Client, c)
 }
 
+// confirm put
 func (o *ThirdApi) ConfirmPut(c *gin.Context) {
 	a2r.Call(third.ThirdClient.ConfirmPut, o.Client, c)
 }
 
+// get hash code
 func (o *ThirdApi) GetHash(c *gin.Context) {
 	a2r.Call(third.ThirdClient.GetHashInfo, o.Client, c)
 }

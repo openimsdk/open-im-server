@@ -19,7 +19,7 @@ type AwsStorageCredentialReq struct {
 }
 
 type AwsStorageCredentialRespData struct {
-	AccessKeyId     string `json:"accessKeyID"`
+	AccessKeyID     string `json:"accessKeyID"`
 	SecretAccessKey string `json:"secretAccessKey"`
 	SessionToken    string `json:"sessionToken"`
 	RegionID        string `json:"regionId"`

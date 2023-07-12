@@ -16,14 +16,17 @@ package cmd
 
 import "github.com/spf13/cobra"
 
+// define a api command struct
 type ApiCmd struct {
 	*RootCmd
 }
 
+// create a new api command
 func NewApiCmd() *ApiCmd {
 	return &ApiCmd{NewRootCmd("api")}
 }
 
+// add api
 func (a *ApiCmd) AddApi(f func(port int) error) {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return f(a.getPortFlag(cmd))

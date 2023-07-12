@@ -15,7 +15,7 @@
 package apistruct
 
 import (
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 type KickGroupMemberReq struct {
@@ -26,7 +26,7 @@ type KickGroupMemberReq struct {
 }
 type KickGroupMemberResp struct {
 
-	//UserIDResultList []*UserIDResult `json:"data"`
+	// UserIDResultList []*UserIDResult `json:"data"`
 }
 
 type GetGroupMembersInfoReq struct {

@@ -17,18 +17,17 @@ package api
 import (
 	"context"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -60,7 +59,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
 	}
-	//friend routing group
+	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
 	{
 		f := NewFriendApi(discov)
@@ -107,7 +106,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
 		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
-	//certificate
+	// certificate
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
@@ -116,7 +115,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
 	}
-	//Third service
+	// Third service
 	thirdGroup := r.Group("/third", ParseToken)
 	{
 		t := NewThirdApi(discov)
@@ -130,7 +129,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/object", t.GetURL)
 		thirdGroup.GET("/object", t.GetURL)
 	}
-	//Message
+	// Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
 		m := NewMessageApi(discov)
@@ -152,7 +151,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 	}
-	//Conversation
+	// Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
 		c := NewConversationApi(discov)

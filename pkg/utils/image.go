@@ -27,6 +27,7 @@ import (
 	"golang.org/x/image/bmp"
 )
 
+// generate image small
 func GenSmallImage(src, dst string) error {
 	fIn, _ := os.Open(src)
 	defer fIn.Close()

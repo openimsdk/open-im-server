@@ -23,13 +23,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 // copy a by b  b->a
@@ -166,6 +165,7 @@ func DifferenceString(slice1, slice2 []string) []string {
 	return n
 }
 
+// generate operation ID
 func OperationIDGenerator() string {
 	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }
@@ -182,10 +182,12 @@ func String2Pb(s string, pb proto.Message) error {
 	return proto.Unmarshal([]byte(s), pb)
 }
 
+// get hash code
 func GetHashCode(s string) uint32 {
 	return crc32.ChecksumIEEE([]byte(s))
 }
 
+// get notification conversation ID
 func GetNotificationConversationID(msg *sdkws.MsgData) string {
 	switch msg.SessionType {
 	case constant.SingleChatType:
@@ -202,6 +204,7 @@ func GetNotificationConversationID(msg *sdkws.MsgData) string {
 	return ""
 }
 
+// get chat conversation ID by message
 func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
 	switch msg.SessionType {
 	case constant.SingleChatType:
@@ -218,26 +221,31 @@ func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
 	return ""
 }
 
+// get conversation ID for single
 func GenConversationIDForSingle(sendID, recvID string) string {
 	l := []string{sendID, recvID}
 	sort.Strings(l)
 	return "si_" + strings.Join(l, "_")
 }
 
+// get conversation ID unique key for group
 func GenConversationUniqueKeyForGroup(groupID string) string {
 	return groupID
 }
 
+// generate group conversation ID
 func GenGroupConversationID(groupID string) string {
 	return "sg_" + groupID
 }
 
+// generate conversation unique key for single
 func GenConversationUniqueKeyForSingle(sendID, recvID string) string {
 	l := []string{sendID, recvID}
 	sort.Strings(l)
 	return strings.Join(l, "_")
 }
 
+// generate conversation unique key
 func GenConversationUniqueKey(msg *sdkws.MsgData) string {
 	switch msg.SessionType {
 	case constant.SingleChatType, constant.NotificationChatType:
@@ -250,6 +258,7 @@ func GenConversationUniqueKey(msg *sdkws.MsgData) string {
 	return ""
 }
 
+// get conversation ID by mesage model
 func GetConversationIDByMsgModel(msg *unrelation.MsgDataModel) string {
 	options := Options(msg.Options)
 	switch msg.SessionType {
@@ -279,6 +288,7 @@ func GetConversationIDByMsgModel(msg *unrelation.MsgDataModel) string {
 	return ""
 }
 
+// get conversation ID by message
 func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 	options := Options(msg.Options)
 	switch msg.SessionType {
@@ -308,6 +318,7 @@ func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 	return ""
 }
 
+// get conversation ID by session type
 func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	sort.Strings(ids)
 	if len(ids) > 2 || len(ids) < 1 {
@@ -326,14 +337,17 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	return ""
 }
 
+// judege is or not notification
 func IsNotification(conversationID string) bool {
 	return strings.HasPrefix(conversationID, "n_")
 }
 
+// judege is or not notification by message
 func IsNotificationByMsg(msg *sdkws.MsgData) bool {
 	return !Options(msg.Options).IsNotNotification()
 }
 
+// parse conversation ID
 func ParseConversationID(msg *sdkws.MsgData) (isNotification bool, conversationID string) {
 	options := Options(msg.Options)
 	switch msg.SessionType {
@@ -358,6 +372,7 @@ func ParseConversationID(msg *sdkws.MsgData) (isNotification bool, conversationI
 	return false, ""
 }
 
+// get notification conversation ID by conversation ID
 func GetNotificationConversationIDByConversationID(conversationID string) string {
 	l := strings.Split(conversationID, "_")
 	if len(l) > 1 {
@@ -367,6 +382,7 @@ func GetNotificationConversationIDByConversationID(conversationID string) string
 	return ""
 }
 
+// get seq begin to end
 func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
 	if len(seqs) == 0 {
 		return 0, 0
@@ -374,6 +390,7 @@ func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
 	return seqs[0], seqs[len(seqs)-1]
 }
 
+// type MsgBySeq
 type MsgBySeq []*sdkws.MsgData
 
 func (s MsgBySeq) Len() int {

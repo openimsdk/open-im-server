@@ -236,7 +236,7 @@ func Filter[E, T any](es []E, fn func(e E) (T, bool)) []T {
 	return rs
 }
 
-// Slice 批量转换切片类型
+// Slice transfer slice batch
 func Slice[E any, T any](es []E, fn func(e E) T) []T {
 	v := make([]T, len(es))
 	for i := 0; i < len(es); i++ {
@@ -414,7 +414,7 @@ func SortAny[E any](es []E, fn func(a, b E) bool) {
 	})
 }
 
-// If true -> a, false -> b
+// If true -> a, false -> b。
 func If[T any](isa bool, a, b T) T {
 	if isa {
 		return a
@@ -426,7 +426,7 @@ func ToPtr[T any](t T) *T {
 	return &t
 }
 
-// Equal 比较切片是否相对(包括元素顺序)
+// Compare slices to each other (including element order)
 func Equal[E comparable](a []E, b []E) bool {
 	if len(a) != len(b) {
 		return false
@@ -439,7 +439,7 @@ func Equal[E comparable](a []E, b []E) bool {
 	return true
 }
 
-// Single a中存在,b中不存在 或 b中存在,a中不存在
+// Exists in a, does not exist in b or exists in b, does not exist in a
 func Single[E comparable](a, b []E) []E {
 	kn := make(map[E]uint8)
 	for _, e := range Distinct(a) {
@@ -457,7 +457,7 @@ func Single[E comparable](a, b []E) []E {
 	return v
 }
 
-// Order 将ts按es排序
+// sort ts by es
 func Order[E comparable, T any](es []E, ts []T, fn func(t T) E) []T {
 	if len(es) == 0 || len(ts) == 0 {
 		return ts
@@ -485,6 +485,7 @@ func OrderPtr[E comparable, T any](es []E, ts *[]T, fn func(t T) E) []T {
 	return *ts
 }
 
+// join unique
 func UniqueJoin(s ...string) string {
 	data, _ := json.Marshal(s)
 	return string(data)
@@ -507,11 +508,12 @@ func (o *sortSlice[E]) Swap(i, j int) {
 	o.ts[i], o.ts[j] = o.ts[j], o.ts[i]
 }
 
-// Ordered types that can be sorted
+// types that can be sorted
 type Ordered interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
 }
 
+// unwrap
 func Unwrap(err error) error {
 	for err != nil {
 		unwrap, ok := err.(interface {
@@ -525,7 +527,7 @@ func Unwrap(err error) error {
 	return err
 }
 
-// NotNilReplace 当new_不为空时, 将old设置为new_
+// NotNilReplace 当new_不为空时, 将old设置为new_。
 func NotNilReplace[T any](old, new_ *T) {
 	if new_ == nil {
 		return

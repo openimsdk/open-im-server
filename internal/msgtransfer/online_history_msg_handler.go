@@ -21,21 +21,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-
-	"github.com/Shopify/sarama"
-	"github.com/go-redis/redis"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/Shopify/sarama"
+	"github.com/go-redis/redis"
+	"google.golang.org/protobuf/proto"
 )
 
 const ConsumerMsgs = 3
@@ -63,6 +61,7 @@ type ContextMsg struct {
 	ctx     context.Context
 }
 
+// define a OnlineHistoryRedisConsumerHandler struct
 type OnlineHistoryRedisConsumerHandler struct {
 	historyConsumerGroup *kafka.MConsumerGroup
 	chArrays             [ChannelNum]chan Cmd2Value
@@ -120,7 +119,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 					"uniqueKey",
 					msgChannelValue.uniqueKey,
 				)
-				storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(
+				storageMsgList, notStorageMsgList, storageNotificationList,
+					notStorageNotificationList, modifyMsgList := och.getPushStorageMsgList(
 					ctxMsgList,
 				)
 				log.ZDebug(
@@ -147,7 +147,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 					storageNotificationList,
 					notStorageNotificationList,
 				)
-				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey, conversationIDNotification, modifyMsgList); err != nil {
+				if err := och.msgDatabase.MsgToModifyMQ(ctx, msgChannelValue.uniqueKey,
+					conversationIDNotification, modifyMsgList); err != nil {
 					log.ZError(
 						ctx,
 						"msg to modify mq error",
@@ -302,6 +303,7 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 	}
 }
 
+// MessagesDistributionHandle
 func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 	for {
 		aggregationMsgs := make(map[string][]*ContextMsg, ChannelNum)
@@ -378,6 +380,8 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 		}
 	}
 }
+
+// withAggregationCtx
 func withAggregationCtx(ctx context.Context, values []*ContextMsg) context.Context {
 	var allMessageOperationID string
 	for i, v := range values {
@@ -393,11 +397,15 @@ func withAggregationCtx(ctx context.Context, values []*ContextMsg) context.Conte
 	return mcontext.SetOperationID(ctx, allMessageOperationID)
 }
 
+// setup
 func (och *OnlineHistoryRedisConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error { return nil }
+
+// clean up
 func (och *OnlineHistoryRedisConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 	return nil
 }
 
+// consume claim
 func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 	sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim,

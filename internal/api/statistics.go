@@ -15,20 +15,22 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/gin-gonic/gin"
 )
 
+// define a statistic api
 type StatisticsApi rpcclient.User
 
+// create a new statistics api
 func NewStatisticsApi(discov discoveryregistry.SvcDiscoveryRegistry) StatisticsApi {
 	return StatisticsApi(*rpcclient.NewUser(discov))
 }
 
+// user registry
 func (s *StatisticsApi) UserRegister(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegisterCount, s.Client, c)
 }

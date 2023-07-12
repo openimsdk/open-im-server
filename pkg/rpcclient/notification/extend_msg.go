@@ -18,8 +18,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -28,16 +26,20 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/protobuf/proto"
 )
 
+// define a extend message notificaion sender
 type ExtendMsgNotificationSender struct {
 	*rpcclient.MessageRpcClient
 }
 
+// new extend message notification sender
 func NewExtendMsgNotificationSender(client discoveryregistry.SvcDiscoveryRegistry) *ExtendMsgNotificationSender {
 	return &ExtendMsgNotificationSender{}
 }
 
+// extend message updated notification
 func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(
 	ctx context.Context,
 	sendID string,
@@ -78,6 +80,7 @@ func (e *ExtendMsgNotificationSender) ExtendMessageUpdatedNotification(
 	)
 }
 
+// extend message deleted notification
 func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(
 	ctx context.Context,
 	sendID string,
@@ -116,6 +119,7 @@ func (e *ExtendMsgNotificationSender) ExtendMessageDeleteNotification(
 	)
 }
 
+// message reaction sender
 func (e *ExtendMsgNotificationSender) messageReactionSender(
 	ctx context.Context,
 	sendID string,

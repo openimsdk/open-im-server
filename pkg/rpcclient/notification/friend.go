@@ -17,17 +17,17 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
+// define a friend notification sender struct
 type FriendNotificationSender struct {
 	*rpcclient.NotificationSender
 	// 找不到报错
@@ -36,14 +36,17 @@ type FriendNotificationSender struct {
 	db controller.FriendDatabase
 }
 
+// friend notification send option
 type friendNotificationSenderOptions func(*FriendNotificationSender)
 
+// friend db
 func WithFriendDB(db controller.FriendDatabase) friendNotificationSenderOptions {
 	return func(s *FriendNotificationSender) {
 		s.db = db
 	}
 }
 
+// db func
 func WithDBFunc(
 	fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error),
 ) friendNotificationSenderOptions {
@@ -62,6 +65,7 @@ func WithDBFunc(
 	}
 }
 
+// rpc
 func WithRpcFunc(
 	fn func(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error),
 ) friendNotificationSenderOptions {
@@ -80,6 +84,7 @@ func WithRpcFunc(
 	}
 }
 
+// a new friend notification send
 func NewFriendNotificationSender(
 	msgRpcClient *rpcclient.MessageRpcClient,
 	opts ...friendNotificationSenderOptions,
@@ -93,6 +98,7 @@ func NewFriendNotificationSender(
 	return f
 }
 
+// get user info group
 func (f *FriendNotificationSender) getUsersInfoMap(
 	ctx context.Context,
 	userIDs []string,
@@ -108,6 +114,7 @@ func (f *FriendNotificationSender) getUsersInfoMap(
 	return result, nil
 }
 
+// get from to user nickname
 func (f *FriendNotificationSender) getFromToUserNickname(
 	ctx context.Context,
 	fromUserID, toUserID string,
@@ -119,11 +126,13 @@ func (f *FriendNotificationSender) getFromToUserNickname(
 	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
 }
 
+// user infi uodated notification
 func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, changedUserID string) error {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
 	return f.Notification(ctx, mcontext.GetOpUserID(ctx), changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
+// friend application added notification
 func (f *FriendNotificationSender) FriendApplicationAddNotification(
 	ctx context.Context,
 	req *pbFriend.ApplyToAddFriendReq,
@@ -135,6 +144,7 @@ func (f *FriendNotificationSender) FriendApplicationAddNotification(
 	return f.Notification(ctx, req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &tips)
 }
 
+// friend application agreed notification
 func (c *FriendNotificationSender) FriendApplicationAgreedNotification(
 	ctx context.Context,
 	req *pbFriend.RespondFriendApplyReq,
@@ -146,6 +156,7 @@ func (c *FriendNotificationSender) FriendApplicationAgreedNotification(
 	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 }
 
+// friend application refused notification
 func (c *FriendNotificationSender) FriendApplicationRefusedNotification(
 	ctx context.Context,
 	req *pbFriend.RespondFriendApplyReq,
@@ -157,6 +168,7 @@ func (c *FriendNotificationSender) FriendApplicationRefusedNotification(
 	return c.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &tips)
 }
 
+// friend added notification
 func (c *FriendNotificationSender) FriendAddedNotification(
 	ctx context.Context,
 	operationID, opUserID, fromUserID, toUserID string,
@@ -181,6 +193,7 @@ func (c *FriendNotificationSender) FriendAddedNotification(
 	return c.Notification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &tips)
 }
 
+// friend deleted notification
 func (c *FriendNotificationSender) FriendDeletedNotification(ctx context.Context, req *pbFriend.DeleteFriendReq) error {
 	tips := sdkws.FriendDeletedTips{FromToUserID: &sdkws.FromToUserID{
 		FromUserID: req.OwnerUserID,
@@ -189,6 +202,7 @@ func (c *FriendNotificationSender) FriendDeletedNotification(ctx context.Context
 	return c.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.FriendDeletedNotification, &tips)
 }
 
+// friend remark set notification
 func (c *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Context, fromUserID, toUserID string) error {
 	tips := sdkws.FriendInfoChangedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = fromUserID
@@ -196,6 +210,7 @@ func (c *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Conte
 	return c.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
 
+// black added notification
 func (c *FriendNotificationSender) BlackAddedNotification(ctx context.Context, req *pbFriend.AddBlackReq) error {
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID
@@ -203,6 +218,7 @@ func (c *FriendNotificationSender) BlackAddedNotification(ctx context.Context, r
 	return c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackAddedNotification, &tips)
 }
 
+// black delter notification
 func (c *FriendNotificationSender) BlackDeletedNotification(ctx context.Context, req *pbFriend.RemoveBlackReq) {
 	blackDeletedTips := sdkws.BlackDeletedTips{FromToUserID: &sdkws.FromToUserID{
 		FromUserID: req.OwnerUserID,
@@ -211,6 +227,7 @@ func (c *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 	c.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
+// friend info updated notification
 func (c *FriendNotificationSender) FriendInfoUpdatedNotification(
 	ctx context.Context,
 	changedUserID string,

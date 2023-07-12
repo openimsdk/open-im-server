@@ -16,14 +16,17 @@ package cmd
 
 import "github.com/spf13/cobra"
 
+// define a cron task command
 type CronTaskCmd struct {
 	*RootCmd
 }
 
+// create a new cron task command
 func NewCronTaskCmd() *CronTaskCmd {
 	return &CronTaskCmd{NewRootCmd("cronTask")}
 }
 
+// add rune
 func (c *CronTaskCmd) addRunE(f func() error) {
 	c.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return f()

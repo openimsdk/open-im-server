@@ -55,6 +55,7 @@ func MkDir(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }
 
+// get new file name and content type
 func GetNewFileNameAndContentType(fileName string, fileType int) (string, string) {
 	suffix := path.Ext(fileName)
 	newName := fmt.Sprintf("%d-%d%s", time.Now().UnixNano(), rand.Int(), fileName)
@@ -65,6 +66,7 @@ func GetNewFileNameAndContentType(fileName string, fileType int) (string, string
 	return newName, contentType
 }
 
+// get byte size
 func ByteSize(bytes uint64) string {
 	unit := ""
 	value := float64(bytes)

@@ -22,6 +22,7 @@ import (
 	"time"
 )
 
+// const constants
 var (
 	ErrorAbort                 = errors.New("stop retry")
 	ErrorTimeout               = errors.New("retry timeout")
@@ -30,10 +31,19 @@ var (
 	ErrorTimeFormat            = errors.New("time out err")
 )
 
+// define a retry func
 type RetriesFunc func() error
+
+// option func
 type Option func(c *Config)
+
+// define hook func
 type HookFunc func()
+
+// define a retry check func
 type RetriesChecker func(err error) (needRetry bool)
+
+// type a config struct
 type Config struct {
 	MaxRetryTimes int
 	Timeout       time.Duration
@@ -44,6 +54,7 @@ type Config struct {
 	AfterTry      HookFunc
 }
 
+// const constants
 var (
 	DefaultMaxRetryTimes = 3
 	DefaultTimeout       = time.Minute
@@ -53,6 +64,7 @@ var (
 	}
 )
 
+// create a default config
 func newDefaultConfig() *Config {
 	return &Config{
 		MaxRetryTimes: DefaultMaxRetryTimes,
@@ -64,42 +76,49 @@ func newDefaultConfig() *Config {
 	}
 }
 
+// with time out
 func WithTimeout(timeout time.Duration) Option {
 	return func(c *Config) {
 		c.Timeout = timeout
 	}
 }
 
+// with max retry times
 func WithMaxRetryTimes(times int) Option {
 	return func(c *Config) {
 		c.MaxRetryTimes = times
 	}
 }
 
+// with recover panic
 func WithRecoverPanic() Option {
 	return func(c *Config) {
 		c.RecoverPanic = true
 	}
 }
 
+// a before hook
 func WithBeforeHook(hook HookFunc) Option {
 	return func(c *Config) {
 		c.BeforeTry = hook
 	}
 }
 
+// a hook with after
 func WithAfterHook(hook HookFunc) Option {
 	return func(c *Config) {
 		c.AfterTry = hook
 	}
 }
 
+// retry check
 func WithRetryChecker(checker RetriesChecker) Option {
 	return func(c *Config) {
 		c.RetryChecker = checker
 	}
 }
 
+// with backoff strategy
 func WithBackOffStrategy(s BackoffStrategy, duration time.Duration) Option {
 	return func(c *Config) {
 		switch s {
@@ -113,12 +132,14 @@ func WithBackOffStrategy(s BackoffStrategy, duration time.Duration) Option {
 	}
 }
 
+// with custom strategy
 func WithCustomStrategy(s Strategy) Option {
 	return func(c *Config) {
 		c.Strategy = s
 	}
 }
 
+// do
 func Do(ctx context.Context, fn RetriesFunc, opts ...Option) error {
 	if fn == nil {
 		return ErrorEmptyRetryFunc
@@ -146,7 +167,7 @@ func Do(ctx context.Context, fn RetriesFunc, opts ...Option) error {
 			if e := recover(); e == nil {
 				return
 			} else {
-				panicInfoChan <- fmt.Sprintf("retry function panic has occured, err=%v, stack:%s", e, string(debug.Stack()))
+				panicInfoChan <- fmt.Sprintf("retry function panic has occurred, err=%v, stack:%s", e, string(debug.Stack()))
 			}
 		}()
 		for i := 0; i < config.MaxRetryTimes; i++ {

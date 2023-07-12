@@ -18,8 +18,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/Shopify/sarama"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -30,10 +28,11 @@ import (
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-
+	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 )
 
+// define a ModifyMsgConsumerHandler struct
 type ModifyMsgConsumerHandler struct {
 	modifyMsgConsumerGroup *kfk.MConsumerGroup
 
@@ -41,6 +40,7 @@ type ModifyMsgConsumerHandler struct {
 	extendSetMsgModel unRelationTb.ExtendMsgSetModel
 }
 
+// create a new ModifyMsgConsumerHandler
 func NewModifyMsgConsumerHandler(database controller.ExtendMsgDatabase) *ModifyMsgConsumerHandler {
 	return &ModifyMsgConsumerHandler{
 		modifyMsgConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
@@ -50,8 +50,13 @@ func NewModifyMsgConsumerHandler(database controller.ExtendMsgDatabase) *ModifyM
 	}
 }
 
-func (ModifyMsgConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+// setup
+func (ModifyMsgConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error { return nil }
+
+// clean up
 func (ModifyMsgConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+
+// consume claim
 func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
@@ -78,6 +83,7 @@ func (mmc *ModifyMsgConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	return nil
 }
 
+// modify message
 func (mmc *ModifyMsgConsumerHandler) ModifyMsg(
 	ctx context.Context,
 	cMsg *sarama.ConsumerMessage,

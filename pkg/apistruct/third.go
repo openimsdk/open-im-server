@@ -16,10 +16,12 @@ package apistruct
 
 import "mime/multipart"
 
+// define a MinioStorageCredentialReq
 type MinioStorageCredentialReq struct {
 	OperationID string `json:"operationID"`
 }
 
+// define a MiniostorageCredentialResp
 type MiniostorageCredentialResp struct {
 	SecretAccessKey  string `json:"secretAccessKey"`
 	AccessKeyID      string `json:"accessKeyID"`
@@ -30,11 +32,13 @@ type MiniostorageCredentialResp struct {
 	IsDistributedMod bool   `json:"isDistributedMod"`
 }
 
+// define a MinioUploadFileReq
 type MinioUploadFileReq struct {
 	OperationID string `form:"operationID" binding:"required"`
 	FileType    int    `form:"fileType"    binding:"required"`
 }
 
+// define a MinioUploadFile
 type MinioUploadFile struct {
 	URL             string `json:"URL"`
 	NewName         string `json:"newName"`
@@ -42,12 +46,14 @@ type MinioUploadFile struct {
 	SnapshotNewName string `json:"snapshotName,omitempty"`
 }
 
+// define a MinioUploadFileResp
 type MinioUploadFileResp struct {
 	Data struct {
 		MinioUploadFile
 	} `json:"data"`
 }
 
+// define a UploadUpdateAppReq
 type UploadUpdateAppReq struct {
 	OperationID string                `form:"operationID" binding:"required"`
 	Type        int                   `form:"type"        binding:"required"`
@@ -58,9 +64,11 @@ type UploadUpdateAppReq struct {
 	UpdateLog   string                `form:"updateLog"   binding:"required"`
 }
 
+// define a UploadUpdateAppResp
 type UploadUpdateAppResp struct {
 }
 
+// define a GetDownloadURLReq
 type GetDownloadURLReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	Type        int    `json:"type"        binding:"required"`
@@ -119,13 +127,17 @@ type FcmUpdateTokenReq struct {
 	FcmToken    string `json:"fcmToken"    binding:"required"`
 }
 
+// define a fcm update token resep struct
 type FcmUpdateTokenResp struct {
 }
+
+// define a set appbadge request struct
 type SetAppBadgeReq struct {
 	OperationID    string `json:"operationID"    binding:"required"`
 	FromUserID     string `json:"fromUserID"     binding:"required"`
 	AppUnreadCount int32  `json:"appUnreadCount"`
 }
 
+// null struct
 type SetAppBadgeResp struct {
 }

@@ -16,35 +16,41 @@ package cmd
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/internal/msggateway"
-	//"github.com/OpenIMSDK/Open-IM-Server/internal/msggateway"
-	"github.com/spf13/cobra"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+
+	// "github.com/OpenIMSDK/Open-IM-Server/internal/msggateway"
+	"github.com/spf13/cobra"
 )
 
+// define a message gateway command
 type MsgGatewayCmd struct {
 	*RootCmd
 }
 
+// create a new MsgGateway command
 func NewMsgGatewayCmd() MsgGatewayCmd {
 	return MsgGatewayCmd{NewRootCmd("msgGateway")}
 }
 
+// add ws port flag
 func (m *MsgGatewayCmd) AddWsPortFlag() {
 	m.Command.Flags().IntP(constant.FlagWsPort, "w", 0, "ws server listen port")
 }
 
+// get ws port flag
 func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 	port, _ := cmd.Flags().GetInt(constant.FlagWsPort)
 	return port
 }
 
+// add rune
 func (m *MsgGatewayCmd) addRunE() {
 	m.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return msggateway.RunWsAndServer(m.getPortFlag(cmd), m.getWsPortFlag(cmd), m.getPrometheusPortFlag(cmd))
 	}
 }
 
+// exec
 func (m *MsgGatewayCmd) Exec() error {
 	m.addRunE()
 	return m.Execute()

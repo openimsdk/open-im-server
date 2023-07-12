@@ -18,24 +18,28 @@ import (
 	_ "embed"
 )
 
-//go:embed version
+// go:embed Version
 var Version string
 
+// renamed config
 var Config config
 
+// define CallBackConfig struct
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
 	CallbackTimeOut        int   `yaml:"timeout"`
 	CallbackFailedContinue *bool `yaml:"failedContinue"`
 }
 
+// define Notificationconf struct
 type NotificationConf struct {
 	IsSendMsg        bool         `yaml:"isSendMsg"`
-	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 presistent
+	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 persistent
 	UnreadCount      bool         `yaml:"unreadCount"`
 	OfflinePush      POfflinePush `yaml:"offlinePush"`
 }
 
+// define POfflinePush struct
 type POfflinePush struct {
 	Enable bool   `yaml:"enable"`
 	Title  string `yaml:"title"`
@@ -64,7 +68,7 @@ type config struct {
 	} `yaml:"mysql"`
 
 	Mongo struct {
-		Uri         string   `yaml:"uri"`
+		URI         string   `yaml:"URI"`
 		Address     []string `yaml:"address"`
 		Database    string   `yaml:"database"`
 		Username    string   `yaml:"username"`
@@ -97,25 +101,25 @@ type config struct {
 		ConsumerGroupID struct {
 			MsgToRedis  string `yaml:"msgToRedis"`
 			MsgToMongo  string `yaml:"msgToMongo"`
-			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToMySQL  string `yaml:"MsgToMySQL"`
 			MsgToPush   string `yaml:"msgToPush"`
 			MsgToModify string `yaml:"msgToModify"`
 		} `yaml:"consumerGroupID"`
 	} `yaml:"kafka"`
 
-	Rpc struct {
+	RPC struct {
 		RegisterIP string `yaml:"registerIP"`
 		ListenIP   string `yaml:"listenIP"`
-	} `yaml:"rpc"`
+	} `yaml:"RPC"`
 
-	Api struct {
-		OpenImApiPort []int  `yaml:"openImApiPort"`
+	API struct {
+		OpenImAPIPort []int  `yaml:"OpenImAPIPort"`
 		ListenIP      string `yaml:"listenIP"`
-	} `yaml:"api"`
+	} `yaml:"API"`
 
 	Object struct {
 		Enable string `yaml:"enable"`
-		ApiURL string `yaml:"apiURL"`
+		APIURL string `yaml:" APIURL"`
 		Minio  struct {
 			TempBucket       string `yaml:"tempBucket"`
 			DataBucket       string `yaml:"dataBucket"`
@@ -150,12 +154,12 @@ type config struct {
 			Bucket          string `yaml:"bucket"`
 			FinalHost       string `yaml:"finalHost"`
 			RoleArn         string `yaml:"roleArn"`
-			ExternalId      string `yaml:"externalId"`
+			ExternalID      string `yaml:"ExternalID"`
 			RoleSessionName string `yaml:"roleSessionName"`
 		} `yaml:"aws"`
 	} `yaml:"object"`
 
-	RpcPort struct {
+	RPCPort struct {
 		OpenImUserPort           []int `yaml:"openImUserPort"`
 		OpenImFriendPort         []int `yaml:"openImFriendPort"`
 		OpenImMessagePort        []int `yaml:"openImMessagePort"`
@@ -166,9 +170,9 @@ type config struct {
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImRtcPort            []int `yaml:"openImRtcPort"`
 		OpenImThirdPort          []int `yaml:"openImThirdPort"`
-	} `yaml:"rpcPort"`
+	} `yaml:"RPCPort"`
 
-	RpcRegisterName struct {
+	RPCRegisterName struct {
 		OpenImUserName           string `yaml:"openImUserName"`
 		OpenImFriendName         string `yaml:"openImFriendName"`
 		OpenImMsgName            string `yaml:"openImMsgName"`
@@ -178,7 +182,7 @@ type config struct {
 		OpenImAuthName           string `yaml:"openImAuthName"`
 		OpenImConversationName   string `yaml:"openImConversationName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
-	} `yaml:"rpcRegisterName"`
+	} `yaml:"RPCRegisterName"`
 
 	Log struct {
 		StorageLocation     string `yaml:"storageLocation"`
@@ -200,7 +204,7 @@ type config struct {
 	Push struct {
 		Enable string `yaml:"enable"`
 		GeTui  struct {
-			PushUrl      string `yaml:"pushUrl"`
+			PushURL      string `yaml:"PushURL"`
 			AppKey       string `yaml:"appKey"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
@@ -213,7 +217,7 @@ type config struct {
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
-			PushUrl      string `yaml:"pushUrl"`
+			PushURL      string `yaml:"PushURL"`
 			PushIntent   string `yaml:"pushIntent"`
 		} `yaml:"jpns"`
 	}
@@ -318,14 +322,14 @@ type notification struct {
 
 func GetServiceNames() []string {
 	return []string{
-		Config.RpcRegisterName.OpenImUserName,
-		Config.RpcRegisterName.OpenImFriendName,
-		Config.RpcRegisterName.OpenImMsgName,
-		Config.RpcRegisterName.OpenImPushName,
-		Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName,
-		Config.RpcRegisterName.OpenImAuthName,
-		Config.RpcRegisterName.OpenImConversationName,
-		Config.RpcRegisterName.OpenImThirdName,
+		Config.RPCRegisterName.OpenImUserName,
+		Config.RPCRegisterName.OpenImFriendName,
+		Config.RPCRegisterName.OpenImMsgName,
+		Config.RPCRegisterName.OpenImPushName,
+		Config.RPCRegisterName.OpenImMessageGatewayName,
+		Config.RPCRegisterName.OpenImGroupName,
+		Config.RPCRegisterName.OpenImAuthName,
+		Config.RPCRegisterName.OpenImConversationName,
+		Config.RPCRegisterName.OpenImThirdName,
 	}
 }

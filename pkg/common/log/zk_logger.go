@@ -19,12 +19,15 @@ import (
 	"fmt"
 )
 
+// type zookeeper struct
 type ZkLogger struct{}
 
+// cteate a new zookeeper logger
 func NewZkLogger() *ZkLogger {
 	return &ZkLogger{}
 }
 
+// printf
 func (l *ZkLogger) Printf(format string, a ...interface{}) {
 	ZInfo(context.Background(), "zookeeper output", "msg", fmt.Sprintf(format, a...))
 }

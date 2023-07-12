@@ -14,18 +14,22 @@
 
 package apistruct
 
+// define a GetJoinedSuperGroupListReq
 type GetJoinedSuperGroupListReq struct {
 	GetJoinedGroupListReq
 }
 
+// define a GetJoinedGroupListresp
 type GetJoinedSuperGroupListResp struct {
 	GetJoinedGroupListResp
 }
 
+// define a GetSuperGroupsInfoReq
 type GetSuperGroupsInfoReq struct {
 	GetGroupInfoReq
 }
 
+// define a GetSuperGroupsInforesp
 type GetSuperGroupsInfoResp struct {
 	GetGroupInfoResp
 }

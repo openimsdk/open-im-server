@@ -16,6 +16,7 @@ package log
 
 import "context"
 
+// define a logger interface
 type Logger interface {
 	Debug(ctx context.Context, msg string, keysAndValues ...interface{})
 	Info(ctx context.Context, msg string, keysAndValues ...interface{})

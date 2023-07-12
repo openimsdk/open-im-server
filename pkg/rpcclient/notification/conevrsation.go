@@ -22,15 +22,17 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
+// define a conversation notification sender struct
 type ConversationNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
+// create a new conversation notification sender
 func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
 	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient))}
 }
 
-// SetPrivate调用
+// SetPrivate调用.
 func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
 	ctx context.Context,
 	sendID, recvID string,
@@ -44,7 +46,7 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
 	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
-// 会话改变
+// 会话改变.
 func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string) error {
 	tips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
@@ -52,7 +54,7 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }
 
-// 会话未读数同步
+// 会话未读数同步.
 func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 	ctx context.Context,
 	userID, conversationID string,

@@ -152,8 +152,8 @@ func (m *msgServer) clearConversation(
 	if err != nil {
 		return err
 	}
-	var existConversations []*conversation.Conversation
-	var existConversationIDs []string
+	var existConversations = make([]*conversation.Conversation, 0, 100)
+	var existConversationIDs = make([]string, 0, 100)
 	for _, conversation := range conversations {
 		existConversations = append(existConversations, conversation)
 		existConversationIDs = append(existConversationIDs, conversation.ConversationID)

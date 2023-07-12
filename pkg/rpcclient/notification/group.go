@@ -42,12 +42,14 @@ func NewGroupNotificationSender(
 	}
 }
 
+// type a group notification sender struct
 type GroupNotificationSender struct {
 	*rpcclient.NotificationSender
 	getUsersInfo func(ctx context.Context, userIDs []string) ([]CommonUser, error)
 	db           controller.GroupDatabase
 }
 
+// get user
 func (g *GroupNotificationSender) getUser(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := g.getUsersInfo(ctx, []string{userID})
 	if err != nil {
@@ -64,6 +66,7 @@ func (g *GroupNotificationSender) getUser(ctx context.Context, userID string) (*
 	}, nil
 }
 
+// get group info
 func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
 	gm, err := g.db.TakeGroup(ctx, groupID)
 	if err != nil {
@@ -98,6 +101,7 @@ func (g *GroupNotificationSender) getGroupInfo(ctx context.Context, groupID stri
 	}, nil
 }
 
+// get group members
 func (g *GroupNotificationSender) getGroupMembers(
 	ctx context.Context,
 	groupID string,
@@ -141,6 +145,7 @@ func (g *GroupNotificationSender) getGroupMembers(
 	return res, nil
 }
 
+// get group member map
 func (g *GroupNotificationSender) getGroupMemberMap(
 	ctx context.Context,
 	groupID string,
@@ -157,6 +162,7 @@ func (g *GroupNotificationSender) getGroupMemberMap(
 	return m, nil
 }
 
+// get group member
 func (g *GroupNotificationSender) getGroupMember(
 	ctx context.Context,
 	groupID string,
@@ -172,6 +178,7 @@ func (g *GroupNotificationSender) getGroupMember(
 	return members[0], nil
 }
 
+// get group owner and admin user id
 func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Context, groupID string) ([]string, error) {
 	members, err := g.db.FindGroupMember(ctx, []string{groupID}, nil, []int32{constant.GroupOwner, constant.GroupAdmin})
 	if err != nil {
@@ -181,6 +188,7 @@ func (g *GroupNotificationSender) getGroupOwnerAndAdminUserID(ctx context.Contex
 	return utils.Slice(members, fn), nil
 }
 
+// get group db2pb
 func (g *GroupNotificationSender) groupDB2PB(
 	group *relation.GroupModel,
 	ownerUserID string,
@@ -207,6 +215,7 @@ func (g *GroupNotificationSender) groupDB2PB(
 	}
 }
 
+// get group member db2pb
 func (g *GroupNotificationSender) groupMemberDB2PB(
 	member *relation.GroupMemberModel,
 	appMangerLevel int32,
@@ -227,6 +236,7 @@ func (g *GroupNotificationSender) groupMemberDB2PB(
 	}
 }
 
+// get user info map
 func (g *GroupNotificationSender) getUsersInfoMap(
 	ctx context.Context,
 	userIDs []string,
@@ -242,6 +252,7 @@ func (g *GroupNotificationSender) getUsersInfoMap(
 	return result, nil
 }
 
+// fill op user
 func (g *GroupNotificationSender) fillOpUser(
 	ctx context.Context,
 	opUser **sdkws.GroupMemberFullInfo,
@@ -285,6 +296,7 @@ func (g *GroupNotificationSender) fillOpUser(
 	return nil
 }
 
+// group created notification
 func (g *GroupNotificationSender) GroupCreatedNotification(
 	ctx context.Context,
 	tips *sdkws.GroupCreatedTips,
@@ -295,6 +307,7 @@ func (g *GroupNotificationSender) GroupCreatedNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupCreatedNotification, tips)
 }
 
+// group info set notification
 func (g *GroupNotificationSender) GroupInfoSetNotification(
 	ctx context.Context,
 	tips *sdkws.GroupInfoSetTips,
@@ -305,6 +318,7 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips)
 }
 
+// group info set name notification
 func (g *GroupNotificationSender) GroupInfoSetNameNotification(
 	ctx context.Context,
 	tips *sdkws.GroupInfoSetNameTips,
@@ -321,6 +335,7 @@ func (g *GroupNotificationSender) GroupInfoSetNameNotification(
 	)
 }
 
+// group info set announcement notification
 func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(
 	ctx context.Context,
 	tips *sdkws.GroupInfoSetAnnouncementTips,
@@ -337,6 +352,7 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(
 	)
 }
 
+// join group application notification
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(
 	ctx context.Context,
 	req *pbGroup.JoinGroupReq,
@@ -364,6 +380,7 @@ func (g *GroupNotificationSender) JoinGroupApplicationNotification(
 	return nil
 }
 
+// member quit notification
 func (g *GroupNotificationSender) MemberQuitNotification(
 	ctx context.Context,
 	member *sdkws.GroupMemberFullInfo,
@@ -382,6 +399,7 @@ func (g *GroupNotificationSender) MemberQuitNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), member.GroupID, constant.MemberQuitNotification, tips)
 }
 
+// group application accepted notification
 func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(
 	ctx context.Context,
 	req *pbGroup.GroupApplicationResponseReq,
@@ -419,6 +437,7 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(
 	return nil
 }
 
+// group application rejected notification
 func (g *GroupNotificationSender) GroupApplicationRejectedNotification(
 	ctx context.Context,
 	req *pbGroup.GroupApplicationResponseReq,
@@ -450,6 +469,7 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(
 	return nil
 }
 
+// Group Owner Transferred Notification
 func (g *GroupNotificationSender) GroupOwnerTransferredNotification(
 	ctx context.Context,
 	req *pbGroup.TransferGroupOwnerReq,
@@ -480,6 +500,7 @@ func (g *GroupNotificationSender) GroupOwnerTransferredNotification(
 	)
 }
 
+// member kick out notification
 func (g *GroupNotificationSender) MemberKickedNotification(
 	ctx context.Context,
 	tips *sdkws.MemberKickedTips,
@@ -490,6 +511,7 @@ func (g *GroupNotificationSender) MemberKickedNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.MemberKickedNotification, tips)
 }
 
+// member invited notification
 func (g *GroupNotificationSender) MemberInvitedNotification(
 	ctx context.Context,
 	groupID, reason string,
@@ -513,6 +535,7 @@ func (g *GroupNotificationSender) MemberInvitedNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberInvitedNotification, tips)
 }
 
+// member enter notification
 func (g *GroupNotificationSender) MemberEnterNotification(
 	ctx context.Context,
 	req *pbGroup.GroupApplicationResponseReq,
@@ -529,6 +552,7 @@ func (g *GroupNotificationSender) MemberEnterNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
+// group dismissed notification
 func (g *GroupNotificationSender) GroupDismissedNotification(
 	ctx context.Context,
 	tips *sdkws.GroupDismissedTips,
@@ -539,6 +563,7 @@ func (g *GroupNotificationSender) GroupDismissedNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupDismissedNotification, tips)
 }
 
+// group member muted notification
 func (g *GroupNotificationSender) GroupMemberMutedNotification(
 	ctx context.Context,
 	groupID, groupMemberUserID string,
@@ -560,6 +585,7 @@ func (g *GroupNotificationSender) GroupMemberMutedNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberMutedNotification, tips)
 }
 
+// group member cancel nuted notification
 func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(
 	ctx context.Context,
 	groupID, groupMemberUserID string,
@@ -589,6 +615,7 @@ func (g *GroupNotificationSender) GroupMemberCancelMutedNotification(
 	)
 }
 
+// group muted notification
 func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, groupID string) (err error) {
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
@@ -608,6 +635,7 @@ func (g *GroupNotificationSender) GroupMutedNotification(ctx context.Context, gr
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMutedNotification, tips)
 }
 
+// group cancel notification
 func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Context, groupID string) (err error) {
 	group, err := g.getGroupInfo(ctx, groupID)
 	if err != nil {
@@ -621,12 +649,13 @@ func (g *GroupNotificationSender) GroupCancelMutedNotification(ctx context.Conte
 	if len(users) > 0 {
 		tips.OpUser = users[0]
 	}
-	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
-		return err
+	if err2 := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
+		return err2
 	}
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupCancelMutedNotification, tips)
 }
 
+// group member info set notification
 func (g *GroupNotificationSender) GroupMemberInfoSetNotification(
 	ctx context.Context,
 	groupID, groupMemberUserID string,
@@ -650,6 +679,7 @@ func (g *GroupNotificationSender) GroupMemberInfoSetNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.GroupMemberInfoSetNotification, tips)
 }
 
+// group member set to admin notification
 func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(
 	ctx context.Context,
 	groupID, groupMemberUserID string,
@@ -679,6 +709,7 @@ func (g *GroupNotificationSender) GroupMemberSetToAdminNotification(
 	)
 }
 
+// group member set to ordinary user notification
 func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(
 	ctx context.Context,
 	groupID, groupMemberUserID string,
@@ -708,6 +739,7 @@ func (g *GroupNotificationSender) GroupMemberSetToOrdinaryUserNotification(
 	)
 }
 
+// member enter directly notification
 func (g *GroupNotificationSender) MemberEnterDirectlyNotification(
 	ctx context.Context,
 	groupID string,
@@ -731,6 +763,7 @@ func (g *GroupNotificationSender) MemberEnterDirectlyNotification(
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), group.GroupID, constant.MemberEnterNotification, tips)
 }
 
+// super group notification
 func (g *GroupNotificationSender) SuperGroupNotification(ctx context.Context, sendID, recvID string) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {

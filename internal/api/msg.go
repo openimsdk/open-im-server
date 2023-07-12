@@ -15,11 +15,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
-	"github.com/mitchellh/mapstructure"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
@@ -31,17 +26,24 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/mitchellh/mapstructure"
+	"google.golang.org/protobuf/proto"
 )
 
+// type a message api struct
 type MessageApi struct {
 	rpcclient.Message
 	validate *validator.Validate
 }
 
+// newMessageApi returns a new MessageApi.
 func NewMessageApi(discov discoveryregistry.SvcDiscoveryRegistry) MessageApi {
 	return MessageApi{Message: *rpcclient.NewMessage(discov), validate: validator.New()}
 }
 
+// set options.
 func (MessageApi) SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
@@ -49,6 +51,7 @@ func (MessageApi) SetOptions(options map[string]bool, value bool) {
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
+// create a new user send message request.
 func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.ManagementSendMsgReq) *msg.SendMsgReq {
 	var newContent string
 	var err error
@@ -114,70 +117,87 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.Manageme
 	return &pbData
 }
 
+// get max seq.
 func (m *MessageApi) GetSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMaxSeq, m.Client, c)
 }
 
+// pull message by seqs.
 func (m *MessageApi) PullMsgBySeqs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.PullMessageBySeqs, m.Client, c)
 }
 
+// revoke message.
 func (m *MessageApi) RevokeMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.RevokeMsg, m.Client, c)
 }
 
+// mark msgs as read.
 func (m *MessageApi) MarkMsgsAsRead(c *gin.Context) {
 	a2r.Call(msg.MsgClient.MarkMsgsAsRead, m.Client, c)
 }
 
+// mark conversations as read.
 func (m *MessageApi) MarkConversationAsRead(c *gin.Context) {
 	a2r.Call(msg.MsgClient.MarkConversationAsRead, m.Client, c)
 }
 
+// get conversations which has read and max seq.
 func (m *MessageApi) GetConversationsHasReadAndMaxSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetConversationsHasReadAndMaxSeq, m.Client, c)
 }
 
+// set conversations which has read and max seq
 func (m *MessageApi) SetConversationHasReadSeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetConversationHasReadSeq, m.Client, c)
 }
 
+// clear conversation message
 func (m *MessageApi) ClearConversationsMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.ClearConversationsMsg, m.Client, c)
 }
 
+// clear all message about user
 func (m *MessageApi) UserClearAllMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.UserClearAllMsg, m.Client, c)
 }
 
+// delete message
 func (m *MessageApi) DeleteMsgs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgs, m.Client, c)
 }
 
+// delete message form disk by seq
 func (m *MessageApi) DeleteMsgPhysicalBySeq(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysicalBySeq, m.Client, c)
 }
 
+// delete msg from disk
 func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
+// set message reaction extension
 func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
 }
 
+// get message list reaction extension
 func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
 }
 
+// add message reaction extension
 func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
 }
 
+// delete message reaction extension
 func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
 }
 
+// send message
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -185,7 +205,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		return
 	}
 	// todo
-	//if !tokenverify.IsAppManagerUid(c) {
+	// if !tokenverify.IsAppManagerUid(c) {
 	//	apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 	//	return
 	//}
@@ -242,14 +262,17 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	apiresp.GinSuccess(c, respPb)
 }
 
+// manage send message batch
 func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SendMsg, m.Client, c)
 }
 
+// check message send is or not success
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }
 
+// get user online status
 func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
 }
