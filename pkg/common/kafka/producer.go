@@ -76,6 +76,9 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 		//}
 		time.Sleep(time.Duration(1) * time.Second)
 	}
+	if err != nil {
+		panic(err.Error())
+	}
 	p.producer = producer
 	return &p
 }

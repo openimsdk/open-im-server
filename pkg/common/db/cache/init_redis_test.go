@@ -27,4 +27,10 @@ func TestNewRedis(t *testing.T) {
 		fmt.Println("config load error")
 		return
 	}
+	redis, err := NewRedis()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(redis)
 }
