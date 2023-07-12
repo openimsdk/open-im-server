@@ -129,7 +129,7 @@ func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.Co
 		return nil, err
 	}
 	return &third.CompleteMultipartUploadResp{
-		Url: t.apiAddress(obj.Key),
+		Url: t.apiAddress(obj.Name),
 	}, nil
 }
 

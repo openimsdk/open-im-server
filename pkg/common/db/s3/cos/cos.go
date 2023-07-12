@@ -170,7 +170,8 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	if name != "" && name[0] == '/' {
 		name = name[1:]
 	}
-	info, err := c.client.Object.Head(ctx, c.statObjectURL+name, nil)
+	//info, err := c.client.Object.Head(ctx, c.statObjectURL+name, nil)
+	info, err := c.client.Object.Head(ctx, name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +202,7 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 }
 
 func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyObjectInfo, error) {
-	result, _, err := c.client.Object.Copy(ctx, dst, c.copyURL+src, &cos.ObjectCopyOptions{})
+	result, _, err := c.client.Object.Copy(ctx, dst, src, &cos.ObjectCopyOptions{})
 	if err != nil {
 		return nil, err
 	}
