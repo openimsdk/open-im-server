@@ -45,7 +45,7 @@ jobs:
 
     strategy:
       matrix:
-        go_version: ["1.18","1.19","1.20"]
+        go_version: ["1.17","1.18","1.19","1.20"]
         os: [ubuntu-latest]
 
     steps:
@@ -65,6 +65,7 @@ jobs:
       - name: Run go format
         run: |
           make format
+          echo "Run go format successfully"
 
     #   - name: Generate all necessary files, such as error code files
     #     run: |
@@ -81,7 +82,8 @@ jobs:
 
       - name: Build source code for host platform
         run: |
-          make build # skip build for now
+          make multiarch
+          echo "Build source code for host platform successfully"
 
     #   - name: Collect Test Coverage File
     #     uses: actions/upload-artifact@v1.0.0
