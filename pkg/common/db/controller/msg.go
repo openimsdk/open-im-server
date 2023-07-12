@@ -136,6 +136,7 @@ type commonMsgDatabase struct {
 
 func (db *commonMsgDatabase) GetChatLog(ctx context.Context, req *pbMsg.GetChatLogsReq, pageNumber int32, showNumber int32, int32s []int32) (int64, []relation.ChatLogModel, error) {
 	chatLog := &relation.ChatLogModel{
+		SessionType: req.SessionType,
 		ContentType: req.ContentType,
 		RecvID:      req.RecvID,
 		SendID:      req.SendID,

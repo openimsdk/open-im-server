@@ -346,6 +346,7 @@ message GetChatLogsReq{
   int32 contentType = 3;
   string sendTime=4;
   sdkws.RequestPagination pagination = 6;
+  int32 sessionType = 7;
 }
 
 message GetChatLogsResp{
