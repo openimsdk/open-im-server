@@ -232,7 +232,7 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	reqParams := make(url.Values)
+	//reqParams := make(url.Values)
 	//if opt != nil {
 	//	if opt.ContentType != "" {
 	//		reqParams.Set("Content-Type", opt.ContentType)
@@ -246,7 +246,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, reqParams)
+	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, nil)
 	if err != nil {
 		return "", err
 	}

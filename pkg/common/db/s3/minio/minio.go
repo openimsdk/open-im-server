@@ -228,7 +228,7 @@ func (m *Minio) ListUploadedParts(ctx context.Context, uploadID string, name str
 }
 
 func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	reqParams := make(url.Values)
+	//reqParams := make(url.Values)
 	//if opt != nil {
 	//	if opt.ContentType != "" {
 	//		reqParams.Set("Content-Type", opt.ContentType)
@@ -242,7 +242,7 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	u, err := m.core.Client.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
+	u, err := m.core.Client.PresignedGetObject(ctx, m.bucket, name, expire, nil)
 	if err != nil {
 		return "", err
 	}

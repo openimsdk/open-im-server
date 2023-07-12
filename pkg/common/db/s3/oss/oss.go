@@ -241,7 +241,7 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	var opts []oss.Option
+	//var opts []oss.Option
 	//if opt != nil {
 	//	if opt.ContentType != "" {
 	//		opts = append(opts, oss.ContentType(opt.ContentType))
@@ -255,5 +255,5 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
+	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second))
 }
