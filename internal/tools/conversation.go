@@ -17,7 +17,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 		log.ZError(ctx, "get conversation id need destruct failed", err)
 		return
 	}
-	log.ZDebug(context.Background(), "nums conversations need destruct", len(conversations))
+	log.ZDebug(context.Background(), "nums conversations need destruct", "nums", len(conversations))
 	for _, conversation := range conversations {
 		log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversation.ConversationID, "ownerUserID", conversation.OwnerUserID, "msgDestructTime", conversation.MsgDestructTime, "lastMsgDestructTime", conversation.LatestMsgDestructTime)
 		seqs, err := c.msgDatabase.UserMsgsDestruct(ctx, conversation.OwnerUserID, conversation.ConversationID, conversation.MsgDestructTime, conversation.LatestMsgDestructTime)
