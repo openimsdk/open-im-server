@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
@@ -121,6 +122,11 @@ type GroupDatabase interface {
 	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	CreateSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+
+	// 获取群总数
+	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
+	// 获取范围内群增量
+	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }
 
 func NewGroupDatabase(
@@ -561,4 +567,12 @@ func (g *groupDatabase) CreateSuperGroupMember(ctx context.Context, groupID stri
 		return err
 	}
 	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
+}
+
+func (g *groupDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
+	return g.groupDB.CountTotal(ctx, before)
+}
+
+func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+	return g.groupDB.CountRangeEverydayTotal(ctx, start, end)
 }

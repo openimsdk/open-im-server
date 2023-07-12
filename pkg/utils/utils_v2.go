@@ -543,3 +543,15 @@ func Batch[T any, V any](fn func(T) V, ts []T) []V {
 	}
 	return res
 }
+
+func InitSlice[T any](val *[]T) {
+	if val != nil && *val == nil {
+		*val = []T{}
+	}
+}
+
+func InitMap[K comparable, V any](val *map[K]V) {
+	if val != nil && *val == nil {
+		*val = map[K]V{}
+	}
+}

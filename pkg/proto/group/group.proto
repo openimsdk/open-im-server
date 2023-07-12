@@ -332,6 +332,17 @@ message GetGroupMemberCacheResp {
   sdkws.GroupMemberFullInfo member = 1;
 }
 
+message GroupCreateCountReq {
+  int64 start = 1;
+  int64 end = 2;
+}
+
+message GroupCreateCountResp {
+  int64 total = 1;
+  int64 before = 2;
+  map<string, int64> count = 3;
+}
+
 service group{
   //创建群
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -394,6 +405,8 @@ service group{
 
   rpc GetGroupInfoCache(GetGroupInfoCacheReq) returns (GetGroupInfoCacheResp);
   rpc GetGroupMemberCache(GetGroupMemberCacheReq) returns (GetGroupMemberCacheResp);
+
+  rpc GroupCreateCount(GroupCreateCountReq) returns (GroupCreateCountResp);
 }
 
 
