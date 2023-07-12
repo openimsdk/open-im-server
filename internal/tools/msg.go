@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -17,9 +16,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry/zookeeper"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -31,8 +32,6 @@ type MsgTool struct {
 	groupDatabase         controller.GroupDatabase
 	msgNotificationSender *notification.MsgNotificationSender
 }
-
-var errSeq = errors.New("cache max seq and mongo max seq is diff > 10")
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
 	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase, msgNotificationSender *notification.MsgNotificationSender) *MsgTool {
@@ -103,12 +102,12 @@ func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []s
 }
 
 func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID string, maxSeqCache int64) error {
-	maxSeqMongo, _, err := c.msgDatabase.GetMongoMaxAndMinSeq(ctx, conversationID)
+	minSeqMongo, maxSeqMongo, err := c.msgDatabase.GetMongoMaxAndMinSeq(ctx, conversationID)
 	if err != nil {
 		return err
 	}
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		return errSeq
+		log.ZError(ctx, "cache max seq and mongo max seq is diff > 10", nil, "maxSeqMongo", maxSeqMongo, "minSeqMongo", minSeqMongo, "maxSeqCache", maxSeqCache, "conversationID", conversationID)
 	}
 	return nil
 }
@@ -116,6 +115,9 @@ func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID strin
 func (c *MsgTool) checkMaxSeq(ctx context.Context, conversationID string) error {
 	maxSeq, err := c.msgDatabase.GetMaxSeq(ctx, conversationID)
 	if err != nil {
+		if errs.Unwrap(err) == redis.Nil {
+			return nil
+		}
 		return err
 	}
 	if err := c.checkMaxSeqWithMongo(ctx, conversationID, maxSeq); err != nil {
