@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package relation
 
 import (
@@ -41,11 +55,23 @@ type FriendModelInterface interface {
 	// 获取 owner指定的好友列表 如果有friendUserIDs不存在，也不返回错误
 	FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string) (friends []*FriendModel, err error)
 	// 获取哪些人添加了friendUserID 如果有ownerUserIDs不存在，也不返回错误
-	FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string) (friends []*FriendModel, err error)
+	FindReversalFriends(
+		ctx context.Context,
+		friendUserID string,
+		ownerUserIDs []string,
+	) (friends []*FriendModel, err error)
 	// 获取ownerUserID好友列表 支持翻页
-	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindOwnerFriends(
+		ctx context.Context,
+		ownerUserID string,
+		pageNumber, showNumber int32,
+	) (friends []*FriendModel, total int64, err error)
 	// 获取哪些人添加了friendUserID 支持翻页
-	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*FriendModel, total int64, err error)
+	FindInWhoseFriends(
+		ctx context.Context,
+		friendUserID string,
+		pageNumber, showNumber int32,
+	) (friends []*FriendModel, total int64, err error)
 	// 获取好友UserID列表
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
 	NewTx(tx any) FriendModelInterface

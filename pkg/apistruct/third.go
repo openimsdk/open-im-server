@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package apistruct
 
 import "mime/multipart"
@@ -18,7 +32,7 @@ type MiniostorageCredentialResp struct {
 
 type MinioUploadFileReq struct {
 	OperationID string `form:"operationID" binding:"required"`
-	FileType    int    `form:"fileType" binding:"required"`
+	FileType    int    `form:"fileType"    binding:"required"`
 }
 
 type MinioUploadFile struct {
@@ -36,12 +50,12 @@ type MinioUploadFileResp struct {
 
 type UploadUpdateAppReq struct {
 	OperationID string                `form:"operationID" binding:"required"`
-	Type        int                   `form:"type" binding:"required"`
-	Version     string                `form:"version"  binding:"required"`
-	File        *multipart.FileHeader `form:"file" binding:"required"`
+	Type        int                   `form:"type"        binding:"required"`
+	Version     string                `form:"version"     binding:"required"`
+	File        *multipart.FileHeader `form:"file"        binding:"required"`
 	Yaml        *multipart.FileHeader `form:"yaml"`
 	ForceUpdate bool                  `form:"forceUpdate"`
-	UpdateLog   string                `form:"updateLog" binding:"required"`
+	UpdateLog   string                `form:"updateLog"   binding:"required"`
 }
 
 type UploadUpdateAppResp struct {
@@ -49,8 +63,8 @@ type UploadUpdateAppResp struct {
 
 type GetDownloadURLReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	Type        int    `json:"type" binding:"required"`
-	Version     string `json:"version" binding:"required"`
+	Type        int    `json:"type"        binding:"required"`
+	Version     string `json:"version"     binding:"required"`
 }
 
 type GetDownloadURLResp struct {
@@ -101,15 +115,15 @@ type GetRTCInvitationInfoStartAppResp struct {
  */
 type FcmUpdateTokenReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	Platform    int    `json:"platform" binding:"required,min=1,max=2"` //only for ios + android
-	FcmToken    string `json:"fcmToken" binding:"required"`
+	Platform    int    `json:"platform"    binding:"required,min=1,max=2"` //only for ios + android
+	FcmToken    string `json:"fcmToken"    binding:"required"`
 }
 
 type FcmUpdateTokenResp struct {
 }
 type SetAppBadgeReq struct {
-	OperationID    string `json:"operationID" binding:"required"`
-	FromUserID     string `json:"fromUserID" binding:"required"`
+	OperationID    string `json:"operationID"    binding:"required"`
+	FromUserID     string `json:"fromUserID"     binding:"required"`
 	AppUnreadCount int32  `json:"appUnreadCount"`
 }
 

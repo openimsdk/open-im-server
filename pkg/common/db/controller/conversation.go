@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -34,6 +35,7 @@ type ConversationDatabase interface {
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error)
+	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationTb.ConversationModel, error)
 }
 
 func NewConversationDatabase(conversation relationTb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -73,12 +75,14 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
 		var conversations []*relationTb.ConversationModel
+		now := time.Now()
 		for _, v := range NotUserIDs {
 			temp := new(relationTb.ConversationModel)
 			if err := utils.CopyStructFields(temp, conversation); err != nil {
 				return err
 			}
 			temp.OwnerUserID = v
+			temp.CreateTime = now
 			conversations = append(conversations, temp)
 
 		}
@@ -123,26 +127,28 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 		conversationTx := c.conversationDB.NewTx(tx)
 		for _, conversation := range conversations {
 			for _, v := range [][2]string{{conversation.OwnerUserID, conversation.UserID}, {conversation.UserID, conversation.OwnerUserID}} {
-				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{v[0]}, []string{conversation.ConversationID})
+				ownerUserID := v[0]
+				userID := v[1]
+				haveUserIDs, err := conversationTx.FindUserID(ctx, []string{ownerUserID}, []string{conversation.ConversationID})
 				if err != nil {
 					return err
 				}
 				if len(haveUserIDs) > 0 {
-					_, err := conversationTx.UpdateByMap(ctx, []string{v[0]}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
+					_, err := conversationTx.UpdateByMap(ctx, []string{ownerUserID}, conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
 					if err != nil {
 						return err
 					}
-					cache = cache.DelUsersConversation(conversation.ConversationID, v[0])
+					cache = cache.DelUsersConversation(conversation.ConversationID, ownerUserID)
 				} else {
 					newConversation := *conversation
-					newConversation.OwnerUserID = v[0]
-					newConversation.UserID = v[1]
+					newConversation.OwnerUserID = ownerUserID
+					newConversation.UserID = userID
 					newConversation.ConversationID = conversation.ConversationID
 					newConversation.IsPrivateChat = conversation.IsPrivateChat
 					if err := conversationTx.Create(ctx, []*relationTb.ConversationModel{&newConversation}); err != nil {
 						return err
 					}
-					cache = cache.DelConversationIDs(v[0]).DelUserConversationIDsHash(v[0])
+					cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
 				}
 			}
 		}
@@ -150,7 +156,7 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 	}); err != nil {
 		return err
 	}
-	return c.cache.ExecDel(ctx)
+	return cache.ExecDel(ctx)
 }
 
 func (c *conversationDatabase) FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
@@ -269,4 +275,8 @@ func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerU
 
 func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationTb.ConversationModel, error) {
 	return c.conversationDB.GetConversationsByConversationID(ctx, conversationIDs)
+}
+
+func (c *conversationDatabase) GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationTb.ConversationModel, error) {
+	return c.conversationDB.GetConversationIDsNeedDestruct(ctx)
 }

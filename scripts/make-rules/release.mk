@@ -17,14 +17,14 @@
 # Versions are used after merging
 #
 
-## release: release the project
+## release.run: release the project
 .PHONY: release.run
 release.run: release.verify release.ensure-tag
 	@scripts/release.sh
 
 ## release.verify: Check if a tool is installed and install it
 .PHONY: release.verify
-release.verify: tools.verify.git-chglog tools.verify.github-release tools.verify.coscmd
+release.verify: tools.verify.git-chglog tools.verify.github-release tools.verify.coscmd tools.verify.coscli
 
 ## release.tag: release the project
 .PHONY: release.tag

@@ -1,7 +1,23 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package auth
 
 import (
 	"context"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -15,7 +31,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type authServer struct {
@@ -33,7 +48,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbAuth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
-		authDatabase:   controller.NewAuthDatabase(cache.NewMsgCacheModel(rdb), config.Config.Secret, config.Config.TokenPolicy.Expire),
+		authDatabase: controller.NewAuthDatabase(
+			cache.NewMsgCacheModel(rdb),
+			config.Config.Secret,
+			config.Config.TokenPolicy.Expire,
+		),
 	})
 	return nil
 }
@@ -41,7 +60,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	resp := pbAuth.UserTokenResp{}
 	if req.Secret != config.Config.Secret {
-		return nil, errs.ErrIdentity.Wrap("secret invalid")
+		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
 	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
@@ -80,7 +99,10 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 	return nil, errs.ErrTokenNotExist.Wrap()
 }
 
-func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (resp *pbAuth.ParseTokenResp, err error) {
+func (s *authServer) ParseToken(
+	ctx context.Context,
+	req *pbAuth.ParseTokenReq,
+) (resp *pbAuth.ParseTokenResp, err error) {
 	resp = &pbAuth.ParseTokenResp{}
 	claims, err := s.parseToken(ctx, req.Token)
 	if err != nil {
@@ -93,14 +115,13 @@ func (s *authServer) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) 
 }
 
 func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
-	resp := pbAuth.ForceLogoutResp{}
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return &pbAuth.ForceLogoutResp{}, nil
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
@@ -112,8 +133,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
-		s.RegisterCenter.CloseConn(v)
 		return utils.Wrap(err, "")
 	}
-	return errs.ErrInternalServer.Wrap()
+	return nil
 }

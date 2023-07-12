@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msggateway
 
 import (
@@ -13,14 +27,16 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/go-playground/validator/v10"
 )
 
 type LongConnServer interface {
@@ -169,7 +185,14 @@ func (ws *WsServer) registerClient(client *Client) {
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		}
 	}
-	log.ZInfo(client.ctx, "user online", "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
+	log.ZInfo(
+		client.ctx,
+		"user online",
+		"online user Num",
+		ws.onlineUserNum,
+		"online user conn Num",
+		ws.onlineUserConnNum,
+	)
 }
 func getRemoteAdders(client []*Client) string {
 	var ret string
@@ -200,18 +223,47 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 					log.ZWarn(c.ctx, "KickOnlineMessage", err)
 				}
 			}
-			m, err := ws.cache.GetTokensWithoutError(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID)
+			m, err := ws.cache.GetTokensWithoutError(
+				info.newClient.ctx,
+				info.newClient.UserID,
+				info.newClient.PlatformID,
+			)
 			if err != nil && err != redis.Nil {
-				log.ZWarn(info.newClient.ctx, "get token from redis err", err, "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				log.ZWarn(
+					info.newClient.ctx,
+					"get token from redis err",
+					err,
+					"userID",
+					info.newClient.UserID,
+					"platformID",
+					info.newClient.PlatformID,
+				)
 				return
 			}
 			if m == nil {
-				log.ZWarn(info.newClient.ctx, "m is nil", errors.New("m is nil"), "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				log.ZWarn(
+					info.newClient.ctx,
+					"m is nil",
+					errors.New("m is nil"),
+					"userID",
+					info.newClient.UserID,
+					"platformID",
+					info.newClient.PlatformID,
+				)
 				return
 			}
-			log.ZDebug(info.newClient.ctx, "get token from redis", "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID, "tokenMap", m)
+			log.ZDebug(
+				info.newClient.ctx,
+				"get token from redis",
+				"userID",
+				info.newClient.UserID,
+				"platformID",
+				info.newClient.PlatformID,
+				"tokenMap",
+				m,
+			)
 
-			for k, _ := range m {
+			for k := range m {
 				if k != info.newClient.ctx.GetToken() {
 					m[k] = constant.KickedToken
 				}
@@ -219,7 +271,15 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 			log.ZDebug(info.newClient.ctx, "set token map is ", "token map", m, "userID", info.newClient.UserID)
 			err = ws.cache.SetTokenMapByUidPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
 			if err != nil {
-				log.ZWarn(info.newClient.ctx, "SetTokenMapByUidPid err", err, "userID", info.newClient.UserID, "platformID", info.newClient.PlatformID)
+				log.ZWarn(
+					info.newClient.ctx,
+					"SetTokenMapByUidPid err",
+					err,
+					"userID",
+					info.newClient.UserID,
+					"platformID",
+					info.newClient.PlatformID,
+				)
 				return
 			}
 		}
@@ -233,7 +293,16 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
-	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum, "online user conn Num", ws.onlineUserConnNum)
+	log.ZInfo(
+		client.ctx,
+		"user offline",
+		"close reason",
+		client.closedErr,
+		"online user Num",
+		ws.onlineUserNum,
+		"online user conn Num",
+		ws.onlineUserConnNum,
+	)
 }
 
 func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -312,7 +381,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	client := ws.clientPool.Get().(*Client)
-	client.ResetClient(connContext, wsLongConn, connContext.GetBackground(), compression, ws)
+	client.ResetClient(connContext, wsLongConn, connContext.GetBackground(), compression, ws, token)
 	ws.registerChan <- client
 	go client.readMessage()
 }

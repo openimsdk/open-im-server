@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cache
 
 import (
@@ -7,10 +21,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dtm-labs/rockscache"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/dtm-labs/rockscache"
 )
 
 const (
@@ -48,7 +63,14 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 		for {
 			if err := m.rcClient.TagAsDeletedBatch2(ctx, m.keys); err != nil {
 				if retryTimes >= m.maxRetryTimes {
-					err = errs.ErrInternalServer.Wrap(fmt.Sprintf("delete cache error: %v, keys: %v, retry times %d, please check redis server", err, m.keys, retryTimes))
+					err = errs.ErrInternalServer.Wrap(
+						fmt.Sprintf(
+							"delete cache error: %v, keys: %v, retry times %d, please check redis server",
+							err,
+							m.keys,
+							retryTimes,
+						),
+					)
 					log.ZWarn(ctx, "delete cache failed, please handle keys", err, "keys", m.keys)
 					return err
 				}
@@ -84,7 +106,13 @@ func GetDefaultOpt() rockscache.Options {
 	return opts
 }
 
-func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
+func getCache[T any](
+	ctx context.Context,
+	rcClient *rockscache.Client,
+	key string,
+	expire time.Duration,
+	fn func(ctx context.Context) (T, error),
+) (T, error) {
 	var t T
 	var write bool
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
@@ -116,7 +144,14 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	return t, nil
 }
 
-func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) ([]T, error)) ([]T, error) {
+func batchGetCache[T any](
+	ctx context.Context,
+	rcClient *rockscache.Client,
+	keys []string,
+	expire time.Duration,
+	keyIndexFn func(t T, keys []string) (int, error),
+	fn func(ctx context.Context) ([]T, error),
+) ([]T, error) {
 	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 		values := make(map[int]string)
 		tArrays, err := fn(ctx)
@@ -153,7 +188,14 @@ func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys
 	return tArrays, nil
 }
 
-func batchGetCacheMap[T any](ctx context.Context, rcClient *rockscache.Client, keys, originKeys []string, expire time.Duration, keyIndexFn func(s string, keys []string) (int, error), fn func(ctx context.Context) (map[string]T, error)) (map[string]T, error) {
+func batchGetCacheMap[T any](
+	ctx context.Context,
+	rcClient *rockscache.Client,
+	keys, originKeys []string,
+	expire time.Duration,
+	keyIndexFn func(s string, keys []string) (int, error),
+	fn func(ctx context.Context) (map[string]T, error),
+) (map[string]T, error) {
 	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 		tArrays, err := fn(ctx)
 		if err != nil {

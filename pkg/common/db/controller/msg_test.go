@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
@@ -11,10 +25,11 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Test_BatchInsertChat2DB(t *testing.T) {
@@ -193,7 +208,9 @@ func Test_FindBySeq(t *testing.T) {
 	}
 	db := GetDB()
 	ctx := context.Background()
-	fmt.Println(db.msgDocDatabase.(*unrelation.MsgMongoDriver).GetMsgBySeqIndexIn1Doc(ctx, "100", "si_100_101:0", []int64{1}))
+	fmt.Println(
+		db.msgDocDatabase.(*unrelation.MsgMongoDriver).GetMsgBySeqIndexIn1Doc(ctx, "100", "si_100_101:0", []int64{1}),
+	)
 	//res, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, "123456", "test:0", []int64{1, 2, 3})
 	//if err != nil {
 	//	t.Fatal(err)

@@ -1,10 +1,5 @@
 package apistruct
 
-import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-)
-
 type DelMsgReq struct {
 	UserID      string   `json:"userID,omitempty" binding:"required"`
 	SeqList     []uint32 `json:"seqList,omitempty" binding:"required"`
@@ -47,69 +42,6 @@ type SetMsgMinSeqReq struct {
 }
 
 type SetMsgMinSeqResp struct {
-}
-
-type ModifyMessageReactionExtensionsReq struct {
-	OperationID           string                     `json:"operationID" binding:"required"`
-	conversationID        string                     `json:"conversationID"  binding:"required"`
-	SessionType           int32                      `json:"sessionType" binding:"required"`
-	ReactionExtensionList map[string]*sdkws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
-	ClientMsgID           string                     `json:"clientMsgID" binding:"required"`
-	Ex                    *string                    `json:"ex"`
-	AttachedInfo          *string                    `json:"attachedInfo"`
-	IsReact               bool                       `json:"isReact"`
-	IsExternalExtensions  bool                       `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64                      `json:"msgFirstModifyTime"`
-}
-
-type ModifyMessageReactionExtensionsResp struct {
-	Data struct {
-		ResultKeyValue     []*msg.KeyValueResp `json:"result"`
-		MsgFirstModifyTime int64               `json:"msgFirstModifyTime"`
-		IsReact            bool                `json:"isReact"`
-	} `json:"data"`
-}
-
-//type OperateMessageListReactionExtensionsReq struct {
-//	OperationID            string                                                        `json:"operationID" binding:"required"`
-//	conversationID               string                                                        `json:"conversationID"  binding:"required"`
-//	SessionType            string                                                        `json:"sessionType" binding:"required"`
-//	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
-//}
-
-type OperateMessageListReactionExtensionsResp struct {
-	Data struct {
-		SuccessList []*msg.ExtendMsgResp `json:"successList"`
-		FailedList  []*msg.ExtendMsgResp `json:"failedList"`
-	} `json:"data"`
-}
-
-type SetMessageReactionExtensionsCallbackReq ModifyMessageReactionExtensionsReq
-
-type SetMessageReactionExtensionsCallbackResp ModifyMessageReactionExtensionsResp
-
-//type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
-
-type GetMessageListReactionExtensionsResp struct {
-	Data []*msg.SingleMessageExtensionResult `json:"data"`
-}
-
-type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
-
-type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
-
-type DeleteMessageReactionExtensionsReq struct {
-	OperationID           string            `json:"operationID" binding:"required"`
-	conversationID        string            `json:"conversationID" binding:"required"`
-	SessionType           int32             `json:"sessionType" binding:"required"`
-	ClientMsgID           string            `json:"clientMsgID" binding:"required"`
-	IsExternalExtensions  bool              `json:"isExternalExtensions"`
-	MsgFirstModifyTime    int64             `json:"msgFirstModifyTime" binding:"required"`
-	ReactionExtensionList []*sdkws.KeyValue `json:"reactionExtensionList" binding:"required"`
-}
-
-type DeleteMessageReactionExtensionsResp struct {
-	Data []*msg.KeyValueResp
 }
 
 type PictureBaseInfo struct {
@@ -171,7 +103,7 @@ type CustomElem struct {
 	Extension   string `mapstructure:"extension"`
 }
 type TextElem struct {
-	Text string `mapstructure:"text" validate:"required"`
+	Content string `mapstructure:"content" validate:"required"`
 }
 
 type RevokeElem struct {

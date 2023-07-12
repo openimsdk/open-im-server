@@ -30,17 +30,17 @@ output/
 _output/
 
 ### OpenIM deploy ###
-deploy/open_im_demo
-deploy/open_im_api
-deploy/open_im_msg_gateway
-deploy/open_im_msg_transfer
-deploy/open_im_push
-deploy/open_im_timer_task
-deploy/open_im_rpc_user
-deploy/open_im_rpc_friend
-deploy/open_im_rpc_group
-deploy/open_im_rpc_msg
-deploy/open_im_rpc_auth
+deploy/openim_demo
+deploy/openim-api
+deploy/openim-rpc-msg_gateway
+deploy/openim-msgtransfer
+deploy/openim-push
+deploy/openim_timer_task
+deploy/openim-rpc-user
+deploy/openim-rpc-friend
+deploy/openim-rpc-group
+deploy/openim-rpc-msg
+deploy/openim-rpc-auth
 deploy/Open-IM-SDK-Core
 
 # files used by the developer
@@ -162,6 +162,8 @@ go.work
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
+.idea/
+.idea
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml

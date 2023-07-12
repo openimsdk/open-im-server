@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package convert
 
 import (
@@ -16,7 +30,11 @@ func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	return dbFriend
 }
 
-func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (*sdkws.FriendInfo, error) {
+func FriendDB2Pb(
+	ctx context.Context,
+	friendDB *relation.FriendModel,
+	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
+) (*sdkws.FriendInfo, error) {
 	pbfriend := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
 	utils.CopyStructFields(pbfriend, friendDB)
 	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
@@ -31,7 +49,11 @@ func FriendDB2Pb(ctx context.Context, friendDB *relation.FriendModel, getUsers f
 	return pbfriend, nil
 }
 
-func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) (friendsPb []*sdkws.FriendInfo, err error) {
+func FriendsDB2Pb(
+	ctx context.Context,
+	friendsDB []*relation.FriendModel,
+	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
+) (friendsPb []*sdkws.FriendInfo, err error) {
 	var userID []string
 	for _, friendDB := range friendsDB {
 		userID = append(userID, friendDB.FriendUserID)
@@ -53,7 +75,11 @@ func FriendsDB2Pb(ctx context.Context, friendsDB []*relation.FriendModel, getUse
 	return friendsPb, nil
 }
 
-func FriendRequestDB2Pb(ctx context.Context, friendRequests []*relation.FriendRequestModel, getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error)) ([]*sdkws.FriendRequest, error) {
+func FriendRequestDB2Pb(
+	ctx context.Context,
+	friendRequests []*relation.FriendRequestModel,
+	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
+) ([]*sdkws.FriendRequest, error) {
 	userIDMap := make(map[string]struct{})
 	for _, friendRequest := range friendRequests {
 		userIDMap[friendRequest.ToUserID] = struct{}{}

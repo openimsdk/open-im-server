@@ -32,11 +32,6 @@ func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) Con
 	return ConversationRpcClient(*NewConversation(discov))
 }
 
-func (c *ConversationRpcClient) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) error {
-	_, err := c.Client.ModifyConversationField(ctx, req)
-	return err
-}
-
 func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
 	var req pbConversation.GetConversationReq
 	req.OwnerUserID = userID

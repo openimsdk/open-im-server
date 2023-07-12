@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msggateway
 
 import (
@@ -6,20 +20,21 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 
+	"github.com/go-playground/validator/v10"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/go-playground/validator/v10"
-	"google.golang.org/protobuf/proto"
 )
 
 type Req struct {
 	ReqIdentifier int32  `json:"reqIdentifier" validate:"required"`
-	Token         string `json:"token" `
-	SendID        string `json:"sendID" validate:"required"`
-	OperationID   string `json:"operationID" validate:"required"`
-	MsgIncr       string `json:"msgIncr" validate:"required"`
+	Token         string `json:"token"`
+	SendID        string `json:"sendID"        validate:"required"`
+	OperationID   string `json:"operationID"   validate:"required"`
+	MsgIncr       string `json:"msgIncr"       validate:"required"`
 	Data          []byte `json:"data"`
 }
 
@@ -160,7 +175,8 @@ func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data Req) ([]byt
 	return nil, req.IsBackground, nil
 }
 
-//func (g GrpcHandler) call[T any](ctx context.Context, data Req, m proto.Message, rpc func(ctx context.Context, req proto.Message)) ([]byte, error) {
+// func (g GrpcHandler) call[T any](ctx context.Context, data Req, m proto.Message, rpc func(ctx context.Context, req
+// proto.Message)) ([]byte, error) {
 //	if err := proto.Unmarshal(data.Data, m); err != nil {
 //		return nil, err
 //	}

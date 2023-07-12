@@ -1,19 +1,37 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package group
 
 import (
+	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"time"
 
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
-func UpdateGroupInfoMap(group *sdkws.GroupInfoForSet) map[string]any {
+func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[string]any {
 	m := make(map[string]any)
 	if group.GroupName != "" {
 		m["name"] = group.GroupName
 	}
 	if group.Notification != "" {
-		m["Notification"] = group.Notification
+		m["notification"] = group.Notification
+		m["notification_update_time"] = time.Now()
+		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
 	}
 	if group.Introduction != "" {
 		m["introduction"] = group.Introduction

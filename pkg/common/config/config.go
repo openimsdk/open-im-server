@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package config
 
 import (
@@ -77,15 +91,11 @@ type config struct {
 		MsgToPush struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"msgToPush"`
-		MsgToModify struct {
-			Topic string `yaml:"topic"`
-		} `yaml:"msgToModify"`
 		ConsumerGroupID struct {
-			MsgToRedis  string `yaml:"msgToRedis"`
-			MsgToMongo  string `yaml:"msgToMongo"`
-			MsgToMySql  string `yaml:"msgToMySql"`
-			MsgToPush   string `yaml:"msgToPush"`
-			MsgToModify string `yaml:"msgToModify"`
+			MsgToRedis string `yaml:"msgToRedis"`
+			MsgToMongo string `yaml:"msgToMongo"`
+			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToPush  string `yaml:"msgToPush"`
 		} `yaml:"consumerGroupID"`
 	} `yaml:"kafka"`
 
@@ -103,42 +113,26 @@ type config struct {
 		Enable string `yaml:"enable"`
 		ApiURL string `yaml:"apiURL"`
 		Minio  struct {
-			TempBucket       string `yaml:"tempBucket"`
-			DataBucket       string `yaml:"dataBucket"`
-			Location         string `yaml:"location"`
-			Endpoint         string `yaml:"endpoint"`
-			AccessKeyID      string `yaml:"accessKeyID"`
-			SecretAccessKey  string `yaml:"secretAccessKey"`
-			IsDistributedMod bool   `yaml:"isDistributedMod"`
+			Bucket          string `yaml:"bucket"`
+			Endpoint        string `yaml:"endpoint"`
+			AccessKeyID     string `yaml:"accessKeyID"`
+			SecretAccessKey string `yaml:"secretAccessKey"`
+			SessionToken    string `yaml:"sessionToken"`
 		} `yaml:"minio"`
-		Tencent struct {
-			AppID     string `yaml:"appID"`
-			Region    string `yaml:"region"`
-			Bucket    string `yaml:"bucket"`
-			SecretID  string `yaml:"secretID"`
-			SecretKey string `yaml:"secretKey"`
-		} `yaml:"tencent"`
-		Ali struct {
-			RegionID           string `yaml:"regionID"`
-			AccessKeyID        string `yaml:"accessKeyID"`
-			AccessKeySecret    string `yaml:"accessKeySecret"`
-			StsEndpoint        string `yaml:"stsEndpoint"`
-			OssEndpoint        string `yaml:"ossEndpoint"`
-			Bucket             string `yaml:"bucket"`
-			FinalHost          string `yaml:"finalHost"`
-			StsDurationSeconds int64  `yaml:"stsDurationSeconds"`
-			OssRoleArn         string `yaml:"OssRoleArn"`
-		} `yaml:"ali"`
-		Aws struct {
+		Cos struct {
+			BucketURL    string `yaml:"bucketURL"`
+			SecretID     string `yaml:"secretID"`
+			SecretKey    string `yaml:"secretKey"`
+			SessionToken string `yaml:"sessionToken"`
+		} `yaml:"cos"`
+		Oss struct {
+			Endpoint        string `yaml:"endpoint"`
+			Bucket          string `yaml:"bucket"`
+			BucketURL       string `yaml:"bucketURL"`
 			AccessKeyID     string `yaml:"accessKeyID"`
 			AccessKeySecret string `yaml:"accessKeySecret"`
-			Region          string `yaml:"region"`
-			Bucket          string `yaml:"bucket"`
-			FinalHost       string `yaml:"finalHost"`
-			RoleArn         string `yaml:"roleArn"`
-			ExternalId      string `yaml:"externalId"`
-			RoleSessionName string `yaml:"roleSessionName"`
-		} `yaml:"aws"`
+			SessionToken    string `yaml:"sessionToken"`
+		} `yaml:"oss"`
 	} `yaml:"object"`
 
 	RpcPort struct {
@@ -215,6 +209,7 @@ type config struct {
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
 	RetainChatRecords                 int    `yaml:"retainChatRecords"`
 	ChatRecordsClearTime              string `yaml:"chatRecordsClearTime"`
+	MsgDestructTime                   string `yaml:"msgDestructTime"`
 	Secret                            string `yaml:"secret"`
 	TokenPolicy                       struct {
 		Expire int64 `yaml:"expire"`
@@ -303,6 +298,15 @@ type notification struct {
 }
 
 func GetServiceNames() []string {
-	return []string{Config.RpcRegisterName.OpenImUserName, Config.RpcRegisterName.OpenImFriendName, Config.RpcRegisterName.OpenImMsgName, Config.RpcRegisterName.OpenImPushName, Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName, Config.RpcRegisterName.OpenImAuthName, Config.RpcRegisterName.OpenImConversationName, Config.RpcRegisterName.OpenImThirdName}
+	return []string{
+		Config.RpcRegisterName.OpenImUserName,
+		Config.RpcRegisterName.OpenImFriendName,
+		Config.RpcRegisterName.OpenImMsgName,
+		Config.RpcRegisterName.OpenImPushName,
+		Config.RpcRegisterName.OpenImMessageGatewayName,
+		Config.RpcRegisterName.OpenImGroupName,
+		Config.RpcRegisterName.OpenImAuthName,
+		Config.RpcRegisterName.OpenImConversationName,
+		Config.RpcRegisterName.OpenImThirdName,
+	}
 }

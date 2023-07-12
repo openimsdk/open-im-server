@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"gorm.io/gorm"
+	"time"
 )
 
 var _ relation.GroupModelInterface = (*GroupGorm)(nil)
@@ -49,4 +51,31 @@ func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, show
 
 func (g *GroupGorm) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
 	return groupIDs, utils.Wrap(g.DB.Model(&relation.GroupModel{}).Where("group_type = ? ", groupType).Pluck("group_id", &groupIDs).Error, "")
+}
+
+func (g *GroupGorm) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
+	db := g.db(ctx).Model(&relation.GroupModel{})
+	if before != nil {
+		db = db.Where("create_time < ?", before)
+	}
+	if err := db.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (g *GroupGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+	var res []struct {
+		Date  time.Time `gorm:"column:date"`
+		Count int64     `gorm:"column:count"`
+	}
+	err := g.db(ctx).Model(&relation.GroupModel{}).Select("DATE(create_time) AS date, count(1) AS count").Where("create_time >= ? and create_time < ?", start, end).Group("date").Find(&res).Error
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	v := make(map[string]int64)
+	for _, r := range res {
+		v[r.Date.Format("2006-01-02")] = r.Count
+	}
+	return v, nil
 }

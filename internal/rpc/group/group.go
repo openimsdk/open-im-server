@@ -3,6 +3,8 @@ package group
 import (
 	"context"
 	"fmt"
+	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -55,7 +57,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
 		User:          userRpcClient,
-		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
 			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
@@ -844,7 +846,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err != nil {
 		return nil, err
 	}
-	data := UpdateGroupInfoMap(req.GroupInfoForSet)
+	data := UpdateGroupInfoMap(ctx, req.GroupInfoForSet)
 	if len(data) == 0 {
 		return resp, nil
 	}
@@ -865,6 +867,23 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	var num int
 	if req.GroupInfoForSet.Notification != "" {
+		go func() {
+			nctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(ctx))
+			conversation := &pbConversation.ConversationReq{
+				ConversationID:   utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupInfoForSet.GroupID),
+				ConversationType: constant.SuperGroupChatType,
+				GroupID:          req.GroupInfoForSet.GroupID,
+			}
+			resp, err := s.GetGroupMemberUserIDs(nctx, &pbGroup.GetGroupMemberUserIDsReq{GroupID: req.GroupInfoForSet.GroupID})
+			if err != nil {
+				log.ZWarn(ctx, "GetGroupMemberIDs", err)
+				return
+			}
+			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.GroupNotification}
+			if err := s.conversationRpcClient.SetConversations(nctx, resp.UserIDs, conversation); err != nil {
+				log.ZWarn(ctx, "SetConversations", err, resp.UserIDs, conversation)
+			}
+		}()
 		num++
 		s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
 

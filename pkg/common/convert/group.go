@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package convert
 
 import (
@@ -41,7 +55,12 @@ func Pb2DbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID st
 	}
 }
 
-func Db2PbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbGroup.CMSGroup {
+func Db2PbCMSGroup(
+	m *relation.GroupModel,
+	ownerUserID string,
+	ownerUserName string,
+	memberCount uint32,
+) *pbGroup.CMSGroup {
 	return &pbGroup.CMSGroup{
 		GroupInfo:          Db2PbGroupInfo(m, ownerUserID, memberCount),
 		GroupOwnerUserID:   ownerUserID,
@@ -66,7 +85,11 @@ func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 	}
 }
 
-func Db2PbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo, group *sdkws.GroupInfo) *sdkws.GroupRequest {
+func Db2PbGroupRequest(
+	m *relation.GroupRequestModel,
+	user *sdkws.PublicUserInfo,
+	group *sdkws.GroupInfo,
+) *sdkws.GroupRequest {
 	return &sdkws.GroupRequest{
 		UserInfo:      user,
 		GroupInfo:     group,
@@ -82,7 +105,11 @@ func Db2PbGroupRequest(m *relation.GroupRequestModel, user *sdkws.PublicUserInfo
 	}
 }
 
-func Db2PbGroupAbstractInfo(groupID string, groupMemberNumber uint32, groupMemberListHash uint64) *pbGroup.GroupAbstractInfo {
+func Db2PbGroupAbstractInfo(
+	groupID string,
+	groupMemberNumber uint32,
+	groupMemberListHash uint64,
+) *pbGroup.GroupAbstractInfo {
 	return &pbGroup.GroupAbstractInfo{
 		GroupID:             groupID,
 		GroupMemberNumber:   groupMemberNumber,

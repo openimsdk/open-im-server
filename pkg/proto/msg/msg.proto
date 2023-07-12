@@ -1,7 +1,21 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 package OpenIMServer.msg;
 import "sdkws/sdkws.proto";
-import "wrapperspb/wrapperspb.proto";
+// import "wrapperspb/wrapperspb.proto";
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg";
 
 message MsgDataToMQ{
@@ -59,93 +73,6 @@ message GetSendMsgStatusResp{
   int32 status = 1;
 }
 
-
-message ModifyMessageReactionExtensionsReq {
-  string conversationID = 1;
-  int32 sessionType = 2;
-  map <string, sdkws.KeyValue>reactionExtensions = 3;
-  string clientMsgID = 4;
-  OpenIMServer.protobuf.StringValue ex = 5;
-  OpenIMServer.protobuf.StringValue attachedInfo = 6;
-  bool isReact = 7;
-  bool isExternalExtensions = 8;
-  int64 msgFirstModifyTime = 9;
-}
-message SetMessageReactionExtensionsReq {
-  string conversationID = 1;
-  int32 sessionType = 2;
-  map <string, sdkws.KeyValue>reactionExtensions = 3;
-  string clientMsgID = 4;
-  OpenIMServer.protobuf.StringValue ex = 5;
-  OpenIMServer.protobuf.StringValue attachedInfo = 6;
-  bool isReact = 7;
-  bool isExternalExtensions = 8;
-  int64 msgFirstModifyTime = 9;
-}
-message SetMessageReactionExtensionsResp {
-  string clientMsgID = 1;
-  int64 msgFirstModifyTime = 2;
-  bool isReact = 3;
-  repeated KeyValueResp result = 4;
-}
-
-message GetMessagesReactionExtensionsReq {
-  string conversationID = 1;
-  int32 sessionType = 2;
-  message MessageReactionKey {
-    string clientMsgID = 1;
-    int64 msgFirstModifyTime = 2;
-  }
-  repeated MessageReactionKey messageReactionKeys = 3;
-  repeated string TypeKeys = 4;
-}
-message GetMessagesReactionExtensionsResp{
-  repeated SingleMessageExtensionResult singleMessageResult = 1;
-
-}
-message SingleMessageExtensionResult {
-  map <string, sdkws.KeyValue>reactionExtensions = 1;
-  string clientMsgID = 2;
-}
-
-
-message ModifyMessageReactionExtensionsResp {
-  repeated ExtendMsgResp successList = 1;
-  repeated ExtendMsgResp failedList = 2;
-}
-
-message DeleteMessagesReactionExtensionsReq {
-  string operationID = 1;
-  string opUserID = 2;
-  string conversationID = 3;
-  int32 sessionType = 4;
-  string clientMsgID = 5;
-  bool isExternalExtensions = 6;
-  int64 msgFirstModifyTime = 7;
-  repeated sdkws.KeyValue reactionExtensions = 8;
-}
-
-message DeleteMessagesReactionExtensionsResp {
-  repeated KeyValueResp result = 1;
-}
-
-message ExtendMsgResp {
-  ExtendMsg extendMsg = 1;
-}
-
-message ExtendMsg {
-  map <string, KeyValueResp>reactionExtensions = 1;
-  string clientMsgID = 2;
-  int64 msgFirstModifyTime = 3;
-  string attachedInfo = 4;
-  string ex = 5;
-}
-
-message KeyValueResp {
-  sdkws.KeyValue keyValue = 1;
-  int32 errCode = 2;
-  string errMsg = 3;
-}
 
 message MsgDataToModifyByMQ{
   repeated sdkws.MsgData messages = 1;
@@ -241,7 +168,7 @@ message DeleteMsgPhysicalBySeqReq {
 }
 
 message DeleteMsgPhysicalBySeqResp {
-  
+
 }
 
 message GetConversationMaxSeqReq {
@@ -264,6 +191,45 @@ message Seqs {
 
 message GetConversationsHasReadAndMaxSeqResp {
   map<string, Seqs> seqs = 1;
+}
+
+message GetActiveUserReq {
+  int64 start = 1;
+  int64 end = 2;
+  bool ase = 3;
+  bool group = 4;
+  sdkws.RequestPagination pagination = 5;
+}
+
+message ActiveUser {
+  sdkws.UserInfo user = 1;
+  int64 count = 2;
+}
+
+message GetActiveUserResp {
+  int64 msgCount = 1;
+  int64 userCount = 2;
+  map<string, int64> dateCount = 3;
+  repeated ActiveUser users = 4;
+}
+
+message GetActiveGroupReq {
+  int64 start = 1;
+  int64 end = 2;
+  bool ase = 3;
+  sdkws.RequestPagination pagination = 4;
+}
+
+message ActiveGroup {
+  sdkws.GroupInfo group = 1;
+  int64 count = 2;
+}
+
+message GetActiveGroupResp {
+  int64 msgCount = 1;
+  int64 groupCount = 2;
+  map<string, int64> dateCount = 3;
+  repeated ActiveGroup groups = 4;
 }
 
 service msg {
@@ -295,11 +261,9 @@ service msg {
   rpc MarkMsgsAsRead(MarkMsgsAsReadReq) returns(MarkMsgsAsReadResp);
   rpc MarkConversationAsRead(MarkConversationAsReadReq) returns(MarkConversationAsReadResp);
   rpc SetConversationHasReadSeq(SetConversationHasReadSeqReq) returns(SetConversationHasReadSeqResp);
-  // 修改消息
-  rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
-  rpc GetMessagesReactionExtensions(GetMessagesReactionExtensionsReq) returns(GetMessagesReactionExtensionsResp);
-  rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
-  rpc DeleteMessageReactionExtensions(DeleteMessagesReactionExtensionsReq) returns(DeleteMessagesReactionExtensionsResp);
-
+  
   rpc GetConversationsHasReadAndMaxSeq(GetConversationsHasReadAndMaxSeqReq) returns(GetConversationsHasReadAndMaxSeqResp);
+
+  rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
+  rpc GetActiveGroup(GetActiveGroupReq) returns(GetActiveGroupResp);
 }

@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
@@ -30,60 +44,60 @@ func (x *GetSendMsgStatusReq) Check() error {
 	return nil
 }
 
-func (x *ModifyMessageReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("reactionExtensions is empty")
-	}
-	return nil
-}
-
-func (x *SetMessageReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("reactionExtensions is empty")
-	}
-	return nil
-}
-
-func (x *GetMessagesReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.MessageReactionKeys == nil {
-		return errs.ErrArgs.Wrap("MessageReactionKeys is empty")
-	}
-	if x.TypeKeys == nil {
-		return errs.ErrArgs.Wrap("TypeKeys is empty")
-	}
-	return nil
-}
-
-func (x *DeleteMessagesReactionExtensionsReq) Check() error {
-	if x.ConversationID == "" {
-		return errs.ErrArgs.Wrap("conversationID is empty")
-	}
-	if x.SessionType < 1 || x.SessionType > 4 {
-		return errs.ErrArgs.Wrap("sessionType is invalid")
-	}
-	if x.ReactionExtensions == nil {
-		return errs.ErrArgs.Wrap("ReactionExtensions is empty")
-	}
-	return nil
-}
+//func (x *ModifyMessageReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("reactionExtensions is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *SetMessageReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("reactionExtensions is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *GetMessagesReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.MessageReactionKeys == nil {
+//		return errs.ErrArgs.Wrap("MessageReactionKeys is empty")
+//	}
+//	if x.TypeKeys == nil {
+//		return errs.ErrArgs.Wrap("TypeKeys is empty")
+//	}
+//	return nil
+//}
+//
+//func (x *DeleteMessagesReactionExtensionsReq) Check() error {
+//	if x.ConversationID == "" {
+//		return errs.ErrArgs.Wrap("conversationID is empty")
+//	}
+//	if x.SessionType < 1 || x.SessionType > 4 {
+//		return errs.ErrArgs.Wrap("sessionType is invalid")
+//	}
+//	if x.ReactionExtensions == nil {
+//		return errs.ErrArgs.Wrap("ReactionExtensions is empty")
+//	}
+//	return nil
+//}
 
 func (x *DelMsgsReq) Check() error {
 	return nil

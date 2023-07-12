@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import (
@@ -41,7 +55,8 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
 			return nil
 		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+		if data.MsgData.ContentType <= constant.NotificationEnd &&
+			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
 		black, err := m.friend.IsBlocked(ctx, data.MsgData.SendID, data.MsgData.RecvID)
@@ -67,7 +82,8 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if err != nil {
 			return err
 		}
-		if groupInfo.Status == constant.GroupStatusDismissed && data.MsgData.ContentType != constant.GroupDismissedNotification {
+		if groupInfo.Status == constant.GroupStatusDismissed &&
+			data.MsgData.ContentType != constant.GroupDismissedNotification {
 			return errs.ErrDismissedAlready.Wrap()
 		}
 		if groupInfo.GroupType == constant.SuperGroup {
@@ -76,7 +92,8 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.UserID) {
 			return nil
 		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+		if data.MsgData.ContentType <= constant.NotificationEnd &&
+			data.MsgData.ContentType >= constant.NotificationBegin {
 			return nil
 		}
 		// memberIDs, err := m.GroupLocalCache.GetGroupMemberIDs(ctx, data.MsgData.GroupID)
@@ -161,7 +178,12 @@ func GetMsgID(sendID string) string {
 	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
-func (m *msgServer) modifyMessageByUserMessageReceiveOpt(ctx context.Context, userID, conversationID string, sessionType int, pb *msg.SendMsgReq) (bool, error) {
+func (m *msgServer) modifyMessageByUserMessageReceiveOpt(
+	ctx context.Context,
+	userID, conversationID string,
+	sessionType int,
+	pb *msg.SendMsgReq,
+) (bool, error) {
 	opt, err := m.User.GetUserGlobalMsgRecvOpt(ctx, userID)
 	if err != nil {
 		return false, err

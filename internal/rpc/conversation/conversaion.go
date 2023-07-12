@@ -82,16 +82,6 @@ func (c *conversationServer) GetConversations(ctx context.Context, req *pbConver
 	return resp, nil
 }
 
-func (c *conversationServer) BatchSetConversations(ctx context.Context, req *pbConversation.BatchSetConversationsReq) (*pbConversation.BatchSetConversationsResp, error) {
-	conversations := convert.ConversationsPb2DB(req.Conversations)
-	err := c.conversationDatabase.SetUserConversations(ctx, req.OwnerUserID, conversations)
-	if err != nil {
-		return nil, err
-	}
-	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
-	return &pbConversation.BatchSetConversationsResp{}, nil
-}
-
 func (c *conversationServer) SetConversation(ctx context.Context, req *pbConversation.SetConversationReq) (*pbConversation.SetConversationResp, error) {
 	var conversation tableRelation.ConversationModel
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
@@ -103,61 +93,6 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	}
 	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
 	resp := &pbConversation.SetConversationResp{}
-	return resp, nil
-}
-
-func (c *conversationServer) SetRecvMsgOpt(ctx context.Context, req *pbConversation.SetRecvMsgOptReq) (*pbConversation.SetRecvMsgOptResp, error) {
-	if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, []string{req.OwnerUserID}, &tableRelation.ConversationModel{OwnerUserID: req.OwnerUserID, ConversationID: req.ConversationID, RecvMsgOpt: req.RecvMsgOpt}, map[string]interface{}{"recv_msg_opt": req.RecvMsgOpt}); err != nil {
-		return nil, err
-	}
-	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.OwnerUserID)
-	return &pbConversation.SetRecvMsgOptResp{}, nil
-}
-
-// deprecated
-func (c *conversationServer) ModifyConversationField(ctx context.Context, req *pbConversation.ModifyConversationFieldReq) (*pbConversation.ModifyConversationFieldResp, error) {
-	resp := &pbConversation.ModifyConversationFieldResp{}
-	var err error
-	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
-		if err != nil {
-			return nil, err
-		}
-		if groupInfo.Status == constant.GroupStatusDismissed && req.FieldType != constant.FieldUnread {
-			return nil, err
-		}
-	}
-	conversation := convert.ConversationPb2DB(req.Conversation)
-	if req.FieldType == constant.FieldIsPrivateChat {
-		err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, []*tableRelation.ConversationModel{conversation})
-		if err != nil {
-			return nil, err
-		}
-		c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, req.Conversation.OwnerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat)
-		return resp, nil
-	}
-	filedMap := make(map[string]interface{})
-	switch req.FieldType {
-	case constant.FieldRecvMsgOpt:
-		filedMap["recv_msg_opt"] = req.Conversation.RecvMsgOpt
-	case constant.FieldGroupAtType:
-		filedMap["group_at_type"] = req.Conversation.GroupAtType
-	case constant.FieldIsPinned:
-		filedMap["is_pinned"] = req.Conversation.IsPinned
-	case constant.FieldEx:
-		filedMap["ex"] = req.Conversation.Ex
-	case constant.FieldAttachedInfo:
-		filedMap["attached_info"] = req.Conversation.AttachedInfo
-	case constant.FieldBurnDuration:
-		filedMap["burn_duration"] = req.Conversation.BurnDuration
-	}
-	err = c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDList, conversation, filedMap)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range req.UserIDList {
-		c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
-	}
 	return resp, nil
 }
 
@@ -173,6 +108,12 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		if groupInfo.Status == constant.GroupStatusDismissed {
 			return nil, err
 		}
+		// for _, userID := range req.UserIDs {
+		// 	if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
+		// 		log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
+		// 		return nil, err
+		// 	}
+		// }
 	}
 	var conversation tableRelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
@@ -195,19 +136,25 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	if req.Conversation.GroupAtType != nil {
 		m["group_at_type"] = req.Conversation.GroupAtType.Value
 	}
-	if req.Conversation.IsPrivateChat != nil {
+	if req.Conversation.MsgDestructTime != nil {
+		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+	}
+	if req.Conversation.IsMsgDestruct != nil {
+		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
+	}
+	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
 		var conversations []*tableRelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
-			conversation.OwnerUserID = ownerUserID
-			conversation.IsPrivateChat = req.Conversation.IsPrivateChat.Value
+			conversation2.OwnerUserID = ownerUserID
+			conversation2.IsPrivateChat = req.Conversation.IsPrivateChat.Value
 			conversations = append(conversations, &conversation2)
 		}
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
-		for _, ownerUserID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, ownerUserID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
+		for _, userID := range req.UserIDs {
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {

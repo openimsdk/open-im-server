@@ -1,25 +1,41 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package mw
 
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
 	"math"
 	"runtime"
 	"strings"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 func rpcString(v interface{}) string {
@@ -29,12 +45,16 @@ func rpcString(v interface{}) string {
 	return fmt.Sprintf("%+v", v)
 }
 
-func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func RpcServerInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
 	log.ZDebug(ctx, "rpc server req", "req", rpcString(req))
-
 	//defer func() {
 	//	if r := recover(); r != nil {
-	//		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
+	// 		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
 	//		fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
 	//		pc, file, line, ok := runtime.Caller(4)
 	//		if !ok {
@@ -47,7 +67,8 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	//			Cause: fmt.Sprintf("%s", r),
 	//			Warp:  nil,
 	//		}
-	//		sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()), errs.ErrInternalServer.Msg()).WithDetails(errInfo)
+	// 		sta, err_ := status.New(codes.Code(errs.ErrInternalServer.Code()),
+	// errs.ErrInternalServer.Msg()).WithDetails(errInfo)
 	//		if err_ != nil {
 	//			panic(err_)
 	//		}
@@ -121,7 +142,17 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		if unwrap != err {
 			sti, ok := err.(interface{ StackTrace() errors.StackTrace })
 			if ok {
-				log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName, "unwrap", unwrap.Error(), "stack", fmt.Sprintf("%+v", err))
+				log.ZWarn(
+					ctx,
+					"rpc server resp",
+					err,
+					"funcName",
+					funcName,
+					"unwrap",
+					unwrap.Error(),
+					"stack",
+					fmt.Sprintf("%+v", err),
+				)
 				if fs := sti.StackTrace(); len(fs) > 0 {
 					pc := uintptr(fs[0])
 					fn := runtime.FuncForPC(pc)
@@ -145,12 +176,13 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	details, err := grpcStatus.WithDetails(errInfo)
 	if err != nil {
-		panic(err)
+		log.ZWarn(ctx, "rpc server resp WithDetails error", err, "funcName", funcName)
+		return nil, errs.Wrap(err)
 	}
 	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
 	return nil, details.Err()
 }
 
 func GrpcServer() grpc.ServerOption {
-	return grpc.UnaryInterceptor(RpcServerInterceptor)
+	return grpc.ChainUnaryInterceptor(RpcServerInterceptor)
 }

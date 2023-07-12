@@ -85,9 +85,9 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 # The OS must be linux when building docker images
-PLATFORMS ?= linux_amd64 linux_arm64
+# PLATFORMS ?= linux_amd64 linux_arm64
 # The OS can be linux/windows/darwin when building binaries
-# PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
+PLATFORMS ?= linux_s390x linux_mips64 linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64 linux_ppc64le
 
 # only support linux
 GOOS=linux
@@ -116,7 +116,7 @@ FIND := find . ! -path './utils/*' ! -path './vendor/*'
 XARGS := xargs -r
 
 # Linux command settings-CODE DIRS Copyright
-CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/deploy $(ROOT_DIR)/deploy_k8s $(ROOT_DIR)/docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test
 FINDS := find $(CODE_DIRS)
 
 # Makefile settings: Select different behaviors by determining whether V option is set
@@ -147,18 +147,18 @@ endef
 
 # Here are some examples of builds
 define MAKEFILE_EXAMPLE
-# make build BINS=imctl                                          Only a single imctl binary is built.
+# make build BINS=openim-api                                     Only a single openim-api binary is built.
 # make -j (nproc) all                                            Run tidy gen add-copyright format lint cover build concurrently.
 # make gen                                                       Generate all necessary files.
-# make linux.arm64                                               imctl is compiled on arm64 platform.
+# make release                                                   Build release binaries for all platforms.
 # make verify-copyright                                          Verify the license headers for all files.
 # make install-deepcopy-gen                                      Install deepcopy-gen tools if the license is missing.
-# make build BINS=imctl V=1 DEBUG=1                              Build debug binaries for only imctl.
-# make multiarch PLATFORMS="linux_arm64 linux_amd64" V=1         Build binaries for both platforms.
+# make build BINS=openim-api V=1 DEBUG=1                         Build debug binaries for only openim-api.
+# make multiarch -j PLATFORMS="linux_arm64 linux_amd64" V=1      Build binaries for both platforms.
 endef
 export MAKEFILE_EXAMPLE
 
-# Define all help functions	@printf "\n\033[1mCurrent imctl version information: $(shell imctl version):\033[0m\n\n"
+# Define all help functions	@printf "\n\033[1mCurrent openim-api version information: $(shell openim-api version):\033[0m\n\n"
 define makeallhelp
 	@printf "\n\033[1mMake example:\033[0m\n\n"
 	$(call MAKEFILE_EXAMPLE)

@@ -65,26 +65,26 @@ ifeq (${BINS},)
 endif
 
 # TODO: EXCLUDE_TESTS variable, which contains the name of the package to be excluded from the test
-EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open-IM-Server/pkg/log github.com/OpenIMSDK/Open-IM-Server/db github.com/OpenIMSDK/Open-IM-Server/scripts github.com/OpenIMSDK/Open-IM-Server/deploy_k8s github.com/OpenIMSDK/Open-IM-Server/deploy github.com/OpenIMSDK/Open-IM-Server/config
+EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open-IM-Server/pkg/log github.com/OpenIMSDK/Open-IM-Server/db github.com/OpenIMSDK/Open-IM-Server/scripts github.com/OpenIMSDK/Open-IM-Server/config
 
 # ==============================================================================
 # ❯ tree -L 1 cmd
 # cmd
 # ├── openim-sdk-core/ - main.go
-# ├── open_im_api	
-# ├── open_im_cms_api
-# ├── open_im_cron_task
-# ├── open_im_demo
-# ├── open_im_msg_gateway
-# ├── open_im_msg_transfer
-# ├── open_im_push
-# ├── rpc/open_im_admin_cms/ - main.go
+# ├── openim-api	
+# ├── openim_cms_api
+# ├── openim-crontask
+# ├── openim_demo
+# ├── openim-rpc-msg_gateway
+# ├── openim-msgtransfer
+# ├── openim-push
+# ├── rpc/openim_admin_cms/ - main.go
 # └── test/ - main.go
 # COMMAND=openim
 # PLATFORM=linux_amd64
 # OS=linux
 # ARCH=amd64
-# BINS=open_im_api open_im_cms_api open_im_cron_task open_im_demo open_im_msg_gateway open_im_msg_transfer open_im_push 
+# BINS=openim-api openim_cms_api openim-crontask openim_demo openim-rpc-msg_gateway openim-msgtransfer openim-push 
 # BIN_DIR=/root/workspaces/OpenIM/_output/bin
 # ==============================================================================
 
@@ -113,10 +113,10 @@ go.build.%:
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> DEBUG: Compilation is not yet supported $(COMMAND)"; \
-	elif [ "$(COMMAND)" == "rpc" ]; then \
-		for d in $(wildcard $(ROOT_DIR)/cmd/rpc/*/); do \
-			cd $$d && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o\
-			 $(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $$d)$(GO_OUT_EXT) .; \
+	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
+		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
+			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
 		done; \
 	else \
 		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
@@ -131,27 +131,20 @@ go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.buil
 .PHONY: go.lint
 go.lint: tools.verify.golangci-lint
 	@echo "===========> Run golangci to lint source codes"
-	@$(BIN_DIR)/golangci-lint run -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/...
+	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/... 
 
 ## go.test: Run unit test
 .PHONY: go.test
 go.test:
 	@$(GO) test ./...
 
-# ## go.test.junit-report: Run unit test
-# .PHONY: go.test.junit-report
-# go.test.junit-report: tools.verify.go-junit-report
-# 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
-# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
-# 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
-# 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
-# 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
-
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report
+	@touch $(TMP_DIR)/coverage.out
 	@echo "===========> Run unit test > $(TMP_DIR)/report.xml"
-	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(OUTPUT_DIR)/report.xml
+# 	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 $(GO_BUILD_FLAGS) ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
+	@$(GO) test -v -coverprofile=$(TMP_DIR)/coverage.out 2>&1 ./... | $(TOOLS_DIR)/go-junit-report -set-exit-code > $(TMP_DIR)/report.xml
 	@sed -i '/mock_.*.go/d' $(TMP_DIR)/coverage.out
 	@echo "===========> Test coverage of Go code is reported to $(TMP_DIR)/coverage.html by generating HTML"
 	@$(GO) tool cover -html=$(TMP_DIR)/coverage.out -o $(TMP_DIR)/coverage.html
@@ -159,7 +152,6 @@ go.test.junit-report: tools.verify.go-junit-report
 ## go.test.cover: Run unit test with coverage
 .PHONY: go.test.cover
 go.test.cover: go.test.junit-report
-	@touch $(TMP_DIR)/coverage.out
 	@$(GO) tool cover -func=$(TMP_DIR)/coverage.out | \
 		awk -v target=$(COVERAGE) -f $(ROOT_DIR)/scripts/coverage.awk
 

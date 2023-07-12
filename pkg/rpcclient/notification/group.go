@@ -16,9 +16,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
 		db:                 db,
 	}
@@ -250,7 +250,7 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips)
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
 func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) (err error) {
@@ -264,7 +264,7 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx conte
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips)
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {

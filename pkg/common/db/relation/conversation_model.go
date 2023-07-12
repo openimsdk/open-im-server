@@ -82,15 +82,13 @@ func (c *ConversationGorm) GetAllConversationIDs(ctx context.Context) (conversat
 }
 
 func (c *ConversationGorm) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hasReadSeqs map[string]int64, err error) {
-	var conversations []*relation.ConversationModel
-	err = utils.Wrap(c.db(ctx).Where("owner_user_id = ?", ownerUserID).Select("conversation_id", "has_read_seq").Find(&conversations).Error, "")
-	hasReadSeqs = make(map[string]int64, len(conversations))
-	// for _, conversation := range conversations {
-	// 	hasReadSeqs[conversation.ConversationID] = conversation.HasReadSeq
-	// }
-	return hasReadSeqs, err
+	return nil, nil
 }
 
 func (c *ConversationGorm) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) (conversations []*relation.ConversationModel, err error) {
 	return conversations, utils.Wrap(c.db(ctx).Where("conversation_id IN (?)", conversationIDs).Find(&conversations).Error, "")
+}
+
+func (c *ConversationGorm) GetConversationIDsNeedDestruct(ctx context.Context) (conversations []*relation.ConversationModel, err error) {
+	return conversations, utils.Wrap(c.db(ctx).Where("is_msg_destruct = 1 && UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) && msg_destruct_time != 0").Find(&conversations).Error, "")
 }

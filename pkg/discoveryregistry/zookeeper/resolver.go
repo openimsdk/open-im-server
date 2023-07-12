@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package zookeeper
 
 import (
@@ -18,7 +32,16 @@ type Resolver struct {
 }
 
 func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
-	log.ZDebug(context.Background(), "start resolve now", "target", r.target, "cc", r.cc.UpdateState, "serviceName", strings.TrimLeft(r.target.URL.Path, "/"))
+	log.ZDebug(
+		context.Background(),
+		"start resolve now",
+		"target",
+		r.target,
+		"cc",
+		r.cc.UpdateState,
+		"serviceName",
+		strings.TrimLeft(r.target.URL.Path, "/"),
+	)
 	newConns, err := r.getConnsRemote(strings.TrimLeft(r.target.URL.Path, "/"))
 	if err != nil {
 		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
@@ -26,7 +49,15 @@ func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
 	}
 	r.addrs = newConns
 	if err := r.cc.UpdateState(resolver.State{Addresses: newConns}); err != nil {
-		log.ZError(context.Background(), "UpdateState error, conns is nil from svr", err, "conns", newConns, "zk path", r.target.URL.Path)
+		log.ZError(
+			context.Background(),
+			"UpdateState error, conns is nil from svr",
+			err,
+			"conns",
+			newConns,
+			"zk path",
+			r.target.URL.Path,
+		)
 		return
 	}
 	log.ZDebug(context.Background(), "resolve now finished", "target", r.target, "conns", r.addrs)
@@ -36,7 +67,11 @@ func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {}
 
 func (s *Resolver) Close() {}
 
-func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (s *ZkClient) Build(
+	target resolver.Target,
+	cc resolver.ClientConn,
+	opts resolver.BuildOptions,
+) (resolver.Resolver, error) {
 	s.logger.Printf("build resolver: %+v, cc: %+v", target, cc.UpdateState)
 	// log.ZDebug(context.Background(), "build resolver start", "target", target, "cc", cc.UpdateState)
 	r := &Resolver{}
@@ -49,7 +84,8 @@ func (s *ZkClient) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	serviceName := strings.TrimLeft(target.URL.Path, "/")
 	s.resolvers[serviceName] = r
 	s.logger.Printf("build resolver finished: %+v, cc: %+v, key: %s", target, cc.UpdateState, serviceName)
-	// log.ZDebug(context.Background(), "build resolver finished", "target", target, "cc", cc.UpdateState, "serviceName", serviceName)
+	// log.ZDebug(context.Background(), "build resolver finished", "target", target, "cc", cc.UpdateState,
+	// "serviceName", serviceName)
 	return r, nil
 }
 
