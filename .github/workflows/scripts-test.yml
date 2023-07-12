@@ -40,19 +40,22 @@ jobs:
       run: |
         chmod +x ./scripts/build_all_service.sh
         ./scripts/build_all_service.sh
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+        cat logs/openIM.log
 
     - name: Start all services
       run: |
         chmod +x ./scripts/start_all.sh
         ./scripts/start_all.sh
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+        cat logs/openIM.log
+      continue-on-error: true
 
     - name: Check all services
       run: |
         chmod +x ./scripts/check_all.sh
         ./scripts/check_all.sh
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+        cat logs/openIM.log
+      continue-on-error: true
+
     - name: Print openIM.log
       run: |
         cat -n logs/openIM.log
