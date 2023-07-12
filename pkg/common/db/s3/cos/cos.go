@@ -33,15 +33,10 @@ func NewCos() (s3.Interface, error) {
 			SessionToken: conf.SessionToken,
 		},
 	})
-	statObjectURL := u.String()
-	if statObjectURL != "" && statObjectURL[len(statObjectURL)-1] != '/' {
-		statObjectURL += "/"
-	}
 	return &Cos{
-		statObjectURL: statObjectURL,
-		copyURL:       u.Host + "/",
-		client:        client,
-		credential:    client.GetCredential(),
+		copyURL:    u.Host + "/",
+		client:     client,
+		credential: client.GetCredential(),
 	}, nil
 }
 
@@ -65,7 +60,6 @@ func (c *Cos) PartLimit() *s3.PartLimit {
 }
 
 func (c *Cos) InitiateMultipartUpload(ctx context.Context, name string) (*s3.InitiateMultipartUploadResult, error) {
-	name = c.client.BaseURL.BucketURL.String() + name
 	result, _, err := c.client.Object.InitiateMultipartUpload(ctx, name, nil)
 	if err != nil {
 		return nil, err
