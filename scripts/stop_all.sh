@@ -20,7 +20,6 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 #Include shell font styles and some basic information
 source $OPENIM_ROOT/scripts/style_info.sh
 source $OPENIM_ROOT/scripts/path_info.sh
-source $OPENIM_ROOT/scripts/function.sh
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
