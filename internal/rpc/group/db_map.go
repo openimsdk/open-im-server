@@ -15,19 +15,23 @@
 package group
 
 import (
+	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"time"
 
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
-func UpdateGroupInfoMap(group *sdkws.GroupInfoForSet) map[string]any {
+func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[string]any {
 	m := make(map[string]any)
 	if group.GroupName != "" {
 		m["name"] = group.GroupName
 	}
 	if group.Notification != "" {
-		m["Notification"] = group.Notification
+		m["notification"] = group.Notification
+		m["notification_update_time"] = time.Now()
+		m["notification_user_id"] = mcontext.GetOpUserID(ctx)
 	}
 	if group.Introduction != "" {
 		m["introduction"] = group.Introduction

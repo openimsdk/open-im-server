@@ -49,6 +49,9 @@ func isAllFieldsPrivate(v any) bool {
 }
 
 func ApiSuccess(data any) *ApiResponse {
+	if format, ok := data.(ApiFormat); ok {
+		format.ApiFormat()
+	}
 	if isAllFieldsPrivate(data) {
 		return &ApiResponse{}
 	}

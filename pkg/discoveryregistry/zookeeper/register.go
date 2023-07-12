@@ -19,7 +19,6 @@ import (
 
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
 )
 
 func (s *ZkClient) CreateRpcRootNodes(serviceNames []string) error {
@@ -61,7 +60,7 @@ func (s *ZkClient) UnRegister() error {
 	}
 	time.Sleep(time.Second)
 	s.node = ""
-	s.localConns = make(map[string][]resolver.Address)
+	s.localConns = make(map[string][]grpc.ClientConnInterface)
 	s.resolvers = make(map[string]*Resolver)
 	return nil
 }

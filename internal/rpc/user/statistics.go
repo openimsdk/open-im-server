@@ -29,13 +29,18 @@ func (s *userServer) UserRegisterCount(
 	if req.Start > req.End {
 		return nil, errs.ErrArgs.Wrap("start > end")
 	}
-	total, err := s.CountTotal(ctx)
+	total, err := s.CountTotal(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	count, err := s.CountRangeEverydayTotal(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End))
+	start := time.UnixMilli(req.Start)
+	before, err := s.CountTotal(ctx, &start)
 	if err != nil {
 		return nil, err
 	}
-	return &pbuser.UserRegisterCountResp{Total: total, Count: count}, nil
+	count, err := s.CountRangeEverydayTotal(ctx, start, time.UnixMilli(req.End))
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.UserRegisterCountResp{Total: total, Before: before, Count: count}, nil
 }

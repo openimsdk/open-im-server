@@ -32,6 +32,9 @@ message Conversation{
   int32 burnDuration = 12;
   int64 minSeq = 13;
   int64 maxSeq = 14;
+  int64 msgDestructTime = 15;
+  int64 latestMsgDestructTime = 16;
+  bool isMsgDestruct = 17;
 }
 
 message ConversationReq{
@@ -48,15 +51,8 @@ message ConversationReq{
   OpenIMServer.protobuf.Int64Value minSeq = 11;
   OpenIMServer.protobuf.Int64Value maxSeq = 12;
   OpenIMServer.protobuf.Int32Value groupAtType = 13;
-}
-
-message ModifyConversationFieldReq{
-  repeated string userIDList = 1;
-  int32 FieldType = 2;
-  Conversation conversation = 3;
-}
-
-message ModifyConversationFieldResp{
+  OpenIMServer.protobuf.Int64Value msgDestructTime = 14;
+  OpenIMServer.protobuf.BoolValue isMsgDestruct = 15;
 }
 
 message SetConversationReq{
@@ -64,15 +60,6 @@ message SetConversationReq{
 }
 
 message SetConversationResp{
-}
-
-message SetRecvMsgOptReq {
-  string ownerUserID = 1;
-  string conversationID = 2;
-  int32 recvMsgOpt = 3;
-}
-
-message SetRecvMsgOptResp {
 }
 
 message GetConversationReq{
@@ -101,13 +88,6 @@ message GetAllConversationsResp{
   repeated Conversation conversations = 2;
 }
 
-message BatchSetConversationsReq{
-  repeated Conversation conversations = 1;
-  string ownerUserID = 2;
-}
-
-message BatchSetConversationsResp{
-}
 
 message GetRecvMsgNotNotifyUserIDsReq {
   string groupID = 1;
@@ -177,13 +157,10 @@ message GetConversationsByConversationIDResp {
 }
 
 service conversation {
-  rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
   rpc GetConversation(GetConversationReq)returns(GetConversationResp);
   rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
   rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
-  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
-  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
   rpc GetRecvMsgNotNotifyUserIDs(GetRecvMsgNotNotifyUserIDsReq) returns (GetRecvMsgNotNotifyUserIDsResp);
   rpc CreateSingleChatConversations(CreateSingleChatConversationsReq) returns (CreateSingleChatConversationsResp);
   rpc CreateGroupChatConversations(CreateGroupChatConversationsReq) returns (CreateGroupChatConversationsResp);

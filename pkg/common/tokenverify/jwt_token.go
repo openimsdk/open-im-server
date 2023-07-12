@@ -84,7 +84,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if opUserID == ownerUserID {
 		return nil
 	}
-	return errs.ErrIdentity.Wrap(utils.GetSelfFuncName())
+	return errs.ErrNoPermission.Wrap(utils.GetSelfFuncName())
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
@@ -95,7 +95,7 @@ func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
 		return nil
 	}
-	return errs.ErrIdentity.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
+	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
