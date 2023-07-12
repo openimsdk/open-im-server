@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Start Docker Compose
-      run: | 
+      run: |
         docker-compose stop
         docker-compose up -d
 
