@@ -52,6 +52,7 @@ message UploadInfo {
   string uploadID = 1;
   int64 partSize = 2;
   AuthSignParts sign = 3;
+  int64 expireTime = 4;
 }
 
 message InitiateMultipartUploadResp {
