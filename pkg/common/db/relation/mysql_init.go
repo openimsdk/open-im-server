@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	maxRetry = 100
+	maxRetry = 100 //number of retries
 )
 
 // newMysqlGormDB Initialize the database connection
