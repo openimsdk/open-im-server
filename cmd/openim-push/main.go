@@ -27,7 +27,7 @@ func main() {
 	if err := pushCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
-	if err := pushCmd.StartSvr(config.Config.RpcRegisterName.OpenImPushName, push.Start); err != nil {
+	if err := pushCmd.StartSvr(config.Config.RPCRegisterName.OpenImPushName, push.Start); err != nil {
 		panic(err.Error())
 	}
 }

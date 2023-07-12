@@ -16,9 +16,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRPCClient *rpcclient.UserRPCClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
 	return &GroupNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRPCClient(msgRpcClient), rpcclient.WithUserRPCClient(userRPCClient)),
 		getUsersInfo:       fn,
 		db:                 db,
 	}
@@ -103,7 +103,7 @@ func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID s
 		res = append(res, g.groupMemberDB2PB(member, user.AppMangerLevel))
 		delete(users, member.UserID)
 	}
-	//for userID, info := range users {
+	// for userID, info := range users {
 	//	if info.AppMangerLevel == constant.AppAdmin {
 	//		res = append(res, &sdkws.GroupMemberFullInfo{
 	//			GroupID:        groupID,
@@ -113,7 +113,7 @@ func (g *GroupNotificationSender) getGroupMembers(ctx context.Context, groupID s
 	//			AppMangerLevel: info.AppMangerLevel,
 	//		})
 	//	}
-	//}
+	// }
 	return res, nil
 }
 
@@ -250,7 +250,7 @@ func (g *GroupNotificationSender) GroupInfoSetNotification(ctx context.Context, 
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRpcGetUserName())
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetNotification, tips, rpcclient.WithRPCGetUserName())
 }
 
 func (g *GroupNotificationSender) GroupInfoSetNameNotification(ctx context.Context, tips *sdkws.GroupInfoSetNameTips) (err error) {
@@ -264,7 +264,7 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx conte
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}
-	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
+	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRPCGetUserName())
 }
 
 func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {

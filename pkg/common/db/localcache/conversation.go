@@ -26,7 +26,7 @@ type ConversationLocalCache struct {
 	lock                              sync.Mutex
 	superGroupRecvMsgNotNotifyUserIDs map[string]Hash
 	conversationIDs                   map[string]Hash
-	client                            *rpcclient.ConversationRpcClient
+	client                            *rpcclient.ConversationRPCClient
 }
 
 type Hash struct {
@@ -34,7 +34,7 @@ type Hash struct {
 	ids  []string
 }
 
-func NewConversationLocalCache(client *rpcclient.ConversationRpcClient) *ConversationLocalCache {
+func NewConversationLocalCache(client *rpcclient.ConversationRPCClient) *ConversationLocalCache {
 	return &ConversationLocalCache{
 		superGroupRecvMsgNotNotifyUserIDs: make(map[string]Hash),
 		conversationIDs:                   make(map[string]Hash),

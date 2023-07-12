@@ -35,7 +35,7 @@ import (
 
 type authServer struct {
 	authDatabase   controller.AuthDatabase
-	userRpcClient  *rpcclient.UserRpcClient
+	userRPCClient  *rpcclient.UserRPCClient
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
@@ -44,9 +44,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	userRPCClient := rpcclient.NewUserRPCClient(client)
 	pbAuth.RegisterAuthServer(server, &authServer{
-		userRpcClient:  &userRpcClient,
+		userRPCClient:  &userRPCClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
 			cache.NewMsgCacheModel(rdb),
@@ -62,7 +62,7 @@ func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*
 	if req.Secret != config.Config.Secret {
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
-	if _, err := s.userRpcClient.GetUserInfo(ctx, req.UserID); err != nil {
+	if _, err := s.userRPCClient.GetUserInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	token, err := s.authDatabase.CreateToken(ctx, req.UserID, int(req.PlatformID))
@@ -125,7 +125,7 @@ func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
-	conns, err := s.RegisterCenter.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := s.RegisterCenter.GetConns(ctx, config.Config.RPCRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		return err
 	}

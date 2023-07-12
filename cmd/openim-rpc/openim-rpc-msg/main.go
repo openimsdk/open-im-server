@@ -27,7 +27,7 @@ func main() {
 	if err := rpcCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
-	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImMsgName, msg.Start); err != nil {
+	if err := rpcCmd.StartSvr(config.Config.RPCRegisterName.OpenImMsgName, msg.Start); err != nil {
 		panic(err.Error())
 	}
 }

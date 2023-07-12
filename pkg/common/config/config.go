@@ -64,7 +64,7 @@ type config struct {
 	} `yaml:"mysql"`
 
 	Mongo struct {
-		Uri         string   `yaml:"uri"`
+		URI         string   `yaml:"uri"`
 		Address     []string `yaml:"address"`
 		Database    string   `yaml:"database"`
 		Username    string   `yaml:"username"`
@@ -94,7 +94,7 @@ type config struct {
 		ConsumerGroupID struct {
 			MsgToRedis string `yaml:"msgToRedis"`
 			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToMySQL string `yaml:"msgToMySql"`
 			MsgToPush  string `yaml:"msgToPush"`
 		} `yaml:"consumerGroupID"`
 	} `yaml:"kafka"`
@@ -105,7 +105,7 @@ type config struct {
 	} `yaml:"rpc"`
 
 	Api struct {
-		OpenImApiPort []int  `yaml:"openImApiPort"`
+		OpenImAPIPort []int  `yaml:"openImApiPort"`
 		ListenIP      string `yaml:"listenIP"`
 	} `yaml:"api"`
 
@@ -135,7 +135,7 @@ type config struct {
 		} `yaml:"oss"`
 	} `yaml:"object"`
 
-	RpcPort struct {
+	RPCPort struct {
 		OpenImUserPort           []int `yaml:"openImUserPort"`
 		OpenImFriendPort         []int `yaml:"openImFriendPort"`
 		OpenImMessagePort        []int `yaml:"openImMessagePort"`
@@ -148,7 +148,7 @@ type config struct {
 		OpenImThirdPort          []int `yaml:"openImThirdPort"`
 	} `yaml:"rpcPort"`
 
-	RpcRegisterName struct {
+	RPCRegisterName struct {
 		OpenImUserName           string `yaml:"openImUserName"`
 		OpenImFriendName         string `yaml:"openImFriendName"`
 		OpenImMsgName            string `yaml:"openImMsgName"`
@@ -166,7 +166,7 @@ type config struct {
 		RemainRotationCount uint   `yaml:"remainRotationCount"`
 		RemainLogLevel      int    `yaml:"remainLogLevel"`
 		IsStdout            bool   `yaml:"isStdout"`
-		IsJson              bool   `yaml:"isJson"`
+		IsJSON              bool   `yaml:"isJson"`
 		WithStack           bool   `yaml:"withStack"`
 	} `yaml:"log"`
 
@@ -180,7 +180,7 @@ type config struct {
 	Push struct {
 		Enable string `yaml:"enable"`
 		GeTui  struct {
-			PushUrl      string `yaml:"pushUrl"`
+			PushURL      string `yaml:"pushUrl"`
 			AppKey       string `yaml:"appKey"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
@@ -193,7 +193,7 @@ type config struct {
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
-			PushUrl      string `yaml:"pushUrl"`
+			PushURL      string `yaml:"pushUrl"`
 			PushIntent   string `yaml:"pushIntent"`
 		} `yaml:"jpns"`
 	}
@@ -224,7 +224,7 @@ type config struct {
 		Production bool   `yaml:"production"`
 	} `yaml:"iosPush"`
 	Callback struct {
-		CallbackUrl                        string         `yaml:"url"`
+		CallbackURL                        string         `yaml:"url"`
 		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"beforeSendSingleMsg"`
 		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"afterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"beforeSendGroupMsg"`
@@ -280,9 +280,9 @@ type notification struct {
 	GroupMemberSetToOrdinary NotificationConf `yaml:"groupMemberSetToOrdinaryUser"`
 	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
 	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
-	////////////////////////user///////////////////////
+	// //////////////////////user///////////////////////
 	UserInfoUpdated NotificationConf `yaml:"userInfoUpdated"`
-	//////////////////////friend///////////////////////
+	// ////////////////////friend///////////////////////
 	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
 	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
 	FriendApplicationRejected NotificationConf `yaml:"friendApplicationRejected"`
@@ -292,21 +292,21 @@ type notification struct {
 	BlackAdded                NotificationConf `yaml:"blackAdded"`
 	BlackDeleted              NotificationConf `yaml:"blackDeleted"`
 	FriendInfoUpdated         NotificationConf `yaml:"friendInfoUpdated"`
-	//////////////////////conversation///////////////////////
+	// ////////////////////conversation///////////////////////
 	ConversationChanged    NotificationConf `yaml:"conversationChanged"`
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }
 
 func GetServiceNames() []string {
 	return []string{
-		Config.RpcRegisterName.OpenImUserName,
-		Config.RpcRegisterName.OpenImFriendName,
-		Config.RpcRegisterName.OpenImMsgName,
-		Config.RpcRegisterName.OpenImPushName,
-		Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName,
-		Config.RpcRegisterName.OpenImAuthName,
-		Config.RpcRegisterName.OpenImConversationName,
-		Config.RpcRegisterName.OpenImThirdName,
+		Config.RPCRegisterName.OpenImUserName,
+		Config.RPCRegisterName.OpenImFriendName,
+		Config.RPCRegisterName.OpenImMsgName,
+		Config.RPCRegisterName.OpenImPushName,
+		Config.RPCRegisterName.OpenImMessageGatewayName,
+		Config.RPCRegisterName.OpenImGroupName,
+		Config.RPCRegisterName.OpenImAuthName,
+		Config.RPCRegisterName.OpenImConversationName,
+		Config.RPCRegisterName.OpenImThirdName,
 	}
 }

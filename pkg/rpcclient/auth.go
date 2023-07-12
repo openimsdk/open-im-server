@@ -25,7 +25,7 @@ import (
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImAuthName)
 	if err != nil {
 		panic(err)
 	}

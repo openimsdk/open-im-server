@@ -38,12 +38,12 @@ type Mongo struct {
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	if config.Config.Mongo.Uri != "" {
+	if config.Config.Mongo.URI != "" {
 		// example:
 		// mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
-		uri = config.Config.Mongo.Uri
+		uri = config.Config.Mongo.URI
 	} else {
-		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
+		// mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
 		mongodbHosts := ""
 		for i, v := range config.Config.Mongo.Address {
 			if i == len(config.Config.Mongo.Address)-1 {

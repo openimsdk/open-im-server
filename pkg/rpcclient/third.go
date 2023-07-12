@@ -31,7 +31,7 @@ type Third struct {
 }
 
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImThirdName)
 	if err != nil {
 		panic(err)
 	}

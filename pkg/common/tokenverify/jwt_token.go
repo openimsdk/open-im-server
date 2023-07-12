@@ -29,7 +29,7 @@ import (
 
 type Claims struct {
 	UserID     string
-	PlatformID int //login platform
+	PlatformID int // login platform
 	jwt.RegisteredClaims
 }
 
@@ -40,9 +40,9 @@ func BuildClaims(uid string, platformID int, ttl int64) Claims {
 		UserID:     uid,
 		PlatformID: platformID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
-			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
-			NotBefore: jwt.NewNumericDate(before),                                     //Begin Effective time
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), // Expiration time
+			IssuedAt:  jwt.NewNumericDate(now),                                        // Issuing time
+			NotBefore: jwt.NewNumericDate(before),                                     // Begin Effective time
 		}}
 }
 
@@ -87,7 +87,7 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	return errs.ErrNoPermission.Wrap(utils.GetSelfFuncName())
 }
 
-func IsAppManagerUid(ctx context.Context) bool {
+func IsAppManagerUID(ctx context.Context) bool {
 	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)
 }
 

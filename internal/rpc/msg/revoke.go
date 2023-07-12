@@ -60,7 +60,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	data, _ := json.Marshal(msgs[0])
 	log.ZInfo(ctx, "GetMsgBySeqs", "conversationID", req.ConversationID, "seq", req.Seq, "msg", string(data))
 	var role int32
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !tokenverify.IsAppManagerUID(ctx) {
 		switch msgs[0].SessionType {
 		case constant.SingleChatType:
 			if err := tokenverify.CheckAccessV3(ctx, msgs[0].SendID); err != nil {
@@ -119,7 +119,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	} else {
 		recvID = msgs[0].RecvID
 	}
-	if err := m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
+	if err := m.notificationSender.NotificationWithSessionType(ctx, req.UserID, recvID, constant.MsgRevokeNotification, msgs[0].SessionType, &tips); err != nil {
 		return nil, err
 	}
 	return &msg.RevokeMsgResp{}, nil

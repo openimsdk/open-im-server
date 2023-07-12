@@ -19,7 +19,7 @@ import (
 	"net/http"
 )
 
-func httpJson(w http.ResponseWriter, data any) {
+func httpJSON(w http.ResponseWriter, data any) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, "json marshal error: "+err.Error(), http.StatusInternalServerError)
@@ -31,9 +31,9 @@ func httpJson(w http.ResponseWriter, data any) {
 }
 
 func HttpError(w http.ResponseWriter, err error) {
-	httpJson(w, ParseError(err))
+	httpJSON(w, ParseError(err))
 }
 
 func HttpSuccess(w http.ResponseWriter, data any) {
-	httpJson(w, ApiSuccess(data))
+	httpJSON(w, ApiSuccess(data))
 }

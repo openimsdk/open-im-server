@@ -18,7 +18,7 @@ type Conversation struct {
 }
 
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImConversationName)
 	if err != nil {
 		panic(err)
 	}
@@ -26,13 +26,13 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversatio
 	return &Conversation{discov: discov, conn: conn, Client: client}
 }
 
-type ConversationRpcClient Conversation
+type ConversationRPCClient Conversation
 
-func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) ConversationRpcClient {
-	return ConversationRpcClient(*NewConversation(discov))
+func NewConversationRPCClient(discov discoveryregistry.SvcDiscoveryRegistry) ConversationRPCClient {
+	return ConversationRPCClient(*NewConversation(discov))
 }
 
-func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
+func (c *ConversationRPCClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
 	var req pbConversation.GetConversationReq
 	req.OwnerUserID = userID
 	req.ConversationID = conversationID
@@ -43,26 +43,26 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 
-func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
+func (c *ConversationRPCClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
 	_, err := c.Client.CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
 	return err
 }
 
-func (c *ConversationRpcClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
+func (c *ConversationRPCClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
 	_, err := c.Client.CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
 	return err
 }
 
-func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
+func (c *ConversationRPCClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
 	return err
 }
-func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
+func (c *ConversationRPCClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
 	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
 	return err
 }
 
-func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
+func (c *ConversationRPCClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	resp, err := c.Client.GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUse
 	return resp.ConversationIDs, nil
 }
 
-func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbConversation.Conversation, error) {
+func (c *ConversationRPCClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbConversation.Conversation, error) {
 	resp, err := c.Client.GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID
 	return resp.Conversation, nil
 }
 
-func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+func (c *ConversationRPCClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
 	resp, err := c.Client.GetConversationsByConversationID(ctx, &pbConversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs})
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	return resp.Conversations, nil
 }
 
-func (c *ConversationRpcClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+func (c *ConversationRPCClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbConversation.Conversation, error) {
 	resp, err := c.Client.GetConversations(ctx, &pbConversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs})
 	if err != nil {
 		return nil, err

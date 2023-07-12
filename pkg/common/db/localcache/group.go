@@ -26,7 +26,7 @@ import (
 type GroupLocalCache struct {
 	lock   sync.Mutex
 	cache  map[string]GroupMemberIDsHash
-	client *rpcclient.GroupRpcClient
+	client *rpcclient.GroupRPCClient
 }
 
 type GroupMemberIDsHash struct {
@@ -34,7 +34,7 @@ type GroupMemberIDsHash struct {
 	userIDs        []string
 }
 
-func NewGroupLocalCache(client *rpcclient.GroupRpcClient) *GroupLocalCache {
+func NewGroupLocalCache(client *rpcclient.GroupRPCClient) *GroupLocalCache {
 	return &GroupLocalCache{
 		cache:  make(map[string]GroupMemberIDsHash, 0),
 		client: client,

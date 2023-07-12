@@ -30,9 +30,9 @@ type Pusher struct {
 	offlinePusher          offlinepush.OfflinePusher
 	groupLocalCache        *localcache.GroupLocalCache
 	conversationLocalCache *localcache.ConversationLocalCache
-	msgRpcClient           *rpcclient.MessageRpcClient
-	conversationRpcClient  *rpcclient.ConversationRpcClient
-	groupRpcClient         *rpcclient.GroupRpcClient
+	msgRPCClient           *rpcclient.MessageRpcClient
+	conversationRPCClient  *rpcclient.ConversationRPCClient
+	groupRPCClient         *rpcclient.GroupRPCClient
 	successCount           int
 }
 
@@ -40,16 +40,16 @@ var errNoOfflinePusher = errors.New("no offlinePusher is configured")
 
 func NewPusher(discov discoveryregistry.SvcDiscoveryRegistry, offlinePusher offlinepush.OfflinePusher, database controller.PushDatabase,
 	groupLocalCache *localcache.GroupLocalCache, conversationLocalCache *localcache.ConversationLocalCache,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient, msgRpcClient *rpcclient.MessageRpcClient) *Pusher {
+	conversationRPCClient *rpcclient.ConversationRPCClient, groupRpcClient *rpcclient.GroupRPCClient, msgRPCClient *rpcclient.MessageRpcClient) *Pusher {
 	return &Pusher{
 		discov:                 discov,
 		database:               database,
 		offlinePusher:          offlinePusher,
 		groupLocalCache:        groupLocalCache,
 		conversationLocalCache: conversationLocalCache,
-		msgRpcClient:           msgRpcClient,
-		conversationRpcClient:  conversationRpcClient,
-		groupRpcClient:         groupRpcClient,
+		msgRPCClient:           msgRPCClient,
+		conversationRPCClient:  conversationRPCClient,
+		groupRPCClient:         groupRpcClient,
 	}
 }
 
@@ -68,11 +68,11 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
 	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
-	maxSeq, err := p.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
+	maxSeq, err := p.msgRPCClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
 	}
-	return p.conversationRpcClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
+	return p.conversationRPCClient.SetConversationMaxSeq(ctx, userIDs, conevrsationID, maxSeq)
 }
 
 func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.MsgData) error {
@@ -165,7 +165,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 					ctx = mcontext.WithOpUserIDContext(ctx, config.Config.Manager.UserID[0])
 				}
 				defer func(groupID string) {
-					if err := p.groupRpcClient.DismissGroup(ctx, groupID); err != nil {
+					if err := p.groupRPCClient.DismissGroup(ctx, groupID); err != nil {
 						log.ZError(ctx, "DismissGroup Notification clear members", err, "groupID", groupID)
 					}
 				}(groupID)
@@ -209,7 +209,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}
 			needOfflinePushUserIDs = utils.DifferenceString(notNotificationUserIDs, needOfflinePushUserIDs)
 		}
-		//Use offline push messaging
+		// Use offline push messaging
 		if len(needOfflinePushUserIDs) > 0 {
 			var offlinePushUserIDs []string
 			err = callbackOfflinePush(ctx, needOfflinePushUserIDs, msg, &offlinePushUserIDs)
@@ -235,12 +235,12 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 }
 
 func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, pushToUserIDs []string) (wsResults []*msggateway.SingleMsgToUserResults, err error) {
-	conns, err := p.discov.GetConns(ctx, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := p.discov.GetConns(ctx, config.Config.RPCRegisterName.OpenImMessageGatewayName)
 	log.ZDebug(ctx, "get gateway conn", "conn length", len(conns))
 	if err != nil {
 		return nil, err
 	}
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(ctx, &msggateway.OnlineBatchPushOneMsgReq{MsgData: msg, PushToUserIDs: pushToUserIDs})
@@ -293,7 +293,7 @@ func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts,
 func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) (title, content string, opts *offlinepush.Opts, err error) {
 	if p.offlinePusher == nil {
 		err = errNoOfflinePusher
-		return
+		return "", "", nil, err
 	}
 	type AtContent struct {
 		Text       string   `json:"text"`
@@ -302,7 +302,7 @@ func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) 
 	}
 	opts, err = p.GetOfflinePushOpts(msg)
 	if err != nil {
-		return
+		return "", "", opts, err
 	}
 	if msg.OfflinePushInfo != nil {
 		title = msg.OfflinePushInfo.Title
@@ -322,7 +322,7 @@ func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) 
 			title = constant.ContentType2PushContent[int64(msg.ContentType)]
 		case constant.AtText:
 			a := AtContent{}
-			_ = utils.JsonStringToStruct(string(msg.Content), &a)
+			_ = utils.JSONStringToStruct(string(msg.Content), &a)
 			if utils.IsContain(conversationID, a.AtUserList) {
 				title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
 			} else {
@@ -337,5 +337,5 @@ func (p *Pusher) getOfflinePushInfos(conversationID string, msg *sdkws.MsgData) 
 	if content == "" {
 		content = title
 	}
-	return
+	return title, content, opts, err
 }

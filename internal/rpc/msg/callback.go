@@ -29,7 +29,7 @@ import (
 )
 
 func cbURL() string {
-	return config.Config.Callback.CallbackUrl
+	return config.Config.Callback.CallbackURL
 }
 
 func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command string) cbapi.CommonCallbackReq {

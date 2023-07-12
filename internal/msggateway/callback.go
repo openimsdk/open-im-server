@@ -26,7 +26,7 @@ import (
 )
 
 func url() string {
-	return config.Config.Callback.CallbackUrl
+	return config.Config.Callback.CallbackURL
 }
 
 func CallbackUserOnline(ctx context.Context, userID string, platformID int, isAppBackground bool, connID string) error {
@@ -114,15 +114,15 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		ConnID:          connID,
 //	}
 //	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: &callbackResp}
-// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOnlineCommand,
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackURL, constant.CallbackUserOnlineCommand,
 // callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil
 // {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}
 //	return callbackResp
-//}
-//func callbackUserOffline(operationID, userID string, platformID int, connID string) cbApi.CommonCallbackResp {
+// }
+// func callbackUserOffline(operationID, userID string, platformID int, connID string) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 //	if !config.Config.Callback.CallbackUserOffline.Enable {
 //		return callbackResp
@@ -141,15 +141,15 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		ConnID: connID,
 //	}
 //	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: &callbackResp}
-// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserOfflineCommand,
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackURL, constant.CallbackUserOfflineCommand,
 // callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil
 // {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}
 //	return callbackResp
-//}
-//func callbackUserKickOff(operationID string, userID string, platformID int) cbApi.CommonCallbackResp {
+// }
+// func callbackUserKickOff(operationID string, userID string, platformID int) cbApi.CommonCallbackResp {
 //	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 //	if !config.Config.Callback.CallbackUserKickOff.Enable {
 //		return callbackResp
@@ -167,11 +167,11 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 //		Seq: int(time.Now().UnixNano() / 1e6),
 //	}
 //	callbackUserKickOffResp := &cbApi.CallbackUserKickOffResp{CommonCallbackResp: &callbackResp}
-// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, constant.CallbackUserKickOffCommand,
+// 	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackURL, constant.CallbackUserKickOffCommand,
 // callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err !=
 // nil {
 //		callbackResp.ErrCode = http2.StatusInternalServerError
 //		callbackResp.ErrMsg = err.Error()
 //	}
 //	return callbackResp
-//}
+// }

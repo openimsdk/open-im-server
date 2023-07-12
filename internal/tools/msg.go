@@ -69,8 +69,8 @@ func InitMsgTool() (*MsgTool, error) {
 	userDatabase := controller.NewUserDatabase(userDB, cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()), tx.NewGorm(db))
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	conversationDatabase := controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)), tx.NewGorm(db))
-	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
-	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))
+	msgRPCClient := rpcclient.NewMessageRpcClient(discov)
+	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRPCClient(&msgRPCClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender)
 	return msgTool, nil
 }

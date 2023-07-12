@@ -64,7 +64,7 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 			if cmdOpts.loggerPrefixName == "" {
 				cmdOpts.loggerPrefixName = "OpenIM.log.all"
 			}
-			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
+			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJSON, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
 				panic(err)
 			}
 			return nil

@@ -43,9 +43,9 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	u := NewUserApi(discov)
 	m := NewMessageApi(discov)
 	if config.Config.Prometheus.Enable {
-		prome.NewApiRequestCounter()
-		prome.NewApiRequestFailedCounter()
-		prome.NewApiRequestSuccessCounter()
+		prome.NewAPIRequestCounter()
+		prome.NewAPIRequestFailedCounter()
+		prome.NewAPIRequestSuccessCounter()
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
@@ -62,7 +62,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
 		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
 	}
-	//friend routing group
+	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
 	{
 		f := NewFriendApi(discov)
@@ -109,7 +109,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
 		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
-	//certificate
+	// certificate
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
@@ -117,7 +117,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
 	}
-	//Third service
+	// Third service
 	thirdGroup := r.Group("/third", ParseToken)
 	{
 		t := NewThirdApi(discov)
@@ -134,7 +134,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		objectGroup.POST("/access_url", t.AccessURL)
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
-	//Message
+	// Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -155,7 +155,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 	}
-	//Conversation
+	// Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
 		c := NewConversationApi(discov)

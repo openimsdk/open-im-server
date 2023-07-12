@@ -59,7 +59,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 	resp := &callbackstruct.CallbackBeforeCreateGroupResp{}
 	err = http.CallBackPostReturn(
 		ctx,
-		config.Config.Callback.CallbackUrl,
+		config.Config.Callback.CallbackURL,
 		cbReq,
 		resp,
 		config.Config.Callback.CallbackBeforeCreateGroup,
@@ -104,7 +104,7 @@ func CallbackBeforeMemberJoinGroup(
 	resp := &callbackstruct.CallbackBeforeMemberJoinGroupResp{}
 	err = http.CallBackPostReturn(
 		ctx,
-		config.Config.Callback.CallbackUrl,
+		config.Config.Callback.CallbackURL,
 		callbackReq,
 		resp,
 		config.Config.Callback.CallbackBeforeMemberJoinGroup,
@@ -150,7 +150,7 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *group.SetGroupMe
 	resp := &callbackstruct.CallbackBeforeSetGroupMemberInfoResp{}
 	err = http.CallBackPostReturn(
 		ctx,
-		config.Config.Callback.CallbackUrl,
+		config.Config.Callback.CallbackURL,
 		callbackReq,
 		resp,
 		config.Config.Callback.CallbackBeforeSetGroupMemberInfo,

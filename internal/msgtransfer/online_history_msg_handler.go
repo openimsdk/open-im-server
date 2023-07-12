@@ -74,25 +74,25 @@ type OnlineHistoryRedisConsumerHandler struct {
 	singleMsgFailedCountMutex  sync.Mutex
 
 	msgDatabase           controller.CommonMsgDatabase
-	conversationRpcClient *rpcclient.ConversationRpcClient
-	groupRpcClient        *rpcclient.GroupRpcClient
+	conversationRPCClient *rpcclient.ConversationRPCClient
+	groupRPCClient        *rpcclient.GroupRPCClient
 }
 
 func NewOnlineHistoryRedisConsumerHandler(
 	database controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient,
-	groupRpcClient *rpcclient.GroupRpcClient,
+	conversationRPCClient *rpcclient.ConversationRPCClient,
+	groupRPCClient *rpcclient.GroupRPCClient,
 ) *OnlineHistoryRedisConsumerHandler {
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
-	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel
+	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
 	go och.MessagesDistributionHandle()
 	for i := 0; i < ChannelNum; i++ {
 		och.chArrays[i] = make(chan Cmd2Value, 50)
 		go och.Run(i)
 	}
-	och.conversationRpcClient = conversationRpcClient
-	och.groupRpcClient = groupRpcClient
+	och.conversationRPCClient = conversationRPCClient
+	och.groupRPCClient = groupRPCClient
 	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
 		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
@@ -165,8 +165,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 
 // 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
 func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
-	totalMsgs []*ContextMsg,
-) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
+	totalMses []*ContextMsg,
+) (storageMsgList, notStorageMsgList, storageNotificationList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
 	isStorage := func(msg *sdkws.MsgData) bool {
 		options2 := utils.Options(msg.Options)
 		if options2.IsHistory() {
@@ -178,7 +178,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 			return false
 		}
 	}
-	for _, v := range totalMsgs {
+	for _, v := range totalMses {
 		options := utils.Options(v.message.Options)
 		if !options.IsNotNotification() {
 			// clone msg from notificationMsg
@@ -205,7 +205,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 				storageMsgList = append(storageMsgList, msg)
 			}
 			if isStorage(v.message) {
-				storageNotificatoinList = append(storageNotificatoinList, v.message)
+				storageNotificationList = append(storageNotificationList, v.message)
 			} else {
 				notStorageNotificationList = append(notStorageNotificationList, v.message)
 			}
@@ -278,16 +278,16 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 		if isNewConversation {
 			if storageList[0].SessionType == constant.SuperGroupChatType {
 				log.ZInfo(ctx, "group chat first create conversation", "conversationID", conversationID)
-				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)
+				userIDs, err := och.groupRPCClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)
 				if err != nil {
 					log.ZWarn(ctx, "get group member ids error", err, "conversationID", conversationID)
 				} else {
-					if err := och.conversationRpcClient.GroupChatFirstCreateConversation(ctx, storageList[0].GroupID, userIDs); err != nil {
+					if err := och.conversationRPCClient.GroupChatFirstCreateConversation(ctx, storageList[0].GroupID, userIDs); err != nil {
 						log.ZWarn(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 					}
 				}
 			} else {
-				if err := och.conversationRpcClient.SingleChatFirstCreateConversation(ctx, storageList[0].RecvID, storageList[0].SendID); err != nil {
+				if err := och.conversationRPCClient.SingleChatFirstCreateConversation(ctx, storageList[0].RecvID, storageList[0].SendID); err != nil {
 					log.ZWarn(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
 				}
 			}
@@ -312,7 +312,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				triggerChannelValue := cmd.Value.(TriggerChannelValue)
 				ctx := triggerChannelValue.ctx
 				consumerMessages := triggerChannelValue.cMsgList
-				//Aggregation map[userid]message list
+				// Aggregation map[userid]message list
 				log.ZDebug(ctx, "batch messages come to distribution center", "length", len(consumerMessages))
 				for i := 0; i < len(consumerMessages); i++ {
 					ctxMsg := &ContextMsg{}
@@ -431,7 +431,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 					ctx := mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
 					log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
-						//log.Debug()
+						// log.Debug()
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 							ctx: ctx, cMsgList: ccMsg[i*split : (i+1)*split]}}
 					}

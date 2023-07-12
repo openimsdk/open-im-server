@@ -27,7 +27,7 @@ func main() {
 	if err := rpcCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
-	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImGroupName, group.Start); err != nil {
+	if err := rpcCmd.StartSvr(config.Config.RPCRegisterName.OpenImGroupName, group.Start); err != nil {
 		panic(err.Error())
 	}
 }

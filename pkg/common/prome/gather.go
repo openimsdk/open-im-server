@@ -20,17 +20,17 @@ import (
 )
 
 var (
-	//auth rpc
+	// auth rpc
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
 
-	//seg
+	// seg
 	SeqGetSuccessCounter prometheus.Counter
 	SeqGetFailedCounter  prometheus.Counter
 	SeqSetSuccessCounter prometheus.Counter
 	SeqSetFailedCounter  prometheus.Counter
 
-	//msg-db
+	// msg-db
 	MsgInsertRedisSuccessCounter   prometheus.Counter
 	MsgInsertRedisFailedCounter    prometheus.Counter
 	MsgInsertMongoSuccessCounter   prometheus.Counter
@@ -40,7 +40,7 @@ var (
 	MsgPullFromMongoSuccessCounter prometheus.Counter
 	MsgPullFromMongoFailedCounter  prometheus.Counter
 
-	//msg-ws
+	// msg-ws
 	MsgRecvTotalCounter          prometheus.Counter
 	GetNewestSeqTotalCounter     prometheus.Counter
 	PullMsgBySeqListTotalCounter prometheus.Counter
@@ -50,7 +50,7 @@ var (
 	WorkSuperGroupChatMsgRecvSuccessCounter prometheus.Counter
 	OnlineUserGauge                         prometheus.Gauge
 
-	//msg-msg
+	// msg-msg
 	SingleChatMsgProcessSuccessCounter         prometheus.Counter
 	SingleChatMsgProcessFailedCounter          prometheus.Counter
 	GroupChatMsgProcessSuccessCounter          prometheus.Counter
@@ -58,14 +58,14 @@ var (
 	WorkSuperGroupChatMsgProcessSuccessCounter prometheus.Counter
 	WorkSuperGroupChatMsgProcessFailedCounter  prometheus.Counter
 
-	//msg-push
+	// msg-push
 	MsgOnlinePushSuccessCounter  prometheus.Counter
 	MsgOfflinePushSuccessCounter prometheus.Counter
 	MsgOfflinePushFailedCounter  prometheus.Counter
 	// api
-	ApiRequestCounter        prometheus.Counter
-	ApiRequestSuccessCounter prometheus.Counter
-	ApiRequestFailedCounter  prometheus.Counter
+	APIRequestCounter        prometheus.Counter
+	APIRequestSuccessCounter prometheus.Counter
+	APIRequestFailedCounter  prometheus.Counter
 
 	// grpc
 	GrpcRequestCounter        prometheus.Counter
@@ -136,31 +136,31 @@ func NewSeqSetFailedCounter() {
 	})
 }
 
-func NewApiRequestCounter() {
-	if ApiRequestCounter != nil {
+func NewAPIRequestCounter() {
+	if APIRequestCounter != nil {
 		return
 	}
-	ApiRequestCounter = promauto.NewCounter(prometheus.CounterOpts{
+	APIRequestCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "api_request",
 		Help: "The number of api request",
 	})
 }
 
-func NewApiRequestSuccessCounter() {
-	if ApiRequestSuccessCounter != nil {
+func NewAPIRequestSuccessCounter() {
+	if APIRequestFailedCounter != nil {
 		return
 	}
-	ApiRequestSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+	APIRequestFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "api_request_success",
 		Help: "The number of api request success",
 	})
 }
 
-func NewApiRequestFailedCounter() {
-	if ApiRequestFailedCounter != nil {
+func NewAPIRequestFailedCounter() {
+	if APIRequestFailedCounter != nil {
 		return
 	}
-	ApiRequestFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+	APIRequestFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "api_request_failed",
 		Help: "The number of api request failed",
 	})

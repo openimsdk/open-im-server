@@ -36,7 +36,7 @@ type User struct {
 }
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
@@ -44,13 +44,13 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	return &User{Discov: discov, Client: client, conn: conn}
 }
 
-type UserRpcClient User
+type UserRPCClient User
 
-func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClient {
-	return UserRpcClient(*NewUser(client))
+func NewUserRPCClient(client discoveryregistry.SvcDiscoveryRegistry) UserRPCClient {
+	return UserRPCClient(*NewUser(client))
 }
 
-func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
+func (u *UserRPCClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
 	resp, err := u.Client.GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
 	})
@@ -65,7 +65,7 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	return resp.UsersInfo, nil
 }
 
-func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
+func (u *UserRPCClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.
 	return users[0], nil
 }
 
-func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
+func (u *UserRPCClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	}), nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfos(
+func (u *UserRPCClient) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
 	complete bool,
@@ -102,7 +102,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	}), nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
+func (u *UserRPCClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 	return users[0], nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfoMap(
+func (u *UserRPCClient) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
 	complete bool,
@@ -124,7 +124,7 @@ func (u *UserRpcClient) GetPublicUserInfoMap(
 	}), nil
 }
 
-func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
+func (u *UserRPCClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
 	resp, err := u.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
 	})
@@ -134,7 +134,7 @@ func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 	return resp.GlobalRecvMsgOpt, err
 }
 
-func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
+func (u *UserRPCClient) Access(ctx context.Context, ownerUserID string) error {
 	_, err := u.GetUserInfo(ctx, ownerUserID)
 	if err != nil {
 		return err

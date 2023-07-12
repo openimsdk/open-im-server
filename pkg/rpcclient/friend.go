@@ -32,7 +32,7 @@ type Friend struct {
 }
 
 func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry) *Friend {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImFriendName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImFriendName)
 	if err != nil {
 		panic(err)
 	}

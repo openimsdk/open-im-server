@@ -40,7 +40,7 @@ import (
 type friendServer struct {
 	friendDatabase     controller.FriendDatabase
 	blackDatabase      controller.BlackDatabase
-	userRpcClient      *rpcclient.UserRpcClient
+	userRPCClient      *rpcclient.UserRPCClient
 	notificationSender *notification.FriendNotificationSender
 	RegisterCenter     registry.SvcDiscoveryRegistry
 }
@@ -59,11 +59,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	blackDB := relation.NewBlackGorm(db)
 	friendDB := relation.NewFriendGorm(db)
-	userRpcClient := rpcclient.NewUserRpcClient(client)
+	userRPCClient := rpcclient.NewUserRPCClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	notificationSender := notification.NewFriendNotificationSender(
 		&msgRpcClient,
-		notification.WithRpcFunc(userRpcClient.GetUsersInfo),
+		notification.WithRpcFunc(userRPCClient.GetUsersInfo),
 	)
 	pbfriend.RegisterFriendServer(server, &friendServer{
 		friendDatabase: controller.NewFriendDatabase(
@@ -76,7 +76,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 			blackDB,
 			cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt()),
 		),
-		userRpcClient:      &userRpcClient,
+		userRPCClient:      &userRPCClient,
 		notificationSender: notificationSender,
 		RegisterCenter:     client,
 	})
@@ -99,7 +99,7 @@ func (s *friendServer) ApplyToAddFriend(
 	if err := CallbackBeforeAddFriend(ctx, req); err != nil && err != errs.ErrCallbackContinue {
 		return nil, err
 	}
-	if _, err := s.userRpcClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
+	if _, err := s.userRPCClient.GetUsersInfoMap(ctx, []string{req.ToUserID, req.FromUserID}); err != nil {
 		return nil, err
 	}
 	in1, in2, err := s.friendDatabase.CheckIn(ctx, req.FromUserID, req.ToUserID)
@@ -125,7 +125,7 @@ func (s *friendServer) ImportFriends(
 	if err := tokenverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := s.userRpcClient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
+	if _, err := s.userRPCClient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
 		return nil, err
 	}
 
@@ -185,7 +185,7 @@ func (s *friendServer) DeleteFriend(
 ) (resp *pbfriend.DeleteFriendResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.DeleteFriendResp{}
-	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -206,7 +206,7 @@ func (s *friendServer) SetFriendRemark(
 ) (resp *pbfriend.SetFriendRemarkResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.SetFriendRemarkResp{}
-	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err = s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, []string{req.FriendUserID})
@@ -234,7 +234,7 @@ func (s *friendServer) GetDesignatedFriends(
 	if err != nil {
 		return nil, err
 	}
-	if resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userRpcClient.GetUsersInfoMap); err != nil {
+	if resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userRPCClient.GetUsersInfoMap); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -247,7 +247,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 ) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyToResp{}
-	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	pageNumber, showNumber := utils.GetPage(req.Pagination)
@@ -255,7 +255,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRPCClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(
 ) (resp *pbfriend.GetPaginationFriendsApplyFromResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
 	resp = &pbfriend.GetPaginationFriendsApplyFromResp{}
-	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	pageNumber, showNumber := utils.GetPage(req.Pagination)
@@ -278,7 +278,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRPCClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +306,7 @@ func (s *friendServer) GetPaginationFriends(
 	req *pbfriend.GetPaginationFriendsReq,
 ) (resp *pbfriend.GetPaginationFriendsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	pageNumber, showNumber := utils.GetPage(req.Pagination)
@@ -315,7 +315,7 @@ func (s *friendServer) GetPaginationFriends(
 		return nil, err
 	}
 	resp = &pbfriend.GetPaginationFriendsResp{}
-	resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userRpcClient.GetUsersInfoMap)
+	resp.FriendsInfo, err = convert.FriendsDB2Pb(ctx, friends, s.userRPCClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func (s *friendServer) GetFriendIDs(
 	req *pbfriend.GetFriendIDsReq,
 ) (resp *pbfriend.GetFriendIDsResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	resp = &pbfriend.GetFriendIDsResp{}

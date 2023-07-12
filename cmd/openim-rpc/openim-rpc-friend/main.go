@@ -27,7 +27,7 @@ func main() {
 	if err := rpcCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
-	if err := rpcCmd.StartSvr(config.Config.RpcRegisterName.OpenImFriendName, friend.Start); err != nil {
+	if err := rpcCmd.StartSvr(config.Config.RPCRegisterName.OpenImFriendName, friend.Start); err != nil {
 		panic(err.Error())
 	}
 }

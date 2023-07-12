@@ -20,9 +20,9 @@ type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
 	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase            controller.CommonMsgDatabase
-	Group                  *rpcclient.GroupRpcClient
-	User                   *rpcclient.UserRpcClient
-	Conversation           *rpcclient.ConversationRpcClient
+	Group                  *rpcclient.GroupRPCClient
+	User                   *rpcclient.UserRPCClient
+	Conversation           *rpcclient.ConversationRPCClient
 	friend                 *rpcclient.FriendRpcClient
 	GroupLocalCache        *localcache.GroupLocalCache
 	ConversationLocalCache *localcache.ConversationLocalCache
@@ -61,13 +61,13 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
-	conversationClient := rpcclient.NewConversationRpcClient(client)
-	userRpcClient := rpcclient.NewUserRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	conversationClient := rpcclient.NewConversationRPCClient(client)
+	userRPCClient := rpcclient.NewUserRPCClient(client)
+	groupRpcClient := rpcclient.NewGroupRPCClient(client)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	s := &msgServer{
 		Conversation:           &conversationClient,
-		User:                   &userRpcClient,
+		User:                   &userRPCClient,
 		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
 		RegisterCenter:         client,

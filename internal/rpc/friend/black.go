@@ -29,7 +29,7 @@ func (s *friendServer) GetPaginationBlacks(
 	ctx context.Context,
 	req *pbFriend.GetPaginationBlacksReq,
 ) (resp *pbFriend.GetPaginationBlacksResp, err error) {
-	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	var pageNumber, showNumber int32
@@ -42,7 +42,7 @@ func (s *friendServer) GetPaginationBlacks(
 		return nil, err
 	}
 	resp = &pbFriend.GetPaginationBlacksResp{}
-	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userRpcClient.GetUsersInfoMap)
+	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userRPCClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (s *friendServer) RemoveBlack(
 	ctx context.Context,
 	req *pbFriend.RemoveBlackReq,
 ) (*pbFriend.RemoveBlackResp, error) {
-	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
+	if err := s.userRPCClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.blackDatabase.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
@@ -79,7 +79,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
+	_, err := s.userRPCClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})
 	if err != nil {
 		return nil, err
 	}

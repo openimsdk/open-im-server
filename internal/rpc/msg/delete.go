@@ -86,7 +86,7 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 			return nil, err
 		}
 		tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-		m.notificationSender.NotificationWithSesstionType(
+		m.notificationSender.NotificationWithSessionType(
 			ctx,
 			req.UserID,
 			m.conversationAndGetRecvID(conversations[0], req.UserID),
@@ -100,7 +100,7 @@ func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*ms
 		}
 		if isSyncSelf {
 			tips := &sdkws.DeleteMsgsTips{UserID: req.UserID, ConversationID: req.ConversationID, Seqs: req.Seqs}
-			m.notificationSender.NotificationWithSesstionType(ctx, req.UserID, req.UserID, constant.DeleteMsgsNotification, constant.SingleChatType, tips)
+			m.notificationSender.NotificationWithSessionType(ctx, req.UserID, req.UserID, constant.DeleteMsgsNotification, constant.SingleChatType, tips)
 		}
 	}
 	return &msg.DeleteMsgsResp{}, nil
@@ -171,7 +171,7 @@ func (m *msgServer) clearConversation(
 		// notification 2 self
 		if isSyncSelf {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: existConversationIDs}
-			m.notificationSender.NotificationWithSesstionType(
+			m.notificationSender.NotificationWithSessionType(
 				ctx,
 				userID,
 				userID,
@@ -186,7 +186,7 @@ func (m *msgServer) clearConversation(
 		}
 		for _, conversation := range existConversations {
 			tips := &sdkws.ClearConversationTips{UserID: userID, ConversationIDs: []string{conversation.ConversationID}}
-			m.notificationSender.NotificationWithSesstionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
+			m.notificationSender.NotificationWithSessionType(ctx, userID, m.conversationAndGetRecvID(conversation, userID), constant.ClearConversationNotification, conversation.ConversationType, tips)
 		}
 	}
 	if err := m.MsgDatabase.UserSetHasReadSeqs(ctx, userID, maxSeqs); err != nil {

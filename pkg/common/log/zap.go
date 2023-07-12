@@ -50,16 +50,16 @@ func InitFromConfig(
 	loggerPrefixName, moduleName string,
 	logLevel int,
 	isStdout bool,
-	isJson bool,
+	isJSON bool,
 	logLocation string,
 	rotateCount uint,
 ) error {
-	l, err := NewZapLogger(loggerPrefixName, moduleName, logLevel, isStdout, isJson, logLocation, rotateCount)
+	l, err := NewZapLogger(loggerPrefixName, moduleName, logLevel, isStdout, isJSON, logLocation, rotateCount)
 	if err != nil {
 		return err
 	}
 	pkgLogger = l.WithCallDepth(2)
-	if isJson {
+	if isJSON {
 		pkgLogger = pkgLogger.WithName(moduleName)
 	}
 	return nil
@@ -104,7 +104,7 @@ func NewZapLogger(
 	loggerPrefixName, loggerName string,
 	logLevel int,
 	isStdout bool,
-	isJson bool,
+	isJSON bool,
 	logLocation string,
 	rotateCount uint,
 ) (*ZapLogger, error) {
@@ -114,7 +114,7 @@ func NewZapLogger(
 		// InitialFields:     map[string]interface{}{"PID": os.Getegid()},
 		DisableStacktrace: true,
 	}
-	if isJson {
+	if isJSON {
 		zapConfig.Encoding = "json"
 	} else {
 		zapConfig.Encoding = "console"
@@ -123,7 +123,7 @@ func NewZapLogger(
 	// 	zapConfig.OutputPaths = append(zapConfig.OutputPaths, "stdout", "stderr")
 	// }
 	zl := &ZapLogger{level: logLevelMap[logLevel], loggerName: loggerName, loggerPrefixName: loggerPrefixName}
-	opts, err := zl.cores(isStdout, isJson, logLocation, rotateCount)
+	opts, err := zl.cores(isStdout, isJSON, logLocation, rotateCount)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func NewZapLogger(
 	return zl, nil
 }
 
-func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotateCount uint) (zap.Option, error) {
+func (l *ZapLogger) cores(isStdout bool, isJSON bool, logLocation string, rotateCount uint) (zap.Option, error) {
 	c := zap.NewProductionEncoderConfig()
 	c.EncodeTime = l.timeEncoder
 	c.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -145,7 +145,7 @@ func (l *ZapLogger) cores(isStdout bool, isJson bool, logLocation string, rotate
 	c.CallerKey = "caller"
 	c.NameKey = "logger"
 	var fileEncoder zapcore.Encoder
-	if isJson {
+	if isJSON {
 		c.EncodeLevel = zapcore.CapitalLevelEncoder
 		fileEncoder = zapcore.NewJSONEncoder(c)
 		fileEncoder.AddInt("PID", os.Getpid())

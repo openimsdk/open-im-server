@@ -88,7 +88,7 @@ func StructToJsonBytes(param interface{}) []byte {
 }
 
 // The incoming parameter must be a pointer
-func JsonStringToStruct(s string, args interface{}) error {
+func JSONStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)
 	return err
 }

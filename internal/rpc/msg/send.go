@@ -30,7 +30,6 @@ import (
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
-	resp = &pbMsg.SendMsgResp{}
 	if req.MsgData != nil {
 		flag := isMessageHasReadEnabled(req.MsgData)
 		if !flag {
@@ -101,9 +100,9 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			return
 		}
 		atUserID = utils.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
-		if len(atUserID) == 0 { //just @everyone
+		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
-		} else { //@Everyone and @other people
+		} else { // @Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
 			err := m.Conversation.SetConversations(ctx, atUserID, conversation)
 			if err != nil {

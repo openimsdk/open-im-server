@@ -150,7 +150,7 @@ func (ws *WsServer) Run() error {
 	}()
 	http.HandleFunc("/", ws.wsHandler)
 	// http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {})
-	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
+	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) // Start listening
 }
 
 func (ws *WsServer) registerClient(client *Client) {
@@ -176,7 +176,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
-			//已经有同平台的连接存在
+			// 已经有同平台的连接存在
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
@@ -269,11 +269,11 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 				}
 			}
 			log.ZDebug(info.newClient.ctx, "set token map is ", "token map", m, "userID", info.newClient.UserID)
-			err = ws.cache.SetTokenMapByUidPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
+			err = ws.cache.SetTokenMapByUIDPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
 			if err != nil {
 				log.ZWarn(
 					info.newClient.ctx,
-					"SetTokenMapByUidPid err",
+					"SetTokenMapByUIDPid err",
 					err,
 					"userID",
 					info.newClient.UserID,

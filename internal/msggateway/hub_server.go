@@ -48,7 +48,7 @@ func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, serve
 func (s *Server) Start() error {
 	return startrpc.Start(
 		s.rpcPort,
-		config.Config.RpcRegisterName.OpenImMessageGatewayName,
+		config.Config.RPCRegisterName.OpenImMessageGatewayName,
 		s.prometheusPort,
 		s.InitServer,
 	)
@@ -84,7 +84,7 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !tokenverify.IsAppManagerUID(ctx) {
 		return nil, errs.ErrNoPermission.Wrap("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp
@@ -197,6 +197,6 @@ func (s *Server) MultiTerminalLoginCheck(
 	ctx context.Context,
 	req *msggateway.MultiTerminalLoginCheckReq,
 ) (*msggateway.MultiTerminalLoginCheckResp, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }

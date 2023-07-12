@@ -85,7 +85,7 @@ func NewFriendNotificationSender(
 	opts ...friendNotificationSenderOptions,
 ) *FriendNotificationSender {
 	f := &FriendNotificationSender{
-		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient)),
+		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRPCClient(msgRpcClient)),
 	}
 	for _, opt := range opts {
 		opt(f)

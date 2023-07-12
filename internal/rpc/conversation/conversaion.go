@@ -21,7 +21,7 @@ import (
 )
 
 type conversationServer struct {
-	groupRpcClient                 *rpcclient.GroupRpcClient
+	groupRPCClient                 *rpcclient.GroupRPCClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
 }
@@ -39,11 +39,11 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	conversationDB := relation.NewConversationGorm(db)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	groupRPCClient := rpcclient.NewGroupRPCClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
-		groupRpcClient:                 &groupRpcClient,
+		groupRPCClient:                 &groupRPCClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
@@ -101,7 +101,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
 	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
+		groupInfo, err := c.groupRPCClient.GetGroupInfo(ctx, req.Conversation.GroupID)
 		if err != nil {
 			return nil, err
 		}

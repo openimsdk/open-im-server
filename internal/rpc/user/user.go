@@ -30,7 +30,7 @@ import (
 type userServer struct {
 	controller.UserDatabase
 	notificationSender *notification.FriendNotificationSender
-	friendRpcClient    *rpcclient.FriendRpcClient
+	friendRPCClient    *rpcclient.FriendRpcClient
 	RegisterCenter     registry.SvcDiscoveryRegistry
 }
 
@@ -57,12 +57,12 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
+	msgRPCClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
 		UserDatabase:       database,
 		RegisterCenter:     client,
-		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		friendRPCClient:    &friendRpcClient,
+		notificationSender: notification.NewFriendNotificationSender(&msgRPCClient, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
@@ -96,7 +96,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 		return nil, err
 	}
 	_ = s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
-	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
+	friends, err := s.friendRPCClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}

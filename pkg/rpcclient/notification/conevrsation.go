@@ -27,7 +27,7 @@ type ConversationNotificationSender struct {
 }
 
 func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
-	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient))}
+	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithRPCClient(msgRpcClient))}
 }
 
 // SetPrivate调用

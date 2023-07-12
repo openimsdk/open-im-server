@@ -38,7 +38,7 @@ func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriend
 		OperationID:     mcontext.GetOperationID(ctx),
 	}
 	resp := &cbapi.CallbackBeforeAddFriendResp{}
-	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackURL, cbReq, resp, config.Config.Callback.CallbackBeforeAddFriend); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}

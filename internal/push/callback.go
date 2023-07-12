@@ -28,7 +28,7 @@ import (
 )
 
 func url() string {
-	return config.Config.Callback.CallbackUrl
+	return config.Config.Callback.CallbackURL
 }
 
 func callbackOfflinePush(
@@ -127,7 +127,7 @@ func callbackBeforeSuperGroupOnlinePush(
 		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}
-	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
+	if err := http.CallBackPostReturn(ctx, config.Config.Callback.CallbackURL, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush); err != nil {
 		if err == errs.ErrCallbackContinue {
 			return nil
 		}

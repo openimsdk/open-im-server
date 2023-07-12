@@ -22,7 +22,7 @@ type OSSCredentialReq struct {
 
 type OSSCredentialRespData struct {
 	Endpoint        string `json:"endpoint"`
-	AccessKeyId     string `json:"access_key_id"`
+	AccessKeyID     string `json:"access_key_id"`
 	AccessKeySecret string `json:"access_key_secret"`
 	Token           string `json:"token"`
 	Bucket          string `json:"bucket"`

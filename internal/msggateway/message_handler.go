@@ -67,15 +67,15 @@ type MessageHandler interface {
 var _ MessageHandler = (*GrpcHandler)(nil)
 
 type GrpcHandler struct {
-	msgRpcClient *rpcclient.MessageRpcClient
-	pushClient   *rpcclient.PushRpcClient
+	msgRPCClient *rpcclient.MessageRpcClient
+	pushClient   *rpcclient.PushRPCClient
 	validate     *validator.Validate
 }
 
 func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry) *GrpcHandler {
-	msgRpcClient := rpcclient.NewMessageRpcClient(client)
-	pushRpcClient := rpcclient.NewPushRpcClient(client)
-	return &GrpcHandler{msgRpcClient: &msgRpcClient,
+	msgRPCClient := rpcclient.NewMessageRpcClient(client)
+	pushRpcClient := rpcclient.NewPushRPCClient(client)
+	return &GrpcHandler{msgRPCClient: &msgRPCClient,
 		pushClient: &pushRpcClient, validate: validate}
 }
 
@@ -87,7 +87,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	if err := g.validate.Struct(&req); err != nil {
 		return nil, err
 	}
-	resp, err := g.msgRpcClient.GetMaxSeq(context, &req)
+	resp, err := g.msgRPCClient.GetMaxSeq(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 		return nil, err
 	}
 	req := msg.SendMsgReq{MsgData: &msgData}
-	resp, err := g.msgRpcClient.SendMsg(context, &req)
+	resp, err := g.msgRPCClient.SendMsg(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 }
 
 func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byte, error) {
-	resp, err := g.msgRpcClient.SendMsg(context, nil)
+	resp, err := g.msgRPCClient.SendMsg(context, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]
 	if err := g.validate.Struct(data); err != nil {
 		return nil, err
 	}
-	resp, err := g.msgRpcClient.PullMessageBySeqList(context, &req)
+	resp, err := g.msgRPCClient.PullMessageBySeqList(context, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -194,4 +194,4 @@ func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data Req) ([]byt
 //		return nil, err
 //	}
 //	return c, nil
-//}
+// }

@@ -62,7 +62,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb)),
-		userRpcClient: rpcclient.NewUserRpcClient(client),
+		userRPCClient: rpcclient.NewUserRPCClient(client),
 		s3dataBase:    controller.NewS3Database(o, relation.NewObjectInfo(db)),
 		defaultExpire: time.Hour * 24 * 7,
 	})
@@ -73,7 +73,7 @@ type thirdServer struct {
 	apiURL        string
 	thirdDatabase controller.ThirdDatabase
 	s3dataBase    controller.S3Database
-	userRpcClient rpcclient.UserRpcClient
+	userRPCClient rpcclient.UserRPCClient
 	defaultExpire time.Duration
 }
 

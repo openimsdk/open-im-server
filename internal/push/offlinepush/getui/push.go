@@ -163,7 +163,7 @@ func (g *Client) request(ctx context.Context, url string, input interface{}, tok
 	header := map[string]string{"token": token}
 	resp := &Resp{}
 	resp.Data = output
-	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
+	return g.postReturn(ctx, config.Config.Push.GeTui.PushURL+url, header, input, resp, 3)
 }
 
 func (g *Client) postReturn(

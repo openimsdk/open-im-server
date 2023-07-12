@@ -100,8 +100,8 @@ type MsgModel interface {
 	thirdCache
 	AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error
 	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
-	SetTokenMapByUidPid(ctx context.Context, userID string, platformID int, m map[string]int) error
-	DeleteTokenByUidPid(ctx context.Context, userID string, platformID int, fields []string) error
+	SetTokenMapByUIDPid(ctx context.Context, userID string, platformID int, m map[string]int) error
+	DeleteTokenByUIDPid(ctx context.Context, userID string, platformID int, fields []string) error
 	GetMessagesBySeq(
 		ctx context.Context,
 		conversationID string,
@@ -330,7 +330,7 @@ func (c *msgCache) GetTokensWithoutError(ctx context.Context, userID string, pla
 	return mm, nil
 }
 
-func (c *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platform int, m map[string]int) error {
+func (c *msgCache) SetTokenMapByUIDPid(ctx context.Context, userID string, platform int, m map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
 	mm := make(map[string]interface{})
 	for k, v := range m {
@@ -339,7 +339,7 @@ func (c *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platf
 	return errs.Wrap(c.rdb.HSet(ctx, key, mm).Err())
 }
 
-func (c *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platform int, fields []string) error {
+func (c *msgCache) DeleteTokenByUIDPid(ctx context.Context, userID string, platform int, fields []string) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
@@ -359,7 +359,7 @@ func (c *msgCache) GetMessagesBySeq(
 ) (seqMsgs []*sdkws.MsgData, failedSeqs []int64, err error) {
 	pipe := c.rdb.Pipeline()
 	for _, v := range seqs {
-		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
+		// MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := c.getMessageCacheKey(conversationID, v)
 		if err := pipe.Get(ctx, key).Err(); err != nil && err != redis.Nil {
 			return nil, nil, err

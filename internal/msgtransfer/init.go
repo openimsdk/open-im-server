@@ -60,8 +60,8 @@ func StartTransfer(prometheusPort int) error {
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	chatLogDatabase := controller.NewChatLogDatabase(relation.NewChatLogGorm(db))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	conversationRpcClient := rpcclient.NewConversationRPCClient(client)
+	groupRpcClient := rpcclient.NewGroupRPCClient(client)
 	msgTransfer := NewMsgTransfer(chatLogDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
@@ -69,7 +69,7 @@ func StartTransfer(prometheusPort int) error {
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 	msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
+	conversationRpcClient *rpcclient.ConversationRPCClient, groupRpcClient *rpcclient.GroupRPCClient) *MsgTransfer {
 	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase)}
 }

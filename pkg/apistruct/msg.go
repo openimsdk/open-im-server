@@ -50,7 +50,7 @@ type PictureBaseInfo struct {
 	Size   int64  `mapstructure:"size" `
 	Width  int32  `mapstructure:"width" `
 	Height int32  `mapstructure:"height"`
-	Url    string `mapstructure:"url" `
+	URL    string `mapstructure:"url" `
 }
 
 type PictureElem struct {
@@ -114,7 +114,7 @@ type OANotificationElem struct {
 	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
 	NotificationType    int32       `mapstructure:"notificationType" json:"notificationType" validate:"required"`
 	Text                string      `mapstructure:"text" json:"text" validate:"required"`
-	Url                 string      `mapstructure:"url" json:"url"`
+	URL                 string      `mapstructure:"url" json:"url"`
 	MixType             int32       `mapstructure:"mixType" json:"mixType"`
 	PictureElem         PictureElem `mapstructure:"pictureElem" json:"pictureElem"`
 	SoundElem           SoundElem   `mapstructure:"soundElem" json:"soundElem"`

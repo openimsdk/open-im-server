@@ -27,7 +27,7 @@ func main() {
 	if err := authCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
-	if err := authCmd.StartSvr(config.Config.RpcRegisterName.OpenImAuthName, auth.Start); err != nil {
+	if err := authCmd.StartSvr(config.Config.RPCRegisterName.OpenImAuthName, auth.Start); err != nil {
 		panic(err.Error())
 	}
 }

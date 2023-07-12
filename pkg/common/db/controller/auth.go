@@ -26,9 +26,9 @@ import (
 )
 
 type AuthDatabase interface {
-	//结果为空 不返回错误
+	// 结果为空 不返回错误
 	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
-	//创建token
+	// 创建token
 	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
 }
 
@@ -66,7 +66,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		}
 	}
 	if len(deleteTokenKey) != 0 {
-		err := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+		err := a.cache.DeleteTokenByUIDPid(ctx, userID, platformID, deleteTokenKey)
 		if err != nil {
 			return "", err
 		}

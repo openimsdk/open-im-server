@@ -116,7 +116,7 @@ func (c *Client) readMessage() {
 			return
 		}
 		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
-		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
+		if c.closed == true { // 连接刚置位已经关闭，但是协程还没退出的场景
 			c.closedErr = ErrConnClosed
 			return
 		}
@@ -191,7 +191,7 @@ func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, e
 		return nil, messageErr
 	}
 	c.IsBackground = isBackground
-	//todo callback
+	// todo callback
 	return resp, nil
 
 }
@@ -254,8 +254,6 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	if c.closed == true {
 		return nil
 	}
-	encodedBuf := bufferPool.Get().([]byte)
-	resultBuf := bufferPool.Get().([]byte)
 	encodedBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
 		return utils.Wrap(err, "")
@@ -263,7 +261,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	_ = c.conn.SetWriteDeadline(writeWait)
 	if c.IsCompress {
 		var compressErr error
-		resultBuf, compressErr = c.longConnServer.Compress(encodedBuf)
+		resultBuf, compressErr := c.longConnServer.Compress(encodedBuf)
 		if compressErr != nil {
 			return utils.Wrap(compressErr, "")
 		}

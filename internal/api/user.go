@@ -69,7 +69,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, config.Config.RPCRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
@@ -79,7 +79,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
 
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -127,12 +127,12 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	conns, err := u.Discov.GetConns(c, config.Config.RpcRegisterName.OpenImMessageGatewayName)
+	conns, err := u.Discov.GetConns(c, config.Config.RPCRegisterName.OpenImMessageGatewayName)
 	if err != nil {
 		apiresp.GinError(c, err)
 		return
 	}
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)

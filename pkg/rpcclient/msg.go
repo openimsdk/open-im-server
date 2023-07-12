@@ -112,7 +112,7 @@ type Message struct {
 }
 
 func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
-	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImMsgName)
 	if err != nil {
 		panic(err)
 	}
@@ -164,15 +164,15 @@ func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*m
 	}
 }
 
-func WithRpcClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
+func WithRPCClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = msgRpcClient.SendMsg
 	}
 }
 
-func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
+func WithUserRPCClient(userRPCClient *UserRPCClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
-		s.getUserInfo = userRpcClient.GetUserInfo
+		s.getUserInfo = userRPCClient.GetUserInfo
 	}
 }
 
@@ -185,18 +185,17 @@ func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSende
 }
 
 type notificationOpt struct {
-	WithRpcGetUsername bool
+	WithRPCGetUsername bool
 }
 
 type NotificationOptions func(*notificationOpt)
 
-func WithRpcGetUserName() NotificationOptions {
+func WithRPCGetUserName() NotificationOptions {
 	return func(opt *notificationOpt) {
-		opt.WithRpcGetUsername = true
+		opt.WithRPCGetUsername = true
 	}
 }
-
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
@@ -209,7 +208,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
-	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
+	if notificationOpt.WithRPCGetUsername && s.getUserInfo != nil {
 		userInfo, err := s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
@@ -248,5 +247,5 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 }
 
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
-	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+	return s.NotificationWithSessionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }
