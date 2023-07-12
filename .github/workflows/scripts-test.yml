@@ -1,4 +1,4 @@
-name: Execute Scripts
+name: OpenIM Start Execute Scripts
 
 on: 
     push:
@@ -58,6 +58,6 @@ jobs:
 
     - name: Print openIM.log
       run: |
-        cat -n logs/openIM.log
+        cat logs/openIM.log
         cat logs/openIM.log  >> "$GITHUB_OUTPUT"
-
+      continue-on-error: true
