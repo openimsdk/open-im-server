@@ -41,18 +41,6 @@ func (o *ConversationApi) GetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.GetConversations, o.Client, c)
 }
 
-func (o *ConversationApi) BatchSetConversations(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.BatchSetConversations, o.Client, c)
-}
-
-func (o *ConversationApi) SetRecvMsgOpt(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.SetRecvMsgOpt, o.Client, c)
-}
-
-func (o *ConversationApi) ModifyConversationField(c *gin.Context) {
-	a2r.Call(conversation.ConversationClient.ModifyConversationField, o.Client, c)
-}
-
 func (o *ConversationApi) SetConversations(c *gin.Context) {
 	a2r.Call(conversation.ConversationClient.SetConversations, o.Client, c)
 }

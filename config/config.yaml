@@ -56,14 +56,11 @@ kafka:
     topic: "offlineMsgToMongoMysql"       #不建议修改
   msgToPush:
     topic: "msgToPush"                    #不建议修改
-  msgToModify:
-    topic: "msgToModify"                  #不建议修改
   consumerGroupID: #消费者组，不建议修改
     msgToRedis: redis                     #
     msgToMongo: mongo                     #
     msgToMySql: mysql                     #
     msgToPush: push                       #
-    msgToModify: modify                   #
 
 
 rpc:
@@ -76,41 +73,26 @@ api:
   listenIP:                               #默认为0.0.0.0
 
 object:
-  enable: minio                           #使用minio
-  apiURL: http://127.0.0.1:10002/third/object
+  enable: "minio"                           #使用minio
+  apiURL: "http://127.0.0.1:10002/object/"
   minio:
-    tempBucket: "openim"                  #不建议修改
-    dataBucket: "openim"                  #不建议修改
-    location: us-east-1                   #不建议修改
-    endpoint: http://127.0.0.1:10005      #minio对外服务的ip和端口，app要能访问此ip和端口
-    accessKeyID: root                     #ID
-    secretAccessKey: openIM123            #秘钥
-    isDistributedMod: false               #是否分布式多硬盘部署，如果是多硬盘部署，需要修改为true
-  tencent: #tencent cos
-    appID:
-    region:
-    bucket:
-    secretID:
-    secretKey:
-  ali: #ali oss
-    regionID:
-    accessKeyID:
-    accessKeySecret:
-    stsEndpoint:
-    ossEndpoint:
-    bucket:
-    finalHost:
-    stsDurationSeconds:
-    OssRoleArn:
-  aws:
-    accessKeyID:
-    accessKeySecret:
-    region:
-    bucket:
-    finalHost:
-    roleArn:
-    externalId:
-    roleSessionName:
+    bucket: "openim"                      #不建议修改
+    endpoint: "http://127.0.0.1:10005"      #minio对外服务的ip和端口，app要能访问此ip和端口
+    accessKeyID: "root"                     #ID
+    secretAccessKey: "openIM123"            #秘钥
+    sessionToken: ""            #token
+  cos: #tencent cos
+    bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
+    secretID: ""
+    secretKey: ""
+    sessionToken: ""
+  oss: #ali oss
+    endpoint: "https://oss-cn-chengdu.aliyuncs.com"
+    bucket: "demo-9999999"
+    bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
+    accessKeyID: ""
+    accessKeySecret: ""
+    sessionToken: ""
 
 rpcPort: #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如  [10110, 10111]
   openImUserPort: [ 10110 ]
@@ -182,7 +164,8 @@ groupMessageHasReadReceiptEnable: true                  #群聊已读是否开�
 singleMessageHasReadReceiptEnable: true                 #单聊已读是否开启
 
 retainChatRecords: 365                                  #mongo保存离线消息时间（天）
-chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息
+chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息，这个删除是为了清理满足上个配置retainChatRecords的过期消息，不会发送通知，仅仅作为清理磁盘使用
+msgDestructTime: "0 2 * * *"                            #消息自动删除时间，每天凌晨2点删除过期消息，这个删除是为了删除保留时间超过超过会话字段msg_destruct_time（秒）的消息。
 
 secret: tuoyun #秘钥，获取token时校验
 

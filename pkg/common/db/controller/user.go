@@ -45,7 +45,7 @@ type UserDatabase interface {
 	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// 获取用户总数
-	CountTotal(ctx context.Context) (int64, error)
+	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// 获取范围内用户增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }
@@ -151,8 +151,8 @@ func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err 
 	return u.userDB.GetAllUserID(ctx)
 }
 
-func (u *userDatabase) CountTotal(ctx context.Context) (count int64, err error) {
-	return u.userDB.CountTotal(ctx)
+func (u *userDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
+	return u.userDB.CountTotal(ctx, before)
 }
 
 func (u *userDatabase) CountRangeEverydayTotal(

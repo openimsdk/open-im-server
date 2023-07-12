@@ -107,10 +107,6 @@ func (m *Mongo) CreateSuperGroupIndex() error {
 	return nil
 }
 
-func (m *Mongo) CreateExtendMsgSetIndex() error {
-	return m.createMongoIndex(unrelation.CExtendMsgSet, true, "-create_time", "work_moment_id")
-}
-
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
 	db := m.db.Database(config.Config.Mongo.Database).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)

@@ -31,17 +31,40 @@ type RootCmd struct {
 	prometheusPort int
 }
 
-func NewRootCmd(name string) (rootCmd *RootCmd) {
+type CmdOpts struct {
+	loggerPrefixName string
+}
+
+func WithCronTaskLogName() func(*CmdOpts) {
+	return func(opts *CmdOpts) {
+		opts.loggerPrefixName = "OpenIM.CronTask.log.all"
+	}
+}
+
+func WithLogName(logName string) func(*CmdOpts) {
+	return func(opts *CmdOpts) {
+		opts.loggerPrefixName = logName
+	}
+}
+
+func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 	rootCmd = &RootCmd{Name: name}
 	c := cobra.Command{
-		Use:   "start",
-		Short: fmt.Sprintf(`Start %s server`, name),
-		Long:  fmt.Sprintf(`Start %s server`, name),
+		Use:   "start openIM application",
+		Short: fmt.Sprintf(`Start %s `, name),
+		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
 				panic(err)
 			}
-			if err := log.InitFromConfig("OpenIM.log.all", name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
+			cmdOpts := &CmdOpts{}
+			for _, opt := range opts {
+				opt(cmdOpts)
+			}
+			if cmdOpts.loggerPrefixName == "" {
+				cmdOpts.loggerPrefixName = "OpenIM.log.all"
+			}
+			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
 				panic(err)
 			}
 			return nil

@@ -70,6 +70,7 @@ message GetUsersOnlineStatusResp{
     string status = 2;
     string connID = 3;
     bool isBackground = 4;
+    string token   =5;
   }
   message FailedDetail{
     string userID = 1;
@@ -80,6 +81,17 @@ message GetUsersOnlineStatusResp{
     repeated SuccessDetail detailPlatformStatus = 3;
   }
 }
+message SingleDetail{
+  string userID = 1;
+  string status = 2;
+  repeated SinglePlatformToken singlePlatformToken = 3;
+}
+message SinglePlatformToken{
+  string platform = 1;
+   int32  total =2;
+   repeated string token = 3;
+}
+
 
 message KickUserOfflineReq{
   int32  platformID = 1;

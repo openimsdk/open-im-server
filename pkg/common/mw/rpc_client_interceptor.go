@@ -31,7 +31,7 @@ import (
 )
 
 func GrpcClient() grpc.DialOption {
-	return grpc.WithUnaryInterceptor(RpcClientInterceptor)
+	return grpc.WithChainUnaryInterceptor(RpcClientInterceptor)
 }
 
 func RpcClientInterceptor(

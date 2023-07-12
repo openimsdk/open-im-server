@@ -51,8 +51,9 @@ type ZkClient struct {
 	lock    sync.Locker
 	options []grpc.DialOption
 
-	resolvers    map[string]*Resolver
-	localConns   map[string][]resolver.Address
+	resolvers  map[string]*Resolver
+	localConns map[string][]grpc.ClientConnInterface
+
 	balancerName string
 
 	logger Logger
@@ -103,7 +104,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		zkRoot:     "/",
 		scheme:     zkRoot,
 		timeout:    timeout,
-		localConns: make(map[string][]resolver.Address),
+		localConns: make(map[string][]grpc.ClientConnInterface),
 		resolvers:  make(map[string]*Resolver),
 		lock:       &sync.Mutex{},
 	}
@@ -216,6 +217,6 @@ func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 	s.options = append(s.options, opts...)
 }
 
-func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
+func (s *ZkClient) GetClientLocalConns() map[string][]grpc.ClientConnInterface {
 	return s.localConns
 }
