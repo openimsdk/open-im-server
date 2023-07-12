@@ -12,10 +12,10 @@ func (x *MsgData) Check() error {
 	if x.Content == nil {
 		return errs.ErrArgs.Wrap("content is empty")
 	}
-	if x.ContentType < 101 || x.ContentType > 203 {
-		return errs.ErrArgs.Wrap("content is empty")
+	if x.ContentType <= constant.ContentTypeBegin || x.ContentType >= constant.NotificationEnd {
+		return errs.ErrArgs.Wrap("content type is invalid")
 	}
-	if x.SessionType < 1 || x.SessionType > 4 {
+	if x.SessionType < constant.SingleChatType || x.SessionType > constant.NotificationChatType {
 		return errs.ErrArgs.Wrap("sessionType is invalid")
 	}
 	if x.SessionType == constant.SingleChatType || x.SessionType == constant.NotificationChatType {
