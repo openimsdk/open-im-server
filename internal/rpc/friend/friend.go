@@ -246,7 +246,6 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 	req *pbfriend.GetPaginationFriendsApplyToReq,
 ) (resp *pbfriend.GetPaginationFriendsApplyToResp, err error) {
 	defer log.ZInfo(ctx, utils.GetFuncName()+" Return")
-	resp = &pbfriend.GetPaginationFriendsApplyToResp{}
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -255,6 +254,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 	if err != nil {
 		return nil, err
 	}
+	resp = &pbfriend.GetPaginationFriendsApplyToResp{}
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
