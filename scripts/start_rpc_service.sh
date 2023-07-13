@@ -95,7 +95,6 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
 
   portList2=$(cat $config_path | grep ${service_prometheus_port_name[$i]} | awk -F '[:]' '{print $NF}')
   list_to_string $portList2
-  echo -e "debug========>cmd=$cmd AAAAA"
   prome_ports=($ports_array)
   #Start related rpc services based on the number of ports
   for ((j = 0; j < ${#service_ports[*]}; j++)); do
@@ -109,10 +108,8 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
     fi
     echo $cmd
-    echo -e "debug========>cmd=$cmd"
     echo "=====================start ${service_filename[$i]}======================">>$OPENIM_ROOT/logs/openIM.log
     nohup $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
-    echo -e "debug========>OpenIMROOT=$OPENIM_ROOT"
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
     echo -e "${GREEN_PREFIX}${service_filename[$i]} start success,port number:${service_ports[$j]} pid:$(eval $pid)$COLOR_SUFFIX"
