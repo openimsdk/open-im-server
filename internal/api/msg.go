@@ -235,7 +235,7 @@ func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	if !tokenverify.IsAppManagerUid(c) {
+	if !tokenverify.IsAppManagerUID(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
