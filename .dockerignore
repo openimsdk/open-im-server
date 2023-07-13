@@ -1,0 +1,31 @@
+# Ignore files and directories starting with a dot
+
+# Ignore specific files
+.dockerignore
+
+# Ignore build artifacts
+_output/
+logs/
+
+# Ignore non-essential documentation
+README.md
+README-zh_CN.md
+CONTRIBUTING.md
+CHANGELOG/
+# LICENSE
+
+# Ignore testing and linting configuration
+.golangci.yml
+
+# Ignore deployment-related files
+docker-compose.yaml
+deployments/
+
+# Ignore assets
+assets/
+
+# Ignore components
+components/
+
+# Ignore tools and scripts
+.github/
