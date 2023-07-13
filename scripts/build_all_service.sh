@@ -26,8 +26,6 @@ echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
-cd $SCRIPTS_ROOT 
-
 echo -e  ""
 
 echo -e "${BACKGROUND_BLUE}===============> Building all using make build binary files ${COLOR_SUFFIX}" 
@@ -37,8 +35,8 @@ echo -e "${BOLD_PREFIX}_________________________________________________________
 
 
 bin_dir="$BIN_DIR"
-logs_dir="../logs"
-sdk_db_dir="../db/sdk/"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/db/sdk/"
 # Automatically created when there is no bin, logs folder
 if [ ! -d $bin_dir ]; then
   mkdir -p $bin_dir
@@ -64,6 +62,11 @@ cd $OPENIM_ROOT
 
 # Execute 'make build'
 make build
+
+if [ $? -ne 0 ]; then
+  echo "make build Error, script exits"
+  exit 1
+fi
 
 # Get the current operating system and architecture
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')

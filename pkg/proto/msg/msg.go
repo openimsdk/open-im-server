@@ -133,9 +133,6 @@ func (x *MarkConversationAsReadReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
 	}
-	if x.Seqs == nil {
-		return errs.ErrArgs.Wrap("seqs is empty")
-	}
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
@@ -165,18 +162,12 @@ func (x *ClearConversationsMsgReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
-	if x.DeleteSyncOpt == nil {
-		return errs.ErrArgs.Wrap("deleteSyncOpt is empty")
-	}
 	return nil
 }
 
 func (x *UserClearAllMsgReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
-	}
-	if x.DeleteSyncOpt == nil {
-		return errs.ErrArgs.Wrap("deleteSyncOpt is empty")
 	}
 	return nil
 }
@@ -190,9 +181,6 @@ func (x *DeleteMsgsReq) Check() error {
 	}
 	if x.Seqs == nil {
 		return errs.ErrArgs.Wrap("seqs is empty")
-	}
-	if x.DeleteSyncOpt == nil {
-		return errs.ErrArgs.Wrap("deleteSyncOpt is empty")
 	}
 	return nil
 }

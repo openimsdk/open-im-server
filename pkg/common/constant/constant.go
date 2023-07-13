@@ -18,19 +18,20 @@ const (
 
 	///ContentType
 	//UserRelated
-	Text     = 101
-	Picture  = 102
-	Voice    = 103
-	Video    = 104
-	File     = 105
-	AtText   = 106
-	Merger   = 107
-	Card     = 108
-	Location = 109
-	Custom   = 110
-	Revoke   = 111
-	Typing   = 113
-	Quote    = 114
+	ContentTypeBegin = 100
+	Text             = 101
+	Picture          = 102
+	Voice            = 103
+	Video            = 104
+	File             = 105
+	AtText           = 106
+	Merger           = 107
+	Card             = 108
+	Location         = 109
+	Custom           = 110
+	Revoke           = 111
+	Typing           = 113
+	Quote            = 114
 
 	AdvancedText = 117
 
@@ -290,8 +291,9 @@ const (
 	GroupResponseAgree  = 1
 	GroupResponseRefuse = -1
 
-	FriendResponseAgree  = 1
-	FriendResponseRefuse = -1
+	FriendResponseNotHandle = 0
+	FriendResponseAgree     = 1
+	FriendResponseRefuse    = -1
 
 	Male   = 1
 	Female = 2

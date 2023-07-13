@@ -16,6 +16,7 @@ package unrelation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"strconv"
 	"time"
 
@@ -108,8 +109,24 @@ type MsgDocModelInterface interface {
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
-	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
-	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
+	SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*MsgInfoModel, error)
+	RangeUserSendCount(
+		ctx context.Context,
+		start time.Time,
+		end time.Time,
+		group bool,
+		ase bool,
+		pageNumber int32,
+		showNumber int32,
+	) (msgCount int64, userCount int64, users []*UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(
+		ctx context.Context,
+		start time.Time,
+		end time.Time,
+		ase bool,
+		pageNumber int32,
+		showNumber int32,
+	) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
 }
 
 func (MsgDocModel) TableName() string {

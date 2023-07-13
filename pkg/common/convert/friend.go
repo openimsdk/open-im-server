@@ -54,6 +54,9 @@ func FriendsDB2Pb(
 	friendsDB []*relation.FriendModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (friendsPb []*sdkws.FriendInfo, err error) {
+	if len(friendsDB) == 0 {
+		return nil, nil
+	}
 	var userID []string
 	for _, friendDB := range friendsDB {
 		userID = append(userID, friendDB.FriendUserID)
@@ -80,6 +83,9 @@ func FriendRequestDB2Pb(
 	friendRequests []*relation.FriendRequestModel,
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) ([]*sdkws.FriendRequest, error) {
+	if len(friendRequests) == 0 {
+		return nil, nil
+	}
 	userIDMap := make(map[string]struct{})
 	for _, friendRequest := range friendRequests {
 		userIDMap[friendRequest.ToUserID] = struct{}{}

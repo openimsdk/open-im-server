@@ -2,9 +2,11 @@ package relation
 
 import (
 	"context"
+
+	"gorm.io/gorm"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"gorm.io/gorm"
 )
 
 type ObjectInfoGorm struct {
