@@ -38,20 +38,21 @@ jobs:
       run: |
         chmod +x ./scripts/stop_all.sh
         ./scripts/stop_all.sh
+        cat logs/openIM.log 2>/dev/null
       shell: bash
 
     - name: Build all services
       run: |
         chmod +x ./scripts/build_all_service.sh
         ./scripts/build_all_service.sh
-        cat logs/openIM.log
+        cat logs/openIM.log 2>/dev/null
       shell: bash
 
     - name: Start all services
       run: |
         chmod +x ./scripts/start_all.sh
         ./scripts/start_all.sh
-        cat logs/openIM.log
+        cat logs/openIM.log 2>/dev/null
       continue-on-error: true
       shell: bash
 
@@ -59,12 +60,12 @@ jobs:
       run: |
         chmod +x ./scripts/check_all.sh
         ./scripts/check_all.sh
-        cat logs/openIM.log
+        cat logs/openIM.log 2>/dev/null
       shell: bash
 
     - name: Print openIM.log
       run: |
-        cat logs/openIM.log
-        cat logs/openIM.log  >> "$GITHUB_OUTPUT"
+        cat logs/* 2>/dev/null
+        cat logs/* 2>/dev/null >> "$GITHUB_OUTPUT"
       shell: bash
       continue-on-error: true
