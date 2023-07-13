@@ -55,9 +55,9 @@ sleep 1
 cd ${msg_transfer_binary_root}
 for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
       prome_port=${prome_ports[$i]}
-      cmd="nohup ./${openim_msgtransfer}  --config_folder_path ${configfile_path} --configFolderPath ${log_path}"
+      cmd="nohup ./${openim_msgtransfer}  --config_folder_path ${configfile_path} "
       if [ $prome_port != "" ]; then
-        cmd="$cmd --prometheus_port $prome_port  --config_folder_path ${configfile_path} --configFolderPath ${log_path}"
+        cmd="$cmd --prometheus_port $prome_port  --config_folder_path ${configfile_path} "
       fi
       echo "==========================start msg_transfer server===========================">>$OPENIM_ROOT/logs/openIM.log
       $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
