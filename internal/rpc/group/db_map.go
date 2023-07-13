@@ -16,8 +16,9 @@ package group
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"

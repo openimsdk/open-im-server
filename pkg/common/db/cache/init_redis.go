@@ -27,6 +27,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
+const (
+	maxRetry = 10 //number of retries
+)
+
+// NewRedis Initialize redis connection
 func NewRedis() (redis.UniversalClient, error) {
 	if len(config.Config.Redis.Address) == 0 {
 		return nil, errors.New("redis address is empty")
@@ -35,25 +40,29 @@ func NewRedis() (redis.UniversalClient, error) {
 	var rdb redis.UniversalClient
 	if len(config.Config.Redis.Address) > 1 {
 		rdb = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    config.Config.Redis.Address,
-			Username: config.Config.Redis.Username,
-			Password: config.Config.Redis.Password, // no password set
-			PoolSize: 50,
+			Addrs:      config.Config.Redis.Address,
+			Username:   config.Config.Redis.Username,
+			Password:   config.Config.Redis.Password, // no password set
+			PoolSize:   50,
+			MaxRetries: maxRetry,
 		})
 	} else {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:     config.Config.Redis.Address[0],
-			Username: config.Config.Redis.Username,
-			Password: config.Config.Redis.Password, // no password set
-			DB:       0,                            // use default DB
-			PoolSize: 100,                          // 连接池大小
+			Addr:       config.Config.Redis.Address[0],
+			Username:   config.Config.Redis.Username,
+			Password:   config.Config.Redis.Password, // no password set
+			DB:         0,                            // use default DB
+			PoolSize:   100,                          // connection pool size
+			MaxRetries: maxRetry,
 		})
 	}
+
+	var err error = nil
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	err := rdb.Ping(ctx).Err()
+	err = rdb.Ping(ctx).Err()
 	if err != nil {
 		return nil, fmt.Errorf("redis ping %w", err)
 	}
-	return rdb, nil
+	return rdb, err
 }

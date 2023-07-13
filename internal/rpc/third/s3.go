@@ -2,6 +2,8 @@ package third
 
 import (
 	"context"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -9,7 +11,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"time"
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {
@@ -29,7 +30,10 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 	return &third.PartSizeResp{Size: size}, nil
 }
 
-func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
+func (t *thirdServer) InitiateMultipartUpload(
+	ctx context.Context,
+	req *third.InitiateMultipartUploadReq,
+) (*third.InitiateMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
@@ -108,7 +112,10 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 	return resp, nil
 }
 
-func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
+func (t *thirdServer) CompleteMultipartUpload(
+	ctx context.Context,
+	req *third.CompleteMultipartUploadReq,
+) (*third.CompleteMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err

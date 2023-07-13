@@ -3,6 +3,10 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
+
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -11,8 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
 
@@ -136,7 +138,10 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 	return resp, err
 }
 
-func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+func (m *MessageRpcClient) PullMessageBySeqList(
+	ctx context.Context,
+	req *sdkws.PullMessageBySeqsReq,
+) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
 	return resp, err
 }
@@ -158,7 +163,9 @@ type NotificationSender struct {
 
 type NotificationSenderOptions func(*NotificationSender)
 
-func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NotificationSenderOptions {
+func WithLocalSendMsg(
+	sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error),
+) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
@@ -177,7 +184,10 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 }
 
 func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+	notificationSender := &NotificationSender{
+		contentTypeConf: newContentTypeConf(),
+		sessionTypeConf: newSessionTypeConf(),
+	}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
@@ -196,11 +206,29 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) NotificationWithSesstionType(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType, sesstionType int32,
+	m proto.Message,
+	opts ...NotificationOptions,
+) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
+		log.ZError(
+			ctx,
+			"MsgClient Notification json.Marshal failed",
+			err,
+			"sendID",
+			sendID,
+			"recvID",
+			recvID,
+			"contentType",
+			contentType,
+			"msg",
+			m,
+		)
 		return err
 	}
 	notificationOpt := &notificationOpt{}
@@ -247,6 +275,25 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	return err
 }
 
-func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
+func (s *NotificationSender) Notification(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType int32,
+	m proto.Message,
+	opts ...NotificationOptions,
+) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+}
+
+func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
+	conn, err := m.discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	client := user.NewUserClient(conn)
+	resp, err := client.GetAllUserID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

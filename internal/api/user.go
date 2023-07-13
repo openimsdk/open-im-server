@@ -107,7 +107,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		}
 		if !flag {
 			res.UserID = v1
-			res.Status = constant.OnlineStatus
+			res.Status = constant.OfflineStatus
 		}
 		respResult = append(respResult, res)
 	}

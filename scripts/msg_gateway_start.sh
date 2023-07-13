@@ -61,7 +61,7 @@ sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
   echo "==========================start msg_gateway server===========================">>$OPENIM_ROOT/logs/openIM.log
-  nohup ./${openim_msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]}  --config_folder_path ${configfile_path} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
+  nohup ./${openim_msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]}  --config_folder_path ${configfile_path} --configFolderPath ${log_path} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 done
 
 #Check launched service process
