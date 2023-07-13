@@ -133,9 +133,6 @@ func (x *MarkConversationAsReadReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
 	}
-	if x.Seqs == nil {
-		return errs.ErrArgs.Wrap("seqs is empty")
-	}
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
