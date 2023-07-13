@@ -3,6 +3,7 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
@@ -282,4 +283,17 @@ func (s *NotificationSender) Notification(
 	opts ...NotificationOptions,
 ) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
+}
+
+func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
+	conn, err := m.discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
+		panic(err)
+	}
+	client := user.NewUserClient(conn)
+	resp, err := client.GetAllUserID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
