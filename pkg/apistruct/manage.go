@@ -36,15 +36,14 @@ type GetUsersOnlineStatusReq struct {
 	UserIDList  []string `json:"userIDList"  binding:"required,lte=200"`
 }
 type GetUsersOnlineStatusResp struct {
-
-	//SuccessResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
+	// SuccessResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
 }
+
 type AccountCheckReq struct {
 	OperationID     string   `json:"operationID"     binding:"required"`
 	CheckUserIDList []string `json:"checkUserIDList" binding:"required,lte=100"`
 }
-type AccountCheckResp struct {
-}
+type AccountCheckResp struct{}
 
 type ManagementSendMsg struct {
 	SendID           string                 `json:"sendID"           binding:"required"`

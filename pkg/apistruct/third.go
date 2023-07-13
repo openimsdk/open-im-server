@@ -58,8 +58,7 @@ type UploadUpdateAppReq struct {
 	UpdateLog   string                `form:"updateLog"   binding:"required"`
 }
 
-type UploadUpdateAppResp struct {
-}
+type UploadUpdateAppResp struct{}
 
 type GetDownloadURLReq struct {
 	OperationID string `json:"operationID" binding:"required"`
@@ -111,21 +110,19 @@ type GetRTCInvitationInfoStartAppResp struct {
 }
 
 /**
- * FCM第三方上报Token
+ * FCM第三方上报Token.
  */
 type FcmUpdateTokenReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	Platform    int    `json:"platform"    binding:"required,min=1,max=2"` //only for ios + android
+	Platform    int    `json:"platform"    binding:"required,min=1,max=2"` // only for ios + android
 	FcmToken    string `json:"fcmToken"    binding:"required"`
 }
 
-type FcmUpdateTokenResp struct {
-}
+type FcmUpdateTokenResp struct{}
 type SetAppBadgeReq struct {
 	OperationID    string `json:"operationID"    binding:"required"`
 	FromUserID     string `json:"fromUserID"     binding:"required"`
 	AppUnreadCount int32  `json:"appUnreadCount"`
 }
 
-type SetAppBadgeResp struct {
-}
+type SetAppBadgeResp struct{}

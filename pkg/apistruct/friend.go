@@ -185,8 +185,7 @@ type AddBlacklistReq struct {
 	ToUserID   string `json:"toUserID"   binding:"required"`
 	FromUserID string `json:"fromUserID" binding:"required"`
 }
-type AddBlacklistResp struct {
-}
+type AddBlacklistResp struct{}
 
 type ImportFriendReq struct {
 	FriendUserIDList []string `json:"friendUserIDList" binding:"required"`
@@ -212,15 +211,13 @@ type AddFriendResponseReq struct {
 	HandleResult int32  `json:"flag"       binding:"required,oneof=-1 0 1"`
 	HandleMsg    string `json:"handleMsg"`
 }
-type AddFriendResponseResp struct {
-}
+type AddFriendResponseResp struct{}
 
 type DeleteFriendReq struct {
 	ToUserID   string `json:"toUserID"   binding:"required"`
 	FromUserID string `json:"fromUserID" binding:"required"`
 }
-type DeleteFriendResp struct {
-}
+type DeleteFriendResp struct{}
 
 type GetBlackListReq struct {
 	FromUserID string `json:"fromUserID" binding:"required"`
@@ -234,15 +231,13 @@ type SetFriendRemarkReq struct {
 	FromUserID string `json:"fromUserID" binding:"required"`
 	Remark     string `json:"remark"`
 }
-type SetFriendRemarkResp struct {
-}
+type SetFriendRemarkResp struct{}
 
 type RemoveBlacklistReq struct {
 	ToUserID   string `json:"toUserID"   binding:"required"`
 	FromUserID string `json:"fromUserID" binding:"required"`
 }
-type RemoveBlacklistResp struct {
-}
+type RemoveBlacklistResp struct{}
 
 type IsFriendReq struct {
 	ToUserID   string `json:"toUserID"   binding:"required"`
@@ -266,7 +261,7 @@ type GetFriendListResp struct {
 	AddSource      int32  `json:"addSource"`
 	OperatorUserID string `json:"operatorUserID"`
 	Ex             string `json:"ex"`
-	//FriendUser           *UserInfo // TODO
+	// FriendUser           *UserInfo // TODO
 }
 
 type GetFriendApplyListReq struct {

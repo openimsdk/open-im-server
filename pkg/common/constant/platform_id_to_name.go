@@ -15,10 +15,9 @@
 package constant
 
 // fixme 1<--->IOS 2<--->Android  3<--->Windows
-//fixme  4<--->OSX  5<--->Web  6<--->MiniWeb 7<--->Linux
-
+// fixme  4<--->OSX  5<--->Web  6<--->MiniWeb 7<--->Linux
 const (
-	//Platform ID
+	//Platform ID.
 	IOSPlatformID        = 1
 	AndroidPlatformID    = 2
 	WindowsPlatformID    = 3
@@ -30,7 +29,7 @@ const (
 	IPadPlatformID       = 9
 	AdminPlatformID      = 10
 
-	//Platform string match to Platform ID
+	//Platform string match to Platform ID.
 	IOSPlatformStr        = "IOS"
 	AndroidPlatformStr    = "Android"
 	WindowsPlatformStr    = "Windows"
@@ -42,7 +41,7 @@ const (
 	IPadPlatformStr       = "IPad"
 	AdminPlatformStr      = "Admin"
 
-	//terminal types
+	//terminal types.
 	TerminalPC     = "PC"
 	TerminalMobile = "Mobile"
 )
@@ -59,6 +58,7 @@ var PlatformID2Name = map[int]string{
 	IPadPlatformID:       IPadPlatformStr,
 	AdminPlatformID:      AdminPlatformStr,
 }
+
 var PlatformName2ID = map[string]int{
 	IOSPlatformStr:        IOSPlatformID,
 	AndroidPlatformStr:    AndroidPlatformID,
@@ -71,6 +71,7 @@ var PlatformName2ID = map[string]int{
 	IPadPlatformStr:       IPadPlatformID,
 	AdminPlatformStr:      AdminPlatformID,
 }
+
 var PlatformName2class = map[string]string{
 	IOSPlatformStr:     TerminalMobile,
 	AndroidPlatformStr: TerminalMobile,
@@ -80,6 +81,7 @@ var PlatformName2class = map[string]string{
 	OSXPlatformStr:     TerminalPC,
 	LinuxPlatformStr:   TerminalPC,
 }
+
 var PlatformID2class = map[int]string{
 	IOSPlatformID:     TerminalMobile,
 	AndroidPlatformID: TerminalMobile,
@@ -93,12 +95,15 @@ var PlatformID2class = map[int]string{
 func PlatformIDToName(num int) string {
 	return PlatformID2Name[num]
 }
+
 func PlatformNameToID(name string) int {
 	return PlatformName2ID[name]
 }
+
 func PlatformNameToClass(name string) string {
 	return PlatformName2class[name]
 }
+
 func PlatformIDToClass(num int) string {
 	return PlatformID2class[num]
 }

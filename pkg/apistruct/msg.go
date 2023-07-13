@@ -20,16 +20,14 @@ type DelMsgReq struct {
 	OperationID string   `json:"operationID,omitempty" binding:"required"`
 }
 
-type DelMsgResp struct {
-}
+type DelMsgResp struct{}
 
 type CleanUpMsgReq struct {
 	UserID      string `json:"userID"      binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
-type CleanUpMsgResp struct {
-}
+type CleanUpMsgResp struct{}
 
 type DelSuperGroupMsgReq struct {
 	UserID      string   `json:"userID"            binding:"required"`
@@ -39,8 +37,7 @@ type DelSuperGroupMsgReq struct {
 	OperationID string   `json:"operationID"       binding:"required"`
 }
 
-type DelSuperGroupMsgResp struct {
-}
+type DelSuperGroupMsgResp struct{}
 
 type MsgDeleteNotificationElem struct {
 	GroupID     string   `json:"groupID"`
@@ -55,8 +52,7 @@ type SetMsgMinSeqReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
-type SetMsgMinSeqResp struct {
-}
+type SetMsgMinSeqResp struct{}
 
 type PictureBaseInfo struct {
 	UUID   string `mapstructure:"uuid"`
