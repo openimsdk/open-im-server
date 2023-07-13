@@ -42,7 +42,6 @@ func startPprof() {
 }
 
 func run(port int) error {
-	port = 10002
 	if port == 0 {
 		return fmt.Errorf("port is empty")
 	}
@@ -58,7 +57,7 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
-	if err := client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+	if client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
 		return err
 	}
 	fmt.Println("api init discov client success")
