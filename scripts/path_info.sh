@@ -82,6 +82,7 @@ cmd_utils_source_root="$OPENIM_ROOT/cmd/openim-cmdutils/"
 # Global configuration file default dir
 config_path="$OPENIM_ROOT/config/config.yaml"
 configfile_path="$OPENIM_ROOT/config"
+log_path="$OPENIM_ROOT/log"
 
 # servicefile dir path
 service_source_root=(

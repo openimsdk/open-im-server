@@ -3,6 +3,8 @@ package msg
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -13,7 +15,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"google.golang.org/grpc"
 )
 
 type MessageInterceptorChain []MessageInterceptorFunc
@@ -100,7 +101,8 @@ func (m *msgServer) initPrometheus() {
 }
 
 func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {
-	if conversation.ConversationType == constant.SingleChatType || conversation.ConversationType == constant.NotificationChatType {
+	if conversation.ConversationType == constant.SingleChatType ||
+		conversation.ConversationType == constant.NotificationChatType {
 		if userID == conversation.OwnerUserID {
 			recvID = conversation.UserID
 		} else {

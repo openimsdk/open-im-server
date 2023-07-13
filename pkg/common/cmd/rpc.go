@@ -3,10 +3,11 @@ package cmd
 import (
 	"errors"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 )
 
 type RpcCmd struct {
@@ -26,7 +27,10 @@ func (a *RpcCmd) Exec() error {
 	return a.Execute()
 }
 
-func (a *RpcCmd) StartSvr(name string, rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error) error {
+func (a *RpcCmd) StartSvr(
+	name string,
+	rpcFn func(discov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
+) error {
 	if a.GetPortFlag() == 0 {
 		return errors.New("port is required")
 	}
