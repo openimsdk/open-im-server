@@ -63,8 +63,10 @@ func (s *Statistics) output() {
 	}
 }
 
+// NewStatistics 新建数据
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
 	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()
+
 	return p
 }

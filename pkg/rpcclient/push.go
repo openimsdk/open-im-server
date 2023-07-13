@@ -24,17 +24,20 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 )
 
+// Push 推送结构体
 type Push struct {
 	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewPush 连接发送服务
 func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImPushName)
 	if err != nil {
 		panic(err)
 	}
+
 	return &Push{
 		discov: discov,
 		conn:   conn,
@@ -44,10 +47,12 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 
 type PushRPCClient Push
 
+// NewPushRPCClient 连接发送 RPC 客户端
 func NewPushRPCClient(discov discoveryregistry.SvcDiscoveryRegistry) PushRPCClient {
 	return PushRPCClient(*NewPush(discov))
 }
 
+// DelUserPushToken 删除用户发送消息 token 权限
 func (p *PushRPCClient) DelUserPushToken(
 	ctx context.Context,
 	req *push.DelUserPushTokenReq,

@@ -108,5 +108,6 @@ func Start(
 			}
 		}
 	}()
+
 	return utils.Wrap1(srv.Serve(listener))
 }

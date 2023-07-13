@@ -147,7 +147,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
-	var isSend bool = true
+	isSend := true
 	isNotification := utils.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(

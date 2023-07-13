@@ -53,14 +53,14 @@ func (r responseBodyWriter) Write(b []byte) (int, error) {
 }
 
 func PrometheusMiddleware(c *gin.Context) {
-	Inc(ApiRequestCounter)
+	Inc(APIRequestCounter)
 	w := &responseBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
 	c.Writer = w
 	c.Next()
 	if c.Writer.Status() == http.StatusOK {
-		Inc(ApiRequestSuccessCounter)
+		Inc(APIRequestSuccessCounter)
 	} else {
-		Inc(ApiRequestFailedCounter)
+		Inc(APIRequestFailedCounter)
 	}
 }
 

@@ -195,7 +195,7 @@ func WithRPCGetUserName() NotificationOptions {
 		opt.WithRPCGetUsername = true
 	}
 }
-func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, sendID, recvID string, contentType, sessionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
@@ -217,14 +217,14 @@ func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, se
 			msg.SenderFaceURL = userInfo.FaceURL
 		}
 	}
-	var offlineInfo sdkws.OfflinePushInfo
+
 	var title, desc, ex string
 	msg.SendID = sendID
 	msg.RecvID = recvID
 	msg.Content = content
 	msg.MsgFrom = constant.SysMsgType
 	msg.ContentType = contentType
-	msg.SessionType = sesstionType
+	msg.SessionType = sessionType
 	if msg.SessionType == constant.SuperGroupChatType {
 		msg.GroupID = recvID
 	}
@@ -232,9 +232,12 @@ func (s *NotificationSender) NotificationWithSessionType(ctx context.Context, se
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	options := config.GetOptionsByNotification(s.contentTypeConf[contentType])
 	msg.Options = options
-	offlineInfo.Title = title
-	offlineInfo.Desc = desc
-	offlineInfo.Ex = ex
+
+	offlineInfo := sdkws.OfflinePushInfo{
+		Title: title,
+		Desc:  desc,
+		Ex:    ex,
+	}
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	_, err = s.sendMsg(ctx, &req)

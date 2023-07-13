@@ -35,17 +35,20 @@ type User struct {
 	Discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewUser 新建用户
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
+
 	return &User{Discov: discov, Client: client, conn: conn}
 }
 
 type UserRPCClient User
 
+// NewUserRPCClient 新建用户 RPC 客户端
 func NewUserRPCClient(client discoveryregistry.SvcDiscoveryRegistry) UserRPCClient {
 	return UserRPCClient(*NewUser(client))
 }
@@ -65,24 +68,29 @@ func (u *UserRPCClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	return resp.UsersInfo, nil
 }
 
+// GetUserInfo 获取指定用户信息
 func (u *UserRPCClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
+// GetUsersInfoMap 获取用户信息集合
 func (u *UserRPCClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
 }
 
+// 获取公有用户信息
 func (u *UserRPCClient) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
@@ -102,14 +110,17 @@ func (u *UserRPCClient) GetPublicUserInfos(
 	}), nil
 }
 
+// GetPublicUserInfo 获取用户信息
 func (u *UserRPCClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
+// GetPublicUserInfoMap 获取用户信息集合
 func (u *UserRPCClient) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
@@ -119,11 +130,13 @@ func (u *UserRPCClient) GetPublicUserInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
 }
 
+// GetUserGlobalMsgRecvOpt 获取用户消息接收选项
 func (u *UserRPCClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
 	resp, err := u.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
@@ -131,13 +144,16 @@ func (u *UserRPCClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 	if err != nil {
 		return 0, err
 	}
+
 	return resp.GlobalRecvMsgOpt, err
 }
 
+// Access token 验签
 func (u *UserRPCClient) Access(ctx context.Context, ownerUserID string) error {
 	_, err := u.GetUserInfo(ctx, ownerUserID)
 	if err != nil {
 		return err
 	}
+
 	return tokenverify.CheckAccessV3(ctx, ownerUserID)
 }

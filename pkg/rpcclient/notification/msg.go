@@ -25,6 +25,7 @@ func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, 
 	return m.Notification(ctx, userID, userID, constant.MsgDeleteNotification, &tips)
 }
 
+// MarkAsReadNotification 标记已读通知
 func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
@@ -32,5 +33,6 @@ func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conv
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
+
 	return m.NotificationWithSessionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
 }

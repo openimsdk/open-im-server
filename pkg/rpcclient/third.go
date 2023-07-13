@@ -30,11 +30,13 @@ type Third struct {
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewThird 连接第三方服务
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 	conn, err := discov.GetConn(context.Background(), config.Config.RPCRegisterName.OpenImThirdName)
 	if err != nil {
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
+
 	return &Third{discov: discov, Client: client, conn: conn}
 }
