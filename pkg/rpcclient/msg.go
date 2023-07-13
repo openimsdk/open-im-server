@@ -17,6 +17,7 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -120,9 +121,10 @@ func newSessionTypeConf() map[int32]int32 {
 }
 
 type Message struct {
-	conn   grpc.ClientConnInterface
-	Client msg.MsgClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	conn       grpc.ClientConnInterface
+	Client     msg.MsgClient
+	discov     discoveryregistry.SvcDiscoveryRegistry
+	userClient user.UserClient
 }
 
 func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
@@ -131,7 +133,20 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client}
+	conn, err = discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
+	if err != nil {
+		panic(err)
+	}
+	userClient := user.NewUserClient(conn)
+	return &Message{discov: discov, conn: conn, Client: client, userClient: userClient}
+}
+
+func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
+	resp, err := m.userClient.GetAllUserID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 type MessageRpcClient Message
