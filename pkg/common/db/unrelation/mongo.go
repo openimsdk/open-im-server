@@ -31,19 +31,21 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+const (
+	maxRetry = 10 //number of retries
+)
+
 type Mongo struct {
 	db *mongo.Client
 }
 
+// NewMongo Initialize MongoDB connection
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
-	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	url := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.Uri != "" {
-		// example:
-		// mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
-		uri = config.Config.Mongo.Uri
+		url = config.Config.Mongo.Uri
 	} else {
-		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
 		mongodbHosts := ""
 		for i, v := range config.Config.Mongo.Address {
 			if i == len(config.Config.Mongo.Address)-1 {
@@ -53,23 +55,34 @@ func NewMongo() (*Mongo, error) {
 			}
 		}
 		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+			url = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
 				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
 				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
 		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+			url = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				mongodbHosts, config.Config.Mongo.Database,
 				config.Config.Mongo.MaxPoolSize)
 		}
 	}
-	fmt.Println("mongo:", uri)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	defer cancel()
-	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
+	fmt.Println("mongo:", url)
+	var mongoClient *mongo.Client
+	var err error = nil
+	for i := 0; i <= maxRetry; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(url))
+		if err == nil {
+			return &Mongo{db: mongoClient}, nil
+		}
+		if cmdErr, ok := err.(mongo.CommandError); ok {
+			if cmdErr.Code == 13 || cmdErr.Code == 18 {
+				return nil, err
+			} else {
+				fmt.Printf("Failed to connect to MongoDB: %s\n", err)
+			}
+		}
 	}
-	return &Mongo{db: mongoClient}, nil
+	return nil, err
 }
 
 func (m *Mongo) GetClient() *mongo.Client {
