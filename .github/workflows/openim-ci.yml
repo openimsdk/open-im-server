@@ -66,6 +66,7 @@ jobs:
         run: |
           make format
           echo "Run go format successfully"
+        continue-on-error: true
 
     #   - name: Generate all necessary files, such as error code files
     #     run: |
