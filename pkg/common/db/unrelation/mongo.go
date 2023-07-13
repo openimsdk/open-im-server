@@ -46,7 +46,6 @@ func NewMongo() (*Mongo, error) {
 	if config.Config.Mongo.URI != "" {
 		uri = config.Config.Mongo.URI
 	} else {
-		// mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
 		mongodbHosts := ""
 		for i, v := range config.Config.Mongo.Address {
 			if i == len(config.Config.Mongo.Address)-1 {
