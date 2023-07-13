@@ -17,17 +17,21 @@ package kafka
 import (
 	"context"
 	"errors"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	log "github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
 	prome "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+)
+
+const (
+	maxRetry = 10 //number of retries
 )
 
 var errEmptyMsg = errors.New("binary msg is empty")
@@ -39,6 +43,7 @@ type Producer struct {
 	producer sarama.SyncProducer
 }
 
+// NewKafkaProducer Initialize kafka producer
 func NewKafkaProducer(addr []string, topic string) *Producer {
 	p := Producer{}
 	p.config = sarama.NewConfig()             //Instantiate a sarama Config
@@ -53,7 +58,24 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	}
 	p.addr = addr
 	p.topic = topic
-	producer, err := sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
+	var producer sarama.SyncProducer
+	var err error
+	for i := 0; i <= maxRetry; i++ {
+		producer, err = sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
+		if err == nil {
+			p.producer = producer
+			return &p
+		}
+		//TODO If the password is wrong, exit directly
+		//if packetErr, ok := err.(*sarama.PacketEncodingError); ok {
+		//if _, ok := packetErr.Err.(sarama.AuthenticationError); ok {
+		//	fmt.Println("Kafka password is wrong.")
+		//}
+		//} else {
+		//	fmt.Printf("Failed to create Kafka producer: %v\n", err)
+		//}
+		time.Sleep(time.Duration(1) * time.Second)
+	}
 	if err != nil {
 		panic(err.Error())
 	}

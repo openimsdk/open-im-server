@@ -15,6 +15,7 @@
 package api
 
 import (
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -204,7 +205,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 		return
-	} else if err := m.validate.Struct(data); err != nil {
+	} else if err := m.validate.Struct(params); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
 		return
 	}
@@ -227,7 +228,107 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 }
 
 func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SendMsg, m.Client, c)
+	params := apistruct.ManagementBatchSendMsgReq{}
+	resp := apistruct.ManagementBatchSendMsgResp{}
+	var msgSendFailedFlag bool
+	if err := c.BindJSON(&params); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if !tokenverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
+
+	var data interface{}
+	switch params.ContentType {
+	case constant.Text:
+		data = apistruct.TextElem{}
+	case constant.Picture:
+		data = apistruct.PictureElem{}
+	case constant.Voice:
+		data = apistruct.SoundElem{}
+	case constant.Video:
+		data = apistruct.VideoElem{}
+	case constant.File:
+		data = apistruct.FileElem{}
+	case constant.Custom:
+		data = apistruct.CustomElem{}
+	case constant.Revoke:
+		data = apistruct.RevokeElem{}
+	case constant.OANotification:
+		data = apistruct.OANotificationElem{}
+		params.SessionType = constant.NotificationChatType
+	case constant.CustomNotTriggerConversation:
+		data = apistruct.CustomElem{}
+	case constant.CustomOnlineOnly:
+		data = apistruct.CustomElem{}
+	default:
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("not support err contentType").Wrap())
+		return
+	}
+	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	} else if err := m.validate.Struct(params); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	}
+
+	t := &apistruct.ManagementSendMsgReq{
+		SendID:           params.SendID,
+		GroupID:          params.GroupID,
+		SenderNickname:   params.SenderNickname,
+		SenderFaceURL:    params.SenderFaceURL,
+		SenderPlatformID: params.SenderPlatformID,
+		Content:          params.Content,
+		ContentType:      params.ContentType,
+		SessionType:      params.SessionType,
+		IsOnlineOnly:     params.IsOnlineOnly,
+		NotOfflinePush:   params.NotOfflinePush,
+		OfflinePushInfo:  params.OfflinePushInfo,
+	}
+	pbReq := m.newUserSendMsgReq(c, t)
+	var recvList []string
+	if params.IsSendAll {
+		req2 := &user.GetAllUserIDReq{}
+		resp2, err := m.Message.GetAllUserID(c, req2)
+		if err != nil {
+			apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+			return
+		}
+		recvList = resp2.UserIDs
+	} else {
+		recvList = params.RecvIDList
+	}
+
+	for _, recvID := range recvList {
+		pbReq.MsgData.RecvID = recvID
+		rpcResp, err := m.Client.SendMsg(c, pbReq)
+		if err != nil {
+			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			msgSendFailedFlag = true
+			continue
+		}
+		resp.Data.ResultList = append(resp.Data.ResultList, &apistruct.SingleReturnResult{
+			ServerMsgID: rpcResp.ServerMsgID,
+			ClientMsgID: rpcResp.ClientMsgID,
+			SendTime:    rpcResp.SendTime,
+			RecvID:      recvID,
+		})
+	}
+	var status int32
+	if msgSendFailedFlag {
+		status = constant.MsgSendFailed
+	} else {
+		status = constant.MsgSendSuccessed
+	}
+	_, err := m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{Status: status})
+	if err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	}
+	apiresp.GinSuccess(c, resp)
 }
 
 func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
@@ -244,4 +345,12 @@ func (m *MessageApi) GetActiveUser(c *gin.Context) {
 
 func (m *MessageApi) GetActiveGroup(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetActiveGroup, m.Client, c)
+}
+
+func (m *MessageApi) SearchMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.SearchMessage, m.Client, c)
+}
+
+func (m *MessageApi) ManagementMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.ManageMsg, m.Client, c)
 }

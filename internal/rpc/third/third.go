@@ -3,12 +3,15 @@ package third
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cos"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/minio"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/oss"
-	"net/url"
-	"time"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -18,7 +21,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"google.golang.org/grpc"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -77,7 +79,10 @@ type thirdServer struct {
 	defaultExpire time.Duration
 }
 
-func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTokenReq) (resp *third.FcmUpdateTokenResp, err error) {
+func (t *thirdServer) FcmUpdateToken(
+	ctx context.Context,
+	req *third.FcmUpdateTokenReq,
+) (resp *third.FcmUpdateTokenResp, err error) {
 	err = t.thirdDatabase.FcmUpdateToken(ctx, req.Account, int(req.PlatformID), req.FcmToken, req.ExpireTime)
 	if err != nil {
 		return nil, err
@@ -85,7 +90,10 @@ func (t *thirdServer) FcmUpdateToken(ctx context.Context, req *third.FcmUpdateTo
 	return &third.FcmUpdateTokenResp{}, nil
 }
 
-func (t *thirdServer) SetAppBadge(ctx context.Context, req *third.SetAppBadgeReq) (resp *third.SetAppBadgeResp, err error) {
+func (t *thirdServer) SetAppBadge(
+	ctx context.Context,
+	req *third.SetAppBadgeReq,
+) (resp *third.SetAppBadgeResp, err error) {
 	err = t.thirdDatabase.SetAppBadge(ctx, req.UserID, int(req.AppUnreadCount))
 	if err != nil {
 		return nil, err

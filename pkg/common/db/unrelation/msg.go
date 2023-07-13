@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -555,7 +556,15 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 //	}
 //
 // ])
-func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
+func (m *MsgMongoDriver) RangeUserSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	group bool,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
 	var sort int
 	if ase {
 		sort = 1
@@ -808,7 +817,14 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 	return result[0].MsgCount, result[0].UserCount, users, dateCount, nil
 }
 
-func (m *MsgMongoDriver) RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*table.GroupCount, dateCount map[string]int64, err error) {
+func (m *MsgMongoDriver) RangeGroupSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, groups []*table.GroupCount, dateCount map[string]int64, err error) {
 	var sort int
 	if ase {
 		sort = 1
@@ -1048,4 +1064,137 @@ func (m *MsgMongoDriver) RangeGroupSendCount(ctx context.Context, start time.Tim
 		dateCount[r.Date] = r.Count
 	}
 	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
+}
+
+func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
+	msgs, err := m.searchMessage(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	for _, msg1 := range msgs {
+		if msg1.IsRead {
+			msg1.Msg.IsRead = true
+		}
+	}
+	return msgs, nil
+}
+
+func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
+	var pipe mongo.Pipeline
+	conditon := bson.A{}
+	if req.SendTime != "" {
+		conditon = append(conditon, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
+	}
+	if req.MsgType != 0 {
+		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+	}
+	if req.SessionType != 0 {
+		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
+	}
+	if req.RecvID != "" {
+		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
+	}
+	if req.SendID != "" {
+		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
+	}
+
+	or := bson.A{
+		bson.M{
+			"doc_id": bson.M{
+				"$regex":   "^si_",
+				"$options": "i",
+			},
+		},
+	}
+	or = append(or,
+		bson.M{
+			"doc_id": bson.M{
+				"$regex":   "^g_",
+				"$options": "i",
+			},
+		},
+		bson.M{
+			"doc_id": bson.M{
+				"$regex":   "^sg_",
+				"$options": "i",
+			},
+		},
+	)
+
+	pipe = mongo.Pipeline{
+		{
+			{"$match", bson.D{
+				{
+					"$or", or,
+				},
+			}},
+		},
+		{
+			{"$project", bson.D{
+				{"msgs", bson.D{
+					{"$filter", bson.D{
+						{"input", "$msgs"},
+						{"as", "item"},
+						{"cond", bson.D{
+							{"$and", conditon},
+						},
+						}},
+					}},
+				},
+				{"doc_id", 1},
+			}},
+		},
+	}
+	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
+	if err != nil {
+		return nil, err
+	}
+
+	var msgsDocs []table.MsgDocModel
+	err = cursor.All(ctx, &msgsDocs)
+	if err != nil {
+		return nil, err
+	}
+	if len(msgsDocs) == 0 {
+		return nil, errs.Wrap(mongo.ErrNoDocuments)
+	}
+	msgs := make([]*table.MsgInfoModel, 0)
+	for index, _ := range msgsDocs {
+		for i := range msgsDocs[index].Msg {
+			msg := msgsDocs[index].Msg[i]
+			if msg == nil || msg.Msg == nil {
+				continue
+			}
+			if msg.Revoke != nil {
+				revokeContent := sdkws.MessageRevokedContent{
+					RevokerID:                   msg.Revoke.UserID,
+					RevokerRole:                 msg.Revoke.Role,
+					ClientMsgID:                 msg.Msg.ClientMsgID,
+					RevokerNickname:             msg.Revoke.Nickname,
+					RevokeTime:                  msg.Revoke.Time,
+					SourceMessageSendTime:       msg.Msg.SendTime,
+					SourceMessageSendID:         msg.Msg.SendID,
+					SourceMessageSenderNickname: msg.Msg.SenderNickname,
+					SessionType:                 msg.Msg.SessionType,
+					Seq:                         msg.Msg.Seq,
+					Ex:                          msg.Msg.Ex,
+				}
+				data, err := json.Marshal(&revokeContent)
+				if err != nil {
+					return nil, err
+				}
+				elem := sdkws.NotificationElem{
+					Detail: string(data),
+				}
+				content, err := json.Marshal(&elem)
+				if err != nil {
+					return nil, err
+				}
+				msg.Msg.ContentType = constant.MsgRevokeNotification
+				msg.Msg.Content = string(content)
+			}
+			msgs = append(msgs, msg)
+		}
+	}
+	return msgs, nil
 }
