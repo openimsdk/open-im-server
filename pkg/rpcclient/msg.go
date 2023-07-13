@@ -3,6 +3,7 @@ package rpcclient
 import (
 	"context"
 	"encoding/json"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 

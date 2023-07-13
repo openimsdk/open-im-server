@@ -71,8 +71,8 @@ func StartTransfer(prometheusPort int) error {
 	msgMysModel := relation.NewChatLogGorm(db)
 	chatLogDatabase := controller.NewChatLogDatabase(msgMysModel)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel, msgMysModel)
-	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	groupRpcClient := rpcclient.NewGroupRpcClient(client)
+	conversationRpcClient := rpcclient.NewConversationRPCClient(client)
+	groupRpcClient := rpcclient.NewGroupRPCClient(client)
 	msgTransfer := NewMsgTransfer(chatLogDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)
 	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
@@ -80,7 +80,7 @@ func StartTransfer(prometheusPort int) error {
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 	msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
+	conversationRpcClient *rpcclient.ConversationRPCClient, groupRpcClient *rpcclient.GroupRPCClient) *MsgTransfer {
 	return &MsgTransfer{
 		persistentCH:   NewPersistentConsumerHandler(chatLogDatabase),
 		historyCH:      NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),

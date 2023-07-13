@@ -3,6 +3,7 @@ package msg
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 
 	"google.golang.org/grpc"
 
@@ -31,6 +32,21 @@ type msgServer struct {
 	MessageLocker          MessageLocker
 	Handlers               MessageInterceptorChain
 	notificationSender     *rpcclient.NotificationSender
+}
+
+func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (*msg.SearchMessageResp, error) {
+	// TODO implement me
+	panic("implement me")
 }
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
