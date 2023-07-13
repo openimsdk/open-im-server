@@ -43,7 +43,7 @@ for i in ${service_port_name[*]}; do
     port=$(ss -tunlp| grep openim | awk '{print $5}' | grep -w ${j} | awk -F '[:]' '{print $NF}')
     if [[ ${port} -ne ${j} ]]; then
       echo -e ${BACKGROUND_GREEN}${i}${COLOR_SUFFIX}${RED_PREFIX}" service does not start normally,not initiated port is "${COLOR_SUFFIX}${BACKGROUND_GREEN}${j}${COLOR_SUFFIX}
-      echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log "${COLOR_SUFFIX}
+      echo -e ${RED_PREFIX}"please check $OPENIM_ROOT/logs/openIM.log"${COLOR_SUFFIX}
       exit -1
     else
       echo -e ${j}${GREEN_PREFIX}" port has been listening,belongs service is "${i}${COLOR_SUFFIX}

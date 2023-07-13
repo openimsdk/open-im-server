@@ -35,6 +35,18 @@ bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
+if [ ! -d "$bin_dir" ]; then
+    mkdir -p "$bin_dir"
+fi
+
+if [ ! -d "$logs_dir" ]; then
+    mkdir -p "$logs_dir"
+fi
+
+if [ ! -d "$sdk_db_dir" ]; then
+    mkdir -p "$sdk_db_dir"
+fi
+
 # Print title
 echo -e "${BOLD_PREFIX}${BLUE_PREFIX}================> OpenIM Server Start${COLOR_SUFFIX}"
 
