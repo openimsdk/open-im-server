@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -1066,8 +1065,8 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
 
-func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
-	msgs, err := m.searchMessage(ctx, req)
+func (m *MsgMongoDriver) SearchMessage(ctx context.Context, sendID string, recvID string, sendTime string, msgType int32, sessionType int32) ([]*table.MsgInfoModel, error) {
+	msgs, err := m.searchMessage(ctx, sendID, recvID, sendTime, msgType, sessionType)
 	if err != nil {
 		return nil, err
 	}
@@ -1079,23 +1078,23 @@ func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessa
 	return msgs, nil
 }
 
-func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
+func (m *MsgMongoDriver) searchMessage(ctx context.Context, sendID string, recvID string, sendTime string, msgType int32, sessionType int32) ([]*table.MsgInfoModel, error) {
 	var pipe mongo.Pipeline
 	conditon := bson.A{}
-	if req.SendTime != "" {
-		conditon = append(conditon, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
+	if sendTime != "" {
+		conditon = append(conditon, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, sendTime}})
 	}
-	if req.MsgType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+	if msgType != 0 {
+		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.content_type", msgType}})
 	}
-	if req.SessionType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
+	if sessionType != 0 {
+		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.session_type", sessionType}})
 	}
-	if req.RecvID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
+	if recvID != "" {
+		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": recvID}})
 	}
-	if req.SendID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
+	if sendID != "" {
+		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": sendID}})
 	}
 
 	or := bson.A{

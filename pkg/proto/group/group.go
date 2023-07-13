@@ -23,9 +23,6 @@ func (x *CreateGroupReq) Check() error {
 	if x.GroupInfo == nil {
 		return errs.ErrArgs.Wrap("groupInfo is empty")
 	}
-	if x.GroupInfo.OwnerUserID == "" {
-		return errs.ErrArgs.Wrap("GroupInfo.ownerUserID")
-	}
 	if x.GroupInfo.GroupType > 2 || x.GroupInfo.GroupType < 0 {
 		return errs.ErrArgs.Wrap("GroupType is invalid")
 	}

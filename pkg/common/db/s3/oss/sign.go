@@ -5,13 +5,12 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"hash"
 	"io"
 	"net/http"
 	"sort"
 	"strings"
-
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 func (o *OSS) getAdditionalHeaderKeys(req *http.Request) ([]string, map[string]string) {
@@ -72,10 +71,7 @@ func (o *OSS) getSignedStr(req *http.Request, canonicalizedResource string, keyS
 
 	// v2 signature
 	if o.bucket.Client.Config.AuthVersion == oss.AuthV2 {
-		signStr = req.Method + "\n" + contentMd5 + "\n" + contentType + "\n" + date + "\n" + canonicalizedOSSHeaders + strings.Join(
-			additionalList,
-			";",
-		) + "\n" + canonicalizedResource
+		signStr = req.Method + "\n" + contentMd5 + "\n" + contentType + "\n" + date + "\n" + canonicalizedOSSHeaders + strings.Join(additionalList, ";") + "\n" + canonicalizedResource
 		h = hmac.New(func() hash.Hash { return sha256.New() }, []byte(keySecret))
 	}
 	_, _ = io.WriteString(h, signStr)

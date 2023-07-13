@@ -3,10 +3,9 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"strings"
 	"time"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -24,9 +23,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -61,22 +59,16 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
-		UserDatabase:    database,
-		RegisterCenter:  client,
-		friendRpcClient: &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(
-			&msgRpcClient,
-			notification.WithDBFunc(database.FindWithError),
-		),
+		UserDatabase:       database,
+		RegisterCenter:     client,
+		friendRpcClient:    &friendRpcClient,
+		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
 }
 
-func (s *userServer) GetDesignateUsers(
-	ctx context.Context,
-	req *pbuser.GetDesignateUsersReq,
-) (resp *pbuser.GetDesignateUsersResp, err error) {
+func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesignateUsersReq) (resp *pbuser.GetDesignateUsersResp, err error) {
 	resp = &pbuser.GetDesignateUsersResp{}
 	users, err := s.FindWithError(ctx, req.UserIDs)
 	if err != nil {
@@ -89,10 +81,7 @@ func (s *userServer) GetDesignateUsers(
 	return resp, nil
 }
 
-func (s *userServer) UpdateUserInfo(
-	ctx context.Context,
-	req *pbuser.UpdateUserInfoReq,
-) (resp *pbuser.UpdateUserInfoResp, err error) {
+func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
 	err = tokenverify.CheckAccessV3(ctx, req.UserInfo.UserID)
 	if err != nil {
@@ -117,10 +106,7 @@ func (s *userServer) UpdateUserInfo(
 	return resp, nil
 }
 
-func (s *userServer) SetGlobalRecvMessageOpt(
-	ctx context.Context,
-	req *pbuser.SetGlobalRecvMessageOptReq,
-) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
+func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.SetGlobalRecvMessageOptReq) (resp *pbuser.SetGlobalRecvMessageOptResp, err error) {
 	resp = &pbuser.SetGlobalRecvMessageOptResp{}
 	if _, err := s.FindWithError(ctx, []string{req.UserID}); err != nil {
 		return nil, err
@@ -134,10 +120,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(
 	return resp, nil
 }
 
-func (s *userServer) AccountCheck(
-	ctx context.Context,
-	req *pbuser.AccountCheckReq,
-) (resp *pbuser.AccountCheckResp, err error) {
+func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckReq) (resp *pbuser.AccountCheckResp, err error) {
 	resp = &pbuser.AccountCheckResp{}
 	if utils.Duplicate(req.CheckUserIDs) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")
@@ -166,10 +149,7 @@ func (s *userServer) AccountCheck(
 	return resp, nil
 }
 
-func (s *userServer) GetPaginationUsers(
-	ctx context.Context,
-	req *pbuser.GetPaginationUsersReq,
-) (resp *pbuser.GetPaginationUsersResp, err error) {
+func (s *userServer) GetPaginationUsers(ctx context.Context, req *pbuser.GetPaginationUsersReq) (resp *pbuser.GetPaginationUsersResp, err error) {
 	var pageNumber, showNumber int32
 	if req.Pagination != nil {
 		pageNumber = req.Pagination.PageNumber
@@ -182,10 +162,7 @@ func (s *userServer) GetPaginationUsers(
 	return &pbuser.GetPaginationUsersResp{Total: int32(total), Users: convert.UsersDB2Pb(users)}, err
 }
 
-func (s *userServer) UserRegister(
-	ctx context.Context,
-	req *pbuser.UserRegisterReq,
-) (resp *pbuser.UserRegisterResp, err error) {
+func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterReq) (resp *pbuser.UserRegisterResp, err error) {
 	resp = &pbuser.UserRegisterResp{}
 	if len(req.Users) == 0 {
 		return nil, errs.ErrArgs.Wrap("users is empty")
@@ -233,10 +210,7 @@ func (s *userServer) UserRegister(
 	return resp, nil
 }
 
-func (s *userServer) GetGlobalRecvMessageOpt(
-	ctx context.Context,
-	req *pbuser.GetGlobalRecvMessageOptReq,
-) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
+func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.GetGlobalRecvMessageOptReq) (resp *pbuser.GetGlobalRecvMessageOptResp, err error) {
 	user, err := s.FindWithError(ctx, []string{req.UserID})
 	if err != nil {
 		return nil, err
@@ -244,10 +218,7 @@ func (s *userServer) GetGlobalRecvMessageOpt(
 	return &pbuser.GetGlobalRecvMessageOptResp{GlobalRecvMsgOpt: user[0].GlobalRecvMsgOpt}, nil
 }
 
-func (s *userServer) GetAllUserID(
-	ctx context.Context,
-	req *pbuser.GetAllUserIDReq,
-) (resp *pbuser.GetAllUserIDResp, err error) {
+func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
 	userIDs, err := s.UserDatabase.GetAllUserID(ctx)
 	if err != nil {
 		return nil, err

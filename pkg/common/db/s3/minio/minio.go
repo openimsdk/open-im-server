@@ -4,18 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/signer"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/signer"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 const (
@@ -81,12 +79,7 @@ func (m *Minio) InitiateMultipartUpload(ctx context.Context, name string) (*s3.I
 	}, nil
 }
 
-func (m *Minio) CompleteMultipartUpload(
-	ctx context.Context,
-	uploadID string,
-	name string,
-	parts []s3.Part,
-) (*s3.CompleteMultipartUploadResult, error) {
+func (m *Minio) CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []s3.Part) (*s3.CompleteMultipartUploadResult, error) {
 	minioParts := make([]minio.CompletePart, len(parts))
 	for i, part := range parts {
 		minioParts[i] = minio.CompletePart{
@@ -123,13 +116,7 @@ func (m *Minio) PartSize(ctx context.Context, size int64) (int64, error) {
 	return partSize, nil
 }
 
-func (m *Minio) AuthSign(
-	ctx context.Context,
-	uploadID string,
-	name string,
-	expire time.Duration,
-	partNumbers []int,
-) (*s3.AuthSignResult, error) {
+func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*s3.AuthSignResult, error) {
 	creds, err := m.opts.Creds.Get()
 	if err != nil {
 		return nil, err
@@ -146,14 +133,7 @@ func (m *Minio) AuthSign(
 			return nil, err
 		}
 		request.Header.Set("X-Amz-Content-Sha256", unsignedPayload)
-		request = signer.SignV4Trailer(
-			*request,
-			creds.AccessKeyID,
-			creds.SecretAccessKey,
-			creds.SessionToken,
-			"us-east-1",
-			nil,
-		)
+		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, "us-east-1", nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			URL:        request.URL.String(),
@@ -224,13 +204,7 @@ func (m *Minio) AbortMultipartUpload(ctx context.Context, uploadID string, name 
 	return m.core.AbortMultipartUpload(ctx, m.bucket, name, uploadID)
 }
 
-func (m *Minio) ListUploadedParts(
-	ctx context.Context,
-	uploadID string,
-	name string,
-	partNumberMarker int,
-	maxParts int,
-) (*s3.ListUploadedPartsResult, error) {
+func (m *Minio) ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*s3.ListUploadedPartsResult, error) {
 	result, err := m.core.ListObjectParts(ctx, m.bucket, name, uploadID, partNumberMarker, maxParts)
 	if err != nil {
 		return nil, err
@@ -253,12 +227,7 @@ func (m *Minio) ListUploadedParts(
 	return res, nil
 }
 
-func (m *Minio) AccessURL(
-	ctx context.Context,
-	name string,
-	expire time.Duration,
-	opt *s3.AccessURLOption,
-) (string, error) {
+func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	//reqParams := make(url.Values)
 	//if opt != nil {
 	//	if opt.ContentType != "" {

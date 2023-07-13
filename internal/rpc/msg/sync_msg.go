@@ -108,7 +108,7 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
 	var chatLogs []*sdkws.MsgData
 	resp = &msg.SearchMessageResp{}
-	if chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
+	if chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req.SendID, req.RecvID, req.SendTime, req.MsgType, req.SessionType); err != nil {
 		return nil, err
 	}
 	var num int
@@ -130,7 +130,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			if err != nil {
 				return nil, err
 			}
-			pbChatLog.SenderNickname = recvUser.Nickname
+			pbChatLog.RecvNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)

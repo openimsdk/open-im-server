@@ -41,7 +41,7 @@ func Start(
 	rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
-	rpcPort = 10030
+	rpcPort = 10070
 	fmt.Println(
 		"start",
 		rpcRegisterName,
