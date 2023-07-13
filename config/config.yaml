@@ -117,10 +117,10 @@ rpcRegisterName: #rpc注册服务名，不建议修改
   openImThirdName: Third
 
 log:
-  storageLocation: ../logs/           #存放目录
-  rotationTime: 24                    #日志旋转时间
-  remainRotationCount: 2              #日志数量
-  remainLogLevel: 6                   #日志级别 6表示全都打印，
+  storageLocation: ../../../../../logs/   #存放目录
+  rotationTime: 24                        #日志旋转时间
+  remainRotationCount: 2                  #日志数量
+  remainLogLevel: 6                       #日志级别 6表示全都打印，
   isStdout: false
   isJson: false
   withStack: false
