@@ -246,16 +246,6 @@ message SearchMessageResp{
   int32 chatLogsNum = 2;
 }
 
-message manageMsgReq{
-  string recvID=1;
-  string sendID=2;
-  string groupID=3;
-  int64 seq=4;
-  int32 sessionType=5;
-}
-
-message manageMsgResp{
-}
 
 message ChatLog {
   string serverMsgID = 1;
@@ -291,7 +281,6 @@ service msg {
   //拉取历史消息（包括用户的，以及指定群组的）
   rpc PullMessageBySeqs(sdkws.PullMessageBySeqsReq) returns(sdkws.PullMessageBySeqsResp);
   rpc SearchMessage(SearchMessageReq) returns(SearchMessageResp);
-  rpc ManageMsg(manageMsgReq) returns (manageMsgResp);
   //发送消息
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
 
