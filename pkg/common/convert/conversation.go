@@ -8,6 +8,7 @@ import (
 
 func ConversationDB2Pb(conversationDB *relation.ConversationModel) *conversation.Conversation {
 	conversationPB := &conversation.Conversation{}
+	conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
 	if err := utils.CopyStructFields(conversationPB, conversationDB); err != nil {
 		return nil
 	}
@@ -20,6 +21,7 @@ func ConversationsDB2Pb(conversationsDB []*relation.ConversationModel) (conversa
 		if err := utils.CopyStructFields(conversationPB, conversationDB); err != nil {
 			continue
 		}
+		conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
 		conversationsPB = append(conversationsPB, conversationPB)
 	}
 	return conversationsPB

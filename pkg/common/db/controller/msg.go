@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"fmt"
 	relation2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -51,6 +51,9 @@ type CommonMsgDatabase interface {
 	GetMsgBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) (minSeq int64, maxSeq int64, seqMsg []*sdkws.MsgData, err error)
 	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
+	// 用户标记删除过期消息返回标记删除的seq列表
+	UserMsgsDestruct(cte context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
+
 	// 用户根据seq删除消息
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
 	// 物理删除消息置空
@@ -85,16 +88,6 @@ type CommonMsgDatabase interface {
 	MsgToPushMQ(ctx context.Context, key, conversarionID string, msg2mq *sdkws.MsgData) (int32, int64, error)
 	MsgToMongoMQ(ctx context.Context, key, conversarionID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
-	// modify
-	JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error)
-	SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error
-	SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error)
-	GetExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error)
-	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
-	GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error)
-	GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error)
-	DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error
-	DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*sdkws.KeyValue) error
 	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error)
 	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
 	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error)
@@ -103,13 +96,12 @@ type CommonMsgDatabase interface {
 
 func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel, msgMyqModel relation.ChatLogModelInterface) CommonMsgDatabase {
 	return &commonMsgDatabase{
-		msgDocDatabase:   msgDocModel,
-		cache:            cacheModel,
-		msgMyq:           msgMyqModel,
-		producer:         kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
-		producerToMongo:  kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic),
-		producerToPush:   kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic),
-		producerToModify: kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToModify.Topic),
+		msgDocDatabase:  msgDocModel,
+		msgMyq:          msgMyqModel,
+		cache:           cacheModel,
+		producer:        kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
+		producerToMongo: kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToMongo.Topic),
+		producerToPush:  kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.MsgToPush.Topic),
 	}
 }
 
@@ -122,16 +114,14 @@ func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, 
 }
 
 type commonMsgDatabase struct {
-	msgDocDatabase    unRelationTb.MsgDocModelInterface
-	extendMsgDatabase unRelationTb.ExtendMsgSetModelInterface
-	extendMsgSetModel unRelationTb.ExtendMsgSetModel
-	msg               unRelationTb.MsgDocModel
-	msgMyq            relation.ChatLogModelInterface
-	cache             cache.MsgModel
-	producer          *kafka.Producer
-	producerToMongo   *kafka.Producer
-	producerToModify  *kafka.Producer
-	producerToPush    *kafka.Producer
+	msgDocDatabase   unRelationTb.MsgDocModelInterface
+	msg              unRelationTb.MsgDocModel
+	msgMyq           relation.ChatLogModelInterface
+	cache            cache.MsgModel
+	producer         *kafka.Producer
+	producerToMongo  *kafka.Producer
+	producerToModify *kafka.Producer
+	producerToPush   *kafka.Producer
 }
 
 func (db *commonMsgDatabase) GetChatLog(ctx context.Context, req *pbMsg.GetChatLogsReq, pageNumber int32, showNumber int32, int32s []int32) (int64, []relation.ChatLogModel, error) {
@@ -428,44 +418,6 @@ func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversat
 	return totalMsgs, nil
 }
 
-// func (db *commonMsgDatabase) refetchDelSeqsMsgs(ctx context.Context, conversationID string, delNums, rangeBegin, begin int64) (seqMsgs []*unRelationTb.MsgDataModel, err error) {
-// 	var reFetchSeqs []int64
-// 	if delNums > 0 {
-// 		newBeginSeq := rangeBegin - delNums
-// 		if newBeginSeq >= begin {
-// 			newEndSeq := rangeBegin - 1
-// 			for i := newBeginSeq; i <= newEndSeq; i++ {
-// 				reFetchSeqs = append(reFetchSeqs, i)
-// 			}
-// 		}
-// 	}
-// 	if len(reFetchSeqs) == 0 {
-// 		return
-// 	}
-// 	if len(reFetchSeqs) > 0 {
-// 		m := db.msg.GetDocIDSeqsMap(conversationID, reFetchSeqs)
-// 		for docID, seqs := range m {
-// 			msgs, _, err := db.findMsgInfoBySeq(ctx, docID, seqs)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 			for _, msg := range msgs {
-// 				if msg.Status != constant.MsgDeleted {
-// 					seqMsgs = append(seqMsgs, msg)
-// 				}
-// 			}
-// 		}
-// 	}
-// 	if len(seqMsgs) < int(delNums) {
-// 		seqMsgs2, err := db.refetchDelSeqsMsgs(ctx, conversationID, delNums-int64(len(seqMsgs)), rangeBegin-1, begin)
-// 		if err != nil {
-// 			return seqMsgs, err
-// 		}
-// 		seqMsgs = append(seqMsgs, seqMsgs2...)
-// 	}
-// 	return seqMsgs, nil
-// }
-
 func (db *commonMsgDatabase) findMsgInfoBySeq(ctx context.Context, userID, docID string, seqs []int64) (totalMsgs []*unRelationTb.MsgInfoModel, err error) {
 	msgs, err := db.msgDocDatabase.GetMsgBySeqIndexIn1Doc(ctx, userID, docID, seqs)
 	for _, msg := range msgs {
@@ -671,6 +623,47 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 		}
 	}
 	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
+}
+
+func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error) {
+	var index int64
+	for {
+		// from oldest 2 newest
+		msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
+		if err != nil || msgDocModel.DocID == "" {
+			if err != nil {
+				if err == unrelation.ErrMsgListNotExist {
+					log.ZDebug(ctx, "deleteMsgRecursion finished", "conversationID", conversationID, "userID", userID, "index", index)
+				} else {
+					log.ZError(ctx, "deleteMsgRecursion GetUserMsgListByIndex failed", err, "conversationID", conversationID, "index", index)
+				}
+			}
+			// 获取报错，或者获取不到了，物理删除并且返回seq delMongoMsgsPhysical(delStruct.delDocIDList), 结束递归
+			break
+		}
+		//&& msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
+		if len(msgDocModel.Msg) > 0 {
+			for _, msg := range msgDocModel.Msg {
+				if msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
+					if msg.Msg.SendTime > lastMsgDestructTime.UnixMilli() && !utils.Contain(userID, msg.DelList...) {
+						seqs = append(seqs, msg.Msg.Seq)
+					}
+				} else {
+					log.ZDebug(ctx, "deleteMsgRecursion finished", "conversationID", conversationID, "userID", userID, "index", index)
+					break
+				}
+
+			}
+		}
+	}
+	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
+	if len(seqs) > 0 {
+		latestSeq := seqs[len(seqs)-1]
+		if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, latestSeq); err != nil {
+			return nil, err
+		}
+	}
+	return seqs, nil
 }
 
 // this is struct for recursion
@@ -903,66 +896,6 @@ func (db *commonMsgDatabase) GetMinMaxSeqMongo(ctx context.Context, conversation
 	}
 	maxSeqMongo = newestMsgMongo.Msg.Seq
 	return
-}
-
-func (db *commonMsgDatabase) JudgeMessageReactionExist(ctx context.Context, clientMsgID string, sessionType int32) (bool, error) {
-	return db.cache.JudgeMessageReactionExist(ctx, clientMsgID, sessionType)
-}
-
-func (db *commonMsgDatabase) SetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey, value string) error {
-	return db.cache.SetMessageTypeKeyValue(ctx, clientMsgID, sessionType, typeKey, value)
-}
-
-func (db *commonMsgDatabase) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
-	return db.cache.SetMessageReactionExpire(ctx, clientMsgID, sessionType, expiration)
-}
-
-func (db *commonMsgDatabase) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
-	return db.cache.GetMessageTypeKeyValue(ctx, clientMsgID, sessionType, typeKey)
-}
-
-func (db *commonMsgDatabase) GetOneMessageAllReactionList(ctx context.Context, clientMsgID string, sessionType int32) (map[string]string, error) {
-	return db.cache.GetOneMessageAllReactionList(ctx, clientMsgID, sessionType)
-}
-
-func (db *commonMsgDatabase) DeleteOneMessageKey(ctx context.Context, clientMsgID string, sessionType int32, subKey string) error {
-	return db.cache.DeleteOneMessageKey(ctx, clientMsgID, sessionType, subKey)
-}
-
-func (db *commonMsgDatabase) InsertOrUpdateReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensions map[string]*sdkws.KeyValue) error {
-	return db.extendMsgDatabase.InsertOrUpdateReactionExtendMsgSet(ctx, conversationID, sessionType, clientMsgID, msgFirstModifyTime, db.extendMsgSetModel.Pb2Model(reactionExtensions))
-}
-
-func (db *commonMsgDatabase) GetExtendMsg(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*pbMsg.ExtendMsg, error) {
-	extendMsgSet, err := db.extendMsgDatabase.GetExtendMsgSet(ctx, conversationID, sessionType, maxMsgUpdateTime)
-	if err != nil {
-		return nil, err
-	}
-	extendMsg, ok := extendMsgSet.ExtendMsgs[clientMsgID]
-	if !ok {
-		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("cant find client msg id: %s", clientMsgID))
-	}
-	reactionExtensionList := make(map[string]*pbMsg.KeyValueResp)
-	for key, model := range extendMsg.ReactionExtensionList {
-		reactionExtensionList[key] = &pbMsg.KeyValueResp{
-			KeyValue: &sdkws.KeyValue{
-				TypeKey:          model.TypeKey,
-				Value:            model.Value,
-				LatestUpdateTime: model.LatestUpdateTime,
-			},
-		}
-	}
-	return &pbMsg.ExtendMsg{
-		ReactionExtensions: reactionExtensionList,
-		ClientMsgID:        extendMsg.ClientMsgID,
-		MsgFirstModifyTime: extendMsg.MsgFirstModifyTime,
-		AttachedInfo:       extendMsg.AttachedInfo,
-		Ex:                 extendMsg.Ex,
-	}, nil
-}
-
-func (db *commonMsgDatabase) DeleteReactionExtendMsgSet(ctx context.Context, conversationID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensions map[string]*sdkws.KeyValue) error {
-	return db.extendMsgDatabase.DeleteReactionExtendMsgSet(ctx, conversationID, sessionType, clientMsgID, msgFirstModifyTime, db.extendMsgSetModel.Pb2Model(reactionExtensions))
 }
 
 func (db *commonMsgDatabase) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error) {

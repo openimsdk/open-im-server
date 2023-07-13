@@ -3,7 +3,6 @@ package rpcclient
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -22,8 +21,7 @@ type User struct {
 }
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
-	conn, err := discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}

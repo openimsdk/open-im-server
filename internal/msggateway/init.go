@@ -8,6 +8,8 @@ import (
 )
 
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
+	rpcPort = 10040
+	wsPort = 10001
 	fmt.Println("start rpc/msg_gateway server, port: ", rpcPort, wsPort, prometheusPort, ", OpenIM version: ", config.Version)
 	longServer, err := NewWsServer(
 		WithPort(wsPort),

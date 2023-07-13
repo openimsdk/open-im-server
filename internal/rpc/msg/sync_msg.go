@@ -59,12 +59,49 @@ func (m *msgServer) PullMessageBySeqs(ctx context.Context, req *sdkws.PullMessag
 }
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
-	var msgs []*sdkws.MsgData
+	var chatLogs []*sdkws.MsgData
 	resp = &msg.SearchMessageResp{}
-	if msgs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
+	if chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
 		return nil, err
 	}
-	resp.Msgs = msgs
+	var num int
+	for _, chatLog := range chatLogs {
+		pbChatLog := &msg.ChatLog{}
+		utils.CopyStructFields(pbChatLog, chatLog)
+		pbChatLog.SendTime = chatLog.SendTime
+		pbChatLog.CreateTime = chatLog.CreateTime
+		if chatLog.SenderNickname == "" {
+			sendUser, err := m.User.GetUserInfo(ctx, chatLog.SendID)
+			if err != nil {
+				return nil, err
+			}
+			pbChatLog.SenderNickname = sendUser.Nickname
+		}
+		switch chatLog.SessionType {
+		case constant.SingleChatType:
+			recvUser, err := m.User.GetUserInfo(ctx, chatLog.RecvID)
+			if err != nil {
+				return nil, err
+			}
+			pbChatLog.SenderNickname = recvUser.Nickname
+
+		case constant.GroupChatType, constant.SuperGroupChatType:
+			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)
+			if err != nil {
+				return nil, err
+			}
+			pbChatLog.SenderFaceURL = group.FaceURL
+			pbChatLog.GroupMemberCount = group.MemberCount
+			pbChatLog.RecvID = group.GroupID
+			pbChatLog.GroupName = group.GroupName
+			pbChatLog.GroupOwner = group.OwnerUserID
+			pbChatLog.GroupType = group.GroupType
+		}
+		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
+		num++
+	}
+
+	resp.ChatLogsNum = int32(num)
 	return resp, nil
 }
 

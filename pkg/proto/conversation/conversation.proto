@@ -18,6 +18,9 @@ message Conversation{
   int32 burnDuration = 12;
   int64 minSeq = 13;
   int64 maxSeq = 14;
+  int64 msgDestructTime = 15;
+  int64 latestMsgDestructTime = 16;
+  bool isMsgDestruct = 17;
 }
 
 message ConversationReq{
@@ -34,6 +37,8 @@ message ConversationReq{
   OpenIMServer.protobuf.Int64Value minSeq = 11;
   OpenIMServer.protobuf.Int64Value maxSeq = 12;
   OpenIMServer.protobuf.Int32Value groupAtType = 13;
+  OpenIMServer.protobuf.Int64Value msgDestructTime = 14;
+  OpenIMServer.protobuf.BoolValue isMsgDestruct = 15;
 }
 
 message SetConversationReq{

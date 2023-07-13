@@ -110,13 +110,15 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
-		thirdGroup.POST("/apply_put", t.ApplyPut)
-		thirdGroup.POST("/get_put", t.GetPut)
-		thirdGroup.POST("/confirm_put", t.ConfirmPut)
-		thirdGroup.POST("/get_hash", t.GetHash)
-		thirdGroup.POST("/object", t.GetURL)
-		thirdGroup.GET("/object", t.GetURL)
+		objectGroup := r.Group("/object", ParseToken)
 
+		objectGroup.POST("/part_limit", t.PartLimit)
+		objectGroup.POST("/part_size", t.PartSize)
+		objectGroup.POST("/initiate_multipart_upload", t.InitiateMultipartUpload)
+		objectGroup.POST("/auth_sign", t.AuthSign)
+		objectGroup.POST("/complete_multipart_upload", t.CompleteMultipartUpload)
+		objectGroup.POST("/access_url", t.AccessURL)
+		objectGroup.GET("/*name", t.ObjectRedirect)
 		thirdGroup.POST("/minio_upload", t.MinioUploadFile)
 	}
 	//Message
@@ -128,6 +130,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/revoke_msg", m.RevokeMsg)
 		msgGroup.POST("/mark_msgs_as_read", m.MarkMsgsAsRead)
 		msgGroup.POST("/mark_conversation_as_read", m.MarkConversationAsRead)
+		msgGroup.POST("/manage_send_msg", m.ManagementSendMsg)
+		msgGroup.POST("/manage_msg", m.ManagementMsg)
 		msgGroup.POST("/get_conversations_has_read_and_max_seq", m.GetConversationsHasReadAndMaxSeq)
 		msgGroup.POST("/set_conversation_has_read_seq", m.SetConversationHasReadSeq)
 

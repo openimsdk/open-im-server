@@ -8,7 +8,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -22,7 +21,6 @@ type MessageInterceptorChain []MessageInterceptorFunc
 type msgServer struct {
 	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
 	MsgDatabase            controller.CommonMsgDatabase
-	ExtendMsgDatabase      controller.ExtendMsgDatabase
 	Group                  *rpcclient.GroupRpcClient
 	User                   *rpcclient.UserRpcClient
 	Conversation           *rpcclient.ConversationRpcClient
@@ -65,9 +63,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	msgMysModel := relation.NewChatLogGorm(mysql)
-	extendMsgModel := unrelation.NewExtendMsgSetMongoDriver(mongo.GetDatabase())
-	extendMsgCacheModel := cache.NewExtendMsgSetCacheRedis(rdb, extendMsgModel, cache.GetDefaultOpt())
-	extendMsgDatabase := controller.NewExtendMsgDatabase(extendMsgModel, extendMsgCacheModel, tx.NewMongo(mongo.GetClient()))
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, msgMysModel)
 	conversationClient := rpcclient.NewConversationRpcClient(client)
 	userRpcClient := rpcclient.NewUserRpcClient(client)
@@ -78,7 +73,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		User:                   &userRpcClient,
 		Group:                  &groupRpcClient,
 		MsgDatabase:            msgDatabase,
-		ExtendMsgDatabase:      extendMsgDatabase,
 		RegisterCenter:         client,
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),

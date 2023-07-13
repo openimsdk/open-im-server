@@ -149,22 +149,6 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
-func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
-}
-
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -351,6 +335,69 @@ func (m *MessageApi) SearchMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SearchMessage, m.Client, c)
 }
 
-func (m MessageApi) GetChatLogs(c *gin.Context) {
+func (m *MessageApi) GetChatLogs(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetChatLogs, m.Client, c)
+}
+
+func (m *MessageApi) ManagementSendMsg(c *gin.Context) {
+	params := apistruct.ManagementSendMsgReq{}
+	if err := c.BindJSON(&params); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	}
+	var data interface{}
+	switch params.ContentType {
+	case constant.Text:
+		data = apistruct.TextElem{}
+	case constant.Picture:
+		data = apistruct.PictureElem{}
+	case constant.Voice:
+		data = apistruct.SoundElem{}
+	case constant.Video:
+		data = apistruct.VideoElem{}
+	case constant.File:
+		data = apistruct.FileElem{}
+	case constant.Custom:
+		data = apistruct.CustomElem{}
+	case constant.Revoke:
+		data = apistruct.RevokeElem{}
+	case constant.OANotification:
+		data = apistruct.OANotificationElem{}
+		params.SessionType = constant.NotificationChatType
+	case constant.CustomNotTriggerConversation:
+		data = apistruct.CustomElem{}
+	case constant.CustomOnlineOnly:
+		data = apistruct.CustomElem{}
+	default:
+		apiresp.GinError(c, errs.ErrArgs.WithDetail("not support err contentType").Wrap())
+		return
+	}
+	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	} else if err := m.validate.Struct(params); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	}
+
+	pbReq := m.newUserSendMsgReq(c, &params)
+	var status int32
+	RpcResp, err := m.Client.SendMsg(c, pbReq)
+	if err != nil {
+		status = constant.MsgSendFailed
+	} else {
+		status = constant.MsgSendSuccessed
+	}
+
+	_, err2 := m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{Status: status})
+	if err2 != nil {
+		apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		return
+	}
+	resp := apistruct.ManagementSendMsgResp{ResultList: sdkws.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
+	apiresp.GinSuccess(c, resp)
+}
+
+func (m *MessageApi) ManagementMsg(c *gin.Context) {
+	a2r.Call(msg.MsgClient.ManageMsg, m.Client, c)
 }
