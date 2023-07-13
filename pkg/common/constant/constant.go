@@ -18,19 +18,20 @@ const (
 
 	///ContentType
 	//UserRelated
-	Text     = 101
-	Picture  = 102
-	Voice    = 103
-	Video    = 104
-	File     = 105
-	AtText   = 106
-	Merger   = 107
-	Card     = 108
-	Location = 109
-	Custom   = 110
-	Revoke   = 111
-	Typing   = 113
-	Quote    = 114
+	ContentTypeBegin = 100
+	Text             = 101
+	Picture          = 102
+	Voice            = 103
+	Video            = 104
+	File             = 105
+	AtText           = 106
+	Merger           = 107
+	Card             = 108
+	Location         = 109
+	Custom           = 110
+	Revoke           = 111
+	Typing           = 113
+	Quote            = 114
 
 	AdvancedText = 117
 

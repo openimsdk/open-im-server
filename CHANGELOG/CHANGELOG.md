@@ -18,6 +18,14 @@ git commit -am "release 2.0.0"
 git tag 2.0.0
 ```
 
+| Query          | Description                                    | Example                     |
+| -------------- | ---------------------------------------------- | --------------------------- |
+| `<old>..<new>` | Commit contained in `<new>` tags from `<old>`. | `$ git-chglog 1.0.0..2.0.0` |
+| `<name>..`     | Commit from the `<name>` to the latest tag.    | `$ git-chglog 1.0.0..`      |
+| `..<name>`     | Commit from the oldest tag to `<name>`.        | `$ git-chglog ..2.0.0`      |
+| `<name>`       | Commit contained in `<name>`.                  | `$ git-chglog 1.0.0`        |
+
+
 ## Release version logs
 
 + [OpenIM CHANGELOG-V1.0](CHANGELOG-1.0.md)
