@@ -38,11 +38,11 @@ var (
 	ErrData             = NewCodeError(DataError, "DataError")
 	ErrTokenExpired     = NewCodeError(TokenExpiredError, "TokenExpiredError")
 	ErrTokenInvalid     = NewCodeError(TokenInvalidError, "TokenInvalidError")         //
-	ErrTokenMalformed   = NewCodeError(TokenMalformedError, "TokenMalformedError")     //格式错误
-	ErrTokenNotValidYet = NewCodeError(TokenNotValidYetError, "TokenNotValidYetError") //还未生效
-	ErrTokenUnknown     = NewCodeError(TokenUnknownError, "TokenUnknownError")         //未知错误
+	ErrTokenMalformed   = NewCodeError(TokenMalformedError, "TokenMalformedError")     // 格式错误
+	ErrTokenNotValidYet = NewCodeError(TokenNotValidYetError, "TokenNotValidYetError") // 还未生效
+	ErrTokenUnknown     = NewCodeError(TokenUnknownError, "TokenUnknownError")         // 未知错误
 	ErrTokenKicked      = NewCodeError(TokenKickedError, "TokenKickedError")
-	ErrTokenNotExist    = NewCodeError(TokenNotExistError, "TokenNotExistError") //在redis中不存在
+	ErrTokenNotExist    = NewCodeError(TokenNotExistError, "TokenNotExistError") // 在redis中不存在
 	ErrDuplicateKey     = NewCodeError(DuplicateKeyError, "DuplicateKeyError")
 
 	ErrMessageHasReadDisable = NewCodeError(MessageHasReadDisable, "MessageHasReadDisable")

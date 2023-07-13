@@ -47,8 +47,7 @@ type ForceLogoutReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
-type ForceLogoutResp struct {
-}
+type ForceLogoutResp struct{}
 
 type ParseTokenReq struct {
 	OperationID string `json:"operationID" binding:"required"`

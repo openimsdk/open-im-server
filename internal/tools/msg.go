@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package tools
 
 import (
@@ -5,10 +19,6 @@ import (
 	"fmt"
 	"math"
 	"time"
-
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -24,6 +34,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type MsgTool struct {
@@ -34,13 +47,8 @@ type MsgTool struct {
 	msgNotificationSender *notification.MsgNotificationSender
 }
 
-func NewMsgTool(
-	msgDatabase controller.CommonMsgDatabase,
-	userDatabase controller.UserDatabase,
-	groupDatabase controller.GroupDatabase,
-	conversationDatabase controller.ConversationDatabase,
-	msgNotificationSender *notification.MsgNotificationSender,
-) *MsgTool {
+func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
+	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase, msgNotificationSender *notification.MsgNotificationSender) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,
 		userDatabase:          userDatabase,
@@ -63,18 +71,9 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	discov, err := zookeeper.NewClient(
-		config.Config.Zookeeper.ZkAddr,
-		config.Config.Zookeeper.Schema,
-		zookeeper.WithFreq(
-			time.Hour,
-		),
-		zookeeper.WithRoundRobin(),
-		zookeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-			config.Config.Zookeeper.Password),
-		zookeeper.WithTimeout(10),
-		zookeeper.WithLogger(log.NewZkLogger()),
-	)
+	discov, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+		zookeeper.WithFreq(time.Hour), zookeeper.WithRoundRobin(), zookeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
+			config.Config.Zookeeper.Password), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +86,7 @@ func InitMsgTool() (*MsgTool, error) {
 		tx.NewGorm(db),
 	)
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
-	conversationDatabase := controller.NewConversationDatabase(
-		relation.NewConversationGorm(db),
-		cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)),
-		tx.NewGorm(db),
-	)
+	conversationDatabase := controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)), tx.NewGorm(db))
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
 	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender)
@@ -116,15 +111,7 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 func (c *MsgTool) ClearConversationsMsg(ctx context.Context, conversationIDs []string) {
 	for _, conversationID := range conversationIDs {
 		if err := c.msgDatabase.DeleteConversationMsgsAndSetMinSeq(ctx, conversationID, int64(config.Config.RetainChatRecords*24*60*60)); err != nil {
-			log.ZError(
-				ctx,
-				"DeleteUserSuperGroupMsgsAndSetMinSeq failed",
-				err,
-				"conversationID",
-				conversationID,
-				"DBRetainChatRecords",
-				config.Config.RetainChatRecords,
-			)
+			log.ZError(ctx, "DeleteUserSuperGroupMsgsAndSetMinSeq failed", err, "conversationID", conversationID, "DBRetainChatRecords", config.Config.RetainChatRecords)
 		}
 		if err := c.checkMaxSeq(ctx, conversationID); err != nil {
 			log.ZError(ctx, "fixSeq failed", err, "conversationID", conversationID)
@@ -138,19 +125,7 @@ func (c *MsgTool) checkMaxSeqWithMongo(ctx context.Context, conversationID strin
 		return err
 	}
 	if math.Abs(float64(maxSeqMongo-maxSeqCache)) > 10 {
-		log.ZError(
-			ctx,
-			"cache max seq and mongo max seq is diff > 10",
-			nil,
-			"maxSeqMongo",
-			maxSeqMongo,
-			"minSeqMongo",
-			minSeqMongo,
-			"maxSeqCache",
-			maxSeqCache,
-			"conversationID",
-			conversationID,
-		)
+		log.ZError(ctx, "cache max seq and mongo max seq is diff > 10", nil, "maxSeqMongo", maxSeqMongo, "minSeqMongo", minSeqMongo, "maxSeqCache", maxSeqCache, "conversationID", conversationID)
 	}
 	return nil
 }

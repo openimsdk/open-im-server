@@ -37,10 +37,12 @@ echo -e "${BOLD_PREFIX}_________________________________________________________
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/db/sdk/"
+
+echo "==> bin_dir=$bin_dir"
+echo "==> logs_dir=$logs_dir"
+echo "==> sdk_db_dir=$sdk_db_dir"
+
 # Automatically created when there is no bin, logs folder
-if [ ! -d $bin_dir ]; then
-  mkdir -p $bin_dir
-fi
 if [ ! -d $logs_dir ]; then
   mkdir -p $logs_dir
 fi
@@ -48,20 +50,17 @@ if [ ! -d $sdk_db_dir ]; then
   mkdir -p $sdk_db_dir
 fi
 
-#Include shell font styles and some basic information
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-
-echo "PWD=================>$PWD"
-
-#Include shell font styles and some basic information
-source ./style_info.sh
-source ./path_info.sh
-source ./function.sh
-
 cd $OPENIM_ROOT
 
-# Execute 'make build'
-make build
+# CPU core number
+cpu_count=$(lscpu | grep -e '^CPU(s):' | awk '{print $2}')
+echo -e "${GREEN_PREFIX}======> cpu_count=$cpu_count${COLOR_SUFFIX}"
+
+# Count the number of concurrent compilations (half the number of cpus)
+compile_count=$((cpu_count / 2))
+
+# Execute 'make build' run the make command for concurrent compilation
+make -j$compile_count build
 
 if [ $? -ne 0 ]; then
   echo "make build Error, script exits"

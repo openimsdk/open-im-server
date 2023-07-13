@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cont
 
 import (
@@ -6,15 +20,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"path"
-	"strings"
-	"time"
-
-	"github.com/google/uuid"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/google/uuid"
+	"path"
+	"strings"
+	"time"
 )
 
 func New(impl s3.Interface) *Controller {
@@ -58,13 +70,7 @@ func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.Object
 	return c.impl.StatObject(ctx, c.HashPath(hash))
 }
 
-func (c *Controller) InitiateUpload(
-	ctx context.Context,
-	hash string,
-	size int64,
-	expire time.Duration,
-	maxParts int,
-) (*InitiateUploadResult, error) {
+func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*InitiateUploadResult, error) {
 	defer log.ZDebug(ctx, "return")
 	if size < 0 {
 		return nil, errors.New("invalid size")
@@ -247,11 +253,6 @@ func (c *Controller) IsNotFound(err error) bool {
 	return c.impl.IsNotFound(err)
 }
 
-func (c *Controller) AccessURL(
-	ctx context.Context,
-	name string,
-	expire time.Duration,
-	opt *s3.AccessURLOption,
-) (string, error) {
+func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	return c.impl.AccessURL(ctx, name, expire, opt)
 }

@@ -25,8 +25,7 @@ type KickGroupMemberReq struct {
 	OperationID      string   `json:"operationID"      binding:"required"`
 }
 type KickGroupMemberResp struct {
-
-	//UserIDResultList []*UserIDResult `json:"data"`
+	// UserIDResultList []*UserIDResult `json:"data"`
 }
 
 type GetGroupMembersInfoReq struct {
@@ -46,8 +45,7 @@ type InviteUserToGroupReq struct {
 	OperationID       string   `json:"operationID"       binding:"required"`
 }
 type InviteUserToGroupResp struct {
-
-	//UserIDResultList []*UserIDResult `json:"data"`
+	// UserIDResultList []*UserIDResult `json:"data"`
 }
 
 type GetJoinedGroupListReq struct {
@@ -114,8 +112,9 @@ type CreateGroupResp struct {
 
 type GetGroupApplicationListReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	FromUserID  string `json:"fromUserID"  binding:"required"` //作为管理员或群主收到的 进群申请
+	FromUserID  string `json:"fromUserID"  binding:"required"` // 作为管理员或群主收到的 进群申请
 }
+
 type GetGroupApplicationListResp struct {
 	GroupRequestList []*sdkws.GroupRequest    `json:"-"`
 	Data             []map[string]interface{} `json:"data" swaggerignore:"true"`
@@ -163,12 +162,11 @@ type GetGroupInfoResp struct {
 type ApplicationGroupResponseReq struct {
 	OperationID  string `json:"operationID"  binding:"required"`
 	GroupID      string `json:"groupID"      binding:"required"`
-	FromUserID   string `json:"fromUserID"   binding:"required"` //application from FromUserID
+	FromUserID   string `json:"fromUserID"   binding:"required"` // application from FromUserID
 	HandledMsg   string `json:"handledMsg"`
 	HandleResult int32  `json:"handleResult" binding:"required,oneof=-1 1"`
 }
-type ApplicationGroupResponseResp struct {
-}
+type ApplicationGroupResponseResp struct{}
 
 type JoinGroupReq struct {
 	GroupID       string `json:"groupID"       binding:"required"`
@@ -178,15 +176,13 @@ type JoinGroupReq struct {
 	InviterUserID string `json:"inviterUserID"`
 }
 
-type JoinGroupResp struct {
-}
+type JoinGroupResp struct{}
 
 type QuitGroupReq struct {
 	GroupID     string `json:"groupID"     binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
-type QuitGroupResp struct {
-}
+type QuitGroupResp struct{}
 
 type SetGroupInfoReq struct {
 	GroupID           string `json:"groupID"           binding:"required"`
@@ -201,8 +197,7 @@ type SetGroupInfoReq struct {
 	ApplyMemberFriend *int32 `json:"applyMemberFriend"`
 }
 
-type SetGroupInfoResp struct {
-}
+type SetGroupInfoResp struct{}
 
 type TransferGroupOwnerReq struct {
 	GroupID        string `json:"groupID"        binding:"required"`
@@ -210,15 +205,13 @@ type TransferGroupOwnerReq struct {
 	NewOwnerUserID string `json:"newOwnerUserID" binding:"required"`
 	OperationID    string `json:"operationID"    binding:"required"`
 }
-type TransferGroupOwnerResp struct {
-}
+type TransferGroupOwnerResp struct{}
 
 type DismissGroupReq struct {
 	GroupID     string `json:"groupID"     binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
-type DismissGroupResp struct {
-}
+type DismissGroupResp struct{}
 
 type MuteGroupMemberReq struct {
 	OperationID  string `json:"operationID"  binding:"required"`
@@ -226,30 +219,26 @@ type MuteGroupMemberReq struct {
 	UserID       string `json:"userID"       binding:"required"`
 	MutedSeconds uint32 `json:"mutedSeconds" binding:"required"`
 }
-type MuteGroupMemberResp struct {
-}
+type MuteGroupMemberResp struct{}
 
 type CancelMuteGroupMemberReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	GroupID     string `json:"groupID"     binding:"required"`
 	UserID      string `json:"userID"      binding:"required"`
 }
-type CancelMuteGroupMemberResp struct {
-}
+type CancelMuteGroupMemberResp struct{}
 
 type MuteGroupReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	GroupID     string `json:"groupID"     binding:"required"`
 }
-type MuteGroupResp struct {
-}
+type MuteGroupResp struct{}
 
 type CancelMuteGroupReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	GroupID     string `json:"groupID"     binding:"required"`
 }
-type CancelMuteGroupResp struct {
-}
+type CancelMuteGroupResp struct{}
 
 type SetGroupMemberNicknameReq struct {
 	OperationID string `json:"operationID" binding:"required"`
@@ -258,8 +247,7 @@ type SetGroupMemberNicknameReq struct {
 	Nickname    string `json:"nickname"`
 }
 
-type SetGroupMemberNicknameResp struct {
-}
+type SetGroupMemberNicknameResp struct{}
 
 type SetGroupMemberInfoReq struct {
 	OperationID string  `json:"operationID"      binding:"required"`
@@ -271,8 +259,7 @@ type SetGroupMemberInfoReq struct {
 	Ex          *string `json:"ex"`
 }
 
-type SetGroupMemberInfoResp struct {
-}
+type SetGroupMemberInfoResp struct{}
 
 type GetGroupAbstractInfoReq struct {
 	OperationID string `json:"operationID"`

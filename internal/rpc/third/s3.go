@@ -1,9 +1,21 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package third
 
 import (
 	"context"
-	"time"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -11,6 +23,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"time"
 )
 
 func (t *thirdServer) PartLimit(ctx context.Context, req *third.PartLimitReq) (*third.PartLimitResp, error) {
@@ -30,10 +43,7 @@ func (t *thirdServer) PartSize(ctx context.Context, req *third.PartSizeReq) (*th
 	return &third.PartSizeResp{Size: size}, nil
 }
 
-func (t *thirdServer) InitiateMultipartUpload(
-	ctx context.Context,
-	req *third.InitiateMultipartUploadReq,
-) (*third.InitiateMultipartUploadResp, error) {
+func (t *thirdServer) InitiateMultipartUpload(ctx context.Context, req *third.InitiateMultipartUploadReq) (*third.InitiateMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err
@@ -112,10 +122,7 @@ func (t *thirdServer) AuthSign(ctx context.Context, req *third.AuthSignReq) (*th
 	return resp, nil
 }
 
-func (t *thirdServer) CompleteMultipartUpload(
-	ctx context.Context,
-	req *third.CompleteMultipartUploadReq,
-) (*third.CompleteMultipartUploadResp, error) {
+func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.CompleteMultipartUploadReq) (*third.CompleteMultipartUploadResp, error) {
 	defer log.ZDebug(ctx, "return")
 	if err := checkUploadName(ctx, req.Name); err != nil {
 		return nil, err

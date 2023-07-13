@@ -42,9 +42,9 @@ type Mongo struct {
 // NewMongo Initialize MongoDB connection
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
-	url := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.Uri != "" {
-		url = config.Config.Mongo.Uri
+		uri = config.Config.Mongo.Uri
 	} else {
 		mongodbHosts := ""
 		for i, v := range config.Config.Mongo.Address {
@@ -55,22 +55,22 @@ func NewMongo() (*Mongo, error) {
 			}
 		}
 		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
-			url = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
 				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
 				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
 		} else {
-			url = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				mongodbHosts, config.Config.Mongo.Database,
 				config.Config.Mongo.MaxPoolSize)
 		}
 	}
-	fmt.Println("mongo:", url)
+	fmt.Println("mongo:", uri)
 	var mongoClient *mongo.Client
 	var err error = nil
 	for i := 0; i <= maxRetry; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
-		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(url))
+		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err == nil {
 			return &Mongo{db: mongoClient}, nil
 		}

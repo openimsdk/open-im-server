@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package s3
 
 import (
@@ -112,21 +126,10 @@ type Interface interface {
 	PartLimit() *PartLimit
 
 	InitiateMultipartUpload(ctx context.Context, name string) (*InitiateMultipartUploadResult, error)
-	CompleteMultipartUpload(
-		ctx context.Context,
-		uploadID string,
-		name string,
-		parts []Part,
-	) (*CompleteMultipartUploadResult, error)
+	CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []Part) (*CompleteMultipartUploadResult, error)
 
 	PartSize(ctx context.Context, size int64) (int64, error)
-	AuthSign(
-		ctx context.Context,
-		uploadID string,
-		name string,
-		expire time.Duration,
-		partNumbers []int,
-	) (*AuthSignResult, error)
+	AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*AuthSignResult, error)
 
 	PresignedPutObject(ctx context.Context, name string, expire time.Duration) (string, error)
 
@@ -139,13 +142,7 @@ type Interface interface {
 	IsNotFound(err error) bool
 
 	AbortMultipartUpload(ctx context.Context, uploadID string, name string) error
-	ListUploadedParts(
-		ctx context.Context,
-		uploadID string,
-		name string,
-		partNumberMarker int,
-		maxParts int,
-	) (*ListUploadedPartsResult, error)
+	ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*ListUploadedPartsResult, error)
 
 	AccessURL(ctx context.Context, name string, expire time.Duration, opt *AccessURLOption) (string, error)
 }

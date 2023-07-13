@@ -1,12 +1,23 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpcclient
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
-
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -15,6 +26,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
 
@@ -108,9 +121,10 @@ func newSessionTypeConf() map[int32]int32 {
 }
 
 type Message struct {
-	conn   grpc.ClientConnInterface
-	Client msg.MsgClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	conn       grpc.ClientConnInterface
+	Client     msg.MsgClient
+	discov     discoveryregistry.SvcDiscoveryRegistry
+	userClient user.UserClient
 }
 
 func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
@@ -119,7 +133,20 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
-	return &Message{discov: discov, conn: conn, Client: client}
+	conn, err = discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
+	if err != nil {
+		panic(err)
+	}
+	userClient := user.NewUserClient(conn)
+	return &Message{discov: discov, conn: conn, Client: client, userClient: userClient}
+}
+
+func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
+	resp, err := m.userClient.GetAllUserID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 type MessageRpcClient Message
@@ -138,10 +165,7 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 	return resp, err
 }
 
-func (m *MessageRpcClient) PullMessageBySeqList(
-	ctx context.Context,
-	req *sdkws.PullMessageBySeqsReq,
-) (*sdkws.PullMessageBySeqsResp, error) {
+func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
 	return resp, err
 }
@@ -163,9 +187,7 @@ type NotificationSender struct {
 
 type NotificationSenderOptions func(*NotificationSender)
 
-func WithLocalSendMsg(
-	sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error),
-) NotificationSenderOptions {
+func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
@@ -184,10 +206,7 @@ func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 }
 
 func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{
-		contentTypeConf: newContentTypeConf(),
-		sessionTypeConf: newSessionTypeConf(),
-	}
+	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
@@ -206,29 +225,11 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(
-	ctx context.Context,
-	sendID, recvID string,
-	contentType, sesstionType int32,
-	m proto.Message,
-	opts ...NotificationOptions,
-) (err error) {
+func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(
-			ctx,
-			"MsgClient Notification json.Marshal failed",
-			err,
-			"sendID",
-			sendID,
-			"recvID",
-			recvID,
-			"contentType",
-			contentType,
-			"msg",
-			m,
-		)
+		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
 		return err
 	}
 	notificationOpt := &notificationOpt{}
@@ -275,25 +276,6 @@ func (s *NotificationSender) NotificationWithSesstionType(
 	return err
 }
 
-func (s *NotificationSender) Notification(
-	ctx context.Context,
-	sendID, recvID string,
-	contentType int32,
-	m proto.Message,
-	opts ...NotificationOptions,
-) error {
+func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
-}
-
-func (m *Message) GetAllUserID(ctx context.Context, req *user.GetAllUserIDReq) (*user.GetAllUserIDResp, error) {
-	conn, err := m.discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
-	if err != nil {
-		panic(err)
-	}
-	client := user.NewUserClient(conn)
-	resp, err := client.GetAllUserID(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
 }
