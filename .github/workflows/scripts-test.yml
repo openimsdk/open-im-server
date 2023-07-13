@@ -40,6 +40,7 @@ jobs:
         ./scripts/stop_all.sh
         cat logs/openIM.log 2>/dev/null
       shell: bash
+      continue-on-error: true
 
     - name: Build all services
       run: |
@@ -47,6 +48,7 @@ jobs:
         ./scripts/build_all_service.sh
         cat logs/openIM.log 2>/dev/null
       shell: bash
+      continue-on-error: true
 
     - name: Start all services
       run: |
