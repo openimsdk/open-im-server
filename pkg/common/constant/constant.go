@@ -17,7 +17,7 @@ package constant
 const (
 
 	///ContentType
-	//UserRelated
+	//UserRelated.
 	ContentTypeBegin = 100
 	Text             = 101
 	Picture          = 102
@@ -45,23 +45,23 @@ const (
 	SignalMsg          = 202
 	CustomNotification = 203
 
-	//SysRelated
+	//SysRelated.
 	NotificationBegin = 1000
 
-	FriendApplicationApprovedNotification = 1201 //add_friend_response
-	FriendApplicationRejectedNotification = 1202 //add_friend_response
-	FriendApplicationNotification         = 1203 //add_friend
+	FriendApplicationApprovedNotification = 1201 // add_friend_response
+	FriendApplicationRejectedNotification = 1202 // add_friend_response
+	FriendApplicationNotification         = 1203 // add_friend
 	FriendAddedNotification               = 1204
-	FriendDeletedNotification             = 1205 //delete_friend
-	FriendRemarkSetNotification           = 1206 //set_friend_remark?
-	BlackAddedNotification                = 1207 //add_black
-	BlackDeletedNotification              = 1208 //remove_black
+	FriendDeletedNotification             = 1205 // delete_friend
+	FriendRemarkSetNotification           = 1206 // set_friend_remark?
+	BlackAddedNotification                = 1207 // add_black
+	BlackDeletedNotification              = 1208 // remove_black
 	FriendInfoUpdatedNotification         = 1209
 
 	ConversationChangeNotification = 1300 // change conversation opt
 
 	UserNotificationBegin       = 1301
-	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip              = 204
+	UserInfoUpdatedNotification = 1303 // SetSelfInfoTip              = 204
 	UserNotificationEnd         = 1399
 	OANotification              = 1400
 
@@ -113,37 +113,37 @@ const (
 
 	NotificationEnd = 5000
 
-	//status
+	//status.
 	MsgNormal  = 1
 	MsgDeleted = 4
 
-	//MsgFrom
+	//MsgFrom.
 	UserMsgType = 100
 	SysMsgType  = 200
 
-	//SessionType
+	//SessionType.
 	SingleChatType       = 1
 	GroupChatType        = 2
 	SuperGroupChatType   = 3
 	NotificationChatType = 4
-	//token
+	//token.
 	NormalToken  = 0
 	InValidToken = 1
 	KickedToken  = 2
 	ExpiredToken = 3
 
-	//MultiTerminalLogin
+	//MultiTerminalLogin.
 	DefalutNotKick = 0
-	//Full-end login, but the same end is mutually exclusive
+	//Full-end login, but the same end is mutually exclusive.
 	AllLoginButSameTermKick = 1
-	//Only one of the endpoints can log in
+	//Only one of the endpoints can log in.
 	SingleTerminalLogin = 2
-	//The web side can be online at the same time, and the other side can only log in at one end
+	//The web side can be online at the same time, and the other side can only log in at one end.
 	WebAndOther = 3
 	// The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at
-	// the same time
+	// the same time.
 	PcMobileAndWeb = 4
-	//The PC terminal can be online at the same time,but other terminal only one of the endpoints can login
+	//The PC terminal can be online at the same time,but other terminal only one of the endpoints can login.
 	PCAndOther = 5
 
 	OnlineStatus  = "online"
@@ -151,12 +151,12 @@ const (
 	Registered    = "registered"
 	UnRegistered  = "unregistered"
 
-	//MsgReceiveOpt
+	//MsgReceiveOpt.
 	ReceiveMessage          = 0
 	NotReceiveMessage       = 1
 	ReceiveNotNotifyMessage = 2
 
-	//OptionsKey
+	//OptionsKey.
 	IsHistory                  = "history"
 	IsPersistent               = "persistent"
 	IsOfflinePush              = "offlinePush"
@@ -170,13 +170,13 @@ const (
 	IsNotNotification          = "isNotNotification"
 	IsSendMsg                  = "isSendMsg"
 
-	//GroupStatus
+	//GroupStatus.
 	GroupOk              = 0
 	GroupBanChat         = 1
 	GroupStatusDismissed = 2
 	GroupStatusMuted     = 3
 
-	//GroupType
+	//GroupType.
 	NormalGroup  = 0
 	SuperGroup   = 1
 	WorkingGroup = 2
@@ -184,19 +184,19 @@ const (
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 
-	//UserJoinGroupSource
+	//UserJoinGroupSource.
 	JoinByAdmin = 1
 
 	JoinByInvitation = 2
 	JoinBySearch     = 3
 	JoinByQRCode     = 4
 
-	//Minio
+	//Minio.
 	MinioDurationTimes = 3600
-	//Aws
+	//Aws.
 	AwsDurationTimes = 3600
 
-	//callbackCommand
+	//callbackCommand.
 	CallbackBeforeSendSingleMsgCommand                   = "callbackBeforeSendSingleMsgCommand"
 	CallbackAfterSendSingleMsgCommand                    = "callbackAfterSendSingleMsgCommand"
 	CallbackBeforeSendGroupMsgCommand                    = "callbackBeforeSendGroupMsgCommand"
@@ -217,19 +217,19 @@ const (
 	CallbackGetMessageListReactionExtensionsCommand      = "callbackGetMessageListReactionExtensionsCommand"
 	CallbackAddMessageListReactionExtensionsCommand      = "callbackAddMessageListReactionExtensionsCommand"
 
-	//callback actionCode
+	//callback actionCode.
 	ActionAllow     = 0
 	ActionForbidden = 1
-	//callback callbackHandleCode
+	//callback callbackHandleCode.
 	CallbackHandleSuccess = 0
 	CallbackHandleFailed  = 1
 
-	// minioUpload
+	// minioUpload.
 	OtherType = 1
 	VideoType = 2
 	ImageType = 3
 
-	// sendMsgStaus
+	// sendMsgStaus.
 	MsgStatusNotExist = 0
 	MsgIsSending      = 1
 	MsgSendSuccessed  = 2
@@ -299,25 +299,27 @@ const (
 	Female = 2
 )
 
-const OperationID = "operationID"
-const OpUserID = "opUserID"
-const ConnID = "connID"
-const OpUserPlatform = "platform"
-const Token = "token"
-const RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
-const CheckKey = "CheckKey"
-const TriggerID = "triggerID"
-const RemoteAddr = "remoteAddr"
+const (
+	OperationID     = "operationID"
+	OpUserID        = "opUserID"
+	ConnID          = "connID"
+	OpUserPlatform  = "platform"
+	Token           = "token"
+	RpcCustomHeader = "customHeader" // rpc中间件自定义ctx参数
+	CheckKey        = "CheckKey"
+	TriggerID       = "triggerID"
+	RemoteAddr      = "remoteAddr"
+)
 
 const (
-	BecomeFriendByImport = 1 //管理员导入
-	BecomeFriendByApply  = 2 //申请添加
+	BecomeFriendByImport = 1 // 管理员导入
+	BecomeFriendByApply  = 2 // 申请添加
 )
 
 const (
 	ApplyNeedVerificationInviteDirectly = 0 // 申请需要同意 邀请直接进
-	AllNeedVerification                 = 1 //所有人进群需要验证，除了群主管理员邀请进群
-	Directly                            = 2 //直接进群
+	AllNeedVerification                 = 1 // 所有人进群需要验证，除了群主管理员邀请进群
+	Directly                            = 2 // 直接进群
 )
 
 const (
@@ -345,7 +347,7 @@ const LogFileName = "OpenIM.log"
 
 const LocalHost = "0.0.0.0"
 
-// flag parse
+// flag parse.
 const (
 	FlagPort   = "port"
 	FlagWsPort = "ws_port"

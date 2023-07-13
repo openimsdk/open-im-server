@@ -68,16 +68,14 @@ type SetConversationReq struct {
 	OperationID      string `json:"operationID"      binding:"required"`
 }
 
-type SetConversationResp struct {
-}
+type SetConversationResp struct{}
 type ModifyConversationFieldReq struct {
 	Conversation
 	FieldType   int32    `json:"fieldType"   binding:"required"`
 	UserIDList  []string `json:"userIDList"  binding:"required"`
 	OperationID string   `json:"operationID" binding:"required"`
 }
-type ModifyConversationFieldResp struct {
-}
+type ModifyConversationFieldResp struct{}
 
 type BatchSetConversationsReq struct {
 	Conversations    []Conversation `json:"conversations"    binding:"required"`
@@ -130,5 +128,4 @@ type SetRecvMsgOptReq struct {
 	NotificationType int32  `json:"notificationType"`
 }
 
-type SetRecvMsgOptResp struct {
-}
+type SetRecvMsgOptResp struct{}

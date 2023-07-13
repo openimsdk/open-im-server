@@ -26,12 +26,15 @@ var mapper = []string{constant.OperationID, constant.OpUserID, constant.OpUserPl
 func WithOpUserIDContext(ctx context.Context, opUserID string) context.Context {
 	return context.WithValue(ctx, constant.OpUserID, opUserID)
 }
+
 func WithOpUserPlatformContext(ctx context.Context, platform string) context.Context {
 	return context.WithValue(ctx, constant.OpUserPlatform, platform)
 }
+
 func WithTriggerIDContext(ctx context.Context, triggerID string) context.Context {
 	return context.WithValue(ctx, constant.TriggerID, triggerID)
 }
+
 func NewCtx(operationID string) context.Context {
 	c := context.Background()
 	ctx := context.WithValue(c, constant.OperationID, operationID)
@@ -59,6 +62,7 @@ func GetOperationID(ctx context.Context) string {
 	}
 	return ""
 }
+
 func GetOpUserID(ctx context.Context) string {
 	if ctx.Value(constant.OpUserID) != "" {
 		s, ok := ctx.Value(constant.OpUserID).(string)
@@ -68,6 +72,7 @@ func GetOpUserID(ctx context.Context) string {
 	}
 	return ""
 }
+
 func GetConnID(ctx context.Context) string {
 	if ctx.Value(constant.ConnID) != "" {
 		s, ok := ctx.Value(constant.ConnID).(string)
@@ -87,6 +92,7 @@ func GetTriggerID(ctx context.Context) string {
 	}
 	return ""
 }
+
 func GetOpUserPlatform(ctx context.Context) string {
 	if ctx.Value(constant.OpUserPlatform) != "" {
 		s, ok := ctx.Value(constant.OpUserPlatform).(string)
@@ -96,6 +102,7 @@ func GetOpUserPlatform(ctx context.Context) string {
 	}
 	return ""
 }
+
 func GetRemoteAddr(ctx context.Context) string {
 	if ctx.Value(constant.RemoteAddr) != "" {
 		s, ok := ctx.Value(constant.RemoteAddr).(string)
@@ -142,8 +149,6 @@ func WithMustInfoCtx(values []string) context.Context {
 	ctx := context.Background()
 	for i, v := range values {
 		ctx = context.WithValue(ctx, mapper[i], v)
-
 	}
 	return ctx
-
 }

@@ -100,9 +100,9 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   for ((j = 0; j < ${#service_ports[*]}; j++)); do
     #Start the service in the background
     if [ -z "${prome_ports[$j]}" ]; then
-      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --config_folder_path ${configfile_path} --configFolderPath ${log_path}"
+      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --config_folder_path ${configfile_path} "
     else
-      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --prometheus_port ${prome_ports[$j]}  --config_folder_path ${configfile_path} --configFolderPath ${log_path}"
+      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --prometheus_port ${prome_ports[$j]}  --config_folder_path ${configfile_path} "
     fi
     if [ $i -eq 0 -o $i -eq 1 ]; then
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"

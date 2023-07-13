@@ -16,7 +16,7 @@ package callbackstruct
 
 type CallbackUserOnlineReq struct {
 	UserStatusCallbackReq
-	//Token           string `json:"token"`
+	// Token           string `json:"token"`
 	Seq             int64  `json:"seq"`
 	IsAppBackground bool   `json:"isAppBackground"`
 	ConnID          string `json:"connID"`
