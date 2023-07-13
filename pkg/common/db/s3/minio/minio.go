@@ -40,6 +40,15 @@ func NewMinio() (s3.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
+	exists, err := client.BucketExists(context.Background(), conf.Bucket)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		if err := client.MakeBucket(context.Background(), conf.Bucket, minio.MakeBucketOptions{}); err != nil {
+			return nil, err
+		}
+	}
 	return &Minio{
 		bucket:    conf.Bucket,
 		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
