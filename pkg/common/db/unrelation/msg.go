@@ -555,7 +555,15 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 //	}
 //
 // ])
-func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
+func (m *MsgMongoDriver) RangeUserSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	group bool,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, users []*table.UserCount, dateCount map[string]int64, err error) {
 	var sort int
 	if ase {
 		sort = 1
@@ -808,7 +816,14 @@ func (m *MsgMongoDriver) RangeUserSendCount(ctx context.Context, start time.Time
 	return result[0].MsgCount, result[0].UserCount, users, dateCount, nil
 }
 
-func (m *MsgMongoDriver) RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*table.GroupCount, dateCount map[string]int64, err error) {
+func (m *MsgMongoDriver) RangeGroupSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, groups []*table.GroupCount, dateCount map[string]int64, err error) {
 	var sort int
 	if ase {
 		sort = 1

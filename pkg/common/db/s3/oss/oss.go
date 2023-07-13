@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 const (
@@ -73,7 +75,12 @@ func (o *OSS) InitiateMultipartUpload(ctx context.Context, name string) (*s3.Ini
 	}, nil
 }
 
-func (o *OSS) CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []s3.Part) (*s3.CompleteMultipartUploadResult, error) {
+func (o *OSS) CompleteMultipartUpload(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	parts []s3.Part,
+) (*s3.CompleteMultipartUploadResult, error) {
 	ossParts := make([]oss.UploadPart, len(parts))
 	for i, part := range parts {
 		ossParts[i] = oss.UploadPart{
@@ -114,7 +121,13 @@ func (o *OSS) PartSize(ctx context.Context, size int64) (int64, error) {
 	return partSize, nil
 }
 
-func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*s3.AuthSignResult, error) {
+func (o *OSS) AuthSign(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	expire time.Duration,
+	partNumbers []int,
+) (*s3.AuthSignResult, error) {
 	result := s3.AuthSignResult{
 		URL:    o.bucketURL + name,
 		Query:  url.Values{"uploadId": {uploadID}},
@@ -132,7 +145,15 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		}
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, time.Now().UTC().Format(http.TimeFormat))
-		authorization := fmt.Sprintf(`OSS %s:%s`, o.credentials.GetAccessKeyID(), o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()))
+		authorization := fmt.Sprintf(
+			`OSS %s:%s`,
+			o.credentials.GetAccessKeyID(),
+			o.getSignedStr(
+				request,
+				fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID),
+				o.credentials.GetAccessKeySecret(),
+			),
+		)
 		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
@@ -213,7 +234,13 @@ func (o *OSS) AbortMultipartUpload(ctx context.Context, uploadID string, name st
 	})
 }
 
-func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*s3.ListUploadedPartsResult, error) {
+func (o *OSS) ListUploadedParts(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	partNumberMarker int,
+	maxParts int,
+) (*s3.ListUploadedPartsResult, error) {
 	result, err := o.bucket.ListUploadedParts(oss.InitiateMultipartUploadResult{
 		UploadID: uploadID,
 		Key:      name,
@@ -240,7 +267,12 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 	return res, nil
 }
 
-func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+func (o *OSS) AccessURL(
+	ctx context.Context,
+	name string,
+	expire time.Duration,
+	opt *s3.AccessURLOption,
+) (string, error) {
 	//var opts []oss.Option
 	//if opt != nil {
 	//	if opt.ContentType != "" {

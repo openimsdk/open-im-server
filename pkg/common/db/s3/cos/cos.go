@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/tencentyun/cos-go-sdk-v5"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/tencentyun/cos-go-sdk-v5"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 const (
@@ -70,7 +72,12 @@ func (c *Cos) InitiateMultipartUpload(ctx context.Context, name string) (*s3.Ini
 	}, nil
 }
 
-func (c *Cos) CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []s3.Part) (*s3.CompleteMultipartUploadResult, error) {
+func (c *Cos) CompleteMultipartUpload(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	parts []s3.Part,
+) (*s3.CompleteMultipartUploadResult, error) {
 	opts := &cos.CompleteMultipartUploadOptions{
 		Parts: make([]cos.Object, len(parts)),
 	}
@@ -109,7 +116,13 @@ func (c *Cos) PartSize(ctx context.Context, size int64) (int64, error) {
 	return partSize, nil
 }
 
-func (c *Cos) AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*s3.AuthSignResult, error) {
+func (c *Cos) AuthSign(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	expire time.Duration,
+	partNumbers []int,
+) (*s3.AuthSignResult, error) {
 	result := s3.AuthSignResult{
 		URL:    c.client.BaseURL.BucketURL.String() + "/" + cos.EncodeURIComponent(name),
 		Query:  url.Values{"uploadId": {uploadID}},
@@ -120,7 +133,13 @@ func (c *Cos) AuthSign(ctx context.Context, uploadID string, name string, expire
 	if err != nil {
 		return nil, err
 	}
-	cos.AddAuthorizationHeader(c.credential.SecretID, c.credential.SecretKey, c.credential.SessionToken, req, cos.NewAuthTime(expire))
+	cos.AddAuthorizationHeader(
+		c.credential.SecretID,
+		c.credential.SecretKey,
+		c.credential.SessionToken,
+		req,
+		cos.NewAuthTime(expire),
+	)
 	result.Header = req.Header
 	for i, partNumber := range partNumbers {
 		result.Parts[i] = s3.SignPart{
@@ -132,7 +151,15 @@ func (c *Cos) AuthSign(ctx context.Context, uploadID string, name string, expire
 }
 
 func (c *Cos) PresignedPutObject(ctx context.Context, name string, expire time.Duration) (string, error) {
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodPut, name, c.credential.SecretID, c.credential.SecretKey, expire, nil)
+	rawURL, err := c.client.Object.GetPresignedURL(
+		ctx,
+		http.MethodPut,
+		name,
+		c.credential.SecretID,
+		c.credential.SecretKey,
+		expire,
+		nil,
+	)
 	if err != nil {
 		return "", err
 	}
@@ -204,7 +231,13 @@ func (c *Cos) AbortMultipartUpload(ctx context.Context, uploadID string, name st
 	return err
 }
 
-func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*s3.ListUploadedPartsResult, error) {
+func (c *Cos) ListUploadedParts(
+	ctx context.Context,
+	uploadID string,
+	name string,
+	partNumberMarker int,
+	maxParts int,
+) (*s3.ListUploadedPartsResult, error) {
 	result, _, err := c.client.Object.ListParts(ctx, name, uploadID, &cos.ObjectListPartsOptions{
 		MaxParts:         strconv.Itoa(maxParts),
 		PartNumberMarker: strconv.Itoa(partNumberMarker),
@@ -231,7 +264,12 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 	return res, nil
 }
 
-func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+func (c *Cos) AccessURL(
+	ctx context.Context,
+	name string,
+	expire time.Duration,
+	opt *s3.AccessURLOption,
+) (string, error) {
 	//reqParams := make(url.Values)
 	//if opt != nil {
 	//	if opt.ContentType != "" {
@@ -246,7 +284,15 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, nil)
+	rawURL, err := c.client.Object.GetPresignedURL(
+		ctx,
+		http.MethodGet,
+		name,
+		c.credential.SecretID,
+		c.credential.SecretKey,
+		expire,
+		nil,
+	)
 	if err != nil {
 		return "", err
 	}

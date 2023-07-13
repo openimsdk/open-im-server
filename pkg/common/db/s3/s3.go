@@ -112,10 +112,21 @@ type Interface interface {
 	PartLimit() *PartLimit
 
 	InitiateMultipartUpload(ctx context.Context, name string) (*InitiateMultipartUploadResult, error)
-	CompleteMultipartUpload(ctx context.Context, uploadID string, name string, parts []Part) (*CompleteMultipartUploadResult, error)
+	CompleteMultipartUpload(
+		ctx context.Context,
+		uploadID string,
+		name string,
+		parts []Part,
+	) (*CompleteMultipartUploadResult, error)
 
 	PartSize(ctx context.Context, size int64) (int64, error)
-	AuthSign(ctx context.Context, uploadID string, name string, expire time.Duration, partNumbers []int) (*AuthSignResult, error)
+	AuthSign(
+		ctx context.Context,
+		uploadID string,
+		name string,
+		expire time.Duration,
+		partNumbers []int,
+	) (*AuthSignResult, error)
 
 	PresignedPutObject(ctx context.Context, name string, expire time.Duration) (string, error)
 
@@ -128,7 +139,13 @@ type Interface interface {
 	IsNotFound(err error) bool
 
 	AbortMultipartUpload(ctx context.Context, uploadID string, name string) error
-	ListUploadedParts(ctx context.Context, uploadID string, name string, partNumberMarker int, maxParts int) (*ListUploadedPartsResult, error)
+	ListUploadedParts(
+		ctx context.Context,
+		uploadID string,
+		name string,
+		partNumberMarker int,
+		maxParts int,
+	) (*ListUploadedPartsResult, error)
 
 	AccessURL(ctx context.Context, name string, expire time.Duration, opt *AccessURLOption) (string, error)
 }
