@@ -15,7 +15,6 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -291,13 +290,13 @@ func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
 	pbReq := m.newUserSendMsgReq(c, t)
 	var recvList []string
 	if params.IsSendAll {
-		req2 := &user.GetAllUserIDReq{}
-		resp2, err := m.Message.GetAllUserID(c, req2)
-		if err != nil {
-			apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
-			return
-		}
-		recvList = resp2.UserIDs
+		// req2 := &user.GetAllUserIDReq{}
+		// resp2, err := m.Message.GetAllUserID(c, req2)
+		// if err != nil {
+		// 	apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		// 	return
+		// }
+		// recvList = resp2.UserIDs
 	} else {
 		recvList = params.RecvIDList
 	}

@@ -93,6 +93,9 @@ func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID
 }
 
 func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+	if len(conversationIDs) == 0 {
+		return nil, nil
+	}
 	resp, err := c.Client.GetConversationsByConversationID(ctx, &pbConversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs})
 	if err != nil {
 		return nil, err
