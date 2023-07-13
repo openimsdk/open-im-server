@@ -70,7 +70,7 @@ func InitMsgTool() (*MsgTool, error) {
 	groupDatabase := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
 	conversationDatabase := controller.NewConversationDatabase(relation.NewConversationGorm(db), cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), relation.NewConversationGorm(db)), tx.NewGorm(db))
 	msgRpcClient := rpcclient.NewMessageRpcClient(discov)
-	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRpcClient(&msgRpcClient))
+	msgNotificationSender := notification.NewMsgNotificationSender(rpcclient.WithRPCClient(&msgRpcClient))
 	msgTool := NewMsgTool(msgDatabase, userDatabase, groupDatabase, conversationDatabase, msgNotificationSender)
 	return msgTool, nil
 }

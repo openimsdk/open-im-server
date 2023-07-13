@@ -57,15 +57,15 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbGroup.RegisterGroupServer(server, &groupServer{
 		GroupDatabase: database,
 		User:          userRPCClient,
-		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		Notification: notification.NewGroupNotificationSender(database, &msgRPCClient, &userRPCClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
 			users, err := userRPCClient.GetUsersInfo(ctx, userIDs)
 			if err != nil {
 				return nil, err
 			}
 			return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
 		}),
-		conversationRpcClient: conversationRPCClient,
-		msgRpcClient:          msgRPCClient,
+		conversationRPCClient: conversationRPCClient,
+		msgRPCClient:          msgRPCClient,
 	})
 	return nil
 }
