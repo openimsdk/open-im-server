@@ -25,7 +25,7 @@ zookeeper:
 mysql:
   address: [ 127.0.0.1:13306 ]            #目前仅支持单机
   username: root                          #用户名
-  password:                      #密码
+  password: openIM123                     #密码
   database: openIM_v3                     #不建议修改
   maxOpenConn: 1000                       #最大连接数
   maxIdleConn: 100                        #最大空闲连接数

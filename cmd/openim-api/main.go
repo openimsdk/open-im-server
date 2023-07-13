@@ -56,7 +56,6 @@ func startPprof() {
 }
 
 func run(port int) error {
-	port = 10002
 	if port == 0 {
 		return fmt.Errorf("port is empty")
 	}
