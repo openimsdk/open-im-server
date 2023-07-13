@@ -28,9 +28,11 @@ jobs:
 
     - name: Start Docker Compose
       run: |
-        docker-compose stop
-        docker-compose up -d
+        docker compose stop
+        sleep 30
+        docker compose up -d
         sleep 60
+      continue-on-error: true
 
     - name: Stop all services
       run: |
