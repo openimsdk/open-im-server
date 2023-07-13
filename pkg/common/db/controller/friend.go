@@ -221,6 +221,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 	friendRequest *relation.FriendRequestModel,
 ) (err error) {
 	return f.tx.Transaction(func(tx any) error {
+		now := time.Now()
 		fr, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err
@@ -230,11 +231,25 @@ func (f *friendDatabase) AgreeFriendRequest(
 		}
 		friendRequest.HandlerUserID = mcontext.GetOpUserID(ctx)
 		friendRequest.HandleResult = constant.FriendResponseAgree
-		friendRequest.HandleTime = time.Now()
+		friendRequest.HandleTime = now
 		err = f.friendRequest.NewTx(tx).Update(ctx, friendRequest)
 		if err != nil {
 			return err
 		}
+
+		fr2, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.ToUserID, friendRequest.FromUserID)
+		if err == nil && fr2.HandleResult == constant.FriendResponseNotHandle {
+			fr2.HandlerUserID = mcontext.GetOpUserID(ctx)
+			fr2.HandleResult = constant.FriendResponseAgree
+			fr2.HandleTime = now
+			err = f.friendRequest.NewTx(tx).Update(ctx, fr2)
+			if err != nil {
+				return err
+			}
+		} else if errs.Unwrap(err) != gorm.ErrRecordNotFound {
+			return err
+		}
+
 		exists, err := f.friend.NewTx(tx).FindUserState(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
 			return err

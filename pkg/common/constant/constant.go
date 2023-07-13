@@ -291,8 +291,9 @@ const (
 	GroupResponseAgree  = 1
 	GroupResponseRefuse = -1
 
-	FriendResponseAgree  = 1
-	FriendResponseRefuse = -1
+	FriendResponseNotHandle = 0
+	FriendResponseAgree     = 1
+	FriendResponseRefuse    = -1
 
 	Male   = 1
 	Female = 2

@@ -27,6 +27,9 @@ func BlackDB2Pb(
 	blackDBs []*relation.BlackModel,
 	f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (blackPbs []*sdk.BlackInfo, err error) {
+	if len(blackDBs) == 0 {
+		return nil, nil
+	}
 	var userIDs []string
 	for _, blackDB := range blackDBs {
 		userIDs = append(userIDs, blackDB.BlockUserID)
