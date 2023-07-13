@@ -124,3 +124,24 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	return &msg.RevokeMsgResp{}, nil
 }
+
+func (m *msgServer) ManageMsg(ctx context.Context, req *msg.ManageMsgReq) (*msg.ManageMsgResp, error) {
+	resp := &msg.ManageMsgResp{}
+	msgData := &sdkws.MsgData{
+		SendID:      req.SendID,
+		RecvID:      req.RecvID,
+		SessionType: req.SessionType,
+		GroupID:     req.GroupID,
+	}
+	conversationID := utils.GetChatConversationIDByMsg(msgData)
+	revokeReq := &msg.RevokeMsgReq{
+		ConversationID: conversationID,
+		Seq:            req.Seq,
+		UserID:         req.SendID,
+	}
+	_, err := m.RevokeMsg(ctx, revokeReq)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
