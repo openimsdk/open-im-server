@@ -1,13 +1,31 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package getui
 
 import (
-	"github.com/go-redis/redis"
 	"sync"
+
+	"github.com/go-redis/redis"
 
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -16,8 +34,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
-	"strconv"
-	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
@@ -97,7 +113,9 @@ func (g *Client) Push(ctx context.Context, userIDs []string, title, content stri
 
 func (g *Client) Auth(ctx context.Context, timeStamp int64) (token string, expireTime int64, err error) {
 	h := sha256.New()
-	h.Write([]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret))
+	h.Write(
+		[]byte(config.Config.Push.GeTui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.GeTui.MasterSecret),
+	)
 	sign := hex.EncodeToString(h.Sum(nil))
 	reqAuth := AuthReq{
 		Sign:      sign,
@@ -148,7 +166,14 @@ func (g *Client) request(ctx context.Context, url string, input interface{}, tok
 	return g.postReturn(ctx, config.Config.Push.GeTui.PushUrl+url, header, input, resp, 3)
 }
 
-func (g *Client) postReturn(ctx context.Context, url string, header map[string]string, input interface{}, output RespI, timeout int) error {
+func (g *Client) postReturn(
+	ctx context.Context,
+	url string,
+	header map[string]string,
+	input interface{},
+	output RespI,
+	timeout int,
+) error {
 	err := http2.PostReturn(ctx, url, header, input, output, timeout)
 	if err != nil {
 		return err

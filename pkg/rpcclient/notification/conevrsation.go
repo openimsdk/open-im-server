@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package notification
 
 import (
@@ -17,7 +31,11 @@ func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient)
 }
 
 // SetPrivate调用
-func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string, isPrivateChat bool) error {
+func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
+	ctx context.Context,
+	sendID, recvID string,
+	isPrivateChat bool,
+) error {
 	tips := &sdkws.ConversationSetPrivateTips{
 		RecvID:    recvID,
 		SendID:    sendID,
@@ -35,7 +53,11 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 }
 
 // 会话未读数同步
-func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(ctx context.Context, userID, conversationID string, unreadCountTime, hasReadSeq int64) error {
+func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
+	ctx context.Context,
+	userID, conversationID string,
+	unreadCountTime, hasReadSeq int64,
+) error {
 	tips := &sdkws.ConversationHasReadTips{
 		UserID:          userID,
 		ConversationID:  conversationID,

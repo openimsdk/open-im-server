@@ -1,12 +1,27 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cmd
 
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/spf13/cobra"
 )
 
 type RootCmd struct {
@@ -16,17 +31,40 @@ type RootCmd struct {
 	prometheusPort int
 }
 
-func NewRootCmd(name string) (rootCmd *RootCmd) {
+type CmdOpts struct {
+	loggerPrefixName string
+}
+
+func WithCronTaskLogName() func(*CmdOpts) {
+	return func(opts *CmdOpts) {
+		opts.loggerPrefixName = "OpenIM.CronTask.log.all"
+	}
+}
+
+func WithLogName(logName string) func(*CmdOpts) {
+	return func(opts *CmdOpts) {
+		opts.loggerPrefixName = logName
+	}
+}
+
+func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 	rootCmd = &RootCmd{Name: name}
 	c := cobra.Command{
-		Use:   "start",
-		Short: fmt.Sprintf(`Start %s server`, name),
-		Long:  fmt.Sprintf(`Start %s server`, name),
+		Use:   "start openIM application",
+		Short: fmt.Sprintf(`Start %s `, name),
+		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
 				panic(err)
 			}
-			if err := log.InitFromConfig("OpenIM.log.all", name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
+			cmdOpts := &CmdOpts{}
+			for _, opt := range opts {
+				opt(cmdOpts)
+			}
+			if cmdOpts.loggerPrefixName == "" {
+				cmdOpts.loggerPrefixName = "OpenIM.log.all"
+			}
+			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount); err != nil {
 				panic(err)
 			}
 			return nil
@@ -69,6 +107,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
+	fmt.Println("configFolderPath:", configFolderPath)
 	return config.InitConfig(configFolderPath)
 }
 

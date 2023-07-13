@@ -1,9 +1,17 @@
-/*
-** description("").
-** copyright('tuoyun,www.tuoyun.net').
-** author("fg,Gordon@tuoyun.net").
-** time(2021/5/11 15:37).
- */
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msgtransfer
 
 import (
@@ -35,7 +43,12 @@ func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *Persiste
 	}
 }
 
-func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
+func (pc *PersistentConsumerHandler) handleChatWs2Mysql(
+	ctx context.Context,
+	cMsg *sarama.ConsumerMessage,
+	msgKey string,
+	_ sarama.ConsumerGroupSession,
+) {
 	msg := cMsg.Value
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
@@ -73,10 +86,25 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(ctx context.Context, cMs
 }
 func (PersistentConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+func (pc *PersistentConsumerHandler) ConsumeClaim(
+	sess sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim,
+) error {
 	for msg := range claim.Messages() {
 		ctx := pc.persistentConsumerGroup.GetContextFromMsg(msg)
-		log.ZDebug(ctx, "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		log.ZDebug(
+			ctx,
+			"kafka get info to mysql",
+			"msgTopic",
+			msg.Topic,
+			"msgPartition",
+			msg.Partition,
+			"msg",
+			string(msg.Value),
+			"key",
+			string(msg.Key),
+		)
 		if len(msg.Value) != 0 {
 			pc.handleChatWs2Mysql(ctx, msg, string(msg.Key), sess)
 		} else {

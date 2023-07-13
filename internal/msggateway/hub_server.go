@@ -1,8 +1,25 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -14,7 +31,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -30,7 +46,12 @@ func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, serve
 }
 
 func (s *Server) Start() error {
-	return startrpc.Start(s.rpcPort, config.Config.RpcRegisterName.OpenImMessageGatewayName, s.prometheusPort, s.InitServer)
+	return startrpc.Start(
+		s.rpcPort,
+		config.Config.RpcRegisterName.OpenImMessageGatewayName,
+		s.prometheusPort,
+		s.InitServer,
+	)
 }
 
 type Server struct {
@@ -45,14 +66,24 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 }
 
 func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
-	return &Server{rpcPort: rpcPort, LongConnServer: longConnServer, pushTerminal: []int{constant.IOSPlatformID, constant.AndroidPlatformID}}
+	return &Server{
+		rpcPort:        rpcPort,
+		LongConnServer: longConnServer,
+		pushTerminal:   []int{constant.IOSPlatformID, constant.AndroidPlatformID},
+	}
 }
 
-func (s *Server) OnlinePushMsg(context context.Context, req *msggateway.OnlinePushMsgReq) (*msggateway.OnlinePushMsgResp, error) {
+func (s *Server) OnlinePushMsg(
+	context context.Context,
+	req *msggateway.OnlinePushMsgReq,
+) (*msggateway.OnlinePushMsgResp, error) {
 	panic("implement me")
 }
 
-func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUsersOnlineStatusReq) (*msggateway.GetUsersOnlineStatusResp, error) {
+func (s *Server) GetUsersOnlineStatus(
+	ctx context.Context,
+	req *msggateway.GetUsersOnlineStatusReq,
+) (*msggateway.GetUsersOnlineStatusResp, error) {
 	if !tokenverify.IsAppManagerUid(ctx) {
 		return nil, errs.ErrNoPermission.Wrap("only app manager")
 	}
@@ -70,6 +101,7 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 				ps.Platform = constant.PlatformIDToName(client.PlatformID)
 				ps.Status = constant.OnlineStatus
 				ps.ConnID = client.ctx.GetConnID()
+				ps.Token = client.token
 				ps.IsBackground = client.IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
@@ -82,11 +114,17 @@ func (s *Server) GetUsersOnlineStatus(ctx context.Context, req *msggateway.GetUs
 	return &resp, nil
 }
 
-func (s *Server) OnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+func (s *Server) OnlineBatchPushOneMsg(
+	ctx context.Context,
+	req *msggateway.OnlineBatchPushOneMsgReq,
+) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	panic("implement me")
 }
 
-func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msggateway.OnlineBatchPushOneMsgReq) (*msggateway.OnlineBatchPushOneMsgResp, error) {
+func (s *Server) SuperGroupOnlineBatchPushOneMsg(
+	ctx context.Context,
+	req *msggateway.OnlineBatchPushOneMsgReq,
+) (*msggateway.OnlineBatchPushOneMsgResp, error) {
 	var singleUserResult []*msggateway.SingleMsgToUserResults
 	for _, v := range req.PushToUserIDs {
 		var resp []*msggateway.SingleMsgToUserPlatform
@@ -107,7 +145,8 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 					RecvID:         v,
 					RecvPlatFormID: int32(client.PlatformID),
 				}
-				if !client.IsBackground || (client.IsBackground == true && client.PlatformID != constant.IOSPlatformID) {
+				if !client.IsBackground ||
+					(client.IsBackground == true && client.PlatformID != constant.IOSPlatformID) {
 					err := client.PushMessage(ctx, req.MsgData)
 					if err != nil {
 						temp.ResultCode = -2
@@ -134,21 +173,30 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, req *msgga
 	}, nil
 }
 
-func (s *Server) KickUserOffline(ctx context.Context, req *msggateway.KickUserOfflineReq) (*msggateway.KickUserOfflineResp, error) {
+func (s *Server) KickUserOffline(
+	ctx context.Context,
+	req *msggateway.KickUserOfflineReq,
+) (*msggateway.KickUserOfflineResp, error) {
 	for _, v := range req.KickUserIDList {
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
+				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
 				err := client.KickOnlineMessage()
 				if err != nil {
 					return nil, err
 				}
 			}
+		} else {
+			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil
 }
 
-func (s *Server) MultiTerminalLoginCheck(ctx context.Context, req *msggateway.MultiTerminalLoginCheckReq) (*msggateway.MultiTerminalLoginCheckResp, error) {
+func (s *Server) MultiTerminalLoginCheck(
+	ctx context.Context,
+	req *msggateway.MultiTerminalLoginCheckReq,
+) (*msggateway.MultiTerminalLoginCheckResp, error) {
 	//TODO implement me
 	panic("implement me")
 }

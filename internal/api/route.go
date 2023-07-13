@@ -1,19 +1,34 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api
 
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -26,6 +41,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
 	u := NewUserApi(discov)
+	m := NewMessageApi(discov)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -44,6 +60,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/account_check", ParseToken, u.AccountCheck)
 		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
+		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
@@ -96,7 +113,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	authRouterGroup := r.Group("/auth")
 	{
 		a := NewAuthApi(discov)
-		authRouterGroup.POST("/user_register", u.UserRegister)
 		authRouterGroup.POST("/user_token", a.UserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
@@ -108,17 +124,19 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
-		thirdGroup.POST("/apply_put", t.ApplyPut)
-		thirdGroup.POST("/get_put", t.GetPut)
-		thirdGroup.POST("/confirm_put", t.ConfirmPut)
-		thirdGroup.POST("/get_hash", t.GetHash)
-		thirdGroup.POST("/object", t.GetURL)
-		thirdGroup.GET("/object", t.GetURL)
+		objectGroup := r.Group("/object", ParseToken)
+
+		objectGroup.POST("/part_limit", t.PartLimit)
+		objectGroup.POST("/part_size", t.PartSize)
+		objectGroup.POST("/initiate_multipart_upload", t.InitiateMultipartUpload)
+		objectGroup.POST("/auth_sign", t.AuthSign)
+		objectGroup.POST("/complete_multipart_upload", t.CompleteMultipartUpload)
+		objectGroup.POST("/access_url", t.AccessURL)
+		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
 	//Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
-		m := NewMessageApi(discov)
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/send_msg", m.SendMessage)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
@@ -144,15 +162,15 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
-		conversationGroup.POST("/batch_set_conversation", c.BatchSetConversations)
-		conversationGroup.POST("/set_recv_msg_opt", c.SetRecvMsgOpt)
-		conversationGroup.POST("/modify_conversation_field", c.ModifyConversationField)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
 	}
 
 	statisticsGroup := r.Group("/statistics", ParseToken)
 	{
-		statisticsGroup.POST("/user_register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/register", u.UserRegisterCount)
+		statisticsGroup.POST("/user/active", m.GetActiveUser)
+		statisticsGroup.POST("/group/create", g.GroupCreateCount)
+		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
 	return r
 }

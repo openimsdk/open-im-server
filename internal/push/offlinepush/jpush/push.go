@@ -1,9 +1,24 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package jpush
 
 import (
 	"context"
 	"encoding/base64"
 	"fmt"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/jpush/body"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -59,5 +74,14 @@ func (j *JPush) Push(ctx context.Context, userIDs []string, title, content strin
 }
 
 func (j *JPush) request(ctx context.Context, po body.PushObj, resp interface{}, timeout int) error {
-	return http2.PostReturn(ctx, config.Config.Push.Jpns.PushUrl, map[string]string{"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret)}, po, resp, timeout)
+	return http2.PostReturn(
+		ctx,
+		config.Config.Push.Jpns.PushUrl,
+		map[string]string{
+			"Authorization": j.getAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret),
+		},
+		po,
+		resp,
+		timeout,
+	)
 }

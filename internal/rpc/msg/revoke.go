@@ -1,9 +1,22 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/google/uuid"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -55,7 +68,12 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 			}
 			role = user.AppMangerLevel
 		case constant.SuperGroupChatType:
-			members, err := m.Group.GetGroupMemberInfoMap(ctx, msgs[0].GroupID, utils.Distinct([]string{req.UserID, msgs[0].SendID}), true)
+			members, err := m.Group.GetGroupMemberInfoMap(
+				ctx,
+				msgs[0].GroupID,
+				utils.Distinct([]string{req.UserID, msgs[0].SendID}),
+				true,
+			)
 			if err != nil {
 				return nil, err
 			}
@@ -79,7 +97,6 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	}
 	now := time.Now().UnixMilli()
 	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
-		ID:       uuid.New().String(),
 		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,

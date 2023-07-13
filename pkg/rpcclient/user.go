@@ -1,9 +1,24 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpcclient
 
 import (
 	"context"
 	"strings"
-	"time"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
@@ -12,23 +27,21 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type User struct {
 	conn   grpc.ClientConnInterface
 	Client user.UserClient
-	discov discoveryregistry.SvcDiscoveryRegistry
+	Discov discoveryregistry.SvcDiscoveryRegistry
 }
 
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
-	conn, err := discov.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
-	return &User{discov: discov, Client: client, conn: conn}
+	return &User{Discov: discov, Client: client, conn: conn}
 }
 
 type UserRpcClient User
@@ -70,7 +83,11 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	}), nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfos(ctx context.Context, userIDs []string, complete bool) ([]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfos(
+	ctx context.Context,
+	userIDs []string,
+	complete bool,
+) ([]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -93,7 +110,11 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 	return users[0], nil
 }
 
-func (u *UserRpcClient) GetPublicUserInfoMap(ctx context.Context, userIDs []string, complete bool) (map[string]*sdkws.PublicUserInfo, error) {
+func (u *UserRpcClient) GetPublicUserInfoMap(
+	ctx context.Context,
+	userIDs []string,
+	complete bool,
+) (map[string]*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, userIDs, complete)
 	if err != nil {
 		return nil, err

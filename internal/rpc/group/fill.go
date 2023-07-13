@@ -1,12 +1,32 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package group
 
 import (
 	"context"
+
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationTb.GroupMemberModel, error) {
+func (s *groupServer) FindGroupMember(
+	ctx context.Context,
+	groupIDs []string,
+	userIDs []string,
+	roleLevels []int32,
+) ([]*relationTb.GroupMemberModel, error) {
 	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, userIDs, roleLevels)
 	if err != nil {
 		return nil, err
@@ -38,7 +58,11 @@ func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, us
 	return members, nil
 }
 
-func (s *groupServer) TakeGroupMember(ctx context.Context, groupID string, userID string) (*relationTb.GroupMemberModel, error) {
+func (s *groupServer) TakeGroupMember(
+	ctx context.Context,
+	groupID string,
+	userID string,
+) (*relationTb.GroupMemberModel, error) {
 	member, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, userID)
 	if err != nil {
 		return nil, err
@@ -78,7 +102,11 @@ func (s *groupServer) TakeGroupOwner(ctx context.Context, groupID string) (*rela
 	return owner, nil
 }
 
-func (s *groupServer) PageGetGroupMember(ctx context.Context, groupID string, pageNumber, showNumber int32) (uint32, []*relationTb.GroupMemberModel, error) {
+func (s *groupServer) PageGetGroupMember(
+	ctx context.Context,
+	groupID string,
+	pageNumber, showNumber int32,
+) (uint32, []*relationTb.GroupMemberModel, error) {
 	total, members, err := s.GroupDatabase.PageGetGroupMember(ctx, groupID, pageNumber, showNumber)
 	if err != nil {
 		return 0, nil, err

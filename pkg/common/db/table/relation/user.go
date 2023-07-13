@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package relation
 
 import (
@@ -14,7 +28,7 @@ type UserModel struct {
 	Nickname         string    `gorm:"column:name;size:255"`
 	FaceURL          string    `gorm:"column:face_url;size:255"`
 	Ex               string    `gorm:"column:ex;size:1024"`
-	CreateTime       time.Time `gorm:"column:create_time;index:create_time; autoCreateTime"`
+	CreateTime       time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:18"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }
@@ -52,7 +66,7 @@ type UserModelInterface interface {
 	GetAllUserID(ctx context.Context) (userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	// 获取用户总数
-	CountTotal(ctx context.Context) (count int64, err error)
+	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// 获取范围内用户增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
 }

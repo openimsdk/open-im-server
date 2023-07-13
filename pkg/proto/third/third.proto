@@ -1,81 +1,110 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 package OpenIMServer.third;
 option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third";
 
-message ApplyPutReq {
-  string putID = 1;
-  string name = 2;
-  int64 size = 3;
-  string hash = 4;
-  string contentType = 5;
-  int64 fragmentSize = 6;
-  int64 validTime = 7; // 文件有效时间
+message KeyValues {
+  string key = 1;
+  repeated string values = 2;
 }
 
-message ApplyPutResp {
+message SignPart {
+  int32 partNumber = 1;
+  string url = 2;
+  repeated KeyValues query = 3;
+  repeated KeyValues header = 4;
+}
+
+message AuthSignParts {
   string url = 1;
-  string putID = 2;
-  int64 fragmentSize = 3;
-  int64 validTime = 4;// 上传地址的有效时间
-  string putURLsHash = 5;
-  repeated string putURLs = 6;
+  repeated KeyValues query = 2;
+  repeated KeyValues header = 3;
+  repeated SignPart parts = 4;
 }
 
-message ConfirmPutReq {
-  string putID = 1;
+message PartLimitReq {
 }
 
-message ConfirmPutResp {
-  string url = 1;
+message PartLimitResp {
+  int64 minPartSize = 1;
+  int64 maxPartSize = 2;
+  int32 maxNumSize = 3;
 }
 
-message GetUrlReq {
-  string name = 1; // 文件名
-  int64 expires = 2; // url有效时间
-  bool attachment = 3;// 是否是附件
-}
-
-message GetUrlResp {
-  string url = 1;
-  int64 size = 2;
-  string hash = 3;
-}
-
-message GetPutReq {
-  string putID = 1;
-}
-
-message GetPutFragment{
+message PartSizeReq {
   int64 size = 1;
-  string hash = 2;
-  string url = 3;
 }
 
-message GetPutResp {
+message PartSizeResp {
+  int64 size = 2;
+}
+
+message InitiateMultipartUploadReq {
+  string hash = 1;
+  int64 size = 2;
+  int64 partSize = 3;
+  int32 maxParts = 4;
+  string cause = 5;
+  string name = 6;
+  string contentType = 7;
+}
+
+message UploadInfo {
+  string uploadID = 1;
+  int64 partSize = 2;
+  AuthSignParts sign = 3;
+  int64 expireTime = 4;
+}
+
+message InitiateMultipartUploadResp {
+  string url = 1;
+  UploadInfo upload = 2;
+}
+
+message AuthSignReq {
+  string uploadID = 1;
+  repeated int32 partNumbers = 2;
+}
+
+message AuthSignResp {
+  string url = 1;
+  repeated KeyValues query = 2;
+  repeated KeyValues header = 3;
+  repeated SignPart parts = 4;
+}
+
+message CompleteMultipartUploadReq {
+  string uploadID = 1;
+  repeated string parts = 2;
+  string name = 3;
+  string contentType = 4;
+  string cause = 5;
+}
+
+message CompleteMultipartUploadResp {
+  string url = 1;
+}
+
+message AccessURLReq {
   string name = 1;
-  int64 size = 2;
-  string hash = 3;
-  int64 fragmentSize = 4;
-  string contentType = 5;
-  int64 validTime = 6; // 上传地址的有效时间
-  //  repeated GetPutFragment fragments = 7;
-  //  string putURLsHash = 8;
-  //  string putID = 2;
-  //  int64 fragmentSize = 3;
-  //  int64 validTime = 4;// 上传地址的有效时间
-  string putURLsHash = 7;
-  repeated GetPutFragment fragments = 8;
-  //  repeated string putURLs = 6;
-  //  repeated GetPutFragment fragments = 7;
 }
 
-message GetHashInfoReq {
-  string hash = 1;
-}
-
-message GetHashInfoResp {
-  string hash = 1;
-  int64 size = 2;
+message AccessURLResp {
+  string url = 1;
+  int64 expireTime = 2;
 }
 
 message FcmUpdateTokenReq {
@@ -97,11 +126,13 @@ message SetAppBadgeResp {
 }
 
 service third {
-  rpc ApplyPut(ApplyPutReq) returns(ApplyPutResp);
-  rpc GetPut(GetPutReq) returns(GetPutResp);
-  rpc ConfirmPut(ConfirmPutReq) returns(ConfirmPutResp);
-  rpc GetUrl(GetUrlReq) returns(GetUrlResp);
-  rpc GetHashInfo(GetHashInfoReq) returns(GetHashInfoResp);
+  rpc PartLimit(PartLimitReq) returns(PartLimitResp);
+  rpc PartSize(PartSizeReq) returns(PartSizeResp);
+  rpc InitiateMultipartUpload(InitiateMultipartUploadReq) returns(InitiateMultipartUploadResp);
+  rpc AuthSign(AuthSignReq) returns(AuthSignResp);
+  rpc CompleteMultipartUpload(CompleteMultipartUploadReq) returns(CompleteMultipartUploadResp);
+  rpc AccessURL(AccessURLReq) returns(AccessURLResp);
+
   rpc FcmUpdateToken(FcmUpdateTokenReq) returns(FcmUpdateTokenResp);
   rpc SetAppBadge(SetAppBadgeReq) returns(SetAppBadgeResp);
 }

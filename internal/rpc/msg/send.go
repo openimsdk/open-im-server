@@ -1,7 +1,22 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -16,24 +31,31 @@ import (
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
 	resp = &pbMsg.SendMsgResp{}
-	flag := isMessageHasReadEnabled(req.MsgData)
-	if !flag {
-		return nil, errs.ErrMessageHasReadDisable.Wrap()
-	}
-	m.encapsulateMsgData(req.MsgData)
-	switch req.MsgData.SessionType {
-	case constant.SingleChatType:
-		return m.sendMsgSingleChat(ctx, req)
-	case constant.NotificationChatType:
-		return m.sendMsgNotification(ctx, req)
-	case constant.SuperGroupChatType:
-		return m.sendMsgSuperGroupChat(ctx, req)
-	default:
-		return nil, errs.ErrArgs.Wrap("unknown sessionType")
+	if req.MsgData != nil {
+		flag := isMessageHasReadEnabled(req.MsgData)
+		if !flag {
+			return nil, errs.ErrMessageHasReadDisable.Wrap()
+		}
+		m.encapsulateMsgData(req.MsgData)
+		switch req.MsgData.SessionType {
+		case constant.SingleChatType:
+			return m.sendMsgSingleChat(ctx, req)
+		case constant.NotificationChatType:
+			return m.sendMsgNotification(ctx, req)
+		case constant.SuperGroupChatType:
+			return m.sendMsgSuperGroupChat(ctx, req)
+		default:
+			return nil, errs.ErrArgs.Wrap("unknown sessionType")
+		}
+	} else {
+		return nil, errs.ErrArgs.Wrap("msgData is nil")
 	}
 }
 
-func (m *msgServer) sendMsgSuperGroupChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgSuperGroupChat(
+	ctx context.Context,
+	req *pbMsg.SendMsgReq,
+) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
 		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
@@ -104,7 +126,10 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 }
 
-func (m *msgServer) sendMsgNotification(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
+func (m *msgServer) sendMsgNotification(
+	ctx context.Context,
+	req *pbMsg.SendMsgReq,
+) (resp *pbMsg.SendMsgResp, err error) {
 	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
@@ -126,14 +151,20 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	var isSend bool = true
 	isNotification := utils.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
-		isSend, err = m.modifyMessageByUserMessageReceiveOpt(ctx, req.MsgData.RecvID, utils.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID), constant.SingleChatType, req)
+		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
+			ctx,
+			req.MsgData.RecvID,
+			utils.GenConversationIDForSingle(req.MsgData.SendID, req.MsgData.RecvID),
+			constant.SingleChatType,
+			req,
+		)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if !isSend {
 		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
-		return nil, errs.ErrUserNotRecvMsg
+		return nil, nil
 	} else {
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
 			return nil, err

@@ -1,8 +1,24 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpcclient
 
 import (
 	"context"
 	"strings"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -11,7 +27,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type Group struct {
@@ -35,7 +50,11 @@ func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) GroupRpcCl
 	return GroupRpcClient(*NewGroup(discov))
 }
 
-func (g *GroupRpcClient) GetGroupInfos(ctx context.Context, groupIDs []string, complete bool) ([]*sdkws.GroupInfo, error) {
+func (g *GroupRpcClient) GetGroupInfos(
+	ctx context.Context,
+	groupIDs []string,
+	complete bool,
+) ([]*sdkws.GroupInfo, error) {
 	resp, err := g.Client.GetGroupsInfo(ctx, &group.GetGroupsInfoReq{
 		GroupIDs: groupIDs,
 	})
@@ -60,7 +79,11 @@ func (g *GroupRpcClient) GetGroupInfo(ctx context.Context, groupID string) (*sdk
 	return groups[0], nil
 }
 
-func (g *GroupRpcClient) GetGroupInfoMap(ctx context.Context, groupIDs []string, complete bool) (map[string]*sdkws.GroupInfo, error) {
+func (g *GroupRpcClient) GetGroupInfoMap(
+	ctx context.Context,
+	groupIDs []string,
+	complete bool,
+) (map[string]*sdkws.GroupInfo, error) {
 	groups, err := g.GetGroupInfos(ctx, groupIDs, complete)
 	if err != nil {
 		return nil, err
@@ -70,7 +93,12 @@ func (g *GroupRpcClient) GetGroupInfoMap(ctx context.Context, groupIDs []string,
 	}), nil
 }
 
-func (g *GroupRpcClient) GetGroupMemberInfos(ctx context.Context, groupID string, userIDs []string, complete bool) ([]*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetGroupMemberInfos(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+	complete bool,
+) ([]*sdkws.GroupMemberFullInfo, error) {
 	resp, err := g.Client.GetGroupMembersInfo(ctx, &group.GetGroupMembersInfoReq{
 		GroupID: groupID,
 		UserIDs: userIDs,
@@ -88,7 +116,11 @@ func (g *GroupRpcClient) GetGroupMemberInfos(ctx context.Context, groupID string
 	return resp.Members, nil
 }
 
-func (g *GroupRpcClient) GetGroupMemberInfo(ctx context.Context, groupID string, userID string) (*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetGroupMemberInfo(
+	ctx context.Context,
+	groupID string,
+	userID string,
+) (*sdkws.GroupMemberFullInfo, error) {
 	members, err := g.GetGroupMemberInfos(ctx, groupID, []string{userID}, true)
 	if err != nil {
 		return nil, err
@@ -96,7 +128,12 @@ func (g *GroupRpcClient) GetGroupMemberInfo(ctx context.Context, groupID string,
 	return members[0], nil
 }
 
-func (g *GroupRpcClient) GetGroupMemberInfoMap(ctx context.Context, groupID string, userIDs []string, complete bool) (map[string]*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetGroupMemberInfoMap(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+	complete bool,
+) (map[string]*sdkws.GroupMemberFullInfo, error) {
 	members, err := g.GetGroupMemberInfos(ctx, groupID, userIDs, true)
 	if err != nil {
 		return nil, err
@@ -106,7 +143,10 @@ func (g *GroupRpcClient) GetGroupMemberInfoMap(ctx context.Context, groupID stri
 	}), nil
 }
 
-func (g *GroupRpcClient) GetOwnerAndAdminInfos(ctx context.Context, groupID string) ([]*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetOwnerAndAdminInfos(
+	ctx context.Context,
+	groupID string,
+) ([]*sdkws.GroupMemberFullInfo, error) {
 	resp, err := g.Client.GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner, constant.GroupAdmin},
@@ -145,7 +185,11 @@ func (g *GroupRpcClient) GetGroupInfoCache(ctx context.Context, groupID string) 
 	return resp.GroupInfo, nil
 }
 
-func (g *GroupRpcClient) GetGroupMemberCache(ctx context.Context, groupID string, groupMemberID string) (*sdkws.GroupMemberFullInfo, error) {
+func (g *GroupRpcClient) GetGroupMemberCache(
+	ctx context.Context,
+	groupID string,
+	groupMemberID string,
+) (*sdkws.GroupMemberFullInfo, error) {
 	resp, err := g.Client.GetGroupMemberCache(ctx, &group.GetGroupMemberCacheReq{
 		GroupID:       groupID,
 		GroupMemberID: groupMemberID,

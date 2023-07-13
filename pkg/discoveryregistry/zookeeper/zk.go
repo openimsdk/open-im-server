@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package zookeeper
 
 import (
@@ -37,8 +51,9 @@ type ZkClient struct {
 	lock    sync.Locker
 	options []grpc.DialOption
 
-	resolvers    map[string]*Resolver
-	localConns   map[string][]resolver.Address
+	resolvers  map[string]*Resolver
+	localConns map[string][]grpc.ClientConnInterface
+
 	balancerName string
 
 	logger Logger
@@ -89,7 +104,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 		zkRoot:     "/",
 		scheme:     zkRoot,
 		timeout:    timeout,
-		localConns: make(map[string][]resolver.Address),
+		localConns: make(map[string][]grpc.ClientConnInterface),
 		resolvers:  make(map[string]*Resolver),
 		lock:       &sync.Mutex{},
 	}
@@ -97,7 +112,12 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	for _, option := range options {
 		option(client)
 	}
-	conn, eventChan, err := zk.Connect(zkServers, time.Duration(client.timeout)*time.Second, zk.WithLogInfo(true), zk.WithLogger(client.logger))
+	conn, eventChan, err := zk.Connect(
+		zkServers,
+		time.Duration(client.timeout)*time.Second,
+		zk.WithLogInfo(true),
+		zk.WithLogger(client.logger),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -197,6 +217,6 @@ func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 	s.options = append(s.options, opts...)
 }
 
-func (s *ZkClient) GetClientLocalConns() map[string][]resolver.Address {
+func (s *ZkClient) GetClientLocalConns() map[string][]grpc.ClientConnInterface {
 	return s.localConns
 }

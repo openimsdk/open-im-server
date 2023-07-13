@@ -1,21 +1,37 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/mitchellh/mapstructure"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
-	"github.com/mitchellh/mapstructure"
-	"google.golang.org/protobuf/proto"
 )
 
 type MessageApi struct {
@@ -147,33 +163,16 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 	a2r.Call(msg.MsgClient.DeleteMsgPhysical, m.Client, c)
 }
 
-func (m *MessageApi) SetMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.SetMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) GetMessageListReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.GetMessagesReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) AddMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.AddMessageReactionExtensions, m.Client, c)
-}
-
-func (m *MessageApi) DeleteMessageReactionExtensions(c *gin.Context) {
-	a2r.Call(msg.MsgClient.DeleteMessageReactionExtensions, m.Client, c)
-}
-
 func (m *MessageApi) SendMessage(c *gin.Context) {
 	params := apistruct.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	// todo
-	//if !tokenverify.IsAppManagerUid(c) {
-	//	apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
-	//	return
-	//}
+	if !tokenverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
 
 	var data interface{}
 	switch params.ContentType {
@@ -237,4 +236,12 @@ func (m *MessageApi) CheckMsgIsSendSuccess(c *gin.Context) {
 
 func (m *MessageApi) GetUsersOnlineStatus(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetSendMsgStatus, m.Client, c)
+}
+
+func (m *MessageApi) GetActiveUser(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveUser, m.Client, c)
+}
+
+func (m *MessageApi) GetActiveGroup(c *gin.Context) {
+	a2r.Call(msg.MsgClient.GetActiveGroup, m.Client, c)
 }

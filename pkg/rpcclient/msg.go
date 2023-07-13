@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
@@ -11,8 +14,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 	// "google.golang.org/protobuf/proto"
 )
 
@@ -100,6 +101,8 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.ConversationChangeNotification:      constant.SingleChatType,
 		constant.ConversationUnreadNotification:      constant.SingleChatType,
 		constant.ConversationPrivateChatNotification: constant.SingleChatType,
+		// delete
+		constant.MsgDeleteNotification: constant.SingleChatType,
 	}
 }
 
@@ -134,7 +137,10 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 	return resp, err
 }
 
-func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
+func (m *MessageRpcClient) PullMessageBySeqList(
+	ctx context.Context,
+	req *sdkws.PullMessageBySeqsReq,
+) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
 	return resp, err
 }
@@ -151,39 +157,94 @@ type NotificationSender struct {
 	contentTypeConf map[int32]config.NotificationConf
 	sessionTypeConf map[int32]int32
 	sendMsg         func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)
+	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
 }
 
-type NewNotificationSenderOptions func(*NotificationSender)
+type NotificationSenderOptions func(*NotificationSender)
 
-func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NewNotificationSenderOptions {
+func WithLocalSendMsg(
+	sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error),
+) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
 }
 
-func WithRpcClient(msgRpcClient *MessageRpcClient) NewNotificationSenderOptions {
+func WithRpcClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = msgRpcClient.SendMsg
 	}
 }
 
-func NewNotificationSender(opts ...NewNotificationSenderOptions) *NotificationSender {
-	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
+func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
+	return func(s *NotificationSender) {
+		s.getUserInfo = userRpcClient.GetUserInfo
+	}
+}
+
+func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
+	notificationSender := &NotificationSender{
+		contentTypeConf: newContentTypeConf(),
+		sessionTypeConf: newSessionTypeConf(),
+	}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
 	return notificationSender
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...utils.OptionsOpt) (err error) {
+type notificationOpt struct {
+	WithRpcGetUsername bool
+}
+
+type NotificationOptions func(*notificationOpt)
+
+func WithRpcGetUserName() NotificationOptions {
+	return func(opt *notificationOpt) {
+		opt.WithRpcGetUsername = true
+	}
+}
+
+func (s *NotificationSender) NotificationWithSesstionType(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType, sesstionType int32,
+	m proto.Message,
+	opts ...NotificationOptions,
+) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
+		log.ZError(
+			ctx,
+			"MsgClient Notification json.Marshal failed",
+			err,
+			"sendID",
+			sendID,
+			"recvID",
+			recvID,
+			"contentType",
+			contentType,
+			"msg",
+			m,
+		)
 		return err
+	}
+	notificationOpt := &notificationOpt{}
+	for _, opt := range opts {
+		opt(notificationOpt)
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
+	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
+		userInfo, err := s.getUserInfo(ctx, sendID)
+		if err != nil {
+			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
+		} else {
+			msg.SenderNickname = userInfo.Nickname
+			msg.SenderFaceURL = userInfo.FaceURL
+		}
+	}
 	var offlineInfo sdkws.OfflinePushInfo
 	var title, desc, ex string
 	msg.SendID = sendID
@@ -198,7 +259,6 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	options := config.GetOptionsByNotification(s.contentTypeConf[contentType])
-	options = utils.WithOptions(options, opts...)
 	msg.Options = options
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
@@ -214,6 +274,12 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	return err
 }
 
-func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...utils.OptionsOpt) error {
+func (s *NotificationSender) Notification(
+	ctx context.Context,
+	sendID, recvID string,
+	contentType int32,
+	m proto.Message,
+	opts ...NotificationOptions,
+) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }

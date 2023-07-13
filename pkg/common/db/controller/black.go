@@ -1,3 +1,17 @@
+// Copyright © 2023 OpenIM. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
@@ -15,7 +29,11 @@ type BlackDatabase interface {
 	// Delete 删除黑名单
 	Delete(ctx context.Context, blacks []*relation.BlackModel) (err error)
 	// FindOwnerBlacks 获取黑名单列表
-	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error)
+	FindOwnerBlacks(
+		ctx context.Context,
+		ownerUserID string,
+		pageNumber, showNumber int32,
+	) (blacks []*relation.BlackModel, total int64, err error)
 	FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 	CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error)
@@ -55,12 +73,19 @@ func (b *blackDatabase) deleteBlackIDsCache(ctx context.Context, blacks []*relat
 }
 
 // FindOwnerBlacks 获取黑名单列表
-func (b *blackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*relation.BlackModel, total int64, err error) {
+func (b *blackDatabase) FindOwnerBlacks(
+	ctx context.Context,
+	ownerUserID string,
+	pageNumber, showNumber int32,
+) (blacks []*relation.BlackModel, total int64, err error) {
 	return b.black.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
 }
 
 // CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
-func (b *blackDatabase) CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error) {
+func (b *blackDatabase) CheckIn(
+	ctx context.Context,
+	userID1, userID2 string,
+) (inUser1Blacks bool, inUser2Blacks bool, err error) {
 	userID1BlackIDs, err := b.cache.GetBlackIDs(ctx, userID1)
 	if err != nil {
 		return

@@ -101,6 +101,11 @@ install.go-gitlint:
 install.go-junit-report:
 	@$(GO) install github.com/jstemmer/go-junit-report@latest
 
+## install.gotests: Install gotests, used to generate go tests
+.PHONY: install.swagger
+install.swagger:
+	@$(GO) install github.com/go-swagger/go-swagger/cmd/swagger@latest
+
 # ==============================================================================
 # Tools that might be used include go gvm
 #
@@ -133,6 +138,7 @@ install.github-release:
 ## install.coscli: Install coscli, used to upload files to cos
 # example: ./coscli  cp/sync -r  /home/off-line/docker-off-line/ cos://openim-1306374445/openim/image/amd/off-line/off-line/ -e cos.ap-guangzhou.myqcloud.com
 # https://cloud.tencent.com/document/product/436/71763
+# amd64
 .PHONY: install.coscli
 install.coscli:
 	@wget -q https://ghproxy.com/https://github.com/tencentyun/coscli/releases/download/v0.13.0-beta/coscli-linux -O ${TOOLS_DIR}/coscli
@@ -189,7 +195,7 @@ install.protoc-gen-go:
 ## install.cfssl: Install cfssl, used to generate certificates
 .PHONY: install.cfssl
 install.cfssl:
-	@$(ROOT_DIR)/scripts/install/install.sh iam::install::install_cfssl
+	@$(ROOT_DIR)/scripts/install/install.sh openim::install::install_cfssl
 
 ## install.depth: Install depth, used to check dependency tree
 .PHONY: install.depth
