@@ -52,8 +52,15 @@ fi
 
 cd $OPENIM_ROOT
 
-# Execute 'make build'
-make build
+# CPU core number
+cpu_count=$(lscpu | grep -e '^CPU(s):' | awk '{print $2}')
+echo -e "${GREEN_PREFIX}======> cpu_count=$cpu_count${COLOR_SUFFIX}"
+
+# Count the number of concurrent compilations (half the number of cpus)
+compile_count=$((cpu_count / 2))
+
+# Execute 'make build' run the make command for concurrent compilation
+make -j$compile_count build
 
 if [ $? -ne 0 ]; then
   echo "make build Error, script exits"
