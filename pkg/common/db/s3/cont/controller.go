@@ -6,13 +6,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/google/uuid"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
 func New(impl s3.Interface) *Controller {
@@ -56,7 +58,13 @@ func (c *Controller) GetHashObject(ctx context.Context, hash string) (*s3.Object
 	return c.impl.StatObject(ctx, c.HashPath(hash))
 }
 
-func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*InitiateUploadResult, error) {
+func (c *Controller) InitiateUpload(
+	ctx context.Context,
+	hash string,
+	size int64,
+	expire time.Duration,
+	maxParts int,
+) (*InitiateUploadResult, error) {
 	defer log.ZDebug(ctx, "return")
 	if size < 0 {
 		return nil, errors.New("invalid size")
@@ -239,6 +247,11 @@ func (c *Controller) IsNotFound(err error) bool {
 	return c.impl.IsNotFound(err)
 }
 
-func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+func (c *Controller) AccessURL(
+	ctx context.Context,
+	name string,
+	expire time.Duration,
+	opt *s3.AccessURLOption,
+) (string, error) {
 	return c.impl.AccessURL(ctx, name, expire, opt)
 }

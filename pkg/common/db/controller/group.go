@@ -573,6 +573,10 @@ func (g *groupDatabase) CountTotal(ctx context.Context, before *time.Time) (coun
 	return g.groupDB.CountTotal(ctx, before)
 }
 
-func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
+func (g *groupDatabase) CountRangeEverydayTotal(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+) (map[string]int64, error) {
 	return g.groupDB.CountRangeEverydayTotal(ctx, start, end)
 }

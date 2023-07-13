@@ -6,9 +6,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/pkg/errors"
 
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"
@@ -69,7 +70,11 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 	return conns, nil
 }
 
-func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
+func (s *ZkClient) GetConns(
+	ctx context.Context,
+	serviceName string,
+	opts ...grpc.DialOption,
+) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
 	opts = append(s.options, opts...)
 	s.lock.Lock()
@@ -83,12 +88,26 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 			return nil, err
 		}
 		if len(addrs) == 0 {
-			return nil, fmt.Errorf("no conn for service %s, grpc server may not exist, local conn is %v, please check zookeeper server %v, path: %s", serviceName, s.localConns, s.zkServers, s.zkRoot)
+			return nil, fmt.Errorf(
+				"no conn for service %s, grpc server may not exist, local conn is %v, please check zookeeper server %v, path: %s",
+				serviceName,
+				s.localConns,
+				s.zkServers,
+				s.zkRoot,
+			)
 		}
 		for _, addr := range addrs {
 			cc, err := grpc.DialContext(ctx, addr.Addr, append(s.options, opts...)...)
 			if err != nil {
-				log.ZError(context.Background(), "dialContext failed", err, "addr", addr.Addr, "opts", append(s.options, opts...))
+				log.ZError(
+					context.Background(),
+					"dialContext failed",
+					err,
+					"addr",
+					addr.Addr,
+					"opts",
+					append(s.options, opts...),
+				)
 				return nil, errs.Wrap(err)
 			}
 			conns = append(conns, cc)
@@ -98,8 +117,15 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 	return conns, nil
 }
 
-func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
-	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
+func (s *ZkClient) GetConn(
+	ctx context.Context,
+	serviceName string,
+	opts ...grpc.DialOption,
+) (grpc.ClientConnInterface, error) {
+	newOpts := append(
+		s.options,
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)),
+	)
 	s.logger.Printf("get conn from client, serviceName: %s", serviceName)
 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }

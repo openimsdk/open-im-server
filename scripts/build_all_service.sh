@@ -35,8 +35,8 @@ echo -e "${BOLD_PREFIX}_________________________________________________________
 
 
 bin_dir="$BIN_DIR"
-logs_dir="../logs"
-sdk_db_dir="../db/sdk/"
+logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/db/sdk/"
 # Automatically created when there is no bin, logs folder
 if [ ! -d $bin_dir ]; then
   mkdir -p $bin_dir
