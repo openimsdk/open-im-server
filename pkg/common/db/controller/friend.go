@@ -238,7 +238,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 		}
 
 		fr2, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.ToUserID, friendRequest.FromUserID)
-		if err == nil {
+		if err == nil && fr2.HandleResult == constant.FriendResponseNotHandle {
 			fr2.HandlerUserID = mcontext.GetOpUserID(ctx)
 			fr2.HandleResult = constant.FriendResponseAgree
 			fr2.HandleTime = now
