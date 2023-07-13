@@ -59,7 +59,6 @@ jobs:
         ./scripts/check_all.sh
         cat logs/openIM.log
       shell: bash
-      continue-on-error: true
 
     - name: Print openIM.log
       run: |

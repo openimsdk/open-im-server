@@ -67,6 +67,7 @@ group:
   - repos: |
       OpenIMSDK/OpenKF@main
       OpenIMSDK/openim-miniprogram-demo@main
+      OpenIMSDK/openim-sdk-core
       OpenIMSDK/openim-sdk-cpp@main
     files: 
       - source: LICENSE
