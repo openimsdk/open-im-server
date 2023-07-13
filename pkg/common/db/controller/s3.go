@@ -2,25 +2,18 @@ package controller
 
 import (
 	"context"
-	"path/filepath"
-	"time"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"path/filepath"
+	"time"
 )
 
 type S3Database interface {
 	PartLimit() *s3.PartLimit
 	PartSize(ctx context.Context, size int64) (int64, error)
 	AuthSign(ctx context.Context, uploadID string, partNumbers []int) (*s3.AuthSignResult, error)
-	InitiateMultipartUpload(
-		ctx context.Context,
-		hash string,
-		size int64,
-		expire time.Duration,
-		maxParts int,
-	) (*cont.InitiateUploadResult, error)
+	InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error)
 	CompleteMultipartUpload(ctx context.Context, uploadID string, parts []string) (*cont.UploadResult, error)
 	AccessURL(ctx context.Context, name string, expire time.Duration) (time.Time, string, error)
 	SetObject(ctx context.Context, info *relation.ObjectModel) error
@@ -50,21 +43,11 @@ func (s *s3Database) AuthSign(ctx context.Context, uploadID string, partNumbers 
 	return s.s3.AuthSign(ctx, uploadID, partNumbers)
 }
 
-func (s *s3Database) InitiateMultipartUpload(
-	ctx context.Context,
-	hash string,
-	size int64,
-	expire time.Duration,
-	maxParts int,
-) (*cont.InitiateUploadResult, error) {
+func (s *s3Database) InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error) {
 	return s.s3.InitiateUpload(ctx, hash, size, expire, maxParts)
 }
 
-func (s *s3Database) CompleteMultipartUpload(
-	ctx context.Context,
-	uploadID string,
-	parts []string,
-) (*cont.UploadResult, error) {
+func (s *s3Database) CompleteMultipartUpload(ctx context.Context, uploadID string, parts []string) (*cont.UploadResult, error) {
 	return s.s3.CompleteUpload(ctx, uploadID, parts)
 }
 
