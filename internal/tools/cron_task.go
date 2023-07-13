@@ -34,19 +34,10 @@ func StartCronTask() error {
 	c := cron.New()
 	var wg sync.WaitGroup
 	wg.Add(1)
-	log.ZInfo(
-		context.Background(),
-		"start chatRecordsClearTime cron task",
-		"cron config",
-		config.Config.ChatRecordsClearTime,
-	)
+	log.ZInfo(context.Background(), "start chatRecordsClearTime cron task", "cron config", config.Config.ChatRecordsClearTime)
 	_, err = c.AddFunc(config.Config.ChatRecordsClearTime, msgTool.AllConversationClearMsgAndFixSeq)
 	if err != nil {
-		fmt.Println(
-			"start allConversationClearMsgAndFixSeq cron failed",
-			err.Error(),
-			config.Config.ChatRecordsClearTime,
-		)
+		fmt.Println("start allConversationClearMsgAndFixSeq cron failed", err.Error(), config.Config.ChatRecordsClearTime)
 		panic(err)
 	}
 	log.ZInfo(context.Background(), "start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)

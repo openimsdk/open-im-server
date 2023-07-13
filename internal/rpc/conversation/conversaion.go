@@ -3,8 +3,6 @@ package conversation
 import (
 	"context"
 
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -19,6 +17,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
@@ -45,19 +44,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	pbConversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
-		conversationDatabase: controller.NewConversationDatabase(
-			conversationDB,
-			cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB),
-			tx.NewGorm(db),
-		),
+		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
 	})
 	return nil
 }
 
-func (c *conversationServer) GetConversation(
-	ctx context.Context,
-	req *pbConversation.GetConversationReq,
-) (*pbConversation.GetConversationResp, error) {
+func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
 	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
@@ -70,10 +62,7 @@ func (c *conversationServer) GetConversation(
 	return resp, nil
 }
 
-func (c *conversationServer) GetAllConversations(
-	ctx context.Context,
-	req *pbConversation.GetAllConversationsReq,
-) (*pbConversation.GetAllConversationsResp, error) {
+func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
 	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
@@ -83,10 +72,7 @@ func (c *conversationServer) GetAllConversations(
 	return resp, nil
 }
 
-func (c *conversationServer) GetConversations(
-	ctx context.Context,
-	req *pbConversation.GetConversationsReq,
-) (*pbConversation.GetConversationsResp, error) {
+func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
 	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
@@ -96,19 +82,12 @@ func (c *conversationServer) GetConversations(
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversation(
-	ctx context.Context,
-	req *pbConversation.SetConversationReq,
-) (*pbConversation.SetConversationResp, error) {
+func (c *conversationServer) SetConversation(ctx context.Context, req *pbConversation.SetConversationReq) (*pbConversation.SetConversationResp, error) {
 	var conversation tableRelation.ConversationModel
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.conversationDatabase.SetUserConversations(
-		ctx,
-		req.Conversation.OwnerUserID,
-		[]*tableRelation.ConversationModel{&conversation},
-	)
+	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
 	if err != nil {
 		return nil, err
 	}
@@ -117,10 +96,7 @@ func (c *conversationServer) SetConversation(
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversations(
-	ctx context.Context,
-	req *pbConversation.SetConversationsReq,
-) (*pbConversation.SetConversationsResp, error) {
+func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
@@ -178,12 +154,7 @@ func (c *conversationServer) SetConversations(
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(
-				ctx,
-				userID,
-				req.Conversation.UserID,
-				req.Conversation.IsPrivateChat.Value,
-			)
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
@@ -200,10 +171,7 @@ func (c *conversationServer) SetConversations(
 }
 
 // 获取超级大群开启免打扰的用户ID
-func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(
-	ctx context.Context,
-	req *pbConversation.GetRecvMsgNotNotifyUserIDsReq,
-) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
+func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
 	userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
@@ -212,10 +180,7 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(
 }
 
 // create conversation without notification for msg redis transfer
-func (c *conversationServer) CreateSingleChatConversations(
-	ctx context.Context,
-	req *pbConversation.CreateSingleChatConversationsReq,
-) (*pbConversation.CreateSingleChatConversationsResp, error) {
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbConversation.CreateSingleChatConversationsReq) (*pbConversation.CreateSingleChatConversationsResp, error) {
 	var conversation tableRelation.ConversationModel
 	conversation.ConversationID = utils.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
 	conversation.ConversationType = constant.SingleChatType
@@ -236,10 +201,7 @@ func (c *conversationServer) CreateSingleChatConversations(
 	return &pbConversation.CreateSingleChatConversationsResp{}, nil
 }
 
-func (c *conversationServer) CreateGroupChatConversations(
-	ctx context.Context,
-	req *pbConversation.CreateGroupChatConversationsReq,
-) (*pbConversation.CreateGroupChatConversationsResp, error) {
+func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbConversation.CreateGroupChatConversationsReq) (*pbConversation.CreateGroupChatConversationsResp, error) {
 	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -247,10 +209,7 @@ func (c *conversationServer) CreateGroupChatConversations(
 	return &pbConversation.CreateGroupChatConversationsResp{}, nil
 }
 
-func (c *conversationServer) SetConversationMaxSeq(
-	ctx context.Context,
-	req *pbConversation.SetConversationMaxSeqReq,
-) (*pbConversation.SetConversationMaxSeqResp, error) {
+func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbConversation.SetConversationMaxSeqReq) (*pbConversation.SetConversationMaxSeqResp, error) {
 	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
@@ -258,10 +217,7 @@ func (c *conversationServer) SetConversationMaxSeq(
 	return &pbConversation.SetConversationMaxSeqResp{}, nil
 }
 
-func (c *conversationServer) GetConversationIDs(
-	ctx context.Context,
-	req *pbConversation.GetConversationIDsReq,
-) (*pbConversation.GetConversationIDsResp, error) {
+func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConversation.GetConversationIDsReq) (*pbConversation.GetConversationIDsResp, error) {
 	conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -269,10 +225,7 @@ func (c *conversationServer) GetConversationIDs(
 	return &pbConversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
 }
 
-func (c *conversationServer) GetUserConversationIDsHash(
-	ctx context.Context,
-	req *pbConversation.GetUserConversationIDsHashReq,
-) (*pbConversation.GetUserConversationIDsHashResp, error) {
+func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req *pbConversation.GetUserConversationIDsHashReq) (*pbConversation.GetUserConversationIDsHashResp, error) {
 	hash, err := c.conversationDatabase.GetUserConversationIDsHash(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
@@ -280,15 +233,10 @@ func (c *conversationServer) GetUserConversationIDsHash(
 	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
 
-func (c *conversationServer) GetConversationsByConversationID(
-	ctx context.Context,
-	req *pbConversation.GetConversationsByConversationIDReq,
-) (*pbConversation.GetConversationsByConversationIDResp, error) {
+func (c *conversationServer) GetConversationsByConversationID(ctx context.Context, req *pbConversation.GetConversationsByConversationIDReq) (*pbConversation.GetConversationsByConversationIDResp, error) {
 	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetConversationsByConversationIDResp{
-		Conversations: convert.ConversationsDB2Pb(conversations),
-	}, nil
+	return &pbConversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
