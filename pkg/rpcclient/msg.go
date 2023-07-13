@@ -131,10 +131,6 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
-	conn, err = discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
-	if err != nil {
-		panic(err)
-	}
 	return &Message{discov: discov, conn: conn, Client: client}
 }
 
