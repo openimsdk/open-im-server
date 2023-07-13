@@ -23,7 +23,7 @@ zookeeper:
   password:                               #密码
 
 mysql:
-  address: [ 127.0.0.1:3306 ]            #目前仅支持单机
+  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
   username: root                          #用户名
   password:                      #密码
   database: openIM_v3                     #不建议修改
@@ -42,7 +42,7 @@ mongo:
   maxPoolSize: 100
 
 redis:
-  address: [ 127.0.0.1:6379 ]            #
+  address: [ 127.0.0.1:16379 ]            #
   username:                               #only redis version 6.0+ need username
   password: openIM123                     #密码
 
