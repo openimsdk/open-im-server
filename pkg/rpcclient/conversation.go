@@ -93,6 +93,9 @@ func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID
 }
 
 func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+	if len(conversationIDs) == 0 {
+		return nil, nil
+	}
 	resp, err := c.Client.GetConversationsByConversationID(ctx, &pbConversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs})
 	if err != nil {
 		return nil, err
@@ -103,8 +106,18 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	return resp.Conversations, nil
 }
 
-func (c *ConversationRpcClient) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*pbConversation.Conversation, error) {
-	resp, err := c.Client.GetConversations(ctx, &pbConversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs})
+func (c *ConversationRpcClient) GetConversations(
+	ctx context.Context,
+	ownerUserID string,
+	conversationIDs []string,
+) ([]*pbConversation.Conversation, error) {
+	if len(conversationIDs) == 0 {
+		return nil, nil
+	}
+	resp, err := c.Client.GetConversations(
+		ctx,
+		&pbConversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs},
+	)
 	if err != nil {
 		return nil, err
 	}
