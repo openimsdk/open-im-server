@@ -67,6 +67,9 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	mysql, err := relation.NewGormDB()
+	if err != nil {
+		return err
+	}
 	msgMysModel := relation.NewChatLogGorm(mysql)
 	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, msgMysModel)
 	s := &msgServer{
