@@ -112,23 +112,3 @@ jobs:
 #           uses: golangci/golangci-lint-action@v3
 #           with:
 #             version: ${{ env.GOLANGCI_VERSION }}
-
-#   docker-image-tests:
-#     runs-on: ubuntu-20.04
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
-      
-#       - name: Set up Go
-#         uses: actions/setup-go@v3
-#         with:
-#           go-version: ${{ env.GO_VERSION }}
-
-#       - name: Run tests
-#         run: make build
-      
-#       - name: Test docker image
-#         run: |
-#           docker build -t openim:ci-build .
