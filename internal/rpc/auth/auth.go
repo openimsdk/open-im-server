@@ -23,6 +23,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
@@ -130,10 +131,15 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		return err
 	}
 	for _, v := range conns {
+		log.ZDebug(ctx, "forceKickOff", "conn", v.(*grpc.ClientConn).Target())
+	}
+	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
-		return utils.Wrap(err, "")
+		if err != nil {
+			log.ZError(ctx, "forceKickOff", err, "kickReq", kickReq)
+		}
 	}
 	return nil
 }
