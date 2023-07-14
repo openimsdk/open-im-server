@@ -20,9 +20,9 @@ ADD . .
 RUN /bin/sh -c "make build"
 
 # Production Stage
-FROM debian
+FROM alpine
 
-RUN apt-get update && apt-get install -y tzdata
+RUN apk --no-cache add tzdata
 
 # Set directory to map logs, config files, scripts, and SDK
 VOLUME ["/Open-IM-Server/logs", "/Open-IM-Server/config", "/Open-IM-Server/scripts", "/Open-IM-Server/db/sdk"]
@@ -33,4 +33,4 @@ COPY --from=builder /Open-IM-Server/_output/bin/platforms/linux/amd64 /Open-IM-S
 
 WORKDIR /Open-IM-Server/scripts
 
-CMD ["./docker_start_all.sh"]
+CMD ["docker_start_all.sh"]
