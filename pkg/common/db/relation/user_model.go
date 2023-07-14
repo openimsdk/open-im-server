@@ -85,8 +85,7 @@ func (u *UserGorm) Page(
 
 // 获取所有用户ID
 func (u *UserGorm) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
-	err = u.db(ctx).Pluck("user_id", &userIDs).Error
-	return userIDs, err
+	return userIDs, errs.Wrap(u.db(ctx).Pluck("user_id", &userIDs).Error)
 }
 
 func (u *UserGorm) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {

@@ -22,7 +22,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
@@ -31,8 +30,8 @@ import (
 
 type UserApi rpcclient.User
 
-func NewUserApi(discov discoveryregistry.SvcDiscoveryRegistry) UserApi {
-	return UserApi(*rpcclient.NewUser(discov))
+func NewUserApi(client rpcclient.User) UserApi {
+	return UserApi(client)
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
