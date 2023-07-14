@@ -20,9 +20,9 @@ ADD . .
 RUN /bin/sh -c "make build"
 
 # Production Stage
-FROM alpine
+FROM debian
 
-RUN apk --no-cache add tzdata
+RUN apt-get update && apt-get install -y tzdata
 
 # Set directory to map logs, config files, scripts, and SDK
 VOLUME ["/Open-IM-Server/logs", "/Open-IM-Server/config", "/Open-IM-Server/scripts", "/Open-IM-Server/db/sdk"]
