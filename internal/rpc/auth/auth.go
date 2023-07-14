@@ -137,7 +137,9 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}
 		_, err := client.KickUserOffline(ctx, kickReq)
-		return utils.Wrap(err, "")
+		if err != nil {
+			log.ZError(ctx, "forceKickOff", err, "kickReq", kickReq)
+		}
 	}
 	return nil
 }

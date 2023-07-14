@@ -181,10 +181,10 @@ func (s *Server) KickUserOffline(
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
 				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
-				err := client.KickOnlineMessage()
-				if err != nil {
-					return nil, err
+				if err := client.longConnServer.KickUserConn(v, client); err != nil {
+					log.ZWarn(ctx, "kick user offline failed", err, "userID", v, "platformID", req.PlatformID)
 				}
+				// s.LongConnServer.UserLogout()
 				// s.LongConnServer.UnRegister(client)
 			}
 		} else {
