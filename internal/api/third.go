@@ -23,7 +23,6 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -31,8 +30,8 @@ import (
 
 type ThirdApi rpcclient.Third
 
-func NewThirdApi(discov discoveryregistry.SvcDiscoveryRegistry) ThirdApi {
-	return ThirdApi(*rpcclient.NewThird(discov))
+func NewThirdApi(client rpcclient.Third) ThirdApi {
+	return ThirdApi(client)
 }
 
 func (o *ThirdApi) FcmUpdateToken(c *gin.Context) {

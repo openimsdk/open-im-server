@@ -30,7 +30,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(
+	db controller.GroupDatabase,
+	msgRpcClient *rpcclient.MessageRpcClient,
+	userRpcClient *rpcclient.UserRpcClient,
+	fn func(ctx context.Context, userIDs []string) ([]CommonUser, error),
+) *GroupNotificationSender {
 	return &GroupNotificationSender{
 		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,
@@ -442,8 +447,10 @@ func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupMemberMutedTips{Group: group, MutedSeconds: mutedSeconds,
-		OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID]}
+	tips := &sdkws.GroupMemberMutedTips{
+		Group: group, MutedSeconds: mutedSeconds,
+		OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID],
+	}
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}

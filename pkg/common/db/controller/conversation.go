@@ -27,21 +27,21 @@ import (
 )
 
 type ConversationDatabase interface {
-	//UpdateUserConversationFiled 更新用户该会话的属性信息
+	// UpdateUserConversationFiled 更新用户该会话的属性信息
 	UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error
-	//CreateConversation 创建一批新的会话
+	// CreateConversation 创建一批新的会话
 	CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error
-	//SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
+	// SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
 	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation []*relationTb.ConversationModel) error
-	//FindConversations 根据会话ID获取某个用户的多个会话
+	// FindConversations 根据会话ID获取某个用户的多个会话
 	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
-	//FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
+	// FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
 	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
-	//GetUserAllConversation 获取一个用户在服务器上所有的会话
+	// GetUserAllConversation 获取一个用户在服务器上所有的会话
 	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
-	//SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
+	// SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
-	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
+	// SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
@@ -98,7 +98,6 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 			temp.OwnerUserID = v
 			temp.CreateTime = now
 			conversations = append(conversations, temp)
-
 		}
 		if len(conversations) > 0 {
 			err = conversationTx.Create(ctx, conversations)

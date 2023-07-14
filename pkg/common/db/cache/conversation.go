@@ -41,7 +41,7 @@ const (
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
 
-// arg fn will exec when no data in msgCache
+// arg fn will exec when no data in msgCache.
 type ConversationCache interface {
 	metaCache
 	NewCache() ConversationCache

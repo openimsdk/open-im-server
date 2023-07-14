@@ -57,10 +57,18 @@ ifeq (${BINS},)
   $(error Could not determine BINS, set ROOT_DIR or run in source dir)
 endif
 
-ifeq (${COMMANDS},)
+ifeq ($(OS),Windows_NT)
+  NULL :=
+  SPACE := $(NULL) $(NULL)
+  ROOT_DIR := $(subst $(SPACE),\$(SPACE),$(shell cd))
+else
+  ROOT_DIR := $(shell pwd)
+endif
+
+ifeq ($(strip $(COMMANDS)),)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
-ifeq (${BINS},)
+ifeq ($(strip $(BINS)),)
   $(error Could not determine BINS, set ROOT_DIR or run in source dir)
 endif
 
@@ -161,7 +169,7 @@ go.format: tools.verify.golines tools.verify.goimports
 	@echo "===========> Formating codes"
 	@$(FIND) -type f -name '*.go' | $(XARGS) gofmt -s -w
 	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=120 --reformat-tags --shorten-comments --ignore-generated .
+	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
 ## imports: task to automatically handle import packages in Go files using goimports tool

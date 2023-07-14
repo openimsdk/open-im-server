@@ -26,9 +26,9 @@ import (
 )
 
 type AuthDatabase interface {
-	//结果为空 不返回错误
+	// 结果为空 不返回错误
 	GetTokensWithoutError(ctx context.Context, userID string, platformID int) (map[string]int, error)
-	//创建token
+	// 创建token
 	CreateToken(ctx context.Context, userID string, platformID int) (string, error)
 }
 
@@ -43,7 +43,7 @@ func NewAuthDatabase(cache cache.MsgModel, accessSecret string, accessExpire int
 	return &authDatabase{cache: cache, accessSecret: accessSecret, accessExpire: accessExpire}
 }
 
-// 结果为空 不返回错误
+// 结果为空 不返回错误.
 func (a *authDatabase) GetTokensWithoutError(
 	ctx context.Context,
 	userID string,
@@ -52,7 +52,7 @@ func (a *authDatabase) GetTokensWithoutError(
 	return a.cache.GetTokensWithoutError(ctx, userID, platformID)
 }
 
-// 创建token
+// 创建token.
 func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformID int) (string, error) {
 	tokens, err := a.cache.GetTokensWithoutError(ctx, userID, platformID)
 	if err != nil {

@@ -197,6 +197,6 @@ func (s *Server) MultiTerminalLoginCheck(
 	ctx context.Context,
 	req *msggateway.MultiTerminalLoginCheckReq,
 ) (*msggateway.MultiTerminalLoginCheckResp, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }

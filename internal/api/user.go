@@ -22,7 +22,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
@@ -31,8 +30,8 @@ import (
 
 type UserApi rpcclient.User
 
-func NewUserApi(discov discoveryregistry.SvcDiscoveryRegistry) UserApi {
-	return UserApi(*rpcclient.NewUser(discov))
+func NewUserApi(client rpcclient.User) UserApi {
+	return UserApi(client)
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
@@ -79,7 +78,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
 
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -132,7 +131,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -161,7 +160,6 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 					}
 				}
 			}
-
 		}
 		for p, tokens := range m {
 			t := new(msggateway.SinglePlatformToken)
@@ -177,5 +175,4 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
-
 }

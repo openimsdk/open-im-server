@@ -38,10 +38,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-const ConsumerMsgs = 3
-const SourceMessages = 4
-const MongoMessages = 5
-const ChannelNum = 100
+const (
+	ConsumerMsgs   = 3
+	SourceMessages = 4
+	MongoMessages  = 5
+	ChannelNum     = 100
+)
 
 type MsgChannelValue struct {
 	uniqueKey  string
@@ -85,7 +87,7 @@ func NewOnlineHistoryRedisConsumerHandler(
 ) *OnlineHistoryRedisConsumerHandler {
 	var och OnlineHistoryRedisConsumerHandler
 	och.msgDatabase = database
-	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel
+	och.msgDistributionCh = make(chan Cmd2Value) // no buffer channel
 	go och.MessagesDistributionHandle()
 	for i := 0; i < ChannelNum; i++ {
 		och.chArrays[i] = make(chan Cmd2Value, 50)
@@ -93,8 +95,10 @@ func NewOnlineHistoryRedisConsumerHandler(
 	}
 	och.conversationRpcClient = conversationRpcClient
 	och.groupRpcClient = groupRpcClient
-	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
+	och.historyConsumerGroup = kafka.NewMConsumerGroup(&kafka.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+	}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
 		config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
 	// statistics.NewStatistics(&och.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d
 	// second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
@@ -163,7 +167,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 	}
 }
 
-// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，
+// 获取消息/通知 存储的消息列表， 不存储并且推送的消息列表，.
 func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 	totalMsgs []*ContextMsg,
 ) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
@@ -312,7 +316,7 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 				triggerChannelValue := cmd.Value.(TriggerChannelValue)
 				ctx := triggerChannelValue.ctx
 				consumerMessages := triggerChannelValue.cMsgList
-				//Aggregation map[userid]message list
+				// Aggregation map[userid]message list
 				log.ZDebug(ctx, "batch messages come to distribution center", "length", len(consumerMessages))
 				for i := 0; i < len(consumerMessages); i++ {
 					ctxMsg := &ContextMsg{}
@@ -378,13 +382,13 @@ func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 		}
 	}
 }
+
 func withAggregationCtx(ctx context.Context, values []*ContextMsg) context.Context {
 	var allMessageOperationID string
 	for i, v := range values {
 		if opid := mcontext.GetOperationID(v.ctx); opid != "" {
 			if i == 0 {
 				allMessageOperationID += opid
-
 			} else {
 				allMessageOperationID += "$" + opid
 			}
@@ -431,13 +435,15 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(
 					ctx := mcontext.WithTriggerIDContext(context.Background(), utils.OperationIDGenerator())
 					log.ZDebug(ctx, "timer trigger msg consumer start", "length", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
-						//log.Debug()
+						// log.Debug()
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
-							ctx: ctx, cMsgList: ccMsg[i*split : (i+1)*split]}}
+							ctx: ctx, cMsgList: ccMsg[i*split : (i+1)*split],
+						}}
 					}
 					if (len(ccMsg) % split) > 0 {
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
-							ctx: ctx, cMsgList: ccMsg[split*(len(ccMsg)/split):]}}
+							ctx: ctx, cMsgList: ccMsg[split*(len(ccMsg)/split):],
+						}}
 					}
 					log.ZDebug(ctx, "timer trigger msg consumer end", "length", len(ccMsg))
 				}

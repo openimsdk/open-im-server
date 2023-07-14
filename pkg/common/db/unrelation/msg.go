@@ -19,8 +19,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
@@ -80,7 +81,7 @@ func (m *MsgMongoDriver) UpdateMsg(
 	return res, nil
 }
 
-// PushUnique value must slice
+// PushUnique value must slice.
 func (m *MsgMongoDriver) PushUnique(
 	ctx context.Context,
 	docID string,
@@ -555,7 +556,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 //	    }
 //	}
 //
-// ])
+// ]).
 func (m *MsgMongoDriver) RangeUserSendCount(
 	ctx context.Context,
 	start time.Time,
@@ -1081,21 +1082,21 @@ func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessa
 
 func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
 	var pipe mongo.Pipeline
-	conditon := bson.A{}
+	condition := bson.A{}
 	if req.SendTime != "" {
-		conditon = append(conditon, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
+		condition = append(condition, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
 	}
 	if req.MsgType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
 	}
 	if req.SessionType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
 	}
 	if req.RecvID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
 	}
 	if req.SendID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
 	}
 
 	or := bson.A{
@@ -1131,15 +1132,20 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 		},
 		{
 			{"$project", bson.D{
-				{"msgs", bson.D{
-					{"$filter", bson.D{
-						{"input", "$msgs"},
-						{"as", "item"},
-						{"cond", bson.D{
-							{"$and", conditon},
+				{
+					"msgs", bson.D{
+						{
+							"$filter", bson.D{
+								{"input", "$msgs"},
+								{"as", "item"},
+								{
+									"cond", bson.D{
+										{"$and", condition},
+									},
+								},
+							},
 						},
-						}},
-					}},
+					},
 				},
 				{"doc_id", 1},
 			}},
@@ -1159,7 +1165,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 		return nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
 	msgs := make([]*table.MsgInfoModel, 0)
-	for index, _ := range msgsDocs {
+	for index := range msgsDocs {
 		for i := range msgsDocs[index].Msg {
 			msg := msgsDocs[index].Msg[i]
 			if msg == nil || msg.Msg == nil {

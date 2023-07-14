@@ -34,8 +34,10 @@ type OnlineHistoryMongoConsumerHandler struct {
 
 func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) *OnlineHistoryMongoConsumerHandler {
 	mc := &OnlineHistoryMongoConsumerHandler{
-		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToMongo.Topic},
+		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+			KafkaVersion:   sarama.V2_0_0_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+		}, []string{config.Config.Kafka.MsgToMongo.Topic},
 			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
 		msgDatabase: database,
 	}
