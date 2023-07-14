@@ -29,8 +29,10 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-var ErrConnIsNil = errors.New("conn is nil")
-var ErrConnIsNilButLocalNotNil = errors.New("conn is nil, but local is not nil")
+var (
+	ErrConnIsNil               = errors.New("conn is nil")
+	ErrConnIsNilButLocalNotNil = errors.New("conn is nil, but local is not nil")
+)
 
 func (s *ZkClient) watch() {
 	for {
@@ -54,7 +56,6 @@ func (s *ZkClient) watch() {
 		case zk.EventNotWatching:
 		}
 	}
-
 }
 
 func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address, err error) {

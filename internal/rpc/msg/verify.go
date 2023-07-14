@@ -28,9 +28,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-var (
-	ExcludeContentType = []int{constant.HasReadReceipt}
-)
+var ExcludeContentType = []int{constant.HasReadReceipt}
 
 type Validator interface {
 	validate(pb *msg.SendMsgReq) (bool, int32, string)
@@ -126,6 +124,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		return nil
 	}
 }
+
 func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	msg.SendTime = utils.GetCurrentTimestampByMill()

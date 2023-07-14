@@ -33,6 +33,7 @@ type GzipCompressor struct {
 func NewGzipCompressor() *GzipCompressor {
 	return &GzipCompressor{compressProtocol: "gzip"}
 }
+
 func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	gzipBuffer := bytes.Buffer{}
 	gz := gzip.NewWriter(&gzipBuffer)

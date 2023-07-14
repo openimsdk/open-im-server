@@ -57,10 +57,18 @@ ifeq (${BINS},)
   $(error Could not determine BINS, set ROOT_DIR or run in source dir)
 endif
 
-ifeq (${COMMANDS},)
+ifeq ($(OS),Windows_NT)
+  NULL :=
+  SPACE := $(NULL) $(NULL)
+  ROOT_DIR := $(subst $(SPACE),\$(SPACE),$(shell cd))
+else
+  ROOT_DIR := $(shell pwd)
+endif
+
+ifeq ($(strip $(COMMANDS)),)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
-ifeq (${BINS},)
+ifeq ($(strip $(BINS)),)
   $(error Could not determine BINS, set ROOT_DIR or run in source dir)
 endif
 

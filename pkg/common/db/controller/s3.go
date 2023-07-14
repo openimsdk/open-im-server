@@ -16,11 +16,12 @@ package controller
 
 import (
 	"context"
+	"path/filepath"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"path/filepath"
-	"time"
 )
 
 type S3Database interface {

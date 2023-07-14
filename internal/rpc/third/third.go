@@ -17,12 +17,13 @@ package third
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cos"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/minio"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/oss"
-	"net/url"
-	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"

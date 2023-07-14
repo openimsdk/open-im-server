@@ -15,10 +15,13 @@
 package controller
 
 import (
+	"context"
+	"errors"
+	"time"
+
 	relation2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"gorm.io/gorm"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 
@@ -31,9 +34,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-
-	"context"
-	"errors"
 
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
@@ -172,7 +172,7 @@ func (db *commonMsgDatabase) BatchInsertBlock(ctx context.Context, conversationI
 		return nil
 	}
 	num := db.msg.GetSingleGocMsgNum()
-	//num = 100
+	// num = 100
 	for i, field := range fields { // 检查类型
 		var ok bool
 		switch key {
@@ -390,7 +390,7 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 
 func (db *commonMsgDatabase) getMsgBySeqs(ctx context.Context, userID, conversationID string, seqs []int64) (totalMsgs []*sdkws.MsgData, err error) {
 	for docID, seqs := range db.msg.GetDocIDSeqsMap(conversationID, seqs) {
-		//log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
+		// log.ZDebug(ctx, "getMsgBySeqs", "docID", docID, "seqs", seqs)
 		msgs, err := db.findMsgInfoBySeq(ctx, userID, docID, seqs)
 		if err != nil {
 			return nil, err
@@ -637,7 +637,6 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 					log.ZDebug(ctx, "deleteMsgRecursion finished", "conversationID", conversationID, "userID", userID, "index", index)
 					break
 				}
-
 			}
 		}
 	}
@@ -652,7 +651,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 	return seqs, nil
 }
 
-// this is struct for recursion
+// this is struct for recursion.
 type delMsgRecursionStruct struct {
 	minSeq    int64
 	delDocIDs []string
@@ -665,7 +664,7 @@ func (d *delMsgRecursionStruct) getSetMinSeq() int64 {
 // index 0....19(del) 20...69
 // seq 70
 // set minSeq 21
-// recursion 删除list并且返回设置的最小seq
+// recursion 删除list并且返回设置的最小seq.
 func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversationID string, index int64, delStruct *delMsgRecursionStruct, remainTime int64) (int64, error) {
 	// find from oldest list
 	msgDocModel, err := db.msgDocDatabase.GetMsgDocModelByIndex(ctx, conversationID, index, 1)
@@ -791,15 +790,19 @@ func (db *commonMsgDatabase) CleanUpUserConversationsMsgs(ctx context.Context, u
 func (db *commonMsgDatabase) SetMaxSeq(ctx context.Context, conversationID string, maxSeq int64) error {
 	return db.cache.SetMaxSeq(ctx, conversationID, maxSeq)
 }
+
 func (db *commonMsgDatabase) GetMaxSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
 	return db.cache.GetMaxSeqs(ctx, conversationIDs)
 }
+
 func (db *commonMsgDatabase) GetMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	return db.cache.GetMaxSeq(ctx, conversationID)
 }
+
 func (db *commonMsgDatabase) SetMinSeq(ctx context.Context, conversationID string, minSeq int64) error {
 	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
 }
+
 func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int64) error {
 	return db.cache.SetMinSeqs(ctx, seqs)
 }
@@ -807,18 +810,23 @@ func (db *commonMsgDatabase) SetMinSeqs(ctx context.Context, seqs map[string]int
 func (db *commonMsgDatabase) GetMinSeqs(ctx context.Context, conversationIDs []string) (map[string]int64, error) {
 	return db.cache.GetMinSeqs(ctx, conversationIDs)
 }
+
 func (db *commonMsgDatabase) GetMinSeq(ctx context.Context, conversationID string) (int64, error) {
 	return db.cache.GetMinSeq(ctx, conversationID)
 }
+
 func (db *commonMsgDatabase) GetConversationUserMinSeq(ctx context.Context, conversationID string, userID string) (int64, error) {
 	return db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
 }
+
 func (db *commonMsgDatabase) GetConversationUserMinSeqs(ctx context.Context, conversationID string, userIDs []string) (map[string]int64, error) {
 	return db.cache.GetConversationUserMinSeqs(ctx, conversationID, userIDs)
 }
+
 func (db *commonMsgDatabase) SetConversationUserMinSeq(ctx context.Context, conversationID string, userID string, minSeq int64) error {
 	return db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, minSeq)
 }
+
 func (db *commonMsgDatabase) SetConversationUserMinSeqs(ctx context.Context, conversationID string, seqs map[string]int64) (err error) {
 	return db.cache.SetConversationUserMinSeqs(ctx, conversationID, seqs)
 }
@@ -834,6 +842,7 @@ func (db *commonMsgDatabase) UserSetHasReadSeqs(ctx context.Context, userID stri
 func (db *commonMsgDatabase) SetHasReadSeq(ctx context.Context, userID string, conversationID string, hasReadSeq int64) error {
 	return db.cache.SetHasReadSeq(ctx, userID, conversationID, hasReadSeq)
 }
+
 func (db *commonMsgDatabase) GetHasReadSeqs(ctx context.Context, userID string, conversationIDs []string) (map[string]int64, error) {
 	return db.cache.GetHasReadSeqs(ctx, userID, conversationIDs)
 }

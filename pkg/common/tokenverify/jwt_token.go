@@ -29,7 +29,7 @@ import (
 
 type Claims struct {
 	UserID     string
-	PlatformID int //login platform
+	PlatformID int // login platform
 	jwt.RegisteredClaims
 }
 
@@ -40,10 +40,11 @@ func BuildClaims(uid string, platformID int, ttl int64) Claims {
 		UserID:     uid,
 		PlatformID: platformID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
-			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
-			NotBefore: jwt.NewNumericDate(before),                                     //Begin Effective time
-		}}
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), // Expiration time
+			IssuedAt:  jwt.NewNumericDate(now),                                        // Issuing time
+			NotBefore: jwt.NewNumericDate(before),                                     // Begin Effective time
+		},
+	}
 }
 
 func secret() jwt.Keyfunc {
@@ -101,9 +102,11 @@ func CheckAdmin(ctx context.Context) error {
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
+
 func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.UserID)
 }
+
 func WsVerifyToken(token, userID string, platformID int) error {
 	claim, err := GetClaimFromToken(token)
 	if err != nil {

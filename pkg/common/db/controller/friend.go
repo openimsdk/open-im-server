@@ -93,7 +93,7 @@ func NewFriendDatabase(
 	return &friendDatabase{friend: friend, friendRequest: friendRequest, cache: cache, tx: tx}
 }
 
-// ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
+// ok 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true).
 func (f *friendDatabase) CheckIn(
 	ctx context.Context,
 	userID1, userID2 string,
@@ -109,7 +109,7 @@ func (f *friendDatabase) CheckIn(
 	return utils.IsContain(userID2, userID1FriendIDs), utils.IsContain(userID1, userID2FriendIDs), nil
 }
 
-// 增加或者更新好友申请 如果之前有记录则更新，没有记录则新增
+// 增加或者更新好友申请 如果之前有记录则更新，没有记录则新增.
 func (f *friendDatabase) AddFriendRequest(
 	ctx context.Context,
 	fromUserID, toUserID string,
@@ -118,11 +118,11 @@ func (f *friendDatabase) AddFriendRequest(
 ) (err error) {
 	return f.tx.Transaction(func(tx any) error {
 		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
-		//有db错误
+		// 有db错误
 		if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
-		//无错误 则更新
+		// 无错误 则更新
 		if err == nil {
 			m := make(map[string]interface{}, 1)
 			m["handle_result"] = 0
@@ -135,7 +135,7 @@ func (f *friendDatabase) AddFriendRequest(
 			}
 			return nil
 		}
-		//gorm.ErrRecordNotFound 错误，则新增
+		// gorm.ErrRecordNotFound 错误，则新增
 		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}}); err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func (f *friendDatabase) AddFriendRequest(
 	})
 }
 
-// (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可
+// (1)先判断是否在好友表 （在不在都不返回错误） (2)对于不在好友列表的 插入即可.
 func (f *friendDatabase) BecomeFriends(
 	ctx context.Context,
 	ownerUserID string,
@@ -152,7 +152,7 @@ func (f *friendDatabase) BecomeFriends(
 ) (err error) {
 	cache := f.cache.NewCache()
 	if err := f.tx.Transaction(func(tx any) error {
-		//先find 找出重复的 去掉重复的
+		// 先find 找出重复的 去掉重复的
 		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
 		if err != nil {
 			return err
@@ -194,7 +194,7 @@ func (f *friendDatabase) BecomeFriends(
 	return cache.ExecDel(ctx)
 }
 
-// 拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝
+// 拒绝好友申请 (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)修改申请记录 已拒绝.
 func (f *friendDatabase) RefuseFriendRequest(
 	ctx context.Context,
 	friendRequest *relation.FriendRequestModel,
@@ -215,7 +215,7 @@ func (f *friendDatabase) RefuseFriendRequest(
 	return nil
 }
 
-// AgreeFriendRequest 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 建立双向好友关系（存在的忽略）
+// AgreeFriendRequest 同意好友申请  (1)检查是否有申请记录且为未处理状态 （没有记录返回错误） (2)检查是否好友（不返回错误）   (3) 建立双向好友关系（存在的忽略）.
 func (f *friendDatabase) AgreeFriendRequest(
 	ctx context.Context,
 	friendRequest *relation.FriendRequestModel,
@@ -289,7 +289,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 	})
 }
 
-// 删除好友  外部判断是否好友关系
+// 删除好友  外部判断是否好友关系.
 func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
 	if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
 		return err
@@ -297,7 +297,7 @@ func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendU
 	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
 }
 
-// 更新好友备注 零值也支持
+// 更新好友备注 零值也支持.
 func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error) {
 	if err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark); err != nil {
 		return err
@@ -305,7 +305,7 @@ func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUs
 	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
 }
 
-// 获取ownerUserID的好友列表 无结果不返回错误
+// 获取ownerUserID的好友列表 无结果不返回错误.
 func (f *friendDatabase) PageOwnerFriends(
 	ctx context.Context,
 	ownerUserID string,
@@ -314,7 +314,7 @@ func (f *friendDatabase) PageOwnerFriends(
 	return f.friend.FindOwnerFriends(ctx, ownerUserID, pageNumber, showNumber)
 }
 
-// friendUserID在哪些人的好友列表中
+// friendUserID在哪些人的好友列表中.
 func (f *friendDatabase) PageInWhoseFriends(
 	ctx context.Context,
 	friendUserID string,
@@ -323,7 +323,7 @@ func (f *friendDatabase) PageInWhoseFriends(
 	return f.friend.FindInWhoseFriends(ctx, friendUserID, pageNumber, showNumber)
 }
 
-// 获取我发出去的好友申请  无结果不返回错误
+// 获取我发出去的好友申请  无结果不返回错误.
 func (f *friendDatabase) PageFriendRequestFromMe(
 	ctx context.Context,
 	userID string,
@@ -332,7 +332,7 @@ func (f *friendDatabase) PageFriendRequestFromMe(
 	return f.friendRequest.FindFromUserID(ctx, userID, pageNumber, showNumber)
 }
 
-// 获取我收到的的好友申请 无结果不返回错误
+// 获取我收到的的好友申请 无结果不返回错误.
 func (f *friendDatabase) PageFriendRequestToMe(
 	ctx context.Context,
 	userID string,
@@ -341,7 +341,7 @@ func (f *friendDatabase) PageFriendRequestToMe(
 	return f.friendRequest.FindToUserID(ctx, userID, pageNumber, showNumber)
 }
 
-// 获取某人指定好友的信息 如果有好友不存在，也返回错误
+// 获取某人指定好友的信息 如果有好友不存在，也返回错误.
 func (f *friendDatabase) FindFriendsWithError(
 	ctx context.Context,
 	ownerUserID string,

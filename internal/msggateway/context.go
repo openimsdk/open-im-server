@@ -71,9 +71,11 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 		ConnID:     utils.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))),
 	}
 }
+
 func (c *UserConnContext) GetRemoteAddr() string {
 	return c.RemoteAddr
 }
+
 func (c *UserConnContext) Query(key string) (string, bool) {
 	var value string
 	if value = c.Req.URL.Query().Get(key); value == "" {
@@ -81,6 +83,7 @@ func (c *UserConnContext) Query(key string) (string, bool) {
 	}
 	return value, true
 }
+
 func (c *UserConnContext) GetHeader(key string) (string, bool) {
 	var value string
 	if value = c.Req.Header.Get(key); value == "" {
@@ -88,27 +91,35 @@ func (c *UserConnContext) GetHeader(key string) (string, bool) {
 	}
 	return value, true
 }
+
 func (c *UserConnContext) SetHeader(key, value string) {
 	c.RespWriter.Header().Set(key, value)
 }
+
 func (c *UserConnContext) ErrReturn(error string, code int) {
 	http.Error(c.RespWriter, error, code)
 }
+
 func (c *UserConnContext) GetConnID() string {
 	return c.ConnID
 }
+
 func (c *UserConnContext) GetUserID() string {
 	return c.Req.URL.Query().Get(WsUserID)
 }
+
 func (c *UserConnContext) GetPlatformID() string {
 	return c.Req.URL.Query().Get(PlatformID)
 }
+
 func (c *UserConnContext) GetOperationID() string {
 	return c.Req.URL.Query().Get(OperationID)
 }
+
 func (c *UserConnContext) GetToken() string {
 	return c.Req.URL.Query().Get(Token)
 }
+
 func (c *UserConnContext) GetBackground() bool {
 	b, err := strconv.ParseBool(c.Req.URL.Query().Get(BackgroundStatus))
 	if err != nil {

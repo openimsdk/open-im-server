@@ -86,6 +86,7 @@ type kickHandler struct {
 func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, client)
 }
+
 func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {
 	ws.cache = cache
 }
@@ -113,7 +114,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	}
 	if config.port < 1024 {
 		return nil, errors.New("port not allow to listen")
-
 	}
 	v := validator.New()
 	return &WsServer{
@@ -134,6 +134,7 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		Encoder:         NewGobEncoder(),
 	}, nil
 }
+
 func (ws *WsServer) Run() error {
 	var client *Client
 	go func() {
@@ -150,7 +151,7 @@ func (ws *WsServer) Run() error {
 	}()
 	http.HandleFunc("/", ws.wsHandler)
 	// http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {})
-	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
+	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) // Start listening
 }
 
 func (ws *WsServer) registerClient(client *Client) {
@@ -165,7 +166,6 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
-
 	} else {
 		i := &kickHandler{
 			clientOK:   clientOK,
@@ -176,7 +176,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
-			//已经有同平台的连接存在
+			// 已经有同平台的连接存在
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
@@ -194,6 +194,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		ws.onlineUserConnNum,
 	)
 }
+
 func getRemoteAdders(client []*Client) string {
 	var ret string
 	for i, c := range client {
@@ -284,8 +285,8 @@ func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
 			}
 		}
 	}
-
 }
+
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
 	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())

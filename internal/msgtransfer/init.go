@@ -84,9 +84,12 @@ func StartTransfer(prometheusPort int) error {
 
 func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 	msgDatabase controller.CommonMsgDatabase,
-	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient) *MsgTransfer {
-	return &MsgTransfer{persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
-		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase)}
+	conversationRpcClient *rpcclient.ConversationRpcClient, groupRpcClient *rpcclient.GroupRpcClient,
+) *MsgTransfer {
+	return &MsgTransfer{
+		persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
+		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase),
+	}
 }
 
 func (m *MsgTransfer) initPrometheus() {

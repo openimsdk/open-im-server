@@ -35,12 +35,12 @@ func (f *FriendRequestGorm) NewTx(tx any) relation.FriendRequestModelInterface {
 	return &FriendRequestGorm{NewMetaDB(tx.(*gorm.DB), &relation.FriendRequestModel{})}
 }
 
-// 插入多条记录
+// 插入多条记录.
 func (f *FriendRequestGorm) Create(ctx context.Context, friendRequests []*relation.FriendRequestModel) (err error) {
 	return utils.Wrap(f.db(ctx).Create(&friendRequests).Error, "")
 }
 
-// 删除记录
+// 删除记录.
 func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
 	return utils.Wrap(
 		f.db(ctx).
@@ -51,7 +51,7 @@ func (f *FriendRequestGorm) Delete(ctx context.Context, fromUserID, toUserID str
 	)
 }
 
-// 更新零值
+// 更新零值.
 func (f *FriendRequestGorm) UpdateByMap(
 	ctx context.Context,
 	fromUserID string,
@@ -68,7 +68,7 @@ func (f *FriendRequestGorm) UpdateByMap(
 	)
 }
 
-// 更新记录 （非零值）
+// 更新记录 （非零值）.
 func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return utils.Wrap(
 		f.db(ctx).
@@ -79,7 +79,7 @@ func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.
 	)
 }
 
-// 获取来指定用户的好友申请  未找到 不返回错误
+// 获取来指定用户的好友申请  未找到 不返回错误.
 func (f *FriendRequestGorm) Find(
 	ctx context.Context,
 	fromUserID, toUserID string,
@@ -104,7 +104,7 @@ func (f *FriendRequestGorm) Take(
 	return friendRequest, err
 }
 
-// 获取toUserID收到的好友申请列表
+// 获取toUserID收到的好友申请列表.
 func (f *FriendRequestGorm) FindToUserID(
 	ctx context.Context,
 	toUserID string,
@@ -126,7 +126,7 @@ func (f *FriendRequestGorm) FindToUserID(
 	return
 }
 
-// 获取fromUserID发出去的好友申请列表
+// 获取fromUserID发出去的好友申请列表.
 func (f *FriendRequestGorm) FindFromUserID(
 	ctx context.Context,
 	fromUserID string,

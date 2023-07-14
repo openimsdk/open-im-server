@@ -48,7 +48,7 @@ func NewBlackDatabase(black relation.BlackModelInterface, cache cache.BlackCache
 	return &blackDatabase{black, cache}
 }
 
-// Create 增加黑名单
+// Create 增加黑名单.
 func (b *blackDatabase) Create(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	if err := b.black.Create(ctx, blacks); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (b *blackDatabase) Create(ctx context.Context, blacks []*relation.BlackMode
 	return b.deleteBlackIDsCache(ctx, blacks)
 }
 
-// Delete 删除黑名单
+// Delete 删除黑名单.
 func (b *blackDatabase) Delete(ctx context.Context, blacks []*relation.BlackModel) (err error) {
 	if err := b.black.Delete(ctx, blacks); err != nil {
 		return err
@@ -72,7 +72,7 @@ func (b *blackDatabase) deleteBlackIDsCache(ctx context.Context, blacks []*relat
 	return cache.ExecDel(ctx)
 }
 
-// FindOwnerBlacks 获取黑名单列表
+// FindOwnerBlacks 获取黑名单列表.
 func (b *blackDatabase) FindOwnerBlacks(
 	ctx context.Context,
 	ownerUserID string,
@@ -81,7 +81,7 @@ func (b *blackDatabase) FindOwnerBlacks(
 	return b.black.FindOwnerBlacks(ctx, ownerUserID, pageNumber, showNumber)
 }
 
-// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
+// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true).
 func (b *blackDatabase) CheckIn(
 	ctx context.Context,
 	userID1, userID2 string,

@@ -31,10 +31,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-var ErrConnClosed = errors.New("conn has closed")
-var ErrNotSupportMessageProtocol = errors.New("not support message protocol")
-var ErrClientClosed = errors.New("client actively close the connection")
-var ErrPanic = errors.New("panic error")
+var (
+	ErrConnClosed                = errors.New("conn has closed")
+	ErrNotSupportMessageProtocol = errors.New("not support message protocol")
+	ErrClientClosed              = errors.New("client actively close the connection")
+	ErrPanic                     = errors.New("panic error")
+)
 
 const (
 	// MessageText is for UTF-8 encoded text messages like JSON.
@@ -102,10 +104,12 @@ func (c *Client) ResetClient(
 	c.closedErr = nil
 	c.token = token
 }
+
 func (c *Client) pongHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
 	return nil
 }
+
 func (c *Client) readMessage() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -124,7 +128,7 @@ func (c *Client) readMessage() {
 			return
 		}
 		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
-		if c.closed == true { //连接刚置位已经关闭，但是协程还没退出的场景
+		if c.closed == true { // 连接刚置位已经关闭，但是协程还没退出的场景
 			c.closedErr = ErrConnClosed
 			return
 		}
@@ -148,8 +152,8 @@ func (c *Client) readMessage() {
 		default:
 		}
 	}
-
 }
+
 func (c *Client) handleMessage(message []byte) error {
 	if c.IsCompress {
 		var decompressErr error
@@ -198,26 +202,26 @@ func (c *Client) handleMessage(message []byte) error {
 	}
 	c.replyMessage(ctx, &binaryReq, messageErr, resp)
 	return nil
-
 }
+
 func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, error) {
 	resp, isBackground, messageErr := c.longConnServer.SetUserDeviceBackground(ctx, req)
 	if messageErr != nil {
 		return nil, messageErr
 	}
 	c.IsBackground = isBackground
-	//todo callback
+	// todo callback
 	return resp, nil
-
 }
+
 func (c *Client) close() {
 	c.w.Lock()
 	defer c.w.Unlock()
 	c.closed = true
 	c.conn.Close()
 	c.longConnServer.UnRegister(c)
-
 }
+
 func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, resp []byte) {
 	errResp := apiresp.ParseError(err)
 	mReply := Resp{
@@ -234,6 +238,7 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 		log.ZWarn(ctx, "wireBinaryMsg replyMessage", err, "resp", mReply.String())
 	}
 }
+
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
 	var msg sdkws.PushMessages
 	conversationID := utils.GetConversationIDByMsg(msgData)
@@ -296,5 +301,4 @@ func (c *Client) writePongMsg() error {
 	}
 	_ = c.conn.SetWriteDeadline(writeWait)
 	return c.conn.WriteMessage(PongMessage, nil)
-
 }

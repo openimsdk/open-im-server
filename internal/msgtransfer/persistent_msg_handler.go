@@ -36,8 +36,10 @@ type PersistentConsumerHandler struct {
 
 func NewPersistentConsumerHandler(database controller.ChatLogDatabase) *PersistentConsumerHandler {
 	return &PersistentConsumerHandler{
-		persistentConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
+		persistentConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+			KafkaVersion:   sarama.V2_0_0_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+		}, []string{config.Config.Kafka.LatestMsgToRedis.Topic},
 			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql),
 		chatLogDatabase: database,
 	}
@@ -59,9 +61,9 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(
 	}
 	return
 	log.ZDebug(ctx, "handleChatWs2Mysql", "msg", msgFromMQ.MsgData)
-	//Control whether to store history messages (mysql)
+	// Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
-	//Only process receiver data
+	// Only process receiver data
 	if isPersist {
 		switch msgFromMQ.MsgData.SessionType {
 		case constant.SingleChatType, constant.NotificationChatType:

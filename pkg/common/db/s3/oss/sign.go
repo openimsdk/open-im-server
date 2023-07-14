@@ -19,12 +19,13 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"hash"
 	"io"
 	"net/http"
 	"sort"
 	"strings"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 func (o *OSS) getAdditionalHeaderKeys(req *http.Request) ([]string, map[string]string) {

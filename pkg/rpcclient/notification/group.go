@@ -442,8 +442,10 @@ func (g *GroupNotificationSender) GroupMemberMutedNotification(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	tips := &sdkws.GroupMemberMutedTips{Group: group, MutedSeconds: mutedSeconds,
-		OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID]}
+	tips := &sdkws.GroupMemberMutedTips{
+		Group: group, MutedSeconds: mutedSeconds,
+		OpUser: user[mcontext.GetOpUserID(ctx)], MutedUser: user[groupMemberUserID],
+	}
 	if err := g.fillOpUser(ctx, &tips.OpUser, tips.Group.GroupID); err != nil {
 		return err
 	}

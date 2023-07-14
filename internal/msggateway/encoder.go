@@ -26,12 +26,12 @@ type Encoder interface {
 	Decode(encodeData []byte, decodeData interface{}) error
 }
 
-type GobEncoder struct {
-}
+type GobEncoder struct{}
 
 func NewGobEncoder() *GobEncoder {
 	return &GobEncoder{}
 }
+
 func (g *GobEncoder) Encode(data interface{}) ([]byte, error) {
 	buff := bytes.Buffer{}
 	enc := gob.NewEncoder(&buff)
@@ -41,6 +41,7 @@ func (g *GobEncoder) Encode(data interface{}) ([]byte, error) {
 	}
 	return buff.Bytes(), nil
 }
+
 func (g *GobEncoder) Decode(encodeData []byte, decodeData interface{}) error {
 	buff := bytes.NewBuffer(encodeData)
 	dec := gob.NewDecoder(buff)

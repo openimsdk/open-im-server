@@ -48,7 +48,8 @@ type MsgTool struct {
 }
 
 func NewMsgTool(msgDatabase controller.CommonMsgDatabase, userDatabase controller.UserDatabase,
-	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase, msgNotificationSender *notification.MsgNotificationSender) *MsgTool {
+	groupDatabase controller.GroupDatabase, conversationDatabase controller.ConversationDatabase, msgNotificationSender *notification.MsgNotificationSender,
+) *MsgTool {
 	return &MsgTool{
 		msgDatabase:           msgDatabase,
 		userDatabase:          userDatabase,

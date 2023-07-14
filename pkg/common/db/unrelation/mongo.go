@@ -32,14 +32,14 @@ import (
 )
 
 const (
-	maxRetry = 10 //number of retries
+	maxRetry = 10 // number of retries
 )
 
 type Mongo struct {
 	db *mongo.Client
 }
 
-// NewMongo Initialize MongoDB connection
+// NewMongo Initialize MongoDB connection.
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"

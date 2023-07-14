@@ -43,10 +43,10 @@ const (
 
 	CallbackError = 80000
 
-	//通用错误码.
-	ServerInternalError = 500  //服务器内部错误
-	ArgsError           = 1001 //输入参数错误
-	NoPermissionError   = 1002 //权限不足
+	// 通用错误码.
+	ServerInternalError = 500  // 服务器内部错误
+	ArgsError           = 1001 // 输入参数错误
+	NoPermissionError   = 1002 // 权限不足
 	DuplicateKeyError   = 1003
 	RecordNotFoundError = 1004 // 记录不存在
 

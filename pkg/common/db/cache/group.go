@@ -106,7 +106,8 @@ func NewGroupCacheRedis(
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
-	return &GroupCacheRedis{rcClient: rcClient, expireTime: groupExpireTime,
+	return &GroupCacheRedis{
+		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
 		mongoDB: mongoClient, metaCache: NewMetaCacheRedis(rcClient),
 	}
@@ -176,7 +177,7 @@ func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *relationTb.GroupMembe
 	return 0, errIndex
 }
 
-// / groupInfo
+// / groupInfo.
 func (g *GroupCacheRedis) GetGroupsInfo(
 	ctx context.Context,
 	groupIDs []string,
@@ -265,7 +266,7 @@ func (g *GroupCacheRedis) GetSuperGroupMemberIDs(
 	)
 }
 
-// userJoinSuperGroup
+// userJoinSuperGroup.
 func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(userIDs ...string) GroupCache {
 	new := g.NewCache()
 	var keys []string
@@ -286,7 +287,7 @@ func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache 
 	return new
 }
 
-// groupMembersHash
+// groupMembersHash.
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
 	return getCache(
 		ctx,
@@ -331,7 +332,7 @@ func (g *GroupCacheRedis) DelGroupMembersHash(groupID string) GroupCache {
 	return cache
 }
 
-// groupMemberIDs
+// groupMemberIDs.
 func (g *GroupCacheRedis) GetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
 	return getCache(
 		ctx,
