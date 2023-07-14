@@ -29,6 +29,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -40,8 +41,17 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
-	u := NewUserApi(discov)
-	m := NewMessageApi(discov)
+	// init rpc client here
+	userRpc := rpcclient.NewUser(discov)
+	groupRpc := rpcclient.NewGroup(discov)
+	friendRpc := rpcclient.NewFriend(discov)
+	messageRpc := rpcclient.NewMessage(discov)
+	conversationRpc := rpcclient.NewConversation(discov)
+	authRpc := rpcclient.NewAuth(discov)
+	thirdRpc := rpcclient.NewThird(discov)
+
+	u := NewUserApi(*userRpc)
+	m := NewMessageApi(messageRpc, userRpc)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -65,7 +75,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
 	{
-		f := NewFriendApi(discov)
+		f := NewFriendApi(*friendRpc)
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
@@ -79,7 +89,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 	}
-	g := NewGroupApi(discov)
+	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group", ParseToken)
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
@@ -113,7 +123,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := NewAuthApi(discov)
+		a := NewAuthApi(*authRpc)
 		authRouterGroup.POST("/user_token", a.UserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
@@ -121,7 +131,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	//Third service
 	thirdGroup := r.Group("/third", ParseToken)
 	{
-		t := NewThirdApi(discov)
+		t := NewThirdApi(*thirdRpc)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
@@ -154,13 +164,13 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/delete_msg_phsical_by_seq", m.DeleteMsgPhysicalBySeq)
 		msgGroup.POST("/delete_msg_physical", m.DeleteMsgPhysical)
 
-		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
+		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
-		c := NewConversationApi(discov)
+		c := NewConversationApi(*conversationRpc)
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)

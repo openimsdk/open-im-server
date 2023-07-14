@@ -41,7 +41,7 @@ type UserDatabase interface {
 	//只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 	//获取所有用户ID
-	GetAllUserID(ctx context.Context) ([]string, error)
+	GetAllUserID(ctx context.Context, pageNumber, showNumber int32) ([]string, error)
 	//函数内部先查询db中是否存在，存在则什么都不做；不存在则插入
 	InitOnce(ctx context.Context, users []*relation.UserModel) (err error)
 	// 获取用户总数
@@ -147,8 +147,8 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 	return false, nil
 }
 
-func (u *userDatabase) GetAllUserID(ctx context.Context) (userIDs []string, err error) {
-	return u.userDB.GetAllUserID(ctx)
+func (u *userDatabase) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error) {
+	return u.userDB.GetAllUserID(ctx, pageNumber, showNumber)
 }
 
 func (u *userDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {

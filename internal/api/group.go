@@ -16,7 +16,6 @@ package api
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
@@ -25,8 +24,8 @@ import (
 
 type GroupApi rpcclient.Group
 
-func NewGroupApi(discov discoveryregistry.SvcDiscoveryRegistry) GroupApi {
-	return GroupApi(*rpcclient.NewGroup(discov))
+func NewGroupApi(client rpcclient.Group) GroupApi {
+	return GroupApi(client)
 }
 
 func (o *GroupApi) CreateGroup(c *gin.Context) {
