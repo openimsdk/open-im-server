@@ -100,7 +100,7 @@ services:
 
 
   openim_server:
-    image: ghcr.io/openimsdk/openim-server:v3.0.1
+    image: ghcr.io/openimsdk/openim-server:v3.0.0
     container_name: openim-server
     volumes:
       - ./logs:/Open-IM-Server/logs
