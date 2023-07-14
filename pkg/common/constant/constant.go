@@ -45,7 +45,7 @@ const (
 	SignalMsg          = 202
 	CustomNotification = 203
 
-	//SysRelated.
+	// SysRelated.
 	NotificationBegin = 1000
 
 	FriendApplicationApprovedNotification = 1201 // add_friend_response
@@ -113,37 +113,37 @@ const (
 
 	NotificationEnd = 5000
 
-	//status.
+	// status.
 	MsgNormal  = 1
 	MsgDeleted = 4
 
-	//MsgFrom.
+	// MsgFrom.
 	UserMsgType = 100
 	SysMsgType  = 200
 
-	//SessionType.
+	// SessionType.
 	SingleChatType       = 1
 	GroupChatType        = 2
 	SuperGroupChatType   = 3
 	NotificationChatType = 4
-	//token.
+	// token.
 	NormalToken  = 0
 	InValidToken = 1
 	KickedToken  = 2
 	ExpiredToken = 3
 
-	//MultiTerminalLogin.
+	// MultiTerminalLogin.
 	DefalutNotKick = 0
-	//Full-end login, but the same end is mutually exclusive.
+	// Full-end login, but the same end is mutually exclusive.
 	AllLoginButSameTermKick = 1
-	//Only one of the endpoints can log in.
+	// Only one of the endpoints can log in.
 	SingleTerminalLogin = 2
-	//The web side can be online at the same time, and the other side can only log in at one end.
+	// The web side can be online at the same time, and the other side can only log in at one end.
 	WebAndOther = 3
 	// The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at
 	// the same time.
 	PcMobileAndWeb = 4
-	//The PC terminal can be online at the same time,but other terminal only one of the endpoints can login.
+	// The PC terminal can be online at the same time,but other terminal only one of the endpoints can login.
 	PCAndOther = 5
 
 	OnlineStatus  = "online"
@@ -151,12 +151,12 @@ const (
 	Registered    = "registered"
 	UnRegistered  = "unregistered"
 
-	//MsgReceiveOpt.
+	// MsgReceiveOpt.
 	ReceiveMessage          = 0
 	NotReceiveMessage       = 1
 	ReceiveNotNotifyMessage = 2
 
-	//OptionsKey.
+	// OptionsKey.
 	IsHistory                  = "history"
 	IsPersistent               = "persistent"
 	IsOfflinePush              = "offlinePush"
@@ -170,13 +170,13 @@ const (
 	IsNotNotification          = "isNotNotification"
 	IsSendMsg                  = "isSendMsg"
 
-	//GroupStatus.
+	// GroupStatus.
 	GroupOk              = 0
 	GroupBanChat         = 1
 	GroupStatusDismissed = 2
 	GroupStatusMuted     = 3
 
-	//GroupType.
+	// GroupType.
 	NormalGroup  = 0
 	SuperGroup   = 1
 	WorkingGroup = 2
@@ -184,19 +184,19 @@ const (
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 
-	//UserJoinGroupSource.
+	// UserJoinGroupSource.
 	JoinByAdmin = 1
 
 	JoinByInvitation = 2
 	JoinBySearch     = 3
 	JoinByQRCode     = 4
 
-	//Minio.
+	// Minio.
 	MinioDurationTimes = 3600
-	//Aws.
+	// Aws.
 	AwsDurationTimes = 3600
 
-	//callbackCommand.
+	// callbackCommand.
 	CallbackBeforeSendSingleMsgCommand                   = "callbackBeforeSendSingleMsgCommand"
 	CallbackAfterSendSingleMsgCommand                    = "callbackAfterSendSingleMsgCommand"
 	CallbackBeforeSendGroupMsgCommand                    = "callbackBeforeSendGroupMsgCommand"
@@ -217,10 +217,10 @@ const (
 	CallbackGetMessageListReactionExtensionsCommand      = "callbackGetMessageListReactionExtensionsCommand"
 	CallbackAddMessageListReactionExtensionsCommand      = "callbackAddMessageListReactionExtensionsCommand"
 
-	//callback actionCode.
+	// callback actionCode.
 	ActionAllow     = 0
 	ActionForbidden = 1
-	//callback callbackHandleCode.
+	// callback callbackHandleCode.
 	CallbackHandleSuccess = 0
 	CallbackHandleFailed  = 1
 

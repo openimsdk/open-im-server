@@ -76,5 +76,4 @@ func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID 
 		return conversationIDsResp.ConversationIDs, nil
 	}
 	return hash.ids, nil
-
 }

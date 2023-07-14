@@ -76,7 +76,7 @@ func Db2PbGroupMember(m *relation.GroupMemberModel) *sdkws.GroupMemberFullInfo {
 		JoinTime:  m.JoinTime.UnixMilli(),
 		Nickname:  m.Nickname,
 		FaceURL:   m.FaceURL,
-		//AppMangerLevel: m.AppMangerLevel,
+		// AppMangerLevel: m.AppMangerLevel,
 		JoinSource:     m.JoinSource,
 		OperatorUserID: m.OperatorUserID,
 		Ex:             m.Ex,

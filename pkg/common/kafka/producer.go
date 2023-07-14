@@ -17,12 +17,13 @@ package kafka
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	log "github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
@@ -31,7 +32,7 @@ import (
 )
 
 const (
-	maxRetry = 10 //number of retries
+	maxRetry = 10 // number of retries
 )
 
 var errEmptyMsg = errors.New("binary msg is empty")
@@ -43,14 +44,14 @@ type Producer struct {
 	producer sarama.SyncProducer
 }
 
-// NewKafkaProducer Initialize kafka producer
+// NewKafkaProducer Initialize kafka producer.
 func NewKafkaProducer(addr []string, topic string) *Producer {
 	p := Producer{}
-	p.config = sarama.NewConfig()             //Instantiate a sarama Config
-	p.config.Producer.Return.Successes = true //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config = sarama.NewConfig()             // Instantiate a sarama Config
+	p.config.Producer.Return.Successes = true // Whether to enable the successes channel to be notified after the message is sent successfully
 	p.config.Producer.Return.Errors = true
-	p.config.Producer.RequiredAcks = sarama.WaitForAll        //Set producer Message Reply level 0 1 all
-	p.config.Producer.Partitioner = sarama.NewHashPartitioner //Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
+	p.config.Producer.RequiredAcks = sarama.WaitForAll        // Set producer Message Reply level 0 1 all
+	p.config.Producer.Partitioner = sarama.NewHashPartitioner // Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
 	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
 		p.config.Net.SASL.Enable = true
 		p.config.Net.SASL.User = config.Config.Kafka.Username
@@ -61,7 +62,7 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	var producer sarama.SyncProducer
 	var err error
 	for i := 0; i <= maxRetry; i++ {
-		producer, err = sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
+		producer, err = sarama.NewSyncProducer(p.addr, p.config) // Initialize the client
 		if err == nil {
 			p.producer = producer
 			return &p
@@ -92,7 +93,8 @@ func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) 
 		{Key: []byte(constant.OperationID), Value: []byte(operationID)},
 		{Key: []byte(constant.OpUserID), Value: []byte(opUserID)},
 		{Key: []byte(constant.OpUserPlatform), Value: []byte(platform)},
-		{Key: []byte(constant.ConnID), Value: []byte(connID)}}, err
+		{Key: []byte(constant.ConnID), Value: []byte(connID)},
+	}, err
 }
 
 func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {

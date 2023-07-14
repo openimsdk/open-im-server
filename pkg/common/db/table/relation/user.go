@@ -63,7 +63,7 @@ type UserModelInterface interface {
 	Take(ctx context.Context, userID string) (user *UserModel, err error)
 	// 获取用户信息 不存在，不返回错误
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*UserModel, count int64, err error)
-	GetAllUserID(ctx context.Context) (userIDs []string, err error)
+	GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	// 获取用户总数
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)

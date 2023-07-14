@@ -46,6 +46,11 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 
 type UserRpcClient User
 
+func NewUserRpcClientByUser(user *User) *UserRpcClient {
+	rpc := UserRpcClient(*user)
+	return &rpc
+}
+
 func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClient {
 	return UserRpcClient(*NewUser(client))
 }
@@ -140,4 +145,12 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 		return err
 	}
 	return tokenverify.CheckAccessV3(ctx, ownerUserID)
+}
+
+func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
+	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
 }

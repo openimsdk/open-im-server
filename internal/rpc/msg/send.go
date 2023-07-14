@@ -83,6 +83,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	resp.ClientMsgID = req.MsgData.ClientMsgID
 	return resp, nil
 }
+
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
 	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
@@ -100,7 +101,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			return
 		}
 		atUserID = utils.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
-		if len(atUserID) == 0 { //just @everyone
+		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { //@Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
@@ -122,7 +123,6 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 		}
 	}
-
 }
 
 func (m *msgServer) sendMsgNotification(

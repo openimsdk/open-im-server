@@ -28,10 +28,10 @@ import (
 )
 
 const (
-	maxRetry = 10 //number of retries
+	maxRetry = 10 // number of retries
 )
 
-// NewRedis Initialize redis connection
+// NewRedis Initialize redis connection.
 func NewRedis() (redis.UniversalClient, error) {
 	if len(config.Config.Redis.Address) == 0 {
 		return nil, errors.New("redis address is empty")

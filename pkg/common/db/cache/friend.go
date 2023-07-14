@@ -32,7 +32,7 @@ const (
 	friendKey           = "FRIEND_INFO:"
 )
 
-// args fn will exec when no data in msgCache
+// args fn will exec when no data in msgCache.
 type FriendCache interface {
 	metaCache
 	NewCache() FriendCache
@@ -109,7 +109,7 @@ func (f *FriendCacheRedis) DelFriendIDs(ownerUserID ...string) FriendCache {
 	return new
 }
 
-// todo
+// todo.
 func (f *FriendCacheRedis) GetTwoWayFriendIDs(
 	ctx context.Context,
 	ownerUserID string,

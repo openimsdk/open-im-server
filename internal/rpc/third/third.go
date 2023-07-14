@@ -17,12 +17,15 @@ package third
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cos"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/minio"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/oss"
-	"net/url"
-	"time"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -32,7 +35,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"google.golang.org/grpc"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {

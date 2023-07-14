@@ -16,9 +16,10 @@ package rpcclient
 
 import (
 	"context"
+	"net/url"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"net/url"
 
 	"google.golang.org/grpc"
 
@@ -54,7 +55,7 @@ func minioInit() (*minio.Client, error) {
 	}
 	opts := &minio.Options{
 		Creds: credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, ""),
-		//Region: config.Config.Credential.Minio.Location,
+		// Region: config.Config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false

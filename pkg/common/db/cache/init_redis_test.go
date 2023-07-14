@@ -16,11 +16,12 @@ package cache
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"testing"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
-//TestNewRedis Test redis connection
+// TestNewRedis Test redis connection
 func TestNewRedis(t *testing.T) {
 	err := config.InitConfig("config_folder_path")
 	if err != nil {

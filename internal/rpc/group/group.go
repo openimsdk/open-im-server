@@ -17,19 +17,22 @@ package group
 import (
 	"context"
 	"fmt"
-	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
+	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+
+	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -45,7 +48,6 @@ import (
 	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -229,7 +231,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}()
 	} else {
-		//s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
+		// s.Notification.GroupCreatedNotification(ctx, group, groupMembers, userMap)
 		tips := &sdkws.GroupCreatedTips{
 			Group:          resp.GroupInfo,
 			OperationTime:  group.CreateTime.UnixMilli(),
@@ -258,7 +260,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		pageNumber = req.Pagination.PageNumber
 		showNumber = req.Pagination.ShowNumber
 	}
-	//total, members, err := s.GroupDatabase.PageGroupMember(ctx, nil, []string{req.FromUserID}, nil, pageNumber, showNumber)
+	// total, members, err := s.GroupDatabase.PageGroupMember(ctx, nil, []string{req.FromUserID}, nil, pageNumber, showNumber)
 	total, members, err := s.GroupDatabase.PageGetJoinGroup(ctx, req.FromUserID, pageNumber, showNumber)
 	if err != nil {
 		return nil, err
@@ -515,7 +517,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				Notification: group.Notification,
 				Introduction: group.Introduction,
 				FaceURL:      group.FaceURL,
-				//OwnerUserID:            owner[0].UserID,
+				// OwnerUserID:            owner[0].UserID,
 				CreateTime:             group.CreateTime.UnixMilli(),
 				MemberCount:            num,
 				Ex:                     group.Ex,
@@ -900,7 +902,6 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		}()
 		num++
 		s.Notification.GroupInfoSetAnnouncementNotification(ctx, &sdkws.GroupInfoSetAnnouncementTips{Group: tips.Group, OpUser: tips.OpUser})
-
 	}
 	switch len(data) - num {
 	case 0:
@@ -1104,7 +1105,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			if err != nil {
 				return nil, err
 			}
-			//s.Notification.GroupDismissedNotification(ctx, req)
+			// s.Notification.GroupDismissedNotification(ctx, req)
 			tips := &sdkws.GroupDismissedTips{
 				Group:  s.groupDB2PB(group, owner.UserID, num),
 				OpUser: &sdkws.GroupMemberFullInfo{},
