@@ -47,6 +47,7 @@ type LongConnServer interface {
 	Validate(s interface{}) error
 	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
+	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -145,7 +146,7 @@ func (ws *WsServer) Run() error {
 			case client = <-ws.unregisterChan:
 				ws.unregisterClient(client)
 			case onlineInfo := <-ws.kickHandlerChan:
-				ws.multiTerminalLoginChecker(onlineInfo)
+				ws.multiTerminalLoginChecker(onlineInfo.clientOK, onlineInfo.oldClients, onlineInfo.newClient)
 			}
 		}
 	}()
@@ -207,80 +208,77 @@ func getRemoteAdders(client []*Client) string {
 	return ret
 }
 
-func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
+func (ws *WsServer) KickUserConn(client *Client) error {
+	ws.clients.deleteClients(client.UserID, []*Client{client})
+	return client.KickOnlineMessage()
+}
+
+func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
-		if constant.PlatformIDToClass(info.newClient.PlatformID) == constant.TerminalPC {
+		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
 		}
 		fallthrough
 	case constant.AllLoginButSameTermKick:
-		if info.clientOK {
-			ws.clients.deleteClients(info.newClient.UserID, info.oldClients)
-			for _, c := range info.oldClients {
+		if clientOK {
+			ws.clients.deleteClients(newClient.UserID, oldClients)
+			for _, c := range oldClients {
 				err := c.KickOnlineMessage()
 				if err != nil {
 					log.ZWarn(c.ctx, "KickOnlineMessage", err)
 				}
 			}
 			m, err := ws.cache.GetTokensWithoutError(
-				info.newClient.ctx,
-				info.newClient.UserID,
-				info.newClient.PlatformID,
+				newClient.ctx,
+				newClient.UserID,
+				newClient.PlatformID,
 			)
 			if err != nil && err != redis.Nil {
 				log.ZWarn(
-					info.newClient.ctx,
+					newClient.ctx,
 					"get token from redis err",
 					err,
 					"userID",
-					info.newClient.UserID,
+					newClient.UserID,
 					"platformID",
-					info.newClient.PlatformID,
+					newClient.PlatformID,
 				)
 				return
 			}
 			if m == nil {
 				log.ZWarn(
-					info.newClient.ctx,
+					newClient.ctx,
 					"m is nil",
 					errors.New("m is nil"),
 					"userID",
-					info.newClient.UserID,
+					newClient.UserID,
 					"platformID",
-					info.newClient.PlatformID,
+					newClient.PlatformID,
 				)
 				return
 			}
 			log.ZDebug(
-				info.newClient.ctx,
+				newClient.ctx,
 				"get token from redis",
 				"userID",
-				info.newClient.UserID,
+				newClient.UserID,
 				"platformID",
-				info.newClient.PlatformID,
+				newClient.PlatformID,
 				"tokenMap",
 				m,
 			)
 
 			for k := range m {
-				if k != info.newClient.ctx.GetToken() {
+				if k != newClient.ctx.GetToken() {
 					m[k] = constant.KickedToken
 				}
 			}
-			log.ZDebug(info.newClient.ctx, "set token map is ", "token map", m, "userID", info.newClient.UserID)
-			err = ws.cache.SetTokenMapByUidPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
+			log.ZDebug(newClient.ctx, "set token map is ", "token map", m, "userID", newClient.UserID)
+			err = ws.cache.SetTokenMapByUidPid(newClient.ctx, newClient.UserID, newClient.PlatformID, m)
 			if err != nil {
-				log.ZWarn(
-					info.newClient.ctx,
-					"SetTokenMapByUidPid err",
-					err,
-					"userID",
-					info.newClient.UserID,
-					"platformID",
-					info.newClient.PlatformID,
-				)
+				log.ZWarn(newClient.ctx, "SetTokenMapByUidPid err", err, "userID", newClient.UserID, "platformID", newClient.PlatformID)
 				return
 			}
 		}
