@@ -54,7 +54,7 @@ type ConversationCache interface {
 
 	// get one conversation from msgCache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
-	DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache
+	DelConvsersations(ownerUserID string, conversationIDs ...string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from msgCache
 	GetConversations(
@@ -225,9 +225,9 @@ func (c *ConversationRedisCache) GetConversation(
 	)
 }
 
-func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache {
+func (c *ConversationRedisCache) DelConvsersations(ownerUserID string, convsersationIDs ...string) ConversationCache {
 	var keys []string
-	for _, conversationID := range conversationIDs {
+	for _, conversationID := range convsersationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()
