@@ -1196,5 +1196,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			msgs = append(msgs, msg)
 		}
 	}
+	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
+	msgs = msgs[start : start+req.Pagination.ShowNumber]
 	return msgs, nil
 }
