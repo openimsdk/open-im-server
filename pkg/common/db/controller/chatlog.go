@@ -21,11 +21,6 @@ import (
 
 type ChatLogDatabase interface {
 	CreateChatLog(msg *pbMsg.MsgDataToMQ) error
-	GetChatLog(
-		chatLog *relationTb.ChatLogModel,
-		pageNumber, showNumber int32,
-		contentTypes []int32,
-	) (int64, []relationTb.ChatLogModel, error)
 }
 
 func NewChatLogDatabase(chatLogModelInterface relationTb.ChatLogModelInterface) ChatLogDatabase {
@@ -38,12 +33,4 @@ type chatLogDatabase struct {
 
 func (c *chatLogDatabase) CreateChatLog(msg *pbMsg.MsgDataToMQ) error {
 	return c.chatLogModel.Create(msg)
-}
-
-func (c *chatLogDatabase) GetChatLog(
-	chatLog *relationTb.ChatLogModel,
-	pageNumber, showNumber int32,
-	contentTypes []int32,
-) (int64, []relationTb.ChatLogModel, error) {
-	return c.chatLogModel.GetChatLog(chatLog, pageNumber, showNumber, contentTypes)
 }

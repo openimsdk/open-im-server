@@ -15,6 +15,7 @@
 package controller
 
 import (
+
 	"context"
 	"errors"
 	"time"
@@ -124,9 +125,8 @@ type CommonMsgDatabase interface {
 	) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
 }
 
-func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel, msgMyqModel relation.ChatLogModelInterface) CommonMsgDatabase {
+func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) CommonMsgDatabase {
 	return &commonMsgDatabase{
-		msgMyq:          msgMyqModel,
 		msgDocDatabase:  msgDocModel,
 		cache:           cacheModel,
 		producer:        kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
@@ -135,18 +135,16 @@ func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheMo
 	}
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, dbGrom *gorm.DB) CommonMsgDatabase {
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) CommonMsgDatabase {
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	msgMyqModel := relation2.NewChatLogGorm(dbGrom)
-	CommonMsgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel, msgMyqModel)
+	CommonMsgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel)
 	return CommonMsgDatabase
 }
 
 type commonMsgDatabase struct {
 	msgDocDatabase   unRelationTb.MsgDocModelInterface
 	msg              unRelationTb.MsgDocModel
-	msgMyq           relation.ChatLogModelInterface
 	cache            cache.MsgModel
 	producer         *kafka.Producer
 	producerToMongo  *kafka.Producer

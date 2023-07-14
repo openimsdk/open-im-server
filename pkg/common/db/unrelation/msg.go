@@ -1202,5 +1202,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			msgs = append(msgs, msg)
 		}
 	}
+	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
+	n := int32(len(msgs))
+	if start+req.Pagination.ShowNumber < n {
+		msgs = msgs[start : start+req.Pagination.ShowNumber]
+	} else {
+		msgs = msgs[start:]
+	}
 	return msgs, nil
 }

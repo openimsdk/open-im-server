@@ -81,7 +81,7 @@ func InitMsgTool() (*MsgTool, error) {
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	userDB := relation.NewUserGorm(db)
-	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase(), db)
+	msgDatabase := controller.InitCommonMsgDatabase(rdb, mongo.GetDatabase())
 	userDatabase := controller.NewUserDatabase(
 		userDB,
 		cache.NewUserCacheRedis(rdb, relation.NewUserGorm(db), cache.GetDefaultOpt()),
