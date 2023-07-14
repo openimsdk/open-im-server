@@ -203,6 +203,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+	log.ZInfo(c, "SendMessage", "req", req)
 	if !tokenverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -241,6 +242,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
+	log.ZInfo(c, "BatchSendMsg", "req", req)
 	if err := tokenverify.CheckAdmin(c); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
