@@ -191,6 +191,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	if err := mapstructure.WeakDecode(req.Content, &data); err != nil {
 		return nil, err
 	}
+	log.ZDebug(c, "getSendMsgReq", "data", data)
 	if err := m.validate.Struct(&data); err != nil {
 		return nil, err
 	}
