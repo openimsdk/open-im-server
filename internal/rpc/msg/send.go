@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
@@ -188,4 +187,8 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 		return resp, nil
 	}
+}
+
+func (m *msgServer) BatchSendMsg(ctx context.Context, in *pbMsg.BatchSendMessageReq) (*pbMsg.BatchSendMessageResp, error) {
+	return nil, nil
 }

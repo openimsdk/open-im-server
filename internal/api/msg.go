@@ -249,6 +249,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		return
 	}
 
+
 	var recvIDs []string
 	var err error
 	if req.IsSendAll {

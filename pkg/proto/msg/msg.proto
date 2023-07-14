@@ -273,6 +273,13 @@ message ChatLog {
   int32 groupType=23;
 }
 
+message batchSendMessageReq{
+  repeated string recvIDList=1;
+  sdkws.MsgData msgData = 2;
+}
+
+message batchSendMessageResp{
+}
 
 service msg {
   //获取最小最大seq（包括用户的，以及指定群组的）

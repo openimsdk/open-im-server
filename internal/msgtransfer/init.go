@@ -75,7 +75,7 @@ func StartTransfer(prometheusPort int) error {
 	msgDocModel := unrelation.NewMsgMongoDriver(mongo.GetDatabase())
 	msgMysModel := relation.NewChatLogGorm(db)
 	chatLogDatabase := controller.NewChatLogDatabase(msgMysModel)
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel, msgMysModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, msgModel)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgTransfer := NewMsgTransfer(chatLogDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)

@@ -196,9 +196,6 @@ func (x *GetGroupAllMemberReq) Check() error {
 }
 
 func (x *GetGroupsReq) Check() error {
-	if x.GroupID == "" {
-		return errs.ErrArgs.Wrap("groupID is empty")
-	}
 	if x.Pagination == nil {
 		return errs.ErrArgs.Wrap("pagination is empty")
 	}
