@@ -147,8 +147,8 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	return tokenverify.CheckAccessV3(ctx, ownerUserID)
 }
 
-func (u *UserRpcClient) GetAllUserIDs(ctx context.Context) ([]string, error) {
-	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{})
+func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
+	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
 	if err != nil {
 		return nil, err
 	}

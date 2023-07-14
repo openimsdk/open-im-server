@@ -252,14 +252,24 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	var recvIDs []string
 	var err error
 	if req.IsSendAll {
-		recvIDs, err = m.userRpcClient.GetAllUserIDs(c)
-		if err != nil {
-			log.ZError(c, "GetAllUserIDs failed", err)
-			apiresp.GinError(c, err)
+		pageNumber := 1
+		showNumber := 100
+		for {
+			recvIDsPart, err := m.userRpcClient.GetAllUserIDs(c, int32(pageNumber), int32(showNumber))
+			if err != nil {
+				log.ZError(c, "GetAllUserIDs failed", err)
+				apiresp.GinError(c, err)
+			}
+			if len(recvIDsPart) < showNumber {
+				recvIDs = append(recvIDs, recvIDsPart...)
+				break
+			}
+			pageNumber++
 		}
 	} else {
 		recvIDs = req.RecvIDs
 	}
+	log.ZDebug(c, "BatchSendMsg nums", "nums ", len(recvIDs))
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
 		log.ZError(c, "decodeData failed", err)
