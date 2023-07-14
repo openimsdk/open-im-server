@@ -19,9 +19,10 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	relation2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"gorm.io/gorm"
 
 	"github.com/redis/go-redis/v9"
 
@@ -35,10 +36,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -103,8 +105,23 @@ type CommonMsgDatabase interface {
 	MsgToPushMQ(ctx context.Context, key, conversarionID string, msg2mq *sdkws.MsgData) (int32, int64, error)
 	MsgToMongoMQ(ctx context.Context, key, conversarionID string, msgs []*sdkws.MsgData, lastSeq int64) error
 
-	RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error)
-	RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
+	RangeUserSendCount(
+		ctx context.Context,
+		start time.Time,
+		end time.Time,
+		group bool,
+		ase bool,
+		pageNumber int32,
+		showNumber int32,
+	) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error)
+	RangeGroupSendCount(
+		ctx context.Context,
+		start time.Time,
+		end time.Time,
+		ase bool,
+		pageNumber int32,
+		showNumber int32,
+	) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
 }
 
 func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel, msgMyqModel relation.ChatLogModelInterface) CommonMsgDatabase {
@@ -575,7 +592,22 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 		}
 	}
-	log.ZInfo(ctx, "db.cache.GetMessagesBySeq", "userID", userID, "conversationID", conversationID, "seqs", seqs, "successMsgs", len(successMsgs), "failedSeqs", failedSeqs, "conversationID", conversationID)
+	log.ZInfo(
+		ctx,
+		"db.cache.GetMessagesBySeq",
+		"userID",
+		userID,
+		"conversationID",
+		conversationID,
+		"seqs",
+		seqs,
+		"successMsgs",
+		len(successMsgs),
+		"failedSeqs",
+		failedSeqs,
+		"conversationID",
+		conversationID,
+	)
 	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
@@ -893,11 +925,26 @@ func (db *commonMsgDatabase) GetMinMaxSeqMongo(ctx context.Context, conversation
 	return
 }
 
-func (db *commonMsgDatabase) RangeUserSendCount(ctx context.Context, start time.Time, end time.Time, group bool, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error) {
+func (db *commonMsgDatabase) RangeUserSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	group bool,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, users []*unRelationTb.UserCount, dateCount map[string]int64, err error) {
 	return db.msgDocDatabase.RangeUserSendCount(ctx, start, end, group, ase, pageNumber, showNumber)
 }
 
-func (db *commonMsgDatabase) RangeGroupSendCount(ctx context.Context, start time.Time, end time.Time, ase bool, pageNumber int32, showNumber int32) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error) {
+func (db *commonMsgDatabase) RangeGroupSendCount(
+	ctx context.Context,
+	start time.Time,
+	end time.Time,
+	ase bool,
+	pageNumber int32,
+	showNumber int32,
+) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error) {
 	return db.msgDocDatabase.RangeGroupSendCount(ctx, start, end, ase, pageNumber, showNumber)
 }
 

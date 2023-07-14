@@ -24,10 +24,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/google/uuid"
 )
 
 func New(impl s3.Interface) *Controller {

@@ -20,9 +20,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/pkg/errors"
 
 	"github.com/go-zookeeper/zk"
 	"google.golang.org/grpc"

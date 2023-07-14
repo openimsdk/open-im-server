@@ -18,7 +18,6 @@ import (
 	"context"
 	"time"
 
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
 	"gorm.io/gorm"

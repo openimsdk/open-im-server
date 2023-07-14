@@ -30,7 +30,12 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
-func NewGroupNotificationSender(db controller.GroupDatabase, msgRpcClient *rpcclient.MessageRpcClient, userRpcClient *rpcclient.UserRpcClient, fn func(ctx context.Context, userIDs []string) ([]CommonUser, error)) *GroupNotificationSender {
+func NewGroupNotificationSender(
+	db controller.GroupDatabase,
+	msgRpcClient *rpcclient.MessageRpcClient,
+	userRpcClient *rpcclient.UserRpcClient,
+	fn func(ctx context.Context, userIDs []string) ([]CommonUser, error),
+) *GroupNotificationSender {
 	return &GroupNotificationSender{
 		NotificationSender: rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient), rpcclient.WithUserRpcClient(userRpcClient)),
 		getUsersInfo:       fn,

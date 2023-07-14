@@ -17,6 +17,8 @@ package conversation
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -31,7 +33,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 type conversationServer struct {
@@ -247,7 +248,10 @@ func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req
 	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
 
-func (c *conversationServer) GetConversationsByConversationID(ctx context.Context, req *pbConversation.GetConversationsByConversationIDReq) (*pbConversation.GetConversationsByConversationIDResp, error) {
+func (c *conversationServer) GetConversationsByConversationID(
+	ctx context.Context,
+	req *pbConversation.GetConversationsByConversationIDReq,
+) (*pbConversation.GetConversationsByConversationIDResp, error) {
 	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
 	if err != nil {
 		return nil, err

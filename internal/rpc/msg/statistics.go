@@ -25,7 +25,15 @@ import (
 )
 
 func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq) (*msg.GetActiveUserResp, error) {
-	msgCount, userCount, users, dateCount, err := m.MsgDatabase.RangeUserSendCount(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End), req.Group, req.Ase, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	msgCount, userCount, users, dateCount, err := m.MsgDatabase.RangeUserSendCount(
+		ctx,
+		time.UnixMilli(req.Start),
+		time.UnixMilli(req.End),
+		req.Group,
+		req.Ase,
+		req.Pagination.PageNumber,
+		req.Pagination.ShowNumber,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +68,14 @@ func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq
 }
 
 func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupReq) (*msg.GetActiveGroupResp, error) {
-	msgCount, groupCount, groups, dateCount, err := m.MsgDatabase.RangeGroupSendCount(ctx, time.UnixMilli(req.Start), time.UnixMilli(req.End), req.Ase, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	msgCount, groupCount, groups, dateCount, err := m.MsgDatabase.RangeGroupSendCount(
+		ctx,
+		time.UnixMilli(req.Start),
+		time.UnixMilli(req.End),
+		req.Ase,
+		req.Pagination.PageNumber,
+		req.Pagination.ShowNumber,
+	)
 	if err != nil {
 		return nil, err
 	}
