@@ -22,11 +22,6 @@ source $SCRIPTS_ROOT/style_info.sh
 source $SCRIPTS_ROOT/path_info.sh
 source $SCRIPTS_ROOT/function.sh
 
-cd $SCRIPTS_ROOT
-
-chmod +x build_all_service.sh
-./build_all_service.sh
-
 echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
