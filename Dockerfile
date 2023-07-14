@@ -1,5 +1,9 @@
 # Build Stage
-FROM golang as build
+FROM golang:1.20 AS builder
+
+LABEL org.opencontainers.image.source=https://github.com/OpenIMSDK/Open-IM-Server
+LABEL org.opencontainers.image.description="OpenIM Server image"
+LABEL org.opencontainers.image.licenses="Apache 2.0"
 
 # Set go mod installation source and proxy
 ARG GO111MODULE=on
@@ -24,9 +28,9 @@ RUN apk --no-cache add tzdata
 VOLUME ["/Open-IM-Server/logs", "/Open-IM-Server/config", "/Open-IM-Server/scripts", "/Open-IM-Server/db/sdk"]
 
 # Copy scripts and binary files to the production image
-COPY --from=build /Open-IM-Server/scripts /Open-IM-Server/scripts
-COPY --from=build /Open-IM-Server/_output/bin/platforms/linux/arm64 /Open-IM-Server/_output/bin/platforms/linux/arm64
+COPY --from=builder /Open-IM-Server/scripts /Open-IM-Server/scripts
+COPY --from=builder /Open-IM-Server/_output/bin/platforms/linux/amd64 /Open-IM-Server/_output/bin/platforms/linux/amd64
 
 WORKDIR /Open-IM-Server/scripts
 
-CMD ["./docker_start_all.sh"]
+CMD ["docker_start_all.sh"]

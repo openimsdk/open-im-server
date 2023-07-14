@@ -95,7 +95,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			if err == nil {
 				apns.Payload.Aps.Badge = &unreadCountSum
 			} else {
-				//log.Error(operationID, "IncrUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				// log.Error(operationID, "IncrUserBadgeUnreadCountSum redis err", err.Error(), uid)
 				Fail++
 				continue
 			}
@@ -107,7 +107,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 				zero := 1
 				apns.Payload.Aps.Badge = &zero
 			} else {
-				//log.Error(operationID, "GetUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				// log.Error(operationID, "GetUserBadgeUnreadCountSum redis err", err.Error(), uid)
 				Fail++
 				continue
 			}
@@ -127,7 +127,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		response, err := f.fcmMsgCli.SendAll(ctx, messages)
 		if err != nil {
 			Fail = Fail + messageCount
-			//log.Info(operationID, "some token push err", err.Error(), messageCount)
+			// log.Info(operationID, "some token push err", err.Error(), messageCount)
 		} else {
 			Success = Success + response.SuccessCount
 			Fail = Fail + response.FailureCount

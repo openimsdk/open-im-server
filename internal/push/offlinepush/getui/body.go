@@ -145,7 +145,7 @@ func newPushReq(title, content string) PushReq {
 }
 
 func newBatchPushReq(userIDs []string, taskID string) PushReq {
-	var IsAsync = true
+	IsAsync := true
 	return PushReq{Audience: &Audience{Alias: userIDs}, IsAsync: &IsAsync, TaskID: &taskID}
 }
 

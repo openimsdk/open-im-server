@@ -83,7 +83,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	return nil
 }
 
-// ok
+// ok.
 func (s *friendServer) ApplyToAddFriend(
 	ctx context.Context,
 	req *pbfriend.ApplyToAddFriendReq,
@@ -116,7 +116,7 @@ func (s *friendServer) ApplyToAddFriend(
 	return resp, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) ImportFriends(
 	ctx context.Context,
 	req *pbfriend.ImportFriendReq,
@@ -142,7 +142,7 @@ func (s *friendServer) ImportFriends(
 	return &pbfriend.ImportFriendResp{}, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) RespondFriendApply(
 	ctx context.Context,
 	req *pbfriend.RespondFriendApplyReq,
@@ -178,7 +178,7 @@ func (s *friendServer) RespondFriendApply(
 	return nil, errs.ErrArgs.Wrap("req.HandleResult != -1/1")
 }
 
-// ok
+// ok.
 func (s *friendServer) DeleteFriend(
 	ctx context.Context,
 	req *pbfriend.DeleteFriendReq,
@@ -199,7 +199,7 @@ func (s *friendServer) DeleteFriend(
 	return resp, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) SetFriendRemark(
 	ctx context.Context,
 	req *pbfriend.SetFriendRemarkReq,
@@ -220,7 +220,7 @@ func (s *friendServer) SetFriendRemark(
 	return resp, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) GetDesignatedFriends(
 	ctx context.Context,
 	req *pbfriend.GetDesignatedFriendsReq,
@@ -240,7 +240,7 @@ func (s *friendServer) GetDesignatedFriends(
 	return resp, nil
 }
 
-// ok 获取接收到的好友申请（即别人主动申请的）
+// ok 获取接收到的好友申请（即别人主动申请的）.
 func (s *friendServer) GetPaginationFriendsApplyTo(
 	ctx context.Context,
 	req *pbfriend.GetPaginationFriendsApplyToReq,
@@ -263,7 +263,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 	return resp, nil
 }
 
-// ok 获取主动发出去的好友申请列表
+// ok 获取主动发出去的好友申请列表.
 func (s *friendServer) GetPaginationFriendsApplyFrom(
 	ctx context.Context,
 	req *pbfriend.GetPaginationFriendsApplyFromReq,
@@ -286,7 +286,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(
 	return resp, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) IsFriend(
 	ctx context.Context,
 	req *pbfriend.IsFriendReq,
@@ -300,7 +300,7 @@ func (s *friendServer) IsFriend(
 	return resp, nil
 }
 
-// ok
+// ok.
 func (s *friendServer) GetPaginationFriends(
 	ctx context.Context,
 	req *pbfriend.GetPaginationFriendsReq,

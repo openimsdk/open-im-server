@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 
 	"google.golang.org/grpc"
@@ -32,20 +33,22 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
-type MessageInterceptorChain []MessageInterceptorFunc
-type msgServer struct {
-	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase            controller.CommonMsgDatabase
-	Group                  *rpcclient.GroupRpcClient
-	User                   *rpcclient.UserRpcClient
-	Conversation           *rpcclient.ConversationRpcClient
-	friend                 *rpcclient.FriendRpcClient
-	GroupLocalCache        *localcache.GroupLocalCache
-	ConversationLocalCache *localcache.ConversationLocalCache
-	MessageLocker          MessageLocker
-	Handlers               MessageInterceptorChain
-	notificationSender     *rpcclient.NotificationSender
-}
+type (
+	MessageInterceptorChain []MessageInterceptorFunc
+	msgServer               struct {
+		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
+		MsgDatabase            controller.CommonMsgDatabase
+		Group                  *rpcclient.GroupRpcClient
+		User                   *rpcclient.UserRpcClient
+		Conversation           *rpcclient.ConversationRpcClient
+		friend                 *rpcclient.FriendRpcClient
+		GroupLocalCache        *localcache.GroupLocalCache
+		ConversationLocalCache *localcache.ConversationLocalCache
+		MessageLocker          MessageLocker
+		Handlers               MessageInterceptorChain
+		notificationSender     *rpcclient.NotificationSender
+	}
+)
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)

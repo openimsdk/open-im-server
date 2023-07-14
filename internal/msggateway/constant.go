@@ -27,11 +27,13 @@ const (
 	GzipCompressionProtocol = "gzip"
 	BackgroundStatus        = "isBackground"
 )
+
 const (
 	WebSocket = iota + 1
 )
+
 const (
-	//Websocket Protocol
+	// Websocket Protocol.
 	WSGetNewestSeq        = 1001
 	WSPullMsgBySeqList    = 1002
 	WSSendMsg             = 1003

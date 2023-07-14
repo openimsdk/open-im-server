@@ -54,7 +54,6 @@ func MsgPb2DB(msg *sdkws.MsgData) *unrelation.MsgDataModel {
 	msgDataModel.AttachedInfo = msg.AttachedInfo
 	msgDataModel.Ex = msg.Ex
 	return &msgDataModel
-
 }
 
 func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {

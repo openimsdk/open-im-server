@@ -22,14 +22,16 @@ package conversation
 
 import (
 	context "context"
-	wrapperspb "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
+	reflect "reflect"
+	sync "sync"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
+
+	wrapperspb "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
 )
 
 const (
@@ -44,23 +46,23 @@ type Conversation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OwnerUserID           string `protobuf:"bytes,1,opt,name=ownerUserID,proto3" json:"ownerUserID"`
-	ConversationID        string `protobuf:"bytes,2,opt,name=conversationID,proto3" json:"conversationID"`
-	RecvMsgOpt            int32  `protobuf:"varint,3,opt,name=recvMsgOpt,proto3" json:"recvMsgOpt"`
-	ConversationType      int32  `protobuf:"varint,4,opt,name=conversationType,proto3" json:"conversationType"`
-	UserID                string `protobuf:"bytes,5,opt,name=userID,proto3" json:"userID"`
-	GroupID               string `protobuf:"bytes,6,opt,name=groupID,proto3" json:"groupID"`
-	IsPinned              bool   `protobuf:"varint,7,opt,name=isPinned,proto3" json:"isPinned"`
-	AttachedInfo          string `protobuf:"bytes,8,opt,name=attachedInfo,proto3" json:"attachedInfo"`
-	IsPrivateChat         bool   `protobuf:"varint,9,opt,name=isPrivateChat,proto3" json:"isPrivateChat"`
-	GroupAtType           int32  `protobuf:"varint,10,opt,name=groupAtType,proto3" json:"groupAtType"`
-	Ex                    string `protobuf:"bytes,11,opt,name=ex,proto3" json:"ex"`
-	BurnDuration          int32  `protobuf:"varint,12,opt,name=burnDuration,proto3" json:"burnDuration"`
-	MinSeq                int64  `protobuf:"varint,13,opt,name=minSeq,proto3" json:"minSeq"`
-	MaxSeq                int64  `protobuf:"varint,14,opt,name=maxSeq,proto3" json:"maxSeq"`
-	MsgDestructTime       int64  `protobuf:"varint,15,opt,name=msgDestructTime,proto3" json:"msgDestructTime"`
+	OwnerUserID           string `protobuf:"bytes,1,opt,name=ownerUserID,proto3"             json:"ownerUserID"`
+	ConversationID        string `protobuf:"bytes,2,opt,name=conversationID,proto3"          json:"conversationID"`
+	RecvMsgOpt            int32  `protobuf:"varint,3,opt,name=recvMsgOpt,proto3"             json:"recvMsgOpt"`
+	ConversationType      int32  `protobuf:"varint,4,opt,name=conversationType,proto3"       json:"conversationType"`
+	UserID                string `protobuf:"bytes,5,opt,name=userID,proto3"                  json:"userID"`
+	GroupID               string `protobuf:"bytes,6,opt,name=groupID,proto3"                 json:"groupID"`
+	IsPinned              bool   `protobuf:"varint,7,opt,name=isPinned,proto3"               json:"isPinned"`
+	AttachedInfo          string `protobuf:"bytes,8,opt,name=attachedInfo,proto3"            json:"attachedInfo"`
+	IsPrivateChat         bool   `protobuf:"varint,9,opt,name=isPrivateChat,proto3"          json:"isPrivateChat"`
+	GroupAtType           int32  `protobuf:"varint,10,opt,name=groupAtType,proto3"           json:"groupAtType"`
+	Ex                    string `protobuf:"bytes,11,opt,name=ex,proto3"                     json:"ex"`
+	BurnDuration          int32  `protobuf:"varint,12,opt,name=burnDuration,proto3"          json:"burnDuration"`
+	MinSeq                int64  `protobuf:"varint,13,opt,name=minSeq,proto3"                json:"minSeq"`
+	MaxSeq                int64  `protobuf:"varint,14,opt,name=maxSeq,proto3"                json:"maxSeq"`
+	MsgDestructTime       int64  `protobuf:"varint,15,opt,name=msgDestructTime,proto3"       json:"msgDestructTime"`
 	LatestMsgDestructTime int64  `protobuf:"varint,16,opt,name=latestMsgDestructTime,proto3" json:"latestMsgDestructTime"`
-	IsMsgDestruct         bool   `protobuf:"varint,17,opt,name=isMsgDestruct,proto3" json:"isMsgDestruct"`
+	IsMsgDestruct         bool   `protobuf:"varint,17,opt,name=isMsgDestruct,proto3"         json:"isMsgDestruct"`
 }
 
 func (x *Conversation) Reset() {
@@ -219,21 +221,21 @@ type ConversationReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ConversationID   string                  `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
+	ConversationID   string                  `protobuf:"bytes,1,opt,name=conversationID,proto3"    json:"conversationID"`
 	ConversationType int32                   `protobuf:"varint,2,opt,name=conversationType,proto3" json:"conversationType"`
-	UserID           string                  `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID"`
-	GroupID          string                  `protobuf:"bytes,4,opt,name=groupID,proto3" json:"groupID"`
-	RecvMsgOpt       *wrapperspb.Int32Value  `protobuf:"bytes,5,opt,name=recvMsgOpt,proto3" json:"recvMsgOpt"`
-	IsPinned         *wrapperspb.BoolValue   `protobuf:"bytes,6,opt,name=isPinned,proto3" json:"isPinned"`
-	AttachedInfo     *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=attachedInfo,proto3" json:"attachedInfo"`
-	IsPrivateChat    *wrapperspb.BoolValue   `protobuf:"bytes,8,opt,name=isPrivateChat,proto3" json:"isPrivateChat"`
-	Ex               *wrapperspb.StringValue `protobuf:"bytes,9,opt,name=ex,proto3" json:"ex"`
-	BurnDuration     *wrapperspb.Int32Value  `protobuf:"bytes,10,opt,name=burnDuration,proto3" json:"burnDuration"`
-	MinSeq           *wrapperspb.Int64Value  `protobuf:"bytes,11,opt,name=minSeq,proto3" json:"minSeq"`
-	MaxSeq           *wrapperspb.Int64Value  `protobuf:"bytes,12,opt,name=maxSeq,proto3" json:"maxSeq"`
-	GroupAtType      *wrapperspb.Int32Value  `protobuf:"bytes,13,opt,name=groupAtType,proto3" json:"groupAtType"`
-	MsgDestructTime  *wrapperspb.Int64Value  `protobuf:"bytes,14,opt,name=msgDestructTime,proto3" json:"msgDestructTime"`
-	IsMsgDestruct    *wrapperspb.BoolValue   `protobuf:"bytes,15,opt,name=isMsgDestruct,proto3" json:"isMsgDestruct"`
+	UserID           string                  `protobuf:"bytes,3,opt,name=userID,proto3"            json:"userID"`
+	GroupID          string                  `protobuf:"bytes,4,opt,name=groupID,proto3"           json:"groupID"`
+	RecvMsgOpt       *wrapperspb.Int32Value  `protobuf:"bytes,5,opt,name=recvMsgOpt,proto3"        json:"recvMsgOpt"`
+	IsPinned         *wrapperspb.BoolValue   `protobuf:"bytes,6,opt,name=isPinned,proto3"          json:"isPinned"`
+	AttachedInfo     *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=attachedInfo,proto3"      json:"attachedInfo"`
+	IsPrivateChat    *wrapperspb.BoolValue   `protobuf:"bytes,8,opt,name=isPrivateChat,proto3"     json:"isPrivateChat"`
+	Ex               *wrapperspb.StringValue `protobuf:"bytes,9,opt,name=ex,proto3"                json:"ex"`
+	BurnDuration     *wrapperspb.Int32Value  `protobuf:"bytes,10,opt,name=burnDuration,proto3"     json:"burnDuration"`
+	MinSeq           *wrapperspb.Int64Value  `protobuf:"bytes,11,opt,name=minSeq,proto3"           json:"minSeq"`
+	MaxSeq           *wrapperspb.Int64Value  `protobuf:"bytes,12,opt,name=maxSeq,proto3"           json:"maxSeq"`
+	GroupAtType      *wrapperspb.Int32Value  `protobuf:"bytes,13,opt,name=groupAtType,proto3"      json:"groupAtType"`
+	MsgDestructTime  *wrapperspb.Int64Value  `protobuf:"bytes,14,opt,name=msgDestructTime,proto3"  json:"msgDestructTime"`
+	IsMsgDestruct    *wrapperspb.BoolValue   `protobuf:"bytes,15,opt,name=isMsgDestruct,proto3"    json:"isMsgDestruct"`
 }
 
 func (x *ConversationReq) Reset() {
@@ -464,7 +466,7 @@ type GetConversationReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	OwnerUserID    string `protobuf:"bytes,2,opt,name=ownerUserID,proto3" json:"ownerUserID"`
+	OwnerUserID    string `protobuf:"bytes,2,opt,name=ownerUserID,proto3"    json:"ownerUserID"`
 }
 
 func (x *GetConversationReq) Reset() {
@@ -565,7 +567,7 @@ type GetConversationsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	OwnerUserID     string   `protobuf:"bytes,1,opt,name=ownerUserID,proto3" json:"ownerUserID"`
+	OwnerUserID     string   `protobuf:"bytes,1,opt,name=ownerUserID,proto3"     json:"ownerUserID"`
 	ConversationIDs []string `protobuf:"bytes,2,rep,name=conversationIDs,proto3" json:"conversationIDs"`
 }
 
@@ -1042,8 +1044,8 @@ type SetConversationMaxSeqReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string   `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	OwnerUserID    []string `protobuf:"bytes,2,rep,name=ownerUserID,proto3" json:"ownerUserID"`
-	MaxSeq         int64    `protobuf:"varint,3,opt,name=maxSeq,proto3" json:"maxSeq"`
+	OwnerUserID    []string `protobuf:"bytes,2,rep,name=ownerUserID,proto3"    json:"ownerUserID"`
+	MaxSeq         int64    `protobuf:"varint,3,opt,name=maxSeq,proto3"        json:"maxSeq"`
 }
 
 func (x *SetConversationMaxSeqReq) Reset() {
@@ -1236,7 +1238,7 @@ type SetConversationsReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserIDs      []string         `protobuf:"bytes,1,rep,name=userIDs,proto3" json:"userIDs"`
+	UserIDs      []string         `protobuf:"bytes,1,rep,name=userIDs,proto3"      json:"userIDs"`
 	Conversation *ConversationReq `protobuf:"bytes,2,opt,name=conversation,proto3" json:"conversation"`
 }
 

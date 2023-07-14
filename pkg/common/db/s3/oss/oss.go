@@ -18,14 +18,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 const (
@@ -146,7 +148,11 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		}
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, time.Now().UTC().Format(http.TimeFormat))
-		authorization := fmt.Sprintf(`OSS %s:%s`, o.credentials.GetAccessKeyID(), o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()))
+		authorization := fmt.Sprintf(
+			`OSS %s:%s`,
+			o.credentials.GetAccessKeyID(),
+			o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()),
+		)
 		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,

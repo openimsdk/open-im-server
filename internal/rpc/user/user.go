@@ -38,8 +38,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	"google.golang.org/grpc"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
 type userServer struct {
