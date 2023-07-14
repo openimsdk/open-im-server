@@ -5,7 +5,7 @@ go 1.18
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/OpenIMSDK/open_utils v1.0.8
-	github.com/Shopify/sarama v1.32.0
+	github.com/Shopify/sarama v1.29.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
@@ -141,5 +141,3 @@ require (
 	google.golang.org/genproto v0.0.0-20230525234025-438c736192d0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/Shopify/sarama => github.com/Shopify/sarama v1.29.0
