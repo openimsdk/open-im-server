@@ -49,7 +49,6 @@ func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typ
 	}
 	return err
 }
-}
 func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID string) (err error) {
 	for i := 0; i < 3; i++ {
 		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
@@ -61,7 +60,6 @@ func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID strin
 		}
 	}
 	return err
-}
 }
 func (l *LockerMessage) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, typeKey string) error {
 	return l.cache.UnLockMessageTypeKey(ctx, clientMsgID, typeKey)

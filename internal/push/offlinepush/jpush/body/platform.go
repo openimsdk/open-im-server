@@ -77,7 +77,7 @@ func (p *Platform) SetPlatform(platform string) error {
 		return errors.New("platform err")
 	}
 }
-}
+
 func (p *Platform) SetIOS() error {
 	return p.Set(IOS)
 }

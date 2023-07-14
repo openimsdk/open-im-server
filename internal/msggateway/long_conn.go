@@ -71,7 +71,7 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 	d.conn = conn
 	return nil
 }
-}
+
 func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
 	// d.setSendConn(d.conn)
 	return d.conn.WriteMessage(messageType, message)

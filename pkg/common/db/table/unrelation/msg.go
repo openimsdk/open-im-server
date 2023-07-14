@@ -21,8 +21,6 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"

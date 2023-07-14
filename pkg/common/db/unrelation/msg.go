@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -1141,7 +1140,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 								{"as", "item"},
 								{
 									"cond", bson.D{
-										{"$and", conditon},
+										{"$and", condition},
 									},
 								},
 							},
