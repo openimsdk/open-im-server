@@ -253,7 +253,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	var err error
 	if req.IsSendAll {
 		pageNumber := 1
-		showNumber := 100
+		showNumber := 500
 		for {
 			recvIDsPart, err := m.userRpcClient.GetAllUserIDs(c, int32(pageNumber), int32(showNumber))
 			if err != nil {
