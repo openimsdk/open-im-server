@@ -22,14 +22,14 @@ import (
 )
 
 type LongConn interface {
-	//Close this connection
+	// Close this connection
 	Close() error
 	// WriteMessage Write message to connection,messageType means data type,can be set binary(2) and text(1).
 	WriteMessage(messageType int, message []byte) error
 	// ReadMessage Read message from connection.
 	ReadMessage() (int, []byte, error)
 	// SetReadDeadline sets the read deadline on the underlying network connection,
-	//after a read has timed out, will return an error.
+	// after a read has timed out, will return an error.
 	SetReadDeadline(timeout time.Duration) error
 	// SetWriteDeadline sets to write deadline when send message,when read has timed out,will return error.
 	SetWriteDeadline(timeout time.Duration) error
@@ -58,6 +58,7 @@ func newGWebSocket(protocolType int, handshakeTimeout time.Duration) *GWebSocket
 func (d *GWebSocket) Close() error {
 	return d.conn.Close()
 }
+
 func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) error {
 	upgrader := &websocket.Upgrader{
 		HandshakeTimeout: d.handshakeTimeout,
@@ -69,10 +70,10 @@ func (d *GWebSocket) GenerateLongConn(w http.ResponseWriter, r *http.Request) er
 	}
 	d.conn = conn
 	return nil
-
 }
+
 func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
-	//d.setSendConn(d.conn)
+	// d.setSendConn(d.conn)
 	return d.conn.WriteMessage(messageType, message)
 }
 
@@ -83,6 +84,7 @@ func (d *GWebSocket) WriteMessage(messageType int, message []byte) error {
 func (d *GWebSocket) ReadMessage() (int, []byte, error) {
 	return d.conn.ReadMessage()
 }
+
 func (d *GWebSocket) SetReadDeadline(timeout time.Duration) error {
 	return d.conn.SetReadDeadline(time.Now().Add(timeout))
 }
@@ -97,7 +99,6 @@ func (d *GWebSocket) Dial(urlStr string, requestHeader http.Header) (*http.Respo
 		d.conn = conn
 	}
 	return httpResp, err
-
 }
 
 func (d *GWebSocket) IsNil() bool {
@@ -110,9 +111,11 @@ func (d *GWebSocket) IsNil() bool {
 func (d *GWebSocket) SetConnNil() {
 	d.conn = nil
 }
+
 func (d *GWebSocket) SetReadLimit(limit int64) {
 	d.conn.SetReadLimit(limit)
 }
+
 func (d *GWebSocket) SetPongHandler(handler PongHandler) {
 	d.conn.SetPongHandler(handler)
 }

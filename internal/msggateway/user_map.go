@@ -29,6 +29,7 @@ type UserMap struct {
 func newUserMap() *UserMap {
 	return &UserMap{}
 }
+
 func (u *UserMap) GetAll(key string) ([]*Client, bool) {
 	allClients, ok := u.m.Load(key)
 	if ok {
@@ -36,6 +37,7 @@ func (u *UserMap) GetAll(key string) ([]*Client, bool) {
 	}
 	return nil, ok
 }
+
 func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 	allClients, userExisted := u.m.Load(key)
 	if userExisted {
@@ -47,12 +49,12 @@ func (u *UserMap) Get(key string, platformID int) ([]*Client, bool, bool) {
 		}
 		if len(clients) > 0 {
 			return clients, userExisted, true
-
 		}
 		return clients, userExisted, false
 	}
 	return nil, userExisted, false
 }
+
 func (u *UserMap) Set(key string, v *Client) {
 	allClients, existed := u.m.Load(key)
 	if existed {
@@ -67,6 +69,7 @@ func (u *UserMap) Set(key string, v *Client) {
 		u.m.Store(key, clients)
 	}
 }
+
 func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) {
 	allClients, existed := u.m.Load(key)
 	if existed {
@@ -87,6 +90,7 @@ func (u *UserMap) delete(key string, connRemoteAddr string) (isDeleteUser bool) 
 	}
 	return existed
 }
+
 func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser bool) {
 	m := utils.SliceToMapAny(clients, func(c *Client) (string, struct{}) {
 		return c.ctx.GetRemoteAddr(), struct{}{}
@@ -110,6 +114,7 @@ func (u *UserMap) deleteClients(key string, clients []*Client) (isDeleteUser boo
 	}
 	return existed
 }
+
 func (u *UserMap) DeleteAll(key string) {
 	u.m.Delete(key)
 }

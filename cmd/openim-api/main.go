@@ -18,12 +18,12 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
 
-	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/api"

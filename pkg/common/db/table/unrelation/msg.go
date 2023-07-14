@@ -16,9 +16,10 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
 	"go.mongodb.org/mongo-driver/mongo"
 

@@ -31,7 +31,7 @@ type CallBackConfig struct {
 
 type NotificationConf struct {
 	IsSendMsg        bool         `yaml:"isSendMsg"`
-	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 presistent
+	ReliabilityLevel int          `yaml:"reliabilityLevel"` // 1 online 2 persistent
 	UnreadCount      bool         `yaml:"unreadCount"`
 	OfflinePush      POfflinePush `yaml:"offlinePush"`
 }

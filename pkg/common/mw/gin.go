@@ -53,7 +53,7 @@ func CorsHandler() gin.HandlerFunc {
 			"content-type",
 			"application/json",
 		) // Set the return format to json.
-		//Release all option pre-requests
+		// Release all option pre-requests
 		if c.Request.Method == http.MethodOptions {
 			c.JSON(http.StatusOK, "Options Request!")
 			c.Abort()

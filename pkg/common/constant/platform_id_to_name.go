@@ -15,9 +15,9 @@
 package constant
 
 // fixme 1<--->IOS 2<--->Android  3<--->Windows
-// fixme  4<--->OSX  5<--->Web  6<--->MiniWeb 7<--->Linux
+// fixme  4<--->OSX  5<--->Web  6<--->MiniWeb 7<--->Linux.
 const (
-	//Platform ID.
+	// Platform ID.
 	IOSPlatformID        = 1
 	AndroidPlatformID    = 2
 	WindowsPlatformID    = 3
@@ -29,7 +29,7 @@ const (
 	IPadPlatformID       = 9
 	AdminPlatformID      = 10
 
-	//Platform string match to Platform ID.
+	// Platform string match to Platform ID.
 	IOSPlatformStr        = "IOS"
 	AndroidPlatformStr    = "Android"
 	WindowsPlatformStr    = "Windows"
@@ -41,7 +41,7 @@ const (
 	IPadPlatformStr       = "IPad"
 	AdminPlatformStr      = "Admin"
 
-	//terminal types.
+	// terminal types.
 	TerminalPC     = "PC"
 	TerminalMobile = "Mobile"
 )

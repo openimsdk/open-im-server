@@ -39,7 +39,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	if err != nil {
 		return nil, err
 	}
-	var conversationMaxSeqMap = make(map[string]int64)
+	conversationMaxSeqMap := make(map[string]int64)
 	for _, conversation := range conversations {
 		if conversation.MaxSeq != 0 {
 			conversationMaxSeqMap[conversation.ConversationID] = conversation.MaxSeq

@@ -28,46 +28,46 @@ jobs:
 
     - name: Start Docker Compose
       run: |
-        docker compose stop
-        sleep 30
-        docker compose up -d
-        sleep 60
+        sudo docker compose stop
+        sudo sleep 30
+        sudo docker compose up -d
+        sudo sleep 60
       continue-on-error: true
 
     - name: Stop all services
       run: |
-        chmod +x ./scripts/stop_all.sh
-        ./scripts/stop_all.sh
-        cat logs/openIM.log 2>/dev/null
+        sudo chmod +x ./scripts/stop_all.sh
+        sudo ./scripts/stop_all.sh
+        sudo cat logs/openIM.log 2>/dev/null
       shell: bash
       continue-on-error: true
 
     - name: Build all services
       run: |
-        chmod +x ./scripts/build_all_service.sh
-        ./scripts/build_all_service.sh
-        cat logs/openIM.log 2>/dev/null
+        sudo chmod +x ./scripts/build_all_service.sh
+        sudo ./scripts/build_all_service.sh
+        sudo cat logs/openIM.log 2>/dev/null
       shell: bash
       continue-on-error: true
 
     - name: Start all services
       run: |
-        chmod +x ./scripts/start_all.sh
-        ./scripts/start_all.sh
-        cat logs/openIM.log 2>/dev/null
+        sudo chmod +x ./scripts/start_all.sh
+        sudo ./scripts/start_all.sh
+        sudo cat logs/openIM.log 2>/dev/null
       continue-on-error: true
       shell: bash
 
     - name: Check all services
       run: |
-        chmod +x ./scripts/check_all.sh
-        ./scripts/check_all.sh
-        cat logs/openIM.log 2>/dev/null
+        sudo chmod +x ./scripts/check_all.sh
+        sudo ./scripts/check_all.sh
+        sudo cat logs/openIM.log 2>/dev/null
       shell: bash
 
     - name: Print openIM.log
       run: |
-        cat logs/* 2>/dev/null
-        cat logs/* 2>/dev/null >> "$GITHUB_OUTPUT"
+        sudo cat logs/* 2>/dev/null
+        sudo cat logs/* 2>/dev/null >> "$GITHUB_OUTPUT"
       shell: bash
       continue-on-error: true

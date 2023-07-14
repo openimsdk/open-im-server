@@ -78,7 +78,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
 
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -131,7 +131,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -160,7 +160,6 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 					}
 				}
 			}
-
 		}
 		for p, tokens := range m {
 			t := new(msggateway.SinglePlatformToken)
@@ -176,5 +175,4 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
-
 }

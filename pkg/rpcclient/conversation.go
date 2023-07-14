@@ -18,11 +18,12 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"google.golang.org/grpc"
 )
 
 type Conversation struct {
@@ -71,6 +72,7 @@ func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, owner
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
 	return err
 }
+
 func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
 	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
 	return err

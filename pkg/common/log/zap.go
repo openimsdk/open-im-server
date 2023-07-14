@@ -45,7 +45,7 @@ var (
 	}
 )
 
-// InitFromConfig initializes a Zap-based logger
+// InitFromConfig initializes a Zap-based logger.
 func InitFromConfig(
 	loggerPrefixName, moduleName string,
 	logLevel int,
@@ -183,7 +183,6 @@ func (l *ZapLogger) customCallerEncoder(caller zapcore.EntryCaller, enc zapcore.
 	// 	color = _levelToColor[zapcore.ErrorLevel]
 	// }
 	enc.AppendString(s)
-
 }
 
 func (l *ZapLogger) timeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
