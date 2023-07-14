@@ -75,7 +75,6 @@ func RpcClientInterceptor(
 }
 
 func getRpcContext(ctx context.Context, method string) (context.Context, error) {
-	// ctx, _ = context.WithTimeout(ctx, time.Second*5)
 	md := metadata.Pairs()
 	if keys, _ := ctx.Value(constant.RpcCustomHeader).([]string); len(keys) > 0 {
 		for _, key := range keys {
@@ -111,6 +110,5 @@ func getRpcContext(ctx context.Context, method string) (context.Context, error) 
 	if ok {
 		md.Set(constant.ConnID, connID)
 	}
-	md.Set(constant.CheckKey, genReqKey(checkArgs))
 	return metadata.NewOutgoingContext(ctx, md), nil
 }

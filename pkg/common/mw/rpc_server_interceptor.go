@@ -106,13 +106,6 @@ func RpcServerInterceptor(
 	if opts := md.Get(constant.ConnID); len(opts) == 1 {
 		ctx = context.WithValue(ctx, constant.ConnID, opts[0])
 	}
-	if opts := md.Get(constant.CheckKey); len(opts) != 1 || opts[0] == "" {
-		return nil, status.New(codes.InvalidArgument, "check key empty").Err()
-	} else {
-		if err := verifyReqKey(args, opts[0]); err != nil {
-			return nil, status.New(codes.InvalidArgument, err.Error()).Err()
-		}
-	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
 	resp, err = func() (interface{}, error) {
 		if err := checker.Validate(req); err != nil {

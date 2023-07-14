@@ -288,28 +288,48 @@ func (m *MessageApi) ManagementBatchSendMsg(c *gin.Context) {
 		OfflinePushInfo:  params.OfflinePushInfo,
 	}
 	pbReq := m.newUserSendMsgReq(c, t)
-	l := len(params.RecvIDList)
-	for i := 0; i < l; {
-		recvList := []string{}
-		if i+constant.BatchNum < l {
-			recvList = params.RecvIDList[i : i+constant.BatchNum]
-		} else {
-			recvList = params.RecvIDList[i:]
-		}
-		for _, recvID := range recvList {
-			pbReq.MsgData.RecvID = recvID
-			rpcResp, err := m.Client.SendMsg(c, pbReq)
-			if err != nil {
-				resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
-				msgSendFailedFlag = true
-				continue
-			}
-			resp.Data.ResultList = append(resp.Data.ResultList, &apistruct.SingleReturnResult{
-				ServerMsgID: rpcResp.ServerMsgID,
-				ClientMsgID: rpcResp.ClientMsgID,
-				SendTime:    rpcResp.SendTime,
-				RecvID:      recvID,
-			})
+	//	l := len(params.RecvIDList)
+	//	for i := 0; i < l; {
+	//		recvList := []string{}
+	//		if i+constant.BatchNum < l {
+	//			recvList = params.RecvIDList[i : i+constant.BatchNum]
+	//		} else {
+	//			recvList = params.RecvIDList[i:]
+	//		}
+	//		for _, recvID := range recvList {
+	//			pbReq.MsgData.RecvID = recvID
+	//			rpcResp, err := m.Client.SendMsg(c, pbReq)
+	//			if err != nil {
+	//				resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+	//				msgSendFailedFlag = true
+	//				continue
+	//			}
+	//			resp.Data.ResultList = append(resp.Data.ResultList, &apistruct.SingleReturnResult{
+	//				ServerMsgID: rpcResp.ServerMsgID,
+	//				ClientMsgID: rpcResp.ClientMsgID,
+	//				SendTime:    rpcResp.SendTime,
+	//				RecvID:      recvID,
+	//			})
+	var recvList []string
+	if params.IsSendAll {
+		// req2 := &user.GetAllUserIDReq{}
+		// resp2, err := m.Message.GetAllUserID(c, req2)
+		// if err != nil {
+		// 	apiresp.GinError(c, errs.ErrArgs.Wrap(err.Error()))
+		// 	return
+		// }
+		// recvList = resp2.UserIDs
+	} else {
+		recvList = params.RecvIDList
+	}
+
+	for _, recvID := range recvList {
+		pbReq.MsgData.RecvID = recvID
+		_, err := m.Client.SendMsg(c, pbReq)
+		if err != nil {
+			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			msgSendFailedFlag = true
+			continue
 		}
 	}
 	var status int32
@@ -344,8 +364,4 @@ func (m *MessageApi) GetActiveGroup(c *gin.Context) {
 
 func (m *MessageApi) SearchMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SearchMessage, m.Client, c)
-}
-
-func (m *MessageApi) ManagementMsg(c *gin.Context) {
-	a2r.Call(msg.MsgClient.ManageMsg, m.Client, c)
 }
