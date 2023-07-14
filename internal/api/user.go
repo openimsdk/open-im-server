@@ -83,7 +83,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
-			log.ZWarn(c, "GetUsersOnlineStatus rpc  err", err)
+			log.ZWarn(c, "GetUsersOnlineStatus rpc err", err)
 			continue
 		} else {
 			wsResult = append(wsResult, reply.SuccessResult...)
