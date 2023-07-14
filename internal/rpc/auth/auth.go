@@ -130,7 +130,9 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 	if err != nil {
 		return err
 	}
-	log.ZDebug(ctx, "forceKickOff", "conns", conns)
+	for _, v := range conns {
+		log.ZDebug(ctx, "forceKickOff", "conn", v.(*grpc.ClientConn).Target())
+	}
 	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
 		kickReq := &msggateway.KickUserOfflineReq{KickUserIDList: []string{userID}, PlatformID: platformID}

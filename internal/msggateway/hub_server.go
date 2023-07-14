@@ -185,7 +185,7 @@ func (s *Server) KickUserOffline(
 				if err != nil {
 					return nil, err
 				}
-				s.LongConnServer.UnRegister(client)
+				// s.LongConnServer.UnRegister(client)
 			}
 		} else {
 			log.ZInfo(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)

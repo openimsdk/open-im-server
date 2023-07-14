@@ -126,6 +126,11 @@ func (x *MarkMsgsAsReadReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+	for _, seq := range x.Seqs {
+		if seq == 0 {
+			return errs.ErrArgs.Wrap("seqs has 0 value is invalid")
+		}
+	}
 	return nil
 }
 
@@ -138,6 +143,11 @@ func (x *MarkConversationAsReadReq) Check() error {
 	}
 	if x.HasReadSeq < 1 {
 		return errs.ErrArgs.Wrap("hasReadSeq is invalid")
+	}
+	for _, seq := range x.Seqs {
+		if seq == 0 {
+			return errs.ErrArgs.Wrap("seqs has 0 value is invalid")
+		}
 	}
 	return nil
 }
