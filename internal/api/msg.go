@@ -192,7 +192,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		return nil, err
 	}
 	log.ZDebug(c, "getSendMsgReq", "data", data)
-	if err := m.validate.Struct(&data); err != nil {
+	if err := m.validate.Struct(data); err != nil {
 		return nil, err
 	}
 	return m.newUserSendMsgReq(c, &req), nil
