@@ -130,7 +130,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			if err != nil {
 				return nil, err
 			}
-			pbChatLog.SenderNickname = recvUser.Nickname
+			pbChatLog.RecvNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)

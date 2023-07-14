@@ -359,3 +359,5 @@ const (
 const OpenIMCommonConfigKey = "OpenIMServerConfig"
 
 const CallbackCommand = "command"
+
+const BatchNum = 100

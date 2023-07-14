@@ -16,8 +16,6 @@ package msg
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
@@ -80,12 +78,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
-	mysql, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	msgMysModel := relation.NewChatLogGorm(mysql)
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, msgMysModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		User:                   &userRpcClient,
