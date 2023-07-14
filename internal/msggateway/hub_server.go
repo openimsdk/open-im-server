@@ -185,9 +185,10 @@ func (s *Server) KickUserOffline(
 				if err != nil {
 					return nil, err
 				}
+				s.LongConnServer.UnRegister(client)
 			}
 		} else {
-			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
+			log.ZInfo(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil

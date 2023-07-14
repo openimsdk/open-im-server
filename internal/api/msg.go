@@ -214,6 +214,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	if err != nil {
 		log.ZError(c, "decodeData failed", err)
 		apiresp.GinError(c, err)
+		return
 	}
 	sendMsgReq.MsgData.RecvID = req.RecvID
 	var status int
@@ -259,6 +260,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 			if err != nil {
 				log.ZError(c, "GetAllUserIDs failed", err)
 				apiresp.GinError(c, err)
+				return
 			}
 			if len(recvIDsPart) < showNumber {
 				recvIDs = append(recvIDs, recvIDsPart...)
@@ -274,6 +276,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	if err != nil {
 		log.ZError(c, "decodeData failed", err)
 		apiresp.GinError(c, err)
+		return
 	}
 	for _, recvID := range recvIDs {
 		sendMsgReq.MsgData.RecvID = recvID
