@@ -92,7 +92,7 @@ type CommonMsgDatabase interface {
 	GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error)
+	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
@@ -940,14 +940,14 @@ func (db *commonMsgDatabase) RangeGroupSendCount(
 	return db.msgDocDatabase.RangeGroupSendCount(ctx, start, end, ase, pageNumber, showNumber)
 }
 
-func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error) {
 	var totalMsgs []*sdkws.MsgData
-	msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
+	total, msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	for _, msg := range msgs {
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
-	return totalMsgs, nil
+	return total, totalMsgs, nil
 }
