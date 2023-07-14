@@ -47,7 +47,7 @@ type LongConnServer interface {
 	Validate(s interface{}) error
 	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
-	KickUserConn(userID string, client *Client) error
+	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -208,8 +208,8 @@ func getRemoteAdders(client []*Client) string {
 	return ret
 }
 
-func (ws *WsServer) KickUserConn(userID string, client *Client) error {
-	ws.clients.deleteClients(userID, []*Client{client})
+func (ws *WsServer) KickUserConn(client *Client) error {
+	ws.clients.deleteClients(client.UserID, []*Client{client})
 	return client.KickOnlineMessage()
 }
 
