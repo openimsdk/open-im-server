@@ -15,15 +15,9 @@
 package controller
 
 import (
-
 	"context"
 	"errors"
 	"time"
-
-	"gorm.io/gorm"
-
-	relation2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 
 	"github.com/redis/go-redis/v9"
 
