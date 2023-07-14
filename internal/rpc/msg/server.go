@@ -17,9 +17,6 @@ package msg
 import (
 	"context"
 
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
