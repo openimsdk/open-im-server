@@ -60,11 +60,11 @@ jobs:
 
       - name: Run go modules tidy
         run: |
-          make tidy
+          sudo make tidy
 
       - name: Run go format
         run: |
-          make format
+          sudo make format
           echo "Run go format successfully"
         continue-on-error: true
 
@@ -72,18 +72,13 @@ jobs:
     #     run: |
     #       make generate
 
-    #   - name: Check syntax and styling of go sources
-    #     run: |
-    #       set -e
-    #       make lint
-
     #   - name: Run unit test and get test coverage
     #     run: |
     #       make cover
 
       - name: Build source code for host platform
         run: |
-          make build
+          sudo make build
           echo "Build source code for host platform successfully"
 
     #   - name: Collect Test Coverage File
@@ -116,4 +111,4 @@ jobs:
 
       - name: Run OpenIM make install start
         run: |
-          make install
+          sudo make install
