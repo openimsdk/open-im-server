@@ -82,6 +82,8 @@ do_sth() {
     echo -e "${PURPLE_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
 }
 
+set -e
+
 do_sth &
 do_sth_pid=$(jobs -p | tail -1)
 

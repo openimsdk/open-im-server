@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Common utilities, variables and checks for all build scripts.
+set -o errexit
+set -o nounset
+set -o pipefail
+
 #Include shell font styles and some basic information
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
