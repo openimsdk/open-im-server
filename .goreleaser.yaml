@@ -15,7 +15,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -33,7 +32,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -43,7 +41,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-crontask
     id: openim-crontask
     main: ./cmd/openim-crontask/main.go
@@ -52,7 +49,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -62,7 +58,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-msggateway
     id: openim-msggateway
     main: ./cmd/openim-msggateway/main.go
@@ -71,7 +66,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -81,7 +75,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-msgtransfer
     id: openim-msgtransfer
     main: ./cmd/openim-msgtransfer/main.go
@@ -90,7 +83,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -100,7 +92,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-push
     id: openim-push
     main: ./cmd/openim-push/main.go
@@ -109,7 +100,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -119,7 +109,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-auth
     id: openim-rpc-auth
     main: ./cmd/openim-rpc/openim-rpc-auth/main.go
@@ -128,7 +117,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -138,7 +126,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-conversation
     id: openim-rpc-conversation
     main: ./cmd/openim-rpc/openim-rpc-conversation/main.go
@@ -147,7 +134,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -157,7 +143,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-friend
     id: openim-rpc-friend
     main: ./cmd/openim-rpc/openim-rpc-friend/main.go
@@ -166,7 +151,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -176,7 +160,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-group
     id: openim-rpc-group
     main: ./cmd/openim-rpc/openim-rpc-group/main.go
@@ -185,7 +168,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -195,7 +177,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-msg
     id: openim-rpc-msg
     main: ./cmd/openim-rpc/openim-rpc-msg/main.go
@@ -204,7 +185,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -214,7 +194,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-third
     id: openim-rpc-third
     main: ./cmd/openim-rpc/openim-rpc-third/main.go
@@ -223,7 +202,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
@@ -233,7 +211,6 @@ builds:
     goarm:
       - 6
       - 7
-
   - binary: openim-rpc-user
     id: openim-rpc-user
     main: ./cmd/openim-rpc/openim-rpc-user/main.go
@@ -242,7 +219,6 @@ builds:
       - windows
       - linux
     goarch:
-      - amd64
       - s390x
       - mips64
       - mips64le
