@@ -98,7 +98,7 @@ jobs:
     strategy:
       matrix:
         go_version: ["1.20"]
-        os: ["ubuntu-latest","centos-latest"]
+        os: ["ubuntu-latest"]
     steps:
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v2
