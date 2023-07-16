@@ -1,4 +1,4 @@
-name: goreleaser
+name: OpenIM Server release
 
 on:
   push:

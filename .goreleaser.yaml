@@ -1,33 +1,257 @@
-#gomod:
-#  # Proxy a module from proxy.golang.org, making the builds verifiable.
-#  # This will only be effective if running against a tag. Snapshots will ignore this setting.
-#  # Notice: for this to work your `build.main` must be a package, not a `.go` file.
-#  #
-#  # Default is false.
-#  proxy: true
-#
-#  # If proxy is true, use these environment variables when running `go mod` commands (namely, `go mod tidy`).
-#  # Defaults to `os.Environ()`.
-#  env:
-#    - GOPROXY=https://goproxy.cn
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
-
 before:
   hooks:
-    - make clean
     # You may remove this if you don't use go modules.
     - go mod tidy
     # you may remove this if you don't need go generate
     - go generate ./...
-
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - binary: openim-api
+    id: openim-api
+    main: ./cmd/openim-api/main.go
     goos:
-      - linux
-      - windows
       - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+  - binary: openim-cmdutils
+    id: openim-cmdutils
+    main: ./cmd/openim-cmdutils/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-crontask
+    id: openim-crontask
+    main: ./cmd/openim-crontask/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-msggateway
+    id: openim-msggateway
+    main: ./cmd/openim-msggateway/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-msgtransfer
+    id: openim-msgtransfer
+    main: ./cmd/openim-msgtransfer/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-push
+    id: openim-push
+    main: ./cmd/openim-push/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-auth
+    id: openim-rpc-auth
+    main: ./cmd/openim-rpc/openim-rpc-auth/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-conversation
+    id: openim-rpc-conversation
+    main: ./cmd/openim-rpc/openim-rpc-conversation/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-friend
+    id: openim-rpc-friend
+    main: ./cmd/openim-rpc/openim-rpc-friend/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-group
+    id: openim-rpc-group
+    main: ./cmd/openim-rpc/openim-rpc-group/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-msg
+    id: openim-rpc-msg
+    main: ./cmd/openim-rpc/openim-rpc-msg/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-third
+    id: openim-rpc-third
+    main: ./cmd/openim-rpc/openim-rpc-third/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+  - binary: openim-rpc-user
+    id: openim-rpc-user
+    main: ./cmd/openim-rpc/openim-rpc-user/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - s390x
+      - mips64
+      - mips64le
+      - amd64
+      - ppc64le
+      - arm64
+    goarm:
+      - 6
+      - 7
 
 archives:
   - format: tar.gz
@@ -61,16 +285,3 @@ changelog:
 
 # Default: './dist'
 dist: _output/dist
-
-git:
-  # What should be used to sort tags when gathering the current and previous
-  # tags if there are more than one tag in the same commit.
-  #
-  # Default: '-version:refname'
-  tag_sort: -version:creatordate
-
-  # What should be used to specify prerelease suffix while sorting tags when gathering
-  # the current and previous tags if there are more than one tag in the same commit.
-  #
-  # Since: v1.17
-  prerelease_suffix: "-"
