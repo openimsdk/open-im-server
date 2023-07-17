@@ -117,8 +117,8 @@ type ListUploadedPartsResult struct {
 }
 
 type AccessURLOption struct {
-	ContentType        string `json:"contentType"`
-	ContentDisposition string `json:"contentDisposition"`
+	ContentType string `json:"contentType"`
+	Filename    string `json:"filename"`
 }
 
 type Interface interface {
