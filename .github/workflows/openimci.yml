@@ -60,6 +60,9 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
+        with:
+            repository: kubbot/Open-IM-Server
+            token: ${{ secrets.BOT_GITHUB_TOKEN }} # `GH_PAT` is a secret that contains your PAT
 
       - name: Run go modules tidy
         run: |
