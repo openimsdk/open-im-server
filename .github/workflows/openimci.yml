@@ -40,6 +40,9 @@ jobs:
   openim:
     name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+        # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+        contents: write
     environment:
       name: openim
 
@@ -61,6 +64,7 @@ jobs:
       - name: Run go modules tidy
         run: |
           sudo make tidy
+          sudo make tools.verify.go-gitlint
           echo "Run go modules tidy successfully" 
 
       - name: Run go format
