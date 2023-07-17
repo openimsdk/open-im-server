@@ -102,8 +102,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "cicd: robot automated Change"
-          commit_options: '--no-verify --signoff'
-        #   branch: main
+        #   commit_options: '--no-verify --signoff'
+          branch: main
         #   create_branch: true
         #   # Optional commit user and author settings
         #   commit_user_name: kubbot # defaults to "github-actions[bot]"
