@@ -674,8 +674,8 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 
 	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
 	if len(seqs) > 0 {
-		latestSeq := seqs[len(seqs)-1]
-		if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, latestSeq); err != nil {
+		userMinSeq := seqs[len(seqs)-1] + 1
+		if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
 			return nil, err
 		}
 	}
