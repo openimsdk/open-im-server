@@ -104,7 +104,7 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConvsersations(conversation.ConversationID, NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConversations(conversation.ConversationID, NotUserIDs...)
 		}
 		return nil
 	}); err != nil {
@@ -128,7 +128,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	var userIDs []string
 	cache := c.cache.NewCache()
 	for _, conversation := range conversations {
-		cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
+		cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
 	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
@@ -190,7 +190,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		var conversationIDs []string
 		for _, conversation := range conversations {
 			conversationIDs = append(conversationIDs, conversation.ConversationID)
-			cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
+			cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		}
 		conversationTx := c.conversationDB.NewTx(tx)
 		existConversations, err := conversationTx.Find(ctx, ownerUserID, conversationIDs)
@@ -247,7 +247,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range notExistUserIDs {
 			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
-			cache = cache.DelConvsersations(v, conversationID)
+			cache = cache.DelConversations(v, conversationID)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
 		if len(conversations) > 0 {
@@ -261,7 +261,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 			return err
 		}
 		for _, v := range existConversationUserIDs {
-			cache = cache.DelConvsersations(v, conversationID)
+			cache = cache.DelConversations(v, conversationID)
 		}
 		return nil
 	}); err != nil {
