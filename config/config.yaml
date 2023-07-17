@@ -74,7 +74,7 @@ api:
 
 object:
   enable: "minio"                           #使用minio
-  apiURL: "http://127.0.0.1:10002/object/"
+  apiURL: "http://127.0.0.1:10002/object/"  #地址需要app能访问到
   minio:
     bucket: "openim"                      #不建议修改
     endpoint: "http://127.0.0.1:10005"      #minio对外服务的ip和端口，app要能访问此ip和端口
