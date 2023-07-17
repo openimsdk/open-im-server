@@ -44,46 +44,48 @@ Open-IM-Server is not a standalone product and does not include account registra
 ## Community
 - Visit the official Chinese website: [OpenIM Chinese Developer Documentation](https://doc.rentsoft.cn/)
 
-## Quick start
+## Quick Start
 
 ### Deploying with docker-compose
 
+1. Clone the project
+
+```
+clone https://github.com/OpenIMSDK/Open-IM-Server 
+cd Open-IM-Server
+git checkout release-v3.0 #or other release branch
+```
+
+1. Modify .env
+
+```
+makefileCopy codeHere you mainly modify the passwords for related components
+USER=root #no need to modify
+PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
+ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
+API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP and port or domain,
+DATA_DIR=./  #designate large disk directory
+```
+
+1. Deploy and start
+
+Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
+
+```
+bashCopy codechmod +x install_im_server.sh;
+./install_im_server.sh;
+```
+
+1. Check the service
+
+```
+bashCopy codecd scripts;
+./docker_check_service.sh
+```
+
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
 
 
-> 1. Clone the project
->
-> ```
-> 
-> ```
->
-> 1. Modify .env
->
-> ```
-> makefileCopy codeHere you mainly modify the passwords for related components
-> USER=root #no need to modify
-> PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
-> ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
-> API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP and port or domain,
-> DATA_DIR=./  #designate large disk directory
-> ```
->
-> 1. Deploy and start
->
-> Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
->
-> ```
-> bashCopy codechmod +x install_im_server.sh;
-> ./install_im_server.sh;
-> ```
->
-> 1. Check the service
->
-> ```
-> bashCopy codecd scripts;
-> ./docker_check_service.sh
-> ```
->
-> ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
 
 ### Compile from source
 
