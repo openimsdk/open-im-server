@@ -248,21 +248,27 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	//reqParams := make(url.Values)
-	//if opt != nil {
-	//	if opt.ContentType != "" {
-	//		reqParams.Set("Content-Type", opt.ContentType)
-	//	}
-	//	if opt.ContentDisposition != "" {
-	//		reqParams.Set("Content-Disposition", opt.ContentDisposition)
-	//	}
-	//}
+	var option *cos.PresignedURLOptions
+	if opt != nil {
+		query := make(url.Values)
+		if opt.ContentType != "" {
+			query.Set("response-content-type", opt.ContentType)
+		}
+		if opt.Filename != "" {
+			query.Set("response-content-disposition", `attachment; filename="`+opt.Filename+`"`)
+		}
+		if len(query) > 0 {
+			option = &cos.PresignedURLOptions{
+				Query: &query,
+			}
+		}
+	}
 	if expire <= 0 {
 		expire = time.Hour * 24 * 365 * 99 // 99 years
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, nil)
+	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, option)
 	if err != nil {
 		return "", err
 	}

@@ -261,15 +261,15 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	//var opts []oss.Option
-	//if opt != nil {
-	//	if opt.ContentType != "" {
-	//		opts = append(opts, oss.ContentType(opt.ContentType))
-	//	}
-	//	if opt.ContentDisposition != "" {
-	//		opts = append(opts, oss.ContentDisposition(opt.ContentDisposition))
-	//	}
-	//}
+	var opts []oss.Option
+	if opt != nil {
+		if opt.ContentType != "" {
+			opts = append(opts, oss.ResponseContentType(opt.ContentType))
+		}
+		if opt.Filename != "" {
+			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename="`+opt.Filename+`"`))
+		}
+	}
 	if expire <= 0 {
 		expire = time.Hour * 24 * 365 * 99 // 99 years
 	} else if expire < time.Second {
