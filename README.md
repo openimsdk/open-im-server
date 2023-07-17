@@ -28,142 +28,219 @@
 
 ## What is Open-IM-Server
 
-Instant messaging server. Backend in pure Golang, wire transport protocol is JSON over websocket.
-Everything is a message in Open-IM-Server, so you can extend custom messages easily, there is no need to modify the server code.
-Using microservice architectures, Open-IM-Server can be deployed using clusters.
-By deployment of the Open-IM-Server on the customer's server, developers can integrate instant messaging and real-time network capabilities into their own applications free of charge and quickly, and ensure the security and privacy of business data.
+Open-IM-Server is an instant messaging server developed using pure Golang, adopting JSON over WebSocket as the communication protocol. In Open-IM-Server, everything is a message, so you can easily extend custom messages without modifying the server code. With a microservice architecture, Open-IM-Server can be deployed using clusters. By deploying Open-IM-Server on a server, developers can quickly integrate instant messaging and real-time networking features into their applications, ensuring the security and privacy of business data.
+
+Open-IM-Server is not a standalone product and does not include account registration and login services. For your convenience, we have open-sourced the [chat repository](https://github.com/OpenIMSDK/chat) which includes login and registration functionality. By deploying the chat business server alongside Open-IM-Server, a chat product can be set up.
 
 ## Features
 
-- Everything in Free
-- Scalable architecture
-- Easy integration
-- Good scalability
+- Open source
+- Easy to integrate
+- Excellent scalability
 - High performance
 - Lightweight
 - Supports multiple protocols
 
 ## Community
-- Visit the Chinese official website here: [📚 Open-IM docs](https://www.openim.online/zh)
+- Visit the official Chinese website: [OpenIM Chinese Developer Documentation](https://doc.rentsoft.cn/)
 
 ## Quick start
 
-### Installing Open-IM-Server
+### Deploying with docker-compose
 
-> Open-IM relies on five open source high-performance components: ETCD, MySQL, MongoDB, Redis, and Kafka. Privatization deployment Before Open-IM-Server, please make sure that the above five components have been installed. If your server does not have the above components, you must first install Missing components. If you have the above components, it is recommended to use them directly. If not, it is recommended to use Docker-compose, no To install dependencies, one-click deployment, faster and more convenient.
 
-#### Deploy using Docker
 
-1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.17
+> 1. Clone the project
+>
+> ```
+> 
+> ```
+>
+> 1. Modify .env
+>
+> ```
+> makefileCopy codeHere you mainly modify the passwords for related components
+> USER=root #no need to modify
+> PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
+> ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
+> API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP and port or domain,
+> DATA_DIR=./  #designate large disk directory
+> ```
+>
+> 1. Deploy and start
+>
+> Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
+>
+> ```
+> bashCopy codechmod +x install_im_server.sh;
+> ./install_im_server.sh;
+> ```
+>
+> 1. Check the service
+>
+> ```
+> bashCopy codecd scripts;
+> ./docker_check_service.sh
+> ```
+>
+> ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
 
-2. Clone the Open-IM project to your server
+### Compile from source
 
-   ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
-   ```
+1. Go 1.18 or higher version.
 
-3. Deploy
-
-    1. Modify env
-
-       ```
-       #cd Open-IM-server
-       USER=root  
-       PASSWORD=openIM123    #Password with more than 8 digits, excluding special characters
-       ENDPOINT=http://127.0.0.1:10005 #Replace 127.0.0.1 with Internet IP
-       DATA_DIR=./ 
-       ```
-
-    2. Deploy && Start
-    
-       ```
-       chmod +x install_im_server.sh;
-       ./install_im_server.sh;
-       ```
-    
-    4. Check service
-    
-       ```
-       cd scripts;
-       ./docker_check_service.sh./check_all.sh
-       ```
-       
-       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Open-IM-Servers-on-System.png)
-
-#### Deploy using source code
-
-1. Go 1.17 or above.
 2. Clone
 
-```shell
-git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive 
-cd cmd/openim-sdk-core
-git checkout main
-```
+   ```
+   arduinoCopy codegit clone https://github.com/OpenIMSDK/Open-IM-Server 
+   cd Open-IM-Server
+   git checkout release-v3.0 #or other release branch
+   ```
 
-1. Set executable permissions
+3. Compile
 
-```shell
-cd ../../scripts/
-chmod +x *.sh
-```
+   ```
+   bashCopy codecd Open-IM-server/scripts
+   chmod +x *.sh
+   ./build_all_service.sh
+   ```
 
-1. build
+All services have been successfully built as shown in the figure
 
-```shell
-./batch_build_all_service.sh
-```
+![Successful Compilation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/build.png)
 
-all services build success
+### Component Configuration Instructions
 
-### CONFIGURATION INSTRUCTIONS
+The config/config.yaml file has detailed configuration instructions for the storage components.
 
-> Open-IM configuration is divided into basic component configuration and business internal service configuration. Developers need to fill in the address of each component as the address of their server component when using the product, and ensure that the internal service port of the business is not occupied
+- Zookeeper
 
-#### Basic Component Configuration Instructions
+  - Used for RPC service discovery and registration, cluster support.
 
-- ETCD
-    - Etcd is used for the discovery and registration of rpc services, etcd Schema is the prefix of the registered name, it is recommended to modify it to your company name, etcd address (ip+port) supports clustered deployment, you can fill in multiple ETCD addresses separated by commas, and also only one etcd address.
+    ````
+    yamlCopy code```
+    zookeeper:
+      schema: openim                          #Not recommended to modify
+      address: [ 127.0.0.1:2181 ]             #address
+      username:                               #username
+      password:                               #password
+    ```
+    ````
+
 - MySQL
-    - mysql is used for full storage of messages and user relationships. Cluster deployment is not supported for the time being. Modify addresses and users, passwords, and database names.
+
+  - Used for storing users, relationships, and groups, supports master-slave database.
+
+    ```
+    yamlCopy codemysql:
+      address: [ 127.0.0.1:13306 ]            #address
+      username: root                          #username
+      password: openIM123                     #password
+      database: openIM_v2                     #Not recommended to modify
+      maxOpenConn: 1000                       #maximum connection
+      maxIdleConn: 100                        #maximum idle connection
+      maxLifeTime: 60                         #maximum time a connection can be reused (seconds)
+      logLevel: 4                             #log level 1=slient 2=error 3=warn 4=info
+      slowThreshold: 500                      #slow statement threshold (milliseconds)
+    ```
+
 - Mongo
-    - Mongo is used for offline storage of messages. The default storage is 7 days. Cluster deployment is temporarily not supported. Just modify the address and database name.
+
+  - Used for storing offline messages, supports mongo sharded clusters.
+
+    ```
+    yamlCopy codemongo:
+      uri:                                    #Use this value directly if not empty
+      address: [ 127.0.0.1:37017 ]            #address
+      database: openIM                        #default mongo db
+      username: root                          #username
+      password: openIM123                     #password
+      maxPoolSize: 100                        #maximum connections
+    ```
+
 - Redis
-    - Redis is currently mainly used for message serial number storage and user token information storage. Cluster deployment is temporarily not supported. Just modify the corresponding redis address and password.
+
+  - Used for storing message sequence numbers, latest messages, user tokens, and mysql cache, supports cluster deployment.
+
+    ```
+    yamlCopy coderedis:
+      address: [ 127.0.0.1:16379 ]            #address
+      username:                               #username
+      password: openIM123                     #password
+    ```
+
 - Kafka
-    - Kafka is used as a message transfer storage queue to support cluster deployment, just modify the corresponding address
 
-#### Internal Service Configuration Instructions
+  - Used for message queues, for message decoupling, supports cluster deployment.
 
-- credential&&push
-    - The Open-IM needs to use the three-party offline push function. Currently, Tencent's three-party push is used. It supports IOS, Android and OSX push. This information is some registration information pushed by Tencent. Developers need to go to Tencent Cloud Mobile Push to register the corresponding information. If you do not fill in the corresponding information, you cannot use the offline message push function
-- api&&rpcport&&longconnsvr&&rpcregistername
-    - The api port is the http interface, longconnsvr is the websocket listening port, and rpcport is the internal service startup port. Both support cluster deployment. Make sure that these ports are not used. If you want to open multiple services for a single service, fill in multiple ports separated by commas. rpcregistername is the service name registered by each service to the registry etcd, no need to modify
-- log&&modulename
-    - The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
-- multiloginpolicy&&tokenpolicy
-    - Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
+    ```
+    yamlCopy codekafka:
+      username:                               #username
+      password:                               #password
+      addr: [ 127.0.0.1:9092 ]                #address
+      latestMsgToRedis:
+        topic: "latestMsgToRedis"
+      offlineMsgToMongo:
+        topic: "offlineMsgToMongoMysql"
+      msgToPush:
+        topic: "msqToPush"
+      msgToModify:
+        topic: "msgToModify"
+      consumerGroupID:
+        msgToRedis: redis
+        msgToMongo: mongo
+        msgToMySql: mysql
+        msgToPush: push
+        msgToModify: modify
+    ```
 
-### scripts DESCRIPTION
+### Start and Stop Services
 
-> Open-IM scripts provides service compilation, start, and stop scripts. There are four Open-IM scripts start modules, one is the http+rpc service start module, the second is the websocket service start module, then the msg_transfer module, and the last is the push module
+Start services
 
-- path_info.sh&&style_info.sh&&functions.sh
-    - Contains the path information of each module, including the path where the source code is located, the name of the service startup, the shell print font style, and some functions for processing shell strings
-- build_all_service.sh
-    - Compile the module, compile all the source code of Open-IM into a binary file and put it into the bin directory
-- start_rpc_api_service.sh&&msg_gateway_start.sh&&msg_transfer_start.sh&&push_start.sh
-    - Independent scripts startup module, followed by api and rpc modules, message gateway module, message transfer module, and push module
-- start_all.sh&&stop_all.sh
-    - Total scripts, start all services and close all services
+```
+bashCopy code
+./start_all.sh;
+```
 
-## Authentication Clow Chart 
+Check services
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
+```
+bashCopy code
+./check_all.sh
+```
 
-## Architecture
+Stop services
 
-![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
+```
+bashCopy code
+./stop_all.sh
+```
+
+### Open IM Ports
+
+| TCP Port  | Description                                                  | Operation                                             |
+| --------- | ------------------------------------------------------------ | ----------------------------------------------------- |
+| TCP:10001 | ws protocol, message port such as message sending, pushing etc, used for client SDK | Port release or nginx reverse proxy, and firewall off |
+| TCP:10002 | api port, such as user, friend, group, message interfaces.   | Port release or nginx reverse proxy, and firewall off |
+| TCP:10005 | Required when choosing minio storage (openIM uses minio storage by default) | Port release or nginx reverse proxy, and firewall off |
+
+### Open Chat Ports
+
+| TCP Port  | Description                                         | Operation                                             |
+| --------- | --------------------------------------------------- | ----------------------------------------------------- |
+| TCP:10008 | Business system, such as registration, login etc    | Port release or nginx reverse proxy, and firewall off |
+| TCP:10009 | Management backend, such as statistics, banning etc | Port release or nginx reverse proxy, and firewall off |
+
+## Relationship Between APP and OpenIM
+
+OpenIM is an open source instant messaging component, it is not an independent product. This image shows the relationship between AppServer, AppClient, Open-IM-Server and Open-IM-SDK.
+
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
+
+## Overall Architecture
+
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
 
 ## To start developing OpenIM
 The [community repository](https://github.com/OpenIMSDK/community) hosts all information about building Kubernetes from source, how to contribute code and documentation, who to contact about what, etc.
