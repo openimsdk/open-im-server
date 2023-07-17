@@ -57,43 +57,44 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Run go modules tidy
         run: |
           sudo make tidy
+          echo "Run go modules tidy successfully" >> $GITHUB_OUTPUT
 
       - name: Run go format
         run: |
           sudo make format
-          echo "Run go format successfully"
+          echo "Run go format successfully" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate all necessary files, such as error code files
         run: |
           make generate
+          echo "Generate all necessary files successfully" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Run unit test and get test coverage
         run: |
           make cover
+          echo "Run unit test and get test coverage successfully" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Build source code for host platform
         run: |
           sudo make build
-          echo "Build source code for host platform successfully"
+          echo "Build source code for host platform successfully" >> $GITHUB_OUTPUT
 
       - name: OpenIM verify copyright
         run: |
           sudo make verify-copyright
-          echo "OpenIM verify successfully"
+          echo "OpenIM verify successfully" >> $GITHUB_OUTPUT
 
       - name: Clean all build
         run: |
           sudo make clean
-          echo "Clean all build successfully"
+          echo "Clean all build successfully" >> $GITHUB_OUTPUT
 
       - name: push OpenIM 
         uses: stefanzweifel/git-auto-commit-action@v4
