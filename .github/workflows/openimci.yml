@@ -61,6 +61,11 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 2.x
+
       - name: Run go modules tidy
         run: |
           sudo make tidy

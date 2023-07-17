@@ -3,9 +3,22 @@
 before:
   hooks:
     # You may remove this if you don't use go modules.
-    - go mod tidy
+    - make tidy
+    - make copyright-add
     # you may remove this if you don't need go generate
-    - go generate ./...
+    - make generate
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+gomod:
+  proxy: true
+
+report_sizes: true
+
+metadata:
+  mod_timestamp: "{{ .CommitTimestamp }}"
+
 builds:
   - binary: openim-api
     id: openim-api
