@@ -46,13 +46,9 @@ Open-IM-Server并不是一个独立的产品，本身不包含账号的注册和
 
 ## 快速开始
 
-### 安装Open-IM-Server
-
-> Open-IM-Server依赖于五个开源组件：Zookeeper、MySQL、MongoDB、Redis 和 Kafka。在部署 Open-IM-Server 之前，请确保已安装上述五个组件。如果没有，则建议使用 docker-compose，一键部署，方便快捷。
-
 ### 使用 docker-compose 部署
 
-1. 隆项目
+1. 克隆项目
 
 ```
 git clone https://github.com/OpenIMSDK/Open-IM-Server 
@@ -60,7 +56,7 @@ cd Open-IM-Server
 git checkout release-v3.0 #or other release branch
 ```
 
-2. 修改 env
+2. 修改 .env
 
 ```
 此处主要修改相关组件密码
@@ -90,22 +86,7 @@ cd scripts;
 
 ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
 
-5. 开放 IM 端口
-
-| TCP 端口  | 说明                                                  | 操作                                    |
-| --------- | ----------------------------------------------------- | --------------------------------------- |
-| TCP:10001 | ws 协议，消息端口，如消息发送、推送等，用于客户端 SDK | 端口放行或 nginx 反向代理，并关闭防火墙 |
-| TCP:10002 | api 端口，如用户、好友、群组、消息等接口。            | 端口放行或 nginx 反向代理，并关闭防火墙 |
-| TCP:10005 | 选择 minio 存储时需要(openIM 默认使用 minio 存储)     | 端口放行或 nginx 反向代理，并关闭防火墙 |
-
-6. 开放 Chat 端口
-
-| TCP 端口  | 说明                     | 操作                                    |
-| --------- | ------------------------ | --------------------------------------- |
-| TCP:10008 | 业务系统，如注册、登录等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
-| TCP:10009 | 管理后台，如统计、封号等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
-
-### 使用源代码部署
+### 使用源码编译
 
 1. Go 1.18或更高版本。
 
@@ -128,8 +109,6 @@ cd scripts;
 所有服务已成功构建如图所示
 
 ![编译成功](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/build.png)
-
-> 
 
 ### 组件配置说明
 
@@ -215,6 +194,41 @@ config/config.yaml中针对存储组件有详细的配置说明
         msgToPush: push
         msgToModify: modify
     ```
+
+### 启停服务
+
+启动服务
+
+```
+./start_all.sh;
+```
+
+检查服务
+
+```
+./check_all.sh
+```
+
+停止服务
+
+```
+./stop_all.sh
+```
+
+### 开放 IM 端口
+
+| TCP 端口  | 说明                                                  | 操作                                    |
+| --------- | ----------------------------------------------------- | --------------------------------------- |
+| TCP:10001 | ws 协议，消息端口，如消息发送、推送等，用于客户端 SDK | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10002 | api 端口，如用户、好友、群组、消息等接口。            | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10005 | 选择 minio 存储时需要(openIM 默认使用 minio 存储)     | 端口放行或 nginx 反向代理，并关闭防火墙 |
+
+### 开放 Chat 端口
+
+| TCP 端口  | 说明                     | 操作                                    |
+| --------- | ------------------------ | --------------------------------------- |
+| TCP:10008 | 业务系统，如注册、登录等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10009 | 管理后台，如统计、封号等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
 
 ## APP和OpenIM关系
 
