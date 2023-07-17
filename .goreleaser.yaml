@@ -240,13 +240,46 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     # use zip for windows archives
+    files:
+      - LICENSE.txt
+      - README.md
+      - CHANGELOG/*
+      - docs/*
+      - src: "*.md"
+        dst: docs
+
+        # Strip parent folders when adding files to the archive.
+        strip_parent: true
+
+        # File info.
+        # Not all fields are supported by all formats available formats.
+        #
+        # Default: copied from the source file
+        info:
+          # Templates: allowed (since v1.14)
+          owner: root
+
+          # Templates: allowed (since v1.14)
+          group: root
+
+          # Must be in time.RFC3339Nano format.
+          #
+          # Templates: allowed (since v1.14)
+          mtime: "{{ .CommitDate }}"
+
+          # File mode.
+          mode: 0644
+
     format_overrides:
     - goos: windows
       format: zip
+
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -260,4 +293,4 @@ changelog:
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 # Default: './dist'
-dist: _output/dist
+dist: ./_output/dist
