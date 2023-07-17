@@ -26,12 +26,14 @@
 
 ## Open-IM-Server 是什么
 
-Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用 JSON over WebSocket 传输协议。在 Open-IM-Server 中，所有东西都是消息，因此您可以轻松扩展自定义消息，而无需修改服务器代码。使用微服务架构，Open-IM-Server 可以使用集群进行部署。通过在客户端服务器上部署 Open-IM-Server，开发人员可以免费快速地将即时通讯和实时网络功能集成到自己的应用程序中，并确保业务数据的安全性和隐私性。
+Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用 JSON over WebSocket 传输协议。在 Open-IM-Server 中，所有东西都是消息，因此您可以轻松扩展自定义消息，而无需修改服务器代码。使用微服务架构，Open-IM-Server 可以使用集群进行部署。通过在服务器上部署 Open-IM-Server，开发人员可以快速地将即时通讯和实时网络功能集成到自己的应用程序中，并确保业务数据的安全性和隐私性。
+
+Open-IM-Server并不是一个独立的产品，本身不包含账号的注册和登录服务。
+为方便大家测试，我们开源了包括登录注册功能的 [chat 仓库](https://github.com/OpenIMSDK/chat)，chat 业务服务端和 Open-IM-Server 一起部署，即可搭建一个聊天产品。
 
 ## 特点
 
-+ 免费
-+ 可扩展架构
++ 开源
 + 易于集成
 + 良好的可扩展性
 + 高性能
@@ -40,137 +42,193 @@ Open-IM-Server 是一款即时通讯服务器，使用纯 Golang 开发，采用
 
 ## 社区
 
-+ 访问中文官方网站：[Open-IM中文开发文档](https://doc.rentsoft.cn/)
++ 访问中文官方网站：[OpenIM中文开发文档](https://doc.rentsoft.cn/)
 
 ## 快速开始
 
 ### 安装Open-IM-Server
 
-> Open-IM 依赖于五个开源高性能组件：ETCD、MySQL、MongoDB、Redis 和 Kafka。在部署 Open-IM-Server 之前，请确保已安装上述五个组件。如果您的服务器没有上述组件，则必须首先安装缺失组件。如果您已经拥有上述组件，则建议直接使用它们。如果没有，则建议使用 Docker-compose，无需安装依赖项，一键部署，更快更方便。
+> Open-IM-Server依赖于五个开源组件：Zookeeper、MySQL、MongoDB、Redis 和 Kafka。在部署 Open-IM-Server 之前，请确保已安装上述五个组件。如果没有，则建议使用 docker-compose，一键部署，方便快捷。
 
-### 使用 Docker 部署
+### 使用 docker-compose 部署
 
-1. 安装 [Go 环境](https://golang.org/doc/install)。确保 Go 版本至少为 1.17。
+1. 隆项目
 
-2. 克隆 Open-IM 项目到您的服务器
+```
+git clone https://github.com/OpenIMSDK/Open-IM-Server 
+cd Open-IM-Server
+git checkout release-v3.0 #or other release branch
+```
 
-   `git clone <https://github.com/OpenIMSDK/Open-IM-Server.git> --recursive`
+2. 修改 env
 
-3. 部署
+```
+此处主要修改相关组件密码
+USER=root #不用修改
+PASSWORD=openIM123  #8位以上的数字和字母组合密码，密码对redis mysql mongo生效，以及config/config.yaml中的accessSecret
+ENDPOINT=http://127.0.0.1:10005 #minio对外服务的ip和端口，或用域名storage.xx.xx，app要能访问到此ip和端口或域名，
+API_URL=http://127.0.0.1:10002/object/ #app要能访问到此ip和端口或域名，
+DATA_DIR=./  #指定大磁盘目录
+```
 
-   1. 修改 env
+3. 部署和启动
 
-      ```
-      #cd Open-IM-server
-      USER=root
-      PASSWORD=openIM123    #密码至少8位数字，不包括特殊字符
-      ENDPOINT=http://127.0.0.1:10005 #请用互联网IP替换127.0.0.1
-      DATA_DIR=./
-      ```
+注意：此命令只能执行一次，它会根据.env 中的 PASSWORD 变量修改 docker-compose 中组件密码，并修改 config/config.yaml 中的组件密码
+如果.env 中的密码变了，需要先 docker-compose down ; rm components -rf 后再执行此命令。
 
-   2. 部署和启动
+```
+chmod +x install_im_server.sh;
+./install_im_server.sh;
+```
 
-      ```
-      chmod +x install_im_server.sh;
-      ./install_im_server.sh;
-      ```
+4. 检查服务
 
-   3. 检查服务
+```
+cd scripts;
+./docker_check_service.sh
+```
 
-      ```
-      cd scripts;
-      ./docker_check_service.sh
-      ./check_all.sh
-      ```
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
 
-      ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
+5. 开放 IM 端口
+
+| TCP 端口  | 说明                                                  | 操作                                    |
+| --------- | ----------------------------------------------------- | --------------------------------------- |
+| TCP:10001 | ws 协议，消息端口，如消息发送、推送等，用于客户端 SDK | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10002 | api 端口，如用户、好友、群组、消息等接口。            | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10005 | 选择 minio 存储时需要(openIM 默认使用 minio 存储)     | 端口放行或 nginx 反向代理，并关闭防火墙 |
+
+6. 开放 Chat 端口
+
+| TCP 端口  | 说明                     | 操作                                    |
+| --------- | ------------------------ | --------------------------------------- |
+| TCP:10008 | 业务系统，如注册、登录等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
+| TCP:10009 | 管理后台，如统计、封号等 | 端口放行或 nginx 反向代理，并关闭防火墙 |
 
 ### 使用源代码部署
 
-1. Go 1.17 或更高版本。
+1. Go 1.18或更高版本。
 
 2. 克隆
 
    ```
-   git clone <https://github.com/OpenIMSDK/Open-IM-Server.git> --recursive
-   cd cmd/openim-sdk-core
-   git checkout main
+   git clone https://github.com/OpenIMSDK/Open-IM-Server 
+   cd Open-IM-Server
+   git checkout release-v3.0 #or other release branch
    ```
 
-3. 设置可执行权限
+3. 编译
 
    ```
-   cd ../../scripts/
+   cd Open-IM-server/scripts
    chmod +x *.sh
+   ./build_all_service.sh
    ```
 
-4. 构建
+所有服务已成功构建如图所示
 
-   ```
-   ./batch_build_all_service.sh
-   ```
+![编译成功](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/build.png)
 
-所有服务已成功构建
+> 
 
-### 配置说明
+### 组件配置说明
 
-> Open-IM 配置分为基本组件配置和业务内部服务配置。当使用产品时，开发人员需要将每个组件的地址填写为其服务器组件的地址，并确保业务内部服务端口未被占用。
+config/config.yaml中针对存储组件有详细的配置说明
 
-### 基本组件配置说明
-
-+ ETCD
-  + Etcd 用于 RPC 服务的发现和注册，Etcd Schema 是注册名称的前缀，建议将其修改为公司名称，Etcd 地址(ip+port)支持集群部署，可以填写多个 ETCD 地址，也可以只有一个 etcd 地址。
++ Zookeeper
+  + 用于RPC 服务发现和注册，支持集群。
+  
+    ````
+    ```
+    zookeeper:
+      schema: openim                          #不建议修改
+      address: [ 127.0.0.1:2181 ]             #地址
+      username:                               #用户名
+      password:                               #密码
+    ```
+    ````
+  
+    
+  
 + MySQL
-  + MySQL 用于消息和用户关系的全存储，暂时不支持集群部署。修改地址、用户、密码和数据库名称。
+  
+  + 用于存储用户、关系链、群组，支持数据库主备。
+  
+    ```
+    mysql:
+      address: [ 127.0.0.1:13306 ]            #地址
+      username: root                          #用户名
+      password: openIM123                     #密码
+      database: openIM_v2                     #不建议修改
+      maxOpenConn: 1000                       #最大连接数
+      maxIdleConn: 100                        #最大空闲连接数
+      maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
+      logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
+      slowThreshold: 500                      #慢语句阈值 （毫秒）
+    ```
+  
+    
+  
 + Mongo
-  + Mongo 用于消息的离线存储，默认存储 7 天。暂时不支持集群部署。只需修改地址和数据库名称即可。
+  + 用于存储离线消息，支持mongo分片集群。
+  
+    ```
+    mongo:
+      uri:                                    #不为空则直接使用该值
+      address: [ 127.0.0.1:37017 ]            #地址
+      database: openIM                        #mongo db 默认即可
+      username: root                          #用户名
+      password: openIM123                     #密码
+      maxPoolSize: 100                        #最大连接数
+    ```
+  
 + Redis
-  + Redis 目前主要用于消息序列号存储和用户令牌信息存储。暂时不支持集群部署。只需修改相应的 Redis 地址和密码即可。
+  + 用于存储消息序列号、最新消息、用户token及mysql缓存，支持集群部署。
+  
+    ```
+    redis:
+      address: [ 127.0.0.1:16379 ]            #地址
+      username:                               #用户名
+      password: openIM123                     #密码
+    ```
+  
 + Kafka
-  + Kafka 用作消息传输存储队列，支持集群部署，只需修改相应的地址。
+  + 用于消息队列，用于消息解耦，支持集群部署。
+  
+    ```
+    kafka:
+      username:                               #用户名
+      password:                               #密码
+      addr: [ 127.0.0.1:9092 ]                #地址
+      latestMsgToRedis:
+        topic: "latestMsgToRedis"
+      offlineMsgToMongo:
+        topic: "offlineMsgToMongoMysql"
+      msgToPush:
+        topic: "msqToPush"
+      msgToModify:
+        topic: "msgToModify"
+      consumerGroupID:
+        msgToRedis: redis
+        msgToMongo: mongo
+        msgToMySql: mysql
+        msgToPush: push
+        msgToModify: modify
+    ```
 
-### 内部服务配置说明
+## APP和OpenIM关系
 
-+ credential&&push
-  + Open-IM 需要使用三方离线推送功能。目前使用的是腾讯的三方推送，支持 IOS、Android 和 OSX 推送。这些信息是腾讯推送的一些注册信息，开发人员需要去腾讯云移动推送注册相应的信息。如果您没有填写相应的信息，则无法使用离线消息推送功能。
-+ api&&rpcport&&longconnsvr&&rpcregistername
-  + API 端口是 HTTP 接口，longconnsvr 是 WebSocket 监听端口，rpcport 是内部服务启动端口。两者都支持集群部署。请确保这些端口未被使用。如果要为单个服务打开多个服务，请填写多个以逗号分隔的端口。rpcregistername 是每个服务在注册表 Etcd 中注册的服务名称，无需修改。
-+ log&&modulename
-  + 日志配置包括日志文件的存储路径，日志发送到 Elasticsearch 进行日志查看。目前不支持将日志发送到 Elasticsearch。暂时不需要修改配置。modulename 用于根据服务模块的名称拆分日志。默认配置可以。
-
-### 脚本说明
-
-> Open-IM 脚本提供服务编译、启动和停止脚本。有四个 Open-IM 脚本启动模块，一个是 http+rpc 服务启动模块，第二个是 WebSocket 服务启动模块，然后是 msg_transfer 模块，最后是 push 模块。
-
-+ path_info.sh&&style_info.sh&&
-
-  functions.sh
-
-  + 包含每个模块的路径信息，包括源代码所在的路径、服务启动名称、shell 打印字体样式以及一些用于处理 shell 字符串的函数。
-
-+ build_all_service.sh
-
-  + 编译模块，将 Open-IM 的所有源代码编译为二进制文件并放入 bin 目录。
-
-+ start_rpc_api_service.sh&&msg_gateway_start.sh&&msg_transfer_start.sh&&push_start.sh
-
-  + 独立脚本启动模块，后跟 API 和 RPC 模块、消息网关模块、消息传输模块和推送模块。
-
-+ start_all.sh&&stop_all.sh
-
-  + 总脚本，启动所有服务和关闭所有服务。
-
-## 认证流程图
+OpenIM 是开源的即时通讯组件，它并不是一个独立的产品，此图展示了AppServer、AppClient、Open-IM-Server以及Open-IM-SDK之间的关系
 
 ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
 
-## 架构
+## 整体架构
 
 ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
 
 ## 开始开发 OpenIM
 
-[社区存储库](https://github.com/OpenIMSDK/community)包含有关从源代码构建 Kubernetes、如何贡献代码和文档、有关什么的联系人等所有信息。
+[社区存储库](https://github.com/OpenIMSDK/community)包含有关从源代码构建 Kubernetes、如何贡献代码和文档。
 
 ## 贡献
 
