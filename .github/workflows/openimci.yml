@@ -60,8 +60,6 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
-        with:
-            ref: ${{ github.head_ref }}
 
       - name: Run go modules tidy
         run: |
