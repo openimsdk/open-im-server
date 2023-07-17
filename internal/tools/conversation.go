@@ -33,6 +33,7 @@ func (c *MsgTool) ConversationsDestructMsgs() {
 	}
 	log.ZDebug(context.Background(), "nums conversations need destruct", "nums", len(conversations))
 	for _, conversation := range conversations {
+		ctx = mcontext.NewCtx(utils.GetSelfFuncName() + "-" + utils.OperationIDGenerator() + "-" + conversation.ConversationID + "-" + conversation.OwnerUserID)
 		log.ZDebug(
 			ctx,
 			"UserMsgsDestruct",
