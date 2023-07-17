@@ -19,11 +19,6 @@ import (
 	"errors"
 	"time"
 
-	"gorm.io/gorm"
-
-	relation2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-
 	"github.com/redis/go-redis/v9"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -97,7 +92,7 @@ type CommonMsgDatabase interface {
 	GetConversationMinMaxSeqInMongoAndCache(ctx context.Context, conversationID string) (minSeqMongo, maxSeqMongo, minSeqCache, maxSeqCache int64, err error)
 	SetSendMsgStatus(ctx context.Context, id string, status int32) error
 	GetSendMsgStatus(ctx context.Context, id string) (int32, error)
-	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error)
+	SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error)
 
 	// to mq
 	MsgToMQ(ctx context.Context, key string, msg2mq *sdkws.MsgData) error
@@ -124,9 +119,8 @@ type CommonMsgDatabase interface {
 	) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
 }
 
-func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel, msgMyqModel relation.ChatLogModelInterface) CommonMsgDatabase {
+func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) CommonMsgDatabase {
 	return &commonMsgDatabase{
-		msgMyq:          msgMyqModel,
 		msgDocDatabase:  msgDocModel,
 		cache:           cacheModel,
 		producer:        kafka.NewKafkaProducer(config.Config.Kafka.Addr, config.Config.Kafka.LatestMsgToRedis.Topic),
@@ -135,18 +129,16 @@ func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheMo
 	}
 }
 
-func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database, dbGrom *gorm.DB) CommonMsgDatabase {
+func InitCommonMsgDatabase(rdb redis.UniversalClient, database *mongo.Database) CommonMsgDatabase {
 	cacheModel := cache.NewMsgCacheModel(rdb)
 	msgDocModel := unrelation.NewMsgMongoDriver(database)
-	msgMyqModel := relation2.NewChatLogGorm(dbGrom)
-	CommonMsgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel, msgMyqModel)
+	CommonMsgDatabase := NewCommonMsgDatabase(msgDocModel, cacheModel)
 	return CommonMsgDatabase
 }
 
 type commonMsgDatabase struct {
 	msgDocDatabase   unRelationTb.MsgDocModelInterface
 	msg              unRelationTb.MsgDocModel
-	msgMyq           relation.ChatLogModelInterface
 	cache            cache.MsgModel
 	producer         *kafka.Producer
 	producerToMongo  *kafka.Producer
@@ -948,14 +940,14 @@ func (db *commonMsgDatabase) RangeGroupSendCount(
 	return db.msgDocDatabase.RangeGroupSendCount(ctx, start, end, ase, pageNumber, showNumber)
 }
 
-func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (msgData []*sdkws.MsgData, err error) {
+func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.SearchMessageReq) (total int32, msgData []*sdkws.MsgData, err error) {
 	var totalMsgs []*sdkws.MsgData
-	msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
+	total, msgs, err := db.msgDocDatabase.SearchMessage(ctx, req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	for _, msg := range msgs {
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
-	return totalMsgs, nil
+	return total, totalMsgs, nil
 }

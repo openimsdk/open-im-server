@@ -108,11 +108,11 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
 	var chatLogs []*sdkws.MsgData
+	var total int32
 	resp = &msg.SearchMessageResp{}
-	if chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
+	if total, chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
 		return nil, err
 	}
-	var num int
 	for _, chatLog := range chatLogs {
 		pbChatLog := &msg.ChatLog{}
 		utils.CopyStructFields(pbChatLog, chatLog)
@@ -131,7 +131,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			if err != nil {
 				return nil, err
 			}
-			pbChatLog.SenderNickname = recvUser.Nickname
+			pbChatLog.RecvNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)
@@ -146,9 +146,8 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			pbChatLog.GroupType = group.GroupType
 		}
 		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
-		num++
 	}
 
-	resp.ChatLogsNum = int32(num)
+	resp.ChatLogsNum = total
 	return resp, nil
 }

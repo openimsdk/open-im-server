@@ -1067,20 +1067,20 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
 
-func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
-	msgs, err := m.searchMessage(ctx, req)
+func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
+	total, msgs, err := m.searchMessage(ctx, req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	for _, msg1 := range msgs {
 		if msg1.IsRead {
 			msg1.Msg.IsRead = true
 		}
 	}
-	return msgs, nil
+	return total, msgs, nil
 }
 
-func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
+func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
 	var pipe mongo.Pipeline
 	condition := bson.A{}
 	if req.SendTime != "" {
@@ -1153,16 +1153,16 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	}
 	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	var msgsDocs []table.MsgDocModel
 	err = cursor.All(ctx, &msgsDocs)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	if len(msgsDocs) == 0 {
-		return nil, errs.Wrap(mongo.ErrNoDocuments)
+		return 0, nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
 	msgs := make([]*table.MsgInfoModel, 0)
 	for index := range msgsDocs {
@@ -1187,14 +1187,14 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 				}
 				data, err := json.Marshal(&revokeContent)
 				if err != nil {
-					return nil, err
+					return 0, nil, err
 				}
 				elem := sdkws.NotificationElem{
 					Detail: string(data),
 				}
 				content, err := json.Marshal(&elem)
 				if err != nil {
-					return nil, err
+					return 0, nil, err
 				}
 				msg.Msg.ContentType = constant.MsgRevokeNotification
 				msg.Msg.Content = string(content)
@@ -1202,5 +1202,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			msgs = append(msgs, msg)
 		}
 	}
-	return msgs, nil
+	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
+	n := int32(len(msgs))
+	if start+req.Pagination.ShowNumber < n {
+		msgs = msgs[start : start+req.Pagination.ShowNumber]
+	} else {
+		msgs = msgs[start:]
+	}
+	return n, msgs, nil
 }
