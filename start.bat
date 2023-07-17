@@ -8,5 +8,5 @@ start msg.exe -p 10030
 start msggateway.exe -p 10040 -w 10001
 start push.exe -p 10070
 start msgtransfer.exe
-start third.exe -p 10090
 start user.exe -p 10010
+start third.exe -p 10090

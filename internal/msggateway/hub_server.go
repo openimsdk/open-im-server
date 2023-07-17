@@ -25,9 +25,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
@@ -84,9 +82,6 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !tokenverify.IsAppManagerUid(ctx) {
-		return nil, errs.ErrNoPermission.Wrap("only app manager")
-	}
 	var resp msggateway.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDs {
 		clients, ok := s.LongConnServer.GetUserAllCons(userID)
@@ -181,13 +176,12 @@ func (s *Server) KickUserOffline(
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
 				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
-				err := client.KickOnlineMessage()
-				if err != nil {
-					return nil, err
+				if err := client.longConnServer.KickUserConn(client); err != nil {
+					log.ZWarn(ctx, "kick user offline failed", err, "userID", v, "platformID", req.PlatformID)
 				}
 			}
 		} else {
-			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
+			log.ZInfo(ctx, "conn not exist", "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil

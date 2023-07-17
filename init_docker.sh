@@ -21,7 +21,12 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 # Start Docker services using docker-compose
-docker-compose up -d
+if command -v docker-compose &> /dev/null
+then
+    docker-compose up -d
+else
+    docker compose up -d
+fi
 
 # Move back to the 'scripts' folder
 cd scripts
