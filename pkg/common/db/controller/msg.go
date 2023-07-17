@@ -653,6 +653,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 		//&& msgDocModel.Msg[0].Msg.SendTime > lastMsgDestructTime.UnixMilli()
 		if len(msgDocModel.Msg) > 0 {
 			i := 0
+			var over bool
 			for _, msg := range msgDocModel.Msg {
 				i++
 				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
@@ -661,8 +662,12 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 					}
 				} else {
 					log.ZDebug(ctx, "all msg need destruct is found", "conversationID", conversationID, "userID", userID, "index", index, "stop index", i)
+					over = true
 					break
 				}
+			}
+			if over {
+				break
 			}
 		}
 	}
