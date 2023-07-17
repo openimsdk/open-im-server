@@ -105,16 +105,13 @@ jobs:
           echo "Clean all build successfully" 
 
       - name: push OpenIM 
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "cicd: robot automated Change"
-        #   commit_options: '--no-verify --signoff'
-          branch: main
-        #   create_branch: true
-        #   # Optional commit user and author settings
-        #   commit_user_name: kubbot # defaults to "github-actions[bot]"
-        #   commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
-        #   commit_author: Kubbot # defaults to author of the commit that triggered the run
+        run: |
+          date > generated.txt
+          git config user.name kubbot
+          git config user.email 3293172751ysy@gmail.com
+          git add .
+          git commit -m "cicd: make cicd all test push"
+          git push
 
       - name: Collect Test Coverage File
         uses: actions/upload-artifact@v1.0.0
