@@ -61,40 +61,40 @@ jobs:
       - name: Run go modules tidy
         run: |
           sudo make tidy
-          echo "Run go modules tidy successfully" >> $GITHUB_OUTPUT
+          echo "Run go modules tidy successfully" 
 
       - name: Run go format
         run: |
           sudo make format
-          echo "Run go format successfully" >> $GITHUB_OUTPUT
+          echo "Run go format successfully" 
         continue-on-error: true
 
       - name: Generate all necessary files, such as error code files
         run: |
           make generate
-          echo "Generate all necessary files successfully" >> $GITHUB_OUTPUT
+          echo "Generate all necessary files successfully" 
         continue-on-error: true
 
       - name: Run unit test and get test coverage
         run: |
           make cover
-          echo "Run unit test and get test coverage successfully" >> $GITHUB_OUTPUT
+          echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
       - name: Build source code for host platform
         run: |
           sudo make build
-          echo "Build source code for host platform successfully" >> $GITHUB_OUTPUT
+          echo "Build source code for host platform successfully" 
 
       - name: OpenIM verify copyright
         run: |
           sudo make verify-copyright
-          echo "OpenIM verify successfully" >> $GITHUB_OUTPUT
+          echo "OpenIM verify successfully" 
 
       - name: Clean all build
         run: |
           sudo make clean
-          echo "Clean all build successfully" >> $GITHUB_OUTPUT
+          echo "Clean all build successfully" 
 
       - name: push OpenIM 
         uses: stefanzweifel/git-auto-commit-action@v4
