@@ -103,17 +103,17 @@ jobs:
           echo "Clean all build successfully" 
 
       - name: push OpenIM 
-        run: |
-          date > generated.txt
-          git remote -v 
-          git status
-          git branch -a 
-          echo "===> git config user.name kubbot"
-          git config user.name kubbot
-          git config user.email 3293172751ysy@gmail.com
-          git add .
-          git commit -m "cicd: make cicd all test push"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "cicd: robot automated Change"
+        #   commit_options: '--no-verify --signoff'
+          branch: main
+        #   create_branch: true
+        #   # Optional commit user and author settings
+        #   commit_user_name: kubbot # defaults to "github-actions[bot]"
+        #   commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
+        #   commit_author: Kubbot # defaults to author of the commit that triggered the run
+        continue-on-error: true
 
       - name: Collect Test Coverage File
         uses: actions/upload-artifact@v1.0.0
@@ -126,31 +126,24 @@ jobs:
         continue-on-error: true
 
   openim-start:
-      name: Test OpenIM make install start on ${{ matrix.os }}
-      runs-on: ${{ matrix.os }}
-      environment:
-        name: openim
-      strategy:
-        matrix:
-          go_version: ["1.20"]
-          os: ["ubuntu-latest"]
-      steps:
-        - name: Set up Go ${{ matrix.go_version }}
-          uses: actions/setup-go@v2
-          with:
-            go-version: ${{ matrix.go_version }}
-          id: go
-    
-        - name: Check out code into the Go module directory
-          uses: actions/checkout@v2
-    
-        - name: Run OpenIM make install start
-          run: |
-            sudo make install
-          continue-on-error: true
-    
-        - name: Upload Logs
-          uses: actions/upload-artifact@v2
-          with:
-            name: OpenIM Logs
-            path: /home/runner/work/Open-IM-Server/Open-IM-Server/logs/openIM.log
+    name: Teat OpenIM make install start on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    environment:
+      name: openim
+    strategy:
+      matrix:
+        go_version: ["1.20"]
+        os: ["ubuntu-latest"]
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Run OpenIM make install start
+        run: |
+          sudo make install
