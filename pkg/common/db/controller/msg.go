@@ -63,7 +63,7 @@ type CommonMsgDatabase interface {
 	// 删除会话消息重置最小seq， remainTime为消息保留的时间单位秒,超时消息删除， 传0删除所有消息(此方法不删除redis cache)
 	DeleteConversationMsgsAndSetMinSeq(ctx context.Context, conversationID string, remainTime int64) error
 	// 用户标记删除过期消息返回标记删除的seq列表
-	UserMsgsDestruct(cte context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
+	UserMsgsDestruct(ctx context.Context, userID string, conversationID string, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, err error)
 
 	// 用户根据seq删除消息
 	DeleteUserMsgsBySeqs(ctx context.Context, userID string, conversationID string, seqs []int64) error
@@ -675,8 +675,14 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 	log.ZDebug(ctx, "UserMsgsDestruct", "conversationID", conversationID, "userID", userID, "seqs", seqs)
 	if len(seqs) > 0 {
 		userMinSeq := seqs[len(seqs)-1] + 1
-		if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
+		currentUserMinSeq, err := db.cache.GetConversationUserMinSeq(ctx, conversationID, userID)
+		if err != nil && errs.Unwrap(err) != redis.Nil {
 			return nil, err
+		}
+		if currentUserMinSeq < userMinSeq {
+			if err := db.cache.SetConversationUserMinSeq(ctx, conversationID, userID, userMinSeq); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return seqs, nil
