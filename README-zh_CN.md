@@ -220,11 +220,11 @@ config/config.yaml中针对存储组件有详细的配置说明
 
 OpenIM 是开源的即时通讯组件，它并不是一个独立的产品，此图展示了AppServer、AppClient、Open-IM-Server以及Open-IM-SDK之间的关系
 
-![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
 
 ## 整体架构
 
-![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
 
 ## 开始开发 OpenIM
 
