@@ -93,7 +93,7 @@ jobs:
       - name: OpenIM verify copyright
         run: |
           sudo make verify-copyright
-          sudi make add-copyright
+          sudo make add-copyright
           echo "OpenIM verify successfully" 
         continue-on-error: true
 
@@ -115,11 +115,25 @@ jobs:
         #   commit_author: Kubbot # defaults to author of the commit that triggered the run
         continue-on-error: true
 
+      - name: Set Current Directory
+        id: set_directory
+        run: |
+          echo "::set-output name=directory::$(pwd)"
+        continue-on-error: true
+
       - name: Collect Test Coverage File
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: main-output
-          path: _output/tmp/coverage.out
+        id: collect_coverage
+        run: |
+          cd ${{ steps.set_directory.outputs.directory }}
+          make cover
+          echo "::set-output name=coverage_file::./_output/tmp/coverage.out"
+        continue-on-error: true
+
+      - name: Display Test Coverage
+        run: |
+          echo "Test Coverage:"
+          cat ${{ steps.collect_coverage.outputs.coverage_file }}
+        continue-on-error: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
