@@ -42,7 +42,7 @@ Open-IM-Server is not a standalone product and does not include account registra
 - Supports multiple protocols
 
 ## Community
-- Visit the official Chinese website: [OpenIM Chinese Developer Documentation](https://doc.rentsoft.cn/)
+- Visit the official website: [OpenIM  Developer Documentation](https://www.openim.online/)
 
 ## Quick Start
 
@@ -59,7 +59,6 @@ git checkout release-v3.0 #or other release branch
 1. Modify .env
 
 ```
-makefileCopy codeHere you mainly modify the passwords for related components
 USER=root #no need to modify
 PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
 ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
@@ -72,14 +71,14 @@ DATA_DIR=./  #designate large disk directory
 Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
 
 ```
-bashCopy codechmod +x install_im_server.sh;
+chmod +x install_im_server.sh;
 ./install_im_server.sh;
 ```
 
 1. Check the service
 
 ```
-bashCopy codecd scripts;
+cd scripts;
 ./docker_check_service.sh
 ```
 
@@ -94,7 +93,7 @@ bashCopy codecd scripts;
 2. Clone
 
    ```
-   arduinoCopy codegit clone https://github.com/OpenIMSDK/Open-IM-Server 
+   git clone https://github.com/OpenIMSDK/Open-IM-Server 
    cd Open-IM-Server
    git checkout release-v3.0 #or other release branch
    ```
@@ -102,7 +101,7 @@ bashCopy codecd scripts;
 3. Compile
 
    ```
-   bashCopy codecd Open-IM-server/scripts
+   cd Open-IM-server/scripts
    chmod +x *.sh
    ./build_all_service.sh
    ```
@@ -119,22 +118,20 @@ The config/config.yaml file has detailed configuration instructions for the stor
 
   - Used for RPC service discovery and registration, cluster support.
 
-    ````
-    yamlCopy code```
+    ```
     zookeeper:
       schema: openim                          #Not recommended to modify
       address: [ 127.0.0.1:2181 ]             #address
       username:                               #username
       password:                               #password
     ```
-    ````
 
 - MySQL
 
   - Used for storing users, relationships, and groups, supports master-slave database.
 
     ```
-    yamlCopy codemysql:
+    mysql:
       address: [ 127.0.0.1:13306 ]            #address
       username: root                          #username
       password: openIM123                     #password
@@ -151,7 +148,7 @@ The config/config.yaml file has detailed configuration instructions for the stor
   - Used for storing offline messages, supports mongo sharded clusters.
 
     ```
-    yamlCopy codemongo:
+    mongo:
       uri:                                    #Use this value directly if not empty
       address: [ 127.0.0.1:37017 ]            #address
       database: openIM                        #default mongo db
@@ -165,7 +162,7 @@ The config/config.yaml file has detailed configuration instructions for the stor
   - Used for storing message sequence numbers, latest messages, user tokens, and mysql cache, supports cluster deployment.
 
     ```
-    yamlCopy coderedis:
+    redis:
       address: [ 127.0.0.1:16379 ]            #address
       username:                               #username
       password: openIM123                     #password
@@ -176,7 +173,7 @@ The config/config.yaml file has detailed configuration instructions for the stor
   - Used for message queues, for message decoupling, supports cluster deployment.
 
     ```
-    yamlCopy codekafka:
+    kafka:
       username:                               #username
       password:                               #password
       addr: [ 127.0.0.1:9092 ]                #address
@@ -201,21 +198,18 @@ The config/config.yaml file has detailed configuration instructions for the stor
 Start services
 
 ```
-bashCopy code
 ./start_all.sh;
 ```
 
 Check services
 
 ```
-bashCopy code
 ./check_all.sh
 ```
 
 Stop services
 
 ```
-bashCopy code
 ./stop_all.sh
 ```
 
