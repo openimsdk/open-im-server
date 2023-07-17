@@ -103,6 +103,9 @@ jobs:
         with:
           commit_message: Automated Change
           commit_options: '--no-verify --signoff'
+          branch: feature-123
+          push_options: '--force'
+          create_branch: true
           # Optional commit user and author settings
           commit_user_name: kubbot # defaults to "github-actions[bot]"
           commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
