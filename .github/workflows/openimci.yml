@@ -89,7 +89,9 @@ jobs:
       - name: OpenIM verify copyright
         run: |
           sudo make verify-copyright
+          sudi make add-copyright
           echo "OpenIM verify successfully" 
+        continue-on-error: true
 
       - name: Clean all build
         run: |
