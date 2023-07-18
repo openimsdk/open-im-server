@@ -77,9 +77,7 @@ func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Dur
 	}
 	opt := &s3.AccessURLOption{
 		ContentType: obj.ContentType,
-	}
-	if filename := filepath.Base(obj.Name); filename != "" {
-		opt.ContentDisposition = `attachment; filename=` + filename
+		Filename:    filepath.Base(obj.Name),
 	}
 	expireTime := time.Now().Add(expire)
 	rawURL, err := s.s3.AccessURL(ctx, obj.Key, expire, opt)
