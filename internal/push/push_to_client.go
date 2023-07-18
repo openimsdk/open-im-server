@@ -257,7 +257,7 @@ func (p *Pusher) GetConnsAndOnlinePush(ctx context.Context, msg *sdkws.MsgData, 
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(debug.Stack()))
+	fmt.Println(mcontext.GetOperationID(ctx), string(debug.Stack()))
 	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
