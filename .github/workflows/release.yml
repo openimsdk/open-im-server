@@ -1,4 +1,4 @@
-name: OpenIM Server release
+name: OpenIM Server Release
 
 on:
   push:
