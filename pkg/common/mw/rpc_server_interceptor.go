@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"math"
 	"runtime"
-	"runtime/debug"
 	"strings"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/checker"
@@ -178,6 +177,5 @@ func RpcServerInterceptor(
 }
 
 func GrpcServer() grpc.ServerOption {
-	fmt.Println("grpc server interceptor", "stack", string(debug.Stack()))
 	return grpc.ChainUnaryInterceptor(RpcServerInterceptor)
 }
