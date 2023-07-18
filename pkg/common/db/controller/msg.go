@@ -657,7 +657,7 @@ func (db *commonMsgDatabase) UserMsgsDestruct(ctx context.Context, userID string
 			for _, msg := range msgDocModel.Msg {
 				i++
 				if msg != nil && msg.Msg != nil && msg.Msg.SendTime+destructTime*1000 <= time.Now().UnixMilli() {
-					if msg.Msg.SendTime > lastMsgDestructTime.UnixMilli() && !utils.Contain(userID, msg.DelList...) {
+					if msg.Msg.SendTime+destructTime*1000 > lastMsgDestructTime.UnixMilli() && !utils.Contain(userID, msg.DelList...) {
 						seqs = append(seqs, msg.Msg.Seq)
 					}
 				} else {
