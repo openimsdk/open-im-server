@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -31,6 +32,7 @@ import (
 )
 
 func GrpcClient() grpc.DialOption {
+	fmt.Println("grpc client interceptor", "stack", string(debug.Stack()))
 	return grpc.WithChainUnaryInterceptor(RpcClientInterceptor)
 }
 
