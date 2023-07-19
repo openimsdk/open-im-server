@@ -17,8 +17,8 @@ gomod:
 
 report_sizes: true
 
-metadata:
-  mod_timestamp: "{{ .CommitTimestamp }}"
+# metadata:
+#   mod_timestamp: "{{ .CommitTimestamp }}"
 
 builds:
   - binary: openim-api
@@ -407,7 +407,7 @@ checksum:
 
 release:
   footer: |
-    **Full Changelog**: https://github.com/OpenIMSDK/chat/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/OpenIMSDK/Open-IM-Server/compare/{{ .PreviousTag }}...{{ .Tag }}
 
     ## Helping out
 
