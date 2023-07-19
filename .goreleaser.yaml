@@ -326,13 +326,22 @@ changelog:
 nfpms:
   - id: packages
     builds:
-      - admin_api
-      - chat_api
-      - chat_rpc
-      - admin_rpc
+      - openim-api
+      - openim-cmdutils
+      - openim-crontask
+      - openim-msggateway
+      - openim-msgtransfer
+      - openim-push
+      - openim-rpc-auth
+      - openim-rpc-conversation
+      - openim-rpc-friend
+      - openim-rpc-group
+      - openim-rpc-msg
+      - openim-rpc-third
+      - openim-rpc-user
     # Your app's vendor.
     vendor: OpenIMSDK
-    homepage: https://github.com/OpenIMSDK/chat
+    homepage: https://github.com/OpenIMSDK/Open-IM-Server
     maintainer: kubbot <https://github.com/kubbot>
     description: |-
       Auto sync github labels
