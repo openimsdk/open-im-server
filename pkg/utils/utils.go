@@ -367,6 +367,10 @@ func GetNotificationConversationIDByConversationID(conversationID string) string
 	return ""
 }
 
+func GetSelfNotificationConversationID(userID string) string {
+	return "n_" + userID + "_" + userID
+}
+
 func GetSeqsBeginEnd(seqs []int64) (int64, int64) {
 	if len(seqs) == 0 {
 		return 0, 0

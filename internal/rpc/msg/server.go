@@ -42,7 +42,6 @@ type (
 		friend                 *rpcclient.FriendRpcClient
 		GroupLocalCache        *localcache.GroupLocalCache
 		ConversationLocalCache *localcache.ConversationLocalCache
-		MessageLocker          MessageLocker
 		Handlers               MessageInterceptorChain
 		notificationSender     *rpcclient.NotificationSender
 	}
@@ -91,7 +90,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
 		friend:                 &friendRpcClient,
-		MessageLocker:          NewLockerMessage(cacheModel),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)

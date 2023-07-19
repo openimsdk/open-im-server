@@ -41,11 +41,11 @@ func StartCronTask() error {
 		panic(err)
 	}
 	log.ZInfo(context.Background(), "start msgDestruct cron task", "cron config", config.Config.MsgDestructTime)
-	// _, err = c.AddFunc(config.Config.MsgDestructTime, msgTool.ConversationsDestructMsgs)
-	// if err != nil {
-	// 	fmt.Println("start conversationsDestructMsgs cron failed", err.Error(), config.Config.ChatRecordsClearTime)
-	// 	panic(err)
-	// }
+	_, err = c.AddFunc(config.Config.MsgDestructTime, msgTool.ConversationsDestructMsgs)
+	if err != nil {
+		fmt.Println("start conversationsDestructMsgs cron failed", err.Error(), config.Config.ChatRecordsClearTime)
+		panic(err)
+	}
 	c.Start()
 	wg.Wait()
 	return nil
