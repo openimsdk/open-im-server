@@ -65,7 +65,13 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	case constant.SuperGroupChatType:
 		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		err = c.pusher.Push2User(ctx, []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}, pbData.MsgData)
+		var pushUserIDs []string
+		if pbData.MsgData.SendID != pbData.MsgData.RecvID {
+			pushUserIDs = []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}
+		} else {
+			pushUserIDs = []string{pbData.MsgData.SendID}
+		}
+		err = c.pusher.Push2User(ctx, pushUserIDs, pbData.MsgData)
 	}
 	if err != nil {
 		if err == errNoOfflinePusher {
