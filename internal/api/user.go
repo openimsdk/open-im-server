@@ -88,6 +88,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 			parseError := apiresp.ParseError(err)
 			if parseError.ErrCode == errs.NoPermissionError {
 				apiresp.GinError(c, err)
+				return
 			}
 		} else {
 			wsResult = append(wsResult, reply.SuccessResult...)
