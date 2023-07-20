@@ -5,7 +5,7 @@ name: OpenIM Run Gosec
 #     1. Find common security vulnerabilities, such as SQL injection, command injection, and cross-site scripting (XSS).
 #     2. Audit codes according to common security standards and find non-standard codes.
 #     3. Assist the Go language engineer to write safe and reliable code.
-
+# https://github.com/securego/gosec/
 on:
   push:
     branches: "*"
