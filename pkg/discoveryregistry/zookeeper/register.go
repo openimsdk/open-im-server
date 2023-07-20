@@ -30,6 +30,14 @@ func (s *ZkClient) CreateRpcRootNodes(serviceNames []string) error {
 	return nil
 }
 
+func (s *ZkClient) CreateTempNode(rpcRegisterName, addr string) (node string, err error) {
+	return s.conn.CreateProtectedEphemeralSequential(
+		s.getPath(rpcRegisterName)+"/"+addr+"_",
+		[]byte(addr),
+		zk.WorldACL(zk.PermAll),
+	)
+}
+
 func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc.DialOption) error {
 	if err := s.ensureName(rpcRegisterName); err != nil {
 		return err
@@ -39,15 +47,14 @@ func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc
 	if err != nil {
 		return err
 	}
-	node, err := s.conn.CreateProtectedEphemeralSequential(
-		s.getPath(rpcRegisterName)+"/"+addr+"_",
-		[]byte(addr),
-		zk.WorldACL(zk.PermAll),
-	)
+	node, err := s.CreateTempNode(rpcRegisterName, addr)
 	if err != nil {
 		return err
 	}
+	s.rpcRegisterName = rpcRegisterName
+	s.rpcRegisterAddr = addr
 	s.node = node
+	s.isRegistered = true
 	return nil
 }
 
@@ -60,6 +67,9 @@ func (s *ZkClient) UnRegister() error {
 	}
 	time.Sleep(time.Second)
 	s.node = ""
+	s.rpcRegisterName = ""
+	s.rpcRegisterAddr = ""
+	s.isRegistered = false
 	s.localConns = make(map[string][]grpc.ClientConnInterface)
 	s.resolvers = make(map[string]*Resolver)
 	return nil
