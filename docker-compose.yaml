@@ -110,6 +110,7 @@ services:
       - ./scripts:/Open-IM-Server/scripts
     restart: always
     depends_on:
+      - zookeeper
       - kafka
       - mysql
       - mongodb
