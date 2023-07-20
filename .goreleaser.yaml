@@ -12,8 +12,8 @@ before:
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 
-gomod:
-  proxy: true
+# gomod:
+#   proxy: true
 
 report_sizes: true
 
