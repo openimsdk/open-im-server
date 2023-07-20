@@ -39,7 +39,11 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 		return err
 	}
 	hubServer := NewServer(rpcPort, longServer)
-	go hubServer.Start()
-	hubServer.LongConnServer.Run()
-	return nil
+	go func() {
+		err := hubServer.Start()
+		if err != nil {
+			panic(err.Error())
+		}
+	}()
+	return hubServer.LongConnServer.Run()
 }
