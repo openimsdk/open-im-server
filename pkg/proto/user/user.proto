@@ -159,24 +159,35 @@ message userRegisterCountResp {
   map<string, int64> count = 3;
 }
 
+message subscribeOrCancelUsersStatusReq{
+  repeated string userIDs = 1;
+  int32 type = 2;
+}
+message subscribeOrCancelUsersStatusResp{
+  map<string, int64> status = 1;
+}
+
+
 service user {
-  //获取指定的用户信息 全字段
+  //Get the specified user information full field
   rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
-  //更新用户信息
+  //update user information
   rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
-  //设置用户消息接收选项
+  //Set user message receiving options
   rpc setGlobalRecvMessageOpt(setGlobalRecvMessageOptReq) returns(setGlobalRecvMessageOptResp);
-  //获取用户消息接收选项 没找到不返回错误
+  //Get the user message receiving option If not found, no error will be returned
   rpc getGlobalRecvMessageOpt(getGlobalRecvMessageOptReq) returns(getGlobalRecvMessageOptResp);
-  //检查userID是否存在
+  //Check if userID exists
   rpc accountCheck(accountCheckReq) returns (accountCheckResp);
-  //翻页（或指定userID，昵称）拉取用户信息 全字段
+  //Turn the page (or specify userID, nickname) to pull user information Full field
   rpc getPaginationUsers(getPaginationUsersReq) returns (getPaginationUsersResp);
-  //用户注册
+  //user registration
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
-  //获取所有用户ID
+  //Get all user IDs
   rpc getAllUserID(getAllUserIDReq) returns (getAllUserIDResp);
-  // 获取用户总数和指定时间段内的用户增量
+  //Get the total number of users and the user increment within a specified time period
   rpc userRegisterCount(userRegisterCountReq)returns(userRegisterCountResp);
+  //Subscribe or unsubscribe user presence
+  rpc subscribeOrCancelUsersStatus(subscribeOrCancelUsersStatusReq)returns(subscribeOrCancelUsersStatusResp);
 }
 
