@@ -255,9 +255,10 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     # use zip for windows archives
     files:
-      - LICENSE.txt
+      - LICENSE
       - README.md
       - CHANGELOG/*
+      - CONTRIBUTING.md
       - docs/*
       - src: "*.md"
         dst: docs
