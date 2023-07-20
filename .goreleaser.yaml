@@ -5,7 +5,7 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - make tidy
-    - make copyright-add
+    - make copyright.add
     # you may remove this if you don't need go generate
     - make generate
 
