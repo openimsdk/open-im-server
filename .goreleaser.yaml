@@ -7,7 +7,7 @@ before:
     - make tidy
     - make copyright.add
     # you may remove this if you don't need go generate
-    - make generate
+    - go generate ./...
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
