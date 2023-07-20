@@ -23,8 +23,7 @@ jobs:
     strategy:
       matrix:
         bin:
-          - ssserver
-          - sslocal
+          - openim-server
     steps:
       - name: Checkout
         uses: actions/checkout@v3
