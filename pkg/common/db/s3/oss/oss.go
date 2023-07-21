@@ -148,7 +148,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		}
 		now := time.Now().UTC().Format(http.TimeFormat)
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
-		request.Header.Set(oss.HTTPHeaderDate, now)
+		//request.Header.Set(oss.HTTPHeaderDate, now)
 		request.Header.Set(oss.HttpHeaderOssDate, now)
 		authorization := fmt.Sprintf(
 			`OSS %s:%s`,
@@ -277,5 +277,5 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second))
+	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 }
