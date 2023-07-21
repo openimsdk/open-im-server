@@ -131,6 +131,12 @@ go.build.%:
 		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
 	fi
 
+## go.install: Install deployment openim
+.PHONY: go.install
+go.install:
+	@echo "===========> Installing deployment openim"
+	@$(ROOT_DIR)/scripts/install_im_server.sh
+
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch
 go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix $(p)., $(BINS))))
