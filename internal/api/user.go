@@ -84,12 +84,7 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
 			log.ZWarn(c, "GetUsersOnlineStatus rpc err", err)
-			// apiresp.GinError(c, err)
-			parseError := apiresp.ParseError(err)
-			if parseError.ErrCode == errs.NoPermissionError {
-				apiresp.GinError(c, err)
-				return
-			}
+			apiresp.GinError(c, err)
 		} else {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
