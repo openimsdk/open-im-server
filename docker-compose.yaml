@@ -11,8 +11,7 @@ services:
       - ${DATA_DIR}/components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
     environment:
-      - MYSQL_ROOT_PASSWORD: ${PASSWORD}
-      - TZ=Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${PASSWORD}
     restart: always
 
   mongodb:
@@ -35,7 +34,6 @@ services:
       - MONGO_INITDB_DATABASE=openIM
       - MONGO_USERNAME=${USER}
       - MONGO_PASSWORD=${PASSWORD}
-      - TZ=Asia/Shanghai
     restart: always
 
   redis:
@@ -74,14 +72,14 @@ services:
     ports:
       - 9092:9092
     environment:
-      - TZ: Asia/Shanghai
-      - KAFKA_BROKER_ID: 0
-      - KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      - KAFKA_CREATE_TOPICS: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
-      - KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
-      - KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
-      - KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      TZ: Asia/Shanghai
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     depends_on:
       - zookeeper
 
@@ -95,9 +93,8 @@ services:
       - /mnt/data:/data
       - /mnt/config:/root/.minio
     environment:
-      - MINIO_ROOT_USER: ${USER}
-      - MINIO_ROOT_PASSWORD: ${PASSWORD}
-      - TZ: Asia/Shanghai
+      MINIO_ROOT_USER: ${USER}
+      MINIO_ROOT_PASSWORD: ${PASSWORD}
     restart: always
     command: minio server /data --console-address ':9090'
 
