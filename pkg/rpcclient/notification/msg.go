@@ -36,7 +36,7 @@ func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, 
 		ConversationID: conversationID,
 		Seqs:           seqs,
 	}
-	return m.Notification(ctx, userID, userID, constant.MsgDeleteNotification, &tips)
+	return m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
 func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {

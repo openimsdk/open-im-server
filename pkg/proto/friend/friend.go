@@ -152,9 +152,6 @@ func (x *SetFriendRemarkReq) Check() error {
 	if x.FriendUserID == "" {
 		return errs.ErrArgs.Wrap("fromUserID is empty")
 	}
-	if x.Remark == "" {
-		return errs.ErrArgs.Wrap("remark is empty")
-	}
 	return nil
 }
 

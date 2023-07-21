@@ -40,7 +40,10 @@ type ZkClient struct {
 	userName  string
 	password  string
 
-	scheme string
+	rpcRegisterName string
+	rpcRegisterAddr string
+	isRegistered    bool
+	scheme          string
 
 	timeout   int
 	conn      *zk.Conn
@@ -136,6 +139,7 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	resolver.Register(client)
 	go client.refresh()
 	go client.watch()
+	time.Sleep(time.Millisecond * 50)
 	return client, nil
 }
 
