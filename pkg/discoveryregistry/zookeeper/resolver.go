@@ -73,7 +73,11 @@ func (s *ZkClient) Build(
 	opts resolver.BuildOptions,
 ) (resolver.Resolver, error) {
 	s.logger.Printf("build resolver: %+v, cc: %+v", target, cc.UpdateState)
-	// log.ZDebug(context.Background(), "build resolver start", "target", target, "cc", cc.UpdateState)
+	serviceName := strings.TrimLeft(target.URL.Path, "/")
+	if oldResolver, ok := s.resolvers[serviceName]; ok {
+		s.logger.Printf("rpc resolver exist: %+v, cc: %+v, key: %s", target, cc.UpdateState, serviceName)
+		return oldResolver, nil
+	}
 	r := &Resolver{}
 	r.target = target
 	r.cc = cc
@@ -81,11 +85,8 @@ func (s *ZkClient) Build(
 	r.ResolveNowZK(resolver.ResolveNowOptions{})
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	serviceName := strings.TrimLeft(target.URL.Path, "/")
 	s.resolvers[serviceName] = r
 	s.logger.Printf("build resolver finished: %+v, cc: %+v, key: %s", target, cc.UpdateState, serviceName)
-	// log.ZDebug(context.Background(), "build resolver finished", "target", target, "cc", cc.UpdateState,
-	// "serviceName", serviceName)
 	return r, nil
 }
 
