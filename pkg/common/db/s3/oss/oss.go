@@ -146,8 +146,10 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		if o.credentials.GetSecurityToken() != "" {
 			request.Header.Set(oss.HTTPHeaderOssSecurityToken, o.credentials.GetSecurityToken())
 		}
+		now := time.Now().UTC().Format(http.TimeFormat)
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
-		request.Header.Set(oss.HTTPHeaderDate, time.Now().UTC().Format(http.TimeFormat))
+		request.Header.Set(oss.HTTPHeaderDate, now)
+		request.Header.Set(oss.HttpHeaderOssDate, now)
 		authorization := fmt.Sprintf(
 			`OSS %s:%s`,
 			o.credentials.GetAccessKeyID(),
