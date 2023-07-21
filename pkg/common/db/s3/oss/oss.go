@@ -148,14 +148,15 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		}
 		now := time.Now().UTC().Format(http.TimeFormat)
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
-		//request.Header.Set(oss.HTTPHeaderDate, now)
-		request.Header.Set(oss.HttpHeaderOssDate, now)
+		request.Header.Set(oss.HTTPHeaderDate, now)
 		authorization := fmt.Sprintf(
 			`OSS %s:%s`,
 			o.credentials.GetAccessKeyID(),
 			o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()),
 		)
 		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
+		delete(request.Header, oss.HTTPHeaderDate)
+		request.Header.Set(oss.HttpHeaderOssDate, now)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
