@@ -67,7 +67,7 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return errors.New("len(config.Config.Manager.AppManagerUid) != len(config.Config.Manager.Nickname)")
 	}
 	for k, v := range config.Config.Manager.UserID {
-		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k]})
+		users = append(users, &tablerelation.UserModel{UserID: v, Nickname: config.Config.Manager.Nickname[k], AppMangerLevel: constant.AppAdmin})
 	}
 	userDB := relation.NewUserGorm(db)
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())

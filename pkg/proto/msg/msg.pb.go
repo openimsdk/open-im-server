@@ -22,16 +22,14 @@ package msg
 
 import (
 	context "context"
-	reflect "reflect"
-	sync "sync"
-
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -46,7 +44,7 @@ type MsgDataToMQ struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token   string         `protobuf:"bytes,1,opt,name=token,proto3"   json:"token"`
+	Token   string         `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
 	MsgData *sdkws.MsgData `protobuf:"bytes,2,opt,name=msgData,proto3" json:"msgData"`
 }
 
@@ -148,7 +146,7 @@ type PushMsgDataToMQ struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgData        *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3"        json:"msgData"`
+	MsgData        *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3" json:"msgData"`
 	ConversationID string         `protobuf:"bytes,2,opt,name=conversationID,proto3" json:"conversationID"`
 }
 
@@ -203,9 +201,9 @@ type MsgDataToMongoByMQ struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LastSeq        int64            `protobuf:"varint,1,opt,name=lastSeq,proto3"       json:"lastSeq"`
+	LastSeq        int64            `protobuf:"varint,1,opt,name=lastSeq,proto3" json:"lastSeq"`
 	ConversationID string           `protobuf:"bytes,2,opt,name=conversationID,proto3" json:"conversationID"`
-	MsgData        []*sdkws.MsgData `protobuf:"bytes,3,rep,name=msgData,proto3"        json:"msgData"`
+	MsgData        []*sdkws.MsgData `protobuf:"bytes,3,rep,name=msgData,proto3" json:"msgData"`
 }
 
 func (x *MsgDataToMongoByMQ) Reset() {
@@ -417,7 +415,7 @@ type SendMsgResp struct {
 
 	ServerMsgID string `protobuf:"bytes,1,opt,name=serverMsgID,proto3" json:"serverMsgID"`
 	ClientMsgID string `protobuf:"bytes,2,opt,name=clientMsgID,proto3" json:"clientMsgID"`
-	SendTime    int64  `protobuf:"varint,3,opt,name=sendTime,proto3"   json:"sendTime"`
+	SendTime    int64  `protobuf:"varint,3,opt,name=sendTime,proto3" json:"sendTime"`
 }
 
 func (x *SendMsgResp) Reset() {
@@ -648,7 +646,7 @@ type MsgDataToModifyByMQ struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Messages       []*sdkws.MsgData `protobuf:"bytes,1,rep,name=messages,proto3"       json:"messages"`
+	Messages       []*sdkws.MsgData `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages"`
 	ConversationID string           `protobuf:"bytes,2,opt,name=conversationID,proto3" json:"conversationID"`
 }
 
@@ -780,8 +778,8 @@ type RevokeMsgReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	Seq            int64  `protobuf:"varint,2,opt,name=seq,proto3"           json:"seq"`
-	UserID         string `protobuf:"bytes,3,opt,name=userID,proto3"         json:"userID"`
+	Seq            int64  `protobuf:"varint,2,opt,name=seq,proto3" json:"seq"`
+	UserID         string `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID"`
 }
 
 func (x *RevokeMsgReq) Reset() {
@@ -881,8 +879,8 @@ type MarkMsgsAsReadReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string  `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	Seqs           []int64 `protobuf:"varint,2,rep,packed,name=seqs,proto3"   json:"seqs"`
-	UserID         string  `protobuf:"bytes,3,opt,name=userID,proto3"         json:"userID"`
+	Seqs           []int64 `protobuf:"varint,2,rep,packed,name=seqs,proto3" json:"seqs"`
+	UserID         string  `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID"`
 }
 
 func (x *MarkMsgsAsReadReq) Reset() {
@@ -982,9 +980,9 @@ type MarkConversationAsReadReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string  `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	UserID         string  `protobuf:"bytes,2,opt,name=userID,proto3"         json:"userID"`
-	HasReadSeq     int64   `protobuf:"varint,3,opt,name=hasReadSeq,proto3"    json:"hasReadSeq"`
-	Seqs           []int64 `protobuf:"varint,4,rep,packed,name=seqs,proto3"   json:"seqs"`
+	UserID         string  `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID"`
+	HasReadSeq     int64   `protobuf:"varint,3,opt,name=hasReadSeq,proto3" json:"hasReadSeq"`
+	Seqs           []int64 `protobuf:"varint,4,rep,packed,name=seqs,proto3" json:"seqs"`
 }
 
 func (x *MarkConversationAsReadReq) Reset() {
@@ -1091,8 +1089,8 @@ type SetConversationHasReadSeqReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	UserID         string `protobuf:"bytes,2,opt,name=userID,proto3"         json:"userID"`
-	HasReadSeq     int64  `protobuf:"varint,3,opt,name=hasReadSeq,proto3"    json:"hasReadSeq"`
+	UserID         string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID"`
+	HasReadSeq     int64  `protobuf:"varint,3,opt,name=hasReadSeq,proto3" json:"hasReadSeq"`
 }
 
 func (x *SetConversationHasReadSeqReq) Reset() {
@@ -1191,7 +1189,7 @@ type DeleteSyncOpt struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	IsSyncSelf  bool `protobuf:"varint,3,opt,name=IsSyncSelf,proto3"  json:"IsSyncSelf"`
+	IsSyncSelf  bool `protobuf:"varint,3,opt,name=IsSyncSelf,proto3" json:"IsSyncSelf"`
 	IsSyncOther bool `protobuf:"varint,4,opt,name=IsSyncOther,proto3" json:"IsSyncOther"`
 }
 
@@ -1247,8 +1245,8 @@ type ClearConversationsMsgReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationIDs []string       `protobuf:"bytes,1,rep,name=conversationIDs,proto3" json:"conversationIDs"`
-	UserID          string         `protobuf:"bytes,2,opt,name=userID,proto3"          json:"userID"`
-	DeleteSyncOpt   *DeleteSyncOpt `protobuf:"bytes,3,opt,name=deleteSyncOpt,proto3"   json:"deleteSyncOpt"`
+	UserID          string         `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID"`
+	DeleteSyncOpt   *DeleteSyncOpt `protobuf:"bytes,3,opt,name=deleteSyncOpt,proto3" json:"deleteSyncOpt"`
 }
 
 func (x *ClearConversationsMsgReq) Reset() {
@@ -1347,7 +1345,7 @@ type UserClearAllMsgReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID        string         `protobuf:"bytes,1,opt,name=userID,proto3"        json:"userID"`
+	UserID        string         `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
 	DeleteSyncOpt *DeleteSyncOpt `protobuf:"bytes,3,opt,name=deleteSyncOpt,proto3" json:"deleteSyncOpt"`
 }
 
@@ -1441,9 +1439,9 @@ type DeleteMsgsReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string         `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	Seqs           []int64        `protobuf:"varint,2,rep,packed,name=seqs,proto3"   json:"seqs"`
-	UserID         string         `protobuf:"bytes,3,opt,name=userID,proto3"         json:"userID"`
-	DeleteSyncOpt  *DeleteSyncOpt `protobuf:"bytes,4,opt,name=deleteSyncOpt,proto3"  json:"deleteSyncOpt"`
+	Seqs           []int64        `protobuf:"varint,2,rep,packed,name=seqs,proto3" json:"seqs"`
+	UserID         string         `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID"`
+	DeleteSyncOpt  *DeleteSyncOpt `protobuf:"bytes,4,opt,name=deleteSyncOpt,proto3" json:"deleteSyncOpt"`
 }
 
 func (x *DeleteMsgsReq) Reset() {
@@ -1550,7 +1548,7 @@ type DeleteMsgPhysicalReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationIDs []string `protobuf:"bytes,1,rep,name=conversationIDs,proto3" json:"conversationIDs"`
-	Timestamp       int64    `protobuf:"varint,2,opt,name=timestamp,proto3"      json:"timestamp"`
+	Timestamp       int64    `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp"`
 }
 
 func (x *DeleteMsgPhysicalReq) Reset() {
@@ -1643,7 +1641,7 @@ type DeleteMsgPhysicalBySeqReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	ConversationID string  `protobuf:"bytes,1,opt,name=conversationID,proto3" json:"conversationID"`
-	Seqs           []int64 `protobuf:"varint,2,rep,packed,name=seqs,proto3"   json:"seqs"`
+	Seqs           []int64 `protobuf:"varint,2,rep,packed,name=seqs,proto3" json:"seqs"`
 }
 
 func (x *DeleteMsgPhysicalBySeqReq) Reset() {
@@ -1876,7 +1874,7 @@ type Seqs struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MaxSeq     int64 `protobuf:"varint,1,opt,name=maxSeq,proto3"     json:"maxSeq"`
+	MaxSeq     int64 `protobuf:"varint,1,opt,name=maxSeq,proto3" json:"maxSeq"`
 	HasReadSeq int64 `protobuf:"varint,2,opt,name=hasReadSeq,proto3" json:"hasReadSeq"`
 }
 
@@ -1978,10 +1976,10 @@ type GetActiveUserReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Start      int64                    `protobuf:"varint,1,opt,name=start,proto3"     json:"start"`
-	End        int64                    `protobuf:"varint,2,opt,name=end,proto3"       json:"end"`
-	Ase        bool                     `protobuf:"varint,3,opt,name=ase,proto3"       json:"ase"`
-	Group      bool                     `protobuf:"varint,4,opt,name=group,proto3"     json:"group"`
+	Start      int64                    `protobuf:"varint,1,opt,name=start,proto3" json:"start"`
+	End        int64                    `protobuf:"varint,2,opt,name=end,proto3" json:"end"`
+	Ase        bool                     `protobuf:"varint,3,opt,name=ase,proto3" json:"ase"`
+	Group      bool                     `protobuf:"varint,4,opt,name=group,proto3" json:"group"`
 	Pagination *sdkws.RequestPagination `protobuf:"bytes,5,opt,name=pagination,proto3" json:"pagination"`
 }
 
@@ -2057,7 +2055,7 @@ type ActiveUser struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User  *sdkws.UserInfo `protobuf:"bytes,1,opt,name=user,proto3"   json:"user"`
+	User  *sdkws.UserInfo `protobuf:"bytes,1,opt,name=user,proto3" json:"user"`
 	Count int64           `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
@@ -2112,10 +2110,10 @@ type GetActiveUserResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgCount  int64            `protobuf:"varint,1,opt,name=msgCount,proto3"  json:"msgCount"`
+	MsgCount  int64            `protobuf:"varint,1,opt,name=msgCount,proto3" json:"msgCount"`
 	UserCount int64            `protobuf:"varint,2,opt,name=userCount,proto3" json:"userCount"`
-	DateCount map[string]int64 `protobuf:"bytes,3,rep,name=dateCount,proto3"  json:"dateCount" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
-	Users     []*ActiveUser    `protobuf:"bytes,4,rep,name=users,proto3"      json:"users"`
+	DateCount map[string]int64 `protobuf:"bytes,3,rep,name=dateCount,proto3" json:"dateCount" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	Users     []*ActiveUser    `protobuf:"bytes,4,rep,name=users,proto3" json:"users"`
 }
 
 func (x *GetActiveUserResp) Reset() {
@@ -2183,9 +2181,9 @@ type GetActiveGroupReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Start      int64                    `protobuf:"varint,1,opt,name=start,proto3"     json:"start"`
-	End        int64                    `protobuf:"varint,2,opt,name=end,proto3"       json:"end"`
-	Ase        bool                     `protobuf:"varint,3,opt,name=ase,proto3"       json:"ase"`
+	Start      int64                    `protobuf:"varint,1,opt,name=start,proto3" json:"start"`
+	End        int64                    `protobuf:"varint,2,opt,name=end,proto3" json:"end"`
+	Ase        bool                     `protobuf:"varint,3,opt,name=ase,proto3" json:"ase"`
 	Pagination *sdkws.RequestPagination `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination"`
 }
 
@@ -2254,7 +2252,7 @@ type ActiveGroup struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Group *sdkws.GroupInfo `protobuf:"bytes,1,opt,name=group,proto3"  json:"group"`
+	Group *sdkws.GroupInfo `protobuf:"bytes,1,opt,name=group,proto3" json:"group"`
 	Count int64            `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
@@ -2309,10 +2307,10 @@ type GetActiveGroupResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgCount   int64            `protobuf:"varint,1,opt,name=msgCount,proto3"   json:"msgCount"`
+	MsgCount   int64            `protobuf:"varint,1,opt,name=msgCount,proto3" json:"msgCount"`
 	GroupCount int64            `protobuf:"varint,2,opt,name=groupCount,proto3" json:"groupCount"`
-	DateCount  map[string]int64 `protobuf:"bytes,3,rep,name=dateCount,proto3"   json:"dateCount"  protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
-	Groups     []*ActiveGroup   `protobuf:"bytes,4,rep,name=groups,proto3"      json:"groups"`
+	DateCount  map[string]int64 `protobuf:"bytes,3,rep,name=dateCount,proto3" json:"dateCount" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	Groups     []*ActiveGroup   `protobuf:"bytes,4,rep,name=groups,proto3" json:"groups"`
 }
 
 func (x *GetActiveGroupResp) Reset() {
@@ -2380,12 +2378,12 @@ type SearchMessageReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	SendID      string                   `protobuf:"bytes,1,opt,name=sendID,proto3"       json:"sendID"` //发送者ID
-	RecvID      string                   `protobuf:"bytes,2,opt,name=recvID,proto3"       json:"recvID"` //接收者ID
-	MsgType     int32                    `protobuf:"varint,3,opt,name=msgType,proto3"     json:"msgType"`
-	SendTime    string                   `protobuf:"bytes,4,opt,name=sendTime,proto3"     json:"sendTime"`
+	SendID      string                   `protobuf:"bytes,1,opt,name=sendID,proto3" json:"sendID"` //发送者ID
+	RecvID      string                   `protobuf:"bytes,2,opt,name=recvID,proto3" json:"recvID"` //接收者ID
+	MsgType     int32                    `protobuf:"varint,3,opt,name=msgType,proto3" json:"msgType"`
+	SendTime    string                   `protobuf:"bytes,4,opt,name=sendTime,proto3" json:"sendTime"`
 	SessionType int32                    `protobuf:"varint,5,opt,name=sessionType,proto3" json:"sessionType"`
-	Pagination  *sdkws.RequestPagination `protobuf:"bytes,6,opt,name=pagination,proto3"   json:"pagination"`
+	Pagination  *sdkws.RequestPagination `protobuf:"bytes,6,opt,name=pagination,proto3" json:"pagination"`
 }
 
 func (x *SearchMessageReq) Reset() {
@@ -2467,7 +2465,7 @@ type SearchMessageResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatLogs    []*ChatLog `protobuf:"bytes,1,rep,name=chatLogs,proto3"     json:"chatLogs"`
+	ChatLogs    []*ChatLog `protobuf:"bytes,1,rep,name=chatLogs,proto3" json:"chatLogs"`
 	ChatLogsNum int32      `protobuf:"varint,2,opt,name=chatLogsNum,proto3" json:"chatLogsNum"`
 }
 
@@ -2522,29 +2520,29 @@ type ChatLog struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServerMsgID      string `protobuf:"bytes,1,opt,name=serverMsgID,proto3"        json:"serverMsgID"`
-	ClientMsgID      string `protobuf:"bytes,2,opt,name=clientMsgID,proto3"        json:"clientMsgID"`
-	SendID           string `protobuf:"bytes,3,opt,name=sendID,proto3"             json:"sendID"`
-	RecvID           string `protobuf:"bytes,4,opt,name=recvID,proto3"             json:"recvID"`
-	GroupID          string `protobuf:"bytes,5,opt,name=groupID,proto3"            json:"groupID"`
-	RecvNickname     string `protobuf:"bytes,6,opt,name=recvNickname,proto3"       json:"recvNickname"`
-	SenderPlatformID int32  `protobuf:"varint,7,opt,name=senderPlatformID,proto3"  json:"senderPlatformID"`
-	SenderNickname   string `protobuf:"bytes,8,opt,name=senderNickname,proto3"     json:"senderNickname"`
-	SenderFaceURL    string `protobuf:"bytes,9,opt,name=senderFaceURL,proto3"      json:"senderFaceURL"`
-	GroupName        string `protobuf:"bytes,10,opt,name=groupName,proto3"         json:"groupName"`
-	SessionType      int32  `protobuf:"varint,11,opt,name=sessionType,proto3"      json:"sessionType"`
-	MsgFrom          int32  `protobuf:"varint,12,opt,name=msgFrom,proto3"          json:"msgFrom"`
-	ContentType      int32  `protobuf:"varint,13,opt,name=contentType,proto3"      json:"contentType"`
-	Content          string `protobuf:"bytes,14,opt,name=content,proto3"           json:"content"`
-	Status           int32  `protobuf:"varint,15,opt,name=status,proto3"           json:"status"`
-	SendTime         int64  `protobuf:"varint,16,opt,name=sendTime,proto3"         json:"sendTime"`
-	CreateTime       int64  `protobuf:"varint,17,opt,name=createTime,proto3"       json:"createTime"`
-	Ex               string `protobuf:"bytes,18,opt,name=ex,proto3"                json:"ex"`
-	GroupFaceURL     string `protobuf:"bytes,19,opt,name=groupFaceURL,proto3"      json:"groupFaceURL"`
+	ServerMsgID      string `protobuf:"bytes,1,opt,name=serverMsgID,proto3" json:"serverMsgID"`
+	ClientMsgID      string `protobuf:"bytes,2,opt,name=clientMsgID,proto3" json:"clientMsgID"`
+	SendID           string `protobuf:"bytes,3,opt,name=sendID,proto3" json:"sendID"`
+	RecvID           string `protobuf:"bytes,4,opt,name=recvID,proto3" json:"recvID"`
+	GroupID          string `protobuf:"bytes,5,opt,name=groupID,proto3" json:"groupID"`
+	RecvNickname     string `protobuf:"bytes,6,opt,name=recvNickname,proto3" json:"recvNickname"`
+	SenderPlatformID int32  `protobuf:"varint,7,opt,name=senderPlatformID,proto3" json:"senderPlatformID"`
+	SenderNickname   string `protobuf:"bytes,8,opt,name=senderNickname,proto3" json:"senderNickname"`
+	SenderFaceURL    string `protobuf:"bytes,9,opt,name=senderFaceURL,proto3" json:"senderFaceURL"`
+	GroupName        string `protobuf:"bytes,10,opt,name=groupName,proto3" json:"groupName"`
+	SessionType      int32  `protobuf:"varint,11,opt,name=sessionType,proto3" json:"sessionType"`
+	MsgFrom          int32  `protobuf:"varint,12,opt,name=msgFrom,proto3" json:"msgFrom"`
+	ContentType      int32  `protobuf:"varint,13,opt,name=contentType,proto3" json:"contentType"`
+	Content          string `protobuf:"bytes,14,opt,name=content,proto3" json:"content"`
+	Status           int32  `protobuf:"varint,15,opt,name=status,proto3" json:"status"`
+	SendTime         int64  `protobuf:"varint,16,opt,name=sendTime,proto3" json:"sendTime"`
+	CreateTime       int64  `protobuf:"varint,17,opt,name=createTime,proto3" json:"createTime"`
+	Ex               string `protobuf:"bytes,18,opt,name=ex,proto3" json:"ex"`
+	GroupFaceURL     string `protobuf:"bytes,19,opt,name=groupFaceURL,proto3" json:"groupFaceURL"`
 	GroupMemberCount uint32 `protobuf:"varint,20,opt,name=groupMemberCount,proto3" json:"groupMemberCount"`
-	Seq              int64  `protobuf:"varint,21,opt,name=seq,proto3"              json:"seq"`
-	GroupOwner       string `protobuf:"bytes,22,opt,name=groupOwner,proto3"        json:"groupOwner"`
-	GroupType        int32  `protobuf:"varint,23,opt,name=groupType,proto3"        json:"groupType"`
+	Seq              int64  `protobuf:"varint,21,opt,name=seq,proto3" json:"seq"`
+	GroupOwner       string `protobuf:"bytes,22,opt,name=groupOwner,proto3" json:"groupOwner"`
+	GroupType        int32  `protobuf:"varint,23,opt,name=groupType,proto3" json:"groupType"`
 }
 
 func (x *ChatLog) Reset() {

@@ -137,9 +137,6 @@ func (x *GetPaginationUsersReq) Check() error {
 }
 
 func (x *UserRegisterReq) Check() error {
-	if x.Secret == "" {
-		return errs.ErrArgs.Wrap("Secret is empty")
-	}
 	if x.Users == nil {
 		return errs.ErrArgs.Wrap("Users is empty")
 	}

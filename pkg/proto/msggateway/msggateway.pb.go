@@ -22,16 +22,14 @@ package msggateway
 
 import (
 	context "context"
-	reflect "reflect"
-	sync "sync"
-
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -46,7 +44,7 @@ type OnlinePushMsgReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgData      *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3"      json:"msgData"`
+	MsgData      *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3" json:"msgData"`
 	PushToUserID string         `protobuf:"bytes,2,opt,name=pushToUserID,proto3" json:"pushToUserID"`
 }
 
@@ -148,8 +146,8 @@ type SingleMsgToUserResults struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID     string                     `protobuf:"bytes,1,opt,name=userID,proto3"      json:"userID"`
-	Resp       []*SingleMsgToUserPlatform `protobuf:"bytes,2,rep,name=resp,proto3"        json:"resp"`
+	UserID     string                     `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
+	Resp       []*SingleMsgToUserPlatform `protobuf:"bytes,2,rep,name=resp,proto3" json:"resp"`
 	OnlinePush bool                       `protobuf:"varint,3,opt,name=onlinePush,proto3" json:"onlinePush"`
 }
 
@@ -211,7 +209,7 @@ type OnlineBatchPushOneMsgReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgData       *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3"       json:"msgData"`
+	MsgData       *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3" json:"msgData"`
 	PushToUserIDs []string       `protobuf:"bytes,2,rep,name=pushToUserIDs,proto3" json:"pushToUserIDs"`
 }
 
@@ -313,8 +311,8 @@ type SingleMsgToUserPlatform struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ResultCode     int64  `protobuf:"varint,1,opt,name=ResultCode,proto3"     json:"ResultCode"`
-	RecvID         string `protobuf:"bytes,2,opt,name=RecvID,proto3"          json:"RecvID"`
+	ResultCode     int64  `protobuf:"varint,1,opt,name=ResultCode,proto3" json:"ResultCode"`
+	RecvID         string `protobuf:"bytes,2,opt,name=RecvID,proto3" json:"RecvID"`
 	RecvPlatFormID int32  `protobuf:"varint,3,opt,name=RecvPlatFormID,proto3" json:"RecvPlatFormID"`
 }
 
@@ -424,7 +422,7 @@ type GetUsersOnlineStatusResp struct {
 	unknownFields protoimpl.UnknownFields
 
 	SuccessResult []*GetUsersOnlineStatusResp_SuccessResult `protobuf:"bytes,1,rep,name=successResult,proto3" json:"successResult"`
-	FailedResult  []*GetUsersOnlineStatusResp_FailedDetail  `protobuf:"bytes,2,rep,name=failedResult,proto3"  json:"failedResult"`
+	FailedResult  []*GetUsersOnlineStatusResp_FailedDetail  `protobuf:"bytes,2,rep,name=failedResult,proto3" json:"failedResult"`
 }
 
 func (x *GetUsersOnlineStatusResp) Reset() {
@@ -478,8 +476,8 @@ type SingleDetail struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID              string                 `protobuf:"bytes,1,opt,name=userID,proto3"              json:"userID"`
-	Status              string                 `protobuf:"bytes,2,opt,name=status,proto3"              json:"status"`
+	UserID              string                 `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
+	Status              string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
 	SinglePlatformToken []*SinglePlatformToken `protobuf:"bytes,3,rep,name=singlePlatformToken,proto3" json:"singlePlatformToken"`
 }
 
@@ -542,8 +540,8 @@ type SinglePlatformToken struct {
 	unknownFields protoimpl.UnknownFields
 
 	Platform string   `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform"`
-	Total    int32    `protobuf:"varint,2,opt,name=total,proto3"   json:"total"`
-	Token    []string `protobuf:"bytes,3,rep,name=token,proto3"    json:"token"`
+	Total    int32    `protobuf:"varint,2,opt,name=total,proto3" json:"total"`
+	Token    []string `protobuf:"bytes,3,rep,name=token,proto3" json:"token"`
 }
 
 func (x *SinglePlatformToken) Reset() {
@@ -604,7 +602,7 @@ type KickUserOfflineReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PlatformID     int32    `protobuf:"varint,1,opt,name=platformID,proto3"    json:"platformID"`
+	PlatformID     int32    `protobuf:"varint,1,opt,name=platformID,proto3" json:"platformID"`
 	KickUserIDList []string `protobuf:"bytes,2,rep,name=kickUserIDList,proto3" json:"kickUserIDList"`
 }
 
@@ -697,9 +695,9 @@ type MultiTerminalLoginCheckReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID      string `protobuf:"bytes,1,opt,name=userID,proto3"      json:"userID"`
+	UserID      string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
 	PlatformID  int32  `protobuf:"varint,2,opt,name=platformID,proto3" json:"platformID"`
-	Token       string `protobuf:"bytes,3,opt,name=token,proto3"       json:"token"`
+	Token       string `protobuf:"bytes,3,opt,name=token,proto3" json:"token"`
 	OperationID string `protobuf:"bytes,4,opt,name=operationID,proto3" json:"operationID"`
 }
 
@@ -806,11 +804,11 @@ type GetUsersOnlineStatusResp_SuccessDetail struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Platform     string `protobuf:"bytes,1,opt,name=platform,proto3"      json:"platform"`
-	Status       string `protobuf:"bytes,2,opt,name=status,proto3"        json:"status"`
-	ConnID       string `protobuf:"bytes,3,opt,name=connID,proto3"        json:"connID"`
+	Platform     string `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform"`
+	Status       string `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
+	ConnID       string `protobuf:"bytes,3,opt,name=connID,proto3" json:"connID"`
 	IsBackground bool   `protobuf:"varint,4,opt,name=isBackground,proto3" json:"isBackground"`
-	Token        string `protobuf:"bytes,5,opt,name=token,proto3"         json:"token"`
+	Token        string `protobuf:"bytes,5,opt,name=token,proto3" json:"token"`
 }
 
 func (x *GetUsersOnlineStatusResp_SuccessDetail) Reset() {
@@ -932,8 +930,8 @@ type GetUsersOnlineStatusResp_SuccessResult struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID               string                                    `protobuf:"bytes,1,opt,name=userID,proto3"               json:"userID"`
-	Status               string                                    `protobuf:"bytes,2,opt,name=status,proto3"               json:"status"`
+	UserID               string                                    `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
+	Status               string                                    `protobuf:"bytes,2,opt,name=status,proto3" json:"status"`
 	DetailPlatformStatus []*GetUsersOnlineStatusResp_SuccessDetail `protobuf:"bytes,3,rep,name=detailPlatformStatus,proto3" json:"detailPlatformStatus"`
 }
 

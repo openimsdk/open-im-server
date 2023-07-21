@@ -40,7 +40,17 @@ func (s *ZkClient) watch() {
 		event := <-s.eventChan
 		switch event.Type {
 		case zk.EventSession:
-			s.logger.Printf("zk session event: %+v", event)
+			if event.State == zk.StateHasSession && s.isRegistered {
+				s.logger.Printf("zk session event stateHasSession: %+v, client prepare to create new temp node", event)
+				node, err := s.CreateTempNode(s.rpcRegisterName, s.rpcRegisterAddr)
+				if err != nil {
+					s.logger.Printf("zk session event stateHasSession: %+v, create temp node error: %v", event, err)
+				} else {
+					s.node = node
+				}
+			} else {
+				s.logger.Printf("zk session event: %+v", event)
+			}
 		case zk.EventNodeChildrenChanged:
 			s.logger.Printf("zk event: %s", event.Path)
 			l := strings.Split(event.Path, "/")
