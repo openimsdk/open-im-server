@@ -38,6 +38,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
 )
 
+// rpcString
 func rpcString(v interface{}) string {
 	if s, ok := v.(interface{ String() string }); ok {
 		return s.String()
@@ -45,6 +46,7 @@ func rpcString(v interface{}) string {
 	return fmt.Sprintf("%+v", v)
 }
 
+// RpcServerInterceptor
 func RpcServerInterceptor(
 	ctx context.Context,
 	req interface{},
@@ -52,7 +54,7 @@ func RpcServerInterceptor(
 	handler grpc.UnaryHandler,
 ) (resp interface{}, err error) {
 	log.ZDebug(ctx, "rpc server req", "req", rpcString(req))
-	//defer func() {
+	// defer func() {
 	//	if r := recover(); r != nil {
 	// 		log.ZError(ctx, "rpc panic", nil, "FullMethod", info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r)
 	//		fmt.Printf("panic: %+v\nstack info: %s\n", r, string(debug.Stack()))
@@ -74,7 +76,7 @@ func RpcServerInterceptor(
 	//		}
 	//		err = sta.Err()
 	//	}
-	//}()
+	// }()
 	funcName := info.FullMethod
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -133,8 +135,8 @@ func RpcServerInterceptor(
 	var errInfo *errinfo.ErrorInfo
 	if config.Config.Log.WithStack {
 		if unwrap != err {
-			sti, ok := err.(interface{ StackTrace() errors.StackTrace })
-			if ok {
+			var sti interface{ StackTrace() errors.StackTrace }
+			if errors.As(err, &sti) {
 				log.ZWarn(
 					ctx,
 					"rpc server resp",
@@ -173,9 +175,11 @@ func RpcServerInterceptor(
 		return nil, errs.Wrap(err)
 	}
 	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
+
 	return nil, details.Err()
 }
 
+// GrpcServer
 func GrpcServer() grpc.ServerOption {
 	return grpc.ChainUnaryInterceptor(RpcServerInterceptor)
 }

@@ -26,27 +26,33 @@ import (
 	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 )
 
+// Conversation
 type Conversation struct {
 	Client pbConversation.ConversationClient
 	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewConversation
 func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversation {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImConversationName)
 	if err != nil {
 		panic(err)
 	}
 	client := pbConversation.NewConversationClient(conn)
+
 	return &Conversation{discov: discov, conn: conn, Client: client}
 }
 
+// ConversationRpcClient
 type ConversationRpcClient Conversation
 
+// NewConversationRpcClient
 func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) ConversationRpcClient {
 	return ConversationRpcClient(*NewConversation(discov))
 }
 
+// GetSingleConversationRecvMsgOpt
 func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
 	var req pbConversation.GetConversationReq
 	req.OwnerUserID = userID
@@ -55,45 +61,59 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 	if err != nil {
 		return 0, err
 	}
+
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 
+// SingleChatFirstCreateConversation
 func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
 	_, err := c.Client.CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+
 	return err
 }
 
+// GroupChatFirstCreateConversation
 func (c *ConversationRpcClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
 	_, err := c.Client.CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
+
 	return err
 }
 
+// SetConversationMaxSeq
 func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
+
 	return err
 }
 
+// SetConversations
 func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
 	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
+
 	return err
 }
 
+// GetConversationIDs
 func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
 	resp, err := c.Client.GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.ConversationIDs, nil
 }
 
+// GetConversation
 func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbConversation.Conversation, error) {
 	resp, err := c.Client.GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Conversation, nil
 }
 
+// GetConversationsByConversationID
 func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
 	if len(conversationIDs) == 0 {
 		return nil, nil
@@ -105,9 +125,11 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	if len(resp.Conversations) == 0 {
 		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("conversationIDs: %v not found", conversationIDs))
 	}
+
 	return resp.Conversations, nil
 }
 
+// GetConversations
 func (c *ConversationRpcClient) GetConversations(
 	ctx context.Context,
 	ownerUserID string,
@@ -123,5 +145,6 @@ func (c *ConversationRpcClient) GetConversations(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Conversations, nil
 }

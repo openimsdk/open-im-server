@@ -35,6 +35,7 @@ var (
 	ErrConnIsNilButLocalNotNil = errors.New("conn is nil, but local is not nil")
 )
 
+// watch
 func (s *ZkClient) watch() {
 	for {
 		event := <-s.eventChan
@@ -69,6 +70,7 @@ func (s *ZkClient) watch() {
 	}
 }
 
+// GetConnsRemote
 func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address, err error) {
 	path := s.getPath(serviceName)
 	_, _, _, err = s.conn.ChildrenW(path)
@@ -86,15 +88,18 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 				if err == zk.ErrNoNode {
 					return nil, errors.Wrap(err, "this is zk ErrNoNode")
 				}
+
 				return nil, errors.Wrap(err, "get children error")
 			}
 			log.ZDebug(context.Background(), "get addrs from remote", "conn", string(data))
 			conns = append(conns, resolver.Address{Addr: string(data), ServerName: serviceName})
 		}
 	}
+
 	return conns, nil
 }
 
+// GetConns
 func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
 	s.lock.Lock()
@@ -114,21 +119,26 @@ func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grp
 			cc, err := grpc.DialContext(ctx, addr.Addr, append(s.options, opts...)...)
 			if err != nil {
 				log.ZError(context.Background(), "dialContext failed", err, "addr", addr.Addr, "opts", append(s.options, opts...))
+
 				return nil, errs.Wrap(err)
 			}
 			conns = append(conns, cc)
 		}
 		s.localConns[serviceName] = conns
 	}
+
 	return conns, nil
 }
 
+// GetConn
 func (s *ZkClient) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
 	newOpts := append(s.options, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, s.balancerName)))
 	s.logger.Printf("get conn from client, serviceName: %s", serviceName)
+
 	return grpc.DialContext(ctx, fmt.Sprintf("%s:///%s", s.scheme, serviceName), append(newOpts, opts...)...)
 }
 
+// CloseConn
 func (s *ZkClient) CloseConn(conn grpc.ClientConnInterface) {
 	if closer, ok := conn.(io.Closer); ok {
 		closer.Close()

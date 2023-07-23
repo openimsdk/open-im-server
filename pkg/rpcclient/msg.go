@@ -121,29 +121,36 @@ func newSessionTypeConf() map[int32]int32 {
 	}
 }
 
+// Message
 type Message struct {
 	conn   grpc.ClientConnInterface
 	Client msg.MsgClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewMessage
 func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
+
 	return &Message{discov: discov, conn: conn, Client: client}
 }
 
+// MessageRpcClient
 type MessageRpcClient Message
 
+// NewMessageRpcClient
 func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) MessageRpcClient {
 	return MessageRpcClient(*NewMessage(discov))
 }
 
+// SendMsg
 func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 	resp, err := m.Client.SendMsg(ctx, req)
+
 	return resp, err
 }
 

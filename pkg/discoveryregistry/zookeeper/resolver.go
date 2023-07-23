@@ -23,6 +23,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+// Resolver
 type Resolver struct {
 	target resolver.Target
 	cc     resolver.ClientConn
@@ -31,6 +32,7 @@ type Resolver struct {
 	getConnsRemote func(serviceName string) (conns []resolver.Address, err error)
 }
 
+// ResolveNowZK
 func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
 	log.ZDebug(
 		context.Background(),
@@ -45,6 +47,7 @@ func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
 	newConns, err := r.getConnsRemote(strings.TrimLeft(r.target.URL.Path, "/"))
 	if err != nil {
 		log.ZError(context.Background(), "resolve now error", err, "target", r.target)
+
 		return
 	}
 	r.addrs = newConns
@@ -58,15 +61,19 @@ func (r *Resolver) ResolveNowZK(o resolver.ResolveNowOptions) {
 			"zk path",
 			r.target.URL.Path,
 		)
+
 		return
 	}
 	log.ZDebug(context.Background(), "resolve now finished", "target", r.target, "conns", r.addrs)
 }
 
+// ResolveNow
 func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {}
 
+// Close
 func (s *Resolver) Close() {}
 
+// Build
 func (s *ZkClient) Build(
 	target resolver.Target,
 	cc resolver.ClientConn,
@@ -76,6 +83,7 @@ func (s *ZkClient) Build(
 	serviceName := strings.TrimLeft(target.URL.Path, "/")
 	if oldResolver, ok := s.resolvers[serviceName]; ok {
 		s.logger.Printf("rpc resolver exist: %+v, cc: %+v, key: %s", target, cc.UpdateState, serviceName)
+
 		return oldResolver, nil
 	}
 	r := &Resolver{}
@@ -87,7 +95,9 @@ func (s *ZkClient) Build(
 	defer s.lock.Unlock()
 	s.resolvers[serviceName] = r
 	s.logger.Printf("build resolver finished: %+v, cc: %+v, key: %s", target, cc.UpdateState, serviceName)
+
 	return r, nil
 }
 
+// Scheme
 func (s *ZkClient) Scheme() string { return s.scheme }

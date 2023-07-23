@@ -24,15 +24,18 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
 )
 
+// NewAuth
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImAuthName)
 	if err != nil {
 		panic(err)
 	}
 	client := auth.NewAuthClient(conn)
+
 	return &Auth{discov: discov, conn: conn, Client: client}
 }
 
+// Auth
 type Auth struct {
 	conn   grpc.ClientConnInterface
 	Client auth.AuthClient
