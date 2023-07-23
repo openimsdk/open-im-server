@@ -54,5 +54,6 @@ func BlackDB2Pb(
 		}
 		blackPbs = append(blackPbs, blackPb)
 	}
+
 	return blackPbs, nil
 }

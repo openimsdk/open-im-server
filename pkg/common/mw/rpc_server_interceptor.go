@@ -110,13 +110,15 @@ func RpcServerInterceptor(
 	}
 	log.ZInfo(ctx, "rpc server req", "funcName", funcName, "req", rpcString(req))
 	resp, err = func() (interface{}, error) {
-		if err := checker.Validate(req); err != nil {
+		if err = checker.Validate(req); err != nil {
 			return nil, err
 		}
+
 		return handler(ctx, req)
 	}()
 	if err == nil {
 		log.ZInfo(ctx, "rpc server resp", "funcName", funcName, "resp", rpcString(resp))
+
 		return resp, nil
 	}
 	log.ZError(ctx, "rpc server resp", err, "funcName", funcName)
@@ -134,7 +136,7 @@ func RpcServerInterceptor(
 	grpcStatus := status.New(codes.Code(code), codeErr.Msg())
 	var errInfo *errinfo.ErrorInfo
 	if config.Config.Log.WithStack {
-		if unwrap != err {
+		if errors.Is(err, unwrap) {
 			var sti interface{ StackTrace() errors.StackTrace }
 			if errors.As(err, &sti) {
 				log.ZWarn(
@@ -172,6 +174,7 @@ func RpcServerInterceptor(
 	details, err := grpcStatus.WithDetails(errInfo)
 	if err != nil {
 		log.ZWarn(ctx, "rpc server resp WithDetails error", err, "funcName", funcName)
+
 		return nil, errs.Wrap(err)
 	}
 	log.ZWarn(ctx, "rpc server resp", err, "funcName", funcName)
