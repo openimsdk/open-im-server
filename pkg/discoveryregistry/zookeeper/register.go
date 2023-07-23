@@ -21,16 +21,20 @@ import (
 	"google.golang.org/grpc"
 )
 
+// CreateRpcRootNodes
 func (s *ZkClient) CreateRpcRootNodes(serviceNames []string) error {
 	for _, serviceName := range serviceNames {
 		if err := s.ensureName(serviceName); err != nil && err != zk.ErrNodeExists {
 			return err
 		}
 	}
+
 	return nil
 }
 
+// CreateTempNode
 func (s *ZkClient) CreateTempNode(rpcRegisterName, addr string) (node string, err error) {
+
 	return s.conn.CreateProtectedEphemeralSequential(
 		s.getPath(rpcRegisterName)+"/"+addr+"_",
 		[]byte(addr),
@@ -38,6 +42,7 @@ func (s *ZkClient) CreateTempNode(rpcRegisterName, addr string) (node string, er
 	)
 }
 
+// Register
 func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc.DialOption) error {
 	if err := s.ensureName(rpcRegisterName); err != nil {
 		return err
@@ -55,9 +60,11 @@ func (s *ZkClient) Register(rpcRegisterName, host string, port int, opts ...grpc
 	s.rpcRegisterAddr = addr
 	s.node = node
 	s.isRegistered = true
+
 	return nil
 }
 
+// UnRegister
 func (s *ZkClient) UnRegister() error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
@@ -72,5 +79,6 @@ func (s *ZkClient) UnRegister() error {
 	s.isRegistered = false
 	s.localConns = make(map[string][]grpc.ClientConnInterface)
 	s.resolvers = make(map[string]*Resolver)
+
 	return nil
 }

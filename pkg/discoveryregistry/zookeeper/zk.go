@@ -30,10 +30,12 @@ const (
 	timeout     = 5
 )
 
+// Logger
 type Logger interface {
 	Printf(string, ...interface{})
 }
 
+// ZkClient
 type ZkClient struct {
 	zkServers []string
 	zkRoot    string
@@ -62,14 +64,17 @@ type ZkClient struct {
 	logger Logger
 }
 
+// ZkOption
 type ZkOption func(*ZkClient)
 
+// WithRoundRobin
 func WithRoundRobin() ZkOption {
 	return func(client *ZkClient) {
 		client.balancerName = "round_robin"
 	}
 }
 
+// WithUserNameAndPassword
 func WithUserNameAndPassword(userName, password string) ZkOption {
 	return func(client *ZkClient) {
 		client.userName = userName
@@ -83,24 +88,28 @@ func WithOptions(opts ...grpc.DialOption) ZkOption {
 	}
 }
 
+// WithFreq
 func WithFreq(freq time.Duration) ZkOption {
 	return func(client *ZkClient) {
 		client.ticker = time.NewTicker(freq)
 	}
 }
 
+// WithTimeout
 func WithTimeout(timeout int) ZkOption {
 	return func(client *ZkClient) {
 		client.timeout = timeout
 	}
 }
 
+// WithLogger
 func WithLogger(logger Logger) ZkOption {
 	return func(client *ZkClient) {
 		client.logger = logger
 	}
 }
 
+// NewClient
 func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClient, error) {
 	client := &ZkClient{
 		zkServers:  zkServers,
@@ -134,15 +143,18 @@ func NewClient(zkServers []string, zkRoot string, options ...ZkOption) (*ZkClien
 	client.conn = conn
 	if err := client.ensureRoot(); err != nil {
 		client.CloseZK()
+
 		return nil, err
 	}
 	resolver.Register(client)
 	go client.refresh()
 	go client.watch()
 	time.Sleep(time.Millisecond * 50)
+
 	return client, nil
 }
 
+// CloseZK
 func (s *ZkClient) CloseZK() {
 	s.conn.Close()
 }
@@ -158,6 +170,7 @@ func (s *ZkClient) ensureAndCreate(node string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -189,14 +202,17 @@ func (s *ZkClient) flushResolver(serviceName string) {
 	}
 }
 
+// GetZkConn
 func (s *ZkClient) GetZkConn() *zk.Conn {
 	return s.conn
 }
 
+// GetRootPath
 func (s *ZkClient) GetRootPath() string {
 	return s.zkRoot
 }
 
+// GetNode
 func (s *ZkClient) GetNode() string {
 	return s.node
 }
@@ -217,10 +233,12 @@ func (s *ZkClient) getAddr(host string, port int) string {
 	return net.JoinHostPort(host, strconv.Itoa(port))
 }
 
+// AddOption
 func (s *ZkClient) AddOption(opts ...grpc.DialOption) {
 	s.options = append(s.options, opts...)
 }
 
+// GetClientLocalConns
 func (s *ZkClient) GetClientLocalConns() map[string][]grpc.ClientConnInterface {
 	return s.localConns
 }

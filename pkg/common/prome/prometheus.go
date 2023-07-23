@@ -26,6 +26,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// StartPrometheusSrv
 func StartPrometheusSrv(prometheusPort int) error {
 	if config.Config.Prometheus.Enable {
 		http.Handle("/metrics", promhttp.Handler())
@@ -35,6 +36,7 @@ func StartPrometheusSrv(prometheusPort int) error {
 	return nil
 }
 
+// PrometheusHandler
 func PrometheusHandler() gin.HandlerFunc {
 	h := promhttp.Handler()
 	return func(c *gin.Context) {
@@ -42,16 +44,19 @@ func PrometheusHandler() gin.HandlerFunc {
 	}
 }
 
+// responseBodyWriter
 type responseBodyWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
 }
 
+// Write
 func (r responseBodyWriter) Write(b []byte) (int, error) {
 	r.body.Write(b)
 	return r.ResponseWriter.Write(b)
 }
 
+// PrometheusMiddleware
 func PrometheusMiddleware(c *gin.Context) {
 	Inc(ApiRequestCounter)
 	w := &responseBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
@@ -64,6 +69,7 @@ func PrometheusMiddleware(c *gin.Context) {
 	}
 }
 
+// Inc
 func Inc(counter prometheus.Counter) {
 	if config.Config.Prometheus.Enable {
 		if counter != nil {
@@ -72,6 +78,7 @@ func Inc(counter prometheus.Counter) {
 	}
 }
 
+// Add
 func Add(counter prometheus.Counter, add int) {
 	if config.Config.Prometheus.Enable {
 		if counter != nil {
@@ -80,6 +87,7 @@ func Add(counter prometheus.Counter, add int) {
 	}
 }
 
+// GaugeInc
 func GaugeInc(gauges prometheus.Gauge) {
 	if config.Config.Prometheus.Enable {
 		if gauges != nil {
@@ -88,6 +96,7 @@ func GaugeInc(gauges prometheus.Gauge) {
 	}
 }
 
+// GaugeDec
 func GaugeDec(gauges prometheus.Gauge) {
 	if config.Config.Prometheus.Enable {
 		if gauges != nil {

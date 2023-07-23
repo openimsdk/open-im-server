@@ -28,6 +28,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 )
 
+// Third
 type Third struct {
 	conn        grpc.ClientConnInterface
 	Client      third.ThirdClient
@@ -35,20 +36,22 @@ type Third struct {
 	MinioClient *minio.Client
 }
 
+// NewThird
 func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
+	var minioClient *minio.Client
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImThirdName)
 	if err != nil {
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
-	minioClient, err := minioInit()
+	minioClient, err = minioInit()
+
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
 }
 
 func minioInit() (*minio.Client, error) {
-	minioClient := &minio.Client{}
-	var initUrl string
-	initUrl = config.Config.Object.Minio.Endpoint
+	var minioClient *minio.Client
+	initUrl := config.Config.Object.Minio.Endpoint
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err
@@ -66,5 +69,6 @@ func minioInit() (*minio.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return minioClient, nil
 }

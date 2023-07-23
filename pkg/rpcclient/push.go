@@ -24,17 +24,20 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 )
 
+// Push
 type Push struct {
 	conn   grpc.ClientConnInterface
 	Client push.PushMsgServiceClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewPush
 func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImPushName)
 	if err != nil {
 		panic(err)
 	}
+
 	return &Push{
 		discov: discov,
 		conn:   conn,
@@ -42,12 +45,15 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 	}
 }
 
+// PushRpcClient
 type PushRpcClient Push
 
+// NewPushRpcClient
 func NewPushRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) PushRpcClient {
 	return PushRpcClient(*NewPush(discov))
 }
 
+// DelUserPushToken
 func (p *PushRpcClient) DelUserPushToken(
 	ctx context.Context,
 	req *push.DelUserPushTokenReq,

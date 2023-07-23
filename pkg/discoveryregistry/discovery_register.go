@@ -20,6 +20,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Conn
 type Conn interface {
 	GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error)
 	GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error)
@@ -29,6 +30,7 @@ type Conn interface {
 	GetClientLocalConns() map[string][]grpc.ClientConnInterface
 }
 
+// SvcDiscoveryRegistry
 type SvcDiscoveryRegistry interface {
 	Conn
 	Register(serviceName, host string, port int, opts ...grpc.DialOption) error

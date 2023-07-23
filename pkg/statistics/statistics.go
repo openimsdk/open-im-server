@@ -21,6 +21,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 )
 
+// Statistics num
 type Statistics struct {
 	AllCount   *uint64
 	ModuleName string
@@ -63,8 +64,10 @@ func (s *Statistics) output() {
 	}
 }
 
+// NewStatistics
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
 	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()
+
 	return p
 }

@@ -14,10 +14,15 @@
 
 package specialerror
 
-import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+import (
+	"errors"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+)
 
 var handlers []func(err error) errs.CodeError
 
+// AddErrHandler
 func AddErrHandler(h func(err error) errs.CodeError) {
 	if h == nil {
 		panic("nil handler")
@@ -27,13 +32,15 @@ func AddErrHandler(h func(err error) errs.CodeError) {
 
 func AddReplace(target error, codeErr errs.CodeError) {
 	AddErrHandler(func(err error) errs.CodeError {
-		if err == target {
+		if errors.Is(err, target) {
 			return codeErr
 		}
+
 		return nil
 	})
 }
 
+// ErrCode
 func ErrCode(err error) errs.CodeError {
 	if codeErr, ok := err.(errs.CodeError); ok {
 		return codeErr
@@ -43,5 +50,6 @@ func ErrCode(err error) errs.CodeError {
 			return codeErr
 		}
 	}
+
 	return nil
 }

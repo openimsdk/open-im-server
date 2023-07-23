@@ -19,6 +19,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
+// Check
 func (x *UserTokenReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
@@ -26,9 +27,11 @@ func (x *UserTokenReq) Check() error {
 	if x.PlatformID > constant.AdminPlatformID || x.PlatformID < constant.IOSPlatformID {
 		return errs.ErrArgs.Wrap("platform is invalidate")
 	}
+
 	return nil
 }
 
+// Check
 func (x *ForceLogoutReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
@@ -36,12 +39,15 @@ func (x *ForceLogoutReq) Check() error {
 	if x.PlatformID > constant.AdminPlatformID || x.PlatformID < constant.IOSPlatformID {
 		return errs.ErrArgs.Wrap("platformID is invalidate")
 	}
+
 	return nil
 }
 
+// Check
 func (x *ParseTokenReq) Check() error {
 	if x.Token == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }

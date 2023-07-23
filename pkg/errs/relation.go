@@ -14,6 +14,7 @@
 
 package errs
 
+// Relation
 var Relation = &relation{m: make(map[int]map[int]struct{})}
 
 func init() {
@@ -52,5 +53,6 @@ func (r *relation) Is(parent, child int) bool {
 		return false
 	}
 	_, ok = s[child]
+
 	return ok
 }

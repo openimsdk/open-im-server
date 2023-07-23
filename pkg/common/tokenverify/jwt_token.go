@@ -27,15 +27,18 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+// Claims
 type Claims struct {
 	UserID     string
 	PlatformID int // login platform
 	jwt.RegisteredClaims
 }
 
+// BuildClaims
 func BuildClaims(uid string, platformID int, ttl int64) Claims {
 	now := time.Now()
 	before := now.Add(-time.Minute * 5)
+
 	return Claims{
 		UserID:     uid,
 		PlatformID: platformID,
@@ -47,12 +50,14 @@ func BuildClaims(uid string, platformID int, ttl int64) Claims {
 	}
 }
 
+// secret
 func secret() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Config.Secret), nil
 	}
 }
 
+// GetClaimFromToken
 func GetClaimFromToken(tokensString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokensString, &Claims{}, secret())
 	if err != nil {
@@ -73,10 +78,12 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			return claims, nil
 		}
+
 		return nil, utils.Wrap(errs.ErrTokenUnknown, "")
 	}
 }
 
+// CheckAccessV3
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := mcontext.GetOpUserID(ctx)
 	if utils.IsContain(opUserID, config.Config.Manager.UserID) {
@@ -85,28 +92,35 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	if opUserID == ownerUserID {
 		return nil
 	}
+
 	return errs.ErrNoPermission.Wrap(utils.GetSelfFuncName())
 }
 
+// IsAppManagerUid
 func IsAppManagerUid(ctx context.Context) bool {
 	return utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID)
 }
 
+// CheckAdmin
 func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(mcontext.GetOpUserID(ctx), config.Config.Manager.UserID) {
 		return nil
 	}
+
 	return errs.ErrNoPermission.Wrap(fmt.Sprintf("user %s is not admin userID", mcontext.GetOpUserID(ctx)))
 }
 
+// ParseRedisInterfaceToken
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
 
+// IsManagerUserID
 func IsManagerUserID(opUserID string) bool {
 	return utils.IsContain(opUserID, config.Config.Manager.UserID)
 }
 
+// WsVerifyToken
 func WsVerifyToken(token, userID string, platformID int) error {
 	claim, err := GetClaimFromToken(token)
 	if err != nil {
@@ -118,5 +132,6 @@ func WsVerifyToken(token, userID string, platformID int) error {
 	if claim.PlatformID != platformID {
 		return errs.ErrTokenInvalid.Wrap(fmt.Sprintf("token platform %d != %d", claim.PlatformID, platformID))
 	}
+
 	return nil
 }
