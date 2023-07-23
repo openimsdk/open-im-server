@@ -16,6 +16,7 @@ package push
 
 import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
+// Check
 func (x *PushMsgReq) Check() error {
 	if x.MsgData == nil {
 		return errs.ErrArgs.Wrap("MsgData is empty")
@@ -26,9 +27,11 @@ func (x *PushMsgReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("ConversationID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *DelUserPushTokenReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("UserID is empty")
@@ -36,5 +39,6 @@ func (x *DelUserPushTokenReq) Check() error {
 	if x.PlatformID < 1 || x.PlatformID > 9 {
 		return errs.ErrArgs.Wrap("PlatformID is invalid")
 	}
+
 	return nil
 }

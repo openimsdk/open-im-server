@@ -16,6 +16,7 @@ package group
 
 import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
+// Check
 func (x *CreateGroupReq) Check() error {
 	if x.MemberUserIDs == nil {
 		return errs.ErrArgs.Wrap("memberUserIDS is empty")
@@ -29,16 +30,20 @@ func (x *CreateGroupReq) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("ownerUserID")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupsInfoReq) Check() error {
 	if x.GroupIDs == nil {
 		return errs.ErrArgs.Wrap("GroupIDs")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetGroupInfoReq) Check() error {
 	if x.GroupInfoForSet == nil {
 		return errs.ErrArgs.Wrap("GroupInfoForSets is empty")
@@ -46,9 +51,11 @@ func (x *SetGroupInfoReq) Check() error {
 	if x.GroupInfoForSet.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupApplicationListReq) Check() error {
 	if x.Pagination == nil {
 		return errs.ErrArgs.Wrap("pagination is empty")
@@ -59,9 +66,11 @@ func (x *GetGroupApplicationListReq) Check() error {
 	if x.FromUserID == "" {
 		return errs.ErrArgs.Wrap("fromUserID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetUserReqApplicationListReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("UserID is empty")
@@ -72,9 +81,11 @@ func (x *GetUserReqApplicationListReq) Check() error {
 	if x.Pagination.PageNumber < 1 {
 		return errs.ErrArgs.Wrap("pageNumber is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *TransferGroupOwnerReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -85,9 +96,11 @@ func (x *TransferGroupOwnerReq) Check() error {
 	if x.NewOwnerUserID == "" {
 		return errs.ErrArgs.Wrap("newOwnerUserID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *JoinGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -100,9 +113,11 @@ func (x *JoinGroupReq) Check() error {
 			return errs.ErrArgs.Wrap("inviterUserID is empty")
 		}
 	}
+
 	return nil
 }
 
+// Check
 func (x *GroupApplicationResponseReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -113,16 +128,20 @@ func (x *GroupApplicationResponseReq) Check() error {
 	if x.HandleResult > 1 || x.HandleResult < -1 {
 		return errs.ErrArgs.Wrap("handleResult is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *QuitGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMemberListReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -136,9 +155,11 @@ func (x *GetGroupMemberListReq) Check() error {
 	if x.Filter < 0 || x.Filter > 5 {
 		return errs.ErrArgs.Wrap("filter is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMembersInfoReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -146,9 +167,11 @@ func (x *GetGroupMembersInfoReq) Check() error {
 	if x.UserIDs == nil {
 		return errs.ErrArgs.Wrap("userIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *KickGroupMemberReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -156,9 +179,11 @@ func (x *KickGroupMemberReq) Check() error {
 	if x.KickedUserIDs == nil {
 		return errs.ErrArgs.Wrap("kickUserIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetJoinedGroupListReq) Check() error {
 	if x.Pagination == nil {
 		return errs.ErrArgs.Wrap("pagination is empty")
@@ -169,9 +194,11 @@ func (x *GetJoinedGroupListReq) Check() error {
 	if x.FromUserID == "" {
 		return errs.ErrArgs.Wrap("fromUserID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *InviteUserToGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -179,9 +206,11 @@ func (x *InviteUserToGroupReq) Check() error {
 	if x.InvitedUserIDs == nil {
 		return errs.ErrArgs.Wrap("invitedUserIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupAllMemberReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -192,9 +221,11 @@ func (x *GetGroupAllMemberReq) Check() error {
 	if x.Pagination.PageNumber < 1 {
 		return errs.ErrArgs.Wrap("pageNumber is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupsReq) Check() error {
 	if x.Pagination == nil {
 		return errs.ErrArgs.Wrap("pagination is empty")
@@ -202,16 +233,20 @@ func (x *GetGroupsReq) Check() error {
 	if x.Pagination.PageNumber < 1 {
 		return errs.ErrArgs.Wrap("pageNumber is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMemberReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMembersCMSReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -222,16 +257,20 @@ func (x *GetGroupMembersCMSReq) Check() error {
 	if x.Pagination.PageNumber < 1 {
 		return errs.ErrArgs.Wrap("pageNumber is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *DismissGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *MuteGroupMemberReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -242,9 +281,11 @@ func (x *MuteGroupMemberReq) Check() error {
 	if x.MutedSeconds <= 0 {
 		return errs.ErrArgs.Wrap("mutedSeconds is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *CancelMuteGroupMemberReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
@@ -252,37 +293,47 @@ func (x *CancelMuteGroupMemberReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *MuteGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *CancelMuteGroupReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetJoinedSuperGroupListReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetSuperGroupsInfoReq) Check() error {
 	if x.GroupIDs == nil {
 		return errs.ErrArgs.Wrap("GroupIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetGroupMemberInfo) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
@@ -290,23 +341,29 @@ func (x *SetGroupMemberInfo) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetGroupMemberInfoReq) Check() error {
 	if x.Members == nil {
 		return errs.ErrArgs.Wrap("Members is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupAbstractInfoReq) Check() error {
 	if x.GroupIDs == nil {
 		return errs.ErrArgs.Wrap("GroupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetUserInGroupMembersReq) Check() error {
 	if x.GroupIDs == nil {
 		return errs.ErrArgs.Wrap("GroupID is empty")
@@ -314,16 +371,20 @@ func (x *GetUserInGroupMembersReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMemberUserIDsReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMemberRoleLevelReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
@@ -331,16 +392,20 @@ func (x *GetGroupMemberRoleLevelReq) Check() error {
 	if x.RoleLevels == nil {
 		return errs.ErrArgs.Wrap("rolesLevel is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupInfoCacheReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetGroupMemberCacheReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("GroupID is empty")
@@ -348,5 +413,6 @@ func (x *GetGroupMemberCacheReq) Check() error {
 	if x.GroupMemberID == "" {
 		return errs.ErrArgs.Wrap("GroupMemberID is empty")
 	}
+
 	return nil
 }

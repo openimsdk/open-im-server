@@ -18,6 +18,7 @@ import (
 	"github.com/go-zookeeper/zk"
 )
 
+// RegisterConf2Registry
 func (s *ZkClient) RegisterConf2Registry(key string, conf []byte) error {
 	exists, _, err := s.conn.Exists(s.getPath(key))
 	if err != nil {
@@ -32,10 +33,13 @@ func (s *ZkClient) RegisterConf2Registry(key string, conf []byte) error {
 	if err != zk.ErrNodeExists {
 		return err
 	}
+
 	return nil
 }
 
+// GetConfFromRegistry
 func (s *ZkClient) GetConfFromRegistry(key string) ([]byte, error) {
 	bytes, _, err := s.conn.Get(s.getPath(key))
+
 	return bytes, err
 }

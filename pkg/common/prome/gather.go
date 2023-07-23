@@ -79,6 +79,7 @@ var (
 	ConversationCreateFailedCounter  prometheus.Counter
 )
 
+// NewUserLoginCounter
 func NewUserLoginCounter() {
 	if UserLoginCounter != nil {
 		return
@@ -89,6 +90,7 @@ func NewUserLoginCounter() {
 	})
 }
 
+// NewUserRegisterCounter
 func NewUserRegisterCounter() {
 	if UserRegisterCounter != nil {
 		return
@@ -99,6 +101,7 @@ func NewUserRegisterCounter() {
 	})
 }
 
+// NewSeqGetSuccessCounter
 func NewSeqGetSuccessCounter() {
 	if SeqGetSuccessCounter != nil {
 		return
@@ -109,6 +112,7 @@ func NewSeqGetSuccessCounter() {
 	})
 }
 
+// NewSeqGetFailedCounter
 func NewSeqGetFailedCounter() {
 	if SeqGetFailedCounter != nil {
 		return
@@ -119,6 +123,7 @@ func NewSeqGetFailedCounter() {
 	})
 }
 
+// NewSeqSetSuccessCounter
 func NewSeqSetSuccessCounter() {
 	if SeqSetSuccessCounter != nil {
 		return
@@ -129,6 +134,7 @@ func NewSeqSetSuccessCounter() {
 	})
 }
 
+// NewSeqSetFailedCounter
 func NewSeqSetFailedCounter() {
 	if SeqSetFailedCounter != nil {
 		return
@@ -139,6 +145,7 @@ func NewSeqSetFailedCounter() {
 	})
 }
 
+// NewApiRequestCounter
 func NewApiRequestCounter() {
 	if ApiRequestCounter != nil {
 		return
@@ -149,6 +156,7 @@ func NewApiRequestCounter() {
 	})
 }
 
+// NewApiRequestSuccessCounter
 func NewApiRequestSuccessCounter() {
 	if ApiRequestSuccessCounter != nil {
 		return
@@ -159,6 +167,7 @@ func NewApiRequestSuccessCounter() {
 	})
 }
 
+// NewApiRequestFailedCounter
 func NewApiRequestFailedCounter() {
 	if ApiRequestFailedCounter != nil {
 		return
@@ -169,6 +178,7 @@ func NewApiRequestFailedCounter() {
 	})
 }
 
+// NewGrpcRequestCounter
 func NewGrpcRequestCounter() {
 	if GrpcRequestCounter != nil {
 		return
@@ -179,6 +189,7 @@ func NewGrpcRequestCounter() {
 	})
 }
 
+// NewGrpcRequestSuccessCounter
 func NewGrpcRequestSuccessCounter() {
 	if GrpcRequestSuccessCounter != nil {
 		return
@@ -189,6 +200,7 @@ func NewGrpcRequestSuccessCounter() {
 	})
 }
 
+// NewGrpcRequestFailedCounter
 func NewGrpcRequestFailedCounter() {
 	if GrpcRequestFailedCounter != nil {
 		return
@@ -199,6 +211,7 @@ func NewGrpcRequestFailedCounter() {
 	})
 }
 
+// NewSendMsgCount
 func NewSendMsgCount() {
 	if SendMsgCounter != nil {
 		return
@@ -209,6 +222,7 @@ func NewSendMsgCount() {
 	})
 }
 
+// NewMsgInsertRedisSuccessCounter
 func NewMsgInsertRedisSuccessCounter() {
 	if MsgInsertRedisSuccessCounter != nil {
 		return
@@ -219,6 +233,7 @@ func NewMsgInsertRedisSuccessCounter() {
 	})
 }
 
+// NewMsgInsertRedisFailedCounter
 func NewMsgInsertRedisFailedCounter() {
 	if MsgInsertRedisFailedCounter != nil {
 		return
@@ -229,6 +244,7 @@ func NewMsgInsertRedisFailedCounter() {
 	})
 }
 
+// NewMsgInsertMongoSuccessCounter
 func NewMsgInsertMongoSuccessCounter() {
 	if MsgInsertMongoSuccessCounter != nil {
 		return
@@ -239,6 +255,7 @@ func NewMsgInsertMongoSuccessCounter() {
 	})
 }
 
+// NewMsgInsertMongoFailedCounter
 func NewMsgInsertMongoFailedCounter() {
 	if MsgInsertMongoFailedCounter != nil {
 		return
@@ -249,6 +266,7 @@ func NewMsgInsertMongoFailedCounter() {
 	})
 }
 
+// NewMsgPullFromRedisSuccessCounter
 func NewMsgPullFromRedisSuccessCounter() {
 	if MsgPullFromRedisSuccessCounter != nil {
 		return
@@ -259,6 +277,7 @@ func NewMsgPullFromRedisSuccessCounter() {
 	})
 }
 
+// NewMsgPullFromRedisFailedCounter
 func NewMsgPullFromRedisFailedCounter() {
 	if MsgPullFromRedisFailedCounter != nil {
 		return
@@ -269,6 +288,7 @@ func NewMsgPullFromRedisFailedCounter() {
 	})
 }
 
+// NewMsgPullFromMongoSuccessCounter
 func NewMsgPullFromMongoSuccessCounter() {
 	if MsgPullFromMongoSuccessCounter != nil {
 		return
@@ -279,6 +299,7 @@ func NewMsgPullFromMongoSuccessCounter() {
 	})
 }
 
+// NewMsgPullFromMongoFailedCounter
 func NewMsgPullFromMongoFailedCounter() {
 	if MsgPullFromMongoFailedCounter != nil {
 		return
@@ -289,6 +310,7 @@ func NewMsgPullFromMongoFailedCounter() {
 	})
 }
 
+// NewMsgRecvTotalCounter
 func NewMsgRecvTotalCounter() {
 	if MsgRecvTotalCounter != nil {
 		return
@@ -299,6 +321,7 @@ func NewMsgRecvTotalCounter() {
 	})
 }
 
+// NewGetNewestSeqTotalCounter
 func NewGetNewestSeqTotalCounter() {
 	if GetNewestSeqTotalCounter != nil {
 		return
@@ -309,6 +332,7 @@ func NewGetNewestSeqTotalCounter() {
 	})
 }
 
+// NewPullMsgBySeqListTotalCounter
 func NewPullMsgBySeqListTotalCounter() {
 	if PullMsgBySeqListTotalCounter != nil {
 		return
@@ -319,6 +343,7 @@ func NewPullMsgBySeqListTotalCounter() {
 	})
 }
 
+// NewSingleChatMsgRecvSuccessCounter
 func NewSingleChatMsgRecvSuccessCounter() {
 	if SingleChatMsgRecvSuccessCounter != nil {
 		return
@@ -329,6 +354,7 @@ func NewSingleChatMsgRecvSuccessCounter() {
 	})
 }
 
+// NewGroupChatMsgRecvSuccessCounter
 func NewGroupChatMsgRecvSuccessCounter() {
 	if GroupChatMsgRecvSuccessCounter != nil {
 		return
@@ -339,6 +365,7 @@ func NewGroupChatMsgRecvSuccessCounter() {
 	})
 }
 
+// NewWorkSuperGroupChatMsgRecvSuccessCounter
 func NewWorkSuperGroupChatMsgRecvSuccessCounter() {
 	if WorkSuperGroupChatMsgRecvSuccessCounter != nil {
 		return
@@ -349,6 +376,7 @@ func NewWorkSuperGroupChatMsgRecvSuccessCounter() {
 	})
 }
 
+// NewOnlineUserGauges
 func NewOnlineUserGauges() {
 	if OnlineUserGauge != nil {
 		return
@@ -359,6 +387,7 @@ func NewOnlineUserGauges() {
 	})
 }
 
+// NewSingleChatMsgProcessSuccessCounter
 func NewSingleChatMsgProcessSuccessCounter() {
 	if SingleChatMsgProcessSuccessCounter != nil {
 		return
@@ -369,6 +398,7 @@ func NewSingleChatMsgProcessSuccessCounter() {
 	})
 }
 
+// NewSingleChatMsgProcessFailedCounter
 func NewSingleChatMsgProcessFailedCounter() {
 	if SingleChatMsgProcessFailedCounter != nil {
 		return
@@ -379,6 +409,7 @@ func NewSingleChatMsgProcessFailedCounter() {
 	})
 }
 
+// NewGroupChatMsgProcessSuccessCounter
 func NewGroupChatMsgProcessSuccessCounter() {
 	if GroupChatMsgProcessSuccessCounter != nil {
 		return
@@ -389,6 +420,7 @@ func NewGroupChatMsgProcessSuccessCounter() {
 	})
 }
 
+// NewGroupChatMsgProcessFailedCounter
 func NewGroupChatMsgProcessFailedCounter() {
 	if GroupChatMsgProcessFailedCounter != nil {
 		return
@@ -399,6 +431,7 @@ func NewGroupChatMsgProcessFailedCounter() {
 	})
 }
 
+// NewWorkSuperGroupChatMsgProcessSuccessCounter
 func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
 	if WorkSuperGroupChatMsgProcessSuccessCounter != nil {
 		return
@@ -409,6 +442,7 @@ func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
 	})
 }
 
+// NewWorkSuperGroupChatMsgProcessFailedCounter
 func NewWorkSuperGroupChatMsgProcessFailedCounter() {
 	if WorkSuperGroupChatMsgProcessFailedCounter != nil {
 		return
@@ -419,6 +453,7 @@ func NewWorkSuperGroupChatMsgProcessFailedCounter() {
 	})
 }
 
+// NewMsgOnlinePushSuccessCounter
 func NewMsgOnlinePushSuccessCounter() {
 	if MsgOnlinePushSuccessCounter != nil {
 		return
@@ -429,6 +464,7 @@ func NewMsgOnlinePushSuccessCounter() {
 	})
 }
 
+// NewMsgOfflinePushSuccessCounter
 func NewMsgOfflinePushSuccessCounter() {
 	if MsgOfflinePushSuccessCounter != nil {
 		return
@@ -439,6 +475,7 @@ func NewMsgOfflinePushSuccessCounter() {
 	})
 }
 
+// NewMsgOfflinePushFailedCounter
 func NewMsgOfflinePushFailedCounter() {
 	if MsgOfflinePushFailedCounter != nil {
 		return
@@ -449,6 +486,7 @@ func NewMsgOfflinePushFailedCounter() {
 	})
 }
 
+// NewConversationCreateSuccessCounter
 func NewConversationCreateSuccessCounter() {
 	if ConversationCreateSuccessCounter != nil {
 		return
@@ -459,6 +497,7 @@ func NewConversationCreateSuccessCounter() {
 	})
 }
 
+// NewConversationCreateFailedCounter
 func NewConversationCreateFailedCounter() {
 	if ConversationCreateFailedCounter != nil {
 		return

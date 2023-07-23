@@ -29,27 +29,33 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+// Group
 type Group struct {
 	conn   grpc.ClientConnInterface
 	Client group.GroupClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewGroup
 func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImGroupName)
 	if err != nil {
 		panic(err)
 	}
 	client := group.NewGroupClient(conn)
+
 	return &Group{discov: discov, conn: conn, Client: client}
 }
 
+// GroupRpcClient
 type GroupRpcClient Group
 
+// NewGroupRpcClient
 func NewGroupRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) GroupRpcClient {
 	return GroupRpcClient(*NewGroup(discov))
 }
 
+// GetGroupInfos
 func (g *GroupRpcClient) GetGroupInfos(
 	ctx context.Context,
 	groupIDs []string,
@@ -71,14 +77,17 @@ func (g *GroupRpcClient) GetGroupInfos(
 	return resp.GroupInfos, nil
 }
 
+// GetGroupInfo
 func (g *GroupRpcClient) GetGroupInfo(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
 	groups, err := g.GetGroupInfos(ctx, []string{groupID}, true)
 	if err != nil {
 		return nil, err
 	}
+
 	return groups[0], nil
 }
 
+// GetGroupInfoMap
 func (g *GroupRpcClient) GetGroupInfoMap(
 	ctx context.Context,
 	groupIDs []string,
@@ -88,11 +97,13 @@ func (g *GroupRpcClient) GetGroupInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(groups, func(e *sdkws.GroupInfo) string {
 		return e.GroupID
 	}), nil
 }
 
+// GetGroupMemberInfos
 func (g *GroupRpcClient) GetGroupMemberInfos(
 	ctx context.Context,
 	groupID string,
@@ -113,9 +124,11 @@ func (g *GroupRpcClient) GetGroupMemberInfos(
 			return nil, errs.ErrNotInGroupYet.Wrap(strings.Join(ids, ","))
 		}
 	}
+
 	return resp.Members, nil
 }
 
+// GetGroupMemberInfo
 func (g *GroupRpcClient) GetGroupMemberInfo(
 	ctx context.Context,
 	groupID string,
@@ -125,9 +138,11 @@ func (g *GroupRpcClient) GetGroupMemberInfo(
 	if err != nil {
 		return nil, err
 	}
+
 	return members[0], nil
 }
 
+// GetGroupMemberInfoMap
 func (g *GroupRpcClient) GetGroupMemberInfoMap(
 	ctx context.Context,
 	groupID string,
@@ -138,11 +153,13 @@ func (g *GroupRpcClient) GetGroupMemberInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
 		return e.UserID
 	}), nil
 }
 
+// GetOwnerAndAdminInfos
 func (g *GroupRpcClient) GetOwnerAndAdminInfos(
 	ctx context.Context,
 	groupID string,
@@ -154,17 +171,21 @@ func (g *GroupRpcClient) GetOwnerAndAdminInfos(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Members, nil
 }
 
+// GetOwnerInfo
 func (g *GroupRpcClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdkws.GroupMemberFullInfo, error) {
 	resp, err := g.Client.GetGroupMemberRoleLevel(ctx, &group.GetGroupMemberRoleLevelReq{
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner},
 	})
+
 	return resp.Members[0], err
 }
 
+// GetGroupMemberIDs
 func (g *GroupRpcClient) GetGroupMemberIDs(ctx context.Context, groupID string) ([]string, error) {
 	resp, err := g.Client.GetGroupMemberUserIDs(ctx, &group.GetGroupMemberUserIDsReq{
 		GroupID: groupID,
@@ -172,9 +193,11 @@ func (g *GroupRpcClient) GetGroupMemberIDs(ctx context.Context, groupID string) 
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.UserIDs, nil
 }
 
+// GetGroupInfoCache
 func (g *GroupRpcClient) GetGroupInfoCache(ctx context.Context, groupID string) (*sdkws.GroupInfo, error) {
 	resp, err := g.Client.GetGroupInfoCache(ctx, &group.GetGroupInfoCacheReq{
 		GroupID: groupID,
@@ -182,9 +205,11 @@ func (g *GroupRpcClient) GetGroupInfoCache(ctx context.Context, groupID string) 
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.GroupInfo, nil
 }
 
+// GetGroupMemberCache
 func (g *GroupRpcClient) GetGroupMemberCache(
 	ctx context.Context,
 	groupID string,
@@ -197,13 +222,16 @@ func (g *GroupRpcClient) GetGroupMemberCache(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Member, nil
 }
 
+// DismissGroup
 func (g *GroupRpcClient) DismissGroup(ctx context.Context, groupID string) error {
 	_, err := g.Client.DismissGroup(ctx, &group.DismissGroupReq{
 		GroupID:      groupID,
 		DeleteMember: true,
 	})
+
 	return err
 }

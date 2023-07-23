@@ -16,13 +16,16 @@ package msg
 
 import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
+// Check
 func (x *GetMaxAndMinSeqReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SendMsgReq) Check() error {
 	if x.MsgData == nil {
 		return errs.ErrArgs.Wrap("MsgData is empty")
@@ -30,21 +33,25 @@ func (x *SendMsgReq) Check() error {
 	if err := x.MsgData.Check(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetSendMsgStatusReq) Check() error {
 	if x.Status < 0 || x.Status > 3 {
 		return errs.ErrArgs.Wrap("status is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetSendMsgStatusReq) Check() error {
 	return nil
 }
 
-//func (x *ModifyMessageReactionExtensionsReq) Check() error {
+// func (x *ModifyMessageReactionExtensionsReq) Check() error {
 //	if x.ConversationID == "" {
 //		return errs.ErrArgs.Wrap("conversationID is empty")
 //	}
@@ -55,9 +62,9 @@ func (x *GetSendMsgStatusReq) Check() error {
 //		return errs.ErrArgs.Wrap("reactionExtensions is empty")
 //	}
 //	return nil
-//}
+// }
 //
-//func (x *SetMessageReactionExtensionsReq) Check() error {
+// func (x *SetMessageReactionExtensionsReq) Check() error {
 //	if x.ConversationID == "" {
 //		return errs.ErrArgs.Wrap("conversationID is empty")
 //	}
@@ -68,9 +75,9 @@ func (x *GetSendMsgStatusReq) Check() error {
 //		return errs.ErrArgs.Wrap("reactionExtensions is empty")
 //	}
 //	return nil
-//}
+// }
 //
-//func (x *GetMessagesReactionExtensionsReq) Check() error {
+// func (x *GetMessagesReactionExtensionsReq) Check() error {
 //	if x.ConversationID == "" {
 //		return errs.ErrArgs.Wrap("conversationID is empty")
 //	}
@@ -84,9 +91,9 @@ func (x *GetSendMsgStatusReq) Check() error {
 //		return errs.ErrArgs.Wrap("TypeKeys is empty")
 //	}
 //	return nil
-//}
+// }
 //
-//func (x *DeleteMessagesReactionExtensionsReq) Check() error {
+// func (x *DeleteMessagesReactionExtensionsReq) Check() error {
 //	if x.ConversationID == "" {
 //		return errs.ErrArgs.Wrap("conversationID is empty")
 //	}
@@ -97,12 +104,14 @@ func (x *GetSendMsgStatusReq) Check() error {
 //		return errs.ErrArgs.Wrap("ReactionExtensions is empty")
 //	}
 //	return nil
-//}
+// }
 
+// Check
 func (x *DelMsgsReq) Check() error {
 	return nil
 }
 
+// Check
 func (x *RevokeMsgReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -113,9 +122,11 @@ func (x *RevokeMsgReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *MarkMsgsAsReadReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -131,9 +142,11 @@ func (x *MarkMsgsAsReadReq) Check() error {
 			return errs.ErrArgs.Wrap("seqs has 0 value is invalid")
 		}
 	}
+
 	return nil
 }
 
+// Check
 func (x *MarkConversationAsReadReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -149,9 +162,11 @@ func (x *MarkConversationAsReadReq) Check() error {
 			return errs.ErrArgs.Wrap("seqs has 0 value is invalid")
 		}
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetConversationHasReadSeqReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -162,9 +177,11 @@ func (x *SetConversationHasReadSeqReq) Check() error {
 	if x.HasReadSeq < 1 {
 		return errs.ErrArgs.Wrap("hasReadSeq is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *ClearConversationsMsgReq) Check() error {
 	if x.ConversationIDs == nil {
 		return errs.ErrArgs.Wrap("conversationIDs is empty")
@@ -172,16 +189,20 @@ func (x *ClearConversationsMsgReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *UserClearAllMsgReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *DeleteMsgsReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -192,26 +213,33 @@ func (x *DeleteMsgsReq) Check() error {
 	if x.Seqs == nil {
 		return errs.ErrArgs.Wrap("seqs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *DeleteMsgPhysicalReq) Check() error {
 	if x.ConversationIDs == nil {
 		return errs.ErrArgs.Wrap("conversationIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetConversationMaxSeqReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetConversationsHasReadAndMaxSeqReq) Check() error {
 	if x.UserID == "" {
 		return errs.ErrArgs.Wrap("userID is empty")
 	}
+
 	return nil
 }

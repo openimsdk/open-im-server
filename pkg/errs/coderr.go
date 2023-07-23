@@ -15,12 +15,12 @@
 package errs
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
+// CodeError
 type CodeError interface {
 	Code() int
 	Msg() string
@@ -32,6 +32,7 @@ type CodeError interface {
 	error
 }
 
+// NewCodeError
 func NewCodeError(code int, msg string) CodeError {
 	return &codeError{
 		code: code,
@@ -64,6 +65,7 @@ func (e *codeError) WithDetail(detail string) CodeError {
 	} else {
 		d = e.detail + ", " + detail
 	}
+
 	return &codeError{
 		code:   e.code,
 		msg:    e.msg,
@@ -93,13 +95,15 @@ func (e *codeError) Is(err error, loose ...bool) bool {
 			return codeErr.Code() == e.code
 		}
 	}
+
 	return false
 }
 
 func (e *codeError) Error() string {
-	return fmt.Sprintf("%s", e.msg)
+	return e.msg
 }
 
+// Unwrap
 func Unwrap(err error) error {
 	for err != nil {
 		unwrap, ok := err.(interface {
@@ -110,9 +114,11 @@ func Unwrap(err error) error {
 		}
 		err = unwrap.Unwrap()
 	}
+
 	return err
 }
 
+// Wrap
 func Wrap(err error, msg ...string) error {
 	if err == nil {
 		return nil
@@ -120,5 +126,6 @@ func Wrap(err error, msg ...string) error {
 	if len(msg) == 0 {
 		return errors.WithStack(err)
 	}
+
 	return errors.Wrap(err, strings.Join(msg, ", "))
 }

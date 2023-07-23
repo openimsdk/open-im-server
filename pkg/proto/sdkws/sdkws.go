@@ -19,6 +19,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
+// Check
 func (x *MsgData) Check() error {
 	if x.SendID == "" {
 		return errs.ErrArgs.Wrap("sendID is empty")
@@ -42,5 +43,6 @@ func (x *MsgData) Check() error {
 			return errs.ErrArgs.Wrap("GroupID is empty")
 		}
 	}
+
 	return nil
 }

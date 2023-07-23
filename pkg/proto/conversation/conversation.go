@@ -16,13 +16,16 @@ package conversation
 
 import "github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 
+// Check
 func (x *ConversationReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversation is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *Conversation) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("OwnerUserID is empty")
@@ -36,19 +39,23 @@ func (x *Conversation) Check() error {
 	if x.RecvMsgOpt < 0 || x.RecvMsgOpt > 2 {
 		return errs.ErrArgs.Wrap("RecvMsgOpt is invalid")
 	}
+
 	return nil
 }
 
-//func (x *ModifyConversationFieldReq) Check() error {
+// // Check
+// func (x *ModifyConversationFieldReq) Check() error {
 //	if x.UserIDList == nil {
 //		return errs.ErrArgs.Wrap("userIDList is empty")
 //	}
 //	if x.Conversation == nil {
 //		return errs.ErrArgs.Wrap("conversation is empty")
 //	}
-//	return nil
-//}
+//
+// return nil
+// }
 
+// Check
 func (x *SetConversationReq) Check() error {
 	if x.Conversation == nil {
 		return errs.ErrArgs.Wrap("Conversation is empty")
@@ -56,10 +63,12 @@ func (x *SetConversationReq) Check() error {
 	if x.Conversation.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
 	}
+
 	return nil
 }
 
-//func (x *SetRecvMsgOptReq) Check() error {
+// // Check
+// func (x *SetRecvMsgOptReq) Check() error {
 //	if x.OwnerUserID == "" {
 //		return errs.ErrArgs.Wrap("ownerUserID is empty")
 //	}
@@ -69,9 +78,11 @@ func (x *SetConversationReq) Check() error {
 //	if x.RecvMsgOpt > 2 || x.RecvMsgOpt < 0 {
 //		return errs.ErrArgs.Wrap("MsgReceiveOpt is invalid")
 //	}
-//	return nil
-//}
+//
+// return nil
+// }
 
+// Check
 func (x *GetConversationReq) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("ownerUserID is empty")
@@ -79,9 +90,11 @@ func (x *GetConversationReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetConversationsReq) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("ownerUserID is empty")
@@ -89,41 +102,51 @@ func (x *GetConversationsReq) Check() error {
 	if x.ConversationIDs == nil {
 		return errs.ErrArgs.Wrap("conversationIDs is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetAllConversationsReq) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("ownerUserID is empty")
 	}
+
 	return nil
 }
 
 //
-//func (x *BatchSetConversationsReq) Check() error {
+// // Check
+// func (x *BatchSetConversationsReq) Check() error {
 //	if x.Conversations == nil {
 //		return errs.ErrArgs.Wrap("conversations is empty")
 //	}
 //	if x.OwnerUserID == "" {
 //		return errs.ErrArgs.Wrap("conversation is empty")
 //	}
-//	return nil
-//}
+//
+// return nil
+// }
 
+// Check
 func (x *GetRecvMsgNotNotifyUserIDsReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *CreateGroupChatConversationsReq) Check() error {
 	if x.GroupID == "" {
 		return errs.ErrArgs.Wrap("groupID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetConversationMaxSeqReq) Check() error {
 	if x.ConversationID == "" {
 		return errs.ErrArgs.Wrap("conversationID is empty")
@@ -134,9 +157,11 @@ func (x *SetConversationMaxSeqReq) Check() error {
 	if x.MaxSeq <= 0 {
 		return errs.ErrArgs.Wrap("maxSeq is invalid")
 	}
+
 	return nil
 }
 
+// Check
 func (x *SetConversationsReq) Check() error {
 	if x.UserIDs == nil {
 		return errs.ErrArgs.Wrap("userID is empty")
@@ -144,19 +169,24 @@ func (x *SetConversationsReq) Check() error {
 	if x.Conversation == nil {
 		return errs.ErrArgs.Wrap("conversation is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetUserConversationIDsHashReq) Check() error {
 	if x.OwnerUserID == "" {
 		return errs.ErrArgs.Wrap("ownerUserID is empty")
 	}
+
 	return nil
 }
 
+// Check
 func (x *GetConversationsByConversationIDReq) Check() error {
 	if x.ConversationIDs == nil {
 		return errs.ErrArgs.Wrap("conversationIDs is empty")
 	}
+
 	return nil
 }
