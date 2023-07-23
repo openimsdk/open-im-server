@@ -22,14 +22,16 @@ package push
 
 import (
 	context "context"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	reflect "reflect"
+	sync "sync"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
+
+	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 )
 
 const (
@@ -44,7 +46,7 @@ type PushMsgReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MsgData        *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3" json:"msgData"`
+	MsgData        *sdkws.MsgData `protobuf:"bytes,1,opt,name=msgData,proto3"        json:"msgData"`
 	ConversationID string         `protobuf:"bytes,2,opt,name=conversationID,proto3" json:"conversationID"`
 }
 
@@ -137,7 +139,7 @@ type DelUserPushTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID     string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
+	UserID     string `protobuf:"bytes,1,opt,name=userID,proto3"      json:"userID"`
 	PlatformID int32  `protobuf:"varint,2,opt,name=platformID,proto3" json:"platformID"`
 }
 
