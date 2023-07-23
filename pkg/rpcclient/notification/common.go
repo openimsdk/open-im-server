@@ -14,6 +14,7 @@
 
 package notification
 
+// CommonUser
 type CommonUser interface {
 	GetNickname() string
 	GetFaceURL() string
@@ -21,6 +22,7 @@ type CommonUser interface {
 	GetEx() string
 }
 
+// CommonGroup
 type CommonGroup interface {
 	GetNickname() string
 	GetFaceURL() string

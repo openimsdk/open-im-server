@@ -22,15 +22,17 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
+// ConversationNotificationSender
 type ConversationNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
+// NewConversationNotificationSender
 func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient) *ConversationNotificationSender {
 	return &ConversationNotificationSender{rpcclient.NewNotificationSender(rpcclient.WithRpcClient(msgRpcClient))}
 }
 
-// SetPrivate调用.
+// ConversationSetPrivateNotification
 func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
 	ctx context.Context,
 	sendID, recvID string,
@@ -41,18 +43,20 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
 		SendID:    sendID,
 		IsPrivate: isPrivateChat,
 	}
+
 	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
-// 会话改变.
+// ConversationChangeNotification
 func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string) error {
 	tips := &sdkws.ConversationUpdateTips{
 		UserID: userID,
 	}
+
 	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }
 
-// 会话未读数同步.
+// ConversationUnreadChangeNotification
 func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 	ctx context.Context,
 	userID, conversationID string,
@@ -64,5 +68,6 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 		HasReadSeq:      hasReadSeq,
 		UnreadCountTime: unreadCountTime,
 	}
+
 	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }

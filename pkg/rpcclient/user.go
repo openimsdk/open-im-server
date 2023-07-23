@@ -29,32 +29,39 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+// User
 type User struct {
 	conn   grpc.ClientConnInterface
 	Client user.UserClient
 	Discov discoveryregistry.SvcDiscoveryRegistry
 }
 
+// NewUser
 func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 	conn, err := discov.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImUserName)
 	if err != nil {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
+
 	return &User{Discov: discov, Client: client, conn: conn}
 }
 
 type UserRpcClient User
 
+// NewUserRpcClientByUser
 func NewUserRpcClientByUser(user *User) *UserRpcClient {
 	rpc := UserRpcClient(*user)
+
 	return &rpc
 }
 
+// NewUserRpcClient
 func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClient {
 	return UserRpcClient(*NewUser(client))
 }
 
+// GetUsersInfo
 func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdkws.UserInfo, error) {
 	resp, err := u.Client.GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
 		UserIDs: userIDs,
@@ -67,27 +74,33 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	})); len(ids) > 0 {
 		return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
+
 	return resp.UsersInfo, nil
 }
 
+// GetUserInfo
 func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
+// GetUsersInfoMap
 func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
 }
 
+// GetPublicUserInfos
 func (u *UserRpcClient) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
@@ -97,6 +110,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
@@ -107,14 +121,17 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	}), nil
 }
 
+// GetPublicUserInfo
 func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
+// GetPublicUserInfoMap
 func (u *UserRpcClient) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
@@ -124,11 +141,13 @@ func (u *UserRpcClient) GetPublicUserInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
 }
 
+// GetUserGlobalMsgRecvOpt
 func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID string) (int32, error) {
 	resp, err := u.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
@@ -136,21 +155,26 @@ func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 	if err != nil {
 		return 0, err
 	}
+
 	return resp.GlobalRecvMsgOpt, err
 }
 
+// Access
 func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	_, err := u.GetUserInfo(ctx, ownerUserID)
 	if err != nil {
 		return err
 	}
+
 	return tokenverify.CheckAccessV3(ctx, ownerUserID)
 }
 
+// GetAllUserIDs
 func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
 	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.UserIDs, nil
 }

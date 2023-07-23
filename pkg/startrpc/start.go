@@ -34,6 +34,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 )
 
+// Start
 func Start(
 	rpcPort int,
 	rpcRegisterName string,
@@ -108,5 +109,6 @@ func Start(
 			}
 		}
 	}()
+
 	return utils.Wrap1(srv.Serve(listener))
 }

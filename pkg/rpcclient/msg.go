@@ -154,17 +154,21 @@ func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqRe
 
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
+
 	return resp, err
 }
 
+// GetConversationMaxSeq
 func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversationID string) (int64, error) {
 	resp, err := m.Client.GetConversationMaxSeq(ctx, &msg.GetConversationMaxSeqReq{ConversationID: conversationID})
 	if err != nil {
 		return 0, err
 	}
+
 	return resp.MaxSeq, nil
 }
 
+// NotificationSender
 type NotificationSender struct {
 	contentTypeConf map[int32]config.NotificationConf
 	sessionTypeConf map[int32]int32
@@ -172,31 +176,37 @@ type NotificationSender struct {
 	getUserInfo     func(ctx context.Context, userID string) (*sdkws.UserInfo, error)
 }
 
+// NotificationSenderOptions
 type NotificationSenderOptions func(*NotificationSender)
 
+// WithLocalSendMsg
 func WithLocalSendMsg(sendMsg func(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error)) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = sendMsg
 	}
 }
 
+// WithRpcClient
 func WithRpcClient(msgRpcClient *MessageRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.sendMsg = msgRpcClient.SendMsg
 	}
 }
 
+// WithUserRpcClient
 func WithUserRpcClient(userRpcClient *UserRpcClient) NotificationSenderOptions {
 	return func(s *NotificationSender) {
 		s.getUserInfo = userRpcClient.GetUserInfo
 	}
 }
 
+// NewNotificationSender
 func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSender {
 	notificationSender := &NotificationSender{contentTypeConf: newContentTypeConf(), sessionTypeConf: newSessionTypeConf()}
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
+
 	return notificationSender
 }
 
@@ -204,19 +214,23 @@ type notificationOpt struct {
 	WithRpcGetUsername bool
 }
 
+// NotificationOptions
 type NotificationOptions func(*notificationOpt)
 
+// WithRpcGetUserName
 func WithRpcGetUserName() NotificationOptions {
 	return func(opt *notificationOpt) {
 		opt.WithRpcGetUsername = true
 	}
 }
 
+// NotificationWithSesstionType
 func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
 		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
+
 		return err
 	}
 	notificationOpt := &notificationOpt{}
@@ -260,9 +274,11 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	} else {
 		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
 	}
+
 	return err
 }
 
+// Notification
 func (s *NotificationSender) Notification(ctx context.Context, sendID, recvID string, contentType int32, m proto.Message, opts ...NotificationOptions) error {
 	return s.NotificationWithSesstionType(ctx, sendID, recvID, contentType, s.sessionTypeConf[contentType], m, opts...)
 }
