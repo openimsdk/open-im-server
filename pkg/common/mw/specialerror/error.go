@@ -16,6 +16,7 @@ package specialerror
 
 import (
 	"errors"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 )
 
