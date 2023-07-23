@@ -1,0 +1,168 @@
+# Copyright © 2023 OpenIM open source community. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: OpenIM CI Aotu Build and Install
+
+on: 
+  push:
+    branches:
+        - main
+    paths-ignore:
+        - "docs/**"
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+  pull_request:
+    branches:
+        - main
+    paths-ignore:
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+        - "docs/**"
+
+env:
+  GO_VERSION: "1.19"
+  GOLANGCI_VERSION: "v1.50.1"
+
+jobs:
+  openim:
+    name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+        # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+        contents: write
+    environment:
+      name: openim
+
+    strategy:
+      matrix:
+        go_version: ["1.18","1.19","1.20"]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 2.x
+
+      - name: Run go modules tidy
+        run: |
+          sudo make tidy
+          sudo make tools.verify.go-gitlint
+          echo "Run go modules tidy successfully" 
+
+      - name: Run go format
+        run: |
+          sudo make format
+          echo "Run go format successfully" 
+        continue-on-error: true
+
+      - name: Generate all necessary files, such as error code files
+        run: |
+          make generate
+          echo "Generate all necessary files successfully" 
+        continue-on-error: true
+
+      - name: Run unit test and get test coverage
+        run: |
+          make cover
+          echo "Run unit test and get test coverage successfully" 
+        continue-on-error: true
+
+      - name: Build source code for host platform
+        run: |
+          sudo make build
+          echo "Build source code for host platform successfully" 
+
+      - name: OpenIM verify copyright
+        run: |
+          sudo make verify-copyright
+          sudo make add-copyright
+          echo "OpenIM verify successfully" 
+        continue-on-error: true
+
+      - name: Clean all build
+        run: |
+          sudo make clean
+          echo "Clean all build successfully" 
+
+      - name: push OpenIM 
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "cicd: robot automated Change"
+        #   commit_options: '--no-verify --signoff'
+          branch: main
+        #   create_branch: true
+        #   # Optional commit user and author settings
+        #   commit_user_name: kubbot # defaults to "github-actions[bot]"
+        #   commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
+        #   commit_author: Kubbot # defaults to author of the commit that triggered the run
+        continue-on-error: true
+
+      - name: Set Current Directory
+        id: set_directory
+        run: |
+          echo "::set-output name=directory::$(pwd)"
+        continue-on-error: true
+
+      - name: Collect Test Coverage File
+        id: collect_coverage
+        run: |
+          cd ${{ steps.set_directory.outputs.directory }}
+          make cover
+          echo "::set-output name=coverage_file::./_output/tmp/coverage.out"
+        continue-on-error: true
+
+      - name: Display Test Coverage
+        run: |
+          echo "Test Coverage:"
+          cat ${{ steps.collect_coverage.outputs.coverage_file }}
+        continue-on-error: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        continue-on-error: true
+
+  openim-start:
+    name: Teat OpenIM make install start on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    environment:
+      name: openim
+    strategy:
+      matrix:
+        go_version: ["1.20"]
+        os: ["ubuntu-latest"]
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Run OpenIM make install start
+        run: |
+          sudo make install

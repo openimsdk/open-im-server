@@ -83,6 +83,9 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
+	if !tokenverify.IsAppManagerUid(ctx) {
+		return nil, errs.ErrNoPermission.Wrap("only app manager")
+	}
 	var resp msggateway.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDs {
 		clients, ok := s.LongConnServer.GetUserAllCons(userID)

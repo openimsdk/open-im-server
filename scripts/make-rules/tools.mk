@@ -130,6 +130,11 @@ install.gsemver:
 install.git-chglog:
 	@$(GO) install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
 
+## install.ko: Install ko, used to build go program into container images
+.PHONY: install.ko
+install.ko:
+	@$(GO) install github.com/google/ko@latest
+
 ## install.github-release: Install github-release, used to create github release
 .PHONY: install.github-release
 install.github-release:
@@ -148,6 +153,11 @@ install.coscli:
 .PHONY: install.coscmd
 install.coscmd:
 	@if which pip &>/dev/null; then pip install coscmd; else pip3 install coscmd; fi
+
+## install.minio: Install minio, used to upload files to minio
+.PHONY: install.minio
+install.minio:
+	@$(GO) install github.com/minio/minio@latest
 
 ## install.delve: Install delve, used to debug go program
 .PHONY: install.delve

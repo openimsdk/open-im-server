@@ -97,7 +97,6 @@ func (s *ZkClient) GetConnsRemote(serviceName string) (conns []resolver.Address,
 
 func (s *ZkClient) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]grpc.ClientConnInterface, error) {
 	s.logger.Printf("get conns from client, serviceName: %s", serviceName)
-	opts = append(s.options, opts...)
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	conns := s.localConns[serviceName]
