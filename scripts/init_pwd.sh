@@ -14,7 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-source ../.env
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
+
+#Include shell font styles and some basic information
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
+
+source $OPENIM_ROOT/.env
 
 # Check if PASSWORD only contains letters and numbers
 if [[ "$PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]
@@ -25,16 +36,18 @@ else
     exit
 fi
 
-echo "your user is:$USER"
-echo "your password is:$PASSWORD"
-echo "your minio endPoint is:$MINIO_ENDPOINT"
-echo "your data dir is $DATA_DIR"
+echo ""
+echo -e "===> ${PURPLE_PREFIX} you user is:$USER ${COLOR_SUFFIX}"
+echo -e "===> ${PURPLE_PREFIX} you password is:$PASSWORD ${COLOR_SUFFIX}" 
+echo -e "===> ${PURPLE_PREFIX} you minio endpoint is:$MINIO_ENDPOINT ${COLOR_SUFFIX}"
+echo -e "===> ${PURPLE_PREFIX} you api url is:$API_URL ${COLOR_SUFFIX}"
+echo ""
 
 # Specify the config file
-config_file='../config/config.yaml'
+config_file=${OPENIM_ROOT}/config/config.yaml
 
 # Load variables from .env file
-source ../.env
+source ${OPENIM_ROOT}/.env
 
 # Replace the password and username field for mysql
 sed -i "/mysql:/,/database:/ s/password:.*/password: $PASSWORD/" $config_file

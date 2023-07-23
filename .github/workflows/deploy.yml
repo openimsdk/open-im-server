@@ -1,0 +1,45 @@
+name: deploy for dev
+
+on:
+    push:
+        branches:
+            - 'devops' # Only for the dev branch
+        paths:
+            - '.github/workflows/*'
+            # - '__test__/**' # dev No immediate testing is required
+            - 'src/**'
+            - 'Dockerfile'
+            - 'docker-compose.yml'
+            - 'bin/*'
+
+jobs:
+    deploy-dev:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+            - name: set ssh key # Temporarily set up ssh key
+              run: |
+                  mkdir -p ~/.ssh/
+                  # secrets.WFP_ID_RSA set in GitHub
+                  echo "${{secrets.WFP_ID_RSA}}" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan "182.92.xxx.xxx" >> ~/.ssh/known_hosts
+            - name: deploy # Deployment
+              run: |
+                  ssh work@182.92.xxx.xxx "
+                    # 【Attention】Log in with the 'work' account, manually create /home/work/imooc-lego directory
+                    # Then git clone https://username:password@github.com/imooc-lego/biz-editor-server.git -b dev (private repository, use GitHub username and password)
+                    # Remember to delete origin to avoid exposing GitHub password
+
+                    cd /home/work/imooc-lego/biz-editor-server;
+                    git remote add origin https://openimbot:${{secrets.WFP_PASSWORD}}@github.com/OpenIMSDK/open-im-server.git;
+                    git checkout dev;
+                    git pull origin dev; # Download the latest code again
+                    git remote remove origin; # Remove origin to avoid exposing GitHub password
+                    # Start docker
+                    docker-compose build editor-server; # Same as the service name in docker-compose.yml
+                    docker-compose up -d;
+                  "
+            - name: delete ssh key # Delete ssh key
+              run: rm -rf ~/.ssh/id_rsa

@@ -13,7 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-source ./style_info.sh
+#Include shell font styles and some basic information
+SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
+
+#Include shell font styles and some basic information
+source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/path_info.sh
+source $SCRIPTS_ROOT/function.sh
+
+cd $SCRIPTS_ROOT
 
 echo -e "check time synchronize.................................."
 t=`curl http://time.akamai.com/?iso -s`
@@ -27,7 +36,6 @@ else
 fi
 
 
-
 echo -e "check login user........................................"
 user=`whoami`
 if [ $user == "root" ] ; then
@@ -35,8 +43,6 @@ if [ $user == "root" ] ; then
 else
   echo -e ${RED_PREFIX}"Warning: The current user is not root "${COLOR_SUFFIX}
 fi
-
-
 
 echo -e "check docker............................................"
 docker_running=`systemctl status docker | grep running |  grep active | wc -l`

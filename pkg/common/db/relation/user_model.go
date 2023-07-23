@@ -83,7 +83,7 @@ func (u *UserGorm) Page(
 	return
 }
 
-// 获取所有用户ID
+// 获取所有用户ID.
 func (u *UserGorm) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error) {
 	return userIDs, errs.Wrap(u.db(ctx).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Pluck("user_id", &userIDs).Error)
 }
