@@ -22,23 +22,28 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
+// MsgNotificationSender
 type MsgNotificationSender struct {
 	*rpcclient.NotificationSender
 }
 
+// NewMsgNotificationSender
 func NewMsgNotificationSender(opts ...rpcclient.NotificationSenderOptions) *MsgNotificationSender {
 	return &MsgNotificationSender{rpcclient.NewNotificationSender(opts...)}
 }
 
+// UserDeleteMsgsNotification
 func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, userID, conversationID string, seqs []int64) error {
 	tips := sdkws.DeleteMsgsTips{
 		UserID:         userID,
 		ConversationID: conversationID,
 		Seqs:           seqs,
 	}
+
 	return m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
+// MarkAsReadNotification
 func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {
 	tips := &sdkws.MarkAsReadTips{
 		MarkAsReadUserID: sendID,
@@ -46,5 +51,6 @@ func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conv
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
+
 	return m.NotificationWithSesstionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
 }

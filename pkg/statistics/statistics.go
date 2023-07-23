@@ -21,6 +21,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 )
 
+// Statistics num
 type Statistics struct {
 	AllCount   *uint64
 	ModuleName string
@@ -34,10 +35,12 @@ func (s *Statistics) output() {
 	defer t.Stop()
 	var sum uint64
 	var timeIntervalNum uint64
+	outputCh := make(chan struct{})
 	for {
 		sum = *s.AllCount
 		select {
 		case <-t.C:
+			outputCh <- struct{}{}
 		}
 		if *s.AllCount-sum <= 0 {
 			intervalCount = 0
@@ -63,8 +66,10 @@ func (s *Statistics) output() {
 	}
 }
 
+// NewStatistics
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
 	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()
+
 	return p
 }
