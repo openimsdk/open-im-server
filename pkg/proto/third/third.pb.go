@@ -22,13 +22,14 @@ package third
 
 import (
 	context "context"
+	reflect "reflect"
+	sync "sync"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -43,7 +44,7 @@ type KeyValues struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Key    string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key"`
+	Key    string   `protobuf:"bytes,1,opt,name=key,proto3"    json:"key"`
 	Values []string `protobuf:"bytes,2,rep,name=values,proto3" json:"values"`
 }
 
@@ -99,9 +100,9 @@ type SignPart struct {
 	unknownFields protoimpl.UnknownFields
 
 	PartNumber int32        `protobuf:"varint,1,opt,name=partNumber,proto3" json:"partNumber"`
-	Url        string       `protobuf:"bytes,2,opt,name=url,proto3" json:"url"`
-	Query      []*KeyValues `protobuf:"bytes,3,rep,name=query,proto3" json:"query"`
-	Header     []*KeyValues `protobuf:"bytes,4,rep,name=header,proto3" json:"header"`
+	Url        string       `protobuf:"bytes,2,opt,name=url,proto3"         json:"url"`
+	Query      []*KeyValues `protobuf:"bytes,3,rep,name=query,proto3"       json:"query"`
+	Header     []*KeyValues `protobuf:"bytes,4,rep,name=header,proto3"      json:"header"`
 }
 
 func (x *SignPart) Reset() {
@@ -169,10 +170,10 @@ type AuthSignParts struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url    string       `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3" json:"query"`
+	Url    string       `protobuf:"bytes,1,opt,name=url,proto3"    json:"url"`
+	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3"  json:"query"`
 	Header []*KeyValues `protobuf:"bytes,3,rep,name=header,proto3" json:"header"`
-	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3" json:"parts"`
+	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3"  json:"parts"`
 }
 
 func (x *AuthSignParts) Reset() {
@@ -280,7 +281,7 @@ type PartLimitResp struct {
 
 	MinPartSize int64 `protobuf:"varint,1,opt,name=minPartSize,proto3" json:"minPartSize"`
 	MaxPartSize int64 `protobuf:"varint,2,opt,name=maxPartSize,proto3" json:"maxPartSize"`
-	MaxNumSize  int32 `protobuf:"varint,3,opt,name=maxNumSize,proto3" json:"maxNumSize"`
+	MaxNumSize  int32 `protobuf:"varint,3,opt,name=maxNumSize,proto3"  json:"maxNumSize"`
 }
 
 func (x *PartLimitResp) Reset() {
@@ -435,12 +436,12 @@ type InitiateMultipartUploadReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hash        string `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
-	Size        int64  `protobuf:"varint,2,opt,name=size,proto3" json:"size"`
-	PartSize    int64  `protobuf:"varint,3,opt,name=partSize,proto3" json:"partSize"`
-	MaxParts    int32  `protobuf:"varint,4,opt,name=maxParts,proto3" json:"maxParts"`
-	Cause       string `protobuf:"bytes,5,opt,name=cause,proto3" json:"cause"`
-	Name        string `protobuf:"bytes,6,opt,name=name,proto3" json:"name"`
+	Hash        string `protobuf:"bytes,1,opt,name=hash,proto3"        json:"hash"`
+	Size        int64  `protobuf:"varint,2,opt,name=size,proto3"       json:"size"`
+	PartSize    int64  `protobuf:"varint,3,opt,name=partSize,proto3"   json:"partSize"`
+	MaxParts    int32  `protobuf:"varint,4,opt,name=maxParts,proto3"   json:"maxParts"`
+	Cause       string `protobuf:"bytes,5,opt,name=cause,proto3"       json:"cause"`
+	Name        string `protobuf:"bytes,6,opt,name=name,proto3"        json:"name"`
 	ContentType string `protobuf:"bytes,7,opt,name=contentType,proto3" json:"contentType"`
 }
 
@@ -530,9 +531,9 @@ type UploadInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UploadID   string         `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
-	PartSize   int64          `protobuf:"varint,2,opt,name=partSize,proto3" json:"partSize"`
-	Sign       *AuthSignParts `protobuf:"bytes,3,opt,name=sign,proto3" json:"sign"`
+	UploadID   string         `protobuf:"bytes,1,opt,name=uploadID,proto3"    json:"uploadID"`
+	PartSize   int64          `protobuf:"varint,2,opt,name=partSize,proto3"   json:"partSize"`
+	Sign       *AuthSignParts `protobuf:"bytes,3,opt,name=sign,proto3"        json:"sign"`
 	ExpireTime int64          `protobuf:"varint,4,opt,name=expireTime,proto3" json:"expireTime"`
 }
 
@@ -601,7 +602,7 @@ type InitiateMultipartUploadResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url    string      `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	Url    string      `protobuf:"bytes,1,opt,name=url,proto3"    json:"url"`
 	Upload *UploadInfo `protobuf:"bytes,2,opt,name=upload,proto3" json:"upload"`
 }
 
@@ -656,7 +657,7 @@ type AuthSignReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UploadID    string  `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
+	UploadID    string  `protobuf:"bytes,1,opt,name=uploadID,proto3"            json:"uploadID"`
 	PartNumbers []int32 `protobuf:"varint,2,rep,packed,name=partNumbers,proto3" json:"partNumbers"`
 }
 
@@ -711,10 +712,10 @@ type AuthSignResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url    string       `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
-	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3" json:"query"`
+	Url    string       `protobuf:"bytes,1,opt,name=url,proto3"    json:"url"`
+	Query  []*KeyValues `protobuf:"bytes,2,rep,name=query,proto3"  json:"query"`
 	Header []*KeyValues `protobuf:"bytes,3,rep,name=header,proto3" json:"header"`
-	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3" json:"parts"`
+	Parts  []*SignPart  `protobuf:"bytes,4,rep,name=parts,proto3"  json:"parts"`
 }
 
 func (x *AuthSignResp) Reset() {
@@ -782,11 +783,11 @@ type CompleteMultipartUploadReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UploadID    string   `protobuf:"bytes,1,opt,name=uploadID,proto3" json:"uploadID"`
-	Parts       []string `protobuf:"bytes,2,rep,name=parts,proto3" json:"parts"`
-	Name        string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	UploadID    string   `protobuf:"bytes,1,opt,name=uploadID,proto3"    json:"uploadID"`
+	Parts       []string `protobuf:"bytes,2,rep,name=parts,proto3"       json:"parts"`
+	Name        string   `protobuf:"bytes,3,opt,name=name,proto3"        json:"name"`
 	ContentType string   `protobuf:"bytes,4,opt,name=contentType,proto3" json:"contentType"`
-	Cause       string   `protobuf:"bytes,5,opt,name=cause,proto3" json:"cause"`
+	Cause       string   `protobuf:"bytes,5,opt,name=cause,proto3"       json:"cause"`
 }
 
 func (x *CompleteMultipartUploadReq) Reset() {
@@ -955,7 +956,7 @@ type AccessURLResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url        string `protobuf:"bytes,1,opt,name=url,proto3" json:"url"`
+	Url        string `protobuf:"bytes,1,opt,name=url,proto3"         json:"url"`
 	ExpireTime int64  `protobuf:"varint,2,opt,name=expireTime,proto3" json:"expireTime"`
 }
 
@@ -1011,8 +1012,8 @@ type FcmUpdateTokenReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	PlatformID int32  `protobuf:"varint,1,opt,name=platformID,proto3" json:"platformID"`
-	FcmToken   string `protobuf:"bytes,2,opt,name=fcmToken,proto3" json:"fcmToken"`
-	Account    string `protobuf:"bytes,3,opt,name=account,proto3" json:"account"`
+	FcmToken   string `protobuf:"bytes,2,opt,name=fcmToken,proto3"    json:"fcmToken"`
+	Account    string `protobuf:"bytes,3,opt,name=account,proto3"     json:"account"`
 	ExpireTime int64  `protobuf:"varint,4,opt,name=expireTime,proto3" json:"expireTime"`
 }
 
@@ -1119,7 +1120,7 @@ type SetAppBadgeReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID         string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
+	UserID         string `protobuf:"bytes,1,opt,name=userID,proto3"          json:"userID"`
 	AppUnreadCount int32  `protobuf:"varint,2,opt,name=appUnreadCount,proto3" json:"appUnreadCount"`
 }
 
