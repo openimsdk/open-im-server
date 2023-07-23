@@ -1,0 +1,25 @@
+name: Assign issue to comment author
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  assign-issue:
+    if: contains(github.event.comment.body, '/assign') || contains(github.event.comment.body, '/accept')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Assign the issue
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-assignee "${{ github.event.comment.user.login }}"
+          gh issue edit ${{ github.event.issue.number }} --add-label "triage/accepted"
+          gh issue comment $ISSUE --body "@${{ github.event.comment.user.login }}, this issue has been assigned to you. We are looking forward to your PR!"
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
