@@ -14,13 +14,12 @@ permissions:
 
 env:
   # Define Open-IM-Server variables here
-  REMOTE_ORGANIZATION: open-im-server
-  REMOTE_REPOSITORY: cla
-
-  OPEN_IM_SERVER_CLA_DOCUMENT: https://github.com/openim-sigs/cla/blob/main/README.md
-  OPEN_IM_SERVER_SIGNATURES_PATH: signatures/openim-server/cla.json
-  OPEN_IM_SERVER_ALLOWLIST: kubbot,bot* 
   OPEN_IM_SERVER_REMOTE_ORGANIZATION: openim-sigs
+  REMOTE_REPOSITORY: cla
+  OPEN_IM_SERVER_CLA_DOCUMENT: https://github.com/openim-sigs/cla/blob/main/README.md
+  OPEN_IM_SERVER_SIGNATURES_PATH: signatures/${{ github.event.repository.name }}/cla.json
+
+  OPEN_IM_SERVER_ALLOWLIST: kubbot,bot* 
 
 jobs:
   CLAAssistant:
@@ -40,9 +39,10 @@ jobs:
 
           remote-organization-name: ${{ env.OPEN_IM_SERVER_REMOTE_ORGANIZATION }}
           remote-repository-name: ${{ env.REMOTE_REPOSITORY }}
-          create-file-commit-message: '📚 Docs: Creating file for storing ${{ env.REMOTE_ORGANIZATION }} CLA Signatures'
-          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our [🎯https://github.com/openim-sigs/cla/blob/main/README.md](https://github.com/openim-sigs/cla/blob/main/README.md)'
+
+          create-file-commit-message: '📚 Docs: Creating file for storing ${{ github.event.repository.name }} CLA Signatures'
+          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our [🎯https://github.com/openim-sigs/cla/blob/main/README.md](https://github.com/openim-sigs/cla/blob/main/README.md) <br> '
           custom-pr-sign-comment: 'I have read the CLA Document and I hereby sign the CLA'
-          custom-allsigned-prcomment: '🤖 All Contributors have signed the ${{ env.REMOTE_ORGANIZATION }} [CLA](https://github.com/openim-sigs/cla/blob/main/README.md).'
+          custom-allsigned-prcomment: '🤖 All Contributors have signed the [${{ github.event.repository.name }} CLA](https://github.com/openim-sigs/cla/blob/main/README.md).<br> The signed information is recorded [🤖here](https://github.com/openim-sigs/cla/tree/main/signatures/${{ env.OPEN_IM_SERVER_ALLOWLIST }}/cla.json)'
         #   lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
         #   use-dco-flag: true - If you are using DCO instead of CLA
