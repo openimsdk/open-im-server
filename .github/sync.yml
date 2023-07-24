@@ -94,9 +94,6 @@ group:
       - source: .github/workflows/cla.yml
         dest: .github/workflows/cla.yml
         replace: false
-      - source: .github/workflows/
-        dest: .github/workflows/
-        replace: false
       - source: .github/workflows/auto-assign-issue.yml
         dest: .github/workflows/auto-assign-issue.yml
         replace: false

@@ -18,12 +18,12 @@ import (
 	"context"
 )
 
-// OfflinePusher Offline Pusher
+// OfflinePusher Offline Pusher.
 type OfflinePusher interface {
 	Push(ctx context.Context, userIDs []string, title, content string, opts *Opts) error
 }
 
-// Opts opts
+// Opts opts.
 type Opts struct {
 	Signal        *Signal
 	IOSPushSound  string
@@ -31,7 +31,7 @@ type Opts struct {
 	Ex            string
 }
 
-// Signal message id
+// Signal message id.
 type Signal struct {
 	ClientMsgID string
 }

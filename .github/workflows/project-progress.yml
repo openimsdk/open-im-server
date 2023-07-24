@@ -33,4 +33,4 @@ jobs:
         with:
           project: OpenIM-V3.1
           column: In Progress
-          repo-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
