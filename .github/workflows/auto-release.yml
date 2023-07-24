@@ -14,7 +14,7 @@ jobs:
 
       - name: Assign the issue
         run: |
-          export LETASE_MILESTONES=$(curl 'https://api.github.com/repos/kubecub/github-label-syncer/milestones' | jq -r 'last(.[]).title')
+          export LETASE_MILESTONES=$(curl 'https://api.github.com/repos/$OWNER/$PEPO/milestones' | jq -r 'last(.[]).title')
           gh issue edit ${{ github.event.issue.number }} --add-assignee "${{ github.event.comment.user.login }}"
           gh issue edit ${{ github.event.issue.number }} --add-label "triage/accepted"
           gh issue edit ${{ github.event.issue.number }} --milestone "$LETASE_MILESTONES"
