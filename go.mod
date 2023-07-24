@@ -25,7 +25,6 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.2 // indirect
 	github.com/stretchr/testify v1.8.3
-	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	go.mongodb.org/mongo-driver v1.8.3
 	golang.org/x/image v0.3.0
 	google.golang.org/api v0.114.0
