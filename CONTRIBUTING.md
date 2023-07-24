@@ -130,7 +130,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
 
    ```bash
    ❯ git rebase upstream/main
-   ❯ make link	  # golangci-lint run -c .golangci.yml
+   ❯ make lint	  # golangci-lint run -c .golangci.yml
    ❯ git add -A  # add changes to staging
    ❯ git commit -a -s -m "message for your changes" # -s adds a Signed-off-by trailer
    ```
