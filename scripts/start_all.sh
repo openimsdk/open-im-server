@@ -36,7 +36,7 @@ echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
-bin_dir="$BIN_DIR"
+bin_dir="$OPENIM_ROOT/_output/bin"
 logs_dir="$OPENIM_ROOT/logs"
 sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
