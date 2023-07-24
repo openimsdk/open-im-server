@@ -1,26 +1,26 @@
-name: Automatic Rebase
+name: Assign issue to comment author
 on:
   issue_comment:
     types: [created]
 jobs:
-  rebase:
-    name: Rebase
+  assign-issue:
+    if: contains(github.event.comment.body, '/assign') || contains(github.event.comment.body, '/accept')
     runs-on: ubuntu-latest
-    if: >-
-      github.event.issue.pull_request != '' && 
-      (
-        contains(github.event.comment.body, '/rebase') || 
-        contains(github.event.comment.body, '/autosquash')
-      )
+    permissions:
+      issues: write
     steps:
-      - name: Checkout the latest code
+      - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
-      - name: Automatic Rebase
-        uses: cirrus-actions/rebase@1.8
-        with:
-          autosquash: ${{ contains(github.event.comment.body, '/autosquash') || contains(github.event.comment.body, '/rebase-autosquash') }}
+
+      - name: Assign the issue
+        run: |
+          export LETASE_MILESTONES=$(curl 'https://api.github.com/repos/kubecub/github-label-syncer/milestones' | jq -r 'last(.[]).title')
+          gh issue edit ${{ github.event.issue.number }} --add-assignee "${{ github.event.comment.user.login }}"
+          gh issue edit ${{ github.event.issue.number }} --add-label "triage/accepted"
+          gh issue edit ${{ github.event.issue.number }} --milestone "$LETASE_MILESTONES"
+          gh issue comment $ISSUE --body "@${{ github.event.comment.user.login }} Glad to see you accepted this issue🤲, this issue has been assigned to you. I set the milestones for this issue to $LETASE_MILESTONES, We are looking forward to your PR!"
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.REDBOT_GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
