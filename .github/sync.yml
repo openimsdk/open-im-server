@@ -67,6 +67,10 @@ group:
   - repos: |
       OpenIMSDK/OpenKF@main
       OpenIMSDK/openim-miniprogram-demo@main
+      OpenIMSDK/docs
+      OpenIMSDK/chat
+      OpenIMSDK/community
+      OpenIMSDK/openim-charts
       OpenIMSDK/openim-sdk-cpp@main
     files: 
       - source: LICENSE
@@ -80,12 +84,24 @@ group:
         replace: false
       - source: .github/workflows/project-progress.yml
         dest: .github/workflows/project-progress.yml
-        replace: false
+        replace: false 
       - source: .github/workflows/help-comment-issue.yml
         dest: .github/workflows/help-comment-issue.yml
         replace: false
       - source: .github/.codecov.yml
         dest: .github/.codecov.yml
+        replace: false
+      - source: .github/workflows/cla.yml
+        dest: .github/workflows/cla.yml
+        replace: false
+      - source: .github/workflows/
+        dest: .github/workflows/
+        replace: false
+      - source: .github/workflows/auto-assign-issue.yml
+        dest: .github/workflows/auto-assign-issue.yml
+        replace: false
+      - source: .github/workflows/release.yml
+        dest: .github/workflows/release.yml
         replace: false
       - source: ./scripts/githooks/
         dest: ./scripts/githooks/

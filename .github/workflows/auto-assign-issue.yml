@@ -1,0 +1,26 @@
+name: Assign issue to comment author
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  assign-issue:
+    if: contains(github.event.comment.body, '/assign') || contains(github.event.comment.body, '/accept')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Assign the issue
+        run: |
+          export LETASE_MILESTONES=$(curl "https://api.github.com/repos/$OWNER/$REPO/milestones" | jq -r 'last(.[]).title')
+          gh issue edit ${{ github.event.issue.number }} --add-assignee "${{ github.event.comment.user.login }}"
+          gh issue edit ${{ github.event.issue.number }} --add-label "triage/accepted"
+          gh issue edit ${{ github.event.issue.number }} --milestone "$LETASE_MILESTONES"
+          gh issue comment $ISSUE --body "@${{ github.event.comment.user.login }} Glad to see you accepted this issue🤲, this issue has been assigned to you. <br>I set the milestones for this issue to $LETASE_MILESTONES, we are looking forward to your PR!"
+        env:
+          GH_TOKEN: ${{ secrets.REDBOT_GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}

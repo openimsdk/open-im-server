@@ -22,6 +22,7 @@ logs
 .devcontainer
 components
 out-test
+Dockerfile.cross
 
 ### Makefile ###
 tmp/
@@ -390,3 +391,4 @@ Sessionx.vim
 
 # End of https://www.toptal.com/developers/gitignore/api/go,git,vim,tags,test,emacs,backup,jetbrains
 .idea
+dist/
