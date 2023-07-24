@@ -48,7 +48,6 @@ jobs:
         sudo ./scripts/build_all_service.sh
         sudo cat logs/openIM.log 2>/dev/null
       shell: bash
-      continue-on-error: true
 
     - name: Start all services
       run: |

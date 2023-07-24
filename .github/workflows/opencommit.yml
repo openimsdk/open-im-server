@@ -1,4 +1,4 @@
-name: 'OpenCommit Action'
+name: 'OpenIM Commit Action'
 
 on:
   push:
