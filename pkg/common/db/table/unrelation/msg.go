@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	singleGocMsgNum = 5000
+	singleGocMsgNum = 100
 	Msg             = "msg"
 	OldestList      = 0
 	NewestList      = -1
