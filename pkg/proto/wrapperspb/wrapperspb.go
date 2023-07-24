@@ -16,6 +16,7 @@ package wrapperspb
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"strconv"
 )
@@ -211,15 +212,11 @@ func (m *BoolValue) MarshalJSON() ([]byte, error) {
 }
 
 func (m *StringValue) UnmarshalJSON(p []byte) error {
-	if len(p) < 2 || p[0] != '"' || p[len(p)-1] != '"' {
-		return errors.New("invalid string value")
-	}
-	m.Value = string(p[1 : len(p)-1])
-	return nil
+	return json.Unmarshal(p, &m.Value)
 }
 
 func (m *StringValue) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + m.Value + `"`), nil
+	return json.Marshal(m.Value)
 }
 
 func (m *BytesValue) UnmarshalJSON(p []byte) error {
