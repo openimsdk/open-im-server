@@ -22,13 +22,14 @@ package auth
 
 import (
 	context "context"
+	reflect "reflect"
+	sync "sync"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -43,9 +44,9 @@ type UserTokenReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Secret     string `protobuf:"bytes,1,opt,name=secret,proto3" json:"secret"`
+	Secret     string `protobuf:"bytes,1,opt,name=secret,proto3"      json:"secret"`
 	PlatformID int32  `protobuf:"varint,2,opt,name=platformID,proto3" json:"platformID"`
-	UserID     string `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID"`
+	UserID     string `protobuf:"bytes,3,opt,name=userID,proto3"      json:"userID"`
 }
 
 func (x *UserTokenReq) Reset() {
@@ -106,7 +107,7 @@ type UserTokenResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Token             string `protobuf:"bytes,2,opt,name=token,proto3" json:"token"`
+	Token             string `protobuf:"bytes,2,opt,name=token,proto3"              json:"token"`
 	ExpireTimeSeconds int64  `protobuf:"varint,3,opt,name=expireTimeSeconds,proto3" json:"expireTimeSeconds"`
 }
 
@@ -162,7 +163,7 @@ type ForceLogoutReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	PlatformID int32  `protobuf:"varint,1,opt,name=platformID,proto3" json:"platformID"`
-	UserID     string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID"`
+	UserID     string `protobuf:"bytes,2,opt,name=userID,proto3"      json:"userID"`
 }
 
 func (x *ForceLogoutReq) Reset() {
@@ -301,8 +302,8 @@ type ParseTokenResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserID            string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID"`
-	Platform          string `protobuf:"bytes,2,opt,name=platform,proto3" json:"platform"`
+	UserID            string `protobuf:"bytes,1,opt,name=userID,proto3"             json:"userID"`
+	Platform          string `protobuf:"bytes,2,opt,name=platform,proto3"           json:"platform"`
 	ExpireTimeSeconds int64  `protobuf:"varint,4,opt,name=expireTimeSeconds,proto3" json:"expireTimeSeconds"`
 }
 
