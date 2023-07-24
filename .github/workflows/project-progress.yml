@@ -31,6 +31,6 @@ jobs:
     steps:
       - uses: alex-page/github-project-automation-plus@v0.8.3
         with:
-          project: OpenIM 2023 Sprint 🔥
+          project: OpenIM-V3.1
           column: In Progress
           repo-token: ${{ secrets.BOT_GITHUB_TOKEN }}
