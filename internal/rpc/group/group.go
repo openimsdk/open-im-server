@@ -1482,5 +1482,5 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	resp.GroupRequests = utils.Slice(requests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
 		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
 	})
-	return nil, nil
+	return resp, nil
 }
