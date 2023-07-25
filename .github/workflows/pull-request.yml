@@ -18,8 +18,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'README.md'
-            - 'CONTRIBUTING.md'
-
+      - 'CONTRIBUTING.md'
       - 'docs/**'
   pull_request:
     branches: [main]

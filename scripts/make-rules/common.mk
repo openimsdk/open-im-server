@@ -60,6 +60,7 @@ endif
 
 ifeq ($(origin VERSION), undefined)
 # VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')	#v2.3.3.dirty
+# git describe --tags --always --match="v*" --dirty
 VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
 # v2.3.3: git tag
 endif
@@ -116,7 +117,7 @@ FIND := find . ! -path './utils/*' ! -path './vendor/*'
 XARGS := xargs -r
 
 # Linux command settings-CODE DIRS Copyright
-CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/build $(ROOT_DIR)/deployments
 FINDS := find $(CODE_DIRS)
 
 # Makefile settings: Select different behaviors by determining whether V option is set
