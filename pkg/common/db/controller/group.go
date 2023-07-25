@@ -110,7 +110,7 @@ type GroupDatabase interface {
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
-	FindGroupReuests(ctx context.Context, groupID string, userIDs []string) ([]*relationTb.GroupRequestModel, error)
+	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationTb.GroupRequestModel, error)
 	PageGroupRequestUser(
 		ctx context.Context,
 		userID string,
@@ -578,6 +578,6 @@ func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.
 	return g.groupDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-func (g *groupDatabase) FindGroupReuests(ctx context.Context, groupID string, userIDs []string) ([]*relationTb.GroupRequestModel, error) {
-	return g.groupRequestDB.FindGroupReuests(ctx, groupID, userIDs)
+func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationTb.GroupRequestModel, error) {
+	return g.groupRequestDB.FindGroupRequests(ctx, groupID, userIDs)
 }

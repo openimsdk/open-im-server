@@ -245,6 +245,7 @@ func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfri
 	if err != nil {
 		return nil, err
 	}
+	resp = &pbfriend.GetDesignatedFriendsApplyResp{}
 	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err

@@ -1443,6 +1443,44 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.
 }
 
 func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbGroup.GetGroupUsersReqApplicationListReq) (*pbGroup.GetGroupUsersReqApplicationListResp, error) {
-
+	resp := &pbGroup.GetGroupUsersReqApplicationListResp{}
+	total, requests, err := s.GroupDatabase.FindGroupRequests(ctx, req.GroupID, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.Total = int64(total)
+	if len(requests) == 0 {
+		return resp, nil
+	}
+	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationTb.GroupRequestModel) string {
+		return e.GroupID
+	}))
+	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupMap := utils.SliceToMap(groups, func(e *relationTb.GroupModel) string {
+		return e.GroupID
+	})
+	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
+		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+	}
+	owners, err := s.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
+	if err != nil {
+		return nil, err
+	}
+	ownerMap := utils.SliceToMap(owners, func(e *relationTb.GroupMemberModel) string {
+		return e.GroupID
+	})
+	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
+		return nil, errs.ErrData.Wrap("group no owner", strings.Join(ids, ","))
+	}
+	groupMemberNum, err := s.GroupDatabase.MapGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.GroupRequests = utils.Slice(requests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
+		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+	})
 	return nil, nil
 }
