@@ -31,23 +31,22 @@ func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient)
 }
 
 // SetPrivate调用.
-func (c *ConversationNotificationSender) ConversationSetPrivateNotification(
-	ctx context.Context,
-	sendID, recvID string,
-	isPrivateChat bool,
-) error {
+func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string,
+	isPrivateChat bool, conversationID string) error {
 	tips := &sdkws.ConversationSetPrivateTips{
-		RecvID:    recvID,
-		SendID:    sendID,
-		IsPrivate: isPrivateChat,
+		RecvID:         recvID,
+		SendID:         sendID,
+		IsPrivate:      isPrivateChat,
+		ConversationID: conversationID,
 	}
 	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
 // 会话改变.
-func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string) error {
+func (c *ConversationNotificationSender) ConversationChangeNotification(ctx context.Context, userID string, conversationIDs []string) error {
 	tips := &sdkws.ConversationUpdateTips{
-		UserID: userID,
+		UserID:             userID,
+		ConversationIDList: conversationIDs,
 	}
 	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }

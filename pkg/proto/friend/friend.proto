@@ -56,6 +56,15 @@ message getPaginationFriendsApplyToResp{
   int32 total = 2;
 }
 
+message getDesignatedFriendsApplyReq{
+  string fromUserID = 1;
+  string toUserID = 2;
+}
+
+message getDesignatedFriendsApplyResp{
+  repeated sdkws.FriendRequest friendRequests = 1;
+}
+
 
 message getDesignatedFriendsReq{
   string ownerUserID = 1;
@@ -160,6 +169,8 @@ service friend{
   rpc getPaginationFriendsApplyTo(getPaginationFriendsApplyToReq) returns(getPaginationFriendsApplyToResp);
   //获取主动发出去的好友申请列表
   rpc getPaginationFriendsApplyFrom(getPaginationFriendsApplyFromReq) returns(getPaginationFriendsApplyFromResp);
+  //获取指定好友申请
+  rpc getDesignatedFriendsApply(getDesignatedFriendsApplyReq) returns(getDesignatedFriendsApplyResp);
   //添加黑名单
   rpc addBlack(addBlackReq) returns(addBlackResp);
   //移除黑名单

@@ -110,3 +110,13 @@ func (g *GroupRequestGorm) PageGroup(
 		showNumber,
 	)
 }
+
+func (g *GroupRequestGorm) FindGroupReuests(ctx context.Context, groupID string, userIDs []string) (groupRequests []*relation.GroupRequestModel, err error) {
+	return groupRequests, utils.Wrap(
+		g.DB.WithContext(ctx).
+			Where("group_id = ? and user_id in ?", groupID, userIDs).
+			Find(&groupRequests).
+			Error,
+		utils.GetSelfFuncName(),
+	)
+}

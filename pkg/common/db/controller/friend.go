@@ -75,6 +75,7 @@ type FriendDatabase interface {
 		friendUserIDs []string,
 	) (friends []*relation.FriendModel, err error)
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
+	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error)
 }
 
 type friendDatabase struct {
@@ -362,4 +363,8 @@ func (f *friendDatabase) FindFriendUserIDs(
 	ownerUserID string,
 ) (friendUserIDs []string, err error) {
 	return f.cache.GetFriendIDs(ctx, ownerUserID)
+}
+
+func (f *friendDatabase) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
+	return f.friendRequest.FindBothFriendRequests(ctx, fromUserID, toUserID)
 }

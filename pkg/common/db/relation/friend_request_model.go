@@ -147,3 +147,14 @@ func (f *FriendRequestGorm) FindFromUserID(
 	)
 	return
 }
+
+func (f *FriendRequestGorm) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
+	err = utils.Wrap(
+		f.db(ctx).
+			Where("(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)", fromUserID, toUserID, toUserID, fromUserID).
+			Find(&friends).
+			Error,
+		"",
+	)
+	return
+}

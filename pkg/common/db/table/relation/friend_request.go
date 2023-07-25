@@ -61,6 +61,6 @@ type FriendRequestModelInterface interface {
 		fromUserID string,
 		pageNumber, showNumber int32,
 	) (friendRequests []*FriendRequestModel, total int64, err error)
-
+	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*FriendRequestModel, err error)
 	NewTx(tx any) FriendRequestModelInterface
 }

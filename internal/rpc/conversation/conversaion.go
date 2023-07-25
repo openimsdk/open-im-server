@@ -106,7 +106,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbConvers
 	if err != nil {
 		return nil, err
 	}
-	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID)
+	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID, []string{req.Conversation.ConversationID})
 	resp := &pbConversation.SetConversationResp{}
 	return resp, nil
 }
@@ -169,7 +169,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value)
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
@@ -180,7 +180,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		return nil, err
 	}
 	for _, v := range req.UserIDs {
-		c.conversationNotificationSender.ConversationChangeNotification(ctx, v)
+		c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 	}
 	return &pbConversation.SetConversationsResp{}, nil
 }

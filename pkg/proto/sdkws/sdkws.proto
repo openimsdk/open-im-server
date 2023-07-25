@@ -434,6 +434,7 @@ message ConversationSetPrivateTips{
   string recvID = 1;
   string sendID = 2;
   bool isPrivate = 3;
+  string conversationID = 4;
 }
 
 message ConversationHasReadTips {

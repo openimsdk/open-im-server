@@ -60,6 +60,10 @@ func (o *GroupApi) GetUserReqGroupApplicationList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetUserReqApplicationList, o.Client, c)
 }
 
+func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupUsersReqApplicationList, o.Client, c)
+}
+
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroupsInfo, o.Client, c)
 }

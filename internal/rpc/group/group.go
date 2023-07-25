@@ -1441,3 +1441,8 @@ func (s *groupServer) GetGroupMemberRoleLevel(ctx context.Context, req *pbGroup.
 	})
 	return resp, nil
 }
+
+func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbGroup.GetGroupUsersReqApplicationListReq) (*pbGroup.GetGroupUsersReqApplicationListResp, error) {
+
+	return nil, nil
+}

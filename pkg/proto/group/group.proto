@@ -343,6 +343,15 @@ message GroupCreateCountResp {
   map<string, int64> count = 3;
 }
 
+message getGroupUsersReqApplicationListReq {
+  string groupID =1;
+  repeated string userIDs = 2;
+}
+
+message getGroupUsersReqApplicationListResp {
+
+}
+
 service group{
   //创建群
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -358,6 +367,8 @@ service group{
   rpc getGroupApplicationList(GetGroupApplicationListReq) returns(GetGroupApplicationListResp);
   //获取用户自己的主动加群申请
   rpc getUserReqApplicationList(GetUserReqApplicationListReq) returns(GetUserReqApplicationListResp);
+  // 获取该群用户的加群申请
+  rpc getGroupUsersReqApplicationList(getGroupUsersReqApplicationListReq) returns(getGroupUsersReqApplicationListResp);
   //转让群主
   rpc transferGroupOwner(TransferGroupOwnerReq) returns(TransferGroupOwnerResp);
   //群主或管理员处理进群申请
