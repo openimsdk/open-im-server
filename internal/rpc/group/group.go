@@ -1448,7 +1448,6 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
-	resp.Total = int64(total)
 	if len(requests) == 0 {
 		return resp, nil
 	}
@@ -1482,5 +1481,6 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	resp.GroupRequests = utils.Slice(requests, func(e *relationTb.GroupRequestModel) *sdkws.GroupRequest {
 		return convert.Db2PbGroupRequest(e, nil, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
 	})
+	resp.Total = total
 	return resp, nil
 }
