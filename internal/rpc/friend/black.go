@@ -22,7 +22,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	pbFriend "github.com/OpenIMSDK/protocol/friend"
 )
 
 func (s *friendServer) GetPaginationBlacks(

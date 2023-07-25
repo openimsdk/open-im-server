@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/protocol/msg"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 
@@ -33,8 +33,8 @@ import (
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")

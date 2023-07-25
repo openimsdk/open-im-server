@@ -19,7 +19,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
 )
 
 func (m *msgServer) SetSendMsgStatus(

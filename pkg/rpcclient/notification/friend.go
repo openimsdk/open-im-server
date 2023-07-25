@@ -23,9 +23,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbFriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	pbFriend "github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 type FriendNotificationSender struct {

@@ -27,7 +27,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/errinfo"
+	"github.com/OpenIMSDK/protocol/errinfo"
 )
 
 func GrpcClient() grpc.DialOption {

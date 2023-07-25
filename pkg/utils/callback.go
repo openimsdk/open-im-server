@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 )
 
 func GetContent(msg *sdkws.MsgData) string {

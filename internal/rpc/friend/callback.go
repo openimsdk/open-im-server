@@ -23,7 +23,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
+	pbfriend "github.com/OpenIMSDK/protocol/friend"
 )
 
 func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {

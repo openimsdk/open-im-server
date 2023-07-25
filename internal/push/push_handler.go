@@ -24,9 +24,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbChat "github.com/OpenIMSDK/protocol/msg"
+	pbPush "github.com/OpenIMSDK/protocol/push"
 )
 
 type ConsumerHandler struct {

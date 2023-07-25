@@ -32,9 +32,9 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
 	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbfriend "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbfriend "github.com/OpenIMSDK/protocol/friend"
 )
 
 type friendServer struct {

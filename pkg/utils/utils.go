@@ -29,7 +29,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 )
 
 // copy a by b  b->a
