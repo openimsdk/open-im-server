@@ -16,6 +16,8 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"google.golang.org/protobuf/proto"
 
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
@@ -48,9 +50,20 @@ func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command strin
 		CreateTime:       msg.MsgData.CreateTime,
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
-		Content:          utils.GetContent(msg.MsgData),
+		Content:          GetContent(msg.MsgData),
 		Seq:              uint32(msg.MsgData.Seq),
 		Ex:               msg.MsgData.Ex,
+	}
+}
+
+func GetContent(msg *sdkws.MsgData) string {
+	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
+		var tips sdkws.TipsComm
+		_ = proto.Unmarshal(msg.Content, &tips)
+		content := tips.JsonDetail
+		return content
+	} else {
+		return string(msg.Content)
 	}
 }
 

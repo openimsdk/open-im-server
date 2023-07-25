@@ -254,8 +254,7 @@ func (s *friendServer) GetPaginationFriendsApplyTo(
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	pageNumber, showNumber := utils.GetPage(req.Pagination)
-	friendRequests, total, err := s.friendDatabase.PageFriendRequestToMe(ctx, req.UserID, pageNumber, showNumber)
+	friendRequests, total, err := s.friendDatabase.PageFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -278,8 +277,7 @@ func (s *friendServer) GetPaginationFriendsApplyFrom(
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	pageNumber, showNumber := utils.GetPage(req.Pagination)
-	friendRequests, total, err := s.friendDatabase.PageFriendRequestFromMe(ctx, req.UserID, pageNumber, showNumber)
+	friendRequests, total, err := s.friendDatabase.PageFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -314,8 +312,7 @@ func (s *friendServer) GetPaginationFriends(
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	pageNumber, showNumber := utils.GetPage(req.Pagination)
-	friends, total, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, pageNumber, showNumber)
+	friends, total, err := s.friendDatabase.PageOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func callbackOfflinePush(
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDs:       msg.AtUserIDList,
-		Content:         utils.GetContent(msg),
+		Content:         GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	if err := http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOfflinePush); err != nil {
@@ -95,7 +95,7 @@ func callbackOnlinePush(ctx context.Context, userIDs []string, msg *sdkws.MsgDat
 		ContentType: msg.ContentType,
 		SessionType: msg.SessionType,
 		AtUserIDs:   msg.AtUserIDList,
-		Content:     utils.GetContent(msg),
+		Content:     GetContent(msg),
 	}
 	resp := &callbackstruct.CallbackBeforePushResp{}
 	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackOnlinePush)
@@ -123,7 +123,7 @@ func callbackBeforeSuperGroupOnlinePush(
 		ContentType: msg.ContentType,
 		SessionType: msg.SessionType,
 		AtUserIDs:   msg.AtUserIDList,
-		Content:     utils.GetContent(msg),
+		Content:     GetContent(msg),
 		Seq:         msg.Seq,
 	}
 	resp := &callbackstruct.CallbackBeforeSuperGroupOnlinePushResp{}

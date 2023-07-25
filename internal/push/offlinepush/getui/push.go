@@ -28,11 +28,11 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
 	"github.com/OpenIMSDK/tools/config"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/utils/splitter"
 
 	"github.com/OpenIMSDK/tools/utils"
 )

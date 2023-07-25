@@ -4,9 +4,8 @@ go 1.18
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/OpenIMSDK/open_utils v1.0.8
 	github.com/Shopify/sarama v1.29.0
-	github.com/bwmarrin/snowflake v0.3.0
+	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/dtm-labs/rockscache v0.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.14.0
@@ -14,19 +13,19 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/websocket v1.4.2
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/jinzhu/copier v0.3.5
-	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/minio/minio-go/v7 v7.0.59
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/pkg/errors v0.9.1
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.2 // indirect
 	github.com/stretchr/testify v1.8.3
 	go.mongodb.org/mongo-driver v1.12.0
-	golang.org/x/image v0.9.0
+	golang.org/x/image v0.9.0 // indirect
 	google.golang.org/api v0.114.0
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
@@ -39,11 +38,10 @@ require github.com/google/uuid v1.3.0
 
 require (
 	github.com/OpenIMSDK/protocol v0.0.0-20230725064305-11f0568fe5e9
-	github.com/OpenIMSDK/tools v0.0.0-20230725065329-f1a0cb3b07ac
+	github.com/OpenIMSDK/tools v0.0.0-20230725085302-133df5f2ea13
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/go-zookeeper/zk v1.0.3
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 )
@@ -70,6 +68,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-zookeeper/zk v1.0.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -136,8 +135,10 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/spf13/cobra v1.6.1
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	go.uber.org/zap v1.24.0
+	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.10.0 // indirect
 	google.golang.org/genproto v0.0.0-20230525234025-438c736192d0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
+replace github.com/OpenIMSDK/tools => C:\Users\Admin\Desktop\openim\tools

@@ -67,7 +67,7 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	if client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
 	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))

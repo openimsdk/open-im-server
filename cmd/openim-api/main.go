@@ -73,11 +73,11 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
-	if err := client.CreateRpcRootNodes(config.GetServiceNames()); err != nil {
+	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov")
-	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.EncodeConfig()); err != nil {
+	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov success")
