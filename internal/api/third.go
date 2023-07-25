@@ -95,5 +95,5 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Redirect(http.StatusTemporaryRedirect, resp.Url)
+	c.Redirect(http.StatusFound, resp.Url)
 }
