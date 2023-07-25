@@ -1,0 +1,57 @@
+name: Auto PR to release
+
+on:
+  pull_request:
+    # types:
+    #   - closed
+
+env:
+  GH_TOKEN: ${{ secrets.REDBOT_GITHUB_TOKEN }}
+  ISSUE: ${{ github.event.issue.html_url }}
+  OWNER: ${{ github.repository_owner }}
+  REPO: ${{ github.event.repository.name }}
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    steps:
+        - name: Check out code
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+
+        - name: Setup GitHub CLI
+          run: |
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+            sudo apt-add-repository https://cli.github.com/packages
+            sudo apt-get update
+            sudo apt-get install gh
+          continue-on-error: true
+
+        - name: Configure GitHub CLI
+          run: |
+            git config --global user.email "3293172751ysy@gmail.com"
+            git config --global user.name "kubbot"
+            echo "${{ secrets.BOT_GITHUB_TOKEN }}" | gh auth login --with-token
+        - name: Create PR to release branch
+          run: |
+            ISSUEID=$(gh pr view 642 --repo $OWNER/$REPO | grep -oP 'Fixes #\K\d+')
+            echo "===========> $ISSUEID"
+            ISSUE=$(gh issue view $ISSUEID --repo $OWNER/$REPO --json labels,assignees,milestone,title)
+            echo "===========> $ISSUE"
+
+            LABELS=$(echo $ISSUE | jq -r '.labels[] | select(.name) | .name' | jq -R -r -s -c 'split("\n")[:-1] | join(",")')
+            ASSIGNEES=$(echo $ISSUE | jq -r '.assignees[] | select(.login) | .login' | jq -R -s -c 'split("\n")[:-1] | join(",")')
+            MILESTONE=$(echo $ISSUE | jq -r '.milestone | select(.title) | .title')
+            TITLE=$(echo $ISSUE | jq -r '.title')
+
+            echo $ISSUE | jq
+
+            gh pr edit ${{ github.event.pull_request.number }} --repo $OWNER/$REPO --add-label "$LABELS" --add-assignee "$ASSIGNEES" --milestone "$MILESTONE"
+
+            git checkout -b bot/merge-to-release-$ISSUEID
+            git push origin bot/merge-to-release-$ISSUEID
+            gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
+            
+            # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo OpenIMSDK/Open-IM-Server --reviewer "cubxxw"
