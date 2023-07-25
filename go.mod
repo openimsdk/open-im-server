@@ -140,5 +140,3 @@ require (
 	google.golang.org/genproto v0.0.0-20230525234025-438c736192d0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/OpenIMSDK/tools => C:\Users\Admin\Desktop\openim\tools
