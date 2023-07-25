@@ -14,7 +14,7 @@
 
 package msggateway
 
-import "github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
+import "github.com/OpenIMSDK/tools/apiresp"
 
 func httpError(ctx *UserConnContext, err error) {
 	apiresp.HttpError(ctx.RespWriter, err)

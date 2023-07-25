@@ -20,10 +20,10 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
+	pbConversation "github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type Conversation struct {

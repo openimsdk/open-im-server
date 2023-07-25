@@ -23,20 +23,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type LongConnServer interface {

@@ -20,11 +20,11 @@ import (
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	sdkws "github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ChatLogGorm struct {

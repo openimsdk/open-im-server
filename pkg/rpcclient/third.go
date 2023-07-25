@@ -23,9 +23,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
+	"github.com/OpenIMSDK/protocol/third"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 )
 
 type Third struct {

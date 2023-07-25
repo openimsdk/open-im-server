@@ -19,11 +19,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	"github.com/OpenIMSDK/protocol/msg"
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 const (

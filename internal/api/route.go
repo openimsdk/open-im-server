@@ -16,6 +16,13 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -24,12 +31,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -59,7 +66,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	ParseToken := mw.GinParseToken(rdb)
+	ParseToken := GinParseToken(rdb)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -185,4 +192,66 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
 	return r
+}
+
+func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
+	dataBase := controller.NewAuthDatabase(
+		cache.NewMsgCacheModel(rdb),
+		config.Config.Secret,
+		config.Config.TokenPolicy.Expire,
+	)
+	return func(c *gin.Context) {
+		switch c.Request.Method {
+		case http.MethodPost:
+			token := c.Request.Header.Get(constant.Token)
+			if token == "" {
+				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
+				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
+				c.Abort()
+				return
+			}
+			claims, err := tokenverify.GetClaimFromToken(token)
+			if err != nil {
+				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				c.Abort()
+				return
+			}
+			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
+			if err != nil {
+				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if len(m) == 0 {
+				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if v, ok := m[token]; ok {
+				switch v {
+				case constant.NormalToken:
+				case constant.KickedToken:
+					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
+					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					c.Abort()
+					return
+				default:
+					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
+					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					c.Abort()
+					return
+				}
+			} else {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
+			c.Set(constant.OpUserID, claims.UserID)
+			c.Next()
+		}
+	}
 }

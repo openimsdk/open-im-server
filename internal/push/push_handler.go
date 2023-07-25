@@ -20,13 +20,13 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbChat "github.com/OpenIMSDK/protocol/msg"
+	pbPush "github.com/OpenIMSDK/protocol/push"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ConsumerHandler struct {

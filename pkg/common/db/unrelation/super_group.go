@@ -22,7 +22,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func NewSuperGroupMongoDriver(database *mongo.Database) unrelation.SuperGroupModelInterface {

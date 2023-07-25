@@ -23,31 +23,31 @@ import (
 	"strings"
 	"time"
 
-	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
+	pbConversation "github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/wrapperspb"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbGroup "github.com/OpenIMSDK/protocol/group"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -92,6 +92,11 @@ type groupServer struct {
 	Notification          *notification.GroupNotificationSender
 	conversationRpcClient rpcclient.ConversationRpcClient
 	msgRpcClient          rpcclient.MessageRpcClient
+}
+
+func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbGroup.GetGroupUsersReqApplicationListReq) (*pbGroup.GetGroupUsersReqApplicationListResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
@@ -577,8 +582,6 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	pageNumber, showNumber := utils.GetPage(req.Pagination)
-
 	groupIDs, err := s.GroupDatabase.FindUserManagedGroupID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
@@ -587,7 +590,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, pageNumber, showNumber)
+	total, groupRequests, err := s.GroupDatabase.PageGroupRequest(ctx, groupIDs, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
