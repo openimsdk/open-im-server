@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type ObjectInfoGorm struct {

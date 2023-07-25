@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
+	"github.com/OpenIMSDK/tools/mcontext"
 
 	pbGroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"

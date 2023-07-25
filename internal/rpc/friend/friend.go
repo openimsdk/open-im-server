@@ -18,23 +18,23 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/log"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	registry "github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/tools/constant"
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type friendServer struct {
@@ -81,6 +81,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		RegisterCenter:     client,
 	})
 	return nil
+}
+
+func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfriend.GetDesignatedFriendsApplyReq) (*pbfriend.GetDesignatedFriendsApplyResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // ok.

@@ -19,7 +19,7 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type Compressor interface {

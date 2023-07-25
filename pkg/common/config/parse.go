@@ -23,9 +23,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 var (

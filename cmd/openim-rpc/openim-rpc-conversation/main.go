@@ -17,7 +17,7 @@ package main
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/internal/rpc/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/tools/config"
 )
 
 func main() {

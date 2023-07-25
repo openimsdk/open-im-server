@@ -18,14 +18,14 @@ import (
 	"context"
 
 	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
 	pbChat "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func cbURL() string {

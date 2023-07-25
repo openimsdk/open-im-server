@@ -20,11 +20,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mcontext"
 )
 
 type ThirdApi rpcclient.Third

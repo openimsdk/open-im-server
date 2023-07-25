@@ -19,10 +19,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type AuthDatabase interface {

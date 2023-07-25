@@ -17,12 +17,12 @@ package relation
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
+	"github.com/OpenIMSDK/tools/ormutil"
 
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type BlackGorm struct {

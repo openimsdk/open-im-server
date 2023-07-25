@@ -24,12 +24,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {

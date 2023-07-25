@@ -24,11 +24,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 const (
