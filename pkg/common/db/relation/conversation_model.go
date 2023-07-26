@@ -19,9 +19,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ConversationGorm struct {
@@ -207,7 +207,7 @@ func (c *ConversationGorm) GetConversationIDsNeedDestruct(
 ) (conversations []*relation.ConversationModel, err error) {
 	return conversations, utils.Wrap(
 		c.db(ctx).
-			Where("is_msg_destruct = 1 && UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) && msg_destruct_time != 0").
+			Where("is_msg_destruct = 1 && msg_destruct_time != 0 && (UNIX_TIMESTAMP(NOW()) > (msg_destruct_time + UNIX_TIMESTAMP(latest_msg_destruct_time)) || latest_msg_destruct_time is NULL)").
 			Find(&conversations).
 			Error,
 		"",

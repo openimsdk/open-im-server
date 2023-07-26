@@ -20,13 +20,13 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbChat "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbChat "github.com/OpenIMSDK/protocol/msg"
+	pbPush "github.com/OpenIMSDK/protocol/push"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ConsumerHandler struct {
@@ -37,8 +37,10 @@ type ConsumerHandler struct {
 func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
 	var consumerHandler ConsumerHandler
 	consumerHandler.pusher = pusher
-	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
+	consumerHandler.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+		KafkaVersion:   sarama.V2_0_0_0,
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+	}, []string{config.Config.Kafka.MsgToPush.Topic}, config.Config.Kafka.Addr,
 		config.Config.Kafka.ConsumerGroupID.MsgToPush)
 	return &consumerHandler
 }
@@ -63,7 +65,13 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 	case constant.SuperGroupChatType:
 		err = c.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
 	default:
-		err = c.pusher.Push2User(ctx, []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}, pbData.MsgData)
+		var pushUserIDs []string
+		if pbData.MsgData.SendID != pbData.MsgData.RecvID {
+			pushUserIDs = []string{pbData.MsgData.SendID, pbData.MsgData.RecvID}
+		} else {
+			pushUserIDs = []string{pbData.MsgData.SendID}
+		}
+		err = c.pusher.Push2User(ctx, pushUserIDs, pbData.MsgData)
 	}
 	if err != nil {
 		if err == errNoOfflinePusher {
@@ -76,7 +84,8 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 func (ConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (ConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (c *ConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim) error {
+	claim sarama.ConsumerGroupClaim,
+) error {
 	for msg := range claim.Messages() {
 		ctx := c.pushConsumerGroup.GetContextFromMsg(msg)
 		c.handleMs2PsChat(ctx, msg.Value)

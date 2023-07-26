@@ -20,11 +20,11 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/log"
 )
 
 type OnlineHistoryMongoConsumerHandler struct {
@@ -34,8 +34,10 @@ type OnlineHistoryMongoConsumerHandler struct {
 
 func NewOnlineHistoryMongoConsumerHandler(database controller.CommonMsgDatabase) *OnlineHistoryMongoConsumerHandler {
 	mc := &OnlineHistoryMongoConsumerHandler{
-		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
-			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.MsgToMongo.Topic},
+		historyConsumerGroup: kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{
+			KafkaVersion:   sarama.V2_0_0_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false,
+		}, []string{config.Config.Kafka.MsgToMongo.Topic},
 			config.Config.Kafka.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo),
 		msgDatabase: database,
 	}

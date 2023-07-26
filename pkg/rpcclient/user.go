@@ -20,13 +20,13 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type User struct {
@@ -45,6 +45,11 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 }
 
 type UserRpcClient User
+
+func NewUserRpcClientByUser(user *User) *UserRpcClient {
+	rpc := UserRpcClient(*user)
+	return &rpc
+}
 
 func NewUserRpcClient(client discoveryregistry.SvcDiscoveryRegistry) UserRpcClient {
 	return UserRpcClient(*NewUser(client))
@@ -140,4 +145,12 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 		return err
 	}
 	return tokenverify.CheckAccessV3(ctx, ownerUserID)
+}
+
+func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
+	resp, err := u.Client.GetAllUserID(ctx, &user.GetAllUserIDReq{Pagination: &sdkws.RequestPagination{PageNumber: pageNumber, ShowNumber: showNumber}})
+	if err != nil {
+		return nil, err
+	}
+	return resp.UserIDs, nil
 }

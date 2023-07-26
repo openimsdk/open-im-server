@@ -20,14 +20,14 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	pbPush "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	pbPush "github.com/OpenIMSDK/protocol/push"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
 )
 
 type pushServer struct {

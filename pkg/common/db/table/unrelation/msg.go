@@ -16,13 +16,14 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"strconv"
 	"time"
 
+	"github.com/OpenIMSDK/protocol/msg"
+
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 const (
@@ -109,7 +110,7 @@ type MsgDocModelInterface interface {
 	GetMsgDocModelByIndex(ctx context.Context, conversationID string, index, sort int64) (*MsgDocModel, error)
 	DeleteMsgsInOneDocByIndex(ctx context.Context, docID string, indexes []int) error
 	MarkSingleChatMsgsAsRead(ctx context.Context, userID string, docID string, indexes []int64) error
-	SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*MsgInfoModel, error)
+	SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*MsgInfoModel, error)
 	RangeUserSendCount(
 		ctx context.Context,
 		start time.Time,

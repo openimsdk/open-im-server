@@ -19,10 +19,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/protocol/msg"
+
+	"github.com/OpenIMSDK/tools/constant"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,9 +32,9 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
@@ -80,7 +81,7 @@ func (m *MsgMongoDriver) UpdateMsg(
 	return res, nil
 }
 
-// PushUnique value must slice
+// PushUnique value must slice.
 func (m *MsgMongoDriver) PushUnique(
 	ctx context.Context,
 	docID string,
@@ -555,7 +556,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 //	    }
 //	}
 //
-// ])
+// ]).
 func (m *MsgMongoDriver) RangeUserSendCount(
 	ctx context.Context,
 	start time.Time,
@@ -1066,36 +1067,36 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
 
-func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
-	msgs, err := m.searchMessage(ctx, req)
+func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
+	total, msgs, err := m.searchMessage(ctx, req)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	for _, msg1 := range msgs {
 		if msg1.IsRead {
 			msg1.Msg.IsRead = true
 		}
 	}
-	return msgs, nil
+	return total, msgs, nil
 }
 
-func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) ([]*table.MsgInfoModel, error) {
+func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
 	var pipe mongo.Pipeline
-	conditon := bson.A{}
+	condition := bson.A{}
 	if req.SendTime != "" {
-		conditon = append(conditon, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
+		condition = append(condition, bson.M{"$eq": bson.A{bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": bson.M{"$toDate": "$$item.msg.send_time"}}}, req.SendTime}})
 	}
 	if req.MsgType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.content_type", req.MsgType}})
 	}
 	if req.SessionType != 0 {
-		conditon = append(conditon, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
+		condition = append(condition, bson.M{"$eq": bson.A{"$$item.msg.session_type", req.SessionType}})
 	}
 	if req.RecvID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.recv_id", "regex": req.RecvID}})
 	}
 	if req.SendID != "" {
-		conditon = append(conditon, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
+		condition = append(condition, bson.M{"$regexFind": bson.M{"input": "$$item.msg.send_id", "regex": req.SendID}})
 	}
 
 	or := bson.A{
@@ -1131,15 +1132,20 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 		},
 		{
 			{"$project", bson.D{
-				{"msgs", bson.D{
-					{"$filter", bson.D{
-						{"input", "$msgs"},
-						{"as", "item"},
-						{"cond", bson.D{
-							{"$and", conditon},
+				{
+					"msgs", bson.D{
+						{
+							"$filter", bson.D{
+								{"input", "$msgs"},
+								{"as", "item"},
+								{
+									"cond", bson.D{
+										{"$and", condition},
+									},
+								},
+							},
 						},
-						}},
-					}},
+					},
 				},
 				{"doc_id", 1},
 			}},
@@ -1147,19 +1153,19 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	}
 	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	var msgsDocs []table.MsgDocModel
 	err = cursor.All(ctx, &msgsDocs)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	if len(msgsDocs) == 0 {
-		return nil, errs.Wrap(mongo.ErrNoDocuments)
+		return 0, nil, errs.Wrap(mongo.ErrNoDocuments)
 	}
 	msgs := make([]*table.MsgInfoModel, 0)
-	for index, _ := range msgsDocs {
+	for index := range msgsDocs {
 		for i := range msgsDocs[index].Msg {
 			msg := msgsDocs[index].Msg[i]
 			if msg == nil || msg.Msg == nil {
@@ -1181,14 +1187,14 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 				}
 				data, err := json.Marshal(&revokeContent)
 				if err != nil {
-					return nil, err
+					return 0, nil, err
 				}
 				elem := sdkws.NotificationElem{
 					Detail: string(data),
 				}
 				content, err := json.Marshal(&elem)
 				if err != nil {
-					return nil, err
+					return 0, nil, err
 				}
 				msg.Msg.ContentType = constant.MsgRevokeNotification
 				msg.Msg.Content = string(content)
@@ -1196,5 +1202,12 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			msgs = append(msgs, msg)
 		}
 	}
-	return msgs, nil
+	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
+	n := int32(len(msgs))
+	if start+req.Pagination.ShowNumber < n {
+		msgs = msgs[start : start+req.Pagination.ShowNumber]
+	} else {
+		msgs = msgs[start:]
+	}
+	return n, msgs, nil
 }

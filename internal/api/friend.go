@@ -15,18 +15,17 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/tools/a2r"
 
 	"github.com/gin-gonic/gin"
 )
 
 type FriendApi rpcclient.Friend
 
-func NewFriendApi(discov discoveryregistry.SvcDiscoveryRegistry) FriendApi {
-	return FriendApi(*rpcclient.NewFriend(discov))
+func NewFriendApi(client rpcclient.Friend) FriendApi {
+	return FriendApi(client)
 }
 
 func (o *FriendApi) ApplyToAddFriend(c *gin.Context) {

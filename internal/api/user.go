@@ -17,22 +17,21 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/msggateway"
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 )
 
 type UserApi rpcclient.User
 
-func NewUserApi(discov discoveryregistry.SvcDiscoveryRegistry) UserApi {
-	return UserApi(*rpcclient.NewUser(discov))
+func NewUserApi(client rpcclient.User) UserApi {
+	return UserApi(client)
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
@@ -79,13 +78,19 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var respResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
 
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
 		if err != nil {
-			log.ZWarn(c, "GetUsersOnlineStatus rpc  err", err)
-			continue
+			log.ZWarn(c, "GetUsersOnlineStatus rpc err", err)
+
+			parseError := apiresp.ParseError(err)
+			log.ZDebug(c, "errcode bantanger", "errcode", parseError.ErrCode)
+			if parseError.ErrCode == errs.NoPermissionError {
+				apiresp.GinError(c, err)
+				return
+			}
 		} else {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
@@ -132,7 +137,7 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	//Online push message
+	// Online push message
 	for _, v := range conns {
 		msgClient := msggateway.NewMsgGatewayClient(v)
 		reply, err := msgClient.GetUsersOnlineStatus(c, &req)
@@ -161,7 +166,6 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 					}
 				}
 			}
-
 		}
 		for p, tokens := range m {
 			t := new(msggateway.SinglePlatformToken)
@@ -177,5 +181,4 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
-
 }

@@ -15,18 +15,17 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/group"
+	"github.com/OpenIMSDK/tools/a2r"
 
 	"github.com/gin-gonic/gin"
 )
 
 type GroupApi rpcclient.Group
 
-func NewGroupApi(discov discoveryregistry.SvcDiscoveryRegistry) GroupApi {
-	return GroupApi(*rpcclient.NewGroup(discov))
+func NewGroupApi(client rpcclient.Group) GroupApi {
+	return GroupApi(client)
 }
 
 func (o *GroupApi) CreateGroup(c *gin.Context) {
@@ -132,6 +131,7 @@ func (o *GroupApi) GetSuperGroupsInfo(c *gin.Context) {
 func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 	a2r.Call(group.GroupClient.GroupCreateCount, o.Client, c)
 }
+
 func (o *GroupApi) GetGroups(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroups, o.Client, c)
 }

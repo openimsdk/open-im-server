@@ -17,9 +17,9 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/constant"
 )
 
 type MsgNotificationSender struct {
@@ -36,7 +36,7 @@ func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, 
 		ConversationID: conversationID,
 		Seqs:           seqs,
 	}
-	return m.Notification(ctx, userID, userID, constant.MsgDeleteNotification, &tips)
+	return m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
 func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conversationID string, sesstionType int32, sendID, recvID string, seqs []int64, hasReadSeq int64) error {

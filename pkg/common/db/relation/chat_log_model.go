@@ -15,18 +15,16 @@
 package relation
 
 import (
-	"fmt"
-
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jinzhu/copier"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	sdkws "github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ChatLogGorm struct {
@@ -61,45 +59,4 @@ func (c *ChatLogGorm) Create(msg *pbMsg.MsgDataToMQ) error {
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
 	return c.DB.Create(chatLog).Error
-}
-
-func (c *ChatLogGorm) GetChatLog(
-	chatLog *relation.ChatLogModel,
-	pageNumber, showNumber int32,
-	contentTypeList []int32,
-) (int64, []relation.ChatLogModel, error) {
-	mdb := c.DB.Model(chatLog)
-	if chatLog.SendTime.Unix() > 0 {
-		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
-	}
-	if chatLog.Content != "" {
-		mdb = mdb.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
-	}
-	if chatLog.SessionType == 1 {
-		mdb = mdb.Where("session_type = ?", chatLog.SessionType)
-	} else if chatLog.SessionType == 2 {
-		mdb = mdb.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
-	}
-	if chatLog.ContentType != 0 {
-		mdb = mdb.Where("content_type = ?", chatLog.ContentType)
-	}
-	if chatLog.SendID != "" {
-		mdb = mdb.Where("send_id = ?", chatLog.SendID)
-	}
-	if chatLog.RecvID != "" {
-		mdb = mdb.Where("recv_id = ?", chatLog.RecvID)
-	}
-	if len(contentTypeList) > 0 {
-		mdb = mdb.Where("content_type in (?)", contentTypeList)
-	}
-	var count int64
-	if err := mdb.Count(&count).Error; err != nil {
-		return 0, nil, err
-	}
-	var chatLogs []relation.ChatLogModel
-	mdb = mdb.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
-	if err := mdb.Find(&chatLogs).Error; err != nil {
-		return 0, nil, err
-	}
-	return count, chatLogs, nil
 }

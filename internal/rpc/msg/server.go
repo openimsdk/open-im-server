@@ -16,36 +16,36 @@ package msg
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 )
 
-type MessageInterceptorChain []MessageInterceptorFunc
-type msgServer struct {
-	RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
-	MsgDatabase            controller.CommonMsgDatabase
-	Group                  *rpcclient.GroupRpcClient
-	User                   *rpcclient.UserRpcClient
-	Conversation           *rpcclient.ConversationRpcClient
-	friend                 *rpcclient.FriendRpcClient
-	GroupLocalCache        *localcache.GroupLocalCache
-	ConversationLocalCache *localcache.ConversationLocalCache
-	MessageLocker          MessageLocker
-	Handlers               MessageInterceptorChain
-	notificationSender     *rpcclient.NotificationSender
-}
+type (
+	MessageInterceptorChain []MessageInterceptorFunc
+	msgServer               struct {
+		RegisterCenter         discoveryregistry.SvcDiscoveryRegistry
+		MsgDatabase            controller.CommonMsgDatabase
+		Group                  *rpcclient.GroupRpcClient
+		User                   *rpcclient.UserRpcClient
+		Conversation           *rpcclient.ConversationRpcClient
+		friend                 *rpcclient.FriendRpcClient
+		GroupLocalCache        *localcache.GroupLocalCache
+		ConversationLocalCache *localcache.ConversationLocalCache
+		Handlers               MessageInterceptorChain
+		notificationSender     *rpcclient.NotificationSender
+	}
+)
 
 func (m *msgServer) addInterceptorHandler(interceptorFunc ...MessageInterceptorFunc) {
 	m.Handlers = append(m.Handlers, interceptorFunc...)
@@ -80,12 +80,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
-	mysql, err := relation.NewGormDB()
-	if err != nil {
-		return err
-	}
-	msgMysModel := relation.NewChatLogGorm(mysql)
-	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel, msgMysModel)
+	msgDatabase := controller.NewCommonMsgDatabase(msgDocModel, cacheModel)
 	s := &msgServer{
 		Conversation:           &conversationClient,
 		User:                   &userRpcClient,
@@ -95,7 +90,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		GroupLocalCache:        localcache.NewGroupLocalCache(&groupRpcClient),
 		ConversationLocalCache: localcache.NewConversationLocalCache(&conversationClient),
 		friend:                 &friendRpcClient,
-		MessageLocker:          NewLockerMessage(cacheModel),
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)

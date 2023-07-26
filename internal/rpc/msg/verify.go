@@ -20,17 +20,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
-var (
-	ExcludeContentType = []int{constant.HasReadReceipt}
-)
+var ExcludeContentType = []int{constant.HasReadReceipt}
 
 type Validator interface {
 	validate(pb *msg.SendMsgReq) (bool, int32, string)
@@ -126,6 +124,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		return nil
 	}
 }
+
 func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	msg.SendTime = utils.GetCurrentTimestampByMill()

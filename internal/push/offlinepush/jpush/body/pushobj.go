@@ -37,6 +37,7 @@ func (p *PushObj) SetNotification(no *Notification) {
 func (p *PushObj) SetMessage(m *Message) {
 	p.Message = m
 }
+
 func (p *PushObj) SetOptions(o *Options) {
 	p.Options = o
 }

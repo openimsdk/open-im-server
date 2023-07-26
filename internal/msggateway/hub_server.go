@@ -18,19 +18,19 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msggateway"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/startrpc"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/msggateway"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/startrpc"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -181,13 +181,12 @@ func (s *Server) KickUserOffline(
 		if clients, _, ok := s.LongConnServer.GetUserPlatformCons(v, int(req.PlatformID)); ok {
 			for _, client := range clients {
 				log.ZDebug(ctx, "kick user offline", "userID", v, "platformID", req.PlatformID, "client", client)
-				err := client.KickOnlineMessage()
-				if err != nil {
-					return nil, err
+				if err := client.longConnServer.KickUserConn(client); err != nil {
+					log.ZWarn(ctx, "kick user offline failed", err, "userID", v, "platformID", req.PlatformID)
 				}
 			}
 		} else {
-			log.ZWarn(ctx, "conn not exist", nil, "userID", v, "platformID", req.PlatformID)
+			log.ZInfo(ctx, "conn not exist", "userID", v, "platformID", req.PlatformID)
 		}
 	}
 	return &msggateway.KickUserOfflineResp{}, nil
@@ -197,6 +196,6 @@ func (s *Server) MultiTerminalLoginCheck(
 	ctx context.Context,
 	req *msggateway.MultiTerminalLoginCheckReq,
 ) (*msggateway.MultiTerminalLoginCheckResp, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }

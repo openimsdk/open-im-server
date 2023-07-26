@@ -16,15 +16,16 @@ package relation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"time"
+
+	"github.com/OpenIMSDK/tools/constant"
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/ormutil"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 var _ relation.GroupModelInterface = (*GroupGorm)(nil)
@@ -67,6 +68,7 @@ func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, show
 	db = db.WithContext(ctx).Where("status!=?", constant.GroupStatusDismissed)
 	return ormutil.GormSearch[relation.GroupModel](db, []string{"name"}, keyword, pageNumber, showNumber)
 }
+
 func (g *GroupGorm) GetGroupIDsByGroupType(ctx context.Context, groupType int) (groupIDs []string, err error) {
 	return groupIDs, utils.Wrap(g.DB.Model(&relation.GroupModel{}).Where("group_type = ? ", groupType).Pluck("group_id", &groupIDs).Error, "")
 }

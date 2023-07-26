@@ -16,13 +16,14 @@ package msg
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/tools/constant"
+
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func (m *msgServer) PullMessageBySeqs(
@@ -94,6 +95,7 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 	for _, conversationID := range conversationIDs {
 		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
 	}
+	conversationIDs = append(conversationIDs, utils.GetSelfNotificationConversationID(req.UserID))
 	log.ZDebug(ctx, "GetMaxSeq", "conversationIDs", conversationIDs)
 	maxSeqs, err := m.MsgDatabase.GetMaxSeqs(ctx, conversationIDs)
 	if err != nil {
@@ -107,11 +109,11 @@ func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sd
 
 func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (resp *msg.SearchMessageResp, err error) {
 	var chatLogs []*sdkws.MsgData
+	var total int32
 	resp = &msg.SearchMessageResp{}
-	if chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
+	if total, chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
 		return nil, err
 	}
-	var num int
 	for _, chatLog := range chatLogs {
 		pbChatLog := &msg.ChatLog{}
 		utils.CopyStructFields(pbChatLog, chatLog)
@@ -130,7 +132,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			if err != nil {
 				return nil, err
 			}
-			pbChatLog.SenderNickname = recvUser.Nickname
+			pbChatLog.RecvNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
 			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)
@@ -145,9 +147,8 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 			pbChatLog.GroupType = group.GroupType
 		}
 		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
-		num++
 	}
 
-	resp.ChatLogsNum = int32(num)
+	resp.ChatLogsNum = total
 	return resp, nil
 }

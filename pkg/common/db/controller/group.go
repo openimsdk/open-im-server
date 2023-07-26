@@ -24,14 +24,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type GroupDatabase interface {
@@ -203,7 +203,7 @@ func (g *groupDatabase) CreateGroup(
 	groups []*relationTb.GroupModel,
 	groupMembers []*relationTb.GroupMemberModel,
 ) error {
-	var cache = g.cache.NewCache()
+	cache := g.cache.NewCache()
 	if err := g.tx.Transaction(func(tx any) error {
 		if len(groups) > 0 {
 			if err := g.groupDB.NewTx(tx).Create(ctx, groups); err != nil {
@@ -473,7 +473,7 @@ func (g *groupDatabase) UpdateGroupMember(
 }
 
 func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*relationTb.BatchUpdateGroupMember) error {
-	var cache = g.cache.NewCache()
+	cache := g.cache.NewCache()
 	if err := g.tx.Transaction(func(tx any) error {
 		for _, item := range data {
 			if err := g.groupMemberDB.NewTx(tx).Update(ctx, item.GroupID, item.UserID, item.Map); err != nil {

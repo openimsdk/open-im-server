@@ -15,24 +15,22 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/third"
+	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mcontext"
 )
 
 type ThirdApi rpcclient.Third
 
-func NewThirdApi(discov discoveryregistry.SvcDiscoveryRegistry) ThirdApi {
-	return ThirdApi(*rpcclient.NewThird(discov))
+func NewThirdApi(client rpcclient.Third) ThirdApi {
+	return ThirdApi(client)
 }
 
 func (o *ThirdApi) FcmUpdateToken(c *gin.Context) {
@@ -96,5 +94,5 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Redirect(http.StatusTemporaryRedirect, resp.Url)
+	c.Redirect(http.StatusFound, resp.Url)
 }

@@ -4,6 +4,9 @@ name: Github Rebot for Link check error
 on:
   schedule:
     - cron: '30 12 * * 1'
+  push:
+    branches:
+      - main
 
 jobs:
   linkChecker:

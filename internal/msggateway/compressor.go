@@ -19,7 +19,7 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type Compressor interface {
@@ -33,6 +33,7 @@ type GzipCompressor struct {
 func NewGzipCompressor() *GzipCompressor {
 	return &GzipCompressor{compressProtocol: "gzip"}
 }
+
 func (g *GzipCompressor) Compress(rawData []byte) ([]byte, error) {
 	gzipBuffer := bytes.Buffer{}
 	gz := gzip.NewWriter(&gzipBuffer)

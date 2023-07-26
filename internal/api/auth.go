@@ -17,16 +17,15 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/auth"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/auth"
+	"github.com/OpenIMSDK/tools/a2r"
 )
 
 type AuthApi rpcclient.Auth
 
-func NewAuthApi(discov discoveryregistry.SvcDiscoveryRegistry) AuthApi {
-	return AuthApi(*rpcclient.NewAuth(discov))
+func NewAuthApi(client rpcclient.Auth) AuthApi {
+	return AuthApi(client)
 }
 
 func (o *AuthApi) UserToken(c *gin.Context) {

@@ -21,20 +21,20 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw/specialerror"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 const (
-	maxRetry = 100 //number of retries
+	maxRetry = 100 // number of retries
 )
 
-// newMysqlGormDB Initialize the database connection
+// newMysqlGormDB Initialize the database connection.
 func newMysqlGormDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.Username, config.Config.Mysql.Password, config.Config.Mysql.Address[0], "mysql")
@@ -84,7 +84,7 @@ func newMysqlGormDB() (*gorm.DB, error) {
 	return db, nil
 }
 
-// connectToDatabase Connection retry for mysql
+// connectToDatabase Connection retry for mysql.
 func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 	var db *gorm.DB
 	var err error
@@ -101,7 +101,7 @@ func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 	return nil, err
 }
 
-// NewGormDB gorm mysql
+// NewGormDB gorm mysql.
 func NewGormDB() (*gorm.DB, error) {
 	specialerror.AddReplace(gorm.ErrRecordNotFound, errs.ErrRecordNotFound)
 	specialerror.AddErrHandler(replaceDuplicateKey)

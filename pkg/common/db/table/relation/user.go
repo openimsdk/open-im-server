@@ -29,7 +29,7 @@ type UserModel struct {
 	FaceURL          string    `gorm:"column:face_url;size:255"`
 	Ex               string    `gorm:"column:ex;size:1024"`
 	CreateTime       time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
-	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:18"`
+	AppMangerLevel   int32     `gorm:"column:app_manger_level;default:1"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }
 
@@ -63,7 +63,7 @@ type UserModelInterface interface {
 	Take(ctx context.Context, userID string) (user *UserModel, err error)
 	// 获取用户信息 不存在，不返回错误
 	Page(ctx context.Context, pageNumber, showNumber int32) (users []*UserModel, count int64, err error)
-	GetAllUserID(ctx context.Context) (userIDs []string, err error)
+	GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error)
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	// 获取用户总数
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)

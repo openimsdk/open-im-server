@@ -18,30 +18,30 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ConversationDatabase interface {
-	//UpdateUserConversationFiled 更新用户该会话的属性信息
+	// UpdateUserConversationFiled 更新用户该会话的属性信息
 	UpdateUsersConversationFiled(ctx context.Context, userIDs []string, conversationID string, args map[string]interface{}) error
-	//CreateConversation 创建一批新的会话
+	// CreateConversation 创建一批新的会话
 	CreateConversation(ctx context.Context, conversations []*relationTb.ConversationModel) error
-	//SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
+	// SyncPeerUserPrivateConversation 同步对端私聊会话内部保证事务操作
 	SyncPeerUserPrivateConversationTx(ctx context.Context, conversation []*relationTb.ConversationModel) error
-	//FindConversations 根据会话ID获取某个用户的多个会话
+	// FindConversations 根据会话ID获取某个用户的多个会话
 	FindConversations(ctx context.Context, ownerUserID string, conversationIDs []string) ([]*relationTb.ConversationModel, error)
-	//FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
+	// FindRecvMsgNotNotifyUserIDs 获取超级大群开启免打扰的用户ID
 	FindRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
-	//GetUserAllConversation 获取一个用户在服务器上所有的会话
+	// GetUserAllConversation 获取一个用户在服务器上所有的会话
 	GetUserAllConversation(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
-	//SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
+	// SetUserConversations 设置用户多个会话属性，如果会话不存在则创建，否则更新,内部保证原子性
 	SetUserConversations(ctx context.Context, ownerUserID string, conversations []*relationTb.ConversationModel) error
-	//SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
+	// SetUsersConversationFiledTx 设置多个用户会话关于某个字段的更新操作，如果会话不存在则创建，否则更新，内部保证事务操作
 	SetUsersConversationFiledTx(ctx context.Context, userIDs []string, conversation *relationTb.ConversationModel, filedMap map[string]interface{}) error
 	CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
@@ -98,14 +98,13 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 			temp.OwnerUserID = v
 			temp.CreateTime = now
 			conversations = append(conversations, temp)
-
 		}
 		if len(conversations) > 0 {
 			err = conversationTx.Create(ctx, conversations)
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConvsersations(conversation.ConversationID, NotUserIDs...)
+			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConversations(conversation.ConversationID, NotUserIDs...)
 		}
 		return nil
 	}); err != nil {
@@ -129,7 +128,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	var userIDs []string
 	cache := c.cache.NewCache()
 	for _, conversation := range conversations {
-		cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
+		cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
 	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
@@ -191,7 +190,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 		var conversationIDs []string
 		for _, conversation := range conversations {
 			conversationIDs = append(conversationIDs, conversation.ConversationID)
-			cache = cache.DelConvsersations(conversation.OwnerUserID, conversation.ConversationID)
+			cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		}
 		conversationTx := c.conversationDB.NewTx(tx)
 		existConversations, err := conversationTx.Find(ctx, ownerUserID, conversationIDs)
@@ -248,7 +247,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range notExistUserIDs {
 			conversation := relationTb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
-			cache = cache.DelConvsersations(v, conversationID)
+			cache = cache.DelConversations(v, conversationID)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
 		if len(conversations) > 0 {
@@ -262,7 +261,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 			return err
 		}
 		for _, v := range existConversationUserIDs {
-			cache = cache.DelConvsersations(v, conversationID)
+			cache = cache.DelConversations(v, conversationID)
 		}
 		return nil
 	}); err != nil {

@@ -16,6 +16,13 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -24,11 +31,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -40,8 +48,17 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
-	u := NewUserApi(discov)
-	m := NewMessageApi(discov)
+	// init rpc client here
+	userRpc := rpcclient.NewUser(discov)
+	groupRpc := rpcclient.NewGroup(discov)
+	friendRpc := rpcclient.NewFriend(discov)
+	messageRpc := rpcclient.NewMessage(discov)
+	conversationRpc := rpcclient.NewConversation(discov)
+	authRpc := rpcclient.NewAuth(discov)
+	thirdRpc := rpcclient.NewThird(discov)
+
+	u := NewUserApi(*userRpc)
+	m := NewMessageApi(messageRpc, userRpc)
 	if config.Config.Prometheus.Enable {
 		prome.NewApiRequestCounter()
 		prome.NewApiRequestFailedCounter()
@@ -49,7 +66,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	ParseToken := mw.GinParseToken(rdb)
+	ParseToken := GinParseToken(rdb)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -62,10 +79,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
 		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
 	}
-	//friend routing group
+	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
 	{
-		f := NewFriendApi(discov)
+		f := NewFriendApi(*friendRpc)
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
@@ -79,7 +96,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
 	}
-	g := NewGroupApi(discov)
+	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group", ParseToken)
 	{
 		groupRouterGroup.POST("/create_group", g.CreateGroup)
@@ -110,18 +127,18 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		superGroupRouterGroup.POST("/get_joined_group_list", g.GetJoinedSuperGroupList)
 		superGroupRouterGroup.POST("/get_groups_info", g.GetSuperGroupsInfo)
 	}
-	//certificate
+	// certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		a := NewAuthApi(discov)
+		a := NewAuthApi(*authRpc)
 		authRouterGroup.POST("/user_token", a.UserToken)
 		authRouterGroup.POST("/parse_token", a.ParseToken)
 		authRouterGroup.POST("/force_logout", ParseToken, a.ForceLogout)
 	}
-	//Third service
+	// Third service
 	thirdGroup := r.Group("/third", ParseToken)
 	{
-		t := NewThirdApi(discov)
+		t := NewThirdApi(*thirdRpc)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
@@ -135,7 +152,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		objectGroup.POST("/access_url", t.AccessURL)
 		objectGroup.GET("/*name", t.ObjectRedirect)
 	}
-	//Message
+	// Message
 	msgGroup := r.Group("/msg", ParseToken)
 	{
 		msgGroup.POST("/newest_seq", m.GetSeq)
@@ -154,13 +171,13 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/delete_msg_phsical_by_seq", m.DeleteMsgPhysicalBySeq)
 		msgGroup.POST("/delete_msg_physical", m.DeleteMsgPhysical)
 
-		msgGroup.POST("/batch_send_msg", m.ManagementBatchSendMsg)
+		msgGroup.POST("/batch_send_msg", m.BatchSendMsg)
 		msgGroup.POST("/check_msg_is_send_success", m.CheckMsgIsSendSuccess)
 	}
-	//Conversation
+	// Conversation
 	conversationGroup := r.Group("/conversation", ParseToken)
 	{
-		c := NewConversationApi(discov)
+		c := NewConversationApi(*conversationRpc)
 		conversationGroup.POST("/get_all_conversations", c.GetAllConversations)
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
@@ -175,4 +192,66 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
 	return r
+}
+
+func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
+	dataBase := controller.NewAuthDatabase(
+		cache.NewMsgCacheModel(rdb),
+		config.Config.Secret,
+		config.Config.TokenPolicy.Expire,
+	)
+	return func(c *gin.Context) {
+		switch c.Request.Method {
+		case http.MethodPost:
+			token := c.Request.Header.Get(constant.Token)
+			if token == "" {
+				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
+				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
+				c.Abort()
+				return
+			}
+			claims, err := tokenverify.GetClaimFromToken(token)
+			if err != nil {
+				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				c.Abort()
+				return
+			}
+			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
+			if err != nil {
+				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if len(m) == 0 {
+				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if v, ok := m[token]; ok {
+				switch v {
+				case constant.NormalToken:
+				case constant.KickedToken:
+					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
+					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					c.Abort()
+					return
+				default:
+					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
+					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					c.Abort()
+					return
+				}
+			} else {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
+			c.Set(constant.OpUserID, claims.UserID)
+			c.Next()
+		}
+	}
 }

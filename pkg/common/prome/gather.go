@@ -20,17 +20,17 @@ import (
 )
 
 var (
-	//auth rpc
+	// auth rpc.
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
 
-	//seg
+	// seg.
 	SeqGetSuccessCounter prometheus.Counter
 	SeqGetFailedCounter  prometheus.Counter
 	SeqSetSuccessCounter prometheus.Counter
 	SeqSetFailedCounter  prometheus.Counter
 
-	//msg-db
+	// msg-db.
 	MsgInsertRedisSuccessCounter   prometheus.Counter
 	MsgInsertRedisFailedCounter    prometheus.Counter
 	MsgInsertMongoSuccessCounter   prometheus.Counter
@@ -40,7 +40,7 @@ var (
 	MsgPullFromMongoSuccessCounter prometheus.Counter
 	MsgPullFromMongoFailedCounter  prometheus.Counter
 
-	//msg-ws
+	// msg-ws.
 	MsgRecvTotalCounter          prometheus.Counter
 	GetNewestSeqTotalCounter     prometheus.Counter
 	PullMsgBySeqListTotalCounter prometheus.Counter
@@ -50,7 +50,7 @@ var (
 	WorkSuperGroupChatMsgRecvSuccessCounter prometheus.Counter
 	OnlineUserGauge                         prometheus.Gauge
 
-	//msg-msg
+	// msg-msg.
 	SingleChatMsgProcessSuccessCounter         prometheus.Counter
 	SingleChatMsgProcessFailedCounter          prometheus.Counter
 	GroupChatMsgProcessSuccessCounter          prometheus.Counter
@@ -58,23 +58,23 @@ var (
 	WorkSuperGroupChatMsgProcessSuccessCounter prometheus.Counter
 	WorkSuperGroupChatMsgProcessFailedCounter  prometheus.Counter
 
-	//msg-push
+	// msg-push.
 	MsgOnlinePushSuccessCounter  prometheus.Counter
 	MsgOfflinePushSuccessCounter prometheus.Counter
 	MsgOfflinePushFailedCounter  prometheus.Counter
-	// api
+	// api.
 	ApiRequestCounter        prometheus.Counter
 	ApiRequestSuccessCounter prometheus.Counter
 	ApiRequestFailedCounter  prometheus.Counter
 
-	// grpc
+	// grpc.
 	GrpcRequestCounter        prometheus.Counter
 	GrpcRequestSuccessCounter prometheus.Counter
 	GrpcRequestFailedCounter  prometheus.Counter
 
 	SendMsgCounter prometheus.Counter
 
-	// conversation
+	// conversation.
 	ConversationCreateSuccessCounter prometheus.Counter
 	ConversationCreateFailedCounter  prometheus.Counter
 )
@@ -88,6 +88,7 @@ func NewUserLoginCounter() {
 		Help: "The number of user login",
 	})
 }
+
 func NewUserRegisterCounter() {
 	if UserRegisterCounter != nil {
 		return
@@ -107,6 +108,7 @@ func NewSeqGetSuccessCounter() {
 		Help: "The number of successful get seq",
 	})
 }
+
 func NewSeqGetFailedCounter() {
 	if SeqGetFailedCounter != nil {
 		return
@@ -126,6 +128,7 @@ func NewSeqSetSuccessCounter() {
 		Help: "The number of successful set seq",
 	})
 }
+
 func NewSeqSetFailedCounter() {
 	if SeqSetFailedCounter != nil {
 		return
@@ -305,6 +308,7 @@ func NewGetNewestSeqTotalCounter() {
 		Help: "the number of get newest seq",
 	})
 }
+
 func NewPullMsgBySeqListTotalCounter() {
 	if PullMsgBySeqListTotalCounter != nil {
 		return
@@ -404,6 +408,7 @@ func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
 		Help: "The number of work/super group chat msg successful processed",
 	})
 }
+
 func NewWorkSuperGroupChatMsgProcessFailedCounter() {
 	if WorkSuperGroupChatMsgProcessFailedCounter != nil {
 		return
@@ -433,6 +438,7 @@ func NewMsgOfflinePushSuccessCounter() {
 		Help: "The number of msg successful offline pushed",
 	})
 }
+
 func NewMsgOfflinePushFailedCounter() {
 	if MsgOfflinePushFailedCounter != nil {
 		return

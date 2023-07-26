@@ -17,16 +17,16 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbConversation "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/wrapperspb"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	pbConversation "github.com/OpenIMSDK/protocol/conversation"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/protocol/wrapperspb"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
@@ -84,6 +84,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	resp.ClientMsgID = req.MsgData.ClientMsgID
 	return resp, nil
 }
+
 func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgData) {
 	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
@@ -101,7 +102,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			return
 		}
 		atUserID = utils.DifferenceString([]string{constant.AtAllString}, msg.AtUserIDList)
-		if len(atUserID) == 0 { //just @everyone
+		if len(atUserID) == 0 { // just @everyone
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAll}
 		} else { //@Everyone and @other people
 			conversation.GroupAtType = &wrapperspb.Int32Value{Value: constant.AtAllAtMe}
@@ -123,7 +124,6 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 			log.ZWarn(ctx, "SetConversations", err, msg.AtUserIDList, conversation)
 		}
 	}
-
 }
 
 func (m *msgServer) sendMsgNotification(
@@ -188,4 +188,8 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
 		return resp, nil
 	}
+}
+
+func (m *msgServer) BatchSendMsg(ctx context.Context, in *pbMsg.BatchSendMessageReq) (*pbMsg.BatchSendMessageResp, error) {
+	return nil, nil
 }

@@ -15,27 +15,26 @@
 package getui
 
 import (
-	"sync"
-
-	"github.com/go-redis/redis"
-
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"strconv"
+	"sync"
 	"time"
 
+	"github.com/go-redis/redis"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	http2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils/splitter"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/utils/splitter"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 var (
@@ -49,7 +48,7 @@ const (
 	taskURL      = "/push/list/message"
 	batchPushURL = "/push/list/alias"
 
-	// codes
+	// codes.
 	tokenExpireCode = 10001
 	tokenExpireTime = 60 * 60 * 23
 	taskIDTTL       = 1000 * 60 * 60 * 24
@@ -142,7 +141,7 @@ func (g *Client) GetTaskID(ctx context.Context, token string, pushReq PushReq) (
 	return respTask.TaskID, nil
 }
 
-// max num is 999
+// max num is 999.
 func (g *Client) batchPush(ctx context.Context, token string, userIDs []string, pushReq PushReq) error {
 	taskID, err := g.GetTaskID(ctx, token, pushReq)
 	if err != nil {

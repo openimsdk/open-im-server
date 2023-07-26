@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"fmt"
+	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/log"
 )
 
 type RootCmd struct {
@@ -108,7 +109,7 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	fmt.Println("configFolderPath:", configFolderPath)
-	return config.InitConfig(configFolderPath)
+	return config2.InitConfig(configFolderPath)
 }
 
 func (r *RootCmd) Execute() error {

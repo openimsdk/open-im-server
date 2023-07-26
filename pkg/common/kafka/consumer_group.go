@@ -17,7 +17,7 @@ package kafka
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/Shopify/sarama"
 )
@@ -52,7 +52,6 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 
 func (mc *MConsumerGroup) GetContextFromMsg(cMsg *sarama.ConsumerMessage) context.Context {
 	return GetContextWithMQHeader(cMsg.Headers)
-
 }
 
 func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroupHandler) {

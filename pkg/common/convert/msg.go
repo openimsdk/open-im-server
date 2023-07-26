@@ -16,7 +16,7 @@ package convert
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 func MsgPb2DB(msg *sdkws.MsgData) *unrelation.MsgDataModel {
@@ -54,7 +54,6 @@ func MsgPb2DB(msg *sdkws.MsgData) *unrelation.MsgDataModel {
 	msgDataModel.AttachedInfo = msg.AttachedInfo
 	msgDataModel.Ex = msg.Ex
 	return &msgDataModel
-
 }
 
 func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {

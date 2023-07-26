@@ -26,7 +26,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 const (
@@ -41,7 +41,7 @@ const (
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
 
-// arg fn will exec when no data in msgCache
+// arg fn will exec when no data in msgCache.
 type ConversationCache interface {
 	metaCache
 	NewCache() ConversationCache
@@ -54,7 +54,7 @@ type ConversationCache interface {
 
 	// get one conversation from msgCache
 	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
-	DelConvsersations(ownerUserID string, conversationIDs ...string) ConversationCache
+	DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from msgCache
 	GetConversations(
@@ -225,9 +225,9 @@ func (c *ConversationRedisCache) GetConversation(
 	)
 }
 
-func (c *ConversationRedisCache) DelConvsersations(ownerUserID string, convsersationIDs ...string) ConversationCache {
+func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache {
 	var keys []string
-	for _, conversationID := range convsersationIDs {
+	for _, conversationID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()

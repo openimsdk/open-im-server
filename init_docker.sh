@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+mark=''
+for ((ratio=0;${ratio}<=100;ratio+=5))
+do
+        sleep 0.2
+        printf "progress:[%-40s]%d%%\r" "${mark}" "${ratio}"
+        mark="##${mark}"
+done
+echo
+
 set -e
 
 # Change directory to the 'scripts' folder
@@ -21,7 +30,12 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 # Start Docker services using docker-compose
-docker-compose up -d
+if command -v docker-compose &> /dev/null
+then
+    docker-compose up -d
+else
+    docker compose up -d
+fi
 
 # Move back to the 'scripts' folder
 cd scripts

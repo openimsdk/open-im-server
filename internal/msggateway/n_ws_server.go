@@ -23,20 +23,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type LongConnServer interface {
@@ -47,6 +47,7 @@ type LongConnServer interface {
 	Validate(s interface{}) error
 	SetCacheHandler(cache cache.MsgModel)
 	SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry)
+	KickUserConn(client *Client) error
 	UnRegister(c *Client)
 	Compressor
 	Encoder
@@ -86,6 +87,7 @@ type kickHandler struct {
 func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, client)
 }
+
 func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {
 	ws.cache = cache
 }
@@ -113,7 +115,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	}
 	if config.port < 1024 {
 		return nil, errors.New("port not allow to listen")
-
 	}
 	v := validator.New()
 	return &WsServer{
@@ -134,6 +135,7 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 		Encoder:         NewGobEncoder(),
 	}, nil
 }
+
 func (ws *WsServer) Run() error {
 	var client *Client
 	go func() {
@@ -144,13 +146,13 @@ func (ws *WsServer) Run() error {
 			case client = <-ws.unregisterChan:
 				ws.unregisterClient(client)
 			case onlineInfo := <-ws.kickHandlerChan:
-				ws.multiTerminalLoginChecker(onlineInfo)
+				ws.multiTerminalLoginChecker(onlineInfo.clientOK, onlineInfo.oldClients, onlineInfo.newClient)
 			}
 		}
 	}()
 	http.HandleFunc("/", ws.wsHandler)
 	// http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {})
-	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) //Start listening
+	return http.ListenAndServe(":"+utils.IntToString(ws.port), nil) // Start listening
 }
 
 func (ws *WsServer) registerClient(client *Client) {
@@ -165,7 +167,6 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
-
 	} else {
 		i := &kickHandler{
 			clientOK:   clientOK,
@@ -176,7 +177,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
-			//已经有同平台的连接存在
+			// 已经有同平台的连接存在
 			log.ZInfo(client.ctx, "repeat login", "userID", client.UserID, "platformID", client.PlatformID, "old remote addr", getRemoteAdders(oldClients))
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		} else {
@@ -194,6 +195,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		ws.onlineUserConnNum,
 	)
 }
+
 func getRemoteAdders(client []*Client) string {
 	var ret string
 	for i, c := range client {
@@ -206,86 +208,83 @@ func getRemoteAdders(client []*Client) string {
 	return ret
 }
 
-func (ws *WsServer) multiTerminalLoginChecker(info *kickHandler) {
+func (ws *WsServer) KickUserConn(client *Client) error {
+	ws.clients.deleteClients(client.UserID, []*Client{client})
+	return client.KickOnlineMessage()
+}
+
+func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Client, newClient *Client) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.DefalutNotKick:
 	case constant.PCAndOther:
-		if constant.PlatformIDToClass(info.newClient.PlatformID) == constant.TerminalPC {
+		if constant.PlatformIDToClass(newClient.PlatformID) == constant.TerminalPC {
 			return
 		}
 		fallthrough
 	case constant.AllLoginButSameTermKick:
-		if info.clientOK {
-			ws.clients.deleteClients(info.newClient.UserID, info.oldClients)
-			for _, c := range info.oldClients {
+		if clientOK {
+			ws.clients.deleteClients(newClient.UserID, oldClients)
+			for _, c := range oldClients {
 				err := c.KickOnlineMessage()
 				if err != nil {
 					log.ZWarn(c.ctx, "KickOnlineMessage", err)
 				}
 			}
 			m, err := ws.cache.GetTokensWithoutError(
-				info.newClient.ctx,
-				info.newClient.UserID,
-				info.newClient.PlatformID,
+				newClient.ctx,
+				newClient.UserID,
+				newClient.PlatformID,
 			)
 			if err != nil && err != redis.Nil {
 				log.ZWarn(
-					info.newClient.ctx,
+					newClient.ctx,
 					"get token from redis err",
 					err,
 					"userID",
-					info.newClient.UserID,
+					newClient.UserID,
 					"platformID",
-					info.newClient.PlatformID,
+					newClient.PlatformID,
 				)
 				return
 			}
 			if m == nil {
 				log.ZWarn(
-					info.newClient.ctx,
+					newClient.ctx,
 					"m is nil",
 					errors.New("m is nil"),
 					"userID",
-					info.newClient.UserID,
+					newClient.UserID,
 					"platformID",
-					info.newClient.PlatformID,
+					newClient.PlatformID,
 				)
 				return
 			}
 			log.ZDebug(
-				info.newClient.ctx,
+				newClient.ctx,
 				"get token from redis",
 				"userID",
-				info.newClient.UserID,
+				newClient.UserID,
 				"platformID",
-				info.newClient.PlatformID,
+				newClient.PlatformID,
 				"tokenMap",
 				m,
 			)
 
 			for k := range m {
-				if k != info.newClient.ctx.GetToken() {
+				if k != newClient.ctx.GetToken() {
 					m[k] = constant.KickedToken
 				}
 			}
-			log.ZDebug(info.newClient.ctx, "set token map is ", "token map", m, "userID", info.newClient.UserID)
-			err = ws.cache.SetTokenMapByUidPid(info.newClient.ctx, info.newClient.UserID, info.newClient.PlatformID, m)
+			log.ZDebug(newClient.ctx, "set token map is ", "token map", m, "userID", newClient.UserID)
+			err = ws.cache.SetTokenMapByUidPid(newClient.ctx, newClient.UserID, newClient.PlatformID, m)
 			if err != nil {
-				log.ZWarn(
-					info.newClient.ctx,
-					"SetTokenMapByUidPid err",
-					err,
-					"userID",
-					info.newClient.UserID,
-					"platformID",
-					info.newClient.PlatformID,
-				)
+				log.ZWarn(newClient.ctx, "SetTokenMapByUidPid err", err, "userID", newClient.UserID, "platformID", newClient.PlatformID)
 				return
 			}
 		}
 	}
-
 }
+
 func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
 	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())

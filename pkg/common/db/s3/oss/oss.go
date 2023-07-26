@@ -18,14 +18,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+	"github.com/OpenIMSDK/tools/config"
 )
 
 const (
@@ -144,10 +146,17 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		if o.credentials.GetSecurityToken() != "" {
 			request.Header.Set(oss.HTTPHeaderOssSecurityToken, o.credentials.GetSecurityToken())
 		}
+		now := time.Now().UTC().Format(http.TimeFormat)
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
-		request.Header.Set(oss.HTTPHeaderDate, time.Now().UTC().Format(http.TimeFormat))
-		authorization := fmt.Sprintf(`OSS %s:%s`, o.credentials.GetAccessKeyID(), o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()))
+		request.Header.Set(oss.HTTPHeaderDate, now)
+		request.Header.Set(oss.HttpHeaderOssDate, now)
+		authorization := fmt.Sprintf(
+			`OSS %s:%s`,
+			o.credentials.GetAccessKeyID(),
+			o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()),
+		)
 		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
+		delete(request.Header, oss.HTTPHeaderDate)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
@@ -255,19 +264,19 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	//var opts []oss.Option
-	//if opt != nil {
-	//	if opt.ContentType != "" {
-	//		opts = append(opts, oss.ContentType(opt.ContentType))
-	//	}
-	//	if opt.ContentDisposition != "" {
-	//		opts = append(opts, oss.ContentDisposition(opt.ContentDisposition))
-	//	}
-	//}
+	var opts []oss.Option
+	if opt != nil {
+		if opt.ContentType != "" {
+			opts = append(opts, oss.ResponseContentType(opt.ContentType))
+		}
+		if opt.Filename != "" {
+			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename="`+opt.Filename+`"`))
+		}
+	}
 	if expire <= 0 {
 		expire = time.Hour * 24 * 365 * 99 // 99 years
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second))
+	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 }

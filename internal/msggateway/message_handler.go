@@ -17,16 +17,16 @@ package msggateway
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/push"
+	"github.com/OpenIMSDK/protocol/push"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type Req struct {
@@ -75,8 +75,10 @@ type GrpcHandler struct {
 func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDiscoveryRegistry) *GrpcHandler {
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	pushRpcClient := rpcclient.NewPushRpcClient(client)
-	return &GrpcHandler{msgRpcClient: &msgRpcClient,
-		pushClient: &pushRpcClient, validate: validate}
+	return &GrpcHandler{
+		msgRpcClient: &msgRpcClient,
+		pushClient:   &pushRpcClient, validate: validate,
+	}
 }
 
 func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
@@ -164,6 +166,7 @@ func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, erro
 	}
 	return c, nil
 }
+
 func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data Req) ([]byte, bool, error) {
 	req := sdkws.SetAppBackgroundStatusReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {

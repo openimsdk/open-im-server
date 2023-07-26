@@ -16,6 +16,7 @@ package fcm
 
 import (
 	"context"
+	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
@@ -24,9 +25,9 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/tools/constant"
 )
 
 const SinglePushCountLimit = 400
@@ -39,7 +40,7 @@ type Fcm struct {
 }
 
 func NewClient(cache cache.MsgModel) *Fcm {
-	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
+	opt := option.WithCredentialsFile(filepath.Join(config2.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil
@@ -95,7 +96,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 			if err == nil {
 				apns.Payload.Aps.Badge = &unreadCountSum
 			} else {
-				//log.Error(operationID, "IncrUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				// log.Error(operationID, "IncrUserBadgeUnreadCountSum redis err", err.Error(), uid)
 				Fail++
 				continue
 			}
@@ -107,7 +108,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 				zero := 1
 				apns.Payload.Aps.Badge = &zero
 			} else {
-				//log.Error(operationID, "GetUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				// log.Error(operationID, "GetUserBadgeUnreadCountSum redis err", err.Error(), uid)
 				Fail++
 				continue
 			}
@@ -127,7 +128,7 @@ func (f *Fcm) Push(ctx context.Context, userIDs []string, title, content string,
 		response, err := f.fcmMsgCli.SendAll(ctx, messages)
 		if err != nil {
 			Fail = Fail + messageCount
-			//log.Info(operationID, "some token push err", err.Error(), messageCount)
+			// log.Info(operationID, "some token push err", err.Error(), messageCount)
 		} else {
 			Success = Success + response.SuccessCount
 			Fail = Fail + response.FailureCount

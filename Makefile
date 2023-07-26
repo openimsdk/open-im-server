@@ -63,6 +63,11 @@ build:
 multiarch:
 	@$(MAKE) go.build.multiarch
 
+## install: Install deployment openim ✨
+.PHONY: install
+install:
+	@$(MAKE) go.install
+
 ## tidy: tidy go.mod ✨
 .PHONY: tidy
 tidy:

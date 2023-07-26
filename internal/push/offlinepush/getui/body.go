@@ -17,7 +17,7 @@ package getui
 import (
 	"fmt"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/tools/config"
 )
 
 type Resp struct {
@@ -145,7 +145,7 @@ func newPushReq(title, content string) PushReq {
 }
 
 func newBatchPushReq(userIDs []string, taskID string) PushReq {
-	var IsAsync = true
+	IsAsync := true
 	return PushReq{Audience: &Audience{Alias: userIDs}, IsAsync: &IsAsync, TaskID: &taskID}
 }
 

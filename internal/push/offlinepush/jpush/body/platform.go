@@ -17,7 +17,7 @@ package body
 import (
 	"errors"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/tools/constant"
 )
 
 const (
@@ -66,6 +66,7 @@ func (p *Platform) Set(os string) error {
 
 	return nil
 }
+
 func (p *Platform) SetPlatform(platform string) error {
 	switch platform {
 	case constant.AndroidPlatformStr:
@@ -75,8 +76,8 @@ func (p *Platform) SetPlatform(platform string) error {
 	default:
 		return errors.New("platform err")
 	}
-
 }
+
 func (p *Platform) SetIOS() error {
 	return p.Set(IOS)
 }
