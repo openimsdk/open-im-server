@@ -56,6 +56,10 @@ func (o *FriendApi) GetFriendList(c *gin.Context) {
 	a2r.Call(friend.FriendClient.GetPaginationFriends, o.Client, c)
 }
 
+func (o *FriendApi) GetDesignatedFriends(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetDesignatedFriends, o.Client, c)
+}
+
 func (o *FriendApi) SetFriendRemark(c *gin.Context) {
 	a2r.Call(friend.FriendClient.SetFriendRemark, o.Client, c)
 }
