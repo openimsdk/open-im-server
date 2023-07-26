@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"math/big"
 	"math/rand"
@@ -101,7 +102,7 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 }
 
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return err
@@ -163,7 +164,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.Wrap("no group owner")
 	}
-	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	userIDs := append(append(req.MemberUserIDs, req.AdminUserIDs...), req.OwnerUserID)
@@ -258,7 +259,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
-	if err := tokenverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	var pageNumber, showNumber int32
@@ -326,7 +327,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	var groupMember *relationTb.GroupMemberModel
 	var opUserID string
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		opUserID = mcontext.GetOpUserID(ctx)
 		groupMembers, err := s.FindGroupMember(ctx, []string{req.GroupID}, []string{opUserID}, nil)
 		if err != nil {
@@ -338,7 +339,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		groupMember = groupMembers[0]
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
-		if !tokenverify.IsAppManagerUid(ctx) {
+		if !authverify.IsAppManagerUid(ctx) {
 			if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
 				var requests []*relationTb.GroupRequestModel
 				for _, userID := range req.InvitedUserIDs {
@@ -481,7 +482,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		for i, member := range members {
 			memberMap[member.UserID] = members[i]
 		}
-		isAppManagerUid := tokenverify.IsAppManagerUid(ctx)
+		isAppManagerUid := authverify.IsAppManagerUid(ctx)
 		opMember := memberMap[opUserID]
 		for _, userID := range req.KickedUserIDs {
 			member, ok := memberMap[userID]
@@ -671,7 +672,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
 		return nil, errs.ErrArgs.Wrap("HandleResult unknown")
 	}
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
