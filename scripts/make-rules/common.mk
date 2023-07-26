@@ -111,10 +111,13 @@ else
 	IMAGE_PLAT := $(PLATFORM)
 endif
 
+# Protobuf file storage path
+APIROOT=$(ROOT_DIR)/pkg/proto
+
 # Linux command settings
 # TODO: Whether you need to join utils?
-FIND := find . ! -path './utils/*' ! -path './vendor/*'
-XARGS := xargs -r
+FIND := find . ! -path './utils/*' ! -path './vendor/*' ! -path './third_party/*'
+XARGS := xargs -r --no-run-if-empty
 
 # Linux command settings-CODE DIRS Copyright
 CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/build $(ROOT_DIR)/deployments

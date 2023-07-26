@@ -1,9 +1,9 @@
-## miniblog 项目开发规范
+##  OpenIM Project Development Standards
 
-- [代码规范](./go_code.md)
-- [目录规范](./directory.md)
-- [Commit 规范](./commit.md)
-- [版本规范](./version.md)
-- [接口规范](./api.md)
-- [日志规范](./log.md)
-- [错误规范](./error_code.md)
+- [Code Standards](https://chat.openai.com/go_code.md)
+- [Directory Standards](https://chat.openai.com/directory.md)
+- [Commit Standards](https://chat.openai.com/commit.md)
+- [Versioning Standards](https://chat.openai.com/version.md)
+- [Interface Standards](https://chat.openai.com/api.md)
+- [Log Standards](https://chat.openai.com/log.md)
+- [Error Code Standards](https://chat.openai.com/error_code.md)
