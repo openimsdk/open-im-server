@@ -17,9 +17,10 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/tools/log"
 
@@ -48,11 +49,6 @@ type userServer struct {
 	notificationSender *notification.FriendNotificationSender
 	friendRpcClient    *rpcclient.FriendRpcClient
 	RegisterCenter     registry.SvcDiscoveryRegistry
-}
-
-func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (*pbuser.SubscribeOrCancelUsersStatusResp, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
