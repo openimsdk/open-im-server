@@ -12,38 +12,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: OpenIM Build Docker Images
+name: Publish Docker image
+
 on:
   push:
+    branches:
+      - main
     tags:
       - v*
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        bin:
-          - openim-server
     steps:
-      - name: Checkout
+      - name: Check out the repo
         uses: actions/checkout@v3
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker metadata
-        id: metadata
-        uses: docker/metadata-action@v4
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ghcr.io/${{ github.repository_owner }}/openim-${{ matrix.bin }}
-      - name: Build and release Docker images
-        uses: docker/build-push-action@v3
+          images: openim/openim-server
+          tags: latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          platforms: linux/386,linux/amd64,linux/arm64/v8
-          target: ${{ matrix.bin }}
-          tags: ${{ steps.metadata.outputs.tags }}
+          context: .
           push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+
+      - name: Log in to AliYun Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ALIREGISTRY_USERNAME }}
+          password: ${{ secrets.ALIREGISTRY_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta2
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
+          tags: latest
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta2.outputs.tags }}
+          labels: ${{ steps.meta2.outputs.labels }}
+
+# name: OpenIM Build Docker Images
+# on:
+#   push:
+#     tags:
+#       - v*
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         bin:
+#           - openim-server
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+#       - name: Setup Docker Buildx
+#         uses: docker/setup-buildx-action@v2
+#       - name: Login to GitHub Container Registry
+#         uses: docker/login-action@v2
+#         with:
+#           registry: ghcr.io
+#           username: ${{ github.repository_owner }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Docker metadata
+#         id: metadata
+#         uses: docker/metadata-action@v4
+#         with:
+#           images: ghcr.io/${{ github.repository_owner }}/openim-${{ matrix.bin }}
+#       - name: Build and release Docker images
+#         uses: docker/build-push-action@v3
+#         with:
+#           platforms: linux/386,linux/amd64,linux/arm64/v8
+#           target: ${{ matrix.bin }}
+#           tags: ${{ steps.metadata.outputs.tags }}
+#           push: true

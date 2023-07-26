@@ -35,7 +35,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Get League branch Patch
+        run: |
+          git config user.name 'openimbot'
+          git config user.email 'openimsdk@qq.com'
+          git checkout -b cicd/patch-${{ steps.patch.outputs.patch }}
+          git commit -am "docs: modify tracked file during workflow"
+
       - uses: actions/setup-node@v3
       - name: Setup Go
         uses: actions/setup-go@v2
@@ -82,12 +93,17 @@ jobs:
           sudo make add-copyright
           echo "OpenIM verify successfully" 
         continue-on-error: true
-
+      
+      - name: Commit code
+        run: |
+            git add .
+            git commit -a -s -m "cicd: bump League Patch to cicd/patch-${{ steps.patch.outputs.patch }}"
+    
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5.0.0
+        uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: Bump League Patch to ${{ steps.patch.outputs.patch }}
-          title: Bump League Patch to ${{ steps.patch.outputs.patch }}
+          commit-message: "cicd: bump League Patch to cicd/patch-${{ steps.patch.outputs.patch }}"
+          title: Bump League Patch to cicd/patch-${{ steps.patch.outputs.patch }}
           body: |
             Review criteria:
             
@@ -95,5 +111,7 @@ jobs:
             
             This is an automated PR.
             <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
+          base: main
           branch: cicd/patch-${{ steps.patch.outputs.patch }}
           labels: kind/documentation, area/test, ok-to-test
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
