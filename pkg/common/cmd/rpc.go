@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/startrpc"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/startrpc"
 )
 
 type RpcCmd struct {

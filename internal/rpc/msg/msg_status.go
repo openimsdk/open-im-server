@@ -17,8 +17,8 @@ package msg
 import (
 	"context"
 
+	"github.com/OpenIMSDK/protocol/constant"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/mcontext"
 )
 

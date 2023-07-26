@@ -20,11 +20,11 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
+	"github.com/OpenIMSDK/protocol/constant"
 	pbChat "github.com/OpenIMSDK/protocol/msg"
 	pbPush "github.com/OpenIMSDK/protocol/push"
-	"github.com/OpenIMSDK/tools/config"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 )

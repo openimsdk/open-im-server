@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,12 +28,12 @@ import (
 	"github.com/go-redis/redis"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/config"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
@@ -141,8 +142,8 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 					"modifyMsgList",
 					len(modifyMsgList),
 				)
-				conversationIDMsg := utils.GetChatConversationIDByMsg(ctxMsgList[0].message)
-				conversationIDNotification := utils.GetNotificationConversationID(ctxMsgList[0].message)
+				conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMsgList[0].message)
+				conversationIDNotification := msgprocessor.GetNotificationConversationID(ctxMsgList[0].message)
 				och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
 				och.handleNotification(
 					ctx,
@@ -172,7 +173,7 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 	totalMsgs []*ContextMsg,
 ) (storageMsgList, notStorageMsgList, storageNotificatoinList, notStorageNotificationList, modifyMsgList []*sdkws.MsgData) {
 	isStorage := func(msg *sdkws.MsgData) bool {
-		options2 := utils.Options(msg.Options)
+		options2 := msgprocessor.Options(msg.Options)
 		if options2.IsHistory() {
 			return true
 		} else {
@@ -183,28 +184,28 @@ func (och *OnlineHistoryRedisConsumerHandler) getPushStorageMsgList(
 		}
 	}
 	for _, v := range totalMsgs {
-		options := utils.Options(v.message.Options)
+		options := msgprocessor.Options(v.message.Options)
 		if !options.IsNotNotification() {
 			// clone msg from notificationMsg
 			if options.IsSendMsg() {
 				msg := proto.Clone(v.message).(*sdkws.MsgData)
 				// 消息
 				if v.message.Options != nil {
-					msg.Options = utils.NewMsgOptions()
+					msg.Options = msgprocessor.NewMsgOptions()
 				}
 				if options.IsOfflinePush() {
-					v.message.Options = utils.WithOptions(
-						utils.Options(v.message.Options),
-						utils.WithOfflinePush(false),
+					v.message.Options = msgprocessor.WithOptions(
+						v.message.Options,
+						msgprocessor.WithOfflinePush(false),
 					)
-					msg.Options = utils.WithOptions(utils.Options(msg.Options), utils.WithOfflinePush(true))
+					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithOfflinePush(true))
 				}
 				if options.IsUnreadCount() {
-					v.message.Options = utils.WithOptions(
-						utils.Options(v.message.Options),
-						utils.WithUnreadCount(false),
+					v.message.Options = msgprocessor.WithOptions(
+						v.message.Options,
+						msgprocessor.WithUnreadCount(false),
 					)
-					msg.Options = utils.WithOptions(utils.Options(msg.Options), utils.WithUnreadCount(true))
+					msg.Options = msgprocessor.WithOptions(msg.Options, msgprocessor.WithUnreadCount(true))
 				}
 				storageMsgList = append(storageMsgList, msg)
 			}

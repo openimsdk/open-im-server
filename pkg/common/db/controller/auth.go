@@ -16,11 +16,12 @@ package controller
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
@@ -60,7 +61,7 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	}
 	var deleteTokenKey []string
 	for k, v := range tokens {
-		_, err = tokenverify.GetClaimFromToken(k)
+		_, err = tokenverify.GetClaimFromToken(k, authverify.Secret())
 		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}

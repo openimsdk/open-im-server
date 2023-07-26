@@ -27,9 +27,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/tools/config"
 )
 
 func Test_BatchInsertChat2DB(t *testing.T) {
@@ -203,7 +203,7 @@ func Test_Revoke(t *testing.T) {
 }
 
 func Test_FindBySeq(t *testing.T) {
-	if err := log.InitFromConfig("", "", 6, true, false, "", 2); err != nil {
+	if err := log.InitFromConfig("", "", 6, true, false, "", 2, 1); err != nil {
 		t.Fatal(err)
 	}
 	db := GetDB()

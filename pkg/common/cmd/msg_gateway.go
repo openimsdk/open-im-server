@@ -19,7 +19,7 @@ import (
 	//"github.com/OpenIMSDK/Open-IM-Server/internal/msggateway".
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/protocol/constant"
 )
 
 type MsgGatewayCmd struct {

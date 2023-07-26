@@ -18,13 +18,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/tokenverify"
 )
 
 func toPbMapArray(m map[string][]string) []*third.KeyValues {
@@ -52,7 +52,7 @@ func checkUploadName(ctx context.Context, name string) error {
 	if opUserID == "" {
 		return errs.ErrNoPermission.Wrap("opUserID is empty")
 	}
-	if !tokenverify.IsManagerUserID(opUserID) {
+	if !authverify.IsManagerUserID(opUserID) {
 		if !strings.HasPrefix(name, opUserID+"/") {
 			return errs.ErrNoPermission.Wrap(fmt.Sprintf("name must start with `%s/`", opUserID))
 		}

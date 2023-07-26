@@ -16,13 +16,14 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/OpenIMSDK/protocol/constant"
 	pbConversation "github.com/OpenIMSDK/protocol/conversation"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
@@ -90,7 +91,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
 	var atUserID []string
 	conversation := &pbConversation.ConversationReq{
-		ConversationID:   utils.GetConversationIDByMsg(msg),
+		ConversationID:   msgprocessor.GetConversationIDByMsg(msg),
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
 	}
@@ -148,8 +149,8 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
-	var isSend bool = true
-	isNotification := utils.IsNotificationByMsg(req.MsgData)
+	var isSend = true
+	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(
 			ctx,

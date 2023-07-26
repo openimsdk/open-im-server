@@ -18,14 +18,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"runtime/debug"
 	"sync"
 
 	"google.golang.org/protobuf/proto"
 
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/apiresp"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
@@ -241,9 +242,9 @@ func (c *Client) replyMessage(ctx context.Context, binaryReq *Req, err error, re
 
 func (c *Client) PushMessage(ctx context.Context, msgData *sdkws.MsgData) error {
 	var msg sdkws.PushMessages
-	conversationID := utils.GetConversationIDByMsg(msgData)
+	conversationID := msgprocessor.GetConversationIDByMsg(msgData)
 	m := map[string]*sdkws.PullMsgs{conversationID: {Msgs: []*sdkws.MsgData{msgData}}}
-	if utils.IsNotification(conversationID) {
+	if msgprocessor.IsNotification(conversationID) {
 		msg.NotificationMsgs = m
 	} else {
 		msg.Msgs = m
