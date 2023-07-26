@@ -15,9 +15,9 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/friend"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/tools/a2r"
 
 	"github.com/gin-gonic/gin"
 )

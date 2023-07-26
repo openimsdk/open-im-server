@@ -18,14 +18,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
+	"github.com/OpenIMSDK/tools/constant"
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/ormutil"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 var _ relation.GroupModelInterface = (*GroupGorm)(nil)

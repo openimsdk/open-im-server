@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	pbuser "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/user"
+	pbuser "github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 func (s *userServer) UserRegisterCount(

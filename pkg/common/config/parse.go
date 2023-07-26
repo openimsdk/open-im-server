@@ -15,18 +15,25 @@
 package config
 
 import (
-	"bytes"
+	_ "embed"
 	"fmt"
+	"github.com/OpenIMSDK/tools/config"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/tools/utils"
 )
+
+//go:embed version
+var version string
+
+func init() {
+	config.Version = version
+}
 
 var (
 	_, b, _, _ = runtime.Caller(0)
@@ -37,12 +44,10 @@ var (
 const (
 	FileName             = "config.yaml"
 	NotificationFileName = "notification.yaml"
-	ENV                  = "CONFIG_NAME"
 	DefaultFolderPath    = "../config/"
-	ConfKey              = "conf"
 )
 
-func GetOptionsByNotification(cfg NotificationConf) utils.Options {
+func GetOptionsByNotification(cfg config.NotificationConf) utils.Options {
 	opts := utils.NewOptions()
 	if cfg.UnreadCount {
 		opts = utils.WithOptions(opts, utils.WithUnreadCount(true))
@@ -59,18 +64,7 @@ func GetOptionsByNotification(cfg NotificationConf) utils.Options {
 	return opts
 }
 
-func (c *config) unmarshalConfig(config interface{}, configPath string) error {
-	bytes, err := os.ReadFile(configPath)
-	if err != nil {
-		return err
-	}
-	if err = yaml.Unmarshal(bytes, config); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *config) initConfig(config interface{}, configName, configFolderPath string) error {
+func initConfig(config interface{}, configName, configFolderPath string) error {
 	if configFolderPath == "" {
 		configFolderPath = DefaultFolderPath
 	}
@@ -87,37 +81,24 @@ func (c *config) initConfig(config interface{}, configName, configFolderPath str
 	} else {
 		Root = filepath.Dir(configPath)
 	}
-	return c.unmarshalConfig(config, configPath)
-}
-
-func (c *config) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
-	bytes, err := yaml.Marshal(Config)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
 	}
-	return registry.RegisterConf2Registry(ConfKey, bytes)
-}
-
-func (c *config) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
-	return registry.GetConfFromRegistry(ConfKey)
-}
-
-func InitConfig(configFolderPath string) error {
-	err := Config.initConfig(&Config, FileName, configFolderPath)
-	if err != nil {
-		return err
-	}
-	err = Config.initConfig(&Config.Notification, NotificationFileName, configFolderPath)
-	if err != nil {
+	if err = yaml.Unmarshal(data, config); err != nil {
 		return err
 	}
 	return nil
 }
 
-func EncodeConfig() []byte {
-	buf := bytes.NewBuffer(nil)
-	if err := yaml.NewEncoder(buf).Encode(Config); err != nil {
-		panic(err)
+func InitConfig(configFolderPath string) error {
+	err := initConfig(&config.Config, FileName, configFolderPath)
+	if err != nil {
+		return err
 	}
-	return buf.Bytes()
+	err = initConfig(&config.Config.Notification, NotificationFileName, configFolderPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }

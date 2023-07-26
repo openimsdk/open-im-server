@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {

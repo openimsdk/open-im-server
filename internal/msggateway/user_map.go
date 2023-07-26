@@ -18,8 +18,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type UserMap struct {

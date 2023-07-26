@@ -18,8 +18,8 @@ import (
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbGroup "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
-	sdkws "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	pbGroup "github.com/OpenIMSDK/protocol/group"
+	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 )
 
 func Db2PbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *sdkws.GroupInfo {

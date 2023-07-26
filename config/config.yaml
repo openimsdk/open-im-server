@@ -77,7 +77,7 @@ object:
   apiURL: "http://127.0.0.1:10002/object/"  #地址需要app能访问到
   minio:
     bucket: "openim"                      #不建议修改
-    endpoint: http://116.30.3.80:10005
+    endpoint: http://127.0.0.1:10005      #地址需要app能够访问
     accessKeyID: root
     secretAccessKey: openIM123
     sessionToken: ""            #token
@@ -90,7 +90,7 @@ object:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
-    accessKeyID: root
+    accessKeyID: ""
     accessKeySecret: ""
     sessionToken: ""
 

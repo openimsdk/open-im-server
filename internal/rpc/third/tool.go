@@ -21,10 +21,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/third"
+	"github.com/OpenIMSDK/protocol/third"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/tokenverify"
 )
 
 func toPbMapArray(m map[string][]string) []*third.KeyValues {

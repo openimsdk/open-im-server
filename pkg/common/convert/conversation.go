@@ -16,8 +16,8 @@ package convert
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func ConversationDB2Pb(conversationDB *relation.ConversationModel) *conversation.Conversation {

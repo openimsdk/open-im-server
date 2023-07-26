@@ -16,7 +16,7 @@ package controller
 
 import (
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
 )
 
 type ChatLogDatabase interface {
