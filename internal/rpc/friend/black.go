@@ -16,13 +16,13 @@ package friend
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	pbFriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/tokenverify"
 )
 
 func (s *friendServer) GetPaginationBlacks(
@@ -76,7 +76,7 @@ func (s *friendServer) RemoveBlack(
 }
 
 func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) (*pbFriend.AddBlackResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	_, err := s.userRpcClient.GetUsersInfo(ctx, []string{req.OwnerUserID, req.BlackUserID})

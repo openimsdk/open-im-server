@@ -16,11 +16,10 @@ package msggateway
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tokenverify"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -84,7 +83,7 @@ func (s *Server) GetUsersOnlineStatus(
 	ctx context.Context,
 	req *msggateway.GetUsersOnlineStatusReq,
 ) (*msggateway.GetUsersOnlineStatusResp, error) {
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		return nil, errs.ErrNoPermission.Wrap("only app manager")
 	}
 	var resp msggateway.GetUsersOnlineStatusResp

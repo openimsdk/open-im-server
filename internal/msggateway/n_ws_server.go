@@ -17,6 +17,7 @@ package msggateway
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"net/http"
 	"strconv"
 	"sync"
@@ -35,7 +36,6 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -338,7 +338,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(connContext, errs.ErrConnArgsErr)
 		return
 	}
-	if err := tokenverify.WsVerifyToken(token, userID, platformID); err != nil {
+	if err := authverify.WsVerifyToken(token, userID, platformID); err != nil {
 		httpError(connContext, err)
 		return
 	}

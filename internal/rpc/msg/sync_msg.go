@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -23,7 +24,6 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -86,7 +86,7 @@ func (m *msgServer) PullMessageBySeqs(
 }
 
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)

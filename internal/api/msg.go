@@ -15,6 +15,7 @@
 package api
 
 import (
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -29,7 +30,6 @@ import (
 	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -205,7 +205,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "SendMessage", "req", req)
-	if !tokenverify.IsAppManagerUid(c) {
+	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
@@ -245,7 +245,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "BatchSendMsg", "req", req)
-	if err := tokenverify.CheckAdmin(c); err != nil {
+	if err := authverify.CheckAdmin(c); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}

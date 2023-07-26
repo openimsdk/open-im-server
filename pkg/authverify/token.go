@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func secret() jwt.Keyfunc {
+func Secret() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Config.Secret), nil
 	}
@@ -40,7 +40,7 @@ func CheckAdmin(ctx context.Context) error {
 }
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*tokenverify.Claims, error) {
-	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), secret())
+	return tokenverify.GetClaimFromToken(string(redisToken.([]uint8)), Secret())
 }
 
 func IsManagerUserID(opUserID string) bool {
@@ -48,7 +48,7 @@ func IsManagerUserID(opUserID string) bool {
 }
 
 func WsVerifyToken(token, userID string, platformID int) error {
-	claim, err := tokenverify.GetClaimFromToken(token, secret())
+	claim, err := tokenverify.GetClaimFromToken(token, Secret())
 	if err != nil {
 		return err
 	}

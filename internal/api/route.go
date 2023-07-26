@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/protocol/constant"
@@ -210,7 +211,7 @@ func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			claims, err := tokenverify.GetClaimFromToken(token)
+			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret())
 			if err != nil {
 				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
 				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())

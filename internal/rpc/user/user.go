@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"strings"
 	"time"
 
@@ -35,7 +36,6 @@ import (
 	pbuser "github.com/OpenIMSDK/protocol/user"
 	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/tx"
 
 	"google.golang.org/grpc"
@@ -48,6 +48,11 @@ type userServer struct {
 	notificationSender *notification.FriendNotificationSender
 	friendRpcClient    *rpcclient.FriendRpcClient
 	RegisterCenter     registry.SvcDiscoveryRegistry
+}
+
+func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (*pbuser.SubscribeOrCancelUsersStatusResp, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -99,7 +104,7 @@ func (s *userServer) GetDesignateUsers(ctx context.Context, req *pbuser.GetDesig
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInfoReq) (resp *pbuser.UpdateUserInfoResp, err error) {
 	resp = &pbuser.UpdateUserInfoResp{}
-	err = tokenverify.CheckAccessV3(ctx, req.UserInfo.UserID)
+	err = authverify.CheckAccessV3(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +146,7 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbuser.AccountCheckR
 	if utils.Duplicate(req.CheckUserIDs) {
 		return nil, errs.ErrArgs.Wrap("userID repeated")
 	}
-	err = tokenverify.CheckAdmin(ctx)
+	err = authverify.CheckAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}
