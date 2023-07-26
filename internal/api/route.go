@@ -81,6 +81,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/get_designated_friend_apply", f.GetDesignatedFriendsApply)
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
 		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)
+		friendRouterGroup.POST("/get_designated_friends", f.GetDesignatedFriends)
 		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)
 		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
