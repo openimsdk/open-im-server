@@ -335,66 +335,66 @@ changelog:
     - title: Other work
       order: 9999
 
-# dockers:
-#   - image_templates:
-#       - "openimsdk/open-im-server:{{ .Tag }}-amd64"
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-#     dockerfile: Dockerfile
-#     use: buildx
-#     build_flag_templates:
-#       - "--pull"
-#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
-#       - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
-#       - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
-#       - "--label=io.artifacthub.package.license=MIT"
-#       - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
-#       - "--label=org.opencontainers.image.created={{.Date}}"
-#       - "--label=org.opencontainers.image.name={{.ProjectName}}"
-#       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-#       - "--label=org.opencontainers.image.version={{.Version}}"
-#       - "--label=org.opencontainers.image.source={{.GitURL}}"
-#       - "--platform=linux/amd64"
-#     extra_files:
-#       - scripts/entrypoint.sh
-#   - image_templates:
-#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
-#     dockerfile: Dockerfile
-#     use: buildx
-#     build_flag_templates:
-#       - "--pull"
-#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
-#       - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
-#       - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
-#       - "--label=io.artifacthub.package.license=MIT"
-#       - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
-#       - "--label=org.opencontainers.image.created={{.Date}}"
-#       - "--label=org.opencontainers.image.name={{.ProjectName}}"
-#       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-#       - "--label=org.opencontainers.image.version={{.Version}}"
-#       - "--label=org.opencontainers.image.source={{.GitURL}}"
-#       - "--platform=linux/arm64"
-#     goarch: arm64
-#     extra_files:
-#       - scripts/entrypoint.sh
+dockers:
+  - image_templates:
+      - "openimsdk/open-im-server:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
+      - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
+      - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
+      - "--label=io.artifacthub.package.license=MIT"
+      - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+    extra_files:
+      - scripts/entrypoint.sh
+  - image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
+      - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
+      - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
+      - "--label=io.artifacthub.package.license=MIT"
+      - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
+    goarch: arm64
+    extra_files:
+      - scripts/entrypoint.sh
 
-# docker_manifests:
-#   - name_template: "goreleaser/goreleaser:{{ .Tag }}"
-#     image_templates:
-#       - "goreleaser/goreleaser:{{ .Tag }}-amd64"
-#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-#   - name_template: "ghcr.io/goreleaser/goreleaser:{{ .Tag }}"
-#     image_templates:
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
-#   - name_template: "goreleaser/goreleaser:latest"
-#     image_templates:
-#       - "goreleaser/goreleaser:{{ .Tag }}-amd64"
-#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-#   - name_template: "ghcr.io/goreleaser/goreleaser:latest"
-#     image_templates:
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+docker_manifests:
+  - name_template: "goreleaser/goreleaser:{{ .Tag }}"
+    image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/goreleaser/goreleaser:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "goreleaser/goreleaser:latest"
+    image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/goreleaser/goreleaser:latest"
+    image_templates:
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
 
 nfpms:
   - id: packages
@@ -484,9 +484,12 @@ release:
 
     ## Helping out
 
+    We release logs are recorded on [✨ CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)
+
     This release is only possible thanks to **all** the support of some **awesome people**!
 
-    Want to be one of them?
+    **Want to be one of them 😘?**
+
     Contributions to this project are welcome! Please see [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md) for details.
 
     <p align="center">
