@@ -17,15 +17,16 @@ package msggateway
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/tools/config"
-	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/protocol/constant"
 
 	"github.com/redis/go-redis/v9"
 
@@ -35,7 +36,6 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -338,7 +338,7 @@ func (ws *WsServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		httpError(connContext, errs.ErrConnArgsErr)
 		return
 	}
-	if err := tokenverify.WsVerifyToken(token, userID, platformID); err != nil {
+	if err := authverify.WsVerifyToken(token, userID, platformID); err != nil {
 		httpError(connContext, err)
 		return
 	}

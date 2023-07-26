@@ -17,7 +17,7 @@ package body
 import (
 	"errors"
 
-	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/protocol/constant"
 )
 
 const (

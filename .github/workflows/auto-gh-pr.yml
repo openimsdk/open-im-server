@@ -1,3 +1,17 @@
+# Copyright © 2023 OpenIM open source community. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 name: Auto PR to release
 
 on:
@@ -5,16 +19,10 @@ on:
     # types:
     #   - closed
 
-env:
-  GH_TOKEN: ${{ secrets.REDBOT_GITHUB_TOKEN }}
-  ISSUE: ${{ github.event.issue.html_url }}
-  OWNER: ${{ github.repository_owner }}
-  REPO: ${{ github.event.repository.name }}
-
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.base.ref == 'main'
     steps:
         - name: Check out code
           uses: actions/checkout@v3
@@ -29,14 +37,14 @@ jobs:
             sudo apt-get install gh
           continue-on-error: true
 
-        - name: Configure GitHub CLI
-          run: |
-            git config --global user.email "3293172751ysy@gmail.com"
-            git config --global user.name "kubbot"
-            echo "${{ secrets.BOT_GITHUB_TOKEN }}" | gh auth login --with-token
+        # - name: Configure GitHub CLI
+        #   run: |
+        #     git config --global user.email "3293172751ysy@gmail.com"
+        #     git config --global user.name "kubbot"
+        #     echo "${{ secrets.BOT_GITHUB_TOKEN }}" | gh auth login --with-token
         - name: Create PR to release branch
           run: |
-            ISSUEID=$(gh pr view 642 --repo $OWNER/$REPO | grep -oP 'Fixes #\K\d+')
+            ISSUEID=$(gh pr view ${{ github.event.pull_request.number }} --repo $OWNER/$REPO | grep -oP 'Fixes #\K\d+')
             echo "===========> $ISSUEID"
             ISSUE=$(gh issue view $ISSUEID --repo $OWNER/$REPO --json labels,assignees,milestone,title)
             echo "===========> $ISSUE"
@@ -46,8 +54,6 @@ jobs:
             MILESTONE=$(echo $ISSUE | jq -r '.milestone | select(.title) | .title')
             TITLE=$(echo $ISSUE | jq -r '.title')
 
-            echo $ISSUE | jq
-
             gh pr edit ${{ github.event.pull_request.number }} --repo $OWNER/$REPO --add-label "$LABELS" --add-assignee "$ASSIGNEES" --milestone "$MILESTONE"
 
             git checkout -b bot/merge-to-release-$ISSUEID
@@ -55,3 +61,10 @@ jobs:
             gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
             
             # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo OpenIMSDK/Open-IM-Server --reviewer "cubxxw"
+          continue-on-error: true
+          env:
+              GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+              GH_TOKEN: ${{ github.token }}
+              ISSUE: ${{ github.event.issue.html_url }}
+              OWNER: ${{ github.repository_owner }}
+              REPO: ${{ github.event.repository.name }}

@@ -17,23 +17,18 @@ package config
 import (
 	_ "embed"
 	"fmt"
-	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/OpenIMSDK/tools/constant"
-	"github.com/OpenIMSDK/tools/utils"
+	"github.com/OpenIMSDK/protocol/constant"
 )
 
 //go:embed version
-var version string
-
-func init() {
-	config.Version = version
-}
+var Version string
 
 var (
 	_, b, _, _ = runtime.Caller(0)
@@ -47,20 +42,20 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-func GetOptionsByNotification(cfg config.NotificationConf) utils.Options {
-	opts := utils.NewOptions()
+func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
+	opts := msgprocessor.NewOptions()
 	if cfg.UnreadCount {
-		opts = utils.WithOptions(opts, utils.WithUnreadCount(true))
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithUnreadCount(true))
 	}
 	if cfg.OfflinePush.Enable {
-		opts = utils.WithOptions(opts, utils.WithOfflinePush(true))
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithOfflinePush(true))
 	}
 	switch cfg.ReliabilityLevel {
 	case constant.UnreliableNotification:
 	case constant.ReliableNotificationNoMsg:
-		opts = utils.WithOptions(opts, utils.WithHistory(true), utils.WithPersistent())
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithHistory(true), msgprocessor.WithPersistent())
 	}
-	opts = utils.WithOptions(opts, utils.WithSendMsg(cfg.IsSendMsg))
+	opts = msgprocessor.WithOptions(opts, msgprocessor.WithSendMsg(cfg.IsSendMsg))
 	return opts
 }
 
@@ -92,11 +87,11 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 }
 
 func InitConfig(configFolderPath string) error {
-	err := initConfig(&config.Config, FileName, configFolderPath)
+	err := initConfig(&Config, FileName, configFolderPath)
 	if err != nil {
 		return err
 	}
-	err = initConfig(&config.Config.Notification, NotificationFileName, configFolderPath)
+	err = initConfig(&Config.Notification, NotificationFileName, configFolderPath)
 	if err != nil {
 		return err
 	}

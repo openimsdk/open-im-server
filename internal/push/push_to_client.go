@@ -18,20 +18,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/getui"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/jpush"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/localcache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/config"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
@@ -82,7 +83,7 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 }
 
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
-	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	conevrsationID := msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	maxSeq, err := p.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
@@ -170,7 +171,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			if utils.IsNotification(utils.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
 				var tips sdkws.GroupDismissedTips
 				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err

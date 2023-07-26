@@ -36,8 +36,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-cmdutils
     id: openim-cmdutils
     main: ./cmd/openim-cmdutils/main.go
@@ -53,8 +54,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-crontask
     id: openim-crontask
     main: ./cmd/openim-crontask/main.go
@@ -70,8 +72,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-msggateway
     id: openim-msggateway
     main: ./cmd/openim-msggateway/main.go
@@ -87,8 +90,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-msgtransfer
     id: openim-msgtransfer
     main: ./cmd/openim-msgtransfer/main.go
@@ -104,8 +108,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-push
     id: openim-push
     main: ./cmd/openim-push/main.go
@@ -121,8 +126,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-auth
     id: openim-rpc-auth
     main: ./cmd/openim-rpc/openim-rpc-auth/main.go
@@ -138,8 +144,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-conversation
     id: openim-rpc-conversation
     main: ./cmd/openim-rpc/openim-rpc-conversation/main.go
@@ -155,8 +162,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-friend
     id: openim-rpc-friend
     main: ./cmd/openim-rpc/openim-rpc-friend/main.go
@@ -172,8 +180,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-group
     id: openim-rpc-group
     main: ./cmd/openim-rpc/openim-rpc-group/main.go
@@ -189,8 +198,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-msg
     id: openim-rpc-msg
     main: ./cmd/openim-rpc/openim-rpc-msg/main.go
@@ -206,8 +216,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-third
     id: openim-rpc-third
     main: ./cmd/openim-rpc/openim-rpc-third/main.go
@@ -223,8 +234,9 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
+
   - binary: openim-rpc-user
     id: openim-rpc-user
     main: ./cmd/openim-rpc/openim-rpc-user/main.go
@@ -240,8 +252,8 @@ builds:
       - ppc64le
       - arm64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
 
 archives:
   - format: tar.gz
@@ -323,6 +335,66 @@ changelog:
     - title: Other work
       order: 9999
 
+dockers:
+  - image_templates:
+      - "openimsdk/open-im-server:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
+      - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
+      - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
+      - "--label=io.artifacthub.package.license=MIT"
+      - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+    extra_files:
+      - scripts/entrypoint.sh
+  - image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/goreleaser/goreleaser/main/README.md"
+      - "--label=io.artifacthub.package.logo-url=https://goreleaser.com/static/avatar.png"
+      - '--label=io.artifacthub.package.maintainers=[{"name":"Carlos Alexandro Becker","email":"carlos@carlosbecker.dev"}]'
+      - "--label=io.artifacthub.package.license=MIT"
+      - "--label=org.opencontainers.image.description=Deliver Go binaries as fast and easily as possible"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
+    goarch: arm64
+    extra_files:
+      - scripts/entrypoint.sh
+
+docker_manifests:
+  - name_template: "goreleaser/goreleaser:{{ .Tag }}"
+    image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/goreleaser/goreleaser:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "goreleaser/goreleaser:latest"
+    image_templates:
+      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/goreleaser/goreleaser:latest"
+    image_templates:
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
 
 nfpms:
   - id: packages
@@ -412,19 +484,22 @@ release:
 
     ## Helping out
 
+    We release logs are recorded on [✨ CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)
+
     This release is only possible thanks to **all** the support of some **awesome people**!
 
-    Want to be one of them?
+    **Want to be one of them 😘?**
+
     Contributions to this project are welcome! Please see [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md) for details.
 
     <p align="center">
-        <a href="https://github.com/openimbot/openimbot/blob/main/assets/icon/blue%E9%80%8F%E6%98%8E.png" style="float: left; margin-right: 10px;">
+        <a href="https://github.com/kubbot" style="float: left; margin-right: 10px;">
             <img src="https://github.com/openimbot/openimbot/blob/main/assets/icon/blue%E9%80%8F%E6%98%8E.png" width="50" height="50" />
         </a>
         <a href="https://www.openim.online">
             <img src="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo.png" />
         </a>
-        <a href="https://github.com/openimbot/openimbot/blob/main/assets/icon/red%E9%80%8F%E6%98%8E.png" style="float: right; margin-left: 10px;">
+        <a href="https://github.com/openimbot" style="float: right; margin-left: 10px;">
             <img src="https://github.com/openimbot/openimbot/blob/main/assets/icon/red%E9%80%8F%E6%98%8E.png" width="50" height="50" />
         </a>
     </p>

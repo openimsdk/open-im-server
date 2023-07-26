@@ -173,9 +173,9 @@ go.test.cover: go.test.junit-report
 .PHONY: go.format
 go.format: tools.verify.golines tools.verify.goimports
 	@echo "===========> Formating codes"
-	@$(FIND) -type f -name '*.go' | $(XARGS) gofmt -s -w
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) gofmt -s -w
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
 ## imports: task to automatically handle import packages in Go files using goimports tool

@@ -20,8 +20,8 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	pbConversation "github.com/OpenIMSDK/protocol/conversation"
-	"github.com/OpenIMSDK/tools/config"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 )

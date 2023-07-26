@@ -16,13 +16,14 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/tools/constant"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -34,7 +35,7 @@ func (m *msgServer) PullMessageBySeqs(
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
 	for _, seq := range req.SeqRanges {
-		if !utils.IsNotification(seq.ConversationID) {
+		if !msgprocessor.IsNotification(seq.ConversationID) {
 			conversation, err := m.Conversation.GetConversation(ctx, req.UserID, seq.ConversationID)
 			if err != nil {
 				log.ZError(ctx, "GetConversation error", err, "conversationID", seq.ConversationID)
@@ -85,7 +86,7 @@ func (m *msgServer) PullMessageBySeqs(
 }
 
 func (m *msgServer) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)

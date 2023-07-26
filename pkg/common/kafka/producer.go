@@ -19,8 +19,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/OpenIMSDK/tools/config"
-	"github.com/OpenIMSDK/tools/constant"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/protocol/constant"
 	log "github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
