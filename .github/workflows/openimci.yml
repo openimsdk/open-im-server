@@ -128,6 +128,14 @@ jobs:
         #   commit_author: Kubbot # defaults to author of the commit that triggered the run
         continue-on-error: true
 
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(fmt): robot automated format and lint Change"
+          commit_options: '--no-verify --signoff'
+          branch: main
+        continue-on-error: true
+
       - name: Set Current Directory
         id: set_directory
         run: |

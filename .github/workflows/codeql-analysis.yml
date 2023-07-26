@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-name: "Code Scanning - Action"
+name: "OpenIM Code Scanning - Action"
 
 on:
   push:
@@ -42,8 +42,8 @@ jobs:
       security-events: write
 
       # only required for workflows in private repositories
-      actions: read
-      contents: read
+      actions: write
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -53,8 +53,8 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         # Override language selection by uncommenting this and choosing your languages
-        # with:
-        #   languages: go, javascript, csharp, python, cpp, java, ruby
+        with:
+          languages: go
 
       # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or Java).
       # If this step fails, then you should remove it and run the build manually (see below).
@@ -68,9 +68,9 @@ jobs:
       #    three lines and modify them (or add more) to build your code if your
       #    project uses a compiled language
 
-      #- run: |
-      #     make bootstrap
-      #     make release
+    #   - run: |
+    #       make bootstrap
+    #       make release
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

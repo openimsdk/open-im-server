@@ -24,8 +24,8 @@ zookeeper:
 
 mysql:
   address: [ 127.0.0.1:13306 ]            #目前仅支持单机
-  username: root
-  password: openIM123
+  username: root                          #用户名
+  password: openIM123                     #密码
   database: openIM_v3                     #不建议修改
   maxOpenConn: 1000                       #最大连接数
   maxIdleConn: 100                        #最大空闲连接数
@@ -37,14 +37,14 @@ mongo:
   uri:                                    #不为空则直接使用该值
   address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
   database: openIM_v3                      #mongo db 默认即可
-  username: root
-  password: openIM123
+  username: root                          #用户名
+  password: openIM123                     #密码
   maxPoolSize: 100
 
 redis:
   address: [ 127.0.0.1:16379 ]            #
   username:                               #only redis version 6.0+ need username
-  password: openIM123
+  password: openIM123                     #密码
 
 kafka:
   username:                               #用户名
@@ -77,9 +77,9 @@ object:
   apiURL: "http://127.0.0.1:10002/object/"  #地址需要app能访问到
   minio:
     bucket: "openim"                      #不建议修改
-    endpoint: http://127.0.0.1:10005      #地址需要app能够访问
-    accessKeyID: root
-    secretAccessKey: openIM123
+    endpoint: "http://127.0.0.1:10005"      #minio对外服务的ip和端口，app要能访问此ip和端口
+    accessKeyID: "root"                     #ID
+    secretAccessKey: "openIM123"            #秘钥
     sessionToken: ""            #token
   cos: #tencent cos
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
@@ -167,7 +167,7 @@ retainChatRecords: 365                                  #mongo保存离线消息
 chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息，这个删除是为了清理满足上个配置retainChatRecords的过期消息，不会发送通知，仅仅作为清理磁盘使用
 msgDestructTime: "0 2 * * *"                            #消息自动删除时间，每天凌晨2点删除过期消息，这个删除是为了删除保留时间超过超过会话字段msg_destruct_time（秒）的消息。
 
-secret: openIM123
+secret: tuoyun #秘钥，获取token时校验
 
 tokenPolicy:
   expire: 90                                     #过期时间（天）

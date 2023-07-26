@@ -69,7 +69,7 @@ DATA_DIR=./  #designate large disk directory
 
 1. Deploy and start
 
-Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
+> **Note**: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
 
 ```
 chmod +x install_im_server.sh;

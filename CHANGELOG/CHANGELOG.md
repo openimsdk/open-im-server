@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [OpenIM versioning policy](#openim-versioning-policy)
   - [command](#command)
   - [create next tag](#create-next-tag)
   - [Release version logs](#release-version-logs)
@@ -14,6 +15,10 @@
 All notable changes to this project will be documented in this file.
 
 + [https://github.com/OpenIMSDK/Open-IM-Server/releases](https://github.com/OpenIMSDK/Open-IM-Server/releases)
+
+## OpenIM versioning policy
+
++ [OpenIM Version](../docs/conversions/version.md)
 
 ## command
 
