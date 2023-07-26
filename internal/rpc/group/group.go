@@ -48,7 +48,6 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
-	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -841,7 +840,7 @@ func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, gro
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
 	var opMember *relationTb.GroupMemberModel
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		var err error
 		opMember, err = s.TakeGroupMember(ctx, req.GroupInfoForSet.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
@@ -950,7 +949,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	if newOwner == nil {
 		return nil, errs.ErrArgs.Wrap("NewOwnerUser not in group " + req.NewOwnerUserID)
 	}
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		if !(mcontext.GetOpUserID(ctx) == oldOwner.UserID && oldOwner.RoleLevel == constant.GroupOwner) {
 			return nil, errs.ErrNoPermission.Wrap("no permission transfer group owner")
 		}
@@ -1082,7 +1081,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	if err != nil {
 		return nil, err
 	}
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		if owner.UserID != mcontext.GetOpUserID(ctx) {
 			return nil, errs.ErrNoPermission.Wrap("not group owner")
 		}
@@ -1133,7 +1132,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err != nil {
 		return nil, err
 	}
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		opMember, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1181,7 +1180,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err != nil {
 		return nil, err
 	}
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		opMember, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
@@ -1265,7 +1264,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	memberMap := utils.SliceToMap(members, func(e *relationTb.GroupMemberModel) [2]string {
 		return [...]string{e.GroupID, e.UserID}
 	})
-	if !tokenverify.IsAppManagerUid(ctx) {
+	if !authverify.IsAppManagerUid(ctx) {
 		opUserID := mcontext.GetOpUserID(ctx)
 		for _, member := range req.Members {
 			if member.RoleLevel != nil {
