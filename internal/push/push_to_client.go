@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush/fcm"
@@ -82,7 +83,7 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 }
 
 func (p *Pusher) DeleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
-	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	conevrsationID := msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	maxSeq, err := p.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
@@ -170,7 +171,7 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			}(groupID, kickedUsers)
 			pushToUserIDs = append(pushToUserIDs, kickedUsers...)
 		case constant.GroupDismissedNotification:
-			if utils.IsNotification(utils.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
+			if msgprocessor.IsNotification(msgprocessor.GetConversationIDByMsg(msg)) { // 消息先到,通知后到
 				var tips sdkws.GroupDismissedTips
 				if p.UnmarshalNotificationElem(msg.Content, &tips) != nil {
 					return err

@@ -16,6 +16,7 @@ package conversation
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"google.golang.org/grpc"
 
@@ -197,7 +198,7 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 // create conversation without notification for msg redis transfer.
 func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbConversation.CreateSingleChatConversationsReq) (*pbConversation.CreateSingleChatConversationsResp, error) {
 	var conversation tableRelation.ConversationModel
-	conversation.ConversationID = utils.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
+	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
 	conversation.ConversationType = constant.SingleChatType
 	conversation.OwnerUserID = req.SendID
 	conversation.UserID = req.RecvID

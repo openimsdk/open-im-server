@@ -17,6 +17,7 @@ package group
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"math/big"
 	"math/rand"
 	"strconv"
@@ -829,7 +830,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 }
 
 func (s *groupServer) deleteMemberAndSetConversationSeq(ctx context.Context, groupID string, userIDs []string) error {
-	conevrsationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	conevrsationID := msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	maxSeq, err := s.msgRpcClient.GetConversationMaxSeq(ctx, conevrsationID)
 	if err != nil {
 		return err
@@ -889,7 +890,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		go func() {
 			nctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(ctx))
 			conversation := &pbConversation.ConversationReq{
-				ConversationID:   utils.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupInfoForSet.GroupID),
+				ConversationID:   msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, req.GroupInfoForSet.GroupID),
 				ConversationType: constant.SuperGroupChatType,
 				GroupID:          req.GroupInfoForSet.GroupID,
 			}

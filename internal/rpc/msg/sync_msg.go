@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -34,7 +35,7 @@ func (m *msgServer) PullMessageBySeqs(
 	resp.Msgs = make(map[string]*sdkws.PullMsgs)
 	resp.NotificationMsgs = make(map[string]*sdkws.PullMsgs)
 	for _, seq := range req.SeqRanges {
-		if !utils.IsNotification(seq.ConversationID) {
+		if !msgprocessor.IsNotification(seq.ConversationID) {
 			conversation, err := m.Conversation.GetConversation(ctx, req.UserID, seq.ConversationID)
 			if err != nil {
 				log.ZError(ctx, "GetConversation error", err, "conversationID", seq.ConversationID)
