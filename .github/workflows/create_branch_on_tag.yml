@@ -1,0 +1,62 @@
+name: Create Branch on Tag
+
+on:
+  push:
+    tags:
+      - 'v*.*.0'
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'kubbot'
+        git config --global user.email '3293172751yxy@gmail.com'
+
+    - name: Install git-chglog
+      run: make install.git-chglog
+
+    - name: Create Branch
+      run: |
+        TAG_NAME=${GITHUB_REF/refs\/tags\//}
+        IFS='.' read -ra VERSION_PARTS <<< "$TAG_NAME"
+        if [[ "${VERSION_PARTS[2]}" = "0" ]]; then
+          BRANCH_NAME="release-v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}"
+          echo "Creating branch $BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
+        fi
+
+    - name: Push Changes
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto Commit CHANGELOG"
+        branch: release-v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+    - name: Create and Push CHANGELOG
+      run: |
+        git checkout main
+        TAG_NAME=${GITHUB_REF/refs\/tags\//}
+        IFS='.' read -ra VERSION_PARTS <<< "$TAG_NAME"
+        if [[ "${VERSION_PARTS[2]}" = "0" ]]; then
+          cd CHANGELOG
+          git-chglog --tag-filter-pattern "v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.*"  -o "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
+          git add "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
+          git commit -m "Update CHANGELOG for $TAG_NAME"
+        fi
+
+    - name: Push Changes
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto Commit CHANGELOG"
+        branch: main
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
