@@ -13,7 +13,7 @@
 <a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/OpenIMSDK/Open-IM-Server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server"><img src="https://img.shields.io/github/stars/OpenIMSDK/Open-IM-Server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-100%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
+<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
@@ -69,7 +69,8 @@ DATA_DIR=./  #designate large disk directory
 
 1. Deploy and start
 
-> **Note**: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
+> **Note**
+> This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
 
 ```
 chmod +x install_im_server.sh;
@@ -94,18 +95,19 @@ cd scripts;
 2. Clone
 
    ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server 
-   cd Open-IM-Server
-   git checkout release-v3.0 #or other release branch
+   git clone https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make
+   git checkout release-v3.0 # or other tag
    ```
+Read about the [OpenIM Version Policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+
 
 3. Compile
 
    ```
-   cd Open-IM-server/scripts
-   chmod +x *.sh
-   ./build_all_service.sh
+   cd $openim
+   make build
    ```
+`make help` to help you see the instructions supported by OpenIM.
 
 All services have been successfully built as shown in the figure
 
