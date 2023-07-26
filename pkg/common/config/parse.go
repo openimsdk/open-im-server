@@ -17,6 +17,7 @@ package config
 import (
 	_ "embed"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -24,7 +25,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 //go:embed version
@@ -42,20 +42,20 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-func GetOptionsByNotification(cfg NotificationConf) utils.Options {
-	opts := utils.NewOptions()
+func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
+	opts := msgprocessor.NewOptions()
 	if cfg.UnreadCount {
-		opts = utils.WithOptions(opts, utils.WithUnreadCount(true))
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithUnreadCount(true))
 	}
 	if cfg.OfflinePush.Enable {
-		opts = utils.WithOptions(opts, utils.WithOfflinePush(true))
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithOfflinePush(true))
 	}
 	switch cfg.ReliabilityLevel {
 	case constant.UnreliableNotification:
 	case constant.ReliableNotificationNoMsg:
-		opts = utils.WithOptions(opts, utils.WithHistory(true), utils.WithPersistent())
+		opts = msgprocessor.WithOptions(opts, msgprocessor.WithHistory(true), msgprocessor.WithPersistent())
 	}
-	opts = utils.WithOptions(opts, utils.WithSendMsg(cfg.IsSendMsg))
+	opts = msgprocessor.WithOptions(opts, msgprocessor.WithSendMsg(cfg.IsSendMsg))
 	return opts
 }
 
