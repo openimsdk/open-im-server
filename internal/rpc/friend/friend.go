@@ -83,11 +83,6 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	return nil
 }
 
-func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfriend.GetDesignatedFriendsApplyReq) (*pbfriend.GetDesignatedFriendsApplyResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // ok.
 func (s *friendServer) ApplyToAddFriend(
 	ctx context.Context,

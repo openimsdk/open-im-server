@@ -94,11 +94,6 @@ type groupServer struct {
 	msgRpcClient          rpcclient.MessageRpcClient
 }
 
-func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *pbGroup.GetGroupUsersReqApplicationListReq) (*pbGroup.GetGroupUsersReqApplicationListResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !tokenverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))

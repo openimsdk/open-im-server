@@ -241,3 +241,7 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	}
 	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
 }
+
+func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
+	panic("implement me")
+}
