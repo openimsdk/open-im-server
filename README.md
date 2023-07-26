@@ -51,15 +51,15 @@ Open-IM-Server is not a standalone product and does not include account registra
 
 1. Clone the project
 
-```
-clone https://github.com/OpenIMSDK/Open-IM-Server 
-cd Open-IM-Server
-git checkout release-v3.0 #or other release branch
+```bash
+# choose what you need
+BRANCH=release-v3.0
+git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
 
-1. Modify .env
+2. Modify .env
 
-```
+```bash
 USER=root #no need to modify
 PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
 ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
@@ -67,21 +67,19 @@ API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP a
 DATA_DIR=./  #designate large disk directory
 ```
 
-1. Deploy and start
+3. Deploy and start
 
 > **Note**
 > This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
 
 ```
-chmod +x install_im_server.sh;
-./install_im_server.sh;
+make install
 ```
 
-1. Check the service
+4. Check the service
 
-```
-cd scripts;
-./docker_check_service.sh
+```bash
+make check
 ```
 
 ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
@@ -90,23 +88,14 @@ cd scripts;
 
 ### Compile from source
 
-1. Go 1.18 or higher version.
-
-2. Clone
-
-   ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make
-   git checkout release-v3.0 # or other tag
-   ```
+Ur need `Go 1.18` or higher version, and `make`.
+```bash
+# choose what you need
+BRANCH=release-v3.0
+git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
+```
 Read about the [OpenIM Version Policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 
-
-3. Compile
-
-   ```
-   cd $openim
-   make build
-   ```
 `make help` to help you see the instructions supported by OpenIM.
 
 All services have been successfully built as shown in the figure
