@@ -17,7 +17,7 @@ package main
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/internal/rpc/auth"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
-	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 func main() {

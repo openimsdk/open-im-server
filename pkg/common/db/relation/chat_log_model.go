@@ -21,9 +21,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/protocol/constant"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/constant"
 	"github.com/OpenIMSDK/tools/utils"
 )
 

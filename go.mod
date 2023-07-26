@@ -37,7 +37,7 @@ require (
 require github.com/google/uuid v1.3.0
 
 require (
-	github.com/OpenIMSDK/protocol v0.0.0-20230725064305-11f0568fe5e9
+	github.com/OpenIMSDK/protocol v0.0.1
 	github.com/OpenIMSDK/tools v0.0.1
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -139,4 +139,9 @@ require (
 	golang.org/x/crypto v0.10.0 // indirect
 	google.golang.org/genproto v0.0.0-20230525234025-438c736192d0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+)
+
+
+replace (
+	github.com/OpenIMSDK/tools => C:\Users\Admin\Desktop\tools
 )

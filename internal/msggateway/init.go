@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OpenIMSDK/tools/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {

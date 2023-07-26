@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/constant"
 )
 
 type MsgNotificationSender struct {
