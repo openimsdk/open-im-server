@@ -26,12 +26,6 @@ on:
       - 'docker-compose.yml'
       - 'bin/*'
 
-env:
-  SERVER_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }} # server private key
-  SERVER_HOST: ${{ secrets.SERVER_HOST }}               # server ip address
-  USER_NAME: ${{ secrets.USER_NAME }}                   # server username
-  cache-name: note
-
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
@@ -44,6 +38,14 @@ jobs:
           echo "${{secrets.WFP_ID_RSA}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan "182.92.xxx.xxx" >> ~/.ssh/known_hosts
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: whoami
       - name: deploy # Deployment
         run: |
           ssh work@182.92.xxx.xxx "
