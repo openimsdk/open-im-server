@@ -28,6 +28,8 @@ BOLD_PREFIX="\033[1m"  # Bold prefix
 UNDERLINE_PREFIX="\033[4m"  # Underline prefix
 ITALIC_PREFIX="\033[3m"  # Italic prefix
 
+CYAN_PREFIX="033[0;36m"  # Cyan prefix
+
 BACKGROUND_BLACK="\033[40m"  # Black background
 BACKGROUND_RED="\033[41m"  # Red background
 BACKGROUND_GREEN="\033[42m"  # Green background
