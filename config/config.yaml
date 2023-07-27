@@ -126,10 +126,10 @@ api:
 # Configuration for Aliyun OSS
 object:
   enable: "minio"                         
-  apiURL: "http://127.0.0.1:10002/object/"
+  apiURL: http://127.0.0.1:10002/object/
   minio:
     bucket: "openim"                      
-    endpoint: http://127.0.0.1:10005      
+    endpoint: http://127.0.0.1:10005
     accessKeyID: root
     secretAccessKey: openIM123
     sessionToken: ""                      
