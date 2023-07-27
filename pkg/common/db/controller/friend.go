@@ -24,6 +24,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
@@ -222,6 +223,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 	friendRequest *relation.FriendRequestModel,
 ) (err error) {
 	return f.tx.Transaction(func(tx any) error {
+		defer log.ZDebug(ctx, "return line")
 		now := time.Now()
 		fr, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
@@ -247,7 +249,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 			if err != nil {
 				return err
 			}
-		} else if errs.Unwrap(err) != gorm.ErrRecordNotFound {
+		} else if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
 
