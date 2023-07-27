@@ -62,6 +62,7 @@ func (u *UserApi) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.Client, c)
 }
 
+// GetUsersOnlineStatus Get user online status.
 func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
@@ -95,13 +96,13 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
 	}
-	// 遍历 api 请求体中的 userIDs
+	// Traversing the userIDs in the api request body
 	for _, v1 := range req.UserIDs {
 		flag = false
 		res := new(msggateway.GetUsersOnlineStatusResp_SuccessResult)
-		// 遍历从各个网关中获取的在线结果
+		// Iterate through the online results fetched from various gateways
 		for _, v2 := range wsResult {
-			// 如果匹配上说明在线，反之
+			// If matches the above description on the line, and vice versa
 			if v2.UserID == v1 {
 				flag = true
 				res.UserID = v1
@@ -123,6 +124,7 @@ func (u *UserApi) UserRegisterCount(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegisterCount, u.Client, c)
 }
 
+// GetUsersOnlineTokenDetail Get user online token details.
 func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	var wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*msggateway.SingleDetail
@@ -181,4 +183,14 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
+}
+
+// SubscriberStatus Presence status of subscribed users.
+func (u *UserApi) SubscriberStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
+}
+
+// UnSubscriberStatus Unsubscribe a user's presence.
+func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
 }
