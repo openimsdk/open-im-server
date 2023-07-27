@@ -142,7 +142,7 @@ object:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
-    accessKeyID: ""
+    accessKeyID: root
     accessKeySecret: ""
     sessionToken: ""
 
