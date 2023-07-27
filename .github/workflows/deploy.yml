@@ -26,6 +26,12 @@ on:
       - 'docker-compose.yml'
       - 'bin/*'
 
+env:
+  SERVER_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }} # server private key
+  SERVER_HOST: ${{ secrets.SERVER_HOST }}               # server ip address
+  USER_NAME: ${{ secrets.USER_NAME }}                   # server username
+  cache-name: note
+
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest

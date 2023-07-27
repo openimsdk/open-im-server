@@ -335,66 +335,66 @@ changelog:
     - title: Other work
       order: 9999
 
-dockers:
-  - image_templates:
-      - "openimsdk/open-im-server:{{ .Tag }}-amd64"
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
-      - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
-      - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
-      - "--label=io.artifacthub.package.license=Apace-2.0"
-      - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/amd64"
-    extra_files:
-      - scripts/entrypoint.sh
-  - image_templates:
-      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--pull"
-      - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
-      - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
-      - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
-      - "--label=io.artifacthub.package.license=Apace-2.0"
-      - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-      - "--platform=linux/arm64"
-    goarch: arm64
-    extra_files:
-      - scripts/entrypoint.sh
+# dockers:
+#   - image_templates:
+#       - "openimsdk/open-im-server:{{ .Tag }}-amd64"
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+#     dockerfile: Dockerfile
+#     use: buildx
+#     build_flag_templates:
+#       - "--pull"
+#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
+#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
+#       - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
+#       - "--label=io.artifacthub.package.license=Apace-2.0"
+#       - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
+#       - "--label=org.opencontainers.image.created={{.Date}}"
+#       - "--label=org.opencontainers.image.name={{.ProjectName}}"
+#       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+#       - "--label=org.opencontainers.image.version={{.Version}}"
+#       - "--label=org.opencontainers.image.source={{.GitURL}}"
+#       - "--platform=linux/amd64"
+#     extra_files:
+#       - scripts/entrypoint.sh
+#   - image_templates:
+#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+#     dockerfile: Dockerfile
+#     use: buildx
+#     build_flag_templates:
+#       - "--pull"
+#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
+#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
+#       - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
+#       - "--label=io.artifacthub.package.license=Apace-2.0"
+#       - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
+#       - "--label=org.opencontainers.image.created={{.Date}}"
+#       - "--label=org.opencontainers.image.name={{.ProjectName}}"
+#       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+#       - "--label=org.opencontainers.image.version={{.Version}}"
+#       - "--label=org.opencontainers.image.source={{.GitURL}}"
+#       - "--platform=linux/arm64"
+#     goarch: arm64
+#     extra_files:
+#       - scripts/entrypoint.sh
 
-docker_manifests:
-  - name_template: "goreleaser/goreleaser:{{ .Tag }}"
-    image_templates:
-      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
-      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-  - name_template: "ghcr.io/goreleaser/goreleaser:{{ .Tag }}"
-    image_templates:
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
-  - name_template: "goreleaser/goreleaser:latest"
-    image_templates:
-      - "goreleaser/goreleaser:{{ .Tag }}-amd64"
-      - "goreleaser/goreleaser:{{ .Tag }}-arm64"
-  - name_template: "ghcr.io/goreleaser/goreleaser:latest"
-    image_templates:
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-      - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+# docker_manifests:
+#   - name_template: "goreleaser/goreleaser:{{ .Tag }}"
+#     image_templates:
+#       - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+#   - name_template: "ghcr.io/goreleaser/goreleaser:{{ .Tag }}"
+#     image_templates:
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
+#   - name_template: "goreleaser/goreleaser:latest"
+#     image_templates:
+#       - "goreleaser/goreleaser:{{ .Tag }}-amd64"
+#       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
+#   - name_template: "ghcr.io/goreleaser/goreleaser:latest"
+#     image_templates:
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
+#       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
 
 nfpms:
   - id: packages
