@@ -53,5 +53,9 @@ git merge release-v3.1
 # Push the updates to the main branch
 git push origin main
 ```
-
-Remember, communication with your team is key throughout this process, keeping everyone up-to-date with the changes being made.
+##  Pre-release Process
+The pre-release process of OpenIM, including the three repositories Open-IM-Server/chat/open-im-sdk-core, is as follows:
+(1) Check out a new branch named 'develop' from the 'main' branch;
+(2) Generate the SDK on the 'develop' branch of open-im-sdk-core, and deploy the 'develop' branch in chat/Open-IM-Server;
+(3) Test by packaging the apk with the new version of SDK;
+(4) The bug-fixing process on the 'develop' branch: Fork from the 'develop' branch to the personal repository, then create a pull request to merge into the 'develop' branch, and finally merge into the 'main' branch.
