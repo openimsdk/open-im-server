@@ -47,6 +47,7 @@ type GroupRequestModelInterface interface {
 	Delete(ctx context.Context, groupID string, userID string) (err error)
 	UpdateHandler(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32) (err error)
 	Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequestModel, err error)
+	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*GroupRequestModel, error)
 	Page(
 		ctx context.Context,
 		userID string,

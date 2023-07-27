@@ -83,11 +83,6 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	return nil
 }
 
-func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfriend.GetDesignatedFriendsApplyReq) (*pbfriend.GetDesignatedFriendsApplyResp, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // ok.
 func (s *friendServer) ApplyToAddFriend(
 	ctx context.Context,
@@ -245,6 +240,19 @@ func (s *friendServer) GetDesignatedFriends(
 	return resp, nil
 }
 
+func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfriend.GetDesignatedFriendsApplyReq) (resp *pbfriend.GetDesignatedFriendsApplyResp, err error) {
+	friendRequests, err := s.friendDatabase.FindBothFriendRequests(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		return nil, err
+	}
+	resp = &pbfriend.GetDesignatedFriendsApplyResp{}
+	resp.FriendRequests, err = convert.FriendRequestDB2Pb(ctx, friendRequests, s.userRpcClient.GetUsersInfoMap)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // ok 获取接收到的好友申请（即别人主动申请的）.
 func (s *friendServer) GetPaginationFriendsApplyTo(
 	ctx context.Context,
@@ -303,7 +311,6 @@ func (s *friendServer) IsFriend(
 	return resp, nil
 }
 
-// ok.
 func (s *friendServer) GetPaginationFriends(
 	ctx context.Context,
 	req *pbfriend.GetPaginationFriendsReq,
