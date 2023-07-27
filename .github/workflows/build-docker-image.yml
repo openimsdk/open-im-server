@@ -18,6 +18,7 @@ on:
   push:
     branches:
       - main
+      - release-*
     tags:
       - v*
   workflow_dispatch:
@@ -28,6 +29,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+
+      - name: Build OpenIM Server
+        run: |
+          sudo make build
 
 # docker.io/openim/openim-server:latest
       - name: Log in to Docker Hub
@@ -41,13 +46,12 @@ jobs:
         uses: docker/metadata-action@v4.6.0
         with:
           images: openim/openim-server
-          tags: latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -64,15 +68,14 @@ jobs:
         uses: docker/metadata-action@v4.6.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
-          tags: latest
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
-          tags: ${{ steps.meta2.outputs.tags }}
-          labels: ${{ steps.meta2.outputs.labels }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
 # ghcr.io/openim/openim-server:latest
       - name: Log in to GitHub Container Registry
@@ -87,15 +90,14 @@ jobs:
         uses: docker/metadata-action@v4.6.0
         with:
           images: openim/openim-server
-          tags: latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
-          tags: ${{ steps.meta3.outputs.tags }}
-          labels: ${{ steps.meta3.outputs.labels }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
 # name: OpenIM Build Docker Images
 # on:
