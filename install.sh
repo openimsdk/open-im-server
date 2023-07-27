@@ -39,7 +39,7 @@ GO_VERSION="1.18"
 # LATEST_TAG=v3.0.0
 
 # default OpenIM install directory is /tmp
-DOWNLOAD_OPENIM_DIR="/test"
+# DOWNLOAD_OPENIM_DIR="/test"
 
 # github proxy
 # PROXY="https://ghproxy.com/"
