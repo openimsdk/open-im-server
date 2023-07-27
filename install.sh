@@ -23,34 +23,60 @@ set -o pipefail
 ############### OpenIM Github ###############
 # ... rest of the script ...
 
-# OpenIM Repo
-OWNER="OpenIMSDK"
-REPO="Open-IM-Server"
+# TODO
+# You can configure this script in three ways. 
+# 1. First, set the variables in this column with more comments. 
+# 2. The second is to pass an environment variable via a flag such as --help. 
+# 3. The third way is to set the variable externally, or pass it in as an environment variable
 
-# Update your Go version here
+# Default configuration for OpenIM Repo
+# The OpenIM Repo settings can be customized according to your needs.
+
+# OpenIM Repo owner, by default it's set to "OpenIMSDK". If you're using a different owner, replace accordingly.
+OWNER="OpenIMSDK" 
+
+# The repository name, by default it's "Open-IM-Server". If you're using a different repository, replace accordingly.
+REPO="Open-IM-Server" 
+
+# Version of Go you want to use, make sure it is compatible with your OpenIM-Server requirements.
+# Default is 1.18, if you want to use a different version, replace accordingly.
 GO_VERSION="1.18"
 
+# Default HTTP_PORT is 80. If you want to use a different port, uncomment and replace the value.
 # HTTP_PORT=80
 
-# CPU core number, concurrent execution
+# CPU core number for concurrent execution. By default it's determined automatically.
+# Uncomment the next line if you want to set it manually.
 # CPU=$(grep -c ^processor /proc/cpuinfo)
 
-# default is latest tag: https://github.com/OpenIMSDK/Open-IM-Server/releases
+# By default, the script uses the latest tag from OpenIM-Server releases.
+# If you want to use a specific tag, uncomment and replace "v3.0.0" with the desired tag.
 # LATEST_TAG=v3.0.0
 
-# default OpenIM install directory is /tmp
+# Default OpenIM install directory is /tmp. If you want to use a different directory, uncomment and replace "/test".
 # DOWNLOAD_OPENIM_DIR="/test"
 
-# github proxy
-# PROXY="https://ghproxy.com/"
+# GitHub proxy settings. If you are using a proxy, uncomment and replace the empty field with your proxy URL.
 PROXY=
+
+# If you have a GitHub token, replace the empty field with your token.
 GITHUB_TOKEN=
 
-USER=root #no need to modify
-PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
-ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
-API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP and port or domain,
-DATA_DIR=./  #designate large disk directory, default is current directory
+# Default user is "root". If you need to modify it, uncomment and replace accordingly.
+# USER=root 
+
+# Default password for redis, mysql, mongo, as well as accessSecret in config/config.yaml.
+# Remember, it should be a combination of 8 or more numbers and letters. If you want to set a different password, uncomment and replace "openIM123".
+# PASSWORD=openIM123
+
+# Default endpoint for minio's external service IP and port. If you want to use a different endpoint, uncomment and replace.
+# ENDPOINT=http://127.0.0.1:10005 
+
+# Default API_URL, replace if necessary. 
+# API_URL=http://127.0.0.1:10002/object/
+
+# Default data directory. If you want to specify a different directory, uncomment and replace "./".
+# DATA_DIR=./
 
 ############### OpenIM Functions ###############
 # Install horizon of the script
@@ -210,6 +236,7 @@ function download_source_code() {
 
     tar -xzvf "${DOWNLOAD_OPENIM_DIR}/${MODIFIED_TAG}.tar.gz" -C "$DOWNLOAD_OPENIM_DIR"
     cd "$DOWNLOAD_OPENIM_DIR/$REPO-$MODIFIED_TAG"
+    git init && git add . && git commit -m "init"  --no-verify
 
     success "Source code downloaded and extracted to $REPO-$MODIFIED_TAG"
 }
@@ -217,9 +244,40 @@ function download_source_code() {
 function set_openim_env() {
     warn "This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command."
     # Set default values for user input
-    user="root"
-    password="openIM123"
-    endpoint="http://"
+    # If the USER environment variable is not set, it defaults to 'root'
+    if [ -z "$USER" ]; then
+        USER="root"
+        debug "USER is not set. Defaulting to 'root'."
+    fi
+
+    # If the PASSWORD environment variable is not set, it defaults to 'openIM123'
+    # This password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
+    if [ -z "$PASSWORD" ]; then
+        PASSWORD="openIM123"
+        debug "PASSWORD is not set. Defaulting to 'openIM123'."
+    fi
+
+    # If the ENDPOINT environment variable is not set, it defaults to 'http://127.0.0.1:10005'
+    # This is minio's external service IP and port, or it could be a domain like storage.xx.xx
+    # The app must be able to access this IP and port or domain
+    if [ -z "$ENDPOINT" ]; then
+        ENDPOINT="http://127.0.0.1:10005"
+        debug "ENDPOINT is not set. Defaulting to 'http://127.0.0.1:10005'."
+    fi
+
+    # If the API_URL environment variable is not set, it defaults to 'http://127.0.0.1:10002/object/'
+    # The app must be able to access this IP and port or domain
+    if [ -z "$API_URL" ]; then
+        API_URL="http://127.0.0.1:10002/object/"
+        debug "API_URL is not set. Defaulting to 'http://127.0.0.1:10002/object/'."
+    fi
+
+    # If the DATA_DIR environment variable is not set, it defaults to the current directory './'
+    # This can be set to a directory with large disk space
+    if [ -z "$DATA_DIR" ]; then
+        DATA_DIR="./"
+        debug "DATA_DIR is not set. Defaulting to './'."
+    fi
 }
 
 function install_openim() {
@@ -235,11 +293,12 @@ function install_openim() {
 ############### OpenIM Help ###############
 
 # Function to display help message
-display_help() {
+function cmd_help() {
     openim_color
     color_echo ${BRIGHT_GREEN_PREFIX} "Usage: $0 [options]"
     color_echo ${BRIGHT_GREEN_PREFIX} "Options:"
     echo
+    color_echo ${BLUE_PREFIX} "-i,  --install       ${CYAN_PREFIX}Execute the installation logic of the script${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-u,  --user          ${CYAN_PREFIX}set user (default: root)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-p,  --password      ${CYAN_PREFIX}set password (default: openIM123)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-e,  --endpoint      ${CYAN_PREFIX}set endpoint (default: http://127.0.0.1:10005)${COLOR_SUFFIX}"
@@ -255,42 +314,97 @@ display_help() {
     color_echo ${BLUE_PREFIX} "--cpu                ${CYAN_PREFIX}set the number of concurrent processes${COLOR_SUFFIX}"
     echo
     color_echo ${RED_PREFIX} "Note: Only one of the -t/--tag or -r/--release options can be used at a time.${COLOR_SUFFIX}"
-    color_echo ${RED_PREFIX} "If both are used, the -t/--tag option will be prioritized.${COLOR_SUFFIX}"
+    color_echo ${RED_PREFIX} "If both are used or none of them are used, the -t/--tag option will be prioritized.${COLOR_SUFFIX}"
     echo
     exit 1
 }
 
-# Use getopts to parse command line flags
-while getopts ":h:u:p:e:a:d:" opt; do
-  case ${opt} in
-    h )
-      display_help
-      ;;
-    u )
-      user=$OPTARG
-      ;;
-    p )
-      password=$OPTARG
-      ;;
-    e )
-      endpoint=$OPTARG
-      ;;
-    a )
-      api_url=$OPTARG
-      ;;
-    d )
-      data_dir=$OPTARG
-      ;;
-    \? )
-      echo "Invalid Option: -$OPTARG" 1>&2
-      exit 1
-      ;;
-    : )
-      echo "Invalid Option: -$OPTARG requires an argument" 1>&2
-      exit 1
-      ;;
-  esac
-done
+function parseinput() {
+    # set default values
+    # USER=root
+    # PASSWORD=openIM123
+    # ENDPOINT=http://127.0.0.1:10005
+    # API=http://127.0.0.1:10002/object/
+    # DIRECTORY=./
+    # CHINA=false
+    # TAG=latest
+    # RELEASE=""
+    # GO_VERSION=1.18
+    # INSTALL_DIR=/tmp
+    # GITHUB_TOKEN=""
+    # CPU=$(nproc)
+
+    if [ $# -eq 0 ]; then
+        cmd_help
+        exit 1
+    fi
+
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -h|--help)
+                cmd_help
+                exit
+                ;;
+            -u|--user)
+                shift
+                USER=$1
+                ;;
+            -p|--password)
+                shift
+                PASSWORD=$1
+                ;;
+            -e|--endpoint)
+                shift
+                ENDPOINT=$1
+                ;;
+            -a|--api)
+                shift
+                API=$1
+                ;;
+            -d|--directory)
+                shift
+                DIRECTORY=$1
+                ;;
+            -cn|--china)
+                CHINA=true
+                ;;
+            -t|--tag)
+                shift
+                TAG=$1
+                ;;
+            -r|--release)
+                shift
+                RELEASE=$1
+                ;;
+            -g|--go-version)
+                shift
+                GO_VERSION=$1
+                ;;
+            -i|--install-dir)
+                shift
+                INSTALL_DIR=$1
+                ;;
+            -gt|--github-token)
+                shift
+                GITHUB_TOKEN=$1
+                ;;
+            --cpu)
+                shift
+                CPU=$1
+                ;;
+            -i|--install)
+                openim_main
+                exit
+                ;;
+            *)
+                echo "Unknown option: $1"
+                cmd_help
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
 
 ############### OpenIM LOGO ###############
 # Set text color to cyan for header and URL
@@ -443,4 +557,4 @@ function openim_main() {
 
 }
 
-openim_main "$@"
+parseinput "$@"
