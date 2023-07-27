@@ -51,6 +51,12 @@ copyright.add: tools.verify.addlicense
 #   -y string
 #         copyright year(s) (default "2023")
 
+## copyright.advertise: Advertise the license of the project
+.PHONY: copyright.advertise
+copyright.advertise:
+	@chmod +x $(ROOT_DIR)/scripts/advertise.sh
+	@$(ROOT_DIR)/scripts/advertise.sh
+
 ## copyright.help: Show copyright help
 .PHONY: copyright.help
 copyright.help: scripts/make-rules/copyright.mk

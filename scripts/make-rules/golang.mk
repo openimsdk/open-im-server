@@ -137,6 +137,12 @@ go.install:
 	@echo "===========> Installing deployment openim"
 	@$(ROOT_DIR)/scripts/install_im_server.sh
 
+## go.check: Check OpenIM deployment
+.PHONY: go.check
+go.check:
+	@echo "===========> Checking OpenIM deployment"
+	@$(ROOT_DIR)/scripts/check_all.sh
+
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch
 go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix $(p)., $(BINS))))
