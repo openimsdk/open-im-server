@@ -65,7 +65,7 @@ cmd/*
 config/*    @skiffer-git
 
 # db directory
-db/sdk  @BanTanger @cubxxw @Gordon  
+db/sdk  @cubxxw @FGadvancer  
 
 # internal directory
 internal/ @openimsdk/openim @skiffer-git @FGadvancer

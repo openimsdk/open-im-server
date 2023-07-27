@@ -137,6 +137,12 @@ go.install:
 	@echo "===========> Installing deployment openim"
 	@$(ROOT_DIR)/scripts/install_im_server.sh
 
+## go.check: Check OpenIM deployment
+.PHONY: go.check
+go.check:
+	@echo "===========> Checking OpenIM deployment"
+	@$(ROOT_DIR)/scripts/check_all.sh
+
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch
 go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.build., $(addprefix $(p)., $(BINS))))
@@ -173,9 +179,9 @@ go.test.cover: go.test.junit-report
 .PHONY: go.format
 go.format: tools.verify.golines tools.verify.goimports
 	@echo "===========> Formating codes"
-	@$(FIND) -type f -name '*.go' | $(XARGS) gofmt -s -w
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
-	@$(FIND) -type f -name '*.go' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) gofmt -s -w
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
+	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
 ## imports: task to automatically handle import packages in Go files using goimports tool

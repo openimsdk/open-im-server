@@ -13,7 +13,7 @@
 <a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/OpenIMSDK/Open-IM-Server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server"><img src="https://img.shields.io/github/stars/OpenIMSDK/Open-IM-Server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-100%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
+<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
@@ -51,15 +51,15 @@ Open-IM-Server is not a standalone product and does not include account registra
 
 1. Clone the project
 
-```
-clone https://github.com/OpenIMSDK/Open-IM-Server 
-cd Open-IM-Server
-git checkout release-v3.0 #or other release branch
+```bash
+# choose what you need
+BRANCH=release-v3.0
+git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
 
-1. Modify .env
+2. Modify .env
 
-```
+```bash
 USER=root #no need to modify
 PASSWORD=openIM123  #A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
 ENDPOINT=http://127.0.0.1:10005 #minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
@@ -67,20 +67,19 @@ API_URL=http://127.0.0.1:10002/object/ #the app must be able to access this IP a
 DATA_DIR=./  #designate large disk directory
 ```
 
-1. Deploy and start
+3. Deploy and start
 
-Note: This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
-
-```
-chmod +x install_im_server.sh;
-./install_im_server.sh;
-```
-
-1. Check the service
+> **Note**
+> This command can only be executed once. It will modify the component passwords in docker-compose based on the PASSWORD variable in .env, and modify the component passwords in config/config.yaml. If the password in .env changes, you need to first execute docker-compose down; rm components -rf and then execute this command.
 
 ```
-cd scripts;
-./docker_check_service.sh
+make install
+```
+
+4. Check the service
+
+```bash
+make check
 ```
 
 ![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
@@ -89,23 +88,15 @@ cd scripts;
 
 ### Compile from source
 
-1. Go 1.18 or higher version.
+Ur need `Go 1.18` or higher version, and `make`.
+```bash
+# choose what you need
+BRANCH=release-v3.0
+git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
+```
+Read about the [OpenIM Version Policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 
-2. Clone
-
-   ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server 
-   cd Open-IM-Server
-   git checkout release-v3.0 #or other release branch
-   ```
-
-3. Compile
-
-   ```
-   cd Open-IM-server/scripts
-   chmod +x *.sh
-   ./build_all_service.sh
-   ```
+`make help` to help you see the instructions supported by OpenIM.
 
 All services have been successfully built as shown in the figure
 

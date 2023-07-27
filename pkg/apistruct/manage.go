@@ -33,7 +33,7 @@ type SendMsg struct {
 }
 
 type SendMsgReq struct {
-	RecvID string `json:"recvID"           binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType"`
+	RecvID string `json:"recvID" binding:"required_if" message:"recvID is required if sessionType is SingleChatType or NotificationChatType"`
 	SendMsg
 }
 

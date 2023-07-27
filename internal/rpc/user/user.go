@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -245,4 +247,8 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 		return nil, err
 	}
 	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
+}
+
+func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
+	panic("implement me")
 }
