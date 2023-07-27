@@ -12,81 +12,133 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#OpenIM config
+# -----------------------------------------------------------------
+# Infrastructural configurations, please modify based on your setup
+# -----------------------------------------------------------------
 
-
-#---------------Infrastructure configuration---------------------#
+###################### Zookeeper ######################
+# Zookeeper configuration
+# It's not recommended to modify the schema
+# 
+# Zookeeper address
+# Zookeeper username
+# Zookeeper password
 zookeeper:
-  schema: openim                          #不建议修改
-  address: [ 127.0.0.1:2181 ]             #
-  username:                               #用户名
-  password:                               #密码
+  schema: openim                          
+  address: [ 127.0.0.1:2181 ]            
+  username:                               
+  password:   
 
+###################### Mysql ######################
+# MySQL configuration
+# Currently, only single machine setup is supported
+#
+# Maximum number of open connections
+# Maximum number of idle connections
+# Maximum lifetime in seconds a connection can be reused
+# Log level: 1=slient, 2=error, 3=warn, 4=info
+# Slow query threshold in milliseconds
 mysql:
-  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
+  address: [ 127.0.0.1:13306 ]
   username: root
   password: openIM123
-  database: openIM_v3                     #不建议修改
-  maxOpenConn: 1000                       #最大连接数
-  maxIdleConn: 100                        #最大空闲连接数
-  maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
-  logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
-  slowThreshold: 500                      #慢语句阈值 （毫秒）
+  database: openIM_v3                     
+  maxOpenConn: 1000                       
+  maxIdleConn: 100                        
+  maxLifeTime: 60                         
+  logLevel: 4                             
+  slowThreshold: 500    
 
+###################### Mongo ######################
+# MongoDB configuration
+# If uri is not empty, it will be used directly
+#
+# MongoDB address for standalone setup, Mongos address for sharded cluster setup
+# Default MongoDB database name
+# Maximum connection pool size
 mongo:
-  uri:                                    #不为空则直接使用该值
-  address: [ 127.0.0.1:37017 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
-  database: openIM_v3                      #mongo db 默认即可
+  uri:
+  address: [ 127.0.0.1:37017 ]
+  database: openIM_v3
   username: root
   password: openIM123
-  maxPoolSize: 100
+  maxPoolSize: 100  
 
+###################### Redis ######################
+# Redis configuration
+#
+# Username is required only for Redis version 6.0+
 redis:
-  address: [ 127.0.0.1:16379 ]            #
-  username:                               #only redis version 6.0+ need username
+  address: [ 127.0.0.1:16379 ]
+  username:                               
   password: openIM123
 
+###################### Kafka ######################
+# Kafka configuration
+#
+# Kafka username
+# Kafka password
+# It's not recommended to modify this topic name
+# Consumer group ID, it's not recommended to modify
 kafka:
-  username:                               #用户名
-  password:                               #密码
-  addr: [ 127.0.0.1:9092 ]                #
+  username:                               
+  password:                               
+  addr: [ 127.0.0.1:9092 ]
   latestMsgToRedis:
-    topic: "latestMsgToRedis"             #不建议修改
+    topic: "latestMsgToRedis"             
   offlineMsgToMongo:
-    topic: "offlineMsgToMongoMysql"       #不建议修改
+    topic: "offlineMsgToMongoMysql"       
   msgToPush:
-    topic: "msgToPush"                    #不建议修改
-  consumerGroupID: #消费者组，不建议修改
-    msgToRedis: redis                     #
-    msgToMongo: mongo                     #
-    msgToMySql: mysql                     #
-    msgToPush: push                       #
+    topic: "msgToPush"
+  consumerGroupID:
+    msgToRedis: redis
+    msgToMongo: mongo
+    msgToMySql: mysql
+    msgToPush: push
 
-
+###################### RPC ######################
+# RPC configuration
+#
+# IP address to register with zookeeper when starting RPC, the IP and corresponding rpcPort should be accessible by api/gateway
+# Default listen IP is 0.0.0.0
 rpc:
-  registerIP:                             #作为rpc启动时，注册到zookeeper的IP，api/gateway能访问到此ip和对应的rpcPort中的端口
-  listenIP:                               #默认为0.0.0.0
+  registerIP:
+  listenIP: 0.0.0.0
 
-
+###################### API ######################
+# API configuration
+#
+# API service port
+# Default listen IP is 0.0.0.0
 api:
-  openImApiPort: [ 10002 ]                #api服务端口
-  listenIP:                               #默认为0.0.0.0
+  openImApiPort: [ 10002 ]                
+  listenIP: 0.0.0.0    
 
+###################### Gateway ######################
+# Object storage configuration
+#
+# Use minio for object storage
+# API URL should be accessible by the app
+# It's not recommended to modify the bucket name
+# Endpoint should be accessible by the app
+# Session token
+# Configuration for Tencent COS
+# Configuration for Aliyun OSS
 object:
-  enable: "minio"                           #使用minio
-  apiURL: "http://127.0.0.1:10002/object/"  #地址需要app能访问到
+  enable: "minio"                         
+  apiURL: "http://127.0.0.1:10002/object/"
   minio:
-    bucket: "openim"                      #不建议修改
-    endpoint: http://127.0.0.1:10005      #地址需要app能够访问
+    bucket: "openim"                      
+    endpoint: http://127.0.0.1:10005      
     accessKeyID: root
     secretAccessKey: openIM123
-    sessionToken: ""            #token
-  cos: #tencent cos
+    sessionToken: ""                      
+  cos:                                    
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
     secretID: ""
     secretKey: ""
     sessionToken: ""
-  oss: #ali oss
+  oss:                                    
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
@@ -94,7 +146,11 @@ object:
     accessKeySecret: ""
     sessionToken: ""
 
-rpcPort: #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如  [10110, 10111]
+# RPC service ports
+# These ports are passed into the program by the script and are not recommended to modify
+# For launching multiple programs, just fill in multiple ports separated by commas
+# For example, [10110, 10111]
+rpcPort: 
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -105,7 +161,8 @@ rpcPort: #rpc服务端口，不建议修改，端口由脚本读取后传入程�
   openImConversationPort: [ 10180 ]
   openImThirdPort: [ 10190 ]
 
-rpcRegisterName: #rpc注册服务名，不建议修改
+# RPC service names for registration, it's not recommended to modify these
+rpcRegisterName:
   openImUserName: User
   openImFriendName: Friend
   openImMsgName: Msg
@@ -116,78 +173,132 @@ rpcRegisterName: #rpc注册服务名，不建议修改
   openImConversationName: Conversation
   openImThirdName: Third
 
+# Log configuration
+#
+# Storage directory
+# Log rotation time
+# Maximum number of logs to retain
+# Log level, 6 means all levels
+# Whether to output to stdout
+# Whether to output in json format
+# Whether to include stack trace in logs
 log:
-  storageLocation: ../../../../../logs/   #存放目录
-  rotationTime: 24                        #日志旋转时间
-  remainRotationCount: 2                  #日志数量
-  remainLogLevel: 6                       #日志级别 6表示全都打印，
-  isStdout: false
-  isJson: false
+  storageLocation: ../../../../../logs/  
+  rotationTime: 24                        
+  remainRotationCount: 2                  
+  remainLogLevel: 6                       
+  isStdout: false                         
+  isJson: false                           
   withStack: false
 
+# Long connection server configuration
+#
+# Websocket port for msg_gateway
+# Maximum number of websocket connections
+# Maximum length of websocket request package
+# Websocket connection handshake timeout
 longConnSvr:
-  openImWsPort: [ 10001 ]             #msg_gateway的websocket端口
-  websocketMaxConnNum: 100000         #websocket最大连接数
-  websocketMaxMsgLen: 4096            #websocket请求包最大长度
-  websocketTimeout: 10                #websocket连接握手超时时间
+  openImWsPort: [ 10001 ]                 
+  websocketMaxConnNum: 100000             
+  websocketMaxMsgLen: 4096                
+  websocketTimeout: 10  
 
+# Push notification service configuration
+#
+# Use GeTui for push notifications
+# GeTui offline push configuration
+# FCM offline push configuration
+# Account file, place it in the config directory
+# JPush configuration, modify these after applying in JPush backend
 push:
   enable: getui
-  geTui: #个推离线推送
+  geTui:
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
     channelID: ""
     channelName: ""
-  fcm: #fcm离线推送
-    serviceAccount: "x.json"          #帐号文件，并放在 config目录下
-  jpns: #极光推送 在极光后台申请后，修改以下四项
+  fcm:
+    serviceAccount: "x.json"
+  jpns:
     appKey:
     masterSecret:
     pushUrl:
     pushIntent:
 
+# App manager configuration
+#
+# Built-in app manager user IDs
+# Built-in app manager nicknames
 manager:
-  userID: [ "openIM123456","openIM654321","openIMAdmin" ]   #内置的app管理员userID
-  nickname: [ "system1","system2", "system3" ]              #内置的app管理员nickname
+  userID: [ "openIM123456","openIM654321","openIMAdmin" ]
+  nickname: [ "system1","system2", "system3" ]
 
+# Multi-platform login policy
+# For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
+multiLoginPolicy: 1
 
+# Whether to store messages in MySQL, messages in MySQL are only used for management background
+chatPersistenceMysql: true
 
+# Message cache timeout in seconds, it's not recommended to modify
+msgCacheTimeout: 86400
 
-multiLoginPolicy: 1                                     #多平台登录：Android、iOS、Windows、Mac、web 每种平台只能有一个在线
+# Whether to enable read receipts for group chat
+groupMessageHasReadReceiptEnable: true
 
+# Whether to enable read receipts for single chat
+singleMessageHasReadReceiptEnable: true
 
-chatPersistenceMysql: true                              #消息是否存入mysql，mysql中的消息仅用于管理后台使用
-msgCacheTimeout: 86400                                  #信消息缓存时间秒，不建议修改
-groupMessageHasReadReceiptEnable: true                  #群聊已读是否开启
-singleMessageHasReadReceiptEnable: true                 #单聊已读是否开启
+# MongoDB offline message retention period in days
+retainChatRecords: 365
 
-retainChatRecords: 365                                  #mongo保存离线消息时间（天）
-chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息，这个删除是为了清理满足上个配置retainChatRecords的过期消息，不会发送通知，仅仅作为清理磁盘使用
-msgDestructTime: "0 2 * * *"                            #消息自动删除时间，每天凌晨2点删除过期消息，这个删除是为了删除保留时间超过超过会话字段msg_destruct_time（秒）的消息。
+# Schedule to clear expired messages(older than retainChatRecords days) in MongoDB every Wednesday at 2am
+# This deletion is just for cleaning up disk usage according to previous configuration retainChatRecords, no notification will be sent
+chatRecordsClearTime: "0 2 * * 3"
 
+# Schedule to auto delete messages every day at 2am
+# This deletion is for messages that have been retained for more than msg_destruct_time (seconds) in the conversation field
+msgDestructTime: "0 2 * * *"
+
+# Secret key
 secret: openIM123
 
+# Token policy
+#
+# Token expiration period in days
 tokenPolicy:
-  expire: 90                                     #过期时间（天）
+  expire: 90
 
+# Message verification policy
+#
+# Whether to verify friendship when sending messages
 messageVerify:
-  friendVerify: false                                  #发送消息时是否验证好友关系
+  friendVerify: false
 
-#ios系统推送声音以及标记计数
+# iOS push notification configuration
+#
+# iOS push notification sound
+# Whether to count badge
+# Whether it's production environment
 iosPush:
   pushSound: "xxx"
   badgeCount: true
   production: false
 
+# Callback configuration
+#
+# Callback URL
+# Whether to enable this callback event
+# Timeout in seconds
+# Whether to continue execution if callback fails
 callback:
-  # 回调callback
   url:
   beforeSendSingleMsg:
-    enable: false                                     #是否启用此回调事件
-    timeout: 5                                        #超时时间（秒）
-    failedContinue: true                              #如回调失败是否继续往后执行
+    enable: false
+    timeout: 5
+    failedContinue: true
   afterSendSingleMsg:
     enable: false
     timeout: 5
@@ -244,8 +355,11 @@ callback:
     timeout: 5
     failedContinue: true
 
-
-prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
+###################### Prometheus ######################
+# Prometheus configuration
+# The number of Prometheus ports per service needs to correspond to rpcPort
+# The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
+prometheus:
   enable: false
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
@@ -257,4 +371,4 @@ prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.sh中的msg_transfer_service_num保持一致
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ]

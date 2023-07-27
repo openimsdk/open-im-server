@@ -308,9 +308,9 @@ function cmd_help() {
     color_echo ${BLUE_PREFIX} "-cn, --china         ${CYAN_PREFIX}set to use the Chinese domestic proxy${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-t,  --tag           ${CYAN_PREFIX}specify the tag (default option, set to latest if not specified)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-r,  --release       ${CYAN_PREFIX}specify the release branch (cannot be used with the tag option)${COLOR_SUFFIX}"
-    color_echo ${BLUE_PREFIX} "-g,  --go-version    ${CYAN_PREFIX}set the Go language version (default: GO_VERSION=\"1.18\")${COLOR_SUFFIX}"
-    color_echo ${BLUE_PREFIX} "-i,  --install-dir   ${CYAN_PREFIX}set the OpenIM installation directory (default: /tmp)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-gt, --github-token  ${CYAN_PREFIX}set the GITHUB_TOKEN (default: not set)${COLOR_SUFFIX}"
+    color_echo ${BLUE_PREFIX} "-g,  --go-version    ${CYAN_PREFIX}set the Go language version (default: GO_VERSION=\"1.18\")${COLOR_SUFFIX}"
+    color_echo ${BLUE_PREFIX} "--install-dir        ${CYAN_PREFIX}set the OpenIM installation directory (default: /tmp)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "--cpu                ${CYAN_PREFIX}set the number of concurrent processes${COLOR_SUFFIX}"
     echo
     color_echo ${RED_PREFIX} "Note: Only one of the -t/--tag or -r/--release options can be used at a time.${COLOR_SUFFIX}"
@@ -380,7 +380,7 @@ function parseinput() {
                 shift
                 GO_VERSION=$1
                 ;;
-            -i|--install-dir)
+            --install-dir)
                 shift
                 INSTALL_DIR=$1
                 ;;
@@ -435,7 +435,7 @@ print_progress() {
 color_echo() {
     COLOR=$1
     shift
-    echo -e "${COLOR}===> $* ${COLOR_SUFFIX}"
+    echo -e "${COLOR} $* ${COLOR_SUFFIX}"
 }
 
 # Color definitions
