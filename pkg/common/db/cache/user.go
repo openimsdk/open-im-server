@@ -17,7 +17,6 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/OpenIMSDK/protocol/user"
 	"strconv"
 	"time"
@@ -183,7 +182,6 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 				Status:     0,
 				PlatformID: -1,
 			})
-			fmt.Println("Field does not exist")
 			continue
 		}
 		err = json.Unmarshal([]byte(result), &onlineStatus)
