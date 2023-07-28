@@ -131,11 +131,11 @@ go.build.%:
 		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
 	fi
 
-## go.install: Install deployment openim
-.PHONY: go.install
-go.install:
-	@echo "===========> Installing deployment openim"
-	@$(ROOT_DIR)/scripts/install_im_server.sh
+# ## go.install: Install deployment openim
+# .PHONY: go.install
+# go.install:
+# 	@echo "===========> Installing deployment openim"
+# 	@$(ROOT_DIR)/scripts/install_im_server.sh
 
 ## go.check: Check OpenIM deployment
 .PHONY: go.check
