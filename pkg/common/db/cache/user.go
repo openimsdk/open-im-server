@@ -174,15 +174,17 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 		key := olineStatusKey + modKey
 		result, err := u.rdb.HGet(ctx, key, userID).Result()
 		if err != nil {
-			return nil, err
-		} else if err == redis.Nil {
-			// key or field does not exist
-			res = append(res, &user.OnlineStatus{
-				UserID:     userID,
-				Status:     0,
-				PlatformID: -1,
-			})
-			continue
+			if err == redis.Nil {
+				// key or field does not exist
+				res = append(res, &user.OnlineStatus{
+					UserID:     userID,
+					Status:     0,
+					PlatformID: -1,
+				})
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		err = json.Unmarshal([]byte(result), &onlineStatus)
 		if err != nil {
