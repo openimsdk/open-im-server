@@ -39,6 +39,7 @@ type GroupDatabase interface {
 	CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
+	FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
 	SearchGroup(
 		ctx context.Context,
 		keyword string,
@@ -580,4 +581,8 @@ func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.
 
 func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationTb.GroupRequestModel, error) {
 	return g.groupRequestDB.FindGroupRequests(ctx, groupID, userIDs)
+}
+
+func (g *groupDatabase) FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
+	return g.groupDB.FindNotDismissedGroup(ctx, groupIDs)
 }
