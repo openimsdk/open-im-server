@@ -17,12 +17,11 @@ package user
 import (
 	"context"
 	"errors"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/tools/log"
 	"strings"
 	"time"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-
-	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -60,6 +59,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	if err != nil {
 		return err
 	}
+	mongo, err := unrelation.NewMongo()
+	if err != nil {
+		return err
+	}
 	if err := db.AutoMigrate(&tablerelation.UserModel{}); err != nil {
 		return err
 	}
@@ -72,7 +75,8 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	userDB := relation.NewUserGorm(db)
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
-	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
+	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
+	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
@@ -235,6 +239,7 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 	return &pbuser.GetGlobalRecvMessageOptResp{GlobalRecvMsgOpt: user[0].GlobalRecvMsgOpt}, nil
 }
 
+// GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
 	userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
@@ -243,6 +248,24 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
 }
 
+// SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
+	err = s.UserDatabase.SubscribeOrCancelUsersStatus(ctx, req.UserID, req.UserIDs, req.Genre)
+	if err != nil {
+		return nil, err
+	}
+	//var status map[string][]string
+	//TODO 获取用户在线列表，返回订阅的用户的在线列表
+
+	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
+}
+
+func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp, err error) {
+	//TODO implement me
 	panic("implement me")
 }
