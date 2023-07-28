@@ -18,6 +18,7 @@ on:
   push:
     branches:
       - main
+      - release-*
     tags:
       - v*
   workflow_dispatch:
@@ -29,29 +30,38 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Build OpenIM Server
+        run: |
+          sudo make build
+
 # docker.io/openim/openim-server:latest
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: openim/openim-server
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4.6.0
-        with:
-          images: openim/openim-server
-          tags: latest
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
 # registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta2
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
+
       - name: Log in to AliYun Docker Hub
         uses: docker/login-action@v2
         with:
@@ -59,22 +69,21 @@ jobs:
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
       
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta2
-        uses: docker/metadata-action@v4.6.0
-        with:
-          images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
-          tags: latest
-      
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta2.outputs.tags }}
           labels: ${{ steps.meta2.outputs.labels }}
 
-# ghcr.io/openim/openim-server:latest
+# ghcr.io/openimsdk/openim-server:latest
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta3
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: ghcr.io/openimsdk/openim-server
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -82,53 +91,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta3
-        uses: docker/metadata-action@v4.6.0
-        with:
-          images: openim/openim-server
-          tags: latest
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta3.outputs.tags }}
           labels: ${{ steps.meta3.outputs.labels }}
-
-# name: OpenIM Build Docker Images
-# on:
-#   push:
-#     tags:
-#       - v*
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         bin:
-#           - openim-server
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v3
-#       - name: Setup Docker Buildx
-#         uses: docker/setup-buildx-action@v2
-#       - name: Login to GitHub Container Registry
-#         uses: docker/login-action@v2
-#         with:
-#           registry: ghcr.io
-#           username: ${{ github.repository_owner }}
-#           password: ${{ secrets.GITHUB_TOKEN }}
-#       - name: Docker metadata
-#         id: metadata
-#         uses: docker/metadata-action@v4
-#         with:
-#           images: ghcr.io/${{ github.repository_owner }}/openim-${{ matrix.bin }}
-#       - name: Build and release Docker images
-#         uses: docker/build-push-action@v3
-#         with:
-#           platforms: linux/386,linux/amd64,linux/arm64/v8
-#           target: ${{ matrix.bin }}
-#           tags: ${{ steps.metadata.outputs.tags }}
-#           push: true
