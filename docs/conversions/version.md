@@ -55,3 +55,7 @@ git push origin main
 ```
 
 Remember, communication with your team is key throughout this process, keeping everyone up-to-date with the changes being made.
+
+
+## Docker images version management
+

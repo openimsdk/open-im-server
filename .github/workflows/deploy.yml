@@ -18,6 +18,7 @@ on:
   push:
     branches:
       - 'devops' # Only for the dev branch
+      - 'main'
     paths:
       - '.github/workflows/*'
       # - '__test__/**' # dev No immediate testing is required
@@ -26,38 +27,47 @@ on:
       - 'docker-compose.yml'
       - 'bin/*'
 
-env:
-  SERVER_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }} # server private key
-  SERVER_HOST: ${{ secrets.SERVER_HOST }}               # server ip address
-  USER_NAME: ${{ secrets.USER_NAME }}                   # server username
-  cache-name: note
-
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: set ssh key # Temporarily set up ssh key
-        run: |
-          mkdir -p ~/.ssh/
-          # secrets.WFP_ID_RSA set in GitHub
-          echo "${{secrets.WFP_ID_RSA}}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan "182.92.xxx.xxx" >> ~/.ssh/known_hosts
-      - name: deploy # Deployment
-        run: |
-          ssh work@182.92.xxx.xxx "
-            # 【Attention】Log in with the 'work' account, manually create /home/work/imooc-lego directory
-            # Then git clone https://username:password@github.com/imooc-lego/biz-editor-server.git -b dev (private repository, use GitHub username and password)
-            # Remember to delete origin to avoid exposing GitHub password
-            cd /home/work/imooc-lego/biz-editor-server;
-            git remote add origin https://openimbot:${{secrets.WFP_PASSWORD}}@github.com/OpenIMSDK/open-im-server.git;
-            git checkout dev;
-            git pull origin dev; # Download the latest code again
-            git remote remove origin; # Remove origin to avoid exposing GitHub password
-            # Start docker
-            docker-compose build editor-server; # Same as the service name in docker-compose.yml
-            docker-compose up -d;
-          "
-      - name: delete ssh key # Delete ssh key
-        run: rm -rf ~/.ssh/id_rsa
+      - uses: actions/checkout@v3
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+            OWNER: ${{ github.repository_owner }}
+            REPO: ${{ github.event.repository.name }}
+        with:
+          host: "${{ secrets.SG_M1_HOST }}, ${{ secrets.SG_N1_HOST }}, ${{ secrets.SG_N2_HOST}}"
+          username: ${{ secrets.SG_USERNAME }}
+          password: ${{ secrets.SG_PASSWORD }}
+          port: ${{ secrets.SG_PORT }}
+          envs: OWNER,REPO
+          script_stop: true
+          script: |
+            mkdir -p /test/openim
+            cd /test/openim
+            pwd;ls -al
+            echo "OWNER: $OWNER"
+            echo "REPO: $REPO"
+            git clone -b develop https://github.com/${OWNER}/${REPO}.git; cd ${REPO}
+            docker compose up -d
+
+
+    #   - name: deploy # Deployment
+    #     run: |
+    #       ssh work@182.92.xxx.xxx "
+    #         # 【Attention】Log in with the 'work' account, manually create /home/work/imooc-lego directory
+    #         # Then git clone https://username:password@github.com/imooc-lego/biz-editor-server.git -b dev (private repository, use GitHub username and password)
+    #         # Remember to delete origin to avoid exposing GitHub password
+    #         cd /home/work/imooc-lego/biz-editor-server;
+    #         git remote add origin https://openimbot:${{secrets.WFP_PASSWORD}}@github.com/OpenIMSDK/open-im-server.git;
+    #         git checkout dev;
+    #         git pull origin dev; # Download the latest code again
+    #         git remote remove origin; # Remove origin to avoid exposing GitHub password
+    #         # Start docker
+    #         docker-compose build editor-server; # Same as the service name in docker-compose.yml
+    #         docker-compose up -d;
+    #       "
+    #   - name: delete ssh key # Delete ssh key
+    #     run: rm -rf ~/.ssh/id_rsa
