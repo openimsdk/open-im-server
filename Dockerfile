@@ -22,8 +22,8 @@ RUN /bin/sh -c "make build"
 # Production Stage
 FROM alpine
 
-RUN apk --no-cache add tzdata; \
-     apt --no-cache add ca-certificates
+RUN echo "https://mirrors.aliyun.com/alpine/v3.4/main" > /etc/apk/repositories && \
+    apk --no-cache add tzdata ca-certificates
 
 # Set directory to map logs, config files, scripts, and SDK
 VOLUME ["/Open-IM-Server/logs", "/Open-IM-Server/config", "/Open-IM-Server/scripts", "/Open-IM-Server/db/sdk"]
