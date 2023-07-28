@@ -24,7 +24,7 @@ When pulling OpenIM's Docker images, you can choose the most suitable source bas
 
      ```
      bashCopy code
-     docker pull ghcr.io/openim/openim-server:latest
+     docker pull ghcr.io/openimsdk/openim-server:latest
      ```
 
    - Pull from Alibaba Cloud:
@@ -47,7 +47,7 @@ When pulling OpenIM's Docker images, you can choose the most suitable source bas
 
      ```
      bashCopy code
-     docker pull ghcr.io/openim/openim-chat:latest
+     docker pull ghcr.io/openimsdk/openim-chat:latest
      ```
 
    - Pull from Alibaba Cloud:
