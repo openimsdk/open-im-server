@@ -18,6 +18,7 @@ import (
 	"context"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -56,6 +57,10 @@ type UserDatabase interface {
 	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
 	// GetSubscribedList Get all subscribed lists
 	GetSubscribedList(ctx context.Context, userID string) ([]string, error)
+	// GetUserStatus Get the online status of the user
+	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
+	// SetUserStatus Set the user status and store the user status in redis
+	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
 }
 
 type userDatabase struct {
@@ -194,4 +199,15 @@ func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]
 
 	//TODO 获取所有被订阅
 	return nil, nil
+}
+
+// GetUserStatus get user status
+func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
+	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
+	return onlineStatusList, err
+}
+
+// SetUserStatus Set the user status and save it in redis
+func (u *userDatabase) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
+	return u.cache.SetUserStatus(ctx, list)
 }

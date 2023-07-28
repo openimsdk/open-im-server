@@ -194,3 +194,7 @@ func (u *UserApi) SubscriberStatus(c *gin.Context) {
 func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
 }
+
+func (u *UserApi) GetUserStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
+}
