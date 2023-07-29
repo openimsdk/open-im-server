@@ -100,7 +100,7 @@ services:
 
 
   openim_server:
-    image: ghcr.io/openimsdk/openim-server:v3.1.0
+    image: ghcr.io/openimsdk/openim-server:latest
     container_name: openim-server
     volumes:
       - ./logs:/Open-IM-Server/logs
@@ -124,7 +124,7 @@ services:
         max-file: "2"
 
   openim_chat:
-    image: ghcr.io/openimsdk/openim-chat:v1.1.0
+    image: ghcr.io/openimsdk/openim-chat:latest
     container_name: openim_chat
     restart: always
     depends_on:
