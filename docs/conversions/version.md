@@ -14,6 +14,10 @@ In the OpenIM repository, the versioning adheres to the `MAJOR.MINOR.PATCH` form
 
 ## Milestones and Branching
 
++ [OpenIM Milestones](https://github.com/OpenIMSDK/Open-IM-Server/milestones)
++ [OpenIM Tags](https://github.com/OpenIMSDK/Open-IM-Server/tags)
++ [OpenIM Branches](https://github.com/OpenIMSDK/Open-IM-Server/branches)
+
 When a significant milestone like v3.1.0 is achieved, a new branch `release-v3.1` is created. This branch contains all the code pertaining to this stable release. All bug fixes and features intended for the next version, v3.2.0, are merged into this branch.
 
 The release of `PATCH` versions (Z in `X.Y.Z`) are driven by bug fixes, and these can be rolled out depending on the bug's priority or over a scheduled time. On the other hand, `MINOR` versions (Y in `X.Y.Z`) are released based on the project's roadmap, milestone completion, or on a scheduled timeline. Importantly, the API of minor versions is always backward-compatible.
@@ -59,3 +63,4 @@ Remember, communication with your team is key throughout this process, keeping e
 
 ## Docker images version management
 
++ [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)

@@ -1040,7 +1040,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationTb.GroupRequestModel) string {
 		return e.GroupID
 	}))
-	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
+	groups, err := s.GroupDatabase.FindNotDismissedGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
