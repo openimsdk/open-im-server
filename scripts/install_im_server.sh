@@ -37,6 +37,9 @@ function onCtrlC () {
     exit 1
 }
 
+# Load environment variables from .env file
+source ${OPENIM_ROOT}/.env
+
 # Replace local IP address with the public IP address in .env file
 if [ $API_URL == "http://127.0.0.1:10002/object/" ]; then
     sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
@@ -50,8 +53,6 @@ fi
 internet_ip=$(curl ifconfig.me -s)
 echo -e "${PURPLE_PREFIX}=========> Your public internet IP address is ${internet_ip} ${COLOR_SUFFIX} \n"
 
-# Load environment variables from .env file
-source ${OPENIM_ROOT}/.env
 
 echo -e "${PURPLE_PREFIX}=========> Your minio endpoint is ${MINIO_ENDPOINT} ${COLOR_SUFFIX} \n"
 
