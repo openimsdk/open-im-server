@@ -2,6 +2,26 @@
 
 Our project, OpenIM, follows the [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/) standards.
 
+OpenIM, the open source project, employs a comprehensive version management system to ensure the reliability and traceability of our software. Our version management consists of three main components: the `main` branch, the `release` branch, and `tag` management.
+
+## Main Branch
+
+The `main` branch is where all the latest code resides. It's the hub of activity, embodying all the cutting-edge features that are currently being developed or updated. However, since it's subject to frequent changes and updates, it may not always represent the most stable version of the software. Access the `main` branch [here](https://github.com/openimsdk/openim-server/tree/main).
+
+## Release Branch
+
+On the other hand, we have the `release` branch. For instance, in the context of version 3.1, we maintain a `release-v3.1` branch. Unlike the `main` branch, the release branch is designed to be a continuously stable and updated version of the software. This provides a reliable option for users who prefer stability over the latest, but potentially unstable, features. Access the `release-v3.1` branch [here](https://github.com/openimsdk/openim-server/tree/release-v3.1).
+
+## Tag Management
+
+Finally, there's `tag` management. Despite having both `main` and `release` branches, `tag` serves a crucial role. Tags are immutable, i.e., they remain unchanged once created. Therefore, if you need a specific version of the software, you can use the corresponding tag. Check out the available tags [here](https://github.com/openimsdk/openim-server/tags).
+
+Moreover, our Docker image versions are closely tied with these three components. For instance, a tag might correspond to the Docker image `ghcr.io/openimsdk/openim-server:v3.1.0`, a release would be `ghcr.io/openimsdk/openim-server:release-v3.0`, and the main branch might be represented as `ghcr.io/openimsdk/openim-server:main` or `ghcr.io/openimsdk/openim-server:latest`.
+
+To find out more, or to contribute to our project, please visit our GitHub repository at [OpenIM Server](https://github.com/openimsdk/openim-server).
+
+We believe that this approach offers a balanced blend of innovation and stability, enabling us to provide the best possible software to our users.
+
 ## OpenIM version
 
 OpenIM manages two primary branches: `main` and `release`. The project uses Semantic Versioning 2.0.0 to tag different versions of the software, each indicating a significant milestone in the software's development.
