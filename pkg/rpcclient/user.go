@@ -154,3 +154,7 @@ func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumbe
 	}
 	return resp.UserIDs, nil
 }
+func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status int32, platformID int) error {
+	_, err := u.Client.SetUserStatus(ctx, &user.SetUserStatusReq{StatusList: []*user.OnlineStatus{{UserID: userID, Status: status, PlatformID: int32(platformID)}}})
+	return err
+}
