@@ -261,11 +261,18 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 }
 
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	//TODO 是否加一个参数校验-判断req.userID的数量，每一个获取加一个限制，一次请求限制500？
+	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.GetUserStatusResp{StatusList: onlineStatusList}, nil
 }
 
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	err = s.UserDatabase.SetUserStatus(ctx, req.StatusList)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.SetUserStatusResp{}, nil
 }

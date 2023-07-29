@@ -51,7 +51,7 @@ func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 }
 
 func (u *UserApi) GetAllUsersID(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
+	a2r.Call(user.UserClient.GetAllUserID, u.Client, c)
 }
 
 func (u *UserApi) AccountCheck(c *gin.Context) {
@@ -193,4 +193,8 @@ func (u *UserApi) SubscriberStatus(c *gin.Context) {
 // UnSubscriberStatus Unsubscribe a user's presence.
 func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
+}
+
+func (u *UserApi) GetUserStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
 }
