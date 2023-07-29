@@ -41,7 +41,7 @@ require (
 	github.com/OpenIMSDK/tools v0.0.5
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.41
 )
