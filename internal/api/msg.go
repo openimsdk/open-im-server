@@ -262,8 +262,8 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 				apiresp.GinError(c, err)
 				return
 			}
+			recvIDs = append(recvIDs, recvIDsPart...)
 			if len(recvIDsPart) < showNumber {
-				recvIDs = append(recvIDs, recvIDsPart...)
 				break
 			}
 			pageNumber++
