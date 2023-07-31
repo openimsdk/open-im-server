@@ -167,6 +167,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/search_msg", m.SearchMsg)
 		msgGroup.POST("/send_msg", m.SendMessage)
+		msgGroup.POST("/send_business_notification", m.SendBusinessNotification)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
 		msgGroup.POST("/revoke_msg", m.RevokeMsg)
 		msgGroup.POST("/mark_msgs_as_read", m.MarkMsgsAsRead)
