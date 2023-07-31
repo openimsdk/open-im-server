@@ -18,6 +18,7 @@ on:
   push:
     branches:
       - main
+      - release-v*
     paths:
       - "**.go"
       - "!**_test.go"

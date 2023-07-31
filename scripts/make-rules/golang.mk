@@ -26,7 +26,7 @@ GO_LDFLAGS += -X $(VERSION_PACKAGE).gitVersion=$(GIT_TAG) \
 	-s -w		# -s -w deletes debugging information and symbol tables
 ifeq ($(DEBUG), 1)
 	GO_BUILD_FLAGS += -gcflags "all=-N -l"
-	GO_LDFLAGS=
+	GO_LDFLAGS =
 endif
 
 GO_BUILD_FLAGS += -ldflags "$(GO_LDFLAGS)"
