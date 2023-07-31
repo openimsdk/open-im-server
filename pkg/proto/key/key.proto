@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package OpenIMServer.protobuf;
+
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/key";
+
+message GetKeyReq {
+  string conversationId = 1;
+  uint32 conversationType = 2;
+  string userId = 3;
+}
+message KeyResp {
+  string key = 1;
+}
+message GetAllKeyReq {
+  string userId = 1;
+}
+message GetAllKeyResp {
+    map<string,string> keys = 1;
+}
+
+service key {
+  rpc GetKey(GetKeyReq) returns(KeyResp);
+  rpc GetAllKey(GetAllKeyReq) returns(GetAllKeyResp);
+}
