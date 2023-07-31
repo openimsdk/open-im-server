@@ -487,9 +487,13 @@ release:
 
     ## Helping out
 
-    We release logs are recorded on [✨ CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)
+    We release logs are recorded on [✨ CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)--config_folder_path
+
+    For information on versions of OpenIM and how to maintain branches, read [📚this article](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 
     This release is only possible thanks to **all** the support of some **awesome people**!
+
+    https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
 
     **Want to be one of them 😘?**
 
