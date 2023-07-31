@@ -27,7 +27,7 @@ require (
 	go.mongodb.org/mongo-driver v1.12.0
 	golang.org/x/image v0.9.0 // indirect
 	google.golang.org/api v0.134.0
-	google.golang.org/grpc v1.56.2
+	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.1
