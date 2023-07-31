@@ -139,3 +139,7 @@ func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 func (o *GroupApi) GetGroups(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroups, o.Client, c)
 }
+
+func (o *GroupApi) GetGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupMemberUserIDs, o.Client, c)
+}
