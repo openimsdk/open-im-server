@@ -1,9 +1,10 @@
 ##  OpenIM Project Development Standards
 
-- [Code Standards](https://chat.openai.com/go_code.md)
-- [Directory Standards](https://chat.openai.com/directory.md)
-- [Commit Standards](https://chat.openai.com/commit.md)
-- [Versioning Standards](https://chat.openai.com/version.md)
-- [Interface Standards](https://chat.openai.com/api.md)
-- [Log Standards](https://chat.openai.com/log.md)
-- [Error Code Standards](https://chat.openai.com/error_code.md)
+- [Code Standards](./go_code.md)
+- [Docker Images Standards](./images.md)
+- [Directory Standards](./directory.md)
+- [Commit Standards](./commit.md)
+- [Versioning Standards](./version.md)
+- [Interface Standards](./api.md)
+- [Log Standards](./log.md)
+- [Error Code Standards](./error_code.md)
