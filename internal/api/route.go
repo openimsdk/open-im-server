@@ -102,6 +102,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
+		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 	}
 	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group", ParseToken)
