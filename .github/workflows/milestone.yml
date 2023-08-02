@@ -1,0 +1,58 @@
+# shamelessly copied from https://github.com/sigstore/cosign/blob/main/.github/workflows/milestone.yaml
+
+name: milestone
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  milestone:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: none
+      checks: none
+      contents: read
+      deployments: none
+      issues: write
+      packages: none
+      pull-requests: write
+      repository-projects: none
+      security-events: none
+      statuses: none
+
+    steps:
+      - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6
+        with:
+          script: |
+            if (!context.payload.pull_request.merged) {
+              console.log('PR was not merged, skipping.');
+              return;
+            }
+
+            if (!!context.payload.pull_request.milestone) {
+              console.log('PR has existing milestone, skipping.');
+              return;
+            }
+
+            milestones = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'due_on',
+              direction: 'asc'
+            })
+            if (milestones.data.length === 0) {
+              console.log('There are no milestones, skipping.');
+              return;
+            }
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              milestone: milestones.data[0].number
+            });
