@@ -18,30 +18,21 @@ on:
   pull_request:
     # types:
     #   - closed
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.base.ref == 'main' && github.event.pull_request.merged == true
     steps:
         - name: Check out code
           uses: actions/checkout@v3
           with:
             fetch-depth: 0
 
-        - name: Setup GitHub CLI
-          run: |
-            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-            sudo apt-add-repository https://cli.github.com/packages
-            sudo apt-get update
-            sudo apt-get install gh
-          continue-on-error: true
-
-        # - name: Configure GitHub CLI
-        #   run: |
-        #     git config --global user.email "3293172751ysy@gmail.com"
-        #     git config --global user.name "kubbot"
-        #     echo "${{ secrets.BOT_GITHUB_TOKEN }}" | gh auth login --with-token
         - name: Create PR to release branch
           run: |
             ISSUEID=$(gh pr view ${{ github.event.pull_request.number }} --repo $OWNER/$REPO | grep -oP 'Fixes #\K\d+')
@@ -56,10 +47,9 @@ jobs:
 
             gh pr edit ${{ github.event.pull_request.number }} --repo $OWNER/$REPO --add-label "$LABELS" --add-assignee "$ASSIGNEES" --milestone "$MILESTONE"
 
-            git checkout -b bot/merge-to-release-$ISSUEID
-            git push origin bot/merge-to-release-$ISSUEID
-            gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
-            
+            # git checkout -b bot/merge-to-release-$ISSUEID
+            # git push origin bot/merge-to-release-$ISSUEID
+            # gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
             # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo OpenIMSDK/Open-IM-Server --reviewer "cubxxw"
           continue-on-error: true
           env:

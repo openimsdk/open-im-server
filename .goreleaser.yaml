@@ -447,8 +447,8 @@ milestones:
     # Repository for the milestone
     # Default is extracted from the origin remote URL
     repo:
-      owner: user
-      name: repo
+      owner: OpenIMSDK
+      name: Open-IM-Server
 
     # Whether to close the milestone
     close: true
@@ -479,6 +479,9 @@ checksum:
   algorithm: sha256
 
 release:
+
+  prerelease: auto
+  
   footer: |
   
     ## Welcome to the {{ .Tag }} release of [chat](https://github.com/OpenIMSDK/chat)!🎉🎉!
@@ -493,7 +496,7 @@ release:
 
     This release is only possible thanks to **all** the support of some **awesome people**!
 
-    https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
+    If you wish to use mirroring, read OpenIM's [image management policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
 
     **Want to be one of them 😘?**
 
