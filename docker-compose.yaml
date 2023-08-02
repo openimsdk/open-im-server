@@ -104,8 +104,7 @@ services:
     container_name: openim-server
     volumes:
       - ./logs:/openim/openim-server/logs
-      - ./config/config.yaml:/openim/openim-server/config/config.yaml
-      - ./config/notification.yaml:/openim/openim-server/config/notification.yaml
+      - ./config:/openim/openim-server/config
       - ./scripts:/openim/openim-server/scripts
     restart: always
     depends_on:
@@ -125,6 +124,10 @@ services:
   openim_chat:
     image: ghcr.io/openimsdk/openim-chat:latest
     container_name: openim_chat
+    volumes:
+      - ./_output/openim/openim-chat/logs:/openim/openim-chat/logs
+      - ./_output/openim/openim-chat/config:/openim/openim-chat/config
+      - ./_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
     restart: always
     depends_on:
       - mysql
