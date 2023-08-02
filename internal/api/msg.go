@@ -16,6 +16,8 @@ package api
 
 import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -230,6 +232,51 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	})
 	if err != nil {
 		log.ZError(c, "SetSendMsgStatus failed", err)
+	}
+	apiresp.GinSuccess(c, respPb)
+}
+
+func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
+	req := struct {
+		Key        string `json:"key"`
+		Data       string `json:"data"`
+		SendUserID string `json:"sendUserID"`
+		RecvUserID string `json:"recvUserID"`
+	}{}
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if !authverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
+	sendMsgReq := msg.SendMsgReq{
+		MsgData: &sdkws.MsgData{
+			SendID: req.SendUserID,
+			RecvID: req.RecvUserID,
+			Content: []byte(utils.StructToJsonString(&sdkws.NotificationElem{
+				Detail: utils.StructToJsonString(&struct {
+					Key  string `json:"key"`
+					Data string `json:"data"`
+				}{Key: req.Key, Data: req.Data}),
+			})),
+			MsgFrom:     constant.SysMsgType,
+			ContentType: constant.BusinessNotification,
+			SessionType: constant.SingleChatType,
+			CreateTime:  utils.GetCurrentTimestampByMill(),
+			ClientMsgID: utils.GetMsgID(mcontext.GetOpUserID(c)),
+			Options: config.GetOptionsByNotification(config.NotificationConf{
+				IsSendMsg:        false,
+				ReliabilityLevel: 1,
+				UnreadCount:      false,
+			}),
+		},
+	}
+	respPb, err := m.Client.SendMsg(c, &sendMsgReq)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
 	}
 	apiresp.GinSuccess(c, respPb)
 }

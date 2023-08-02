@@ -89,9 +89,12 @@ make check
 ### Compile from source
 
 Ur need `Go 1.18` or higher version, and `make`.
+
+Version Details: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
+
 ```bash
 # choose what you need
-BRANCH=release-v3.0
+BRANCH=release-v3.1
 git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
 Read about the [OpenIM Version Policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)

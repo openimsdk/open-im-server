@@ -83,3 +83,7 @@ func (o *FriendApi) ImportFriends(c *gin.Context) {
 func (o *FriendApi) IsFriend(c *gin.Context) {
 	a2r.Call(friend.FriendClient.IsFriend, o.Client, c)
 }
+
+func (o *FriendApi) GetFriendIDs(c *gin.Context) {
+	a2r.Call(friend.FriendClient.GetFriendIDs, o.Client, c)
+}
