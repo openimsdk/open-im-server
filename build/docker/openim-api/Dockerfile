@@ -39,7 +39,7 @@ FROM ghcr.io/openim-sigs/openim-bash-image:latest
 WORKDIR ${CHAT_WORKDIR}
 
 COPY --from=builder ${OPENIM_CHAT_BINDIR}/open_im_admin_api /openim/openim-chat/bin/open_im_admin_api
-COPY --from=builder ${OPENIM_CHAT_CONFIG_NAME} /openim/openim-chat/config/config.yaml
+COPY --from=builder ${OPENIM_CHAT_CONFIG_NAME} /openim/openim-server/config/config.yaml
 
 env PORT=10002
 
