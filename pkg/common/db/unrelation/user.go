@@ -21,10 +21,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
-//  prefixes and suffixes.
+// prefixes and suffixes.
 const (
 	SubscriptionPrefix = "subscription_prefix"
 	SubscribedPrefix   = "subscribed_prefix"
@@ -48,22 +47,35 @@ type UserMongoDriver struct {
 // AddSubscriptionList Subscriber's handling of thresholds.
 func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string, userIDList []string) error {
 	// Check the number of lists in the key.
-	filter := bson.M{SubscriptionPrefix + userID: bson.M{"$size": 1}}
-	result, err := u.userCollection.Find(context.Background(), filter)
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"user_id", SubscriptionPrefix + userID}}}},
+		{{"$project", bson.D{{"count", bson.D{{"$size", "user_id_list"}}}}}},
+	}
+	// perform aggregate operations
+	cursor, err := u.userCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return err
 	}
-	var newUserIDList []string
-	for result.Next(context.Background()) {
-		err := result.Decode(&newUserIDList)
+	defer cursor.Close(ctx)
+	var cnt struct {
+		Count int `bson:"count"`
+	}
+	// iterate over aggregated results
+	for cursor.Next(ctx) {
+		err := cursor.Decode(&cnt)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
+	var newUserIDList []string
 	// If the threshold is exceeded, pop out the previous MaximumSubscription - len(userIDList) and insert it.
-	if len(newUserIDList)+len(userIDList) > MaximumSubscription {
+	if cnt.Count+len(userIDList) > MaximumSubscription {
+		newUserIDList, err = u.GetAllSubscribeList(ctx, userID)
+		if err != nil {
+			return err
+		}
 		newUserIDList = newUserIDList[MaximumSubscription-len(userIDList):]
-		_, err := u.userCollection.UpdateOne(
+		_, err = u.userCollection.UpdateOne(
 			ctx,
 			bson.M{"user_id": SubscriptionPrefix + userID},
 			bson.M{"$set": bson.M{"user_id_list": newUserIDList}},
@@ -71,16 +83,17 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 		if err != nil {
 			return err
 		}
-		//for i := 1; i <= MaximumSubscription-len(userIDList); i++ {
-		//	_, err := u.userCollection.UpdateOne(
-		//		ctx,
-		//		bson.M{"user_id": SubscriptionPrefix + userID},
-		//		bson.M{SubscriptionPrefix + userID: bson.M{"$pop": -1}},
-		//	)
-		//	if err != nil {
-		//		return err
-		//	}
-		//}
+		// Another way to subscribe to N before pop,Delete after testing
+		/*for i := 1; i <= MaximumSubscription-len(userIDList); i++ {
+			_, err := u.userCollection.UpdateOne(
+				ctx,
+				bson.M{"user_id": SubscriptionPrefix + userID},
+				bson.M{SubscriptionPrefix + userID: bson.M{"$pop": -1}},
+			)
+			if err != nil {
+				return err
+			}
+		}*/
 	}
 	upsert := true
 	opts := &options.UpdateOptions{
@@ -138,4 +151,30 @@ func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, user
 		bson.M{"$pull": bson.M{"user_id_list": userID}},
 	)
 	return utils.Wrap(err, "")
+}
+
+// GetAllSubscribeList Get all users subscribed by this user
+func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string) (userIDList []string, err error) {
+	var user unrelation.UserModel
+	cursor := u.userCollection.FindOne(
+		ctx,
+		bson.M{"user_id": SubscriptionPrefix + userID})
+	err = cursor.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user.UserIDList, nil
+}
+
+// GetSubscribedList Get the user subscribed by those users
+func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) (userIDList []string, err error) {
+	var user unrelation.UserModel
+	cursor := u.userCollection.FindOne(
+		ctx,
+		bson.M{"user_id": SubscribedPrefix + userID})
+	err = cursor.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return user.UserIDList, nil
 }
