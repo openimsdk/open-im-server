@@ -35,7 +35,7 @@ const (
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
-	statusMod                 = 500
+	statusMod                 = 501
 )
 
 type UserCache interface {
