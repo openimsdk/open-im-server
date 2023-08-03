@@ -20,7 +20,7 @@ set -e
 set -o pipefail
 
 
-############### OpenIM Github ###############
+############################## OpenIM Github ##############################
 # ... rest of the script ...
 
 # TODO
@@ -78,7 +78,7 @@ GITHUB_TOKEN=
 # Default data directory. If you want to specify a different directory, uncomment and replace "./".
 # DATA_DIR=./
 
-############### OpenIM Functions ###############
+############################## OpenIM Functions ##############################
 # Install horizon of the script
 #
 # Pre-requisites:
@@ -290,7 +290,7 @@ function install_openim() {
     success "OpenIM installation completed successfully. Happy chatting!"
 }
 
-############### OpenIM Help ###############
+############################## OpenIM Help ##############################
 
 # Function to display help message
 function cmd_help() {
@@ -406,7 +406,7 @@ function parseinput() {
     done
 }
 
-############### OpenIM LOGO ###############
+############################## OpenIM LOG ##############################
 # Set text color to cyan for header and URL
 print_with_delay() {
   text="$1"
