@@ -44,3 +44,7 @@ func (s *userServer) UserRegisterCount(
 	}
 	return &pbuser.UserRegisterCountResp{Total: total, Before: before, Count: count}, nil
 }
+
+//func (s *userServer) OnlineUserCount(ctx context.Context) error {
+//	s.
+//}

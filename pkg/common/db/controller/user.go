@@ -61,6 +61,8 @@ type UserDatabase interface {
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
 	// SetUserStatus Set the user status and store the user status in redis
 	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
+
+	//OnlineUserCount(ctx context.Context, start time.Time, end time.Time) (int64, map[string]int64, error)
 }
 
 type userDatabase struct {
@@ -176,7 +178,7 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-//SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
+// SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
 func (u *userDatabase) SubscribeOrCancelUsersStatus(ctx context.Context, userID string, userIDs []string, genre int32) error {
 	var err error
 	if genre == constant.SubscriberUser {
