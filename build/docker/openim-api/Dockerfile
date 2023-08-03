@@ -12,13 +12,15 @@ WORKDIR /openim/openim-server
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
 RUN make clean
 RUN make build BINS=openim-api
 
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
+FROM ghcr.io/openim-sigs/openim-bash-image:v1.2.0
 
 WORKDIR /openim/openim-server
 
@@ -27,4 +29,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE ${10002}
 
-CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-api","--port", "10002"]
+CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-api --port 10002 -c ${SERVER_WORKDIR}/config"]

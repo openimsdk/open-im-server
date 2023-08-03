@@ -10,13 +10,16 @@ ENV GOPROXY=$GOPROXY
 # Set up the working directory
 WORKDIR /openim/openim-server
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 # Copy all files to the container
 ADD . .
 
 RUN /bin/sh -c "make clean"
 RUN /bin/sh -c "make build"
 
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
+FROM ghcr.io/openim-sigs/openim-bash-image:v1.2.0
 
 WORKDIR ${SERVER_WORKDIR}
 

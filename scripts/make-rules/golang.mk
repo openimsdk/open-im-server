@@ -120,7 +120,7 @@ go.build.%:
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
-		echo "===========> DEBUG: Compilation is not yet supported $(COMMAND)"; \
+		echo "===========> DEBUG: OpenIM-SDK-Core It is no longer supported for openim-server $(COMMAND)"; \
 	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
 		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
 			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
