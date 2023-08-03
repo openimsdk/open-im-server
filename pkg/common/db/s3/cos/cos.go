@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,19 @@ const (
 	minPartSize = 1024 * 1024 * 1        // 1MB
 	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
 	maxNumSize  = 1000
+)
+
+const (
+	imagePng  = "png"
+	imageJpg  = "jpg"
+	imageJpeg = "jpeg"
+	imageGif  = "gif"
+	imageWebp = "webp"
+)
+
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
 )
 
 func NewCos() (s3.Interface, error) {
@@ -248,9 +262,61 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+	var imageMogr string
+	snapshot := make(url.Values)
 	var option *cos.PresignedURLOptions
 	if opt != nil {
 		query := make(url.Values)
+		if opt.Image != nil {
+			// https://cloud.tencent.com/document/product/436/44880
+			style := make([]string, 0, 2)
+			wh := make([]string, 2)
+			if opt.Image.Width > 0 {
+				wh[0] = strconv.Itoa(opt.Image.Width)
+			}
+			if opt.Image.Height > 0 {
+				wh[1] = strconv.Itoa(opt.Image.Height)
+			}
+			if opt.Image.Width > 0 || opt.Image.Height > 0 {
+				style = append(style, strings.Join(wh, "x"))
+			}
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				opt.ContentType = "image/" + opt.Image.Format
+				if opt.Filename == "" {
+					opt.Filename = filepath.Base(name) + "." + opt.Image.Format
+				} else if filepath.Ext(opt.Filename) != "."+opt.Image.Format {
+					opt.Filename += "." + opt.Image.Format
+				}
+				style = append(style, "format/"+opt.Image.Format)
+			}
+			if len(style) > 0 {
+				imageMogr = "&imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
+			}
+		}
+		if opt.Video != nil {
+			snapshot.Set("ci-process", "snapshot")
+			snapshot.Set("time", strconv.FormatFloat(float64(opt.Video.Time/time.Millisecond)/1000, 'f', 3, 64))
+			switch opt.Video.ImageFormat {
+			case
+				videoSnapshotImagePng,
+				videoSnapshotImageJpg:
+			default:
+				opt.Video.ImageFormat = videoSnapshotImageJpg
+			}
+			snapshot.Set("format", opt.Video.ImageFormat)
+			opt.ContentType = "image/" + opt.Video.ImageFormat
+			if opt.Filename == "" {
+				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
+				opt.Filename += "." + opt.Video.ImageFormat
+			}
+		}
 		if opt.ContentType != "" {
 			query.Set("response-content-type", opt.ContentType)
 		}
@@ -272,5 +338,20 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	if err != nil {
 		return "", err
 	}
-	return rawURL.String(), nil
+	urlStr := rawURL.String()
+	if len(snapshot) > 0 {
+		r, err := url.Parse(urlStr)
+		if err != nil {
+			return "", err
+		}
+		query := r.Query()
+		for key, values := range snapshot {
+			query[key] = values
+		}
+		r.RawQuery = query.Encode()
+	}
+	if imageMogr != "" {
+		urlStr += imageMogr
+	}
+	return urlStr, nil
 }

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,14 @@ const (
 	minPartSize = 1024 * 1024 * 1        // 1MB
 	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
 	maxNumSize  = 10000
+)
+
+const (
+	imagePng  = "png"
+	imageJpg  = "jpg"
+	imageJpeg = "jpeg"
+	imageGif  = "gif"
+	imageWebp = "webp"
 )
 
 func NewOSS() (s3.Interface, error) {
@@ -139,7 +148,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := fmt.Sprintf(`%s%s?partNumber=%d&uploadId=%s`, o.bucketURL, name, partNumber, uploadID)
-		request, err := http.NewRequestWithContext(ctx, http.MethodPut, rawURL, nil)
+		request, err := http.NewRequest(http.MethodPut, rawURL, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -150,12 +159,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, now)
 		request.Header.Set(oss.HttpHeaderOssDate, now)
-		authorization := fmt.Sprintf(
-			`OSS %s:%s`,
-			o.credentials.GetAccessKeyID(),
-			o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()),
-		)
-		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
+		ossSignHeader(o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
 		delete(request.Header, oss.HTTPHeaderDate)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
@@ -266,6 +270,41 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	var opts []oss.Option
 	if opt != nil {
+		if opt.Image != nil {
+			// https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
+			var format string
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				format = opt.Image.Format
+				opt.ContentType = "image/" + format
+				if opt.Filename == "" {
+					opt.Filename = filepath.Base(name) + "." + format
+				}
+			}
+			var wh []string
+			if opt.Image.Width > 0 {
+				wh = append(wh, "w_"+strconv.Itoa(opt.Image.Width))
+			}
+			if opt.Image.Height > 0 {
+				wh = append(wh, "h_"+strconv.Itoa(opt.Image.Height))
+			}
+			if len(format)+len(wh) > 0 {
+				style := make([]string, 0, 3)
+				style = append(style, "image")
+				if len(wh) > 0 {
+					style = append(style, "resize,m_lfit,"+strings.Join(wh, ","))
+				}
+				if format != "" {
+					style = append(style, "format,"+format)
+				}
+				opts = append(opts, oss.Process(strings.Join(style, "/")))
+			}
+		}
 		if opt.ContentType != "" {
 			opts = append(opts, oss.ResponseContentType(opt.ContentType))
 		}
