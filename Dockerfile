@@ -23,7 +23,6 @@ FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
 
 WORKDIR ${SERVER_WORKDIR}
 
-# Copy scripts and binary files to the production image
 COPY --from=builder ${OPENIM_SERVER_CMDDIR} /openim/openim-server/scripts
 COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
 COPY --from=builder ${SERVER_WORKDIR}/_output/bin/platforms /openim/openim-server/_output/bin/platforms
