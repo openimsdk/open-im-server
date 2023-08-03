@@ -263,7 +263,7 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	var imageMogr string
-	snapshot := make(url.Values)
+	//snapshot := make(url.Values)
 	var option *cos.PresignedURLOptions
 	if opt != nil {
 		query := make(url.Values)
@@ -300,8 +300,14 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			}
 		}
 		if opt.Video != nil {
-			snapshot.Set("ci-process", "snapshot")
-			snapshot.Set("time", strconv.FormatFloat(float64(opt.Video.Time/time.Millisecond)/1000, 'f', 3, 64))
+			// 对象存储/桶存储列表/数据处理/媒体处理 开启
+			// https://cloud.tencent.com/document/product/436/55671
+			query.Set("ci-process", "snapshot")
+			sec := float64(opt.Video.Time/time.Millisecond) / 1000
+			if sec < 0 {
+				sec = 0
+			}
+			query.Set("time", strconv.FormatFloat(sec, 'f', 3, 64))
 			switch opt.Video.ImageFormat {
 			case
 				videoSnapshotImagePng,
@@ -309,12 +315,18 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			default:
 				opt.Video.ImageFormat = videoSnapshotImageJpg
 			}
-			snapshot.Set("format", opt.Video.ImageFormat)
+			query.Set("format", opt.Video.ImageFormat)
 			opt.ContentType = "image/" + opt.Video.ImageFormat
 			if opt.Filename == "" {
 				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
 			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
 				opt.Filename += "." + opt.Video.ImageFormat
+			}
+			if opt.Video.Width > 0 {
+				query.Set("width", strconv.Itoa(opt.Video.Width))
+			}
+			if opt.Video.Height > 0 {
+				query.Set("height", strconv.Itoa(opt.Video.Height))
 			}
 		}
 		if opt.ContentType != "" {
@@ -339,17 +351,6 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 		return "", err
 	}
 	urlStr := rawURL.String()
-	if len(snapshot) > 0 {
-		r, err := url.Parse(urlStr)
-		if err != nil {
-			return "", err
-		}
-		query := r.Query()
-		for key, values := range snapshot {
-			query[key] = values
-		}
-		r.RawQuery = query.Encode()
-	}
 	if imageMogr != "" {
 		urlStr += imageMogr
 	}
