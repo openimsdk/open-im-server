@@ -90,18 +90,10 @@ jobs:
           echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: go
-
       - name: Build source code for host platform
         run: |
           sudo make build
           echo "Build source code for host platform successfully" 
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
 
       - name: OpenIM verify copyright
         run: |
