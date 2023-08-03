@@ -17,7 +17,6 @@ name: Build Image
 on:
   push:
     branches:
-      - main
       - release-v*
     paths:
       - "**.go"
