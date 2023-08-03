@@ -12,13 +12,15 @@ WORKDIR /openim/openim-server
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
 RUN make clean
 RUN make build BINS=openim-crontask
 
-FROM ghcr.io/openim-sigs/openim-bash-image:v1.2.0
+FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
 
 WORKDIR /openim/openim-server
 

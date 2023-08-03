@@ -20,7 +20,7 @@ COPY . .
 RUN make clean
 RUN make build BINS=openim-msggateway
 
-FROM ghcr.io/openim-sigs/openim-bash-image:v1.2.0
+FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
 
 WORKDIR /openim/openim-server
 

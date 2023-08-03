@@ -21,7 +21,7 @@ RUN make clean
 
 # RUN make build BINS=openim-rpc
 
-RUN go build -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth ./cmd/openim-rpc/openim-rpc-auth
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth ./cmd/openim-rpc/openim-rpc-auth
 
 FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
 

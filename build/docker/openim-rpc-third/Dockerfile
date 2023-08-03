@@ -20,7 +20,7 @@ COPY . .
 RUN make clean
 
 RUN make build BINS=openim-rpc
-# RUN go build -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third ./cmd/openim-rpc/openim-rpc-third
+# RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third ./cmd/openim-rpc/openim-rpc-third
 
 RUN rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-friend && \
     rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-group && \

@@ -12,6 +12,9 @@ WORKDIR /openim/openim-server
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
 RUN make clean
