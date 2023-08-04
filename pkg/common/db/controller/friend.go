@@ -20,14 +20,15 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 type FriendDatabase interface {

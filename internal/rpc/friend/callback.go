@@ -17,13 +17,14 @@ package friend
 import (
 	"context"
 
-	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
+
+	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 )
 
 func CallbackBeforeAddFriend(ctx context.Context, req *pbfriend.ApplyToAddFriendReq) error {

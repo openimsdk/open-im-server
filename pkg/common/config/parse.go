@@ -17,10 +17,11 @@ package config
 import (
 	_ "embed"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"gopkg.in/yaml.v3"
 

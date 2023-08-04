@@ -26,9 +26,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 func New(impl s3.Interface) *Controller {

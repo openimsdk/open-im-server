@@ -17,11 +17,12 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/protocol/user"
-	"github.com/OpenIMSDK/tools/errs"
 	"hash/crc32"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
@@ -163,12 +164,12 @@ func (u *UserCacheRedis) getOnlineStatusKey(userID string) string {
 	return olineStatusKey + userID
 }
 
-// GetUserStatus get user status
+// GetUserStatus get user status.
 func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	var res []*user.OnlineStatus
 	for _, userID := range userIDs {
 		UserIDNum := crc32.ChecksumIEEE([]byte(userID))
-		var modKey = strconv.Itoa(int(UserIDNum % statusMod))
+		modKey := strconv.Itoa(int(UserIDNum % statusMod))
 		var onlineStatus user.OnlineStatus
 		key := olineStatusKey + modKey
 		result, err := u.rdb.HGet(ctx, key, userID).Result()
@@ -195,12 +196,12 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 	return res, nil
 }
 
-// SetUserStatus Set the user status and save it in redis
+// SetUserStatus Set the user status and save it in redis.
 func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
 	for _, status := range list {
 		var isNewKey int64
 		UserIDNum := crc32.ChecksumIEEE([]byte(status.UserID))
-		var modKey = strconv.Itoa(int(UserIDNum % statusMod))
+		modKey := strconv.Itoa(int(UserIDNum % statusMod))
 		key := olineStatusKey + modKey
 		jsonData, err := json.Marshal(status)
 		if err != nil {

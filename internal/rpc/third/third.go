@@ -27,14 +27,15 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/OpenIMSDK/protocol/third"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/protocol/third"
-	"github.com/OpenIMSDK/tools/discoveryregistry"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {

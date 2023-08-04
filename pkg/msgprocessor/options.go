@@ -16,8 +16,10 @@ package msgprocessor
 
 import "github.com/OpenIMSDK/protocol/constant"
 
-type Options map[string]bool
-type OptionsOpt func(Options)
+type (
+	Options    map[string]bool
+	OptionsOpt func(Options)
+)
 
 func NewOptions(opts ...OptionsOpt) Options {
 	options := make(map[string]bool, 11)

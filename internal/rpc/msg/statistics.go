@@ -18,10 +18,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 func (m *msgServer) GetActiveUser(ctx context.Context, req *msg.GetActiveUserReq) (*msg.GetActiveUserResp, error) {

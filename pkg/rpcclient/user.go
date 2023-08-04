@@ -16,17 +16,19 @@ package rpcclient
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"strings"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 type User struct {
@@ -154,6 +156,7 @@ func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumbe
 	}
 	return resp.UserIDs, nil
 }
+
 func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status int32, platformID int) error {
 	_, err := u.Client.SetUserStatus(ctx, &user.SetUserStatusReq{StatusList: []*user.OnlineStatus{{UserID: userID, Status: status, PlatformID: int32(platformID)}}})
 	return err

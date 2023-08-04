@@ -18,9 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbGroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -28,6 +25,10 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 func NewGroupNotificationSender(

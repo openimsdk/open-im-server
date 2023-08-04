@@ -17,16 +17,18 @@ package msg
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"time"
 
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {

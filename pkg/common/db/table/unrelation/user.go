@@ -23,7 +23,7 @@ const (
 
 // UserModel collection structure.
 type UserModel struct {
-	UserID     string   `bson:"user_id"       json:"userID"`
+	UserID     string   `bson:"user_id"      json:"userID"`
 	UserIDList []string `bson:"user_id_list" json:"userIDList"`
 }
 

@@ -17,11 +17,20 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/tools/log"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	pbuser "github.com/OpenIMSDK/protocol/user"
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -31,12 +40,6 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	pbuser "github.com/OpenIMSDK/protocol/user"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
 
 	"google.golang.org/grpc"
 
