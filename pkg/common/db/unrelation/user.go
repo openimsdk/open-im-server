@@ -17,6 +17,7 @@ package unrelation
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -54,7 +55,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	// perform aggregate operations
 	cursor, err := u.userCollection.Aggregate(ctx, pipeline)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 	defer cursor.Close(ctx)
 	var cnt struct {
@@ -64,7 +65,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	for cursor.Next(ctx) {
 		err := cursor.Decode(&cnt)
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 	}
 	var newUserIDList []string
@@ -106,7 +107,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 		opts,
 	)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 	for _, user := range userIDList {
 		_, err = u.userCollection.UpdateOne(
@@ -130,11 +131,11 @@ func (u *UserMongoDriver) UnsubscriptionList(ctx context.Context, userID string,
 		bson.M{"$pull": bson.M{"user_id_list": bson.M{"$in": userIDList}}},
 	)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 	err = u.RemoveSubscribedListFromUser(ctx, userID, userIDList)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -142,18 +143,14 @@ func (u *UserMongoDriver) UnsubscriptionList(ctx context.Context, userID string,
 // RemoveSubscribedListFromUser Among the unsubscribed users, delete the user from the subscribed list.
 func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, userID string, userIDList []string) error {
 	var err error
-	var newUserIDList []string
-	for _, value := range userIDList {
-		newUserIDList = append(newUserIDList, SubscribedPrefix+value)
-	}
-	for _, userIDTemp := range newUserIDList {
+	for _, userIDTemp := range userIDList {
 		_, err = u.userCollection.UpdateOne(
 			ctx,
-			bson.M{"user_id": userIDTemp},
+			bson.M{"user_id": SubscribedPrefix + userIDTemp},
 			bson.M{"$pull": bson.M{"user_id_list": userID}},
 		)
 	}
-	return utils.Wrap(err, "")
+	return errs.Wrap(err)
 }
 
 // GetAllSubscribeList Get all users subscribed by this user
@@ -164,7 +161,7 @@ func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string
 		bson.M{"user_id": SubscriptionPrefix + userID})
 	err = cursor.Decode(&user)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return user.UserIDList, nil
 }
@@ -177,7 +174,7 @@ func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) 
 		bson.M{"user_id": SubscribedPrefix + userID})
 	err = cursor.Decode(&user)
 	if err != nil {
-		return nil, err
+		return nil, errs.Wrap(err)
 	}
 	return user.UserIDList, nil
 }
