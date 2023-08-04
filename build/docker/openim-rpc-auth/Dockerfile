@@ -23,7 +23,7 @@ RUN make clean
 
 RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth ./cmd/openim-rpc/openim-rpc-auth
 
-FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
+FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 

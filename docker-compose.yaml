@@ -103,9 +103,9 @@ services:
     image: ghcr.io/openim-sigs/openim-server:v1.0.0-debug.11 #ghcr.io/openimsdk/openim-server:main
     container_name: openim-server
     volumes:
-      - ./_output/openim/openim-server/logs:/openim/openim-server/logs
-      - ./_output/openim/openim-server/config:/openim/openim-server/config
-      - ./_output/openim/openim-server/scripts:/openim/openim-server/scripts
+      - ./logs:/openim/openim-server/logs
+      - ./config:/openim/openim-server/config
+      - ./scripts:/openim/openim-server/scripts
     restart: always
     depends_on:
       - zookeeper

@@ -29,7 +29,7 @@ RUN rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-fr
     rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-conversation && \
     rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth
 
-FROM ghcr.io/openim-sigs/openim-bash-image:v1.3.0
+FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
