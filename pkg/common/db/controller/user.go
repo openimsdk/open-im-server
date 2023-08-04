@@ -16,16 +16,19 @@ package controller
 
 import (
 	"context"
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/user"
+
+	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 type UserDatabase interface {
@@ -51,7 +54,7 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	//SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
+	// SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
 	SubscribeOrCancelUsersStatus(ctx context.Context, userID string, userIDs []string, genre int32) error
 	// GetAllSubscribeList Get a list of all subscriptions
 	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
@@ -161,22 +164,22 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 	return false, nil
 }
 
-// GetAllUserID Get all user IDs
+// GetAllUserID Get all user IDs.
 func (u *userDatabase) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error) {
 	return u.userDB.GetAllUserID(ctx, pageNumber, showNumber)
 }
 
-// CountTotal Get the total number of users
+// CountTotal Get the total number of users.
 func (u *userDatabase) CountTotal(ctx context.Context, before *time.Time) (count int64, err error) {
 	return u.userDB.CountTotal(ctx, before)
 }
 
-// CountRangeEverydayTotal Get the user increment in the range
+// CountRangeEverydayTotal Get the user increment in the range.
 func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-//SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
+// SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status.
 func (u *userDatabase) SubscribeOrCancelUsersStatus(ctx context.Context, userID string, userIDs []string, genre int32) error {
 	var err error
 	if genre == constant.SubscriberUser {
@@ -189,25 +192,23 @@ func (u *userDatabase) SubscribeOrCancelUsersStatus(ctx context.Context, userID 
 
 // GetAllSubscribeList Get a list of all subscriptions.
 func (u *userDatabase) GetAllSubscribeList(ctx context.Context, userID string) ([]string, error) {
-
 	//TODO 获取所有订阅
 	return nil, nil
 }
 
-// GetSubscribedList Get all subscribed lists
+// GetSubscribedList Get all subscribed lists.
 func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]string, error) {
-
 	//TODO 获取所有被订阅
 	return nil, nil
 }
 
-// GetUserStatus get user status
+// GetUserStatus get user status.
 func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
 	return onlineStatusList, err
 }
 
-// SetUserStatus Set the user status and save it in redis
+// SetUserStatus Set the user status and save it in redis.
 func (u *userDatabase) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
 	return u.cache.SetUserStatus(ctx, list)
 }

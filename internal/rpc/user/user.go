@@ -17,11 +17,20 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/tools/log"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	pbuser "github.com/OpenIMSDK/protocol/user"
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -31,12 +40,6 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
-	pbuser "github.com/OpenIMSDK/protocol/user"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
 
 	"google.golang.org/grpc"
 
@@ -254,14 +257,14 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 	if err != nil {
 		return nil, err
 	}
-	//var status map[string][]string
-	//TODO 获取用户在线列表，返回订阅的用户的在线列表
+	// var status map[string][]string
+	// TODO 获取用户在线列表，返回订阅的用户的在线列表
 
 	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
 }
 
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
-	//TODO 是否加一个参数校验-判断req.userID的数量，每一个获取加一个限制，一次请求限制500？
+	// TODO 是否加一个参数校验-判断req.userID的数量，每一个获取加一个限制，一次请求限制500？
 	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err

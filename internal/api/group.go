@@ -15,9 +15,10 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/tools/a2r"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 
 	"github.com/gin-gonic/gin"
 )

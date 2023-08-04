@@ -21,8 +21,9 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
 func StartCronTask() error {

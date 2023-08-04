@@ -17,8 +17,9 @@ package group
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	pbGroup "github.com/OpenIMSDK/protocol/group"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 )
 
 func (s *groupServer) GetGroupInfoCache(

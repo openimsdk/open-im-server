@@ -16,9 +16,9 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
-	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbConversation "github.com/OpenIMSDK/protocol/conversation"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
@@ -28,6 +28,8 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
@@ -149,7 +151,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
-	var isSend = true
+	isSend := true
 	isNotification := msgprocessor.IsNotificationByMsg(req.MsgData)
 	if !isNotification {
 		isSend, err = m.modifyMessageByUserMessageReceiveOpt(

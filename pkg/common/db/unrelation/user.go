@@ -16,15 +16,17 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	"log"
+
 	"github.com/OpenIMSDK/tools/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
-//  prefixes and suffixes.
+// prefixes and suffixes.
 const (
 	SubscriptionPrefix = "subscription_prefix"
 	SubscribedPrefix   = "subscribed_prefix"

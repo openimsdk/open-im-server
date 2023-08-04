@@ -17,9 +17,10 @@ package notification
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type ConversationNotificationSender struct {
@@ -32,7 +33,8 @@ func NewConversationNotificationSender(msgRpcClient *rpcclient.MessageRpcClient)
 
 // SetPrivate调用.
 func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx context.Context, sendID, recvID string,
-	isPrivateChat bool, conversationID string) error {
+	isPrivateChat bool, conversationID string,
+) error {
 	tips := &sdkws.ConversationSetPrivateTips{
 		RecvID:         recvID,
 		SendID:         sendID,
