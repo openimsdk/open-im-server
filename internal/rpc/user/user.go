@@ -251,11 +251,9 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
 	if req.Genre == constant.SubscriberUser {
-		log.ZDebug(ctx, "========== SubscribeOrCancelUsersStatus_pre ======= ", err)
 		err = s.UserDatabase.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
 		var status []*pbuser.OnlineStatus
 		status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
-		log.ZDebug(ctx, "========== SubscribeOrCancelUsersStatus =======", err)
 		if err != nil {
 			return nil, err
 		}
