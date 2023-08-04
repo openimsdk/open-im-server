@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Copyright © 2023 OpenIM. All rights reserved.
 #
