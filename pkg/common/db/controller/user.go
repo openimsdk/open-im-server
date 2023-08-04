@@ -17,7 +17,6 @@ package controller
 import (
 	"context"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/user"
 	"time"
 
@@ -51,8 +50,10 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	//SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
-	SubscribeOrCancelUsersStatus(ctx context.Context, userID string, userIDs []string, genre int32) error
+	//SubscribeUsersStatus Subscribe a user's presence status
+	SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
+	// UnsubscribeUsersStatus unsubscribe a user's presence status
+	UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
 	// GetAllSubscribeList Get a list of all subscriptions
 	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
 	// GetSubscribedList Get all subscribed lists
@@ -176,29 +177,34 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-//SubscribeOrCancelUsersStatus Subscribe or unsubscribe a user's presence status
-func (u *userDatabase) SubscribeOrCancelUsersStatus(ctx context.Context, userID string, userIDs []string, genre int32) error {
-	var err error
-	if genre == constant.SubscriberUser {
-		err = u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
-	} else if genre == constant.Unsubscribe {
-		err = u.mongoDB.UnsubscriptionList(ctx, userID, userIDs)
-	}
+// SubscribeUsersStatus Subscribe or unsubscribe a user's presence status
+func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
+	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
+	return err
+}
+
+// UnsubscribeUsersStatus unsubscribe a user's presence status
+func (u *userDatabase) UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
+	err := u.mongoDB.UnsubscriptionList(ctx, userID, userIDs)
 	return err
 }
 
 // GetAllSubscribeList Get a list of all subscriptions.
 func (u *userDatabase) GetAllSubscribeList(ctx context.Context, userID string) ([]string, error) {
-
-	//TODO 获取所有订阅
-	return nil, nil
+	list, err := u.mongoDB.GetAllSubscribeList(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 // GetSubscribedList Get all subscribed lists
 func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]string, error) {
-
-	//TODO 获取所有被订阅
-	return nil, nil
+	list, err := u.mongoDB.GetSubscribedList(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 // GetUserStatus get user status
