@@ -68,6 +68,11 @@ multiarch:
 install:
 	@$(MAKE) go.install
 
+## check: Check OpenIM deployment ✨
+.PHONY: check
+check:
+	@$(MAKE) go.check
+
 ## tidy: tidy go.mod ✨
 .PHONY: tidy
 tidy:
@@ -175,6 +180,11 @@ verify-copyright:
 .PHONY: add-copyright
 add-copyright:
 	@$(MAKE) copyright.add
+
+## advertise: Project introduction, become a contributor ✨
+.PHONY: advertise
+advertise:
+	@$(MAKE) copyright.advertise
 
 ## release: release the project ✨
 .PHONY: release

@@ -17,13 +17,14 @@ package group
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	pbConversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
@@ -718,11 +719,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
-	if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
-		return nil, err
-	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+			return nil, err
+		}
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
@@ -1039,7 +1040,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationTb.GroupRequestModel) string {
 		return e.GroupID
 	}))
-	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
+	groups, err := s.GroupDatabase.FindNotDismissedGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
