@@ -50,7 +50,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	// Check the number of lists in the key.
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"user_id", SubscriptionPrefix + userID}}}},
-		{{"$project", bson.D{{"count", bson.D{{"$size", "user_id_list"}}}}}},
+		{{"$project", bson.D{{"count", bson.D{{"$size", "$user_id_list"}}}}}},
 	}
 	// perform aggregate operations
 	cursor, err := u.userCollection.Aggregate(ctx, pipeline)
