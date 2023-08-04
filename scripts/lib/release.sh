@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -455,7 +455,7 @@ EOF
   mkdir -p "${release_stage}/release"
   cp -R "${OPENIM_ROOT}/scripts/release" "${release_stage}/"
   cat <<EOF > "${release_stage}/release/get-openim-binaries.sh"
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
 # Use of this source code is governed by a MIT style
