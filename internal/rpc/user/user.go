@@ -257,11 +257,7 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 		if err != nil {
 			return nil, err
 		}
-		var statusMap map[string]int32
-		for _, value := range status {
-			statusMap[value.UserID] = value.Status
-		}
-		return &pbuser.SubscribeOrCancelUsersStatusResp{Status: statusMap}, nil
+		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
 	} else if req.Genre == constant.Unsubscribe {
 		err = s.UserDatabase.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
 		if err != nil {

@@ -141,15 +141,18 @@ func (u *UserMongoDriver) UnsubscriptionList(ctx context.Context, userID string,
 
 // RemoveSubscribedListFromUser Among the unsubscribed users, delete the user from the subscribed list.
 func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, userID string, userIDList []string) error {
+	var err error
 	var newUserIDList []string
 	for _, value := range userIDList {
 		newUserIDList = append(newUserIDList, SubscribedPrefix+value)
 	}
-	_, err := u.userCollection.UpdateOne(
-		ctx,
-		bson.M{"user_id": bson.M{"$in": newUserIDList}},
-		bson.M{"$pull": bson.M{"user_id_list": userID}},
-	)
+	for _, userIDTemp := range newUserIDList {
+		_, err = u.userCollection.UpdateOne(
+			ctx,
+			bson.M{"user_id": userIDTemp},
+			bson.M{"$pull": bson.M{"user_id_list": userID}},
+		)
+	}
 	return utils.Wrap(err, "")
 }
 
