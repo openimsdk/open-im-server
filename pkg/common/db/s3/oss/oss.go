@@ -45,6 +45,11 @@ const (
 	imageWebp = "webp"
 )
 
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
+)
+
 func NewOSS() (s3.Interface, error) {
 	conf := config.Config.Object.Oss
 	if conf.BucketURL == "" {
@@ -271,7 +276,7 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	var opts []oss.Option
 	if opt != nil {
 		if opt.Image != nil {
-			// https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
+			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
 			var format string
 			switch opt.Image.Format {
 			case
@@ -281,29 +286,54 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				imageGif,
 				imageWebp:
 				format = opt.Image.Format
-				opt.ContentType = "image/" + format
-				if opt.Filename == "" {
-					opt.Filename = filepath.Base(name) + "." + format
-				}
+			default:
+				opt.Image.Format = imageJpg
 			}
-			var wh []string
-			if opt.Image.Width > 0 {
-				wh = append(wh, "w_"+strconv.Itoa(opt.Image.Width))
+			opt.ContentType = "image/" + format
+			if opt.Filename == "" {
+				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
+				opt.Filename += "." + opt.Video.ImageFormat
 			}
-			if opt.Image.Height > 0 {
-				wh = append(wh, "h_"+strconv.Itoa(opt.Image.Height))
+			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
+			process := "image/resize,m_lfit"
+			if opt.Video.Width > 0 {
+				process += ",w_" + strconv.Itoa(opt.Image.Width)
 			}
-			if len(format)+len(wh) > 0 {
-				style := make([]string, 0, 3)
-				style = append(style, "image")
-				if len(wh) > 0 {
-					style = append(style, "resize,m_lfit,"+strings.Join(wh, ","))
-				}
-				if format != "" {
-					style = append(style, "format,"+format)
-				}
-				opts = append(opts, oss.Process(strings.Join(style, "/")))
+			if opt.Video.Height > 0 {
+				process += ",h_" + strconv.Itoa(opt.Image.Height)
 			}
+			process += ",format," + format
+			opts = append(opts, oss.Process(process))
+		}
+		if opt.Video != nil {
+			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/video-snapshots?spm=a2c4g.11186623.0.0.23f743b0BR5WxX
+			// x-oss-process=video/snapshot,t_7000,f_jpg,w_800,h_600,m_fast
+			millisecond := int(opt.Video.Time / time.Millisecond)
+			if millisecond < 0 {
+				millisecond = 0
+			}
+			switch opt.Video.ImageFormat {
+			case videoSnapshotImageJpg, videoSnapshotImagePng:
+			default:
+				opt.Video.ImageFormat = videoSnapshotImageJpg
+			}
+			opt.ContentType = "image/" + opt.Video.ImageFormat
+			if opt.Filename == "" {
+				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
+				opt.Filename += "." + opt.Video.ImageFormat
+			}
+			process := "video/snapshot,t_" + strconv.Itoa(millisecond) + ",f_" + opt.Video.ImageFormat
+			if opt.Video.Width > 0 {
+				process += ",w_" + strconv.Itoa(opt.Video.Width)
+			}
+			if opt.Video.Height > 0 {
+				process += ",h_" + strconv.Itoa(opt.Video.Height)
+			}
+			process += ",m_fast"
+			fmt.Println(process)
+			opts = append(opts, oss.Process(process))
 		}
 		if opt.ContentType != "" {
 			opts = append(opts, oss.ResponseContentType(opt.ContentType))
