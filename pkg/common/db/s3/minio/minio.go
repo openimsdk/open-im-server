@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/signer"
@@ -56,9 +57,17 @@ func NewMinio() (s3.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
+	imageApi := conf.ThumbnailApi
+	if imageApi != "" {
+		if imageApi[len(imageApi)-1] != '/' {
+			imageApi += "/"
+		}
+		imageApi += "image?"
+	}
 	m := &Minio{
 		bucket:    conf.Bucket,
 		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
+		imageApi:  imageApi,
 		opts:      opts,
 		core:      &minio.Core{Client: client},
 		lock:      &sync.Mutex{},
@@ -75,6 +84,7 @@ func NewMinio() (s3.Interface, error) {
 type Minio struct {
 	bucket    string
 	bucketURL string
+	imageApi  string
 	opts      *minio.Options
 	core      *minio.Core
 	lock      sync.Locker
@@ -324,5 +334,20 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	if err != nil {
 		return "", err
 	}
-	return u.String(), nil
+	if opt.Image == nil && opt.Video == nil {
+		return u.String(), nil
+	}
+	if m.imageApi == "" {
+		return "", errs.ErrInternalServer.Wrap("minio: thumbnail not configured")
+	}
+	query := make(url.Values)
+	query.Set("url", u.String())
+	if opt.Image != nil {
+		query.Set("type", "image")
+	}
+	if opt.Video != nil {
+		query.Set("type", "video")
+		query.Set("time", strconv.Itoa(int(opt.Video.Time/time.Millisecond)))
+	}
+	return m.imageApi + query.Encode(), nil
 }
