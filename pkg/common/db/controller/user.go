@@ -18,6 +18,7 @@ import (
 	"context"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
@@ -180,6 +181,7 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 // SubscribeUsersStatus Subscribe or unsubscribe a user's presence status
 func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
 	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
+	log.ZDebug(ctx, "----mongo---controller-----")
 	return err
 }
 
@@ -210,6 +212,7 @@ func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]
 // GetUserStatus get user status
 func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
+	log.ZDebug(ctx, "========redis status========")
 	return onlineStatusList, err
 }
 
