@@ -180,6 +180,7 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 
 // SubscribeUsersStatus Subscribe or unsubscribe a user's presence status
 func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
+	log.ZDebug(ctx, "----mongo---controller-----pre", "userid", userID, "userids", userIDs)
 	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
 	log.ZDebug(ctx, "----mongo---controller-----")
 	return err
@@ -211,6 +212,7 @@ func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]
 
 // GetUserStatus get user status
 func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
+	log.ZDebug(ctx, "========redis status========pre", "userids", userIDs)
 	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
 	log.ZDebug(ctx, "========redis status========")
 	return onlineStatusList, err
