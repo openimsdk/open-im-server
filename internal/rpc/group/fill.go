@@ -18,7 +18,7 @@ import (
 	"context"
 
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func (s *groupServer) FindGroupMember(

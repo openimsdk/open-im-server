@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	sdk "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	sdk "github.com/OpenIMSDK/protocol/sdkws"
 )
 
 func BlackDB2Pb(

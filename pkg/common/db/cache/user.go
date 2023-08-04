@@ -16,6 +16,11 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
+	"hash/crc32"
+	"strconv"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -25,9 +30,12 @@ import (
 )
 
 const (
-	userExpireTime          = time.Second * 60 * 60 * 12
-	userInfoKey             = "USER_INFO:"
-	userGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	userExpireTime            = time.Second * 60 * 60 * 12
+	userInfoKey               = "USER_INFO:"
+	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	olineStatusKey            = "ONLINE_STATUS:"
+	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
+	statusMod                 = 501
 )
 
 type UserCache interface {
@@ -38,10 +46,13 @@ type UserCache interface {
 	DelUsersInfo(userIDs ...string) UserCache
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache
+	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
+	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
 }
 
 type UserCacheRedis struct {
 	metaCache
+	rdb        redis.UniversalClient
 	userDB     relationTb.UserModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
@@ -54,6 +65,7 @@ func NewUserCacheRedis(
 ) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
 	return &UserCacheRedis{
+		rdb:        rdb,
 		metaCache:  NewMetaCacheRedis(rcClient),
 		userDB:     userDB,
 		expireTime: userExpireTime,
@@ -63,6 +75,7 @@ func NewUserCacheRedis(
 
 func (u *UserCacheRedis) NewCache() UserCache {
 	return &UserCacheRedis{
+		rdb:        u.rdb,
 		metaCache:  NewMetaCacheRedis(u.rcClient, u.metaCache.GetPreDelKeys()...),
 		userDB:     u.userDB,
 		expireTime: u.expireTime,
@@ -144,4 +157,66 @@ func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache {
 	cache := u.NewCache()
 	cache.AddKeys(keys...)
 	return cache
+}
+
+func (u *UserCacheRedis) getOnlineStatusKey(userID string) string {
+	return olineStatusKey + userID
+}
+
+// GetUserStatus get user status
+func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
+	var res []*user.OnlineStatus
+	for _, userID := range userIDs {
+		UserIDNum := crc32.ChecksumIEEE([]byte(userID))
+		var modKey = strconv.Itoa(int(UserIDNum % statusMod))
+		var onlineStatus user.OnlineStatus
+		key := olineStatusKey + modKey
+		result, err := u.rdb.HGet(ctx, key, userID).Result()
+		if err != nil {
+			if err == redis.Nil {
+				// key or field does not exist
+				res = append(res, &user.OnlineStatus{
+					UserID:     userID,
+					Status:     0,
+					PlatformID: -1,
+				})
+				continue
+			} else {
+				return nil, errs.Wrap(err)
+			}
+		}
+		err = json.Unmarshal([]byte(result), &onlineStatus)
+		if err != nil {
+			return nil, errs.Wrap(err)
+		}
+		onlineStatus.UserID = userID
+		res = append(res, &onlineStatus)
+	}
+	return res, nil
+}
+
+// SetUserStatus Set the user status and save it in redis
+func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
+	for _, status := range list {
+		var isNewKey int64
+		UserIDNum := crc32.ChecksumIEEE([]byte(status.UserID))
+		var modKey = strconv.Itoa(int(UserIDNum % statusMod))
+		key := olineStatusKey + modKey
+		jsonData, err := json.Marshal(status)
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		isNewKey, err = u.rdb.Exists(ctx, key).Result()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		if isNewKey > 0 {
+			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
+		}
+	}
+	return nil
 }

@@ -16,14 +16,15 @@ package controller
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type ConversationDatabase interface {
@@ -236,7 +237,7 @@ func (c *conversationDatabase) FindRecvMsgNotNotifyUserIDs(ctx context.Context, 
 
 func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, groupID string, userIDs []string) error {
 	cache := c.cache.NewCache()
-	conversationID := utils.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
+	conversationID := msgprocessor.GetConversationIDBySessionType(constant.SuperGroupChatType, groupID)
 	if err := c.tx.Transaction(func(tx any) error {
 		existConversationUserIDs, err := c.conversationDB.FindUserID(ctx, userIDs, []string{conversationID})
 		if err != nil {

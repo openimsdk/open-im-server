@@ -16,6 +16,14 @@ package api
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/tokenverify"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -25,11 +33,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mw"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/discoveryregistry"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
 )
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
@@ -59,7 +67,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		r.Use(prome.PrometheusMiddleware)
 		r.GET("/metrics", prome.PrometheusHandler())
 	}
-	ParseToken := mw.GinParseToken(rdb)
+	ParseToken := GinParseToken(rdb)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/user_register", u.UserRegister)
@@ -71,6 +79,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
 		userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
 		userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
+		userRouterGroup.POST("/subscribe_users_status", ParseToken, u.UnSubscriberStatus)
+		userRouterGroup.POST("/unsubscribe_users_status", ParseToken, u.UnSubscriberStatus)
+		userRouterGroup.POST("/get_users_status", ParseToken, u.GetUserStatus)
+
 	}
 	// friend routing group
 	friendRouterGroup := r.Group("/friend", ParseToken)
@@ -78,8 +90,10 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		f := NewFriendApi(*friendRpc)
 		friendRouterGroup.POST("/delete_friend", f.DeleteFriend)
 		friendRouterGroup.POST("/get_friend_apply_list", f.GetFriendApplyList)
+		friendRouterGroup.POST("/get_designated_friend_apply", f.GetDesignatedFriendsApply)
 		friendRouterGroup.POST("/get_self_friend_apply_list", f.GetSelfApplyList)
 		friendRouterGroup.POST("/get_friend_list", f.GetFriendList)
+		friendRouterGroup.POST("/get_designated_friends", f.GetDesignatedFriends)
 		friendRouterGroup.POST("/add_friend", f.ApplyToAddFriend)
 		friendRouterGroup.POST("/add_friend_response", f.RespondFriendApply)
 		friendRouterGroup.POST("/set_friend_remark", f.SetFriendRemark)
@@ -88,6 +102,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		friendRouterGroup.POST("/remove_black", f.RemoveBlack)
 		friendRouterGroup.POST("/import_friend", f.ImportFriends)
 		friendRouterGroup.POST("/is_friend", f.IsFriend)
+		friendRouterGroup.POST("/get_friend_id", f.GetFriendIDs)
 	}
 	g := NewGroupApi(*groupRpc)
 	groupRouterGroup := r.Group("/group", ParseToken)
@@ -100,6 +115,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		groupRouterGroup.POST("/transfer_group", g.TransferGroupOwner)
 		groupRouterGroup.POST("/get_recv_group_applicationList", g.GetRecvGroupApplicationList)
 		groupRouterGroup.POST("/get_user_req_group_applicationList", g.GetUserReqGroupApplicationList)
+		groupRouterGroup.POST("/get_group_users_req_application_list", g.GetGroupUsersReqApplicationList)
 		groupRouterGroup.POST("/get_groups_info", g.GetGroupsInfo)
 		groupRouterGroup.POST("/kick_group", g.KickGroupMember)
 		groupRouterGroup.POST("/get_group_members_info", g.GetGroupMembersInfo)
@@ -114,6 +130,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		groupRouterGroup.POST("/set_group_member_info", g.SetGroupMemberInfo)
 		groupRouterGroup.POST("/get_group_abstract_info", g.GetGroupAbstractInfo)
 		groupRouterGroup.POST("/get_groups", g.GetGroups)
+		groupRouterGroup.POST("/get_group_member_user_id", g.GetGroupMemberUserIDs)
 	}
 	superGroupRouterGroup := r.Group("/super_group", ParseToken)
 	{
@@ -151,6 +168,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		msgGroup.POST("/newest_seq", m.GetSeq)
 		msgGroup.POST("/search_msg", m.SearchMsg)
 		msgGroup.POST("/send_msg", m.SendMessage)
+		msgGroup.POST("/send_business_notification", m.SendBusinessNotification)
 		msgGroup.POST("/pull_msg_by_seq", m.PullMsgBySeqs)
 		msgGroup.POST("/revoke_msg", m.RevokeMsg)
 		msgGroup.POST("/mark_msgs_as_read", m.MarkMsgsAsRead)
@@ -185,4 +203,66 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		statisticsGroup.POST("/group/active", m.GetActiveGroup)
 	}
 	return r
+}
+
+func GinParseToken(rdb redis.UniversalClient) gin.HandlerFunc {
+	dataBase := controller.NewAuthDatabase(
+		cache.NewMsgCacheModel(rdb),
+		config.Config.Secret,
+		config.Config.TokenPolicy.Expire,
+	)
+	return func(c *gin.Context) {
+		switch c.Request.Method {
+		case http.MethodPost:
+			token := c.Request.Header.Get(constant.Token)
+			if token == "" {
+				log.ZWarn(c, "header get token error", errs.ErrArgs.Wrap("header must have token"))
+				apiresp.GinError(c, errs.ErrArgs.Wrap("header must have token"))
+				c.Abort()
+				return
+			}
+			claims, err := tokenverify.GetClaimFromToken(token, authverify.Secret())
+			if err != nil {
+				log.ZWarn(c, "jwt get token error", errs.ErrTokenUnknown.Wrap())
+				apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+				c.Abort()
+				return
+			}
+			m, err := dataBase.GetTokensWithoutError(c, claims.UserID, claims.PlatformID)
+			if err != nil {
+				log.ZWarn(c, "cache get token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if len(m) == 0 {
+				log.ZWarn(c, "cache do not exist token error", errs.ErrTokenNotExist.Wrap())
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			if v, ok := m[token]; ok {
+				switch v {
+				case constant.NormalToken:
+				case constant.KickedToken:
+					log.ZWarn(c, "cache kicked token error", errs.ErrTokenKicked.Wrap())
+					apiresp.GinError(c, errs.ErrTokenKicked.Wrap())
+					c.Abort()
+					return
+				default:
+					log.ZWarn(c, "cache unknown token error", errs.ErrTokenUnknown.Wrap())
+					apiresp.GinError(c, errs.ErrTokenUnknown.Wrap())
+					c.Abort()
+					return
+				}
+			} else {
+				apiresp.GinError(c, errs.ErrTokenNotExist.Wrap())
+				c.Abort()
+				return
+			}
+			c.Set(constant.OpUserPlatform, constant.PlatformIDToName(claims.PlatformID))
+			c.Set(constant.OpUserID, claims.UserID)
+			c.Next()
+		}
+	}
 }

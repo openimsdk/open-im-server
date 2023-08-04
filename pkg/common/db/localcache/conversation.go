@@ -18,8 +18,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/conversation"
 )
 
 type ConversationLocalCache struct {

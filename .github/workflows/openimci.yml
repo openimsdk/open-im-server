@@ -90,10 +90,18 @@ jobs:
           echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+
       - name: Build source code for host platform
         run: |
           sudo make build
           echo "Build source code for host platform successfully" 
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: OpenIM verify copyright
         run: |
@@ -118,6 +126,14 @@ jobs:
         #   commit_user_name: kubbot # defaults to "github-actions[bot]"
         #   commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
         #   commit_author: Kubbot # defaults to author of the commit that triggered the run
+        continue-on-error: true
+
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(fmt): robot automated format and lint Change"
+          commit_options: '--no-verify --signoff'
+          branch: main
         continue-on-error: true
 
       - name: Set Current Directory

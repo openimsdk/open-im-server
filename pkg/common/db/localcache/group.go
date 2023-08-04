@@ -18,9 +18,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/group"
+	"github.com/OpenIMSDK/tools/errs"
 )
 
 type GroupLocalCache struct {

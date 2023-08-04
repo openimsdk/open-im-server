@@ -15,13 +15,14 @@
 package config
 
 import (
-	_ "embed"
+	"bytes"
+	"github.com/OpenIMSDK/tools/discoveryregistry"
+	"gopkg.in/yaml.v3"
 )
 
-//go:embed version
-var Version string
+var Config configStruct
 
-var Config config
+const ConfKey = "conf"
 
 type CallBackConfig struct {
 	Enable                 bool  `yaml:"enable"`
@@ -43,7 +44,7 @@ type POfflinePush struct {
 	Ext    string `yaml:"ext"`
 }
 
-type config struct {
+type configStruct struct {
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
 		ZkAddr   []string `yaml:"address"`
@@ -162,7 +163,7 @@ type config struct {
 
 	Log struct {
 		StorageLocation     string `yaml:"storageLocation"`
-		RotationTime        int    `yaml:"rotationTime"`
+		RotationTime        uint   `yaml:"rotationTime"`
 		RemainRotationCount uint   `yaml:"remainRotationCount"`
 		RemainLogLevel      int    `yaml:"remainLogLevel"`
 		IsStdout            bool   `yaml:"isStdout"`
@@ -297,16 +298,36 @@ type notification struct {
 	ConversationSetPrivate NotificationConf `yaml:"conversationSetPrivate"`
 }
 
-func GetServiceNames() []string {
+func (c *configStruct) GetServiceNames() []string {
 	return []string{
-		Config.RpcRegisterName.OpenImUserName,
-		Config.RpcRegisterName.OpenImFriendName,
-		Config.RpcRegisterName.OpenImMsgName,
-		Config.RpcRegisterName.OpenImPushName,
-		Config.RpcRegisterName.OpenImMessageGatewayName,
-		Config.RpcRegisterName.OpenImGroupName,
-		Config.RpcRegisterName.OpenImAuthName,
-		Config.RpcRegisterName.OpenImConversationName,
-		Config.RpcRegisterName.OpenImThirdName,
+		c.RpcRegisterName.OpenImUserName,
+		c.RpcRegisterName.OpenImFriendName,
+		c.RpcRegisterName.OpenImMsgName,
+		c.RpcRegisterName.OpenImPushName,
+		c.RpcRegisterName.OpenImMessageGatewayName,
+		c.RpcRegisterName.OpenImGroupName,
+		c.RpcRegisterName.OpenImAuthName,
+		c.RpcRegisterName.OpenImConversationName,
+		c.RpcRegisterName.OpenImThirdName,
 	}
+}
+
+func (c *configStruct) RegisterConf2Registry(registry discoveryregistry.SvcDiscoveryRegistry) error {
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return registry.RegisterConf2Registry(ConfKey, data)
+}
+
+func (c *configStruct) GetConfFromRegistry(registry discoveryregistry.SvcDiscoveryRegistry) ([]byte, error) {
+	return registry.GetConfFromRegistry(ConfKey)
+}
+
+func (c *configStruct) EncodeConfig() []byte {
+	buf := bytes.NewBuffer(nil)
+	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
 }

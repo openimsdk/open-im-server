@@ -16,6 +16,7 @@ package fcm
 
 import (
 	"context"
+	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"path/filepath"
 
 	firebase "firebase.google.com/go"
@@ -25,8 +26,8 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/protocol/constant"
 )
 
 const SinglePushCountLimit = 400
@@ -39,7 +40,7 @@ type Fcm struct {
 }
 
 func NewClient(cache cache.MsgModel) *Fcm {
-	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
+	opt := option.WithCredentialsFile(filepath.Join(config2.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil

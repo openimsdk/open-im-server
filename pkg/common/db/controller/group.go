@@ -24,14 +24,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type GroupDatabase interface {
@@ -39,6 +39,7 @@ type GroupDatabase interface {
 	CreateGroup(ctx context.Context, groups []*relationTb.GroupModel, groupMembers []*relationTb.GroupMemberModel) error
 	TakeGroup(ctx context.Context, groupID string) (group *relationTb.GroupModel, err error)
 	FindGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
+	FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error)
 	SearchGroup(
 		ctx context.Context,
 		keyword string,
@@ -110,6 +111,7 @@ type GroupDatabase interface {
 	// GroupRequest
 	CreateGroupRequest(ctx context.Context, requests []*relationTb.GroupRequestModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relationTb.GroupRequestModel, error)
+	FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationTb.GroupRequestModel, error)
 	PageGroupRequestUser(
 		ctx context.Context,
 		userID string,
@@ -575,4 +577,12 @@ func (g *groupDatabase) CountTotal(ctx context.Context, before *time.Time) (coun
 
 func (g *groupDatabase) CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error) {
 	return g.groupDB.CountRangeEverydayTotal(ctx, start, end)
+}
+
+func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (int64, []*relationTb.GroupRequestModel, error) {
+	return g.groupRequestDB.FindGroupRequests(ctx, groupID, userIDs)
+}
+
+func (g *groupDatabase) FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationTb.GroupModel, err error) {
+	return g.groupDB.FindNotDismissedGroup(ctx, groupIDs)
 }

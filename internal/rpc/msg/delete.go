@@ -16,14 +16,14 @@ package msg
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/conversation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/conversation"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 func (m *msgServer) getMinSeqs(maxSeqs map[string]int64) map[string]int64 {
@@ -45,7 +45,7 @@ func (m *msgServer) ClearConversationsMsg(
 	ctx context.Context,
 	req *msg.ClearConversationsMsgReq,
 ) (*msg.ClearConversationsMsgResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	if err := m.clearConversation(ctx, req.ConversationIDs, req.UserID, req.DeleteSyncOpt); err != nil {
@@ -58,7 +58,7 @@ func (m *msgServer) UserClearAllMsg(
 	ctx context.Context,
 	req *msg.UserClearAllMsgReq,
 ) (*msg.UserClearAllMsgResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
@@ -73,7 +73,7 @@ func (m *msgServer) UserClearAllMsg(
 }
 
 func (m *msgServer) DeleteMsgs(ctx context.Context, req *msg.DeleteMsgsReq) (*msg.DeleteMsgsResp, error) {
-	if err := tokenverify.CheckAccessV3(ctx, req.UserID); err != nil {
+	if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	isSyncSelf, isSyncOther := m.validateDeleteSyncOpt(req.DeleteSyncOpt)
@@ -121,7 +121,7 @@ func (m *msgServer) DeleteMsgPhysical(
 	ctx context.Context,
 	req *msg.DeleteMsgPhysicalReq,
 ) (*msg.DeleteMsgPhysicalResp, error) {
-	if err := tokenverify.CheckAdmin(ctx); err != nil {
+	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	remainTime := utils.GetCurrentTimestampBySecond() - req.Timestamp

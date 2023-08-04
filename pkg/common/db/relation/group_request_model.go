@@ -17,12 +17,12 @@ package relation
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/ormutil"
+	"github.com/OpenIMSDK/tools/ormutil"
 
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type GroupRequestGorm struct {
@@ -109,4 +109,9 @@ func (g *GroupRequestGorm) PageGroup(
 		pageNumber,
 		showNumber,
 	)
+}
+
+func (g *GroupRequestGorm) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (total int64, groupRequests []*relation.GroupRequestModel, err error) {
+	err = g.DB.WithContext(ctx).Where("group_id = ? and user_id in ?", groupID, userIDs).Find(&groupRequests).Error
+	return int64(len(groupRequests)), groupRequests, utils.Wrap(err, utils.GetSelfFuncName())
 }

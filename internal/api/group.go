@@ -15,9 +15,9 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/group"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/group"
+	"github.com/OpenIMSDK/tools/a2r"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +58,10 @@ func (o *GroupApi) GetRecvGroupApplicationList(c *gin.Context) {
 
 func (o *GroupApi) GetUserReqGroupApplicationList(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetUserReqApplicationList, o.Client, c)
+}
+
+func (o *GroupApi) GetGroupUsersReqApplicationList(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupUsersReqApplicationList, o.Client, c)
 }
 
 func (o *GroupApi) GetGroupsInfo(c *gin.Context) {
@@ -134,4 +138,8 @@ func (o *GroupApi) GroupCreateCount(c *gin.Context) {
 
 func (o *GroupApi) GetGroups(c *gin.Context) {
 	a2r.Call(group.GroupClient.GetGroups, o.Client, c)
+}
+
+func (o *GroupApi) GetGroupMemberUserIDs(c *gin.Context) {
+	a2r.Call(group.GroupClient.GetGroupMemberUserIDs, o.Client, c)
 }

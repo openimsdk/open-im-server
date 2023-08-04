@@ -1,3 +1,17 @@
+# Copyright © 2023 OpenIM open source community. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 name: "OpenIM CLA Assistant"
 on:
   issue_comment:
@@ -41,8 +55,8 @@ jobs:
           remote-repository-name: ${{ env.REMOTE_REPOSITORY }}
 
           create-file-commit-message: '📚 Docs: Creating file for storing ${{ github.event.repository.name }} CLA Signatures'
-          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our [🎯https://github.com/openim-sigs/cla/blob/main/README.md](https://github.com/openim-sigs/cla/blob/main/README.md) <br> '
+          custom-notsigned-prcomment: '💕 Thank you for your contribution and please kindly read and sign our [🎯https://github.com/openim-sigs/cla/blob/main/README.md](https://github.com/openim-sigs/cla/blob/main/README.md). <br> If you wish to sign the CRA, **Please copy and comment on the following sentence:**'
           custom-pr-sign-comment: 'I have read the CLA Document and I hereby sign the CLA'
-          custom-allsigned-prcomment: '🤖 All Contributors have signed the [${{ github.event.repository.name }} CLA](https://github.com/openim-sigs/cla/blob/main/README.md).<br> The signed information is recorded [🤖here](https://github.com/openim-sigs/cla/tree/main/signatures/${{ env.OPEN_IM_SERVER_ALLOWLIST }}/cla.json)'
+          custom-allsigned-prcomment: '🤖 All Contributors have signed the [${{ github.event.repository.name }} CLA](https://github.com/openim-sigs/cla/blob/main/README.md).<br> The signed information is recorded [🤖here](https://github.com/openim-sigs/cla/tree/main/signatures/${{ github.event.repository.name }}/cla.json)'
         #   lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
         #   use-dco-flag: true - If you are using DCO instead of CLA

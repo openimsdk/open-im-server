@@ -16,21 +16,22 @@ package cache
 
 import (
 	"context"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"strconv"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/gogo/protobuf/jsonpb"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -374,7 +375,7 @@ func (c *msgCache) GetMessagesBySeq(
 			failedSeqs = append(failedSeqs, seqs[i])
 		} else {
 			msg := sdkws.MsgData{}
-			err = utils.String2Pb(cmd.Val(), &msg)
+			err = msgprocessor.String2Pb(cmd.Val(), &msg)
 			if err == nil {
 				if msg.Status != constant.MsgDeleted {
 					seqMsgs = append(seqMsgs, &msg)
@@ -394,7 +395,7 @@ func (c *msgCache) SetMessageToCache(ctx context.Context, conversationID string,
 	var failedMsgs []*sdkws.MsgData
 	for _, msg := range msgs {
 		key := c.getMessageCacheKey(conversationID, msg.Seq)
-		s, err := utils.Pb2String(msg)
+		s, err := msgprocessor.Pb2String(msg)
 		if err != nil {
 			return 0, errs.Wrap(err)
 		}
@@ -535,7 +536,7 @@ func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []in
 			return err
 		}
 		msg.Status = constant.MsgDeleted
-		s, err := utils.Pb2String(&msg)
+		s, err := msgprocessor.Pb2String(&msg)
 		if err != nil {
 			return errs.Wrap(err)
 		}

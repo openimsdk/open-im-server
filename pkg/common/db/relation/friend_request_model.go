@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type FriendRequestGorm struct {
@@ -142,6 +142,17 @@ func (f *FriendRequestGorm) FindFromUserID(
 			Limit(int(showNumber)).
 			Offset(int(pageNumber-1)*int(showNumber)).
 			Find(&friendRequests).
+			Error,
+		"",
+	)
+	return
+}
+
+func (f *FriendRequestGorm) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
+	err = utils.Wrap(
+		f.db(ctx).
+			Where("(from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)", fromUserID, toUserID, toUserID, fromUserID).
+			Find(&friends).
 			Error,
 		"",
 	)

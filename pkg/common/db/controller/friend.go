@@ -20,13 +20,14 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/tx"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/mcontext"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type FriendDatabase interface {
@@ -75,6 +76,7 @@ type FriendDatabase interface {
 		friendUserIDs []string,
 	) (friends []*relation.FriendModel, err error)
 	FindFriendUserIDs(ctx context.Context, ownerUserID string) (friendUserIDs []string, err error)
+	FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error)
 }
 
 type friendDatabase struct {
@@ -221,6 +223,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 	friendRequest *relation.FriendRequestModel,
 ) (err error) {
 	return f.tx.Transaction(func(tx any) error {
+		defer log.ZDebug(ctx, "return line")
 		now := time.Now()
 		fr, err := f.friendRequest.NewTx(tx).Take(ctx, friendRequest.FromUserID, friendRequest.ToUserID)
 		if err != nil {
@@ -246,7 +249,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 			if err != nil {
 				return err
 			}
-		} else if errs.Unwrap(err) != gorm.ErrRecordNotFound {
+		} else if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
 
@@ -362,4 +365,8 @@ func (f *friendDatabase) FindFriendUserIDs(
 	ownerUserID string,
 ) (friendUserIDs []string, err error) {
 	return f.cache.GetFriendIDs(ctx, ownerUserID)
+}
+
+func (f *friendDatabase) FindBothFriendRequests(ctx context.Context, fromUserID, toUserID string) (friends []*relation.FriendRequestModel, err error) {
+	return f.friendRequest.FindBothFriendRequests(ctx, fromUserID, toUserID)
 }

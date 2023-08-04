@@ -15,22 +15,24 @@
 package api
 
 import (
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/a2r"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/apiresp"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/constant"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tokenverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/errs"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/proto/sdkws"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/utils"
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/a2r"
+	"github.com/OpenIMSDK/tools/apiresp"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/utils"
 )
 
 type MessageApi struct {
@@ -205,7 +207,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "SendMessage", "req", req)
-	if !tokenverify.IsAppManagerUid(c) {
+	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
@@ -234,6 +236,51 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	apiresp.GinSuccess(c, respPb)
 }
 
+func (m *MessageApi) SendBusinessNotification(c *gin.Context) {
+	req := struct {
+		Key        string `json:"key"`
+		Data       string `json:"data"`
+		SendUserID string `json:"sendUserID"`
+		RecvUserID string `json:"recvUserID"`
+	}{}
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	if !authverify.IsAppManagerUid(c) {
+		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
+		return
+	}
+	sendMsgReq := msg.SendMsgReq{
+		MsgData: &sdkws.MsgData{
+			SendID: req.SendUserID,
+			RecvID: req.RecvUserID,
+			Content: []byte(utils.StructToJsonString(&sdkws.NotificationElem{
+				Detail: utils.StructToJsonString(&struct {
+					Key  string `json:"key"`
+					Data string `json:"data"`
+				}{Key: req.Key, Data: req.Data}),
+			})),
+			MsgFrom:     constant.SysMsgType,
+			ContentType: constant.BusinessNotification,
+			SessionType: constant.SingleChatType,
+			CreateTime:  utils.GetCurrentTimestampByMill(),
+			ClientMsgID: utils.GetMsgID(mcontext.GetOpUserID(c)),
+			Options: config.GetOptionsByNotification(config.NotificationConf{
+				IsSendMsg:        false,
+				ReliabilityLevel: 1,
+				UnreadCount:      false,
+			}),
+		},
+	}
+	respPb, err := m.Client.SendMsg(c, &sendMsgReq)
+	if err != nil {
+		apiresp.GinError(c, err)
+		return
+	}
+	apiresp.GinSuccess(c, respPb)
+}
+
 func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 	var (
 		req  apistruct.BatchSendMsgReq
@@ -245,7 +292,7 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 		return
 	}
 	log.ZInfo(c, "BatchSendMsg", "req", req)
-	if err := tokenverify.CheckAdmin(c); err != nil {
+	if err := authverify.CheckAdmin(c); err != nil {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
@@ -262,8 +309,8 @@ func (m *MessageApi) BatchSendMsg(c *gin.Context) {
 				apiresp.GinError(c, err)
 				return
 			}
+			recvIDs = append(recvIDs, recvIDsPart...)
 			if len(recvIDsPart) < showNumber {
-				recvIDs = append(recvIDs, recvIDsPart...)
 				break
 			}
 			pageNumber++

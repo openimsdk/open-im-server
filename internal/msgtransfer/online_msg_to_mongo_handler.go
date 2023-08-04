@@ -23,8 +23,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
-	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/proto/msg"
+	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	"github.com/OpenIMSDK/tools/log"
 )
 
 type OnlineHistoryMongoConsumerHandler struct {

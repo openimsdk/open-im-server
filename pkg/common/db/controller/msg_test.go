@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/log"
+	"github.com/OpenIMSDK/tools/log"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -203,7 +203,7 @@ func Test_Revoke(t *testing.T) {
 }
 
 func Test_FindBySeq(t *testing.T) {
-	if err := log.InitFromConfig("", "", 6, true, false, "", 2); err != nil {
+	if err := log.InitFromConfig("", "", 6, true, false, "", 2, 1); err != nil {
 		t.Fatal(err)
 	}
 	db := GetDB()
