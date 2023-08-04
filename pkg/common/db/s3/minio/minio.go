@@ -19,15 +19,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/signer"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
@@ -68,10 +71,25 @@ func NewMinio() (s3.Interface, error) {
 		bucket:    conf.Bucket,
 		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
 		imageApi:  imageApi,
-		opts:      opts,
 		core:      &minio.Core{Client: client},
 		lock:      &sync.Mutex{},
 		init:      false,
+	}
+	if conf.SignEndpoint == "" {
+		m.sign = m.core.Client
+	} else {
+		su, err := url.Parse(conf.SignEndpoint)
+		if err != nil {
+			return nil, err
+		}
+		m.opts = &minio.Options{
+			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+			Secure: su.Scheme == "https",
+		}
+		m.sign, err = minio.New(su.Host, m.opts)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -85,8 +103,10 @@ type Minio struct {
 	bucket    string
 	bucketURL string
 	imageApi  string
+	location  string
 	opts      *minio.Options
 	core      *minio.Core
+	sign      *minio.Client
 	lock      sync.Locker
 	init      bool
 }
@@ -100,15 +120,34 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
-	exists, err := m.core.Client.BucketExists(ctx, config.Config.Object.Minio.Bucket)
+	conf := config.Config.Object.Minio
+	exists, err := m.core.Client.BucketExists(ctx, conf.Bucket)
 	if err != nil {
 		return fmt.Errorf("check bucket exists error: %w", err)
 	}
 	if !exists {
-		if err := m.core.Client.MakeBucket(ctx, config.Config.Object.Minio.Bucket, minio.MakeBucketOptions{}); err != nil {
+		if err := m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return fmt.Errorf("make bucket error: %w", err)
 		}
 	}
+	m.location, err = m.core.Client.GetBucketLocation(ctx, conf.Bucket)
+	if err != nil {
+		return err
+	}
+	func() {
+		if conf.SignEndpoint == "" {
+			return
+		}
+		defer func() {
+			if r := recover(); r != nil {
+				log.ZWarn(context.Background(), "set sign bucket location cache panic", errors.New("failed to get private field value"), "recover", fmt.Sprintf("%+v", r), "development version", "github.com/minio/minio-go/v7 v7.0.61")
+			}
+		}()
+		filed := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
+		zero := reflect.New(reflect.PtrTo(filed.Type()))
+		*(*unsafe.Pointer)(zero.UnsafePointer()) = unsafe.Pointer(filed.UnsafeAddr())
+		zero.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
+	}()
 	m.init = true
 	return nil
 }
@@ -200,7 +239,7 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 			return nil, err
 		}
 		request.Header.Set("X-Amz-Content-Sha256", unsignedPayload)
-		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, "us-east-1", nil)
+		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			URL:        request.URL.String(),
@@ -215,7 +254,7 @@ func (m *Minio) PresignedPutObject(ctx context.Context, name string, expire time
 	if err := m.initMinio(ctx); err != nil {
 		return "", err
 	}
-	rawURL, err := m.core.Client.PresignedPutObject(ctx, m.bucket, name, expire)
+	rawURL, err := m.sign.PresignedPutObject(ctx, m.bucket, name, expire)
 	if err != nil {
 		return "", err
 	}
@@ -330,7 +369,7 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	u, err := m.core.Client.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
+	u, err := m.sign.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
 	if err != nil {
 		return "", err
 	}
