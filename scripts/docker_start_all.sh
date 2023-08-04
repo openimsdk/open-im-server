@@ -22,11 +22,11 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #fixme Put the shell scripts name here
 need_to_start_server_shell=(
-  start_rpc_service.sh
-  msg_gateway_start.sh
-  push_start.sh
-  msg_transfer_start.sh
-  start_cron.sh
+  ${SCRIPTS_ROOT}/start_rpc_service.sh
+  ${SCRIPTS_ROOT}/msg_gateway_start.sh
+  ${SCRIPTS_ROOT}/push_start.sh
+  ${SCRIPTS_ROOT}/msg_transfer_start.sh
+  ${SCRIPTS_ROOT}/start_cron.sh
 )
 
 #fixme The 10 second delay to start the project is for the docker-compose one-click to start openIM when the infrastructure dependencies are not started
@@ -41,8 +41,7 @@ echo "==========================================================">>$OPENIM_ROOT/
 echo "==========================================================">>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 echo "==========================================================">>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 for i in ${need_to_start_server_shell[*]}; do
-  chmod +x $i
-  ./$i
+  $i
 done
 
 sleep 15

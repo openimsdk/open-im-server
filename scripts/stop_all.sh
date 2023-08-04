@@ -29,7 +29,7 @@ cd "$SCRIPTS_ROOT"
 
 for i in ${service_names[*]}; do
   #Check whether the service exists
-  name="ps -aux |grep -w $i |grep -v grep"
+  name="ps |grep -w $i |grep -v grep"
   count="${name}| wc -l"
   if [ $(eval ${count}) -gt 0 ]; then
     pid="${name}| awk '{print \$2}'"

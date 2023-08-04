@@ -104,9 +104,7 @@ openim::build::get_docker_wrapped_binaries() {
     "openim-rpc-msg,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
     "openim-rpc-third,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
     "openim-rpc-user,${OPENIM_BASE_IMAGE_REGISTRY}/debian-base-${arch}:${debian_base_version}"
-
   )
-
   echo "${targets[@]}"
 }
 

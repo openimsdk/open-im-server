@@ -30,7 +30,6 @@ echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 #service filename
 service_filename=(
@@ -75,7 +74,7 @@ service_prometheus_port_name=(
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do
   #Check whether the service exists
-  service_name="ps -aux |grep -w ${service_filename[$i]} |grep -v grep"
+  service_name="ps |grep -w ${service_filename[$i]} |grep -v grep"
   count="${service_name}| wc -l"
 
   if [ $(eval ${count}) -gt 0 ]; then

@@ -35,7 +35,6 @@ openim::golang::server_targets() {
   local targets=(
     openim-api
     openim-cmdutils
-    openim-cmdutils
     openim-crontask
     openim-msggateway
     openim-msgtransfer

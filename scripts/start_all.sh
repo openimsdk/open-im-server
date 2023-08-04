@@ -27,14 +27,14 @@ source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
+echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
+
 if [ ! -d "${OPENIM_ROOT}/_output/bin/platforms" ]; then
   # exec build_all_service.sh
   "${SCRIPTS_ROOT}/build_all_service.sh"
 fi
-
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$OPENIM_ROOT/_output/bin"
 logs_dir="$OPENIM_ROOT/logs"
