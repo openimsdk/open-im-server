@@ -254,7 +254,7 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 		log.ZDebug(ctx, "SubscribeUsersStatus pre", "userID", req.UserID, "userids", req.UserIDs)
 		err = s.UserDatabase.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
 		var status []*pbuser.OnlineStatus
-		status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+		//status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
 		log.ZDebug(ctx, "SubscribeUsersStatus after", "userID", req.UserID, "userids", req.UserIDs)
 		if err != nil {
 			return nil, err
