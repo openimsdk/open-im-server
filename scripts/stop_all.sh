@@ -23,7 +23,6 @@ source $OPENIM_ROOT/scripts/path_info.sh
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 cd "$SCRIPTS_ROOT"
 
