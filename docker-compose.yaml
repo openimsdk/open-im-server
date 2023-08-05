@@ -100,7 +100,7 @@ services:
 
 
   openim_server:
-    image: ghcr.io/openim-sigs/openim-server:v1.0.0-debug.11 #ghcr.io/openimsdk/openim-server:main
+    image: ghcr.io/openimsdk/openim-server:main
     container_name: openim-server
     volumes:
       - ./logs:/openim/openim-server/logs
@@ -122,7 +122,7 @@ services:
         max-file: "2"
 
   openim-chat:
-    image: ghcr.io/openim-sigs/openim-chat:v1.0.0-debug.11 # ghcr.io/openimsdk/openim-chat:main
+    image: ghcr.io/openimsdk/openim-chat:main
     container_name: openim-chat
     volumes:
       - ./_output/openim/openim-chat/logs:/openim/openim-chat/logs

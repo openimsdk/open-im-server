@@ -38,7 +38,6 @@ fi
 
 bin_dir="$OPENIM_ROOT/_output/bin"
 logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 if [ ! -d "$bin_dir" ]; then
     mkdir -p "$bin_dir"

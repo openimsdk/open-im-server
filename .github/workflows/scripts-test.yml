@@ -40,10 +40,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Download Docker Compose
+      run: |
+        curl -o docker-compose.yaml https://gist.githubusercontent.com/cubxxw/b1d5cbd2edfa23fee911118aa3e8249e/raw/openim-server.sh
+      shell: bash
+
     - name: Start Docker Compose
       run: |
-        sudo docker compose stop
-        sudo sleep 30
         sudo docker compose up -d
         sudo sleep 60
       continue-on-error: true
