@@ -52,7 +52,6 @@ services:
       net.core.somaxconn: 1024
     command: redis-server --requirepass ${PASSWORD} --appendonly yes
 
-
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -63,7 +62,6 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
-
 
   kafka:
     image: wurstmeister/kafka
@@ -97,7 +95,6 @@ services:
       MINIO_ROOT_PASSWORD: ${PASSWORD}
     restart: always
     command: minio server /data --console-address ':9090'
-
 
   openim_server:
     image: ghcr.io/openimsdk/openim-server:main
