@@ -46,7 +46,7 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 |      multiple message      |         Efficient meetings         |
 | :------------------------: | :--------------------------------: |
 |    ![](./docs/images/)     |        ![](./docs/images/)         |
-| One-to-one and group chats | Special features - Custom messages |
+| **One-to-one and group chats** | **Special features - Custom messages** |
 |    ![](./docs/images/)     |        ![](./docs/images/)         |
 
 </div>
@@ -95,7 +95,7 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 
 9. **The ultimate deployment experience 🤖** 
 
-   ✅  Supports cluster deployment
+   ✅  Supports [cluster deployment](https://github.com/OpenIMSDK/Open-IM-Server/edit/main/deployments/README.md)
 
    ✅  Supports multi-architecture mirroring, our Docker images are hosted not only on GitHub but also on Alibaba Cloud and Docker Hub supporting multiple architectures. Visit [our GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) and read our [version management document](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md) for more information.
 
@@ -118,10 +118,9 @@ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && expor
 ```
 
 > **Note**
->
 > Read our release policy: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
 
-2. Modify .env
+2. Modify `.env`
 
 ```bash
 USER=root #no need to modify
@@ -136,7 +135,7 @@ DATA_DIR=./  #designate large disk directory
 > **Note**
 > This command can only be executed once. It will modify the component passwords in docker-compose based on the `PASSWORD` variable in `.env`, and modify the component passwords in `config/config.yaml`. If the password in `.env` changes, you need to first execute `docker-compose down`; `rm components -rf` and then execute this command.
 
-```
+```bash
 make install
 ```
 
