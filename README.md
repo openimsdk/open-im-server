@@ -52,7 +52,9 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 </div>
 
 1. **Comprehensive Message Type Support :speech_balloon:**
-   ✅  Supports almost all types of messages, including text, images, emojis, voice, video, geographical location, files, quotes, business cards, system notifications, custom messages and more
+
+   ✅ Supports almost all types of messages, including text, images, emojis, voice, video, geographical location, files, quotes, business cards, system notifications, custom messages and more
+
    ✅ Supports one-on-one and multi-person audio and video calls
 
    ✅ Provides terminal support for multiple platforms such as iOS, Android, Flutter, uni-app, ReactNative, Electron, Web, H5 
@@ -91,7 +93,7 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 
 8. **Full Platform Support :tv:**
 
-   ✅ Supports native iOS, Android; cross-platform Flutter, uni-app, ReactNative; major web front-end frameworks such as React, Vue; applets; and PC platforms supported by Electron 
+   ✅ Supports native iOS, Android; cross-platform Flutter, uni-app, ReactNative; major web front-end frameworks such as React, Vue; applets; and PC platforms supported by Electron
 
 9. **The ultimate deployment experience 🤖** 
 
@@ -99,10 +101,10 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 
    ✅  Supports multi-architecture mirroring, our Docker images are hosted not only on GitHub but also on Alibaba Cloud and Docker Hub supporting multiple architectures. Visit [our GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) and read our [version management document](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md) for more information.
 
-10. **A large ecosystem of open source communities 🤲**
+11. **A large ecosystem of open source communities 🤲**
 
     ✅  We have tens of thousands of users and many solutions to problems.
-    
+
     ✅  We have a large open source community called [OpenIMSDK](https://github.com/OpenIMSDK) that runs the core modules, we have an open source community called [openim-sigs](https://github.com/openim-sigs) to explore more IM-based infrastructure products.
 
 ## :rocket: Quick Start
