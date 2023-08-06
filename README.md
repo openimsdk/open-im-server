@@ -22,12 +22,14 @@
 
 <p align="center">
     <a href="./README.md"><b> English </b></a> •
-    <a href="./README-zh_CN.md"><b> 中文 </b></a>
+    <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
+    <a href="https://www.openim.online/en"><b> Docs </b></a>
 </p>
+
 
 </p>
 
-## What is Open-IM-Server
+## ✨ About OpenIM
 
 Open-IM-Server is a robust instant messaging server engineered using pure Golang, leveraging JSON over WebSocket for communication. The server treats everything as a message, facilitating straightforward customization without modifying the server code. Its microservice architecture enables deployment using clusters, ensuring high performance and scalability.
 
@@ -37,61 +39,71 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 
 ## :star2: Why OpenIM
 
-1. Comprehensive Message Type Support :speech_balloon:
-   ✅  Supports almost all types of messages, including text, images, emojis, voice, video, geographical location, files, quotes, business cards, system notifications, custom messages and more :mailbox_with_mail:
+**🔍 Function screenshot display**
 
-   ✅ Supports one-on-one and multi-person audio and video calls :telephone_receiver:
+<div align="center">
 
-   ✅ Provides terminal support for multiple platforms such as iOS, Android, Flutter, uni-app, ReactNative, Electron, Web, H5 :iphone:
+|      multiple message      |         Efficient meetings         |
+| :------------------------: | :--------------------------------: |
+|    ![](./docs/images/)     |        ![](./docs/images/)         |
+| One-to-one and group chats | Special features - Custom messages |
+|    ![](./docs/images/)     |        ![](./docs/images/)         |
 
-2. Efficient Meetings Anytime, Anywhere :earth_americas:
+</div>
 
-   ✅ Based on IM (Instant Messaging) with 100% reliable forced signaling capabilities, it paves the way for IM systems, deeply integrated with chat applications :link:
+1. **Comprehensive Message Type Support :speech_balloon:**
+   ✅  Supports almost all types of messages, including text, images, emojis, voice, video, geographical location, files, quotes, business cards, system notifications, custom messages and more
+   ✅ Supports one-on-one and multi-person audio and video calls
 
-   ✅ Supports hundreds of people in a single meeting, with subscription numbers reaching thousands, and server-side audio and video recording :video_camera:
+   ✅ Provides terminal support for multiple platforms such as iOS, Android, Flutter, uni-app, ReactNative, Electron, Web, H5 
 
-3. One-on-one and Group Chats for Various Social Scenarios :busts_in_silhouette:
+2. **Efficient Meetings Anytime, Anywhere :earth_americas:**
 
-   ✅ OpenIM has four roles: application administrator, group owner, group administrator, and regular member :man_teacher:
+   ✅ Based on IM (Instant Messaging) with 100% reliable forced signaling capabilities, it paves the way for IM systems, deeply integrated with chat applications 
 
-   ✅ Powerful group features such as muting, group announcements, group validation, unlimited group members, and loading group messages as needed :loudspeaker:
+   ✅ Supports hundreds of people in a single meeting, with subscription numbers reaching thousands, and server-side audio and video recording 
 
-4. Unique Features :star2:
+3. **One-on-one and Group Chats for Various Social Scenarios :busts_in_silhouette:**
 
-   ✅ Supports read-and-burn private chats, customizable duration :fire:
+   ✅ OpenIM has four roles: application administrator, group owner, group administrator, and regular member 
 
-   ✅ Message editing function broadens social scenarios, making instant communication more diverse and interesting :pencil2:
+   ✅ Powerful group features such as muting, group announcements, group validation, unlimited group members, and loading group messages as needed 
 
-5. Open Source :open_hands:
+4. **Unique Features :star2:**
 
-   ✅ The code of OpenIM is open source, self-controlled data, aimed at building a globally leading IM open source community, including client SDK and server :globe_with_meridians:
+   ✅ Supports read-and-burn private chats, customizable duration
 
-   ✅ Based on open source Server, many excellent open source projects have been developed, such as [OpenKF](https://github.com/OpenIMSDK/OpenKF) (Open source AI customer service system) ✨ 
+   ✅ Message editing function broadens social scenarios, making instant communication more diverse and interesting
 
-6. Easy to Expand :wrench:
+5. **Open Source :open_hands:**
 
-   ✅ The OpenIM server is implemented in Golang, introducing an innovative "everything is a message" communication model, simplifying the implementation of custom messages and extended features :computer:
+   ✅ The code of OpenIM is open source, self-controlled data, aimed at building a globally leading IM open source community, including client SDK and server 
 
-7. High Performance :racing_car:
+   ✅ Based on open source Server, many excellent open source projects have been developed, such as [OpenKF](https://github.com/OpenIMSDK/OpenKF) (Open source AI customer service system) 
 
-   ✅ OpenIM supports a hierarchical governance architecture in the cluster, tested by a large number of users, and abstracts the storage model of online messages, offline messages, and historical messages :rocket:
+6. **Easy to Expand :wrench:**
 
-8. Full Platform Support :tv:
+   ✅ The OpenIM server is implemented in Golang, introducing an innovative "everything is a message" communication model, simplifying the implementation of custom messages and extended features 
 
-   ✅ Supports native iOS, Android; cross-platform Flutter, uni-app, ReactNative; major web front-end frameworks such as React, Vue; applets; and PC platforms supported by Electron :desktop_computer:
+7. **High Performance :racing_car:**
 
-9. The ultimate deployment experience 🤖 
+   ✅ OpenIM supports a hierarchical governance architecture in the cluster, tested by a large number of users, and abstracts the storage model of online messages, offline messages, and historical messages 
+
+8. **Full Platform Support :tv:**
+
+   ✅ Supports native iOS, Android; cross-platform Flutter, uni-app, ReactNative; major web front-end frameworks such as React, Vue; applets; and PC platforms supported by Electron 
+
+9. **The ultimate deployment experience 🤖** 
 
    ✅  Supports cluster deployment
 
-   ✅  Supports multi-architecture mirroring
+   ✅  Supports multi-architecture mirroring, our Docker images are hosted not only on GitHub but also on Alibaba Cloud and Docker Hub supporting multiple architectures. Visit [our GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) and read our [version management document](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md) for more information.
 
-10. A large ecosystem of open source communities 🤲
+10. **A large ecosystem of open source communities 🤲**
 
-
-## :busts_in_silhouette: Community
-
-Explore our [OpenIM Developer Documentation](https://www.openim.online/) for more details.
+    ✅  We have tens of thousands of users and many solutions to problems.
+    
+    ✅  We have a large open source community called [OpenIMSDK](https://github.com/OpenIMSDK) that runs the core modules, we have an open source community called [openim-sigs](https://github.com/openim-sigs) to explore more IM-based infrastructure products.
 
 ## :rocket: Quick Start
 
@@ -302,28 +314,48 @@ Delve into the heart of Open-IM-Server's functionality with our architecture dia
 
 ## :hammer_and_wrench: To start developing OpenIM
 
-The [community repository](https://github.com/OpenIMSDK/community) hosts all the information you need to start contributing to OpenIM.
+OpenIM Our goal is to build a top-level open source community. We have a set of standards, in the [Community repository](https://github.com/OpenIMSDK/community).
 
-## :heart: Contributing
+If you'd like to contribute to this Open-IM-Server repository, please read our [contributor documentation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md).
 
-We welcome all contributions to the project! For more details, please see [CONTRIBUTING.md](./CONTRIBUTING.md).
+Before you start, please make sure your changes are in demand. The best for that is to create a [new discussion](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) OR [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg), or if you find an issue, [report it](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose) first.
+
+- [Code Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/go_code.md)
+- [Docker Images Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
+- [Directory Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/directory.md)
+- [Commit Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
+- [Versioning Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+- [Interface Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
+- [Log Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/log.md)
+- [Error Code Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
+
+## :busts_in_silhouette: Community
+
++ 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
++ 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
++ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg)
++ :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Community Meetings
 
-We love community involvement! Join us for our biweekly meetings every Thursday night. We even offer gifts and rewards! :gift:
+We want anyone to get involved in our community and contributing code, we offer gifts and rewards, and we welcome you to join us every Thursday night.
 
-You can find the meeting minutes on [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting) and our [Google Docs](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
+Our conference is in the [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 🎯, then you can search the Open-IM-Server pipeline to join
 
-## :eyes: Who are using Open-IM-Server
+We take notes of each [biweekly meeting](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) in [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting), Our historical meeting notes, as well as replays of the meetings are available at [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
+
+## :eyes: Who are using OpenIM
 
 Check out our [user case studies](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) page for a list of the project users. Don't hesitate to leave a [📝comment](https://github.com/OpenIMSDK/Open-IM-Server/issues/379) and share your use case.
 
-![avatar](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
-
 ## :page_facing_up: License
 
-Open-IM-Server is licensed under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
+OpenIM is licensed under the Apache 2.0 license. See [LICENSE](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/LICENSE) for the full license text.
 
-## :cloud: Docker Images
+The OpenIM logo, including its variations and animated versions, displayed in this repository [OpenIM](https://github.com/OpenIMSDK/Open-IM-Server) under the [assets/logo](./assets/logo) and [assets/logo-gif](assets/logo-gif) directories, are protected by copyright laws.
 
-Our Docker images are hosted not only on GitHub but also on Alibaba Cloud and Docker Hub supporting multiple architectures. Visit [our GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) and read our [version management document](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md) for more information.
+## 🔮 Thanks to our contributors!
+
+<a href="https://github.com/OpenIMSDK/Open-IM-Server/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=OpenIMSDK/Open-IM-Server" />
+</a>
