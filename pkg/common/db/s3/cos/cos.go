@@ -263,7 +263,7 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	var imageMogr string
 	//snapshot := make(url.Values)
-	var option *cos.PresignedURLOptions
+	var option cos.PresignedURLOptions
 	if opt != nil {
 		query := make(url.Values)
 		if opt.Image != nil {
@@ -323,9 +323,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			query.Set("response-content-disposition", `attachment; filename="`+opt.Filename+`"`)
 		}
 		if len(query) > 0 {
-			option = &cos.PresignedURLOptions{
-				Query: &query,
-			}
+			option.Query = &query
 		}
 	}
 	if expire <= 0 {
@@ -333,7 +331,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, option)
+	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, &option)
 	if err != nil {
 		return "", err
 	}
