@@ -364,7 +364,7 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 			reqParams.Set("response-content-type", opt.ContentType)
 		}
 		if opt.Filename != "" {
-			reqParams.Set("response-content-disposition", `attachment; filename="`+opt.Filename+`"`)
+			reqParams.Set("response-content-disposition", `attachment; filename=`+strconv.Quote(opt.Filename))
 		}
 	}
 	if expire <= 0 {
