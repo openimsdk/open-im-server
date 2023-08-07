@@ -156,16 +156,21 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 	opt := &s3.AccessURLOption{}
 	if len(req.Query) > 0 {
 		switch req.Query["type"] {
+		case "":
 		case "image":
+			opt.Image = &s3.Image{}
 			opt.Image.Format = req.Query["format"]
 			opt.Image.Width, _ = strconv.Atoi(req.Query["width"])
 			opt.Image.Height, _ = strconv.Atoi(req.Query["height"])
 		case "video":
+			opt.Video = &s3.Video{}
 			opt.Video.Format = req.Query["format"]
 			opt.Video.Width, _ = strconv.Atoi(req.Query["width"])
 			opt.Video.Height, _ = strconv.Atoi(req.Query["height"])
 			millisecond, _ := strconv.Atoi(req.Query["time"])
 			opt.Video.Time = time.Millisecond * time.Duration(millisecond)
+		default:
+			return nil, errs.ErrArgs.Wrap("invalid query type")
 		}
 	}
 	expireTime, rawURL, err := t.s3dataBase.AccessURL(ctx, req.Name, t.defaultExpire, opt)
