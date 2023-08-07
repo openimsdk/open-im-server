@@ -9,6 +9,6 @@
 | :---------------------------------------: | :---------------------------------------------: |
 | ![multiple-message](./multiple-message.png) | ![efficient-meetings](./efficient-meetings.png) |
 |      **One-to-one and group chats**       |     **Special features - Custom messages**      |
-|      ![group-chat](./group-chat.png)      |   ![special-function](./special-function.md)    |
+|      ![group-chat](./group-chat.png)      |   ![special-function](./special-function.png)    |
 
 </div>
