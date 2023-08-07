@@ -159,6 +159,7 @@ type configStruct struct {
 		OpenImAuthName           string `yaml:"openImAuthName"`
 		OpenImConversationName   string `yaml:"openImConversationName"`
 		OpenImThirdName          string `yaml:"openImThirdName"`
+		OpenImAesKeyName         string `yaml:"openImAesKeyName"`
 	} `yaml:"rpcRegisterName"`
 
 	Log struct {
@@ -257,6 +258,10 @@ type configStruct struct {
 		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
 		ThirdPrometheusPort           []int `yaml:"thirdPrometheusPort"`
 	} `yaml:"prometheus"`
+	Encipher struct {
+		Enable    bool   `yaml:"enable" json:"enable"`
+		Algorithm string `yaml:"algorithm" json:"algorithm"`
+	} `yaml:"encipher"`
 	Notification notification `yaml:"notification"`
 }
 

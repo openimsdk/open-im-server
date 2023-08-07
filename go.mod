@@ -141,3 +141,7 @@ require (
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
+//replace (
+//	github.com/OpenIMSDK/protocol => ./pkg/proto
+//)

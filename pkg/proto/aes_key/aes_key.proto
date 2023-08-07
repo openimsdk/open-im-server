@@ -1,0 +1,26 @@
+syntax = "proto3";
+package OpenIMServer.auth;
+option go_package = "github.com/OpenIMSDK/protocol/aes_key";
+
+//    protoc --go_out=plugins=grpc:./aes_key --go_opt=module=github.com/OpenIMSDK/protocol/aes_key  aes_key/aes_key.proto
+message GetAesKeyReq {
+  string sId = 1;
+  string uId = 2;
+  int32  sType = 3;
+}
+message GetAllAesKeyReq {
+  string uId = 1;
+
+}
+message GetAesKeyResp {
+  string key = 1;
+}
+
+message GetAllAesKeyResp {
+  map<string, string> keys = 1;
+}
+
+service AesKey{
+  rpc getAesKey(GetAesKeyReq) returns(GetAesKeyResp);
+  rpc getAllAesKey(GetAllAesKeyReq) returns(GetAllAesKeyResp);
+}
