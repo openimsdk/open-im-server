@@ -49,6 +49,7 @@ func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs 
 					} else {
 						msgDocModel.Msg = msgDoc.Msg[index:end]
 					}
+					newMsgDocs = append(newMsgDocs, msgDocModel)
 					index = end
 				} else {
 					break

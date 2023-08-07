@@ -14,6 +14,9 @@ func (c *MsgTool) ConvertTools() {
 		log.ZError(ctx, "get all conversation ids failed", err)
 		return
 	}
+	for _, conversationID := range conversationIDs {
+		conversationIDs = append(conversationIDs, msgprocessor.GetNotificationConversationIDByConversationID(conversationID))
+	}
 	userIDs, err := c.userDatabase.GetAllUserID(ctx, 0, 0)
 	if err != nil {
 		log.ZError(ctx, "get all user ids failed", err)

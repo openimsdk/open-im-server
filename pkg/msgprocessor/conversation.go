@@ -100,6 +100,16 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	return ""
 }
 
+func GetNotificationConversationIDByConversationID(conversationID string) string {
+	l := strings.Split(conversationID, "_")
+	if len(l) > 1 {
+		l[0] = "n"
+		return strings.Join(l, "_")
+	} else {
+		return ""
+	}
+}
+
 func GetNotificationConversationID(sessionType int, ids ...string) string {
 	sort.Strings(ids)
 	if len(ids) > 2 || len(ids) < 1 {
