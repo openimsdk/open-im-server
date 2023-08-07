@@ -162,6 +162,7 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 			opt.Image.Format = req.Query["format"]
 			opt.Image.Width, _ = strconv.Atoi(req.Query["width"])
 			opt.Image.Height, _ = strconv.Atoi(req.Query["height"])
+			log.ZDebug(ctx, "AccessURL image", "name", req.Name, "option", opt.Image)
 		case "video":
 			opt.Video = &s3.Video{}
 			opt.Video.Format = req.Query["format"]
@@ -169,6 +170,7 @@ func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*
 			opt.Video.Height, _ = strconv.Atoi(req.Query["height"])
 			millisecond, _ := strconv.Atoi(req.Query["time"])
 			opt.Video.Time = time.Millisecond * time.Duration(millisecond)
+			log.ZDebug(ctx, "AccessURL video", "name", req.Name, "option", opt.Video)
 		default:
 			return nil, errs.ErrArgs.Wrap("invalid query type")
 		}
