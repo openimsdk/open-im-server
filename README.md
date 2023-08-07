@@ -48,7 +48,7 @@ It's important to note that Open-IM-Server isn't a standalone product, and it do
 | :-----------------------------------------------------: | :---------------------------------------------------------: |
 | ![multiple-message](./assets/demo/multiple-message.png) | ![efficient-meetings](./assets/demo/efficient-meetings.png) |
 |             **One-to-one and group chats**              |           **Special features - Custom messages**            |
-|       ![group-chat](./assets/demo/group-chat.png)       |   ![special-function](./assets/demo/special-function.md)    |
+|       ![group-chat](./assets/demo/group-chat.png)       |   ![special-function](./assets/demo/special-function.png)   |
 
 </div>
 
