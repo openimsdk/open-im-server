@@ -16,8 +16,8 @@ RUN go mod download
 # Copy all files to the container
 ADD . .
 
-RUN /bin/sh -c "make clean"
-RUN /bin/sh -c "make build"
+RUN make clean
+RUN make build
 
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
@@ -27,7 +27,5 @@ WORKDIR ${SERVER_WORKDIR}
 COPY --from=builder ${OPENIM_SERVER_CMDDIR} /openim/openim-server/scripts
 COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
 COPY --from=builder ${SERVER_WORKDIR}/_output/bin/platforms /openim/openim-server/_output/bin/platforms
-
-VOLUME ["/openim/openim-server/logs","/openim/openim-server/config","/openim/openim-server/scripts"]
 
 CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker_start_all.sh"]

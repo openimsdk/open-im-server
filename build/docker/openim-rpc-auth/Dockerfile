@@ -49,4 +49,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE 10160
 
-CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-auth --port 10160 -c ${SERVER_WORKDIR}/config"]
+CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-auth --port 10160 -c ${SERVER_WORKDIR}/config"]

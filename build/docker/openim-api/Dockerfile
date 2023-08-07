@@ -43,4 +43,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE ${10002}
 
-CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-api --port 10002 -c ${SERVER_WORKDIR}/config"]
+CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-api --port 10002 -c ${SERVER_WORKDIR}/config"]
