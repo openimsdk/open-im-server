@@ -56,4 +56,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 EXPOSE 10130
 EXPOSE 20130
 
-CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-msg --port 10130 --prometheus_port 20130 -c ${SERVER_WORKDIR}/config"]
+CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-msg --port 10130 --prometheus_port 20130 -c ${SERVER_WORKDIR}/config"]

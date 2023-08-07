@@ -52,7 +52,6 @@ services:
       net.core.somaxconn: 1024
     command: redis-server --requirepass ${PASSWORD} --appendonly yes
 
-
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -63,7 +62,6 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
-
 
   kafka:
     image: wurstmeister/kafka
@@ -98,9 +96,8 @@ services:
     restart: always
     command: minio server /data --console-address ':9090'
 
-
   openim_server:
-    image: ghcr.io/openim-sigs/openim-server:v1.0.0-debug.11 #ghcr.io/openimsdk/openim-server:main
+    image: ghcr.io/openimsdk/openim-server:latest
     container_name: openim-server
     volumes:
       - ./logs:/openim/openim-server/logs
@@ -122,7 +119,7 @@ services:
         max-file: "2"
 
   openim-chat:
-    image: ghcr.io/openim-sigs/openim-chat:v1.0.0-debug.11 # ghcr.io/openimsdk/openim-chat:main
+    image: ghcr.io/openimsdk/openim-chat:latest
     container_name: openim-chat
     volumes:
       - ./_output/openim/openim-chat/logs:/openim/openim-chat/logs

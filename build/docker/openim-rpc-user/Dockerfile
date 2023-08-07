@@ -55,4 +55,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE 10110
 
-CMD ["sh","-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-user --port 10110 -c ${SERVER_WORKDIR}/config"]
+CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-rpc-user --port 10110 -c ${SERVER_WORKDIR}/config"]
