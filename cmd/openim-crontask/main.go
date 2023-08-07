@@ -21,7 +21,7 @@ import (
 
 func main() {
 	cronTaskCmd := cmd.NewCronTaskCmd()
-	if err := cronTaskCmd.Exec(tools.StartCronTask); err != nil {
+	if err := cronTaskCmd.Exec(tools.StartTask); err != nil {
 		panic(err.Error())
 	}
 }

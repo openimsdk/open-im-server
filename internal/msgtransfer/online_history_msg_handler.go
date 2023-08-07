@@ -16,11 +16,12 @@ package msgtransfer
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/tools/errs"
 
@@ -143,7 +144,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 					len(modifyMsgList),
 				)
 				conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMsgList[0].message)
-				conversationIDNotification := msgprocessor.GetNotificationConversationID(ctxMsgList[0].message)
+				conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMsgList[0].message)
 				och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
 				och.handleNotification(
 					ctx,
