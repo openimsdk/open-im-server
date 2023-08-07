@@ -145,10 +145,10 @@ func (m *Minio) initMinio(ctx context.Context) error {
 				log.ZWarn(context.Background(), "set sign bucket location cache panic", errors.New("failed to get private field value"), "recover", fmt.Sprintf("%+v", r), "development version", "github.com/minio/minio-go/v7 v7.0.61")
 			}
 		}()
-		filed := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
-		zero := reflect.New(reflect.PtrTo(filed.Type()))
-		*(*unsafe.Pointer)(zero.UnsafePointer()) = unsafe.Pointer(filed.UnsafeAddr())
-		zero.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
+		blc := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
+		vblc := reflect.New(reflect.PtrTo(blc.Type()))
+		*(*unsafe.Pointer)(vblc.UnsafePointer()) = unsafe.Pointer(blc.UnsafeAddr())
+		vblc.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
 	}()
 	m.init = true
 	return nil
