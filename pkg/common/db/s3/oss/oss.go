@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -289,12 +288,6 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			default:
 				opt.Image.Format = imageJpg
 			}
-			opt.ContentType = "image/" + format
-			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
-				opt.Filename += "." + opt.Video.Format
-			}
 			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
 			process := "image/resize,m_lfit"
 			if opt.Video.Width > 0 {
@@ -317,12 +310,6 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			case videoSnapshotImageJpg, videoSnapshotImagePng:
 			default:
 				opt.Video.Format = videoSnapshotImageJpg
-			}
-			opt.ContentType = "image/" + opt.Video.Format
-			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
-				opt.Filename += "." + opt.Video.Format
 			}
 			process := "video/snapshot,t_" + strconv.Itoa(millisecond) + ",f_" + opt.Video.Format
 			if opt.Video.Width > 0 {

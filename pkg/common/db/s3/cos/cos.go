@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -287,12 +286,6 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				imageJpeg,
 				imageGif,
 				imageWebp:
-				opt.ContentType = "image/" + opt.Image.Format
-				if opt.Filename == "" {
-					opt.Filename = filepath.Base(name) + "." + opt.Image.Format
-				} else if filepath.Ext(opt.Filename) != "."+opt.Image.Format {
-					opt.Filename += "." + opt.Image.Format
-				}
 				style = append(style, "format/"+opt.Image.Format)
 			}
 			if len(style) > 0 {
@@ -316,12 +309,6 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				opt.Video.Format = videoSnapshotImageJpg
 			}
 			query.Set("format", opt.Video.Format)
-			opt.ContentType = "image/" + opt.Video.Format
-			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
-				opt.Filename += "." + opt.Video.Format
-			}
 			if opt.Video.Width > 0 {
 				query.Set("width", strconv.Itoa(opt.Video.Width))
 			}
