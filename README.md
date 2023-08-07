@@ -31,11 +31,13 @@
 
 ## ✨ About OpenIM
 
-Open-IM-Server is a robust instant messaging server engineered using pure Golang, leveraging JSON over WebSocket for communication. The server treats everything as a message, facilitating straightforward customization without modifying the server code. Its microservice architecture enables deployment using clusters, ensuring high performance and scalability.
+Open-IM-Server, crafted meticulously using pure Golang, stands as a robust instant messaging server. Its unique approach to communication, via JSON over WebSocket, treats every interaction as a message. This simplifies customization and eliminates the need for tinkering with server code. Harnessing the power of microservice architecture, the server can be deployed via clusters, promising impressive performance and scalability.
 
-Whether you're looking to integrate instant messaging or real-time networking into your applications, Open-IM-Server is your go-to solution! :rocket:
+Open-IM-Server is more than an instant messaging server; it's a powerful tool for incorporating real-time networking into your applications, positioning itself as your premier choice for integration! 🚀
 
-It's important to note that Open-IM-Server isn't a standalone product, and it doesn't include account registration and login services. However, we've made your life easier by open-sourcing the [chat repository](https://github.com/OpenIMSDK/chat) that includes login and registration features. Deploying the chat business server alongside Open-IM-Server quickly sets up a comprehensive chat product. :busts_in_silhouette:
+Please be aware that Open-IM-Server does not function as a standalone product and does not offer built-in account registration or login services. To ease your implementation process, we've open-sourced the [chat repository](https://github.com/OpenIMSDK/chat), which comprises these features. Deploying this chat business server in conjunction with Open-IM-Server expedites the setup of a comprehensive chat product. 👥
+
+Further enhancing your experience, we also provide an SDK client, wherein most complex logics are implemented. The [SDK repository](https://github.com/OpenIMSDK/openim-sdk-core) can be found at [this link](https://github.com/OpenIMSDK/openim-sdk-core). The [chat repository](https://github.com/OpenIMSDK/chat) is our business server while the 'core' represents the high-level encapsulation of the SDK, synergistically working together to deliver superior results. ✨
 
 ## :star2: Why OpenIM
 
