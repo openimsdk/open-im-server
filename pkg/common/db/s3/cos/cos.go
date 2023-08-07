@@ -308,19 +308,19 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				sec = 0
 			}
 			query.Set("time", strconv.FormatFloat(sec, 'f', 3, 64))
-			switch opt.Video.ImageFormat {
+			switch opt.Video.Format {
 			case
 				videoSnapshotImagePng,
 				videoSnapshotImageJpg:
 			default:
-				opt.Video.ImageFormat = videoSnapshotImageJpg
+				opt.Video.Format = videoSnapshotImageJpg
 			}
-			query.Set("format", opt.Video.ImageFormat)
-			opt.ContentType = "image/" + opt.Video.ImageFormat
+			query.Set("format", opt.Video.Format)
+			opt.ContentType = "image/" + opt.Video.Format
 			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
-				opt.Filename += "." + opt.Video.ImageFormat
+				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
+				opt.Filename += "." + opt.Video.Format
 			}
 			if opt.Video.Width > 0 {
 				query.Set("width", strconv.Itoa(opt.Video.Width))

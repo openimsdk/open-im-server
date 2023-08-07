@@ -123,10 +123,10 @@ type Image struct {
 }
 
 type Video struct {
-	Width       int           `json:"width"`
-	Height      int           `json:"height"`
-	Time        time.Duration `json:"time"`
-	ImageFormat string        `json:"format"`
+	Width  int           `json:"width"`
+	Height int           `json:"height"`
+	Time   time.Duration `json:"time"`
+	Format string        `json:"format"`
 }
 
 type AccessURLOption struct {

@@ -114,13 +114,14 @@ type configStruct struct {
 		Enable string `yaml:"enable"`
 		ApiURL string `yaml:"apiURL"`
 		Minio  struct {
-			Bucket          string `yaml:"bucket"`
-			Endpoint        string `yaml:"endpoint"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			SecretAccessKey string `yaml:"secretAccessKey"`
-			SessionToken    string `yaml:"sessionToken"`
-			ThumbnailApi    string `yaml:"thumbnailApi"`
-			SignEndpoint    string `yaml:"signEndpoint"`
+			Bucket                   string `yaml:"bucket"`
+			Endpoint                 string `yaml:"endpoint"`
+			AccessKeyID              string `yaml:"accessKeyID"`
+			SecretAccessKey          string `yaml:"secretAccessKey"`
+			SessionToken             string `yaml:"sessionToken"`
+			SignEndpoint             string `yaml:"signEndpoint"`
+			ThumbnailApi             string `yaml:"thumbnailApi"`
+			ThumbnailUseSignEndpoint bool   `yaml:"thumbnailUseSignEndpoint"`
 		} `yaml:"minio"`
 		Cos struct {
 			BucketURL    string `yaml:"bucketURL"`

@@ -68,12 +68,13 @@ func NewMinio() (s3.Interface, error) {
 		imageApi += "image?"
 	}
 	m := &Minio{
-		bucket:    conf.Bucket,
-		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
-		imageApi:  imageApi,
-		core:      &minio.Core{Client: client},
-		lock:      &sync.Mutex{},
-		init:      false,
+		bucket:           conf.Bucket,
+		bucketURL:        conf.Endpoint + "/" + conf.Bucket + "/",
+		imageApi:         imageApi,
+		imageUseSignAddr: conf.ThumbnailUseSignEndpoint,
+		core:             &minio.Core{Client: client},
+		lock:             &sync.Mutex{},
+		init:             false,
 	}
 	if conf.SignEndpoint == "" {
 		m.sign = m.core.Client
@@ -100,15 +101,16 @@ func NewMinio() (s3.Interface, error) {
 }
 
 type Minio struct {
-	bucket    string
-	bucketURL string
-	imageApi  string
-	location  string
-	opts      *minio.Options
-	core      *minio.Core
-	sign      *minio.Client
-	lock      sync.Locker
-	init      bool
+	bucket           string
+	bucketURL        string
+	imageApi         string
+	imageUseSignAddr bool
+	location         string
+	opts             *minio.Options
+	core             *minio.Core
+	sign             *minio.Client
+	lock             sync.Locker
+	init             bool
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -369,7 +371,13 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	u, err := m.sign.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
+	var client *minio.Client
+	if m.imageUseSignAddr {
+		client = m.sign
+	} else {
+		client = m.core.Client
+	}
+	u, err := client.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
 	if err != nil {
 		return "", err
 	}

@@ -135,6 +135,7 @@ object:
     sessionToken: ""
     signEndpoint: "http://127.0.0.1:10005"
     thumbnailApi: "http://127.0.0.1:10003"
+    thumbnailUseSignEndpoint: false
   cos:
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
     secretID: ""

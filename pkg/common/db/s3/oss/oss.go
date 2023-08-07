@@ -291,9 +291,9 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			}
 			opt.ContentType = "image/" + format
 			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
-				opt.Filename += "." + opt.Video.ImageFormat
+				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
+				opt.Filename += "." + opt.Video.Format
 			}
 			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
 			process := "image/resize,m_lfit"
@@ -313,18 +313,18 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			if millisecond < 0 {
 				millisecond = 0
 			}
-			switch opt.Video.ImageFormat {
+			switch opt.Video.Format {
 			case videoSnapshotImageJpg, videoSnapshotImagePng:
 			default:
-				opt.Video.ImageFormat = videoSnapshotImageJpg
+				opt.Video.Format = videoSnapshotImageJpg
 			}
-			opt.ContentType = "image/" + opt.Video.ImageFormat
+			opt.ContentType = "image/" + opt.Video.Format
 			if opt.Filename == "" {
-				opt.Filename = filepath.Base(name) + "." + opt.Video.ImageFormat
-			} else if filepath.Ext(opt.Filename) != "."+opt.Video.ImageFormat {
-				opt.Filename += "." + opt.Video.ImageFormat
+				opt.Filename = filepath.Base(name) + "." + opt.Video.Format
+			} else if filepath.Ext(opt.Filename) != "."+opt.Video.Format {
+				opt.Filename += "." + opt.Video.Format
 			}
-			process := "video/snapshot,t_" + strconv.Itoa(millisecond) + ",f_" + opt.Video.ImageFormat
+			process := "video/snapshot,t_" + strconv.Itoa(millisecond) + ",f_" + opt.Video.Format
 			if opt.Video.Width > 0 {
 				process += ",w_" + strconv.Itoa(opt.Video.Width)
 			}
