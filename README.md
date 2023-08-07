@@ -45,11 +45,11 @@ Further enhancing your experience, we also provide an SDK client, wherein most c
 
 <div align="center">
 
-|                    🗨️💬 Multiple Message 📬📨                    |                  📅⚡ Efficient Meetings 🚀💼                   |
+|            💻🔄📱 Multi Terminal Synchronization 🔄🖥️             |                  📅⚡ Efficient Meetings 🚀💼      |
 | :----------------------------------------------------------: | :---------------------------------------------------------: |
 | ![multiple-message](./assets/demo/multi-terminal-synchronization.png) | ![efficient-meetings](./assets/demo/efficient-meetings.png) |
-|               📲🔄 **One-to-one and Group Chats** 👥🗣️               |          🎁💻 **Special Features - Custom Messages** ✉️🎨           |
-|         ![group-chat](./assets/demo/group-chat.png)          |   ![special-function](./assets/demo/special-function.png)   |
+|             📲🔄 **One-to-one and Group Chats** 👥🗣️             |        🎁💻 **Special Features - Custom Messages** ✉️🎨|
+|         ![group-chat](./assets/demo/group-chat.png)          |   ![special-function](./assets/demo/special-function.png)      |
 
 </div>
 
