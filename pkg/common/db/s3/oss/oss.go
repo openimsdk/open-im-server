@@ -318,7 +318,8 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			if opt.Video.Height > 0 {
 				process += ",h_" + strconv.Itoa(opt.Video.Height)
 			}
-			process += ",m_fast"
+			process += ",ar_auto,m_fast"
+			fmt.Println(process)
 			opts = append(opts, oss.Process(process))
 		}
 		if opt.ContentType != "" {
