@@ -290,10 +290,10 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			}
 			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
 			process := "image/resize,m_lfit"
-			if opt.Video.Width > 0 {
+			if opt.Image.Width > 0 {
 				process += ",w_" + strconv.Itoa(opt.Image.Width)
 			}
-			if opt.Video.Height > 0 {
+			if opt.Image.Height > 0 {
 				process += ",h_" + strconv.Itoa(opt.Image.Height)
 			}
 			process += ",format," + format
@@ -319,7 +319,6 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				process += ",h_" + strconv.Itoa(opt.Video.Height)
 			}
 			process += ",m_fast"
-			fmt.Println(process)
 			opts = append(opts, oss.Process(process))
 		}
 		if opt.ContentType != "" {
