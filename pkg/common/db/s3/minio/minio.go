@@ -401,9 +401,9 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	if opt.Video != nil {
 		query.Set("type", "video")
 		query.Set("time", strconv.Itoa(int(opt.Video.Time/time.Millisecond)))
-		query.Set("width", strconv.Itoa(opt.Image.Width))
-		query.Set("height", strconv.Itoa(opt.Image.Height))
-		query.Set("format", opt.Image.Format)
+		query.Set("width", strconv.Itoa(opt.Video.Width))
+		query.Set("height", strconv.Itoa(opt.Video.Height))
+		query.Set("format", opt.Video.Format)
 	}
 	return m.imageApi + query.Encode(), nil
 }
