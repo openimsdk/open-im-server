@@ -142,6 +142,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		}
 		defer func() {
 			if r := recover(); r != nil {
+				m.sign = m.core.Client
 				log.ZWarn(context.Background(), "set sign bucket location cache panic", errors.New("failed to get private field value"), "recover", fmt.Sprintf("%+v", r), "development version", "github.com/minio/minio-go/v7 v7.0.61")
 			}
 		}()
@@ -372,7 +373,9 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 		expire = time.Second
 	}
 	var client *minio.Client
-	if m.imageUseSignAddr {
+	if opt.Image == nil && opt.Video == nil {
+		client = m.sign
+	} else if m.imageUseSignAddr {
 		client = m.sign
 	} else {
 		client = m.core.Client
