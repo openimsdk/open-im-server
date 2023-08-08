@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,7 @@
 
 # Common utilities, variables and checks for all build scripts.
 set -o errexit
-set -o nounset
+set +o nounset
 set -o pipefail
 
 # Unset CDPATH, having it set messes up with script import paths
