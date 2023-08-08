@@ -1,9 +1,10 @@
 package oss
 
 import (
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"net/http"
 	_ "unsafe"
+
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 //go:linkname ossSignHeader github.com/aliyun/aliyun-oss-go-sdk/oss.(*Conn).signHeader

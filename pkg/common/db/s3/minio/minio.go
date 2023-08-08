@@ -20,10 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/signer"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -39,6 +35,11 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/signer"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
@@ -147,7 +148,15 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		defer func() {
 			if r := recover(); r != nil {
 				m.sign = m.core.Client
-				log.ZWarn(context.Background(), "set sign bucket location cache panic", errors.New("failed to get private field value"), "recover", fmt.Sprintf("%+v", r), "development version", "github.com/minio/minio-go/v7 v7.0.61")
+				log.ZWarn(
+					context.Background(),
+					"set sign bucket location cache panic",
+					errors.New("failed to get private field value"),
+					"recover",
+					fmt.Sprintf("%+v", r),
+					"development version",
+					"github.com/minio/minio-go/v7 v7.0.61",
+				)
 			}
 		}()
 		blc := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
