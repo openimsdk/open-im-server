@@ -132,7 +132,7 @@ go.build.%:
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
 		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/main.go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
+			$(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
 		fi \
 	fi
 
@@ -202,8 +202,8 @@ go.updates: tools.verify.go-mod-outdated
 ## go.clean: Clean all builds directories and files
 .PHONY: go.clean
 go.clean:
-	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR))"
-	@-rm -vrf $(TMP_DIR) $(BIN_DIR)
+	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR)) AND BIN_TOOLS_DIR($(BIN_TOOLS_DIR))"
+	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR)
 	@echo "===========> End clean..."
 
 ## copyright.help: Show copyright help
