@@ -17,18 +17,20 @@ package unrelation
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 const (
@@ -116,10 +118,10 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 	for _, key := range keys {
 		if strings.HasPrefix(key, "-") {
 			keysDoc = append(keysDoc, bson.E{Key: strings.TrimLeft(key, "-"), Value: -1})
-			//keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), bsonx.Int32(-1))
+			// keysDoc = keysDoc.Append(strings.TrimLeft(key, "-"), bsonx.Int32(-1))
 		} else {
 			keysDoc = append(keysDoc, bson.E{Key: key, Value: 1})
-			//keysDoc = keysDoc.Append(key, bsonx.Int32(1))
+			// keysDoc = keysDoc.Append(key, bsonx.Int32(1))
 		}
 	}
 	// create index

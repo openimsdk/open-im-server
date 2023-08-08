@@ -15,16 +15,18 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"strconv"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/gin-gonic/gin"
+
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type ThirdApi rpcclient.Third

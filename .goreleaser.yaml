@@ -447,8 +447,8 @@ milestones:
     # Repository for the milestone
     # Default is extracted from the origin remote URL
     repo:
-      owner: user
-      name: repo
+      owner: OpenIMSDK
+      name: Open-IM-Server
 
     # Whether to close the milestone
     close: true
@@ -479,6 +479,9 @@ checksum:
   algorithm: sha256
 
 release:
+
+  prerelease: auto
+  
   footer: |
   
     ## Welcome to the {{ .Tag }} release of [chat](https://github.com/OpenIMSDK/chat)!🎉🎉!
@@ -487,17 +490,13 @@ release:
 
     ## Helping out
 
-    We release logs are recorded on [✨ CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)--config_folder_path
+    + We release logs are recorded on [✨CHANGELOG](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CHANGELOG/CHANGELOG.md)
 
-    For information on versions of OpenIM and how to maintain branches, read [📚this article](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+    + For information on versions of OpenIM and how to maintain branches, read [📚this article](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 
-    This release is only possible thanks to **all** the support of some **awesome people**!
-
-    https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
+    + If you wish to use mirroring, read OpenIM's [image management policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
 
     **Want to be one of them 😘?**
-
-    Contributions to this project are welcome! Please see [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md) for details.
 
     <p align="center">
         <a href="https://github.com/kubbot" style="float: left; margin-right: 10px;">
@@ -511,6 +510,11 @@ release:
         </a>
     </p>
 
+    > **Note**
+    > @openimbot and @kubbot have made great contributions to the community as community 🤖robots(@openimsdk/bot), respectively.
+    > Thanks to the @openimsdk/openim team for all their hard work on this release.
+    > Thank you to all the [💕developers and contributors](https://github.com/OpenIMSDK/Open-IM-Server/graphs/contributors), people from all over the world, OpenIM brings us together
+    > Contributions to this project are welcome! Please see [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md) for details.
 
     ## Get Involved with OpenIM!
 

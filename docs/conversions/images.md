@@ -11,6 +11,9 @@ OpenIM's versions correspond to GitHub's tag versions. Each time we release a ne
 2. **Alibaba Cloud (registry.cn-hangzhou.aliyuncs.com):** For users in Mainland China, we also host OpenIM's Docker images on Alibaba Cloud to provide faster pull speeds. You can view all Alibaba Cloud images on this [page](https://cr.console.aliyun.com/cn-hangzhou/instances/repositories) of Alibaba Cloud Image Service (note that you need to log in to your Alibaba Cloud account first).
 3. **Docker Hub (docker.io):** Docker Hub is the most commonly used Docker image hosting platform, and we also host OpenIM's images there to facilitate developers worldwide. You can view all Docker Hub images on the [OpenIM's Docker Hub page](https://hub.docker.com/r/openim).
 
+## Base images design
+
++ [https://github.com/openim-sigs/openim-base-image](https://github.com/openim-sigs/openim-base-image)
 
 ## OpenIM Image Design and Usage Guide
 
