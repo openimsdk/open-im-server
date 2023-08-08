@@ -27,6 +27,6 @@ func (c *MsgTool) ConvertTools() {
 		conversationIDs = append(conversationIDs, msgprocessor.GetConversationIDBySessionType(constant.SingleChatType, userID, userID))
 		conversationIDs = append(conversationIDs, msgprocessor.GetNotificationConversationID(constant.SingleChatType, userID, userID))
 	}
-	log.ZDebug(ctx, "all conversationIDs", "conversationIDs", conversationIDs)
+	log.ZDebug(ctx, "all userIDs", "len userIDs", len(conversationIDs))
 	c.msgDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
 }

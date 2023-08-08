@@ -25,42 +25,43 @@ func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs 
 			continue
 		}
 		if len(msgDocs) < 1 {
-			// log.ZDebug(ctx, "len(msgs) < 1", "conversationID", conversationID)
 			continue
 		}
 		log.ZInfo(ctx, "msg doc convert", "conversationID", conversationID, "len(msgDocs)", len(msgDocs))
-		if _, err := m.MsgCollection.DeleteMany(ctx, bson.M{"doc_id": regex}); err != nil {
-			log.ZError(ctx, "convertAll delete many failed", err, "conversationID", conversationID)
-			continue
-		}
-		var newMsgDocs []interface{}
-		for _, msgDoc := range msgDocs {
-			if int64(len(msgDoc.Msg)) == m.model.GetSingleGocMsgNum() {
+		if len(msgDocs[0].Msg) == int(m.model.GetSingleGocMsgNum5000()) {
+			if _, err := m.MsgCollection.DeleteMany(ctx, bson.M{"doc_id": regex}); err != nil {
+				log.ZError(ctx, "convertAll delete many failed", err, "conversationID", conversationID)
 				continue
 			}
-			var index int64
-			for index < int64(len(msgDoc.Msg)) {
-				msg := msgDoc.Msg[index]
-				if msg != nil && msg.Msg != nil {
-					msgDocModel := table.MsgDocModel{DocID: m.model.GetDocID(conversationID, msg.Msg.Seq)}
-					end := index + m.model.GetSingleGocMsgNum()
-					if int(end) >= len(msgDoc.Msg) {
-						msgDocModel.Msg = msgDoc.Msg[index:]
+			var newMsgDocs []interface{}
+			for _, msgDoc := range msgDocs {
+				if int64(len(msgDoc.Msg)) == m.model.GetSingleGocMsgNum() {
+					continue
+				}
+				var index int64
+				for index < int64(len(msgDoc.Msg)) {
+					msg := msgDoc.Msg[index]
+					if msg != nil && msg.Msg != nil {
+						msgDocModel := table.MsgDocModel{DocID: m.model.GetDocID(conversationID, msg.Msg.Seq)}
+						end := index + m.model.GetSingleGocMsgNum()
+						if int(end) >= len(msgDoc.Msg) {
+							msgDocModel.Msg = msgDoc.Msg[index:]
+						} else {
+							msgDocModel.Msg = msgDoc.Msg[index:end]
+						}
+						newMsgDocs = append(newMsgDocs, msgDocModel)
+						index = end
 					} else {
-						msgDocModel.Msg = msgDoc.Msg[index:end]
+						break
 					}
-					newMsgDocs = append(newMsgDocs, msgDocModel)
-					index = end
-				} else {
-					break
 				}
 			}
-		}
-		_, err = m.MsgCollection.InsertMany(ctx, newMsgDocs)
-		if err != nil {
-			log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID)
-		} else {
-			log.ZInfo(ctx, "convertAll insert many success", "conversationID", conversationID)
+			_, err = m.MsgCollection.InsertMany(ctx, newMsgDocs)
+			if err != nil {
+				log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID)
+			} else {
+				log.ZInfo(ctx, "convertAll insert many success", "conversationID", conversationID)
+			}
 		}
 	}
 }
