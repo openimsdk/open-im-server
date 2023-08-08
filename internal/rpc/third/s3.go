@@ -16,7 +16,10 @@ package third
 
 import (
 	"context"
+	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"
@@ -152,7 +155,21 @@ func (t *thirdServer) CompleteMultipartUpload(ctx context.Context, req *third.Co
 }
 
 func (t *thirdServer) AccessURL(ctx context.Context, req *third.AccessURLReq) (*third.AccessURLResp, error) {
-	expireTime, rawURL, err := t.s3dataBase.AccessURL(ctx, req.Name, t.defaultExpire)
+	opt := &s3.AccessURLOption{}
+	if len(req.Query) > 0 {
+		switch req.Query["type"] {
+		case "":
+		case "image":
+			opt.Image = &s3.Image{}
+			opt.Image.Format = req.Query["format"]
+			opt.Image.Width, _ = strconv.Atoi(req.Query["width"])
+			opt.Image.Height, _ = strconv.Atoi(req.Query["height"])
+			log.ZDebug(ctx, "AccessURL image", "name", req.Name, "option", opt.Image)
+		default:
+			return nil, errs.ErrArgs.Wrap("invalid query type")
+		}
+	}
+	expireTime, rawURL, err := t.s3dataBase.AccessURL(ctx, req.Name, t.defaultExpire, opt)
 	if err != nil {
 		return nil, err
 	}

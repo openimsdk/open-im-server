@@ -257,5 +257,9 @@ func (c *Controller) IsNotFound(err error) bool {
 }
 
 func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+	if opt.Image != nil {
+		opt.Filename = ""
+		opt.ContentType = ""
+	}
 	return c.impl.AccessURL(ctx, name, expire, opt)
 }

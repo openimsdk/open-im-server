@@ -49,6 +49,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if apiURL[len(apiURL)-1] != '/' {
 		apiURL += "/"
 	}
+	apiURL += "object/"
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err

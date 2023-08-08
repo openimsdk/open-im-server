@@ -16,12 +16,14 @@ package unrelation
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 // prefixes and suffixes.

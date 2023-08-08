@@ -25,7 +25,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/image v0.9.0 // indirect
+	golang.org/x/image v0.9.0
 	google.golang.org/api v0.135.0
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
