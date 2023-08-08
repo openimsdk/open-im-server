@@ -163,6 +163,12 @@ go.lint: tools.verify.golangci-lint
 go.test:
 	@$(GO) test ./...
 
+## go.demo: Run demo
+.PHONY: go.demo
+go.demo:
+	@echo "===========> Run demo"
+	@$(ROOT_DIR)/scripts/demo.sh
+
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
 go.test.junit-report: tools.verify.go-junit-report

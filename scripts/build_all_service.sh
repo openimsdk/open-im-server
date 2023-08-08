@@ -55,7 +55,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-gen_os_arch
+openim::util::gen_os_arch
 
 # Determine if all scripts were successfully built
 BUILD_SUCCESS=true

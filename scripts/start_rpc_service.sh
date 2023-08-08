@@ -90,11 +90,11 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   cd $BIN_DIR
   # Get the rpc port in the configuration file
   portList=$(cat $config_path | grep ${service_port_name[$i]} | awk -F '[:]' '{print $NF}')
-  list_to_string ${portList}
+  openim::util:list-to-string ${portList}
   service_ports=($ports_array)
 
   portList2=$(cat $config_path | grep ${service_prometheus_port_name[$i]} | awk -F '[:]' '{print $NF}')
-  list_to_string $portList2
+  openim::util:list-to-string $portList2
   prome_ports=($ports_array)
   #Start related rpc services based on the number of ports
   for ((j = 0; j < ${#service_ports[*]}; j++)); do

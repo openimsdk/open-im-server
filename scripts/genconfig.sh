@@ -7,12 +7,12 @@
 # 本脚本功能：根据 scripts/environment.sh 配置，生成 OPENIM 组件 YAML 配置文件。
 # 示例：genconfig.sh scripts/environment.sh configs/openim-apiserver.yaml
 
+# Path to the original script file
 env_file="$1"
+# Path to the generated config file
 template_file="$2"
 
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-
-source "${OPENIM_ROOT}/scripts/lib/init.sh"
+. $(dirname ${BASH_SOURCE})/lib/init.sh
 
 if [ $# -ne 2 ];then
     openim::log::error "Usage: genconfig.sh scripts/environment.sh configs/openim-apiserver.yaml"
