@@ -1,76 +1,88 @@
-#  OpenIM Branch Management and Versioning
+# OpenIM Branch Management and Versioning: A Blueprint for High-Grade Software Development
 
-Our project, OpenIM, follows the [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/) standards.
+[📚 **OpenIM TOC**](#openim-branch-management-and-versioning-a-blueprint-for-high-grade-software-development)
+  - [Unfolding the Mechanism of OpenIM Version Maintenance](#unfolding-the-mechanism-of-openim-version-maintenance)
+  - [Main Branch: The Heart of OpenIM Development](#main-branch-the-heart-of-openim-development)
+  - [Release Branch: The Beacon of Stability](#release-branch-the-beacon-of-stability)
+  - [Tag Management: The Cornerstone of Version Control](#tag-management-the-cornerstone-of-version-control)
+  - [Release Management: A Guided Tour](#release-management-a-guided-tour)
+  - [Milestones, Branching, and Addressing Major Bugs](#milestones-branching-and-addressing-major-bugs)
+  - [Applying Principles: A Git Workflow Example](#applying-principles-a-git-workflow-example)
+  - [Docker Images Version Management](#docker-images-version-management)
 
-OpenIM, the open source project, employs a comprehensive version management system to ensure the reliability and traceability of our software. Our version management consists of three main components: the `main` branch, the `release` branch, and `tag` management.
 
-## Main Branch
+At OpenIM, we acknowledge the profound impact of implementing a robust and efficient version management system, hence we abide by the established standards of [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/).
 
-The `main` branch is where all the latest code resides. It's the hub of activity, embodying all the cutting-edge features that are currently being developed or updated. However, since it's subject to frequent changes and updates, it may not always represent the most stable version of the software. Access the `main` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/main).
+Our software blueprint orchestrates a tripartite version management system that integrates the `main` branch, the `release` branch, and `tag` management. These constituents operate in synchrony to preserve the reliability and traceability of our software across various stages of development.
 
-## Release Branch
+## Unfolding the Mechanism of OpenIM Version Maintenance
 
-On the other hand, we have the `release` branch. For instance, in the context of version 3.1, we maintain a `release-v3.1` branch. Unlike the `main` branch, the release branch is designed to be a continuously stable and updated version of the software. This provides a reliable option for users who prefer stability over the latest, but potentially unstable, features. Access the `release-v3.1` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/release-v3.1).
+Our version maintenance protocol revolves around two primary branches, namely: `main` and `release`. We resort to Semantic Versioning 2.0.0 for marking distinctive versions of our software, representing substantial milestones in its evolution.
 
-## Tag Management
+In the OpenIM repository, version identification strictly complies with the `MAJOR.MINOR.PATCH` protocol. Herein:
 
-In addition to the `main` and `release` branches, `tag` also plays a pivotal role in version control. Tags are immutable, meaning once they're created, they remain unchanged. Therefore, if you need a specific version of the software, you can use the corresponding tag. All of our available tags can be viewed [here](https://github.com/OpenIMSDK/Open-IM-Server/tags).
+- The `MAJOR` version indicates a shift arising from incompatible changes to the API.
+- The `MINOR` version suggests the addition of features in a backward-compatible manner.
+- The `PATCH` version flags backward-compatible bug fixes.
 
-Moreover, our Docker image versions are closely tied with these three components. For example, a tag might correspond to the Docker image `ghcr.io/openimsdk/openim-server:v3.1.0`, a release might be represented as `ghcr.io/openimsdk/openim-server:release-v3.0`, and the main branch could be represented as `ghcr.io/openimsdk/openim-server:main` or `ghcr.io/openimsdk/openim-server:latest`.
+## Main Branch: The Heart of OpenIM Development
 
-Here is the specification of our version numbers:
+The `main` branch is the operational heart of our development process. Housing the most recent and advanced features, this branch serves as the nerve center for all enhancements and updates. It encapsulates the freshest, though possibly unstable, facets of the software. Visit our `main` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/main).
 
-- **Revision version number**: The third digit of the version number, representing bug fixes or code optimizations, usually no new features are added and it is backward compatible with older versions.
+## Release Branch: The Beacon of Stability
 
-- **Build version number**: Usually automatically generated by the system, every code submission will result in an automatic increment by 1.
+For every major release, we curate a corresponding `release` branch, e.g., `release-v3.1`. This branch symbolizes an embodiment of stability and ensures an updated version of the software, providing a dependable option for users favoring stability over nascent, yet possibly unstable, features. Visit the `release-v3.1` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/release-v3.1).
 
-- Version modifiers
+## Tag Management: The Cornerstone of Version Control
 
-  : These can represent the development stage and stability of the software. Common ones include:
+In OpenIM's version control system, the role of `tags` stands paramount. Owing to their immutable nature, tags can be effectively utilized to retrieve a specific version of the software. Explore our library of tags [here](https://github.com/OpenIMSDK/Open-IM-Server/tags).
 
-  - `alpha`: An internal testing version with many bugs, generally used for communication among developers.
-  - `beta`: A test version with many bugs, generally used for testing by eager community members, who provide feedback to the developers.
-  - `rc`: Release candidate, to be released as the official version, it's the last test version before the official version.
+Our Docker image versions are intimately entwined with these tripartite components. For instance, a Docker image tag may correspond to `ghcr.io/openimsdk/openim-server:v3.1.0`, a release to `ghcr.io/openimsdk/openim-server:release-v3.0`, and the main branch to `ghcr.io/openimsdk/openim-server:main` or `ghcr.io/openimsdk/openim-server:latest`.
+
+To further clarify, the semantics of our version numbers are as follows:
+
+- **Revision version number**: This represents bug fixes or code optimizations. Typically, it entails no new feature additions and ensures backward compatibility.
+- **Build version number**: Auto-generated by the system, each code submission prompts an automatic increment by 1.
+- **Version modifiers**: These hint at the software's development stage and stability. Some commonly used modifiers are `alpha`, `beta`, `rc`, `ga`, `r/release/or nothing`, and `lts`.
+  - `alpha`: An internal testing version with numerous bugs, typically used for communication among developers.
+  - `beta`: A test version with numerous bugs, generally used for testing by eager community members, who provide feedback to the developers.
+  - `rc`: Release candidate, which is to be released as the official version. It's the last test version before the official version.
   - `ga`: General Availability, the first stable release.
   - `r/release/or nothing`: The final release version, intended for general users.
-  - `lts`: Long Term Support, the official will specify the maintenance year for this version and will fix all bugs found in this version.
+  - `lts`: Long Term Support, the official will specify the maintenance year for this version and will fix all bugs discovered in this version.
 
-When adding partial functions to the project, the minor version number increases by 1, and the revision version number resets to 0. When there are major changes in the project, the major version number increases by 1. The build number is generally automatically generated by the compiler during the compilation process, only the format needs to be defined, and it does not need to be manually controlled.
+Whenever a project undergoes a partial functional addition, the minor version number increments by 1, resetting the revision version number to 0. In contrast, any major project overhaul results in an increment by 1 in the major version number. The build number, typically auto-generated during the compilation process, only requires format definition, thereby eliminating manual control.
 
-## OpenIM version
+## Release Management: A Guided Tour
 
-OpenIM manages two primary branches: `main` and `release`. The project uses Semantic Versioning 2.0.0 to tag different versions of the software, each indicating a significant milestone in the software's development.
+Our GitHub repository at https://github.com/OpenIMSDK/Open-IM-Server/releases associates a release with each tag, with a distinction between Pre-release and Latest, determined by the branch source. Every significant feature launch prompts the issue of a `release` branch, such as `release-v3.2`, as a beacon of stability and Latest release.
 
-In the OpenIM repository, the versioning adheres to the `MAJOR.MINOR.PATCH` format, where:
+Pre-releases correspond to releases from the `main` branch, denoting tags with Version modifiers such as `v3.2.1-beta.0`, `v3.2.1-rc.1`, etc. If you are seeking the most recent, albeit possibly unstable, release with new features, these tags, originating from the latest `main` branch code, are your go-to.
 
-- `MAJOR` version changes when there are incompatible changes to the API,
-- `MINOR` version changes when features are added in a backward-compatible manner, and
-- `PATCH` version changes when backward-compatible bugs are fixed.
+Conversely, if stability is your primary concern, you should opt for the release tagged Latest, denoted by tags without Version modifiers, such as `v3.2.1`, `v3.2.2` etc. These tags are linked to the latest stable maintenance branch, like `release-v3.2`.
 
-## Milestones and Branching
+## Milestones, Branching, and Addressing Major Bugs
+
+**About:**
 
 + [OpenIM Milestones](https://github.com/OpenIMSDK/Open-IM-Server/milestones)
 + [OpenIM Tags](https://github.com/OpenIMSDK/Open-IM-Server/tags)
 + [OpenIM Branches](https://github.com/OpenIMSDK/Open-IM-Server/branches)
 
-When a significant milestone like v3.1.0 is achieved, a new branch `release-v3.1` is created. This branch contains all the code pertaining to this stable release. All bug fixes and features intended for the next version, v3.2.0, are merged into this branch.
+We create a new branch, such as `release-v3.1`, for each significant milestone (e.g., v3.1.0), housing all relevant code for that release. All enhancements and bug fixes targeting the subsequent version (e.g., v3.2.0) are integrated into this branch.
 
-The release of `PATCH` versions (Z in `X.Y.Z`) are driven by bug fixes, and these can be rolled out depending on the bug's priority or over a scheduled time. On the other hand, `MINOR` versions (Y in `X.Y.Z`) are released based on the project's roadmap, milestone completion, or on a scheduled timeline. Importantly, the API of minor versions is always backward-compatible.
+`PATCH` versions (represented by Z in `X.Y.Z`) are primarily propelled by bug fixes, and their release may be either priority-driven or scheduled. In contrast, `MINOR` versions (represented by Y in `X.Y.Z`) are contingent upon the project's roadmap, milestone completion, or a pre-established timeline, always maintaining backward-compatible APIs.
 
-## Dealing with Major Bugs
+When dealing with major bugs, we selectively merge the fix into the affected version (e.g., v3.1 or the `release-v3.1` branch), as well as the `main` branch. This dual pronged strategy ensures that users on older versions receive crucial bug fixes, while also keeping the `main` branch updated.
 
-In the event of a major bug discovery, the fix would selectively be merged into the previous version (e.g., v3.1 or the `release-v3.1` branch), as well as into the `main` branch. This is to ensure that users relying on the older version can still receive important bug fixes, while also keeping the main branch updated.
+We reinforce our approach to branch management and versioning with stringent testing protocols. Automated tests and code review sessions form vital components of maintaining a robust and reliable codebase.
 
-It's worth noting that a robust testing regime should be in place to ensure the integrity of all branches at any given time. Automated tests and code review sessions are crucial components of maintaining a healthy codebase.
+## Applying Principles: A Git Workflow Example
 
-To summarize, OpenIM's approach to branch management and versioning ensures a balance between introducing new features, fixing bugs, and maintaining backward compatibility. This strategy is vital for managing user expectations, supporting older versions, and paving the way for the project's continuous growth.
+The workflow to address a bug fix might follow these steps:
 
-## Git Workflow Example
-
-To put the above principles into practice, here's a Git workflow example that you might follow when working on a bug fix:
-
-```
-bashCopy code# Checkout the branch for the version that needs the bug fix
+```bash
+bashCopy codebashCopy code# Checkout the branch for the version that needs the bug fix
 git checkout release-v3.1
 
 # Create a new branch for the bug fix
@@ -93,9 +105,8 @@ git merge release-v3.1
 git push origin main
 ```
 
-Remember, communication with your team is key throughout this process, keeping everyone up-to-date with the changes being made.
+Throughout this process, active communication within the team is pivotal to maintaining transparency and consensus on changes.
 
+## Docker Images Version Management
 
-## Docker images version management
-
-+ [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
+For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md).
