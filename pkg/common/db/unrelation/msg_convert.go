@@ -58,9 +58,9 @@ func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs 
 			}
 			_, err = m.MsgCollection.InsertMany(ctx, newMsgDocs)
 			if err != nil {
-				log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID)
+				log.ZError(ctx, "convertAll insert many failed", err, "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
 			} else {
-				log.ZInfo(ctx, "convertAll insert many success", "conversationID", conversationID)
+				log.ZInfo(ctx, "msg doc convert", "conversationID", conversationID, "len(newMsgDocs)", len(newMsgDocs))
 			}
 		}
 	}
