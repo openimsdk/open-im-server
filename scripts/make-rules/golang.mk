@@ -44,8 +44,8 @@ ifeq ($(origin GOBIN), undefined)
 	GOBIN := $(GOPATH)/bin
 endif
 
-# COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ except those ending in.md
-COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/*))
+# COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ and ${ROOT_DIR}/tools/ except those ending in.md
+COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/*))
 ifeq (${COMMANDS},)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
@@ -127,8 +127,13 @@ go.build.%:
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
 		done; \
 	else \
-		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+		if [ -f $(ROOT_DIR)/cmd/$(COMMAND)/main.go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/main.go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
+		fi \
 	fi
 
 ## go.install: Install deployment openim

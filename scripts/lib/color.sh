@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,44 @@ COLOR_BBLACK='\033[40m';COLOR_BRED='\033[41m';
 COLOR_BGREEN='\033[42m';COLOR_BYELLOW='\033[43m';
 COLOR_BBLUE='\033[44m';COLOR_BMAGENTA='\033[45m';
 COLOR_BCYAN='\033[46m';COLOR_BWHITE='\033[47m';
+
+# Color definitions
+COLOR_SUFFIX="\033[0m"      # End all colors and special effects
+BLACK_PREFIX="\033[30m"     # Black prefix
+RED_PREFIX="\033[31m"       # Red prefix
+GREEN_PREFIX="\033[32m"     # Green prefix
+YELLOW_PREFIX="\033[33m"    # Yellow prefix
+BLUE_PREFIX="\033[34m"      # Blue prefix
+SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
+WHITE_PREFIX="\033[37m"     # White prefix
+BOLD_PREFIX="\033[1m"       # Bold prefix
+UNDERLINE_PREFIX="\033[4m"  # Underline prefix
+ITALIC_PREFIX="\033[3m"     # Italic prefix
+BRIGHT_GREEN_PREFIX='\033[1;32m' # Bright green prefix
+CYAN_PREFIX="\033[0;36m"     # Cyan prefix
+
+# --- helper functions for logs ---
+info()
+{
+    echo -e "[${GREEN_PREFIX}INFO${COLOR_SUFFIX}] " "$@"
+}
+warn()
+{
+    echo -e "[${YELLOW_PREFIX}WARN${COLOR_SUFFIX}] " "$@" >&2
+}
+fatal()
+{
+    echo -e "[${RED_PREFIX}ERROR${COLOR_SUFFIX}] " "$@" >&2
+    exit 1
+}
+debug()
+{
+    echo -e "[${BLUE_PREFIX}DEBUG${COLOR_SUFFIX}]===> " "$@"
+}
+success()
+{
+    echo -e "${BRIGHT_GREEN_PREFIX}===> [SUCCESS] <===${COLOR_SUFFIX}\n=> " "$@"
+}
 
 # Print colors you can use
 openim::color::print_color()

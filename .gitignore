@@ -156,7 +156,7 @@ flycheck_*.el
 # vendor/
 
 # Go workspace file
-go.work
+# go.work
 
 ### JetBrains ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider

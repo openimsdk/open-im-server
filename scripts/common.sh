@@ -19,7 +19,7 @@
 
 # Common utilities, variables and checks for all build scripts.
 set -o errexit
-set -o nounset
+set +o nounset
 set -o pipefail
 
 # Unset CDPATH, having it set messes up with script import paths
