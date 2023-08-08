@@ -2,7 +2,7 @@ go 1.20
 
 use (
 	.
-	./tools/component
+	./tools/changelog
 	./tools/infra
 	./tools/ncpu
 )

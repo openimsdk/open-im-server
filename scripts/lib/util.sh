@@ -729,3 +729,43 @@ function remove_space() {
     value=$*  # 获取传入的参数
     result=$(echo $value | sed 's/ //g')  # 去除空格
 }
+
+function gen_os_arch() {
+    # Get the current operating system and architecture
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    ARCH=$(uname -m)
+
+    # Select the repository home directory based on the operating system and architecture
+    if [[ "$OS" == "darwin" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="darwin/amd64"
+        else
+            REPO_DIR="darwin/386"
+        fi
+    elif [[ "$OS" == "linux" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="linux/amd64"
+        elif [[ "$ARCH" == "arm64" ]]; then
+            REPO_DIR="linux/arm64"
+        elif [[ "$ARCH" == "mips64" ]]; then
+            REPO_DIR="linux/mips64"
+        elif [[ "$ARCH" == "mips64le" ]]; then
+            REPO_DIR="linux/mips64le"
+        elif [[ "$ARCH" == "ppc64le" ]]; then
+            REPO_DIR="linux/ppc64le"
+        elif [[ "$ARCH" == "s390x" ]]; then
+            REPO_DIR="linux/s390x"
+        else
+            REPO_DIR="linux/386"
+        fi
+    elif [[ "$OS" == "windows" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="windows/amd64"
+        else
+            REPO_DIR="windows/386"
+        fi
+    else
+        echo -e "${RED_PREFIX}Unsupported OS: $OS${COLOR_SUFFIX}"
+        exit 1
+    fi
+}
