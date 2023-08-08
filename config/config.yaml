@@ -127,8 +127,6 @@ api:
 # apiURL is the address of the api, the access address of the app, use s3 must be configured
 # minio.endpoint can be configured as an intranet address,
 # minio.signEndpoint is minio public network address
-# minio.thumbnailApi is the address of the thumbnail service, the access address of the app, https://github.com/OpenIMSDK/minio-ext
-# minio.thumbnailUseSignEndpoint whether the url parameter for generating thumbnails uses a signed address, the default is fine
 object:
   enable: "minio"
   apiURL: "http://127.0.0.1:10002"
@@ -139,8 +137,6 @@ object:
     secretAccessKey: "openIM123"
     sessionToken: ""
     signEndpoint: "http://127.0.0.1:10005"
-    thumbnailApi: "http://127.0.0.1:10003"
-    thumbnailUseSignEndpoint: false
   cos:
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
     secretID: ""

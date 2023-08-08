@@ -299,29 +299,6 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			process += ",format," + format
 			opts = append(opts, oss.Process(process))
 		}
-		if opt.Video != nil {
-			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/video-snapshots?spm=a2c4g.11186623.0.0.23f743b0BR5WxX
-			// x-oss-process=video/snapshot,t_7000,f_jpg,w_800,h_600,m_fast
-			millisecond := int(opt.Video.Time / time.Millisecond)
-			if millisecond < 0 {
-				millisecond = 0
-			}
-			switch opt.Video.Format {
-			case videoSnapshotImageJpg, videoSnapshotImagePng:
-			default:
-				opt.Video.Format = videoSnapshotImageJpg
-			}
-			process := "video/snapshot,t_" + strconv.Itoa(millisecond) + ",f_" + opt.Video.Format
-			if opt.Video.Width > 0 {
-				process += ",w_" + strconv.Itoa(opt.Video.Width)
-			}
-			if opt.Video.Height > 0 {
-				process += ",h_" + strconv.Itoa(opt.Video.Height)
-			}
-			process += ",ar_auto,m_fast"
-			fmt.Println(process)
-			opts = append(opts, oss.Process(process))
-		}
 		if opt.ContentType != "" {
 			opts = append(opts, oss.ResponseContentType(opt.ContentType))
 		}

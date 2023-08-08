@@ -122,18 +122,10 @@ type Image struct {
 	Height int    `json:"height"`
 }
 
-type Video struct {
-	Width  int           `json:"width"`
-	Height int           `json:"height"`
-	Time   time.Duration `json:"time"`
-	Format string        `json:"format"`
-}
-
 type AccessURLOption struct {
 	ContentType string `json:"contentType"`
 	Filename    string `json:"filename"`
 	Image       *Image `json:"image"`
-	Video       *Video `json:"video"`
 }
 
 type Interface interface {
