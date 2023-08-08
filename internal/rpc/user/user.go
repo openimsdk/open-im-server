@@ -36,10 +36,11 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 
-	"google.golang.org/grpc"
-
+	pbuser "github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
