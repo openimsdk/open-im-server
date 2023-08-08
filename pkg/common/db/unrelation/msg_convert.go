@@ -25,7 +25,7 @@ func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs 
 			continue
 		}
 		if len(msgDocs) < 1 {
-			log.ZInfo(ctx, "len(msgs) < 1", "conversationID", conversationID)
+			log.ZDebug(ctx, "len(msgs) < 1", "conversationID", conversationID)
 			continue
 		}
 		log.ZInfo(ctx, "msg doc convert", "conversationID", conversationID, "len(msgDocs)", len(msgDocs))
