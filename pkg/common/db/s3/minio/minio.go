@@ -58,7 +58,7 @@ const (
 	maxImageWidth  = 1024
 	maxImageHeight = 1024
 	maxImageSize   = 1024 * 1024 * 50
-	pathInfo       = "/minio/thumbnail"
+	pathInfo       = "openim/thumbnail"
 )
 
 func NewMinio() (s3.Interface, error) {
@@ -82,7 +82,7 @@ func NewMinio() (s3.Interface, error) {
 		lock:      &sync.Mutex{},
 		init:      false,
 	}
-	if conf.SignEndpoint == "" {
+	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
 		m.sign = m.core.Client
 	} else {
 		su, err := url.Parse(conf.SignEndpoint)
@@ -141,7 +141,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		return err
 	}
 	func() {
-		if conf.SignEndpoint == "" {
+		if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
 			return
 		}
 		defer func() {
