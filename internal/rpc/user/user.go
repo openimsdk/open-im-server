@@ -20,16 +20,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	pbuser "github.com/OpenIMSDK/protocol/user"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/tx"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
