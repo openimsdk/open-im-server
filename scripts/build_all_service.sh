@@ -19,21 +19,8 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.sh
 source $SCRIPTS_ROOT/path_info.sh
-source $SCRIPTS_ROOT/function.sh
-
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
-
-echo -e  ""
-
-echo -e "${BACKGROUND_BLUE}===============> Building all using make build binary files ${COLOR_SUFFIX}" 
-
-echo -e  ""
-echo -e "${BOLD_PREFIX}____________________________________________________________ ${COLOR_SUFFIX}"
-
+source $SCRIPTS_ROOT/lib/init.sh
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
@@ -68,43 +55,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Get the current operating system and architecture
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m)
-
-# Select the repository home directory based on the operating system and architecture
-if [[ "$OS" == "darwin" ]]; then
-    if [[ "$ARCH" == "x86_64" ]]; then
-        REPO_DIR="darwin/amd64"
-    else
-        REPO_DIR="darwin/386"
-    fi
-elif [[ "$OS" == "linux" ]]; then
-    if [[ "$ARCH" == "x86_64" ]]; then
-        REPO_DIR="linux/amd64"
-    elif [[ "$ARCH" == "arm64" ]]; then
-        REPO_DIR="linux/arm64"
-    elif [[ "$ARCH" == "mips64" ]]; then
-        REPO_DIR="linux/mips64"
-    elif [[ "$ARCH" == "mips64le" ]]; then
-        REPO_DIR="linux/mips64le"
-    elif [[ "$ARCH" == "ppc64le" ]]; then
-        REPO_DIR="linux/ppc64le"
-    elif [[ "$ARCH" == "s390x" ]]; then
-        REPO_DIR="linux/s390x"
-    else
-        REPO_DIR="linux/386"
-    fi
-elif [[ "$OS" == "windows" ]]; then
-    if [[ "$ARCH" == "x86_64" ]]; then
-        REPO_DIR="windows/amd64"
-    else
-        REPO_DIR="windows/386"
-    fi
-else
-    echo -e "${RED_PREFIX}Unsupported OS: $OS${COLOR_SUFFIX}"
-    exit 1
-fi
+gen_os_arch
 
 # Determine if all scripts were successfully built
 BUILD_SUCCESS=true
