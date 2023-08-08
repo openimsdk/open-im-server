@@ -23,6 +23,7 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #fixme Put the shell scripts name here
 need_to_start_server_shell=(
+  ${SCRIPTS_ROOT}/start_component_check.sh
   ${SCRIPTS_ROOT}/start_rpc_service.sh
   ${SCRIPTS_ROOT}/msg_gateway_start.sh
   ${SCRIPTS_ROOT}/push_start.sh
