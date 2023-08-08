@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+
 	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	"github.com/spf13/cobra"

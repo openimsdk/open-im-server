@@ -46,6 +46,12 @@ BIN_DIR := $(OUTPUT_DIR)/bin
 $(shell mkdir -p $(BIN_DIR))
 endif
 
+# BIN_TOOLS_DIR: Directory where executable files are stored.
+ifeq ($(origin BIN_TOOLS_DIR),undefined)
+BIN_TOOLS_DIR := $(OUTPUT_DIR)/bin-tools
+$(shell mkdir -p $(BIN_TOOLS_DIR))
+endif
+
 # TOOLS_DIR: The directory where tools are stored for build and testing.
 ifeq ($(origin TOOLS_DIR),undefined)
 TOOLS_DIR := $(OUTPUT_DIR)/tools

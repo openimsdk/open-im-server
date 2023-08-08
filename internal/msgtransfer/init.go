@@ -22,6 +22,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	openKeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mw"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
@@ -30,9 +34,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	openKeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mw"
 )
 
 type MsgTransfer struct {

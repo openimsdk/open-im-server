@@ -17,8 +17,9 @@ package convert
 import (
 	"time"
 
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/protocol/sdkws"
+
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 func UsersDB2Pb(users []*relationTb.UserModel) (result []*sdkws.UserInfo) {

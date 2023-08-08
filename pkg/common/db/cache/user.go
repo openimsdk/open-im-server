@@ -17,9 +17,12 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/protocol/user"
+	"hash/crc32"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/user"
+	"github.com/OpenIMSDK/tools/errs"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
@@ -33,7 +36,7 @@ const (
 	userGlobalRecvMsgOptKey   = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
-	statusMod                 = 500
+	statusMod                 = 501
 )
 
 type UserCache interface {
@@ -161,15 +164,12 @@ func (u *UserCacheRedis) getOnlineStatusKey(userID string) string {
 	return olineStatusKey + userID
 }
 
-// GetUserStatus get user status
+// GetUserStatus get user status.
 func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	var res []*user.OnlineStatus
 	for _, userID := range userIDs {
-		UserIDNum, err := strconv.Atoi(userID)
-		if err != nil {
-			return nil, err
-		}
-		var modKey = strconv.Itoa(UserIDNum % statusMod)
+		UserIDNum := crc32.ChecksumIEEE([]byte(userID))
+		modKey := strconv.Itoa(int(UserIDNum % statusMod))
 		var onlineStatus user.OnlineStatus
 		key := olineStatusKey + modKey
 		result, err := u.rdb.HGet(ctx, key, userID).Result()
@@ -183,12 +183,12 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 				})
 				continue
 			} else {
-				return nil, err
+				return nil, errs.Wrap(err)
 			}
 		}
 		err = json.Unmarshal([]byte(result), &onlineStatus)
 		if err != nil {
-			return nil, err
+			return nil, errs.Wrap(err)
 		}
 		onlineStatus.UserID = userID
 		res = append(res, &onlineStatus)
@@ -196,27 +196,24 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 	return res, nil
 }
 
-// SetUserStatus Set the user status and save it in redis
+// SetUserStatus Set the user status and save it in redis.
 func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
 	for _, status := range list {
 		var isNewKey int64
-		UserIDNum, err := strconv.Atoi(status.UserID)
-		if err != nil {
-			return err
-		}
-		var modKey = strconv.Itoa(UserIDNum % statusMod)
+		UserIDNum := crc32.ChecksumIEEE([]byte(status.UserID))
+		modKey := strconv.Itoa(int(UserIDNum % statusMod))
 		key := olineStatusKey + modKey
 		jsonData, err := json.Marshal(status)
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 		isNewKey, err = u.rdb.Exists(ctx, key).Result()
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 		_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 		if isNewKey > 0 {
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)

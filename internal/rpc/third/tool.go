@@ -18,9 +18,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"

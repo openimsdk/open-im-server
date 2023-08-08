@@ -1,8 +1,5 @@
 docs/.generated_docs
-docs/guide/en-US/cmd/iam-apiserver.md
-docs/guide/en-US/cmd/iam-authz-server.md
-docs/guide/en-US/cmd/iam-pump.md
-docs/guide/en-US/cmd/iam-watcher.md
+
 docs/guide/en-US/cmd/openim/openim.md
 docs/guide/en-US/cmd/openim/openim_color.md
 docs/guide/en-US/cmd/openim/openim_completion.md

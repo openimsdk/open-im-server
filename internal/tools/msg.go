@@ -24,13 +24,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 	"github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -38,6 +31,14 @@ import (
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 )
 
 type MsgTool struct {

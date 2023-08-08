@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Welcome to the Open-IM-Server installation scripts."
 echo "Please select an deploy option:"

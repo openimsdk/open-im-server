@@ -14,7 +14,7 @@
 
 FROM ubuntu
 
-WORKDIR /Open-IM-Server/bin
+WORKDIR /openim/openim-server/bin
 
 RUN apt-get update && apt-get install apt-transport-https && apt-get install procps\
 &&apt-get install net-tools
@@ -27,6 +27,6 @@ RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends ca-certificates curl
 COPY ./openim-rpc-msg ./
 
-VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config"]
+VOLUME ["/openim/openim-server/logs","/openim/openim-server/config"]
 
 CMD ["./openim-rpc-msg", "--port", "10130", "--prometheus_port","20130"]

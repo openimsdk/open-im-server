@@ -17,17 +17,19 @@ package msggateway
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+
+	"github.com/OpenIMSDK/protocol/constant"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/protocol/constant"
 
 	"github.com/redis/go-redis/v9"
 
@@ -91,6 +93,7 @@ func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRe
 	u := rpcclient.NewUserRpcClient(client)
 	ws.userClient = &u
 }
+
 func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
 	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
 	if err != nil {
@@ -107,9 +110,7 @@ func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, sta
 		if err != nil {
 			log.ZWarn(ctx, "CallbackUserOffline err", err)
 		}
-
 	}
-
 }
 
 func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {

@@ -18,17 +18,18 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/apistruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 )
 
 func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (err error) {
