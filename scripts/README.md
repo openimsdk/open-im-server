@@ -84,7 +84,37 @@ Each directory and script in the structure should be understood as a part of a l
 
 - Linux MIPS64LE (linux_mips64le) : Suitable for 64-bit Linux systems with little endian MIPS architecture.
 
- 
+## Get started quickly - demo.sh
+
+Is the `demo.sh` script teaching you how to quickly get started with OpenIM development and use
+
+
+Steps to run demo:
+
+```sh
+make demo
+```
+
+Instructions for producing the demo movie:
+
+```bash
+# Create temporary directory
+mkdir /tmp/kb-demo
+cd /tmp/kb-demo
+
+asciinema rec
+<path-to-KB-repo>/scripts/demo/run.sh
+
+<CTRL-C> to terminate the script
+<CTRL-D> to terminate the asciinema recording
+<CTRL-C> to save the recording locally
+
+# Edit the recorded file by editing the controller-gen path
+# Once you are happy with the recording, use svg-term program to generate the svg
+
+svg-term --cast=<movie-id> --out _output/demo.svg --window
+```
+
 
 ## examples
 Scripts to perform various build, install, analysis, etc operations.

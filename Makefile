@@ -191,6 +191,11 @@ advertise:
 release: release.verify release.ensure-tag
 	@scripts/release.sh
 
+## demo: Run demo ✨
+.PHONY: demo
+demo:
+	@$(MAKE) go.demo
+
 ## help: Show this help info. ✨
 .PHONY: help
 help: Makefile

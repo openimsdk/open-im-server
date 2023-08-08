@@ -47,6 +47,13 @@ ITALIC_PREFIX="\033[3m"     # Italic prefix
 BRIGHT_GREEN_PREFIX='\033[1;32m' # Bright green prefix
 CYAN_PREFIX="\033[0;36m"     # Cyan prefix
 
+# --- make demo (run demo) ---
+readonly reset=$(tput sgr0)
+readonly green=$(tput bold; tput setaf 2)
+readonly yellow=$(tput bold; tput setaf 3)
+readonly blue=$(tput bold; tput setaf 6)
+readonly timeout=$(if [ "$(uname)" == "Darwin" ]; then echo "1"; else echo "0.1"; fi)
+
 # --- helper functions for logs ---
 info()
 {

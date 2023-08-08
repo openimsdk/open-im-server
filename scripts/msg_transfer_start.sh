@@ -32,7 +32,7 @@ logs_dir="$OPENIM_ROOT/logs"
 cd $OPENIM_ROOT
 
 list1=$(cat $config_path | grep messageTransferPrometheusPort | awk -F '[:]' '{print $NF}')
-list_to_string $list1
+openim::util:list-to-string $list1
 prome_ports=($ports_array)
 
 #Check if the service exists

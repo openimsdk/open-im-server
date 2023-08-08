@@ -710,12 +710,71 @@ fi
 
 # ex: ts=2 sw=2 et filetype=sh
 
+function openim::util::desc() {
+    openim::util:run::maybe_first_prompt
+    rate=25
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      rate=1000
+    fi
+    echo "$blue# $@$reset" | pv -qL $rate
+    openim::util:run::prompt
+}
+
+function openim::util:run::prompt() {
+    echo -n "$yellow\$ $reset"
+}
+
+started=""
+function openim::util:run::maybe_first_prompt() {
+    if [ -z "$started" ]; then
+        openim::util:run::prompt
+        started=true
+    fi
+}
+
+# After a `run` this variable will hold the stdout of the command that was run.
+# If the command was interactive, this will likely be garbage.
+DEMO_RUN_STDOUT=""
+
+function openim::util::run() {
+    openim::util:run::maybe_first_prompt
+    rate=25
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      rate=1000
+    fi
+    echo "$green$1$reset" | pv -qL $rate
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      sleep 0.5
+    fi
+    OFILE="$(mktemp -t $(basename $0).XXXXXX)"
+    if [ "$(uname)" == "Darwin" ]; then
+       script -q "$OFILE" $1
+    else
+       script -eq -c "$1" -f "$OFILE"
+    fi
+    r=$?
+    read -d '' -t "${timeout}" -n 10000 # clear stdin
+    openim::util:run::prompt
+    if [ -z "$DEMO_AUTO_RUN" ]; then
+      read -s
+    fi
+    DEMO_RUN_STDOUT="$(tail -n +2 $OFILE | sed 's/\r//g')"
+    return $r
+}
+
+function openim::util::run::relative() {
+    for arg; do
+        echo "$(realpath $(dirname $(which $0)))/$arg" | sed "s|$(realpath $(pwd))|.|"
+    done
+}
+
+trap "echo" EXIT
+
 
 # input: [10023, 2323, 3434]
 # output: 10023 2323 3434
-
 # Function function: Converts a list to a string, removing Spaces and parentheses
-function list_to_string() {
+function openim::util:list-to-string() {
     ports_list=$*  # 获取传入的参数列表
     sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
     sub_s2=${sub_s1//,/ }  # 将逗号替换为空格
@@ -725,12 +784,12 @@ function list_to_string() {
 }
 
 # Function Function: Remove Spaces in the string
-function remove_space() {
+function openim::util::remove_space() {
     value=$*  # 获取传入的参数
     result=$(echo $value | sed 's/ //g')  # 去除空格
 }
 
-function gen_os_arch() {
+function openim::util::gen_os_arch() {
     # Get the current operating system and architecture
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
     ARCH=$(uname -m)
