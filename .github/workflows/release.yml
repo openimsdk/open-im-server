@@ -43,8 +43,8 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro':
           distribution: goreleaser
           version: latest
-          workdir: ./build/.goreleaser.yaml
-          args: release --clean
+          workdir: .
+          args: release -f ./build/goreleaser.yaml --rm-dist --clean
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
           # Your GoReleaser Pro key, if you are using the 'goreleaser-pro'
