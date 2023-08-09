@@ -12,29 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ncpu
 
 import (
 	"fmt"
-	"log"
+	"runtime"
+
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 func main() {
-	log.Println("Current module is still under development.")
-	message := `
-Current module is still under development.
-
-____                       _____  __  __ 
-/ __ \                     |_   _||  \/  |
-| |  | | _ __    ___  _ __    | |  | \  / |
-| |  | || '_ \  / _ \| '_ \   | |  | |\/| |
-| |__| || |_) ||  __/| | | | _| |_ | |  | |
-\____/ | .__/  \___||_| |_||_____||_|  |_|
-	   | |                                
-	   |_|                                
-
-Keep checking for updates!
-`
-
-	fmt.Println(message)
+	maxprocs.Set()
+	fmt.Print(runtime.GOMAXPROCS(0))
 }

@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ncpu
 
-import (
-	"fmt"
-	"runtime"
+import "testing"
 
-	"go.uber.org/automaxprocs/maxprocs"
-)
-
-func main() {
-	maxprocs.Set()
-	fmt.Print(runtime.GOMAXPROCS(0))
+func Test_main(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "Test_main",
+		},
+		{
+			name: "Test_main2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			main()
+		})
+	}
 }
