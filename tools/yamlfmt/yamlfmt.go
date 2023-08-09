@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // OPENIM plan on prow tools
-package main
+package yamlfmt
 
 import (
 	"flag"

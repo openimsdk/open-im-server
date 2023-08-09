@@ -12,24 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package infra
 
-import "testing"
+import (
+	"fmt"
+	"log"
+)
 
-func Test_main(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "Test_main",
-		},
-		{
-			name: "Test_main2",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			main()
-		})
-	}
+func main() {
+	log.Println("Current module is still under development.")
+	message := `
+Current module is still under development.
+
+____                       _____  __  __ 
+/ __ \                     |_   _||  \/  |
+| |  | | _ __    ___  _ __    | |  | \  / |
+| |  | || '_ \  / _ \| '_ \   | |  | |\/| |
+| |__| || |_) ||  __/| | | | _| |_ | |  | |
+\____/ | .__/  \___||_| |_||_____||_|  |_|
+	   | |                                
+	   |_|                                
+
+Keep checking for updates!
+`
+
+	fmt.Println(message)
 }

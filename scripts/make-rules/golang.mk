@@ -130,9 +130,10 @@ go.build.%:
 		if [ -f $(ROOT_DIR)/cmd/$(COMMAND)/main.go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
-		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/main.go ]; then \
+		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-			$(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
+			$(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go; \
+			chmod +x $(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT); \
 		fi \
 	fi
 
