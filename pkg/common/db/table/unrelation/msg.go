@@ -27,10 +27,11 @@ import (
 )
 
 const (
-	singleGocMsgNum = 5000
-	Msg             = "msg"
-	OldestList      = 0
-	NewestList      = -1
+	singleGocMsgNum     = 100
+	singleGocMsgNum5000 = 5000
+	Msg                 = "msg"
+	OldestList          = 0
+	NewestList          = -1
 )
 
 type MsgDocModel struct {
@@ -128,6 +129,7 @@ type MsgDocModelInterface interface {
 		pageNumber int32,
 		showNumber int32,
 	) (msgCount int64, userCount int64, groups []*GroupCount, dateCount map[string]int64, err error)
+	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
 func (MsgDocModel) TableName() string {
@@ -136,6 +138,10 @@ func (MsgDocModel) TableName() string {
 
 func (MsgDocModel) GetSingleGocMsgNum() int64 {
 	return singleGocMsgNum
+}
+
+func (MsgDocModel) GetSingleGocMsgNum5000() int64 {
+	return singleGocMsgNum5000
 }
 
 func (m *MsgDocModel) IsFull() bool {

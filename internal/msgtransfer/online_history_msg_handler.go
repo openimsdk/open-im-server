@@ -145,7 +145,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 					len(modifyMsgList),
 				)
 				conversationIDMsg := msgprocessor.GetChatConversationIDByMsg(ctxMsgList[0].message)
-				conversationIDNotification := msgprocessor.GetNotificationConversationID(ctxMsgList[0].message)
+				conversationIDNotification := msgprocessor.GetNotificationConversationIDByMsg(ctxMsgList[0].message)
 				och.handleMsg(ctx, msgChannelValue.uniqueKey, conversationIDMsg, storageMsgList, notStorageMsgList)
 				och.handleNotification(
 					ctx,
