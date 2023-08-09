@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # A set of helpers for tests
 
 openim::test::clear_all() {
