@@ -680,6 +680,33 @@ function openim::util::ensure-cfssl {
   popd > /dev/null || return 1
 }
 
+# openim::util::ensure-docker-buildx
+# Check if we have "docker buildx" commands available
+#
+function openim::util::ensure-docker-buildx {
+  # podman returns 0 on `docker buildx version`, docker on `docker buildx`. One of them must succeed.
+  if docker buildx version >/dev/null 2>&1 || docker buildx >/dev/null 2>&1; then
+    return 0
+  else
+    echo "ERROR: docker buildx not available. Docker 19.03 or higher is required with experimental features enabled"
+    exit 1
+  fi
+}
+
+# openim::util::ensure-bash-version
+# Check if we are using a supported bash version
+#
+function openim::util::ensure-bash-version {
+  # shellcheck disable=SC2004
+  if ((${BASH_VERSINFO[0]}<4)) || ( ((${BASH_VERSINFO[0]}==4)) && ((${BASH_VERSINFO[1]}<2)) ); then
+    echo "ERROR: This script requires a minimum bash version of 4.2, but got version of ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"
+    if [ "$(uname)" = 'Darwin' ]; then
+      echo "On macOS with homebrew 'brew install bash' is sufficient."
+    fi
+    exit 1
+  fi
+}
+
 # openim::util::ensure-gnu-sed
 # Determines which sed binary is gnu-sed on linux/darwin
 #
@@ -699,6 +726,26 @@ function openim::util::ensure-gnu-sed {
     return 1
   fi
   openim::util::sourced_variable "${SED}"
+}
+
+# openim::util::ensure-gnu-date
+# Determines which date binary is gnu-date on linux/darwin
+#
+# Sets:
+#  DATE: The name of the gnu-date binary
+#
+function openim::util::ensure-gnu-date {
+  # NOTE: the echo below is a workaround to ensure date is executed before the grep.
+  date_help="$(LANG=C date --help 2>&1 || true)"
+  if echo "${date_help}" | grep -q "GNU\|BusyBox"; then
+    DATE="date"
+  elif command -v gdate &>/dev/null; then
+    DATE="gdate"
+  else
+    openim::log::error "Failed to find GNU date as date or gdate. If you are on Mac: brew install coreutils." >&2
+    return 1
+  fi
+  openim::util::sourced_variable "${DATE}"
 }
 
 # openim::util::check-file-in-alphabetical-order <file>
