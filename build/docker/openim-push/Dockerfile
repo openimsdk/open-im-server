@@ -46,4 +46,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE 10170
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-push --port 10170
+CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push --port 10170

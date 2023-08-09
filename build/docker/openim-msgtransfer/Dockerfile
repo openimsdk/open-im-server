@@ -44,4 +44,4 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-msgtransfer
+CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer

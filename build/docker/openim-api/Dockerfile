@@ -39,11 +39,11 @@ FROM test:v1
 
 WORKDIR /openim/openim-server
 
-RUN mkdir -p /openim/openim-server/$(cat ~/os)/$(cat ~/arch)/bin
-RUN mkdir -p /openim/openim-server/go/$(go env GOOS)/$(go env GOARCH)/bin
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-EXPOSE ${10002}
+ENV PORT 10002
 
-CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-api --port 10002 -c ${SERVER_WORKDIR}/config"]
+EXPOSE ${PORT}
+
+CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-api --port ${PORT} -c ${SERVER_WORKDIR}/config"]
