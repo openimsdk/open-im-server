@@ -35,4 +35,8 @@ cmd="./${component_check}"
 echo "==========================start components checking===========================">>$OPENIM_ROOT/logs/openIM.log
 $cmd
 
+if [ $? -eq 0 ]; then
+    exit 1
+fi
+
 

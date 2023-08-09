@@ -28,7 +28,7 @@ import (
 const (
 	cfgPath                  = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
-	maxRetry                 = 10000
+	maxRetry                 = 100
 	componentStartErrCode    = 6000
 	configErrCode            = 6001
 )
@@ -78,6 +78,7 @@ func main() {
 		// Check Minio
 		if err := checkMinio(); err != nil {
 			if index := strings.Index(err.Error(), utils.IntToString(configErrCode)); index != -1 {
+				successPrint(fmt.Sprint("Minio starts successfully"))
 				warningPrint(fmt.Sprintf("%v. Please modify your config file", err.Error()))
 			} else {
 				errorPrint(fmt.Sprintf("Starting Minio failed: %v. Please make sure your Minio service has started", err.Error()))
@@ -110,8 +111,9 @@ func main() {
 			successPrint(fmt.Sprint("Kafka starts successfully"))
 		}
 		successPrint(fmt.Sprint("All components starts successfully"))
-		break
+		os.Exit(0)
 	}
+	os.Exit(1)
 }
 
 func exactIP(urll string) string {
@@ -275,5 +277,5 @@ func successPrint(s string) {
 }
 
 func warningPrint(s string) {
-	fmt.Printf("\x1b[%dmWarning: %v\x1b[0m\n", 33, s)
+	fmt.Printf("\x1b[%dmWarning: But %v\x1b[0m\n", 33, s)
 }
