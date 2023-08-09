@@ -693,8 +693,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
-	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
-	if err == nil {
+	if _, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
 		inGroup = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
@@ -730,11 +729,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+		if !inGroup {
+			s.Notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID)
+		}
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
-	}
-	if member != nil {
-		s.Notification.MemberEnterNotification(ctx, req)
 	}
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
@@ -781,7 +780,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID)
+		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
