@@ -34,8 +34,8 @@ const (
 )
 
 var (
-	ErrComponentStart = errs.NewCodeError(componentStartErr, "ComponentStartErr")
-	Errconfig         = errs.NewCodeError(configErr, "")
+	ErrComponentStart = errs.NewCodeError(componentStartErrCode, "ComponentStartErr")
+	ErrConfig         = errs.NewCodeError(configErrCode, "Config file is incorrect")
 )
 
 func initCfg() error {
@@ -77,7 +77,11 @@ func main() {
 
 		// Check Minio
 		if err := checkMinio(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Minio failed: %v.Please make sure your Minio service has started", err.Error()))
+			if index := strings.Index(err.Error(), utils.IntToString(configErrCode)); index != -1 {
+				warningPrint(fmt.Sprintf("%v Please modify your config file", err.Error()))
+			} else {
+				errorPrint(fmt.Sprintf("Starting Minio failed: %v.Please make sure your Minio service has started", err.Error()))
+			}
 			continue
 		} else {
 			successPrint(fmt.Sprint("Minio starts successfully"))
@@ -166,7 +170,7 @@ func checkMongo() error {
 func checkMinio() error {
 	if config.Config.Object.Enable == "minio" {
 		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.Endpoint) == "127.0.0.1" {
-			return ErrComponentStart.Wrap("apiURL or endpoint contain 127.0.0.1. Please modify your config file")
+			return ErrConfig.Wrap("apiURL or endpoint contain 127.0.0.1.")
 		}
 		conf := config.Config.Object.Minio
 		u, _ := url.Parse(conf.Endpoint)
@@ -268,4 +272,8 @@ func errorPrint(s string) {
 
 func successPrint(s string) {
 	fmt.Printf("\x1b[%dm%v\x1b[0m\n", 32, s)
+}
+
+func warningPrint(s string) {
+	fmt.Printf("\x1b[%dmhello world\x1b[0m\n", 33)
 }
