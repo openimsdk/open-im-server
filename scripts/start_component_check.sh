@@ -30,6 +30,7 @@ bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 
 cd ${component_check_binary_root}
+echo -e "${YELLOW_PREFIX}=======>$PWD${COLOR_SUFFIX}"
 cmd="nohup ./${component_check}"
 echo "==========================start components checking===========================">>$OPENIM_ROOT/logs/openIM.log
 $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
