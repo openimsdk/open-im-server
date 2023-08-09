@@ -5,4 +5,5 @@ use (
 	./tools/changelog
 	./tools/infra
 	./tools/ncpu
+	./tools/yamlfmt
 )

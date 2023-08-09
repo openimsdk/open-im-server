@@ -17,6 +17,8 @@
 # Controls verbosity of the script output and logging.
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
 
+souorce $(dirname ${BASH_SOURCE})/color.sh
+
 # Handler for when we exit automatically on an error.
 # Borrowed from https://gist.github.com/ahendrix/7030300
 openim::log::errexit() {

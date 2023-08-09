@@ -13,6 +13,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# this script is used to check whether the code is formatted by gofmt or not
+#
+# Usage: source scripts/lib/util.sh
+
+
+#1、将IP写在一个文件里，比如文件名为hosts_file，一行一个IP地址。
+#2、修改ssh-mutual-trust.sh里面的用户名及密码，默认为root用户及密码123。
+# hosts_file_path="path/to/your/hosts/file"
+# openim:util::setup_ssh_key_copy "$hosts_file_path" "root" "123"
+function openim:util::setup_ssh_key_copy() {
+  local hosts_file="$1"
+  local username="${2:-root}"
+  local password="${3:-123}"
+
+  local sshkey_file=~/.ssh/id_rsa.pub
+
+  # check sshkey file 
+  if [[ ! -e $sshkey_file ]]; then
+    expect -c "
+    spawn ssh-keygen -t rsa
+    expect \"Enter*\" { send \"\n\"; exp_continue; }
+    "
+  fi
+
+  # get hosts list
+  local hosts=$(awk '/^[^#]/ {print $1}' "${hosts_file}")
+
+  ssh_key_copy() {
+    local target=$1
+
+    # delete history
+    sed -i "/$target/d" ~/.ssh/known_hosts
+
+    # copy key 
+    expect -c "
+    set timeout 100
+    spawn ssh-copy-id $username@$target
+    expect {
+      \"yes/no\" { send \"yes\n\"; exp_continue; }
+      \"*assword\" { send \"$password\n\"; }
+      \"already exist on the remote system\" { exit 1; }
+    }
+    expect eof
+    "
+  }
+
+  # auto sshkey pair
+  for host in $hosts; do
+    if ! ping -i 0.2 -c 3 -W 1 "$host" > /dev/null 2>&1; then
+      echo "[ERROR]: Can't connect $host"
+      continue
+    fi
+
+    local host_entry=$(awk "/$host/"'{print $1, $2}' /etc/hosts)
+    if [[ $host_entry ]]; then
+      local hostaddr=$(echo "$host_entry" | awk '{print $1}')
+      local hostname=$(echo "$host_entry" | awk '{print $2}')
+      ssh_key_copy "$hostaddr"
+      ssh_key_copy "$hostname"
+    else
+      ssh_key_copy "$host"
+    fi
+  done
+}
 
 function openim::util::sourced_variable {
   # Call this function to tell shellcheck that a variable is supposed to
@@ -774,7 +838,7 @@ trap "echo" EXIT
 # input: [10023, 2323, 3434]
 # output: 10023 2323 3434
 # Function function: Converts a list to a string, removing Spaces and parentheses
-function openim::util:list-to-string() {
+function openim::util::list-to-string() {
     ports_list=$*  # 获取传入的参数列表
     sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
     sub_s2=${sub_s1//,/ }  # 将逗号替换为空格

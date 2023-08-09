@@ -36,11 +36,11 @@ ulimit -n 200000
 list1=$(cat $config_path | grep openImMessageGatewayPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
 list3=$(cat $config_path | grep messageGatewayPrometheusPort | awk -F '[:]' '{print $NF}')
-openim::util:list-to-string $list1
+openim::util::list-to-string $list1
 rpc_ports=($ports_array)
-openim::util:list-to-string $list2
+openim::util::list-to-string $list2
 ws_ports=($ports_array)
-openim::util:list-to-string $list3
+openim::util::list-to-string $list3
 prome_ports=($ports_array)
 if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 
