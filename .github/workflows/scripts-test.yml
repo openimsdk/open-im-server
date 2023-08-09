@@ -61,8 +61,7 @@ jobs:
 
     - name: Build all services
       run: |
-        sudo chmod +x ./scripts/build_all_service.sh
-        sudo ./scripts/build_all_service.sh
+        sudo make build
         sudo cat logs/openIM.log 2>/dev/null
       shell: bash
 
@@ -71,7 +70,6 @@ jobs:
         sudo chmod +x ./scripts/start_all.sh
         sudo ./scripts/start_all.sh
         sudo cat logs/openIM.log 2>/dev/null
-      continue-on-error: true
       shell: bash
 
     - name: Check all services
