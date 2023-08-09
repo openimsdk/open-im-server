@@ -38,6 +38,7 @@ readonly RELEASE_IMAGES="${LOCAL_OUTPUT_ROOT}/release-images"
 # OpenIM github account info
 readonly OPENIM_GITHUB_ORG=OpenIMSDK
 readonly OPENIM_GITHUB_REPO=Open-IM-Server
+readonly CHAT_GITHUB_REPO=chat
 
 readonly ARTIFACT=openim.tar.gz
 readonly CHECKSUM=${ARTIFACT}.sha1sum

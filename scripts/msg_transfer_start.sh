@@ -18,9 +18,8 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
-source $SCRIPTS_ROOT/function.sh
 
 echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
 echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"

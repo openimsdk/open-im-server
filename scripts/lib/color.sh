@@ -53,6 +53,9 @@ CYAN_PREFIX="\033[0;36m"     # Cyan prefix
 
 # --- make demo (run demo) ---
 reset=$(tput sgr0)
+bold=$(tput bold)
+black=$(tput setaf 0)
+red=$(tput setaf 1)
 green=$(tput bold; tput setaf 2)
 yellow=$(tput bold; tput setaf 3)
 blue=$(tput bold; tput setaf 6)

@@ -97,7 +97,6 @@ openim::chat::scrape() {
     curl -s -S "${OPENIM_INTEGRATION_CHAT_URL}/metrics" > "${CHAT_SCRAPE_DIR}/next" && mv "${CHAT_SCRAPE_DIR}/next" "${CHAT_SCRAPE_DIR}/$(date +%s).scrape"
 }
 
-
 openim::chat::stop() {
   if [[ -n "${CHAT_SCRAPE_PID:-}" ]] && [[ -n "${CHAT_SCRAPE_DIR:-}" ]] ; then
     kill "${CHAT_SCRAPE_PID}" &>/dev/null || :
