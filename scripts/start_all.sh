@@ -70,6 +70,7 @@ cd  $SCRIPTS_ROOT
 
 # FIXME Put the shell script names here
 need_to_start_server_shell=(
+  start_component_check.sh
   start_rpc_service.sh
   push_start.sh
   msg_transfer_start.sh
