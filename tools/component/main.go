@@ -81,8 +81,8 @@ func main() {
 				warningPrint(fmt.Sprintf("%v. Please modify your config file", err.Error()))
 			} else {
 				errorPrint(fmt.Sprintf("Starting Minio failed: %v. Please make sure your Minio service has started", err.Error()))
+				continue
 			}
-			continue
 		} else {
 			successPrint(fmt.Sprint("Minio starts successfully"))
 		}
