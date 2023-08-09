@@ -63,7 +63,7 @@ echo -e "${BLUE_PREFIX}================> Architecture: $architecture${COLOR_SUFF
 
 # Set the BIN_DIR based on the architecture and version
 BIN_DIR=${supported_architectures["$version-$architecture"]}
-BIN_DIR_TOOLS=${supported_architectures["$version-$architecture"]}
+BIN_DIR_TOOLS=${supported_architectures_tools["$version-$architecture"]}
 
 echo -e "${BLUE_PREFIX}================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR${COLOR_SUFFIX}"
 
