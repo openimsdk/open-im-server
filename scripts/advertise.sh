@@ -17,6 +17,8 @@
 set -e
 set -o pipefail
 
+. $(dirname ${BASH_SOURCE})/lib/init.sh
+
 trap 'echo "Script interrupted."; exit 1' INT
 
 # Function for colored echo
@@ -24,24 +26,6 @@ function color_echo() {
     COLOR=$1
     shift
     echo -e "${COLOR}===> $* ${COLOR_SUFFIX}"
-}
-
-# Color definitions
-function openim_color() {
-    COLOR_SUFFIX="\033[0m"      # End all colors and special effects
-
-    BLACK_PREFIX="\033[30m"     # Black prefix
-    RED_PREFIX="\033[31m"       # Red prefix
-    GREEN_PREFIX="\033[32m"     # Green prefix
-    YELLOW_PREFIX="\033[33m"    # Yellow prefix
-    BLUE_PREFIX="\033[34m"      # Blue prefix
-    SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
-    WHITE_PREFIX="\033[37m"     # White prefix
-    BOLD_PREFIX="\033[1m"       # Bold prefix
-    UNDERLINE_PREFIX="\033[4m"  # Underline prefix
-    ITALIC_PREFIX="\033[3m"     # Italic prefix
-
-    CYAN_PREFIX="\033[0;36m"     # Cyan prefix
 }
 
 function print_with_delay() {
@@ -68,6 +52,7 @@ function print_progress() {
   done
   printf "]${COLOR_SUFFIX}\n"
 }
+
 function openim_logo() {
     # Set text color to cyan for header and URL
     echo -e "\033[0;36m"
