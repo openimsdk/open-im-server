@@ -82,7 +82,7 @@ echo -e ""
 chmod +x $component_check
 echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
 echo -e ""
-./start_component_check.sh
+./$component_check
 if [ $? -ne 0 ]; then
   # Print error message and exit
   echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
