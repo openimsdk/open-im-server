@@ -47,4 +47,4 @@ ENV ARCH ${ARCH}
 EXPOSE 10140
 EXPOSE 10001
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/${OS}/${ARCH}/openim-msggateway --port 10140 --ws_port 10001
+CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway --port 10140 --ws_port 10001
