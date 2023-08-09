@@ -720,6 +720,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 	}
+	log.ZDebug(ctx, "GroupApplicationResponse", "inGroup", inGroup, "HandleResult", req.HandleResult, "member", member)
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
 		return nil, err
 	}
@@ -729,7 +730,9 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
-		if !inGroup {
+		if member == nil {
+			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
+		} else {
 			s.Notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID)
 		}
 	case constant.GroupResponseRefuse:
