@@ -36,21 +36,6 @@ COLOR_BGREEN='\033[42m';COLOR_BYELLOW='\033[43m';
 COLOR_BBLUE='\033[44m';COLOR_BMAGENTA='\033[45m';
 COLOR_BCYAN='\033[46m';COLOR_BWHITE='\033[47m';
 
-# --- Color definitions --- 
-COLOR_SUFFIX="\033[0m"      # End all colors and special effects
-BLACK_PREFIX="\033[30m"     # Black prefix
-RED_PREFIX="\033[31m"       # Red prefix
-GREEN_PREFIX="\033[32m"     # Green prefix
-YELLOW_PREFIX="\033[33m"    # Yellow prefix
-BLUE_PREFIX="\033[34m"      # Blue prefix
-SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
-WHITE_PREFIX="\033[37m"     # White prefix
-BOLD_PREFIX="\033[1m"       # Bold prefix
-UNDERLINE_PREFIX="\033[4m"  # Underline prefix
-ITALIC_PREFIX="\033[3m"     # Italic prefix
-BRIGHT_GREEN_PREFIX='\033[1;32m' # Bright green prefix
-CYAN_PREFIX="\033[0;36m"     # Cyan prefix
-
 # --- make demo (run demo) ---
 reset=$(tput sgr0)
 bold=$(tput bold)
@@ -60,6 +45,25 @@ green=$(tput bold; tput setaf 2)
 yellow=$(tput bold; tput setaf 3)
 blue=$(tput bold; tput setaf 6)
 timeout=$(if [ "$(uname)" == "Darwin" ]; then echo "1"; else echo "0.1"; fi)
+
+# --- Color definitions --- 
+# Color definitions
+function openim_color() {
+    COLOR_SUFFIX="\033[0m"      # End all colors and special effects
+
+    BLACK_PREFIX="\033[30m"     # Black prefix
+    RED_PREFIX="\033[31m"       # Red prefix
+    GREEN_PREFIX="\033[32m"     # Green prefix
+    YELLOW_PREFIX="\033[33m"    # Yellow prefix
+    BLUE_PREFIX="\033[34m"      # Blue prefix
+    SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
+    WHITE_PREFIX="\033[37m"     # White prefix
+    BOLD_PREFIX="\033[1m"       # Bold prefix
+    UNDERLINE_PREFIX="\033[4m"  # Underline prefix
+    ITALIC_PREFIX="\033[3m"     # Italic prefix
+
+    CYAN_PREFIX="\033[0;36m"     # Cyan prefix
+}
 
 # --- helper functions for logs ---
 function info()

@@ -13,9 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 clear
 . $(dirname ${BASH_SOURCE})/lib/util.sh
+
+openim::util::desc "========> Welcome to the OpenIM Demo"
+openim::util::desc "========> We'll help you get started with OpenIM quickly"
+openim::util::desc "========> Press Enter to continue...."
+openim::util::run "make advertise"
+clear
 
 openim::util::desc "You can learn a lot about automation using make help"
 openim::util::run "make help"
@@ -25,16 +30,28 @@ openim::util::desc "You can learn a lot about automation using make help-all"
 openim::util::run "make help-all"
 clear
 
-openim::util::desc "Run tidy"
+openim::util::desc "How did we teach you how to build OpenIM"
+openim::util::desc "A full build startup check"
+openim::util::run "make all"
+
+openim::util::desc "Build one OpenIM binary"
+openim::util::desc "BINS: openim-api openim-cmdutils openim-crontask openim-msggateway openim-msgtransfer openim-push openim-rpc changelog infra ncpu yamlfmt"
+openim::util::run "make build BINS=openim-api"
+
+openim::util::desc "Build binaries for all platforms"
+openim::util::run "make multiarch -j BINS=openim-api PLATFORMS='linux_arm64 linux_amd64' "
+
+openim::util::desc "If you wish to use dlv for debugging, either binary or process"
+openim::util::desc "You need to enable debug mode"
+openim::util::run "make build BINS=openim-api DEBUG=1"
+clear
+
+openim::util::desc "Run tidy to format and fix imports"
 openim::util::run "make tidy"
 clear
 
-openim::util::desc "Vendor go.mod"
+openim::util::desc "Vendor go.mod dependencies"
 openim::util::run "make vendor"
-clear
-
-openim::util::desc "Code style: fmt, vet, lint"
-openim::util::run "make style"
 clear
 
 openim::util::desc "Run unit tests"
@@ -49,20 +66,12 @@ openim::util::desc "Check for updates to go.mod dependencies"
 openim::util::run "make updates"
 clear
 
-openim::util::desc "Clean"
+openim::util::desc "Clean all generated files"
 openim::util::run "make clean"
 clear
 
 openim::util::desc "Generate all necessary files"
 openim::util::run "make gen"
-clear
-
-openim::util::desc "Generate swagger document"
-openim::util::run "make swagger"
-clear
-
-openim::util::desc "Serve swagger spec and docs"
-openim::util::run "make serve-swagger"
 clear
 
 openim::util::desc "Verify the license headers for all files"
@@ -71,16 +80,4 @@ clear
 
 openim::util::desc "Add copyright"
 openim::util::run "make add-copyright"
-clear
-
-openim::util::desc "Project introduction, become a contributor"
-openim::util::run "make advertise"
-clear
-
-openim::util::desc "Release the project"
-openim::util::run "make release"
-clear
-
-openim::util::desc "Run demo"
-openim::util::run "make demo"
 clear
