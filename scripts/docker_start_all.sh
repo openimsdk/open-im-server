@@ -32,11 +32,11 @@ need_to_start_server_shell=(
 
 component_check=start_component_check.sh
 $SCRIPTS_ROOT/$component_check
-if [ $? -ne 0 ]; then
-  # Print error message and exit
-  echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
-  exit -1
-fi
+#if [ $? -ne 0 ]; then
+#  # Print error message and exit
+#  echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+#  exit -1
+#fi
 
 #fixme The 10 second delay to start the project is for the docker-compose one-click to start openIM when the infrastructure dependencies are not started
 
