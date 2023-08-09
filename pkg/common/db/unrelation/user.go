@@ -16,6 +16,7 @@ package unrelation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
@@ -153,7 +154,7 @@ func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, user
 	return errs.Wrap(err)
 }
 
-// GetAllSubscribeList Get all users subscribed by this user
+// GetAllSubscribeList Get all users subscribed by this user.
 func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string) (userIDList []string, err error) {
 	var user unrelation.UserModel
 	cursor := u.userCollection.FindOne(
@@ -166,7 +167,7 @@ func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string
 	return user.UserIDList, nil
 }
 
-// GetSubscribedList Get the user subscribed by those users
+// GetSubscribedList Get the user subscribed by those users.
 func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) (userIDList []string, err error) {
 	var user unrelation.UserModel
 	cursor := u.userCollection.FindOne(

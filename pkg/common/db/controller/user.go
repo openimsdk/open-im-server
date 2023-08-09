@@ -52,7 +52,7 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	//SubscribeUsersStatus Subscribe a user's presence status
+	// SubscribeUsersStatus Subscribe a user's presence status
 	SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
 	// UnsubscribeUsersStatus unsubscribe a user's presence status
 	UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
@@ -179,13 +179,13 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 	return u.userDB.CountRangeEverydayTotal(ctx, start, end)
 }
 
-// SubscribeUsersStatus Subscribe or unsubscribe a user's presence status
+// SubscribeUsersStatus Subscribe or unsubscribe a user's presence status.
 func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
 	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
 	return err
 }
 
-// UnsubscribeUsersStatus unsubscribe a user's presence status
+// UnsubscribeUsersStatus unsubscribe a user's presence status.
 func (u *userDatabase) UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
 	err := u.mongoDB.UnsubscriptionList(ctx, userID, userIDs)
 	return err

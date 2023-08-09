@@ -13,13 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 #   Use this script to test if a given TCP host/port are available
-
 WAITFORIT_cmdname=${0##*/}
-
-openim_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-source "${openim_root}/scripts/lib/color.sh"
+. $(dirname ${BASH_SOURCE})/lib/init.sh
 
 echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then info "$@" 1>&2; fi }
 
