@@ -275,5 +275,5 @@ func successPrint(s string) {
 }
 
 func warningPrint(s string) {
-	fmt.Printf("\x1b[%dmhello world\x1b[0m\n", 33)
+	fmt.Printf("\x1b[%dm%v\x1b[0m\n", 33, s)
 }
