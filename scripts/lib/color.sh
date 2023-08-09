@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# this script is used to install the dependencies of the project
+#
+# Usage: `scripts/color.sh`.
+################################################################################
+
 # Define color variables
 # --- Feature --- 
 COLOR_NORMAL='\033[0m';COLOR_BOLD='\033[1m';COLOR_DIM='\033[2m';COLOR_UNDER='\033[4m';
@@ -54,24 +59,28 @@ blue=$(tput bold; tput setaf 6)
 timeout=$(if [ "$(uname)" == "Darwin" ]; then echo "1"; else echo "0.1"; fi)
 
 # --- helper functions for logs ---
-info()
+function info()
 {
     echo -e "[${GREEN_PREFIX}INFO${COLOR_SUFFIX}] " "$@"
 }
-warn()
+
+function warn()
 {
     echo -e "[${YELLOW_PREFIX}WARN${COLOR_SUFFIX}] " "$@" >&2
 }
-fatal()
+
+function fatal()
 {
     echo -e "[${RED_PREFIX}ERROR${COLOR_SUFFIX}] " "$@" >&2
     exit 1
 }
-debug()
+
+function debug()
 {
     echo -e "[${BLUE_PREFIX}DEBUG${COLOR_SUFFIX}]===> " "$@"
 }
-success()
+
+function success()
 {
     echo -e "${BRIGHT_GREEN_PREFIX}===> [SUCCESS] <===${COLOR_SUFFIX}\n=> " "$@"
 }
