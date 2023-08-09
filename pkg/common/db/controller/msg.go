@@ -962,6 +962,9 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.Searc
 		return 0, nil, err
 	}
 	for _, msg := range msgs {
+		if msg.IsRead {
+			msg.Msg.IsRead = true
+		}
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
 	return total, totalMsgs, nil

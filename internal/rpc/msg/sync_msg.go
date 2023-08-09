@@ -116,41 +116,75 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 	if total, chatLogs, err = m.MsgDatabase.SearchMessage(ctx, req); err != nil {
 		return nil, err
 	}
+
+	var (
+		sendIDs  []string
+		recvIDs  []string
+		groupIDs []string
+		sendMap  = make(map[string]string)
+		recvMap  = make(map[string]string)
+		groupMap = make(map[string]*sdkws.GroupInfo)
+	)
+	for _, chatLog := range chatLogs {
+		if chatLog.SenderNickname == "" {
+			sendIDs = append(sendIDs, chatLog.SendID)
+		}
+		switch chatLog.SessionType {
+		case constant.SingleChatType:
+			recvIDs = append(recvIDs, chatLog.RecvID)
+		case constant.GroupChatType, constant.SuperGroupChatType:
+			groupIDs = append(groupIDs, chatLog.GroupID)
+		}
+	}
+	if len(sendIDs) != 0 {
+		sendInfos, err := m.User.GetUsersInfo(ctx, sendIDs)
+		if err != nil {
+			return nil, err
+		}
+		for _, sendInfo := range sendInfos {
+			sendMap[sendInfo.UserID] = sendInfo.Nickname
+		}
+	}
+	if len(recvIDs) != 0 {
+		recvInfos, err := m.User.GetUsersInfo(ctx, recvIDs)
+		if err != nil {
+			return nil, err
+		}
+		for _, recvInfo := range recvInfos {
+			recvMap[recvInfo.UserID] = recvInfo.Nickname
+		}
+	}
+	if len(groupIDs) != 0 {
+		groupInfos, err := m.Group.GetGroupInfos(ctx, groupIDs, true)
+		if err != nil {
+			return nil, err
+		}
+		for _, groupInfo := range groupInfos {
+			groupMap[groupInfo.GroupID] = groupInfo
+		}
+	}
 	for _, chatLog := range chatLogs {
 		pbChatLog := &msg.ChatLog{}
 		utils.CopyStructFields(pbChatLog, chatLog)
 		pbChatLog.SendTime = chatLog.SendTime
 		pbChatLog.CreateTime = chatLog.CreateTime
 		if chatLog.SenderNickname == "" {
-			sendUser, err := m.User.GetUserInfo(ctx, chatLog.SendID)
-			if err != nil {
-				return nil, err
-			}
-			pbChatLog.SenderNickname = sendUser.Nickname
+			pbChatLog.SenderNickname = sendMap[chatLog.SendID]
 		}
 		switch chatLog.SessionType {
 		case constant.SingleChatType:
-			recvUser, err := m.User.GetUserInfo(ctx, chatLog.RecvID)
-			if err != nil {
-				return nil, err
-			}
-			pbChatLog.RecvNickname = recvUser.Nickname
+			pbChatLog.RecvNickname = recvMap[chatLog.RecvID]
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			group, err := m.Group.GetGroupInfo(ctx, chatLog.GroupID)
-			if err != nil {
-				return nil, err
-			}
-			pbChatLog.SenderFaceURL = group.FaceURL
-			pbChatLog.GroupMemberCount = group.MemberCount
-			pbChatLog.RecvID = group.GroupID
-			pbChatLog.GroupName = group.GroupName
-			pbChatLog.GroupOwner = group.OwnerUserID
-			pbChatLog.GroupType = group.GroupType
+			pbChatLog.SenderFaceURL = groupMap[chatLog.GroupID].FaceURL
+			pbChatLog.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
+			pbChatLog.RecvID = groupMap[chatLog.GroupID].GroupID
+			pbChatLog.GroupName = groupMap[chatLog.GroupID].GroupName
+			pbChatLog.GroupOwner = groupMap[chatLog.GroupID].OwnerUserID
+			pbChatLog.GroupType = groupMap[chatLog.GroupID].GroupType
 		}
 		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
 	}
-
 	resp.ChatLogsNum = total
 	return resp, nil
 }

@@ -1073,11 +1073,6 @@ func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessa
 	if err != nil {
 		return 0, nil, err
 	}
-	for _, msg1 := range msgs {
-		if msg1.IsRead {
-			msg1.Msg.IsRead = true
-		}
-	}
 	return total, msgs, nil
 }
 
@@ -1151,13 +1146,22 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 				{"doc_id", 1},
 			}},
 		},
+		{
+			{"$unwind", bson.M{"path": "$msgs"}},
+		},
+		{
+			{"$sort", bson.M{"msgs.msg.send_time": -1}},
+		},
 	}
 	cursor, err := m.MsgCollection.Aggregate(ctx, pipe)
 	if err != nil {
 		return 0, nil, err
 	}
-
-	var msgsDocs []table.MsgDocModel
+	type docModel struct {
+		DocID string              `bson:"doc_id"`
+		Msg   *table.MsgInfoModel `bson:"msgs"`
+	}
+	var msgsDocs []docModel
 	err = cursor.All(ctx, &msgsDocs)
 	if err != nil {
 		return 0, nil, err
@@ -1167,41 +1171,39 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	}
 	msgs := make([]*table.MsgInfoModel, 0)
 	for index := range msgsDocs {
-		for i := range msgsDocs[index].Msg {
-			msg := msgsDocs[index].Msg[i]
-			if msg == nil || msg.Msg == nil {
-				continue
-			}
-			if msg.Revoke != nil {
-				revokeContent := sdkws.MessageRevokedContent{
-					RevokerID:                   msg.Revoke.UserID,
-					RevokerRole:                 msg.Revoke.Role,
-					ClientMsgID:                 msg.Msg.ClientMsgID,
-					RevokerNickname:             msg.Revoke.Nickname,
-					RevokeTime:                  msg.Revoke.Time,
-					SourceMessageSendTime:       msg.Msg.SendTime,
-					SourceMessageSendID:         msg.Msg.SendID,
-					SourceMessageSenderNickname: msg.Msg.SenderNickname,
-					SessionType:                 msg.Msg.SessionType,
-					Seq:                         msg.Msg.Seq,
-					Ex:                          msg.Msg.Ex,
-				}
-				data, err := json.Marshal(&revokeContent)
-				if err != nil {
-					return 0, nil, err
-				}
-				elem := sdkws.NotificationElem{
-					Detail: string(data),
-				}
-				content, err := json.Marshal(&elem)
-				if err != nil {
-					return 0, nil, err
-				}
-				msg.Msg.ContentType = constant.MsgRevokeNotification
-				msg.Msg.Content = string(content)
-			}
-			msgs = append(msgs, msg)
+		msgInfo := msgsDocs[index].Msg
+		if msgInfo == nil || msgInfo.Msg == nil {
+			continue
 		}
+		if msgInfo.Revoke != nil {
+			revokeContent := sdkws.MessageRevokedContent{
+				RevokerID:                   msgInfo.Revoke.UserID,
+				RevokerRole:                 msgInfo.Revoke.Role,
+				ClientMsgID:                 msgInfo.Msg.ClientMsgID,
+				RevokerNickname:             msgInfo.Revoke.Nickname,
+				RevokeTime:                  msgInfo.Revoke.Time,
+				SourceMessageSendTime:       msgInfo.Msg.SendTime,
+				SourceMessageSendID:         msgInfo.Msg.SendID,
+				SourceMessageSenderNickname: msgInfo.Msg.SenderNickname,
+				SessionType:                 msgInfo.Msg.SessionType,
+				Seq:                         msgInfo.Msg.Seq,
+				Ex:                          msgInfo.Msg.Ex,
+			}
+			data, err := json.Marshal(&revokeContent)
+			if err != nil {
+				return 0, nil, err
+			}
+			elem := sdkws.NotificationElem{
+				Detail: string(data),
+			}
+			content, err := json.Marshal(&elem)
+			if err != nil {
+				return 0, nil, err
+			}
+			msgInfo.Msg.ContentType = constant.MsgRevokeNotification
+			msgInfo.Msg.Content = string(content)
+		}
+		msgs = append(msgs, msgInfo)
 	}
 	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
 	n := int32(len(msgs))
