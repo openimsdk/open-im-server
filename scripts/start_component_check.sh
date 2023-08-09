@@ -29,19 +29,6 @@ echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 
-cd $OPENIM_ROOT
-
-#Check if the service exists
-#If it is exists,kill this process
-check=`ps  | grep -w ./${openim_msgtransfer} | grep -v grep| wc -l`
-if [ $check -ge 1 ]
-then
-oldPid=`ps  | grep -w ./${openim_msgtransfer} | grep -v grep|awk '{print $2}'`
- kill -9 $oldPid
-fi
-#Waiting port recycling
-sleep 1
-
 cd ${component_check_binary_root}
 cmd="nohup ./${component_check}"
 echo "==========================start components checking===========================">>$OPENIM_ROOT/logs/openIM.log
