@@ -118,6 +118,7 @@ type CommonMsgDatabase interface {
 		pageNumber int32,
 		showNumber int32,
 	) (msgCount int64, userCount int64, groups []*unRelationTb.GroupCount, dateCount map[string]int64, err error)
+	ConvertMsgsDocLen(ctx context.Context, conversationIDs []string)
 }
 
 func NewCommonMsgDatabase(msgDocModel unRelationTb.MsgDocModelInterface, cacheModel cache.MsgModel) CommonMsgDatabase {
@@ -964,4 +965,8 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.Searc
 		totalMsgs = append(totalMsgs, convert.MsgDB2Pb(msg.Msg))
 	}
 	return total, totalMsgs, nil
+}
+
+func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
+	db.msgDocDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
 }

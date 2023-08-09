@@ -23,7 +23,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func GetNotificationConversationID(msg *sdkws.MsgData) string {
+func GetNotificationConversationIDByMsg(msg *sdkws.MsgData) string {
 	switch msg.SessionType {
 	case constant.SingleChatType:
 		l := []string{msg.SendID, msg.RecvID}
@@ -110,6 +110,30 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 		return "sg_" + ids[0] // super group chat
 	case constant.NotificationChatType:
 		return "sn_" + ids[0] // server notification chat
+	}
+	return ""
+}
+
+func GetNotificationConversationIDByConversationID(conversationID string) string {
+	l := strings.Split(conversationID, "_")
+	if len(l) > 1 {
+		l[0] = "n"
+		return strings.Join(l, "_")
+	} else {
+		return ""
+	}
+}
+
+func GetNotificationConversationID(sessionType int, ids ...string) string {
+	sort.Strings(ids)
+	if len(ids) > 2 || len(ids) < 1 {
+		return ""
+	}
+	switch sessionType {
+	case constant.SingleChatType:
+		return "n_" + strings.Join(ids, "_") // single chat
+	case constant.SuperGroupChatType:
+		return "n_" + ids[0] // super group chat
 	}
 	return ""
 }
