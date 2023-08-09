@@ -18,9 +18,8 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
-source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
@@ -43,7 +42,7 @@ service_port_name=(
 )
 for i in ${service_port_name[*]}; do
   list=$(cat $config_path | grep -w ${i} | awk -F '[:]' '{print $NF}')
-  openim::util:list-to-string $list
+  openim::util::list-to-string $list
   for j in ${ports_array}; do
     port=$(ss -tunlp| grep openim | awk '{print $5}' | grep -w ${j} | awk -F '[:]' '{print $NF}')
     if [[ ${port} -ne ${j} ]]; then

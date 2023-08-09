@@ -15,7 +15,7 @@
 
 #input:[10023,2323,3434]
 #output:10023 2323 3434
-openim::util:list-to-string(){
+openim::util::list-to-string(){
     ports_list=$*
     sub_s1=`echo $ports_list | sed 's/ //g'`
     sub_s2=${sub_s1//,/ }

@@ -37,9 +37,9 @@ cd "$OPENIM_ROOT/scripts/"
 
 list1=$(cat $config_path | grep openImPushPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep pushPrometheusPort | awk -F '[:]' '{print $NF}')
-openim::util:list-to-string $list1
+openim::util::list-to-string $list1
 rpc_ports=($ports_array)
-openim::util:list-to-string $list2
+openim::util::list-to-string $list2
 prome_ports=($ports_array)
 
 #Check if the service exists

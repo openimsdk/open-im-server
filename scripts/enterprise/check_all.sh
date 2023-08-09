@@ -38,7 +38,7 @@ service_port_name=(
 
 for i in ${service_port_name[*]}; do
   list=$(cat $config_path | grep -w ${i} | awk -F '[:]' '{print $NF}')
-  openim::util:list-to-string $list
+  openim::util::list-to-string $list
   for j in ${ports_array}; do
     port=$(ss -tunlp| grep openim | awk '{print $5}' | grep -w ${j} | awk -F '[:]' '{print $NF}')
     if [[ ${port} -ne ${j} ]]; then

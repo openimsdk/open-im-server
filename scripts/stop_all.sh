@@ -18,7 +18,7 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 #Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/style_info.sh
+source $OPENIM_ROOT/scripts/lib/init.sh
 source $OPENIM_ROOT/scripts/path_info.sh
 
 bin_dir="$BIN_DIR"
