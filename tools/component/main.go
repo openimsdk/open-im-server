@@ -29,11 +29,13 @@ const (
 	cfgPath                  = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
 	maxRetry                 = 3
-	componentStartErr        = 1705
+	componentStartErrCode    = 6000
+	configErrCode            = 6001
 )
 
 var (
 	ErrComponentStart = errs.NewCodeError(componentStartErr, "ComponentStartErr")
+	Errconfig         = errs.NewCodeError(configErr, "")
 )
 
 func initCfg() error {
