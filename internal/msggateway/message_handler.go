@@ -64,7 +64,7 @@ func (r *Resp) String() string {
 	tResp.OperationID = r.OperationID
 	tResp.ErrCode = r.ErrCode
 	tResp.ErrMsg = r.ErrMsg
-	return utils.StructToJsonString(r)
+	return utils.StructToJsonString(tResp)
 }
 
 type MessageHandler interface {
