@@ -34,6 +34,5 @@ echo -e "${YELLOW_PREFIX}=======>$PWD${COLOR_SUFFIX}"
 cmd="./${component_check}"
 echo "==========================start components checking===========================">>$OPENIM_ROOT/logs/openIM.log
 $cmd
-exit 1
 
 
