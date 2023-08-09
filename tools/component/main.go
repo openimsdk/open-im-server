@@ -61,7 +61,7 @@ func main() {
 		fmt.Printf("Checking components Round %v......\n", i+1)
 		// Check MySQL
 		if err := checkMysql(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Mysql failed: %v.Please make sure your mysql service has started", err.Error()))
+			errorPrint(fmt.Sprintf("Starting Mysql failed: %v. Please make sure your mysql service has started", err.Error()))
 			continue
 		} else {
 			successPrint(fmt.Sprint("Mysql starts successfully"))
@@ -69,7 +69,7 @@ func main() {
 
 		// Check MongoDB
 		if err := checkMongo(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Mongo failed: %v.Please make sure your monngo service has started", err.Error()))
+			errorPrint(fmt.Sprintf("Starting Mongo failed: %v. Please make sure your monngo service has started", err.Error()))
 			continue
 		} else {
 			successPrint(fmt.Sprint("Mongo starts successfully"))
@@ -78,9 +78,9 @@ func main() {
 		// Check Minio
 		if err := checkMinio(); err != nil {
 			if index := strings.Index(err.Error(), utils.IntToString(configErrCode)); index != -1 {
-				warningPrint(fmt.Sprintf("%v Please modify your config file", err.Error()))
+				warningPrint(fmt.Sprintf("%v. Please modify your config file", err.Error()))
 			} else {
-				errorPrint(fmt.Sprintf("Starting Minio failed: %v.Please make sure your Minio service has started", err.Error()))
+				errorPrint(fmt.Sprintf("Starting Minio failed: %v. Please make sure your Minio service has started", err.Error()))
 			}
 			continue
 		} else {
@@ -275,5 +275,5 @@ func successPrint(s string) {
 }
 
 func warningPrint(s string) {
-	fmt.Printf("\x1b[%dm%v\x1b[0m\n", 33, s)
+	fmt.Printf("\x1b[%dmWarning: %v\x1b[0m\n", 33, s)
 }
