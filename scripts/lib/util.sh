@@ -707,6 +707,23 @@ function openim::util::ensure-bash-version {
   fi
 }
 
+# openim::util::ensure-install-nginx
+# Check if nginx is installed
+#
+function openim::util::ensure-install-nginx {
+  if ! command -v nginx &>/dev/null; then
+    echo "ERROR: nginx not found. Please install nginx."
+    exit 1
+  fi
+
+  for port in 80
+  do
+    if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
+      exit 1
+    fi
+  done
+}
+
 # openim::util::ensure-gnu-sed
 # Determines which sed binary is gnu-sed on linux/darwin
 #
