@@ -28,7 +28,7 @@ import (
 const (
 	cfgPath                  = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
-	maxRetry                 = 100
+	maxRetry                 = 10
 	componentStartErrCode    = 6000
 	configErrCode            = 6001
 )
@@ -172,7 +172,7 @@ func checkMongo() error {
 func checkMinio() error {
 	if config.Config.Object.Enable == "minio" {
 		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.Endpoint) == "127.0.0.1" {
-			return ErrConfig.Wrap("apiURL or endpoint contain 127.0.0.1.")
+			return ErrConfig.Wrap("apiURL or Minio endpoint contain 127.0.0.1.")
 		}
 		conf := config.Config.Object.Minio
 		u, _ := url.Parse(conf.Endpoint)
