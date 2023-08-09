@@ -76,8 +76,19 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   start_cron.sh
 )
-  chmod +x $i
-  start_component_check.sh
+
+component_check=start_component_check.sh
+echo -e ""
+chmod +x $component_check
+echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
+echo -e ""
+./start_component_check.sh
+if [ $? -ne 0 ]; then
+  # Print error message and exit
+  echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+  exit -1
+fi
+
 
 # Loop through the script names and execute them
 for i in ${need_to_start_server_shell[*]}; do
