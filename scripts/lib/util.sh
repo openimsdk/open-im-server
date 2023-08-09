@@ -16,7 +16,7 @@
 # this script is used to check whether the code is formatted by gofmt or not
 #
 # Usage: source scripts/lib/util.sh
-
+################################################################################
 
 #1、将IP写在一个文件里，比如文件名为hosts_file，一行一个IP地址。
 #2、修改ssh-mutual-trust.sh里面的用户名及密码，默认为root用户及密码123。
@@ -831,8 +831,6 @@ function openim::util::run::relative() {
         echo "$(realpath $(dirname $(which $0)))/$arg" | sed "s|$(realpath $(pwd))|.|"
     done
 }
-
-trap "echo" EXIT
 
 
 # input: [10023, 2323, 3434]
