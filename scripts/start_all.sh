@@ -82,7 +82,6 @@ echo -e ""
 chmod +x $component_check
 echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
 echo -e ""
-chmod +x ./$component_check
 ./$component_check
 if [ $? -ne 0 ]; then
   # Print error message and exit
