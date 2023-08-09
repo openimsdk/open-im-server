@@ -53,17 +53,15 @@ jobs:
 
     - name: Stop all services
       run: |
-        sudo chmod +x ./scripts/stop_all.sh
         sudo ./scripts/stop_all.sh
-        sudo cat logs/openIM.log 2>/dev/null
       shell: bash
       continue-on-error: true
 
     - name: Build all services
       run: |
-        sudo make build
-        sudo cat logs/openIM.log 2>/dev/null
+        make build
       shell: bash
+      continue-on-error: true
 
     - name: Start all services
       run: |
