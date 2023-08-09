@@ -31,7 +31,7 @@ logs_dir="$OPENIM_ROOT/logs"
 
 cd ${component_check_binary_root}
 echo -e "${YELLOW_PREFIX}=======>$PWD${COLOR_SUFFIX}"
-cmd="nohup ./${component_check}"
+cmd="./${component_check}"
 echo "==========================start components checking===========================">>$OPENIM_ROOT/logs/openIM.log
 $cmd
 
