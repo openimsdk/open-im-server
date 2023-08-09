@@ -101,6 +101,24 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS)))
 	@echo "===========> Building binary $(BINS) $(VERSION) for $(PLATFORM)"
 
+## go.start: Start openim
+.PHONY: go.start
+go.start:
+	@echo "===========> Starting openim"
+	@$(ROOT_DIR)/scripts/start_all.sh
+
+## go.stop: Stop openim
+.PHONY: go.stop
+go.stop:
+	@echo "===========> Stopping openim"
+	@$(ROOT_DIR)/scripts/stop_all.sh
+
+## go.check: Check openim
+.PHONY: go.check
+go.check:
+	@echo "===========> Checking openim"
+	@$(ROOT_DIR)/scripts/check_all.sh
+
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:
@@ -142,12 +160,6 @@ go.build.%:
 go.install:
 	@echo "===========> Installing deployment openim"
 	@$(ROOT_DIR)/scripts/install_im_server.sh
-
-## go.check: Check OpenIM deployment
-.PHONY: go.check
-go.check:
-	@echo "===========> Checking OpenIM deployment"
-	@$(ROOT_DIR)/scripts/check_all.sh
 
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch

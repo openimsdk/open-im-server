@@ -43,9 +43,9 @@ prome_ports=($ports_array)
 
 #Check if the service exists
 #If it is exists,kill this process
-check=$(ps  | grep -w ./${push_name} | grep -v grep | wc -l)
+check=$(ps -aux | grep -w ./${push_name} | grep -v grep | wc -l)
 if [ $check -ge 1 ]; then
-  oldPid=$(ps  | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
+  oldPid=$(ps -aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
   kill -9 $oldPid
 fi
 #Waiting port recycling
@@ -59,9 +59,9 @@ done
 
 sleep 3
 #Check launched service process
-check=$(ps  | grep -w ./${push_name} | grep -v grep | wc -l)
+check=$(ps -aux | grep -w ./${push_name} | grep -v grep | wc -l)
 if [ $check -ge 1 ]; then
-  newPid=$(ps  | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
+  newPid=$(ps -aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
   ports=$(netstat -netulp | grep -w ${newPid} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
   allPorts=""
 

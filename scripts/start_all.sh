@@ -46,10 +46,6 @@ if [ ! -d "$logs_dir" ]; then
     mkdir -p "$logs_dir"
 fi
 
-if [ ! -d "$sdk_db_dir" ]; then
-    mkdir -p "$sdk_db_dir"
-fi
-
 # Print title
 echo -e "${BOLD_PREFIX}${BLUE_PREFIX}================> OpenIM Server Start${COLOR_SUFFIX}"
 
