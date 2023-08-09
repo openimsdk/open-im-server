@@ -46,7 +46,9 @@ jobs:
           workdir: .
           args: release -f ./build/goreleaser.yaml --rm-dist --clean --release-footer-tmpl=scripts/template/footer.md.tmpl --release-header-tmpl=scripts/template/head.md.tmpl
         env:
+          USERNAME: ${{ github.repository_owner }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
           # Your GoReleaser Pro key, if you are using the 'goreleaser-pro'
           # distribution:
           # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
