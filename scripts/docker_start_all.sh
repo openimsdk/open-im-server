@@ -31,7 +31,7 @@ need_to_start_server_shell=(
 )
 
 component_check=start_component_check.sh
-chmod +x ./$component_check
+chmod +x $SCRIPTS_ROOT/$component_check
 $SCRIPTS_ROOT/$component_check
 if [ $? -ne 0 ]; then
   # Print error message and exit
