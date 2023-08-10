@@ -97,8 +97,8 @@ services:
     command: minio server /data --console-address ':9090'
 
   openim-server:
-    #image: ghcr.io/openimsdk/openim-server:latest
-    build: .
+    image: ghcr.io/openimsdk/openim-server:latest
+#    build: .
     container_name: openim-server
     volumes:
       - ./logs:/openim/openim-server/logs
