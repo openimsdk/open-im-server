@@ -14,7 +14,7 @@ COPY go.mod go.sum go.work go.work.sum ./
 #RUN go mod download
 
 # Copy all files to the container
-ADD ../../Desktop .
+ADD ..
 
 RUN make clean
 RUN make build
