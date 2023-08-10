@@ -60,7 +60,6 @@ openim::util::ensure-bash-version
 
 . $(dirname ${BASH_SOURCE})/version.sh
 . $(dirname ${BASH_SOURCE})/golang.sh
-. $(dirname ${BASH_SOURCE})/test.sh
 . $(dirname ${BASH_SOURCE})/release.sh
 . $(dirname ${BASH_SOURCE})/chat.sh
 

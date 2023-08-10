@@ -23,7 +23,7 @@ readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
 )
 
 # If we update this we should also update the set of platforms whose standard
-# library is precompiled for in build/build-image/cross/Dockerfile
+# library is precompiled for in build/image/cross/Dockerfile
 readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
   linux/amd64
   linux/arm64

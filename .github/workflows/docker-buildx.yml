@@ -95,7 +95,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-api/Dockerfile
+          file: ./build/images/openim-api/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta1.outputs.tags }}
@@ -113,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-cmdutils/Dockerfile
+          file: ./build/images/openim-cmdutils/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta2.outputs.tags }}
@@ -131,7 +131,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-crontask/Dockerfile
+          file: ./build/images/openim-crontask/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta3.outputs.tags }}
@@ -149,7 +149,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-msggateway/Dockerfile
+          file: ./build/images/openim-msggateway/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta4.outputs.tags }}
@@ -167,7 +167,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-msgtransfer/Dockerfile
+          file: ./build/images/openim-msgtransfer/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta5.outputs.tags }}
@@ -185,7 +185,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-push/Dockerfile
+          file: ./build/images/openim-push/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta6.outputs.tags }}
@@ -203,7 +203,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-auth/Dockerfile
+          file: ./build/images/openim-rpc-auth/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta7.outputs.tags }}
@@ -221,7 +221,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-conversation/Dockerfile
+          file: ./build/images/openim-rpc-conversation/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta8.outputs.tags }}
@@ -239,7 +239,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-friend/Dockerfile
+          file: ./build/images/openim-rpc-friend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta9.outputs.tags }}
@@ -257,7 +257,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-group/Dockerfile
+          file: ./build/images/openim-rpc-group/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta10.outputs.tags }}
@@ -275,7 +275,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-msg/Dockerfile
+          file: ./build/images/openim-rpc-msg/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta11.outputs.tags }}
@@ -293,7 +293,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-third/Dockerfile
+          file: ./build/images/openim-rpc-third/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta12.outputs.tags }}
@@ -311,7 +311,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./build/docker/openim-rpc-user/Dockerfile
+          file: ./build/images/openim-rpc-user/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta13.outputs.tags }}
