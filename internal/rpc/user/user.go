@@ -45,9 +45,10 @@ import (
 
 type userServer struct {
 	controller.UserDatabase
-	notificationSender *notification.FriendNotificationSender
-	friendRpcClient    *rpcclient.FriendRpcClient
-	RegisterCenter     registry.SvcDiscoveryRegistry
+	friendNotificationSender *notification.FriendNotificationSender
+	userNotificationSender   *notification.UserNotificationSender
+	friendRpcClient          *rpcclient.FriendRpcClient
+	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -80,10 +81,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
-		UserDatabase:       database,
-		RegisterCenter:     client,
-		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		UserDatabase:             database,
+		RegisterCenter:           client,
+		friendRpcClient:          &friendRpcClient,
+		friendNotificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		userNotificationSender:   notification.NewUserNotificationSender(&msgRpcClient, notification.WithUserFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
@@ -116,13 +118,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	_ = s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	for _, friendID := range friends {
-		s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
 	return resp, nil
 }
@@ -137,7 +139,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return resp, nil
 }
 
