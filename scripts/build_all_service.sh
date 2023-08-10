@@ -14,12 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+# This script runs `make build` command.
+# The command compiles all Makefile configs.
+# Args:
+#   WHAT: Directory names to build.  If any of these directories has a 'main'
+#     package, the build will produce executable files under $(OUT_DIR)/go/bin.
+#     If not specified, "everything" will be built.
+# Usage: `hack/build-go.sh`.
+# Example: `hack/build-go.sh WHAT=cmd/kubelet`.
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/path_info.sh
+set -o errexit
+set -o nounset
+set -o pipefail
+
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
+
 source $SCRIPTS_ROOT/lib/init.sh
 
 bin_dir="$BIN_DIR"

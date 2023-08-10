@@ -16,16 +16,24 @@
 # Controls verbosity of the script output and logging.
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
 
-if [[ ! -v OPENIM_VERBOSE ]]; then
-    openim::log::info "OPENIM_VERBOSE is not set; defaulting to \"5\""
+# Enable logging by default. Set to false to disable.
+ENABLE_LOGGING=true
+
+# If OPENIM_OUTPUT is not set, set it to the default value
+if [[ ! -v OPENIM_OUTPUT ]]; then
     OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
-    OPENIM_VERBOSE="${OPENIM_OUTPUT}/logs"
 fi
 
-log_file="${OPENIM_OUTPUT_LOGS}/openim_$(date '+%Y%m%d').log"
+# Set the log file path
+log_file="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
 
+# Define the logging function
 function echo_log() {
-    echo_log -e "$@" | tee -a "${log_file}"
+    if $ENABLE_LOGGING; then
+        echo -e "$@" | tee -a "${log_file}"
+    else
+        echo -e "$@"
+    fi
 }
 
 # MAX_LOG_SIZE=10485760 # 10MB
@@ -74,7 +82,7 @@ openim::log::stack() {
   local stack_skip=${1:-0}
   stack_skip=$((stack_skip + 1))
   if [[ ${#FUNCNAME[@]} -gt ${stack_skip} ]]; then
-    echo_log_log "Call stack:" >&2
+    echo_log "Call stack:" >&2
     local i
     for ((i=1 ; i <= ${#FUNCNAME[@]} - stack_skip ; i++))
     do
@@ -82,7 +90,7 @@ openim::log::stack() {
       local source_file=${BASH_SOURCE[${frame_no}]}
       local source_lineno=${BASH_LINENO[$((frame_no - 1))]}
       local funcname=${FUNCNAME[${frame_no}]}
-      echo_log_log "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
+      echo_log "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
     done
   fi
 }
@@ -194,3 +202,15 @@ openim::log::success()
   fi
   echo_log -e "${BRIGHT_GREEN_PREFIX}===> [success] <===${COLOR_SUFFIX}\n=> " "$@"
 }
+
+function openim::log::test_log() {
+    echo_log "test log"
+    openim::log::error "openim::log::error"
+    openim::log::info "openim::log::info"
+    openim::log::progress "openim::log::progress"
+    openim::log::status "openim::log::status"
+    openim::log::success "openim::log::success"
+    openim::log::error_exit "openim::log::error_exit"
+}
+
+# openim::log::test_log

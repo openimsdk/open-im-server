@@ -457,11 +457,6 @@ EOF
   cp -R "${OPENIM_ROOT}/scripts/release" "${release_stage}/"
   cat <<EOF > "${release_stage}/release/get-openim-binaries.sh"
 #!/usr/bin/env bash
-
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
-
 # This file download openim client and server binaries from tencent cos bucket.
 
 os=linux arch=amd64 version=${OPENIM_GIT_VERSION} && wget https://${BUCKET}.cos.${REGION}.myqcloud.com/${COS_RELEASE_DIR}/\$version/{openim-client-\$os-\$arch.tar.gz,openim-server-\$os-\$arch.tar.gz}

@@ -13,19 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# This script is check openim service is running normally
+# 
+# Usage: `scripts/check_all.sh`.
+# Encapsulated as: `make check`.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/lib/init.sh
-source $SCRIPTS_ROOT/path_info.sh
+source "${OPENIM_ROOT}/scripts/path_info.sh"
 
-cd $SCRIPTS_ROOT
-
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
+OPENIM_VERBOSE=4
 
 service_port_name=(
   openImWsPort

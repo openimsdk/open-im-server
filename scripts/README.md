@@ -68,6 +68,13 @@ The purpose of having a structured scripts directory like this is to make the op
 
 Each directory and script in the structure should be understood as a part of a larger whole. All scripts work together to ensure the smooth operation and maintenance of the OpenIM Server.
 
+
+## log directory
+
+**PATH:** `scripts/lib/logging.sh`
+
++ [log details](../docs/conversions/bash_log.md)
+
 ## Supported platforms
 
 - Linux x86_64 (linux_amd64) : 64-bit Linux for most desktop and server systems.
@@ -94,6 +101,10 @@ Steps to run demo:
 ```sh
 make demo
 ```
+
+More about `make` read:
+
++ [makefile](../docs/conversions/go_code.md)
 
 Instructions for producing the demo movie:
 

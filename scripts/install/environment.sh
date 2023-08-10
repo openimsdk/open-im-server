@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
-
-# OPENIM 项目源码根目录
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
@@ -15,10 +23,10 @@ readonly API_URL=${API_URL:-http://127.0.0.1:10002/object/}
 readonly DATA_DIR=${DATA_DIR:-${OPENIM_ROOT}}
 
 # 设置统一的用户名，方便记忆
-readonly USER=${USER:-'root'}
+readonly USER=${USER:-'root'} # Setting a username
 
 # 设置统一的密码，方便记忆
-readonly PASSWORD=${PASSWORD:-'openIM123'}
+readonly PASSWORD=${PASSWORD:-'openIM123'} # Setting a password
 
 # Linux系统 going 用户
 readonly LINUX_USERNAME=${LINUX_USERNAME:-going}
