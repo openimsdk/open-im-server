@@ -731,34 +731,21 @@ func (db *commonMsgDatabase) deleteMsgRecursion(ctx context.Context, conversatio
 		delStruct.delDocIDs = append(delStruct.delDocIDs, msgDocModel.DocID)
 		delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
 	} else {
-		var hasMarkDelFlag bool
 		var delMsgIndexs []int
 		for i, MsgInfoModel := range msgDocModel.Msg {
 			if MsgInfoModel != nil && MsgInfoModel.Msg != nil {
 				if utils.GetCurrentTimestampByMill() > MsgInfoModel.Msg.SendTime+(remainTime*1000) {
 					delMsgIndexs = append(delMsgIndexs, i)
-					hasMarkDelFlag = true
-				} else {
-					// 到本条消息不需要删除, minSeq置为这条消息的seq
-					if len(delStruct.delDocIDs) > 0 {
-						log.ZDebug(ctx, "delete docs", "delDocIDs", delStruct.delDocIDs)
-					}
-					if err := db.msgDocDatabase.DeleteDocs(ctx, delStruct.delDocIDs); err != nil {
-						return 0, err
-					}
-					if hasMarkDelFlag {
-						log.ZDebug(ctx, "delete msg by index", "delMsgIndexs", delMsgIndexs, "docID", msgDocModel.DocID)
-						// mark del all delMsgIndexs
-						if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
-							return delStruct.getSetMinSeq(), err
-						}
-					}
-					return MsgInfoModel.Msg.Seq, nil
 				}
 			}
 		}
+		if len(delMsgIndexs) > 0 {
+			if err := db.msgDocDatabase.DeleteMsgsInOneDocByIndex(ctx, msgDocModel.DocID, delMsgIndexs); err != nil {
+				log.ZError(ctx, "deleteMsgRecursion DeleteMsgsInOneDocByIndex failed", err, "conversationID", conversationID, "index", index)
+			}
+			delStruct.minSeq = int64(msgDocModel.Msg[delMsgIndexs[len(delMsgIndexs)-1]].Msg.Seq)
+		}
 	}
-	//  继续递归 index+1
 	seq, err := db.deleteMsgRecursion(ctx, conversationID, index+1, delStruct, remainTime)
 	return seq, err
 }
