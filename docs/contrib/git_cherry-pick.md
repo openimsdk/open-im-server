@@ -23,6 +23,75 @@ Our collaboration strategy with GitHub necessitates maintenance of multiple `rel
 
 Ensuring this strategy's success extends beyond just documentation; it hinges on well-engineered solutions and automation tools, like Makefile, powerful CI/CD processes, and even Prow.
 
+## Prerequisites
+
+- [Contributor License Agreement](https://github.com/openim-sigs/cla) is considered implicit for all code within cherry pick pull requests, **unless there is a large conflict**.
+- A pull request merged against the `main` branch.
+- The release branch exists (example: [`release-1.18`](https://github.com/OpenIMSDK/Open-IM-Server/tree/release-v3.1))
+- The normal git and GitHub configured shell environment for pushing to your openim-server `origin` fork on GitHub and making a pull request against a configured remote `upstream` that tracks `https://github.com/OpenIMSDK/Open-IM-Server.git`, including `GITHUB_USER`.
+- Have GitHub CLI (`gh`) installed following [installation instructions](https://github.com/cli/cli#installation).
+- A github personal access token which has permissions "repo" and "read:org". Permissions are required for [gh auth login](https://cli.github.com/manual/gh_auth_login) and not used for anything unrelated to cherry-pick creation process (creating a branch and initiating PR).
+
+## What Kind of PRs are Good for Cherry Picks
+
+Compared to the normal main branch's merge volume across time, the release branches see one or two orders of magnitude less PRs. This is because there is an order or two of magnitude higher scrutiny. Again, the emphasis is on critical bug fixes, e.g.,
+
+- Loss of data
+- Memory corruption
+- Panic, crash, hang
+- Security
+
+A bugfix for a functional issue (not a data loss or security issue) that only affects an alpha feature does not qualify as a critical bug fix.
+
+If you are proposing a cherry pick and it is not a clear and obvious critical bug fix, please reconsider. If upon reflection you wish to continue, bolster your case by supplementing your PR with e.g.,
+
+- A GitHub issue detailing the problem
+- Scope of the change
+- Risks of adding a change
+- Risks of associated regression
+- Testing performed, test cases added
+- Key stakeholder SIG reviewers/approvers attesting to their confidence in the change being a required backport
+
+If the change is in cloud provider-specific platform code (which is in the process of being moved out of core openim-server), describe the customer impact, how the issue escaped initial testing, remediation taken to prevent similar future escapes, and why the change cannot be carried in your downstream fork of the openim-server project branches.
+
+It is critical that our full community is actively engaged on enhancements in the project. If a released feature was not enabled on a particular provider's platform, this is a community miss that needs to be resolved in the `main` branch for subsequent releases. Such enabling will not be backported to the patch release branches.
+
+## Initiate a Cherry Pick
+
+### Before you begin
+
+- Plan to initiate a cherry-pick against *every* supported release branch. If you decide to skip some release branch, explain your decision in a comment to the PR being cherry-picked.
+- Initiate cherry-picks in order, from newest to oldest supported release branches. For example, if 3.1 is the newest supported release branch, then, before cherry-picking to 2.25, make sure the cherry-pick PR already exists for in 2.26 and 3.1. This helps to prevent regressions as a result of an upgrade to the next release.
+
+### Steps
+
+- Run the [cherry pick script](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/cherry_pick_pull.sh)
+
+  This example applies a main branch PR #98765 to the remote branch `upstream/release-v3.1`:
+
+  ```
+  scripts/cherry_pick_pull.sh upstream/release-v3.1 98765
+  ```
+
+  - Be aware the cherry pick script assumes you have a git remote called `upstream` that points at the openim-server github org.
+
+    Please see our [recommended Git workflow](https://github.com/openim-server/community/blob/main/contributors/guide/github-workflow.md#workflow).
+
+  - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/openim-server/website/blob/main/content/en/releases/patch-releases.md#detailed-release-history-for-active-branches) release branches where the fix is applicable.
+
+  - If `GITHUB_TOKEN` is not set you will be asked for your github password: provide the github [personal access token](https://github.com/settings/tokens) rather than your actual github password. If you can securely set the environment variable `GITHUB_TOKEN` to your personal access token then you can avoid an interactive prompt. Refer [mislav/hub#2655 (comment)](https://github.com/mislav/hub/issues/2655#issuecomment-735836048)
+
+- Your cherry pick PR will immediately get the `do-not-merge/cherry-pick-not-approved` label.
+
+  [Normal rules apply for code merge](https://github.com/openim-server/community/blob/main/contributors/devel/sig-release/release.md#tldr), with some additional caveats outlined in the next section of this document.
+
+## Cherry Pick Review
+
+As with any other PR, code OWNERS review (`/lgtm`) and approve (`/approve`) on cherry pick PRs as they deem appropriate.
+
+The same release note requirements apply as normal pull requests, except the release note stanza will auto-populate from the main branch pull request from which the cherry pick originated.
+
+
 ## Using git cherry-pick
 
 `git cherry-pick` applies specified commits from one branch to another.

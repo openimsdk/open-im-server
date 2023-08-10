@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage Instructions: https://git.k8s.io/community/contributors/devel/sig-release/cherry-picks.md
+# Usage Instructions: https://github.com/OpenIMSDK/Open-IM-Server/tree/main/docs/contrib/git_cherry-pick.md
 
 # Checkout a PR from GitHub. (Yes, this is sitting in a Git tree. How
 # meta.) Assumes you care about pulls from remote "upstream" and
@@ -10,6 +10,9 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 declare -r REPO_ROOT
@@ -26,13 +29,11 @@ MAIN_REPO_ORG=${MAIN_REPO_ORG:-$(git remote get-url "$UPSTREAM_REMOTE" | awk '{g
 MAIN_REPO_NAME=${MAIN_REPO_NAME:-$(git remote get-url "$UPSTREAM_REMOTE" | awk '{gsub(/http[s]:\/\/|git@/,"")}1' | awk -F'[@:./]' 'NR==1{print $4}')}
 
 if [[ -z ${GITHUB_USER:-} ]]; then
-  echo "Please export GITHUB_USER=<your-user> (or GH organization, if that's where your fork lives)"
-  exit 1
+  openim::log::error_exit "Please export GITHUB_USER=<your-user> (or GH organization, if that's where your fork lives)"
 fi
 
 if ! command -v gh > /dev/null; then
-  echo "Can't find 'gh' tool in PATH, please install from https://github.com/cli/cli"
-  exit 1
+  openim::log::error_exit "Can't find 'gh' tool in PATH, please install from https://github.com/cli/cli"
 fi
 
 if [[ "$#" -lt 2 ]]; then
@@ -40,8 +41,8 @@ if [[ "$#" -lt 2 ]]; then
   echo
   echo "  Checks out <remote branch> and handles the cherry-pick of <pr> (possibly multiple) for you."
   echo "  Examples:"
-  echo "    $0 upstream/release-3.14 12345        # Cherry-picks PR 12345 onto upstream/release-3.14 and proposes that as a PR."
-  echo "    $0 upstream/release-3.14 12345 56789  # Cherry-picks PR 12345, then 56789 and proposes the combination as a single PR."
+  echo "    $0 upstream/release-v3.1 12345        # Cherry-picks PR 12345 onto upstream/release-v3.1 and proposes that as a PR."
+  echo "    $0 upstream/release-v3.1 12345 56789  # Cherry-picks PR 12345, then 56789 and proposes the combination as a single PR."
   echo
   echo "  Set the DRY_RUN environment var to skip git push and creating PR."
   echo "  This is useful for creating patches to a release branch without making a PR."
@@ -53,7 +54,7 @@ if [[ "$#" -lt 2 ]]; then
   echo "  Set UPSTREAM_REMOTE (default: upstream) and FORK_REMOTE (default: origin)"
   echo "  to override the default remote names to what you have locally."
   echo
-  echo "  For merge process info, see https://git.k8s.io/community/contributors/devel/sig-release/cherry-picks.md"
+  echo "  For merge process info, see https://github.com/OpenIMSDK/Open-IM-Server/tree/main/docs/contrib/git_cherry-pick.md"
   exit 2
 fi
 
@@ -61,13 +62,11 @@ fi
 gh auth status
 
 if git_status=$(git status --porcelain --untracked=no 2>/dev/null) && [[ -n "${git_status}" ]]; then
-  echo "!!! Dirty tree. Clean up and try again."
-  exit 1
+  openim::log::error_exit "!!! Dirty tree. Clean up and try again."
 fi
 
 if [[ -e "${REBASEMAGIC}" ]]; then
-  echo "!!! 'git rebase' or 'git am' in progress. Clean up and try again."
-  exit 1
+  openim::log::error_exit "!!! 'git rebase' or 'git am' in progress. Clean up and try again."
 fi
 
 declare -r BRANCH="$1"
@@ -80,12 +79,12 @@ declare -r PULLDASH
 PULLSUBJ=$(join " " "${PULLS[@]/#/#}") # Generates something like "#12345 #56789"
 declare -r PULLSUBJ
 
-echo "+++ Updating remotes..."
+openim::log::status "Updating remotes..."
 git remote update "${UPSTREAM_REMOTE}" "${FORK_REMOTE}"
 
 if ! git log -n1 --format=%H "${BRANCH}" >/dev/null 2>&1; then
-  echo "!!! '${BRANCH}' not found. The second argument should be something like ${UPSTREAM_REMOTE}/release-0.21."
-  echo "    (In particular, it needs to be a valid, existing remote branch that I can 'git checkout'.)"
+  openim::log::error " '${BRANCH}' not found. The second argument should be something like ${UPSTREAM_REMOTE}/release-0.21."
+  openim::log::error "    (In particular, it needs to be a valid, existing remote branch that I can 'git checkout'.)"
   exit 1
 fi
 
@@ -95,21 +94,21 @@ NEWBRANCH="$(echo "${NEWBRANCHREQ}-${BRANCH}" | sed 's/\//-/g')"
 declare -r NEWBRANCH
 NEWBRANCHUNIQ="${NEWBRANCH}-$(date +%s)"
 declare -r NEWBRANCHUNIQ
-echo "+++ Creating local branch ${NEWBRANCHUNIQ}"
+openim::log::info "+++ Creating local branch ${NEWBRANCHUNIQ}"
 
 cleanbranch=""
 gitamcleanup=false
 function return_to_kansas {
   if [[ "${gitamcleanup}" == "true" ]]; then
     echo
-    echo "+++ Aborting in-progress git am."
+    openim::log::status "Aborting in-progress git am."
     git am --abort >/dev/null 2>&1 || true
   fi
 
   # return to the starting branch and delete the PR text file
   if [[ -z "${DRY_RUN}" ]]; then
     echo
-    echo "+++ Returning you to the ${STARTINGBRANCH} branch and cleaning up."
+    openim::log::status "Returning you to the ${STARTINGBRANCH} branch and cleaning up."
     git checkout -f "${STARTINGBRANCH}" >/dev/null 2>&1 || true
     if [[ -n "${cleanbranch}" ]]; then
       git branch -D "${cleanbranch}" >/dev/null 2>&1 || true
@@ -123,7 +122,7 @@ function make-a-pr() {
   local rel
   rel="$(basename "${BRANCH}")"
   echo
-  echo "+++ Creating a pull request on GitHub at ${GITHUB_USER}:${NEWBRANCH}"
+  openim::log::status "Creating a pull request on GitHub at ${GITHUB_USER}:${NEWBRANCH}"
 
   local numandtitle
   numandtitle=$(printf '%s\n' "${SUBJECTS[@]}")
@@ -132,7 +131,7 @@ Cherry pick of ${PULLSUBJ} on ${rel}.
 
 ${numandtitle}
 
-For details on the cherry pick process, see the [cherry pick requests](https://git.k8s.io/community/contributors/devel/sig-release/cherry-picks.md) page.
+For details on the cherry pick process, see the [cherry pick requests](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/docs/contrib/git_cherry-pick.md) page.
 
 \`\`\`release-note
 
@@ -148,11 +147,11 @@ cleanbranch="${NEWBRANCHUNIQ}"
 
 gitamcleanup=true
 for pull in "${PULLS[@]}"; do
-  echo "+++ Downloading patch to /tmp/${pull}.patch (in case you need to do this again)"
+  openim::log::status "Downloading patch to /tmp/${pull}.patch (in case you need to do this again)"
 
   curl -o "/tmp/${pull}.patch" -sSL "https://github.com/${MAIN_REPO_ORG}/${MAIN_REPO_NAME}/pull/${pull}.patch"
   echo
-  echo "+++ About to attempt cherry pick of PR. To reattempt:"
+  openim::log::status "About to attempt cherry pick of PR. To reattempt:"
   echo "  $ git am -3 /tmp/${pull}.patch"
   echo
   git am -3 "/tmp/${pull}.patch" || {
@@ -161,11 +160,11 @@ for pull in "${PULLS[@]}"; do
       || [[ -e "${REBASEMAGIC}" ]]; do
       conflicts=true # <-- We should have detected conflicts once
       echo
-      echo "+++ Conflicts detected:"
+      openim::log::status "Conflicts detected:"
       echo
       (git status --porcelain | grep ^U) || echo "!!! None. Did you git am --continue?"
       echo
-      echo "+++ Please resolve the conflicts in another window (and remember to 'git add / git am --continue')"
+      openim::log::status "Please resolve the conflicts in another window (and remember to 'git add / git am --continue')"
       read -p "+++ Proceed (anything other than 'y' aborts the cherry-pick)? [y/n] " -r
       echo
       if ! [[ "${REPLY}" =~ ^[yY]$ ]]; then
@@ -193,15 +192,15 @@ gitamcleanup=false
 if [[ -n "${REGENERATE_DOCS}" ]]; then
   echo
   echo "Regenerating docs..."
-  if ! hack/generate-docs.sh; then
+  if ! scripts/generate-docs.sh; then
     echo
-    echo "hack/generate-docs.sh FAILED to complete."
+    echo "scripts/gendoc.sh FAILED to complete."
     exit 1
   fi
 fi
 
 if [[ -n "${DRY_RUN}" ]]; then
-  echo "!!! Skipping git push and PR creation because you set DRY_RUN."
+  openim::log::error "!!! Skipping git push and PR creation because you set DRY_RUN."
   echo "To return to the branch you were in when you invoked this script:"
   echo
   echo "  git checkout ${STARTINGBRANCH}"
@@ -216,7 +215,7 @@ if git remote -v | grep ^"${FORK_REMOTE}" | grep "${MAIN_REPO_ORG}/${MAIN_REPO_N
   echo "!!! You have ${FORK_REMOTE} configured as your ${MAIN_REPO_ORG}/${MAIN_REPO_NAME}.git"
   echo "This isn't normal. Leaving you with push instructions:"
   echo
-  echo "+++ First manually push the branch this script created:"
+  openim::log::status "First manually push the branch this script created:"
   echo
   echo "  git push REMOTE ${NEWBRANCHUNIQ}:${NEWBRANCH}"
   echo
@@ -229,7 +228,7 @@ if git remote -v | grep ^"${FORK_REMOTE}" | grep "${MAIN_REPO_ORG}/${MAIN_REPO_N
 fi
 
 echo
-echo "+++ I'm about to do the following to push to GitHub (and I'm assuming ${FORK_REMOTE} is your personal fork):"
+openim::log::status "I'm about to do the following to push to GitHub (and I'm assuming ${FORK_REMOTE} is your personal fork):"
 echo
 echo "  git push ${FORK_REMOTE} ${NEWBRANCHUNIQ}:${NEWBRANCH}"
 echo
