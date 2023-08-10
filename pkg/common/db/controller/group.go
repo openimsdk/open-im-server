@@ -386,8 +386,24 @@ func (g *groupDatabase) HandlerGroupRequest(
 	handleResult int32,
 	member *relationTb.GroupMemberModel,
 ) error {
-	cache := g.cache.NewCache()
-	if err := g.tx.Transaction(func(tx any) error {
+	//cache := g.cache.NewCache()
+	//if err := g.tx.Transaction(func(tx any) error {
+	//	if err := g.groupRequestDB.NewTx(tx).UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
+	//		return err
+	//	}
+	//	if member != nil {
+	//		if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
+	//			return err
+	//		}
+	//		cache = cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID)
+	//	}
+	//	return nil
+	//}); err != nil {
+	//	return err
+	//}
+	//return cache.ExecDel(ctx)
+
+	return g.tx.Transaction(func(tx any) error {
 		if err := g.groupRequestDB.NewTx(tx).UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
 			return err
 		}
@@ -395,13 +411,12 @@ func (g *groupDatabase) HandlerGroupRequest(
 			if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
 				return err
 			}
-			cache = cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID)
+			if err := g.cache.NewCache().DelGroupMembersHash(groupID).DelGroupMembersInfo(groupID, member.UserID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID).ExecDel(ctx); err != nil {
+				return err
+			}
 		}
 		return nil
-	}); err != nil {
-		return err
-	}
-	return cache.ExecDel(ctx)
+	})
 }
 
 func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {
