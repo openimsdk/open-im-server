@@ -5,7 +5,7 @@
 # license that can be found in the LICENSE file.
 
 # 本脚本功能：根据 scripts/environment.sh 配置，生成 OPENIM 组件 YAML 配置文件。
-# 示例：genconfig.sh scripts/environment.sh configs/openim-api.yaml
+# 示例：./scripts/genconfig.sh scripts/install/environment.sh scripts/template/openim_config.yaml
 
 # Path to the original script file
 env_file="$1"

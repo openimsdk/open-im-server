@@ -105,7 +105,7 @@ function openim::release::package_tarballs() {
   mkdir -p "${RELEASE_TARS}"
   openim::release::package_src_tarball &
   openim::release::package_client_tarballs &
-  openim::release::package_iam_manifests_tarball &
+  openim::release::package_openim_manifests_tarball &
   openim::release::package_server_tarballs &
   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 
@@ -396,7 +396,7 @@ EOF
 }
 
 # This will pack openim-system manifests files for distros such as COS.
-function openim::release::package_iam_manifests_tarball() {
+function openim::release::package_openim_manifests_tarball() {
   openim::log::status "Building tarball: manifests"
 
   local src_dir="${OPENIM_ROOT}/deployments"

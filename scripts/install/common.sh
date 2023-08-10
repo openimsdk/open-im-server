@@ -17,6 +17,8 @@ COMMON_SOURCED=true
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
+
+# Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
 
 # Execute commands that require root permission without entering a password

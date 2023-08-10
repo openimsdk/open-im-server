@@ -186,7 +186,7 @@ openim::util::cleanup-temp-dir() {
 #   OPENIM_TEMP
 openim::util::ensure-temp-dir() {
   if [[ -z ${OPENIM_TEMP-} ]]; then
-    OPENIM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t iamrnetes.XXXXXX)
+    OPENIM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t openimrnetes.XXXXXX)
     openim::util::trap_add openim::util::cleanup-temp-dir EXIT
   fi
 }
@@ -284,7 +284,7 @@ openim::util::gen-docs() {
 
   # Find binary
   gendocs=$(openim::util::find-binary "gendocs")
-  geniamdocs=$(openim::util::find-binary "geniamdocs")
+  genopenimdocs=$(openim::util::find-binary "genopenimdocs")
   genman=$(openim::util::find-binary "genman")
   genyaml=$(openim::util::find-binary "genyaml")
   genfeddocs=$(openim::util::find-binary "genfeddocs")
@@ -297,20 +297,20 @@ openim::util::gen-docs() {
   "${gendocs}" "${dest}/docs/guide/en-US/cmd/imctl/"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-api"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-cmdutils"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-crontask"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msggateway"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msgtransfer"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-push"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-auth"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-conversation"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-friend"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-group"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-msg"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-third"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-user"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/imctl" "imctl"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-api"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-cmdutils"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-crontask"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msggateway"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msgtransfer"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-push"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-auth"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-conversation"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-friend"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-group"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-msg"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-third"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-user"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/imctl" "imctl"
 
   mkdir -p "${dest}/docs/man/man1/"
 "${genman}" "${dest}/docs/man/man1/" "openim-api"
@@ -519,8 +519,8 @@ function openim::util::create_serving_certkey {
 EOF
 }
 
-# creates a self-contained iamconfig: args are sudo, dest-dir, ca file, host, port, client id, token(optional)
-function openim::util::write_client_iamconfig {
+# creates a self-contained openimconfig: args are sudo, dest-dir, ca file, host, port, client id, token(optional)
+function openim::util::write_client_openimconfig {
     local sudo=$1
     local dest_dir=$2
     local ca_file=$3
@@ -528,7 +528,7 @@ function openim::util::write_client_iamconfig {
     local api_port=$5
     local client_id=$6
     local token=${7:-}
-    cat <<EOF | ${sudo} tee "${dest_dir}"/"${client_id}".iamconfig > /dev/null
+    cat <<EOF | ${sudo} tee "${dest_dir}"/"${client_id}".openimconfig > /dev/null
 apiVersion: v1
 kind: Config
 clusters:
@@ -550,12 +550,12 @@ contexts:
 current-context: local-up-cluster
 EOF
 
-    # flatten the iamconfig files to make them self contained
+    # flatten the openimconfig files to make them self contained
     username=$(whoami)
     ${sudo} /usr/bin/env bash -e <<EOF
-    $(openim::util::find-binary imct) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
-    mv -f "/tmp/${client_id}.iamconfig" "${dest_dir}/${client_id}.iamconfig"
-    chown ${username} "${dest_dir}/${client_id}.iamconfig"
+    $(openim::util::find-binary imct) --openimconfig="${dest_dir}/${client_id}.openimconfig" config view --minify --flatten > "/tmp/${client_id}.openimconfig"
+    mv -f "/tmp/${client_id}.openimconfig" "${dest_dir}/${client_id}.openimconfig"
+    chown ${username} "${dest_dir}/${client_id}.openimconfig"
 EOF
 }
 
@@ -732,7 +732,7 @@ function openim::util::ensure-install-nginx {
 #
 function openim::util::ensure-gnu-sed {
   # NOTE: the echo below is a workaround to ensure sed is executed before the grep.
-  # see: https://github.com/iamrnetes/iamrnetes/issues/87251
+  # see: https://github.com/openimrnetes/openimrnetes/issues/87251
   sed_help="$(LANG=C sed --help 2>&1 || true)"
   if echo "${sed_help}" | grep -q "GNU\|BusyBox"; then
     SED="sed"
