@@ -13,44 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 set -e
 set -o pipefail
 
-. $(dirname ${BASH_SOURCE})/lib/init.sh
+. $(dirname ${BASH_SOURCE})/lib/color.sh
 
-trap 'echo "Script interrupted."; exit 1' INT
+trap 'openim::color::echo RED_PREFIX "Script interrupted."; exit 1' INT
 
-# Function for colored echo
-function color_echo() {
-    COLOR=$1
-    shift
-    echo -e "${COLOR}===> $* ${COLOR_SUFFIX}"
-}
-
-function print_with_delay() {
+print_with_delay() {
   text="$1"
   delay="$2"
-  color="$3"
 
   for i in $(seq 0 $((${#text}-1))); do
-    printf "${color}${text:$i:1}${COLOR_SUFFIX}"
+    printf "${text:$i:1}"
     sleep $delay
   done
   printf "\n"
 }
 
-function print_progress() {
+print_progress() {
   total="$1"
   delay="$2"
-  color="$3"
 
-  printf "${color}["
+  printf "["
   for i in $(seq 1 $total); do
     printf "#"
     sleep $delay
   done
-  printf "]${COLOR_SUFFIX}\n"
+  printf "]\n"
 }
 
 function openim_logo() {

@@ -64,11 +64,10 @@ cmd/*
 # config directory
 config/*    @skiffer-git
 
-# db directory
-db/sdk  @cubxxw @FGadvancer  
-
 # internal directory
 internal/ @openimsdk/openim @skiffer-git @FGadvancer
+
+tools @openimsdk/openim @openimsdk/bot @cubxxw @skiffer-git @FGadvancer
 
 # logs directory
 logs/*  @skiffer-git @FGadvancer

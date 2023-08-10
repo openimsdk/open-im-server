@@ -5,10 +5,10 @@
 # license that can be found in the LICENSE file.
 
 # OPENIM 项目源码根目录
-IAM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 
 # 生成文件存放目录
-LOCAL_OUTPUT_ROOT="${IAM_ROOT}/${OUT_DIR:-_output}"
+LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
 
 # 设置统一的密码，方便记忆
 readonly PASSWORD=${PASSWORD:-'iam59!z$'}
@@ -21,7 +21,7 @@ readonly LINUX_PASSWORD=${LINUX_PASSWORD:-${PASSWORD}}
 # 设置安装目录
 readonly INSTALL_DIR=${INSTALL_DIR:-/tmp/installation}
 mkdir -p ${INSTALL_DIR}
-readonly ENV_FILE=${IAM_ROOT}/scripts/install/environment.sh
+readonly ENV_FILE=${OPENIM_ROOT}/scripts/install/environment.sh
 
 # MariaDB 配置信息
 readonly MARIADB_ADMIN_USERNAME=${MARIADB_ADMIN_USERNAME:-root} # MariaDB root 用户

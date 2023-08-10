@@ -221,8 +221,8 @@ go.updates: tools.verify.go-mod-outdated
 ## go.clean: Clean all builds directories and files
 .PHONY: go.clean
 go.clean:
-	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR)) AND BIN_TOOLS_DIR($(BIN_TOOLS_DIR))"
-	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR)
+	@echo "===========> Cleaning all builds tmp, bin, logs directories and files"
+	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR) $(LOGS_DIR)
 	@echo "===========> End clean..."
 
 ## copyright.help: Show copyright help

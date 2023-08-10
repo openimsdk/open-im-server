@@ -13,9 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # Controls verbosity of the script output and logging.
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
+
+if [[ ! -v OPENIM_VERBOSE ]]; then
+    openim::log::info "OPENIM_VERBOSE is not set; defaulting to \"5\""
+    OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
+    OPENIM_VERBOSE="${OPENIM_OUTPUT}/logs"
+fi
+
+log_file="${OPENIM_OUTPUT_LOGS}/openim_$(date '+%Y%m%d').log"
+
+function echo_log() {
+    echo_log -e "$@" | tee -a "${log_file}"
+}
+
+# MAX_LOG_SIZE=10485760 # 10MB
+
+# Clear logs from 5 days ago
+# find $OPENIM_OUTPUT_LOGS -type f -name "*.log" -mtime +5 -exec rm -f {} \;
 
 # Handler for when we exit automatically on an error.
 # Borrowed from https://gist.github.com/ahendrix/7030300
@@ -58,7 +74,7 @@ openim::log::stack() {
   local stack_skip=${1:-0}
   stack_skip=$((stack_skip + 1))
   if [[ ${#FUNCNAME[@]} -gt ${stack_skip} ]]; then
-    echo "Call stack:" >&2
+    echo_log_log "Call stack:" >&2
     local i
     for ((i=1 ; i <= ${#FUNCNAME[@]} - stack_skip ; i++))
     do
@@ -66,7 +82,7 @@ openim::log::stack() {
       local source_file=${BASH_SOURCE[${frame_no}]}
       local source_lineno=${BASH_LINENO[$((frame_no - 1))]}
       local funcname=${FUNCNAME[${frame_no}]}
-      echo "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
+      echo_log_log "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
     done
   fi
 }
@@ -85,14 +101,14 @@ openim::log::error_exit() {
   if [[ ${OPENIM_VERBOSE} -ge 4 ]]; then
     local source_file=${BASH_SOURCE[${stack_skip}]}
     local source_line=${BASH_LINENO[$((stack_skip - 1))]}
-    echo "!!! Error in ${source_file}:${source_line}" >&2
+    echo_log "!!! Error in ${source_file}:${source_line}" >&2
     [[ -z ${1-} ]] || {
-      echo "  ${1}" >&2
+      echo_log "  ${1}" >&2
     }
 
     openim::log::stack ${stack_skip}
 
-    echo "Exiting with status ${code}" >&2
+    echo_log "Exiting with status ${code}" >&2
   fi
 
   exit "${code}"
@@ -101,21 +117,21 @@ openim::log::error_exit() {
 # Log an error but keep going.  Don't dump the stack or exit.
 openim::log::error() {
   timestamp=$(date +"[%m%d %H:%M:%S]")
-  echo "!!! ${timestamp} ${1-}" >&2
+  echo_log "!!! ${timestamp} ${1-}" >&2
   shift
   for message; do
-    echo "    ${message}" >&2
+    echo_log "    ${message}" >&2
   done
 }
 
 # Print an usage message to stderr.  The arguments are printed directly.
 openim::log::usage() {
-  echo >&2
+  echo_log >&2
   local message
   for message; do
-    echo "${message}" >&2
+    echo_log "${message}" >&2
   done
-  echo >&2
+  echo_log >&2
 }
 
 openim::log::usage_from_stdin() {
@@ -135,14 +151,14 @@ openim::log::info() {
   fi
 
   for message; do
-    echo "${message}"
+    echo_log "${message}"
   done
 }
 
 # Just like openim::log::info, but no \n, so you can make a progress bar
 openim::log::progress() {
   for message; do
-    echo -e -n "${message}"
+    echo_log -e -n "${message}"
   done
 }
 
@@ -163,9 +179,18 @@ openim::log::status() {
   fi
 
   timestamp=$(date +"[%m%d %H:%M:%S]")
-  echo "+++ ${timestamp} ${1}"
+  echo_log "+++ ${timestamp} ${1}"
   shift
   for message; do
-    echo "    ${message}"
+    echo_log "    ${message}"
   done
+}
+
+openim::log::success()
+{
+  local V="${V:-0}"
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
+      return
+  fi
+  echo_log -e "${BRIGHT_GREEN_PREFIX}===> [success] <===${COLOR_SUFFIX}\n=> " "$@"
 }

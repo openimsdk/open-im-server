@@ -12,7 +12,6 @@ OpenIM 支持很多种集群化部署方式，包括但不限于 helm, sealos, k
 - https://github.com/showurl/deploy-openim
 
 
-
 ### 依赖检查
 
 ```bash

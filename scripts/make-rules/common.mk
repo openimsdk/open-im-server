@@ -52,6 +52,12 @@ BIN_TOOLS_DIR := $(OUTPUT_DIR)/bin-tools
 $(shell mkdir -p $(BIN_TOOLS_DIR))
 endif
 
+# LOGS_DIR: Directory where log files are stored.
+ifeq ($(origin LOGS_DIR),undefined)
+LOGS_DIR := $(OUTPUT_DIR)/logs
+$(shell mkdir -p $(LOGS_DIR))
+endif
+
 # TOOLS_DIR: The directory where tools are stored for build and testing.
 ifeq ($(origin TOOLS_DIR),undefined)
 TOOLS_DIR := $(OUTPUT_DIR)/tools

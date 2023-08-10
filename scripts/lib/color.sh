@@ -19,6 +19,18 @@
 # Usage: `scripts/color.sh`.
 ################################################################################
 
+# shellcheck disable=SC2034
+if [[ ! -v COLOR_OPEN ]]; then
+    COLOR_OPEN=1
+fi
+
+# Function for colored echo
+openim::color::echo() {
+    COLOR=$1
+    [ $COLOR_OPEN -eq 1 ]  && echo -e "${COLOR} $(date '+%Y-%m-%d %H:%M:%S') $@ ${COLOR_SUFFIX}"
+    shift
+}
+
 # Define color variables
 # --- Feature --- 
 COLOR_NORMAL='\033[0m';COLOR_BOLD='\033[1m';COLOR_DIM='\033[2m';COLOR_UNDER='\033[4m';
@@ -36,6 +48,21 @@ COLOR_BGREEN='\033[42m';COLOR_BYELLOW='\033[43m';
 COLOR_BBLUE='\033[44m';COLOR_BMAGENTA='\033[45m';
 COLOR_BCYAN='\033[46m';COLOR_BWHITE='\033[47m';
 
+# --- Color definitions --- 
+# Color definitions
+COLOR_SUFFIX="\033[0m"      # End all colors and special effects
+BLACK_PREFIX="\033[30m"     # Black prefix
+RED_PREFIX="\033[31m"       # Red prefix
+GREEN_PREFIX="\033[32m"     # Green prefix
+YELLOW_PREFIX="\033[33m"    # Yellow prefix
+BLUE_PREFIX="\033[34m"      # Blue prefix
+SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
+WHITE_PREFIX="\033[37m"     # White prefix
+BOLD_PREFIX="\033[1m"       # Bold prefix
+UNDERLINE_PREFIX="\033[4m"  # Underline prefix
+ITALIC_PREFIX="\033[3m"     # Italic prefix
+CYAN_PREFIX="\033[0;36m"     # Cyan prefix
+
 # --- make demo (run demo) ---
 reset=$(tput sgr0)
 bold=$(tput bold)
@@ -46,51 +73,6 @@ yellow=$(tput bold; tput setaf 3)
 blue=$(tput bold; tput setaf 6)
 timeout=$(if [ "$(uname)" == "Darwin" ]; then echo "1"; else echo "0.1"; fi)
 
-# --- Color definitions --- 
-# Color definitions
-function openim_color() {
-    COLOR_SUFFIX="\033[0m"      # End all colors and special effects
-
-    BLACK_PREFIX="\033[30m"     # Black prefix
-    RED_PREFIX="\033[31m"       # Red prefix
-    GREEN_PREFIX="\033[32m"     # Green prefix
-    YELLOW_PREFIX="\033[33m"    # Yellow prefix
-    BLUE_PREFIX="\033[34m"      # Blue prefix
-    SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
-    WHITE_PREFIX="\033[37m"     # White prefix
-    BOLD_PREFIX="\033[1m"       # Bold prefix
-    UNDERLINE_PREFIX="\033[4m"  # Underline prefix
-    ITALIC_PREFIX="\033[3m"     # Italic prefix
-
-    CYAN_PREFIX="\033[0;36m"     # Cyan prefix
-}
-
-# --- helper functions for logs ---
-function info()
-{
-    echo -e "[${GREEN_PREFIX}INFO${COLOR_SUFFIX}] " "$@"
-}
-
-function warn()
-{
-    echo -e "[${YELLOW_PREFIX}WARN${COLOR_SUFFIX}] " "$@" >&2
-}
-
-function fatal()
-{
-    echo -e "[${RED_PREFIX}ERROR${COLOR_SUFFIX}] " "$@" >&2
-    exit 1
-}
-
-function debug()
-{
-    echo -e "[${BLUE_PREFIX}DEBUG${COLOR_SUFFIX}]===> " "$@"
-}
-
-function success()
-{
-    echo -e "${BRIGHT_GREEN_PREFIX}===> [SUCCESS] <===${COLOR_SUFFIX}\n=> " "$@"
-}
 
 # Print colors you can use
 openim::color::print_color()

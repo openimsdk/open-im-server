@@ -38,6 +38,7 @@ OPENIM_OUTPUT_BINPATH="${OPENIM_OUTPUT}/bin/platforms"
 OPENIM_OUTPUT_BINTOOLPATH="${OPENIM_OUTPUT}/bin-tools"
 OPENIM_OUTPUT_TOOLS="${OPENIM_OUTPUT}/tools"
 OPENIM_OUTPUT_TMP="${OPENIM_OUTPUT}/tmp"
+OPENIM_OUTPUT_LOGS="${OPENIM_OUTPUT}/logs"
 
 # This controls rsync compression. Set to a value > 0 to enable rsync
 # compression for build container
