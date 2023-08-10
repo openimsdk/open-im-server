@@ -73,7 +73,6 @@ func (f *FriendRequestGorm) UpdateByMap(
 func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
 	return utils.Wrap(
 		f.db(ctx).
-			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
 			Updates(friendRequest).
 			Error,
 		"",
