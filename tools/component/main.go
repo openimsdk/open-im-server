@@ -193,13 +193,17 @@ func checkMinio() error {
 		}
 
 		cancel, err := minioClient.HealthCheck(time.Duration(minioHealthCheckDuration) * time.Second)
+		defer func() {
+			if cancel != nil {
+				cancel()
+			}
+		}()
 		if err != nil {
 			return err
 		} else {
 			if minioClient.IsOffline() {
 				return ErrComponentStart.Wrap("Minio server is offline")
 			}
-			cancel()
 		}
 		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.Endpoint) == "127.0.0.1" {
 			return ErrConfig.Wrap("apiURL or Minio endpoint contain 127.0.0.1.")
