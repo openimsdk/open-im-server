@@ -40,6 +40,19 @@ declare -A supported_architectures=(
     ["darwin-x86_64"]="_output/bin/platforms/darwin/amd64"  # Alias for darwin-amd64
 )
 
+declare -A supported_architectures_tools=(
+    ["linux-amd64"]="_output/bin-tools/platforms/linux/amd64"
+    ["linux-arm64"]="_output/bin-tools/platforms/linux/arm64"
+    ["linux-mips64"]="_output/bin-tools/platforms/linux/mips64"
+    ["linux-mips64le"]="_output/bin-tools/platforms/linux/mips64le"
+    ["linux-ppc64le"]="_output/bin-tools/platforms/linux/ppc64le"
+    ["linux-s390x"]="_output/bin-tools/platforms/linux/s390x"
+    ["darwin-amd64"]="_output/bin-tools/platforms/darwin/amd64"
+    ["windows-amd64"]="_output/bin-tools/platforms/windows/amd64"
+    ["linux-x86_64"]="_output/bin-tools/platforms/linux/amd64"  # Alias for linux-amd64
+    ["darwin-x86_64"]="_output/bin-tools/platforms/darwin/amd64"  # Alias for darwin-amd64
+)
+
 # Check if the architecture and version are supported
 if [[ -z ${supported_architectures["$version-$architecture"]} ]]; then
     echo -e "${BLUE_PREFIX}================> Unsupported architecture: $architecture or version: $version${COLOR_SUFFIX}"
@@ -50,6 +63,7 @@ echo -e "${BLUE_PREFIX}================> Architecture: $architecture${COLOR_SUFF
 
 # Set the BIN_DIR based on the architecture and version
 BIN_DIR=${supported_architectures["$version-$architecture"]}
+BIN_DIR_TOOLS=${supported_architectures_tools["$version-$architecture"]}
 
 echo -e "${BLUE_PREFIX}================> BIN_DIR: $OPENIM_ROOT/$BIN_DIR${COLOR_SUFFIX}"
 
@@ -83,6 +97,10 @@ cmd_utils_source_root="$OPENIM_ROOT/cmd/openim-cmdutils/"
 config_path="$OPENIM_ROOT/config/config.yaml"
 configfile_path="$OPENIM_ROOT/config"
 log_path="$OPENIM_ROOT/log"
+
+
+component_check="component"
+component_check_binary_root="$OPENIM_ROOT/$BIN_DIR_TOOLS"
 
 # servicefile dir path
 service_source_root=(
