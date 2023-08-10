@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/tools/errs"
@@ -129,15 +130,20 @@ func exactIP(urll string) string {
 }
 
 func checkMysql() error {
+	var sqlDB *sql.DB
+	defer func() {
+		if sqlDB != nil {
+			sqlDB.Close()
+		}
+	}()
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.Username, config.Config.Mysql.Password, config.Config.Mysql.Address[0], "mysql")
 	db, err := gorm.Open(mysql.Open(dsn), nil)
 	if err != nil {
 		return err
 	} else {
-		sqlDB, err := db.DB()
+		sqlDB, err = db.DB()
 		err = sqlDB.Ping()
-		sqlDB.Close()
 		if err != nil {
 			return err
 		}
@@ -146,6 +152,12 @@ func checkMysql() error {
 }
 
 func checkMongo() error {
+	var client *mongo.Client
+	defer func() {
+		if client != nil {
+			client.Disconnect(context.TODO())
+		}
+	}()
 	mongodbHosts := ""
 	for i, v := range config.Config.Mongo.Address {
 		if i == len(config.Config.Mongo.Address)-1 {
@@ -161,7 +173,6 @@ func checkMongo() error {
 		return err
 	} else {
 		err = client.Ping(context.TODO(), &readpref.ReadPref{})
-		client.Disconnect(context.TODO())
 		if err != nil {
 			return err
 		}
@@ -199,6 +210,11 @@ func checkMinio() error {
 
 func checkRedis() error {
 	var redisClient redis.UniversalClient
+	defer func() {
+		if redisClient != nil {
+			redisClient.Close()
+		}
+	}()
 	if len(config.Config.Redis.Address) > 1 {
 		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    config.Config.Redis.Address,
@@ -220,19 +236,23 @@ func checkRedis() error {
 }
 
 func checkZookeeper() error {
+	var c *zk.Conn
+	defer func() {
+		if c != nil {
+			c.Close()
+		}
+	}()
 	c, _, err := zk.Connect(config.Config.Zookeeper.ZkAddr, time.Second)
 	if err != nil {
 		return err
 	} else {
 		if config.Config.Zookeeper.Username != "" && config.Config.Zookeeper.Password != "" {
 			if err := c.AddAuth("digest", []byte(config.Config.Zookeeper.Username+":"+config.Config.Zookeeper.Password)); err != nil {
-				c.Close()
 				return err
 			}
 		}
 		_, _, err = c.Get("/")
 		if err != nil {
-			c.Close()
 			return err
 		}
 	}
@@ -240,6 +260,12 @@ func checkZookeeper() error {
 }
 
 func checkKafka() error {
+	var kafkaClient sarama.Client
+	defer func() {
+		if kafkaClient != nil {
+			kafkaClient.Close()
+		}
+	}()
 	cfg := sarama.NewConfig()
 	if config.Config.Kafka.Username != "" && config.Config.Kafka.Password != "" {
 		cfg.Net.SASL.Enable = true
@@ -251,7 +277,6 @@ func checkKafka() error {
 		return err
 	} else {
 		topics, err := kafkaClient.Topics()
-		kafkaClient.Close()
 		if err != nil {
 			return err
 		}
