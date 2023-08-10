@@ -19,6 +19,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
@@ -92,4 +93,11 @@ func (u *UserNotificationSender) getFromToUserNickname(
 		return "", "", nil
 	}
 	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
+}
+
+func (u *UserNotificationSender) UserStatusChangeNotification(
+	ctx context.Context,
+	tips *sdkws.UserStatusChangeTips,
+) error {
+	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.FriendAddedNotification, tips)
 }
