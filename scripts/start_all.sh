@@ -77,6 +77,19 @@ need_to_start_server_shell=(
   start_cron.sh
 )
 
+component_check=start_component_check.sh
+echo -e ""
+chmod +x $component_check
+echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
+echo -e ""
+./$component_check
+if [ $? -ne 0 ]; then
+  # Print error message and exit
+  echo -e "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+  exit -1
+fi
+
+
 # Loop through the script names and execute them
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
