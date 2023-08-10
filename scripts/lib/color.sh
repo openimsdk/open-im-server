@@ -39,8 +39,14 @@ COLOR_REVERSE='\033[7m';COLOR_CONCEAL='\033[8m';COLOR_NOBOLD='\033[22m';
 COLOR_NOUNDER='\033[24m';COLOR_NOBLINK='\033[25m';
 
 # --- Front color --- 
-COLOR_BLACK='\033[30m';COLOR_RED='\033[31m';COLOR_GREEN='\033[32m';COLOR_YELLOW='\033[33m';
-COLOR_BLUE='\033[34m';COLOR_MAGENTA='\033[35m';COLOR_CYAN='\033[36m';COLOR_WHITE='\033[37m';
+COLOR_BLACK='\033[30m';
+COLOR_RED='\033[31m';
+COLOR_GREEN='\033[32m';
+COLOR_YELLOW='\033[33m';
+COLOR_BLUE='\033[34m';
+COLOR_MAGENTA='\033[35m';
+COLOR_CYAN='\033[36m';
+COLOR_WHITE='\033[37m';
 
 # --- background color --- 
 COLOR_BBLACK='\033[40m';COLOR_BRED='\033[41m';
@@ -89,3 +95,57 @@ openim::color::print_color()
   dim; blink; nobold; under"
   echo
 }
+
+# test funtion
+openim::color::test() {
+    echo "Starting the color tests..."
+
+    echo "Testing normal echo without color"
+    openim::color::echo $COLOR_NORMAL "This is a normal text"
+
+    echo "Testing bold echo"
+    openim::color::echo $COLOR_BOLD "This is bold text"
+
+    echo "Testing dim echo"
+    openim::color::echo $COLOR_DIM "This is dim text"
+
+    echo "Testing underlined echo"
+    openim::color::echo $COLOR_UNDER "This is underlined text"
+
+    echo "Testing italic echo"
+    openim::color::echo $COLOR_ITALIC "This is italic text"
+
+    echo "Testing red color"
+    openim::color::echo $COLOR_RED "This is red text"
+
+    echo "Testing green color"
+    openim::color::echo $COLOR_GREEN "This is green text"
+
+    echo "Testing yellow color"
+    openim::color::echo $COLOR_YELLOW "This is yellow text"
+
+    echo "Testing blue color"
+    openim::color::echo $COLOR_BLUE "This is blue text"
+
+    echo "Testing magenta color"
+    openim::color::echo $COLOR_MAGENTA "This is magenta text"
+
+    echo "Testing cyan color"
+    openim::color::echo $COLOR_CYAN "This is cyan text"
+
+    echo "Testing black background"
+    openim::color::echo $COLOR_BBLACK "This is text with black background"
+
+    echo "Testing red background"
+    openim::color::echo $COLOR_BRED "This is text with red background"
+
+    echo "Testing green background"
+    openim::color::echo $COLOR_BGREEN "This is text with green background"
+
+    echo "Testing blue background"
+    openim::color::echo $COLOR_BBLUE "This is text with blue background"
+
+    echo "All tests completed!"
+}
+
+# openim::color::test

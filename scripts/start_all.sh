@@ -26,10 +26,6 @@ source $SCRIPTS_ROOT/path_info.sh
 
 cd $SCRIPTS_ROOT
 
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
-
 if [ ! -d "${OPENIM_ROOT}/_output/bin/platforms" ]; then
   # exec build_all_service.sh
   "${SCRIPTS_ROOT}/build_all_service.sh"
@@ -46,20 +42,6 @@ if [ ! -d "$logs_dir" ]; then
     mkdir -p "$logs_dir"
 fi
 
-# Print title
-echo -e "${BOLD_PREFIX}${BLUE_PREFIX}================> OpenIM Server Start${COLOR_SUFFIX}"
-
-# Get current time
-time=$(date +"%Y-%m-%d %H:%M:%S")
-
-# Print section separator
-echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
-
-# Print server start time
-echo -e "${BOLD_PREFIX}${CYAN_PREFIX}Server Start Time: ${time}${COLOR_SUFFIX}"
-
-# Print section separator
-echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
 
 cd  $SCRIPTS_ROOT
 
@@ -104,8 +86,4 @@ for i in ${need_to_start_server_shell[*]}; do
   fi
 done
 
-# Print section separator
-echo -e "${PURPLE_PREFIX}==========================================================${COLOR_SUFFIX}"
-
-# Print completion message
-echo -e "${GREEN_PREFIX}${BOLD_PREFIX}OpenIM Server has been started successfully!${COLOR_SUFFIX}"
+openim::log::success "OpenIM Server has been started successfully!"

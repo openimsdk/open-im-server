@@ -27,6 +27,11 @@ fi
 # Set the log file path
 log_file="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
 
+if [ ! -f "$log_file" ]; then
+    mkdir ${OPENIM_OUTPUT}/logs
+    touch "$log_file"
+fi
+
 # Define the logging function
 function echo_log() {
     if $ENABLE_LOGGING; then
@@ -200,7 +205,7 @@ openim::log::success()
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
       return
   fi
-  echo_log -e "${BRIGHT_GREEN_PREFIX}===> [success] <===${COLOR_SUFFIX}\n=> " "$@"
+  echo_log -e "${BRIGHT_GREEN_PREFIX}[success] ${COLOR_SUFFIX}==> " "$@"
 }
 
 function openim::log::test_log() {

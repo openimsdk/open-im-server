@@ -915,6 +915,11 @@ function openim::util::remove_space() {
     result=$(echo $value | sed 's/ //g')  # 去除空格
 }
 
+function openim::util::gencpu() {
+    cpu=$(lscpu | grep -e '^CPU(s):' | awk '{print $2}')
+    echo $cpu
+}
+
 function openim::util::gen_os_arch() {
     # Get the current operating system and architecture
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
