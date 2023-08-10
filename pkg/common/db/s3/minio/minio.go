@@ -15,16 +15,28 @@
 package minio
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
+	"io"
 	"net/http"
 	"net/url"
+	"path"
+	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/signer"
@@ -41,6 +53,13 @@ const (
 	minPartSize = 1024 * 1024 * 5        // 1MB
 	maxPartSize = 1024 * 1024 * 1024 * 5 // 5GB
 	maxNumSize  = 10000
+)
+
+const (
+	maxImageWidth  = 1024
+	maxImageHeight = 1024
+	maxImageSize   = 1024 * 1024 * 50
+	pathInfo       = "openim/thumbnail"
 )
 
 func NewMinio() (s3.Interface, error) {
@@ -60,10 +79,25 @@ func NewMinio() (s3.Interface, error) {
 	m := &Minio{
 		bucket:    conf.Bucket,
 		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
-		opts:      opts,
 		core:      &minio.Core{Client: client},
 		lock:      &sync.Mutex{},
 		init:      false,
+	}
+	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+		m.sign = m.core.Client
+	} else {
+		su, err := url.Parse(conf.SignEndpoint)
+		if err != nil {
+			return nil, err
+		}
+		m.opts = &minio.Options{
+			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+			Secure: su.Scheme == "https",
+		}
+		m.sign, err = minio.New(su.Host, m.opts)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -76,8 +110,10 @@ func NewMinio() (s3.Interface, error) {
 type Minio struct {
 	bucket    string
 	bucketURL string
+	location  string
 	opts      *minio.Options
 	core      *minio.Core
+	sign      *minio.Client
 	lock      sync.Locker
 	init      bool
 }
@@ -91,15 +127,43 @@ func (m *Minio) initMinio(ctx context.Context) error {
 	if m.init {
 		return nil
 	}
-	exists, err := m.core.Client.BucketExists(ctx, config.Config.Object.Minio.Bucket)
+	conf := config.Config.Object.Minio
+	exists, err := m.core.Client.BucketExists(ctx, conf.Bucket)
 	if err != nil {
 		return fmt.Errorf("check bucket exists error: %w", err)
 	}
 	if !exists {
-		if err := m.core.Client.MakeBucket(ctx, config.Config.Object.Minio.Bucket, minio.MakeBucketOptions{}); err != nil {
+		if err := m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return fmt.Errorf("make bucket error: %w", err)
 		}
 	}
+	m.location, err = m.core.Client.GetBucketLocation(ctx, conf.Bucket)
+	if err != nil {
+		return err
+	}
+	func() {
+		if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+			return
+		}
+		defer func() {
+			if r := recover(); r != nil {
+				m.sign = m.core.Client
+				log.ZWarn(
+					context.Background(),
+					"set sign bucket location cache panic",
+					errors.New("failed to get private field value"),
+					"recover",
+					fmt.Sprintf("%+v", r),
+					"development version",
+					"github.com/minio/minio-go/v7 v7.0.61",
+				)
+			}
+		}()
+		blc := reflect.ValueOf(m.sign).Elem().FieldByName("bucketLocCache")
+		vblc := reflect.New(reflect.PtrTo(blc.Type()))
+		*(*unsafe.Pointer)(vblc.UnsafePointer()) = unsafe.Pointer(blc.UnsafeAddr())
+		vblc.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
+	}()
 	m.init = true
 	return nil
 }
@@ -191,7 +255,7 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 			return nil, err
 		}
 		request.Header.Set("X-Amz-Content-Sha256", unsignedPayload)
-		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, "us-east-1", nil)
+		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			URL:        request.URL.String(),
@@ -206,7 +270,7 @@ func (m *Minio) PresignedPutObject(ctx context.Context, name string, expire time
 	if err := m.initMinio(ctx); err != nil {
 		return "", err
 	}
-	rawURL, err := m.core.Client.PresignedPutObject(ctx, m.bucket, name, expire)
+	rawURL, err := m.sign.PresignedPutObject(ctx, m.bucket, name, expire)
 	if err != nil {
 		return "", err
 	}
@@ -303,6 +367,19 @@ func (m *Minio) ListUploadedParts(ctx context.Context, uploadID string, name str
 	return res, nil
 }
 
+func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time.Duration, query url.Values) (string, error) {
+	if expire <= 0 {
+		expire = time.Hour * 24 * 365 * 99 // 99 years
+	} else if expire < time.Second {
+		expire = time.Second
+	}
+	rawURL, err := m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)
+	if err != nil {
+		return "", err
+	}
+	return rawURL.String(), nil
+}
+
 func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	if err := m.initMinio(ctx); err != nil {
 		return "", err
@@ -313,17 +390,123 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 			reqParams.Set("response-content-type", opt.ContentType)
 		}
 		if opt.Filename != "" {
-			reqParams.Set("response-content-disposition", `attachment; filename="`+opt.Filename+`"`)
+			reqParams.Set("response-content-disposition", `attachment; filename=`+strconv.Quote(opt.Filename))
 		}
 	}
-	if expire <= 0 {
-		expire = time.Hour * 24 * 365 * 99 // 99 years
-	} else if expire < time.Second {
-		expire = time.Second
+	if opt.Image == nil || (opt.Image.Width < 0 && opt.Image.Height < 0 && opt.Image.Format == "") || (opt.Image.Width > maxImageWidth || opt.Image.Height > maxImageHeight) {
+		return m.presignedGetObject(ctx, name, expire, reqParams)
 	}
-	u, err := m.core.Client.PresignedGetObject(ctx, m.bucket, name, expire, reqParams)
+	fileInfo, err := m.StatObject(ctx, name)
 	if err != nil {
 		return "", err
 	}
-	return u.String(), nil
+	if fileInfo.Size > maxImageSize {
+		return "", errors.New("file size too large")
+	}
+	objectInfoPath := path.Join(pathInfo, fileInfo.ETag, "image.json")
+	var (
+		img  image.Image
+		info minioImageInfo
+	)
+	data, err := m.getObjectData(ctx, objectInfoPath, 1024)
+	if err == nil {
+		if err := json.Unmarshal(data, &info); err != nil {
+			return "", fmt.Errorf("unmarshal minio image info.json error: %w", err)
+		}
+		if info.NotImage {
+			return "", errors.New("not image")
+		}
+	} else if m.IsNotFound(err) {
+		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+		if err != nil {
+			return "", err
+		}
+		defer reader.Close()
+		imageInfo, format, err := ImageStat(reader)
+		if err == nil {
+			info.NotImage = false
+			info.Format = format
+			info.Width, info.Height = ImageWidthHeight(imageInfo)
+			img = imageInfo
+		} else {
+			info.NotImage = true
+		}
+		data, err := json.Marshal(&info)
+		if err != nil {
+			return "", err
+		}
+		if _, err := m.core.Client.PutObject(ctx, m.bucket, objectInfoPath, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{}); err != nil {
+			return "", err
+		}
+	} else {
+		return "", err
+	}
+	if opt.Image.Width > info.Width || opt.Image.Width <= 0 {
+		opt.Image.Width = info.Width
+	}
+	if opt.Image.Height > info.Height || opt.Image.Height <= 0 {
+		opt.Image.Height = info.Height
+	}
+	opt.Image.Format = strings.ToLower(opt.Image.Format)
+	if opt.Image.Format == formatJpg {
+		opt.Image.Format = formatJpeg
+	}
+	switch opt.Image.Format {
+	case formatPng:
+	case formatJpeg:
+	case formatGif:
+	default:
+		if info.Format == formatGif {
+			opt.Image.Format = formatGif
+		} else {
+			opt.Image.Format = formatJpeg
+		}
+	}
+	reqParams.Set("response-content-type", "image/"+opt.Image.Format)
+	if opt.Image.Width == info.Width && opt.Image.Height == info.Height && opt.Image.Format == info.Format {
+		return m.presignedGetObject(ctx, name, expire, reqParams)
+	}
+	cacheKey := filepath.Join(pathInfo, fileInfo.ETag, fmt.Sprintf("image_w%d_h%d.%s", opt.Image.Width, opt.Image.Height, opt.Image.Format))
+	if _, err := m.core.Client.StatObject(ctx, m.bucket, cacheKey, minio.StatObjectOptions{}); err == nil {
+		return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
+	} else if !m.IsNotFound(err) {
+		return "", err
+	}
+	if img == nil {
+		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+		if err != nil {
+			return "", err
+		}
+		defer reader.Close()
+		img, _, err = ImageStat(reader)
+		if err != nil {
+			return "", err
+		}
+	}
+	thumbnail := resizeImage(img, opt.Image.Width, opt.Image.Height)
+	buf := bytes.NewBuffer(nil)
+	switch opt.Image.Format {
+	case formatPng:
+		err = png.Encode(buf, thumbnail)
+	case formatJpeg:
+		err = jpeg.Encode(buf, thumbnail, nil)
+	case formatGif:
+		err = gif.Encode(buf, thumbnail, nil)
+	}
+	if _, err := m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
+		return "", err
+	}
+	return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
+}
+
+func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]byte, error) {
+	object, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer object.Close()
+	if limit < 0 {
+		return io.ReadAll(object)
+	}
+	return io.ReadAll(io.LimitReader(object, 1024))
 }

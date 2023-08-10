@@ -17,11 +17,19 @@ package user
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/tools/log"
 	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -31,16 +39,10 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
+
 	pbuser "github.com/OpenIMSDK/protocol/user"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -250,18 +252,27 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 
 // SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
-	err = s.UserDatabase.SubscribeOrCancelUsersStatus(ctx, req.UserID, req.UserIDs, req.Genre)
-	if err != nil {
-		return nil, err
+	if req.Genre == constant.SubscriberUser {
+		err = s.UserDatabase.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
+		var status []*pbuser.OnlineStatus
+		status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
+	} else if req.Genre == constant.Unsubscribe {
+		err = s.UserDatabase.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
 	}
-	//var status map[string][]string
-	//TODO 获取用户在线列表，返回订阅的用户的在线列表
-
 	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
 }
 
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
-	//TODO 是否加一个参数校验-判断req.userID的数量，每一个获取加一个限制，一次请求限制500？
 	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err

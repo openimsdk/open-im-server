@@ -23,10 +23,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type Req struct {

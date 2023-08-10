@@ -36,6 +36,19 @@ const (
 	maxNumSize  = 10000
 )
 
+const (
+	imagePng  = "png"
+	imageJpg  = "jpg"
+	imageJpeg = "jpeg"
+	imageGif  = "gif"
+	imageWebp = "webp"
+)
+
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
+)
+
 func NewOSS() (s3.Interface, error) {
 	conf := config.Config.Object.Oss
 	if conf.BucketURL == "" {
@@ -139,7 +152,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := fmt.Sprintf(`%s%s?partNumber=%d&uploadId=%s`, o.bucketURL, name, partNumber, uploadID)
-		request, err := http.NewRequestWithContext(ctx, http.MethodPut, rawURL, nil)
+		request, err := http.NewRequest(http.MethodPut, rawURL, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -150,12 +163,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, now)
 		request.Header.Set(oss.HttpHeaderOssDate, now)
-		authorization := fmt.Sprintf(
-			`OSS %s:%s`,
-			o.credentials.GetAccessKeyID(),
-			o.getSignedStr(request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID), o.credentials.GetAccessKeySecret()),
-		)
-		request.Header.Set(oss.HTTPHeaderAuthorization, authorization)
+		ossSignHeader(o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
 		delete(request.Header, oss.HTTPHeaderDate)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
@@ -266,11 +274,36 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	var opts []oss.Option
 	if opt != nil {
+		if opt.Image != nil {
+			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
+			var format string
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				format = opt.Image.Format
+			default:
+				opt.Image.Format = imageJpg
+			}
+			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
+			process := "image/resize,m_lfit"
+			if opt.Image.Width > 0 {
+				process += ",w_" + strconv.Itoa(opt.Image.Width)
+			}
+			if opt.Image.Height > 0 {
+				process += ",h_" + strconv.Itoa(opt.Image.Height)
+			}
+			process += ",format," + format
+			opts = append(opts, oss.Process(process))
+		}
 		if opt.ContentType != "" {
 			opts = append(opts, oss.ResponseContentType(opt.ContentType))
 		}
 		if opt.Filename != "" {
-			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename="`+opt.Filename+`"`))
+			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename=`+strconv.Quote(opt.Filename)))
 		}
 	}
 	if expire <= 0 {

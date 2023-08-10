@@ -18,9 +18,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"runtime/debug"
 	"sync"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"google.golang.org/protobuf/proto"
 

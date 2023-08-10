@@ -22,8 +22,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 type UserGorm struct {
@@ -85,7 +86,11 @@ func (u *UserGorm) Page(
 
 // 获取所有用户ID.
 func (u *UserGorm) GetAllUserID(ctx context.Context, pageNumber, showNumber int32) (userIDs []string, err error) {
-	return userIDs, errs.Wrap(u.db(ctx).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Pluck("user_id", &userIDs).Error)
+	if pageNumber == 0 || showNumber == 0 {
+		return userIDs, errs.Wrap(u.db(ctx).Pluck("user_id", &userIDs).Error)
+	} else {
+		return userIDs, errs.Wrap(u.db(ctx).Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Pluck("user_id", &userIDs).Error)
+	}
 }
 
 func (u *UserGorm) GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error) {

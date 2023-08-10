@@ -24,14 +24,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/tools/tx"
+	"github.com/OpenIMSDK/tools/utils"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/tx"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 type GroupDatabase interface {
@@ -385,8 +386,24 @@ func (g *groupDatabase) HandlerGroupRequest(
 	handleResult int32,
 	member *relationTb.GroupMemberModel,
 ) error {
-	cache := g.cache.NewCache()
-	if err := g.tx.Transaction(func(tx any) error {
+	//cache := g.cache.NewCache()
+	//if err := g.tx.Transaction(func(tx any) error {
+	//	if err := g.groupRequestDB.NewTx(tx).UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
+	//		return err
+	//	}
+	//	if member != nil {
+	//		if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
+	//			return err
+	//		}
+	//		cache = cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID)
+	//	}
+	//	return nil
+	//}); err != nil {
+	//	return err
+	//}
+	//return cache.ExecDel(ctx)
+
+	return g.tx.Transaction(func(tx any) error {
 		if err := g.groupRequestDB.NewTx(tx).UpdateHandler(ctx, groupID, userID, handledMsg, handleResult); err != nil {
 			return err
 		}
@@ -394,13 +411,12 @@ func (g *groupDatabase) HandlerGroupRequest(
 			if err := g.groupMemberDB.NewTx(tx).Create(ctx, []*relationTb.GroupMemberModel{member}); err != nil {
 				return err
 			}
-			cache = cache.DelGroupMembersHash(groupID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID)
+			if err := g.cache.NewCache().DelGroupMembersHash(groupID).DelGroupMembersInfo(groupID, member.UserID).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelJoinedGroupID(member.UserID).ExecDel(ctx); err != nil {
+				return err
+			}
 		}
 		return nil
-	}); err != nil {
-		return err
-	}
-	return cache.ExecDel(ctx)
+	})
 }
 
 func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {

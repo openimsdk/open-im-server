@@ -24,10 +24,10 @@
 # Zookeeper username
 # Zookeeper password
 zookeeper:
-  schema: openim                          
-  address: [ 127.0.0.1:2181 ]            
-  username:                               
-  password:   
+  schema: openim
+  address: [ 127.0.0.1:2181 ]
+  username:
+  password:
 
 ###################### Mysql ######################
 # MySQL configuration
@@ -42,12 +42,12 @@ mysql:
   address: [ 127.0.0.1:13306 ]
   username: root
   password: openIM123
-  database: openIM_v3                     
-  maxOpenConn: 1000                       
-  maxIdleConn: 100                        
-  maxLifeTime: 60                         
-  logLevel: 4                             
-  slowThreshold: 500    
+  database: openIM_v3
+  maxOpenConn: 1000
+  maxIdleConn: 100
+  maxLifeTime: 60
+  logLevel: 4
+  slowThreshold: 500
 
 ###################### Mongo ######################
 # MongoDB configuration
@@ -62,7 +62,7 @@ mongo:
   database: openIM_v3
   username: root
   password: openIM123
-  maxPoolSize: 100  
+  maxPoolSize: 100
 
 ###################### Redis ######################
 # Redis configuration
@@ -70,7 +70,7 @@ mongo:
 # Username is required only for Redis version 6.0+
 redis:
   address: [ 127.0.0.1:16379 ]
-  username:                               
+  username:
   password: openIM123
 
 ###################### Kafka ######################
@@ -81,13 +81,13 @@ redis:
 # It's not recommended to modify this topic name
 # Consumer group ID, it's not recommended to modify
 kafka:
-  username:                               
-  password:                               
+  username:
+  password:
   addr: [ 127.0.0.1:9092 ]
   latestMsgToRedis:
-    topic: "latestMsgToRedis"             
+    topic: "latestMsgToRedis"
   offlineMsgToMongo:
-    topic: "offlineMsgToMongoMysql"       
+    topic: "offlineMsgToMongoMysql"
   msgToPush:
     topic: "msgToPush"
   consumerGroupID:
@@ -111,8 +111,8 @@ rpc:
 # API service port
 # Default listen IP is 0.0.0.0
 api:
-  openImApiPort: [ 10002 ]                
-  listenIP: 0.0.0.0    
+  openImApiPort: [ 10002 ]
+  listenIP: 0.0.0.0
 
 ###################### Gateway ######################
 # Object storage configuration
@@ -124,25 +124,29 @@ api:
 # Session token
 # Configuration for Tencent COS
 # Configuration for Aliyun OSS
+# apiURL is the address of the api, the access address of the app, use s3 must be configured
+# minio.endpoint can be configured as an intranet address,
+# minio.signEndpoint is minio public network address
 object:
-  enable: "minio"                         
-  apiURL: http://127.0.0.1:10002/object/
+  enable: "minio"
+  apiURL: "http://127.0.0.1:10002"
   minio:
-    bucket: "openim"                      
-    endpoint: http://127.0.0.1:10005
-    accessKeyID: root
-    secretAccessKey: openIM123
-    sessionToken: ""                      
-  cos:                                    
+    bucket: "openim"
+    endpoint: "http://127.0.0.1:10005"
+    accessKeyID: "root"
+    secretAccessKey: "openIM123"
+    sessionToken: ""
+    signEndpoint: "http://127.0.0.1:10005"
+  cos:
     bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
     secretID: ""
     secretKey: ""
     sessionToken: ""
-  oss:                                    
+  oss:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
-    accessKeyID: root
+    accessKeyID: ""
     accessKeySecret: ""
     sessionToken: ""
 
@@ -150,7 +154,7 @@ object:
 # These ports are passed into the program by the script and are not recommended to modify
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example, [10110, 10111]
-rpcPort: 
+rpcPort:
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -183,12 +187,12 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../../../../../logs/  
-  rotationTime: 24                        
-  remainRotationCount: 2                  
-  remainLogLevel: 6                       
-  isStdout: false                         
-  isJson: false                           
+  storageLocation: ../../../../../logs/
+  rotationTime: 24
+  remainRotationCount: 2
+  remainLogLevel: 6
+  isStdout: false
+  isJson: false
   withStack: false
 
 # Long connection server configuration
@@ -198,10 +202,10 @@ log:
 # Maximum length of websocket request package
 # Websocket connection handshake timeout
 longConnSvr:
-  openImWsPort: [ 10001 ]                 
-  websocketMaxConnNum: 100000             
-  websocketMaxMsgLen: 4096                
-  websocketTimeout: 10  
+  openImWsPort: [ 10001 ]
+  websocketMaxConnNum: 100000
+  websocketMaxMsgLen: 4096
+  websocketTimeout: 10
 
 # Push notification service configuration
 #

@@ -709,3 +709,23 @@ if [[ -z "${color_start-}" ]]; then
 fi
 
 # ex: ts=2 sw=2 et filetype=sh
+
+
+# input: [10023, 2323, 3434]
+# output: 10023 2323 3434
+
+# Function function: Converts a list to a string, removing Spaces and parentheses
+function list_to_string() {
+    ports_list=$*  # 获取传入的参数列表
+    sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
+    sub_s2=${sub_s1//,/ }  # 将逗号替换为空格
+    sub_s3=${sub_s2#*[}  # 去除左括号及其之前的内容
+    sub_s4=${sub_s3%]*}  # 去除右括号及其之后的内容
+    ports_array=$sub_s4  # 将处理后的字符串赋值给变量 ports_array
+}
+
+# Function Function: Remove Spaces in the string
+function remove_space() {
+    value=$*  # 获取传入的参数
+    result=$(echo $value | sed 's/ //g')  # 去除空格
+}
