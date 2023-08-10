@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/tools/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
