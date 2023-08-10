@@ -28,9 +28,9 @@ readonly USER=${USER:-'root'} # Setting a username
 # 设置统一的密码，方便记忆
 readonly PASSWORD=${PASSWORD:-'openIM123'} # Setting a password
 
-# Linux系统 going 用户
-readonly LINUX_USERNAME=${LINUX_USERNAME:-going}
-# Linux root & going 用户密码
+# Linux系统 openim 用户
+readonly LINUX_USERNAME=${LINUX_USERNAME:-openim}
+# Linux root & openim 用户密码
 readonly LINUX_PASSWORD=${LINUX_PASSWORD:-${PASSWORD}}
 
 # 设置安装目录

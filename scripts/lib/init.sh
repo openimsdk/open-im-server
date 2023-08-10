@@ -75,7 +75,6 @@ readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
 )
 
 # If we update this we should also update the set of platforms whose standard
-# library is precompiled for in build/image/cross/Dockerfile
 readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
   linux/amd64
   linux/arm64
@@ -83,6 +82,7 @@ readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
 
 # The set of server targets that we are only building for Linux
 # If you update this list, please also update build/BUILD.
+# TODO: Label
 openim::golang::server_targets() {
   local targets=(
     openim-api

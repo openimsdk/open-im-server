@@ -21,10 +21,6 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
 
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
-
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
 
