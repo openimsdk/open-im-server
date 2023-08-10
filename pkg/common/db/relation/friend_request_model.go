@@ -71,14 +71,13 @@ func (f *FriendRequestGorm) UpdateByMap(
 
 // 更新记录 （非零值）.
 func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
-	fromUserID := friendRequest.FromUserID
-	toUserID := friendRequest.ToUserID
-	friendRequest.FromUserID = ""
-	friendRequest.ToUserID = ""
+	fr2 := *friendRequest
+	fr2.FromUserID = ""
+	fr2.ToUserID = ""
 	return utils.Wrap(
 		f.db(ctx).
-			Where("from_user_id = ? AND to_user_id =?", fromUserID, toUserID).
-			Updates(friendRequest).
+			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
+			Updates(fr2).
 			Error,
 		"",
 	)
