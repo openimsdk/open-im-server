@@ -83,7 +83,14 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 		operationID = strconv.Itoa(rand.Int())
 	}
 	ctx := mcontext.SetOperationID(c, operationID)
-	resp, err := o.Client.AccessURL(ctx, &third.AccessURLReq{Name: name})
+	query := make(map[string]string)
+	for key, values := range c.Request.URL.Query() {
+		if len(values) == 0 {
+			continue
+		}
+		query[key] = values[0]
+	}
+	resp, err := o.Client.AccessURL(ctx, &third.AccessURLReq{Name: name, Query: query})
 	if err != nil {
 		if errs.ErrArgs.Is(err) {
 			c.String(http.StatusBadRequest, err.Error())

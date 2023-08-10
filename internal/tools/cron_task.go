@@ -26,12 +26,13 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
-func StartCronTask() error {
+func StartTask() error {
 	fmt.Println("cron task start, config", config.Config.ChatRecordsClearTime)
 	msgTool, err := InitMsgTool()
 	if err != nil {
 		return err
 	}
+	msgTool.ConvertTools()
 	c := cron.New()
 	var wg sync.WaitGroup
 	wg.Add(1)

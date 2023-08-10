@@ -116,9 +116,16 @@ type ListUploadedPartsResult struct {
 	UploadedParts        []UploadedPart `xml:"Part"`
 }
 
+type Image struct {
+	Format string `json:"format"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+}
+
 type AccessURLOption struct {
 	ContentType string `json:"contentType"`
 	Filename    string `json:"filename"`
+	Image       *Image `json:"image"`
 }
 
 type Interface interface {

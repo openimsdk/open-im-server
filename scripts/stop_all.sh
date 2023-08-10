@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +23,13 @@ source $OPENIM_ROOT/scripts/path_info.sh
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
+sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 cd "$SCRIPTS_ROOT"
 
 for i in ${service_names[*]}; do
   #Check whether the service exists
-  name="ps |grep -w $i |grep -v grep"
+  name="ps -aux |grep -w $i |grep -v grep"
   count="${name}| wc -l"
   if [ $(eval ${count}) -gt 0 ]; then
     pid="${name}| awk '{print \$2}'"

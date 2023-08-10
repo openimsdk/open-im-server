@@ -120,6 +120,7 @@ type configStruct struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			SecretAccessKey string `yaml:"secretAccessKey"`
 			SessionToken    string `yaml:"sessionToken"`
+			SignEndpoint    string `yaml:"signEndpoint"`
 		} `yaml:"minio"`
 		Cos struct {
 			BucketURL    string `yaml:"bucketURL"`

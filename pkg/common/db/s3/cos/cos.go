@@ -36,6 +36,19 @@ const (
 	maxNumSize  = 1000
 )
 
+const (
+	imagePng  = "png"
+	imageJpg  = "jpg"
+	imageJpeg = "jpeg"
+	imageGif  = "gif"
+	imageWebp = "webp"
+)
+
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
+)
+
 func NewCos() (s3.Interface, error) {
 	conf := config.Config.Object.Cos
 	u, err := url.Parse(conf.BucketURL)
@@ -248,19 +261,44 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	var option *cos.PresignedURLOptions
+	var imageMogr string
+	var option cos.PresignedURLOptions
 	if opt != nil {
 		query := make(url.Values)
+		if opt.Image != nil {
+			// https://cloud.tencent.com/document/product/436/44880
+			style := make([]string, 0, 2)
+			wh := make([]string, 2)
+			if opt.Image.Width > 0 {
+				wh[0] = strconv.Itoa(opt.Image.Width)
+			}
+			if opt.Image.Height > 0 {
+				wh[1] = strconv.Itoa(opt.Image.Height)
+			}
+			if opt.Image.Width > 0 || opt.Image.Height > 0 {
+				style = append(style, strings.Join(wh, "x"))
+			}
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				style = append(style, "format/"+opt.Image.Format)
+			}
+			if len(style) > 0 {
+				imageMogr = "&imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
+			}
+		}
 		if opt.ContentType != "" {
 			query.Set("response-content-type", opt.ContentType)
 		}
 		if opt.Filename != "" {
-			query.Set("response-content-disposition", `attachment; filename="`+opt.Filename+`"`)
+			query.Set("response-content-disposition", `attachment; filename=`+strconv.Quote(opt.Filename))
 		}
 		if len(query) > 0 {
-			option = &cos.PresignedURLOptions{
-				Query: &query,
-			}
+			option.Query = &query
 		}
 	}
 	if expire <= 0 {
@@ -268,9 +306,13 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, option)
+	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, &option)
 	if err != nil {
 		return "", err
 	}
-	return rawURL.String(), nil
+	urlStr := rawURL.String()
+	if imageMogr != "" {
+		urlStr += imageMogr
+	}
+	return urlStr, nil
 }
