@@ -293,11 +293,7 @@ func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache 
 
 // groupMembersHash.
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
-	return getCache(
-		ctx,
-		g.rcClient,
-		g.getGroupMembersHashKey(groupID),
-		g.expireTime,
+	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime,
 		func(ctx context.Context) (uint64, error) {
 			userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 			if err != nil {
@@ -357,6 +353,7 @@ func (g *GroupCacheRedis) GetGroupMemberHashMap(
 		if err != nil {
 			return nil, err
 		}
+		log.ZInfo(ctx, "GetGroupMemberHashMap", "groupID", groupID, "hash", hash)
 		num, err := g.GetGroupMemberNum(ctx, groupID)
 		if err != nil {
 			return nil, err
