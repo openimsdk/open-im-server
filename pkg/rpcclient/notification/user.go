@@ -99,5 +99,5 @@ func (u *UserNotificationSender) UserStatusChangeNotification(
 	ctx context.Context,
 	tips *sdkws.UserStatusChangeTips,
 ) error {
-	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.FriendAddedNotification, tips)
+	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserStatusChangeNotification, tips)
 }
