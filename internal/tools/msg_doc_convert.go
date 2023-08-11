@@ -1,10 +1,11 @@
 package tools
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 )
 
 func (c *MsgTool) ConvertTools() {

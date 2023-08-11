@@ -209,6 +209,7 @@ func (f *friendDatabase) RefuseFriendRequest(
 	if fr.HandleResult != 0 {
 		return errs.ErrArgs.Wrap("the friend request has been processed")
 	}
+	log.ZDebug(ctx, "refuse friend request", "friendRequest db", fr, "friendRequest arg", friendRequest)
 	friendRequest.HandleResult = constant.FriendResponseRefuse
 	friendRequest.HandleTime = time.Now()
 	err = f.friendRequest.Update(ctx, friendRequest)
