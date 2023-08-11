@@ -335,6 +335,7 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 			if err != nil {
 				return 0, err
 			}
+			log.ZInfo(ctx, "json hash data", "groupID", groupID, "data", string(val))
 			sum := md5.Sum(val)
 			code := binary.BigEndian.Uint64(sum[:])
 			log.ZInfo(ctx, "GetGroupMembersHash", "groupID", groupID, "hashCode", code, "num", len(members))

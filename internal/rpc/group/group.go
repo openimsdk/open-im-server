@@ -1362,7 +1362,6 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 }
 
 func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
-	log.ZInfo(ctx, "GetGroupAbstractInfo", "req", req, "---------------------------")
 	resp := &pbGroup.GetGroupAbstractInfoResp{}
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("groupIDs empty")
