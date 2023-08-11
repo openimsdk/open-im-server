@@ -27,8 +27,8 @@ fi
 # Set the log file path
 log_file="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
 
-if [ ! -f "$log_file" ]; then
-    mkdir ${OPENIM_OUTPUT}/logs
+if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
+    mkdir -p "${OPENIM_OUTPUT}/logs"
     touch "$log_file"
 fi
 

@@ -14,13 +14,21 @@
 # limitations under the License.
 
 
-# This script lists all of the [Feature:.+] tests in our e2e suite.
-#
-# Usage: `scripts/list-feature-tests.sh`.
+# This script sets up a temporary openim GOPATH and runs an arbitrary
+# command under it. Go tooling requires that the current directory be under
+# GOPATH or else it fails to find some things, such as the vendor directory for
+# the project.
+# Usage: `scripts/run-in-gopath.sh <command>`.
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-grep "\[Feature:\w+\]" "${OPENIM_ROOT}"/test/e2e/**/*.go -Eoh | LC_ALL=C sort -u
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
+
+# This sets up a clean GOPATH and makes sure we are currently in it.
+openim::golang::setup_env
+
+# Run the user-provided command.
+"${@}"

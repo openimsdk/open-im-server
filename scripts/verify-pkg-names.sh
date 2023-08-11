@@ -14,13 +14,22 @@
 # limitations under the License.
 
 
-# This script lists all of the [Feature:.+] tests in our e2e suite.
-#
-# Usage: `scripts/list-feature-tests.sh`.
+# This script verifies whether codes follow golang convention.
+# Usage: `scripts/verify-pkg-names.sh`.
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-grep "\[Feature:\w+\]" "${OPENIM_ROOT}"/test/e2e/**/*.go -Eoh | LC_ALL=C sort -u
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
+
+openim::golang::verify_go_version
+
+cd "${OPENIM_ROOT}"
+if git --no-pager grep -E $'^(import |\t)[a-z]+[A-Z_][a-zA-Z]* "[^"]+"$' -- '**/*.go' ':(exclude)vendor/*' ':(exclude)**/*.pb.go'; then
+  openim::log::error "Some package aliases break go conventions."
+  echo "To fix these errors, do not use capitalized or underlined characters"
+  echo "in pkg aliases. Refer to https://blog.golang.org/package-names for more info."
+  exit 1
+fi

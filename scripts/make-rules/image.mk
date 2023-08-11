@@ -179,7 +179,7 @@ image.manifest.push.multiarch: image.push.multiarch $(addprefix image.manifest.p
 .PHONY: image.manifest.push.multiarch.%
 image.manifest.push.multiarch.%:
 	@echo "===========> Pushing manifest $* $(VERSION) to $(REGISTRY_PREFIX) and then remove the local manifest list"
-	REGISTRY_PREFIX=$(REGISTRY_PREFIX) PLATFROMS="$(PLATFORMS)" IMAGE=$* VERSION=$(VERSION) DOCKER_CLI_EXPERIMENTAL=enabled \
+	REGISTRY_PREFIX=$(REGISTRY_PREFIX) PLATFORMS="$(PLATFORMS)" IMAGE=$* VERSION=$(VERSION) DOCKER_CLI_EXPERIMENTAL=enabled \
 	  $(ROOT_DIR)/build/lib/create-manifest.sh
 
 ## image.help: Print help for image targets

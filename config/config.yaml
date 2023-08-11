@@ -291,6 +291,7 @@ iosPush:
   badgeCount: true
   production: false
 
+###################### Third-party service configuration ######################
 # Callback configuration
 #
 # Callback URL

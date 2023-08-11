@@ -96,7 +96,7 @@ openim::color::print_color()
   echo
 }
 
-# test funtion
+# test functions
 openim::color::test() {
     echo "Starting the color tests..."
 
