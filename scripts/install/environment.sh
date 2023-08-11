@@ -52,8 +52,8 @@ def "ENV_FILE" "${OPENIM_ROOT}/scripts/install/environment.sh"
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                      # Zookeeper的模式
 def "ZOOKEEPER_ADDRESS" "127.0.0.1:2181"             # Zookeeper的地址
-def "ZOOKEEPER_USERNAME" ""                          # Zookeeper的用户名
-def "ZOOKEEPER_PASSWORD" ""                          # Zookeeper的密码
+def "ZOOKEEPER_USERNAME"                           # Zookeeper的用户名
+def "ZOOKEEPER_PASSWORD"                           # Zookeeper的密码
 
 ###################### MySQL 配置信息 ######################
 def "MYSQL_ADDRESS" "127.0.0.1:13306"                # MySQL的地址
@@ -67,7 +67,7 @@ def "MYSQL_LOG_LEVEL" "4"                            # 日志级别
 def "MYSQL_SLOW_THRESHOLD" "500"                     # 慢查询阈值（毫秒）
 
 ###################### MongoDB 配置信息 ######################
-def "MONGO_URI" ""                                  # MongoDB的URI
+def "MONGO_URI"                                   # MongoDB的URI
 def "MONGO_ADDRESS" "127.0.0.1:37017"                # MongoDB的地址
 def "MONGO_DATABASE" "openIM_v3"                     # MongoDB的数据库名
 def "MONGO_USERNAME" "root"                          # MongoDB的用户名
@@ -81,26 +81,26 @@ def "MINIO_BUCKET" "openim"                    # MinIO的存储桶名称
 def "MINIO_ENDPOINT" "http://127.0.0.1:10005"  # MinIO的端点URL
 def "MINIO_ACCESS_KEY" "root"                  # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "openIM123"             # MinIO的密钥
-def "MINIO_SESSION_TOKEN" ""                   # MinIO的会话令牌
+def "MINIO_SESSION_TOKEN"                    # MinIO的会话令牌
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com" # 腾讯云COS的存储桶URL
-def "COS_SECRET_ID" ""                         # 腾讯云COS的密钥ID
-def "COS_SECRET_KEY" ""                        # 腾讯云COS的密钥
-def "COS_SESSION_TOKEN" ""                     # 腾讯云COS的会话令牌
+def "COS_SECRET_ID"                          # 腾讯云COS的密钥ID
+def "COS_SECRET_KEY"                         # 腾讯云COS的密钥
+def "COS_SESSION_TOKEN"                      # 腾讯云COS的会话令牌
 def "OSS_ENDPOINT" "https://oss-cn-chengdu.aliyuncs.com"  # 阿里云OSS的端点URL
 def "OSS_BUCKET" "demo-9999999"                # 阿里云OSS的存储桶名称
 def "OSS_BUCKET_URL" "https://demo-9999999.oss-cn-chengdu.aliyuncs.com" # 阿里云OSS的存储桶URL
 def "OSS_ACCESS_KEY_ID" "root"                 # 阿里云OSS的访问密钥ID
-def "OSS_ACCESS_KEY_SECRET" ""                 # 阿里云OSS的密钥
-def "OSS_SESSION_TOKEN" ""                     # 阿里云OSS的会话令牌
+def "OSS_ACCESS_KEY_SECRET"                  # 阿里云OSS的密钥
+def "OSS_SESSION_TOKEN"                      # 阿里云OSS的会话令牌
 
 ###################### Redis 配置信息 ######################
 def "REDIS_ADDRESS" "127.0.0.1:16379"           # Redis的地址
-def "REDIS_USERNAME" ""                         # Redis的用户名
+def "REDIS_USERNAME"                          # Redis的用户名
 def "REDIS_PASSWORD" "openIM123"                # Redis的密码
 
 ###################### Kafka 配置信息 ######################
-def "KAFKA_USERNAME" ""                         # Kafka的用户名
-def "KAFKA_PASSWORD" ""                         # Kafka的密码
+def "KAFKA_USERNAME"                          # Kafka的用户名
+def "KAFKA_PASSWORD"                          # Kafka的密码
 def "KAFKA_ADDR" "127.0.0.1:9092"              # Kafka的地址
 def "KAFKA_LATESTMSG_REDIS_TOPIC" "latestMsgToRedis"               # Kafka的最新消息到Redis的主题
 def "KAFKA_OFFLINEMSG_MONGO_TOPIC" "offlineMsgToMongoMysql"        # Kafka的离线消息到Mongo的主题
@@ -111,7 +111,7 @@ def "KAFKA_CONSUMERGROUPID_MYSQL" "mysql"                          # Kafka的消
 def "KAFKA_CONSUMERGROUPID_PUSH" "push"                            # Kafka的消费组ID到推送
 
 ###################### RPC 配置信息 ######################
-def "RPC_REGISTER_IP" ""                        # RPC的注册IP
+def "RPC_REGISTER_IP"                         # RPC的注册IP
 def "RPC_LISTEN_IP" "0.0.0.0"                   # RPC的监听IP
 
 ###################### API 配置信息 ######################
@@ -157,10 +157,10 @@ def "WEBSOCKET_TIMEOUT" "10"                          # Websocket超时
 def "PUSH_ENABLE" "getui"                             # 推送是否启用
 def "GETUI_PUSH_URL" "https://restapi.getui.com/v2/$appId"  # GeTui推送URL
 def "FCM_SERVICE_ACCOUNT" "x.json"                    # FCM服务账户
-def "JPNS_APP_KEY" ""                                 # JPNS应用密钥
-def "JPNS_MASTER_SECRET" ""                           # JPNS主密钥
-def "JPNS_PUSH_URL" ""                                # JPNS推送URL
-def "JPNS_PUSH_INTENT" ""                             # JPNS推送意图
+def "JPNS_APP_KEY"                                  # JPNS应用密钥
+def "JPNS_MASTER_SECRET"                            # JPNS主密钥
+def "JPNS_PUSH_URL"                                 # JPNS推送URL
+def "JPNS_PUSH_INTENT"                              # JPNS推送意图
 def "MANAGER_USERID_1" "openIM123456"                 # 管理员ID 1
 def "MANAGER_USERID_2" "openIM654321"                 # 管理员ID 2
 def "MANAGER_USERID_3" "openIMAdmin"                  # 管理员ID 3
