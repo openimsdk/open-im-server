@@ -62,6 +62,7 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
+    network_mode: "host"
 
   kafka:
     image: wurstmeister/kafka
@@ -72,7 +73,7 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
       KAFKA_CREATE_TOPICS: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
       KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
@@ -80,6 +81,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     depends_on:
       - zookeeper
+    network_mode: "host"
 
   minio:
     image: minio/minio

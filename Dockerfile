@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.20 AS builder
+FROM golang:1.21 AS builder
 
 # Set go mod installation source and proxy
 ARG GO111MODULE=on

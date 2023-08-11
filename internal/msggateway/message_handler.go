@@ -40,7 +40,13 @@ type Req struct {
 }
 
 func (r *Req) String() string {
-	return utils.StructToJsonString(r)
+	var tReq Req
+	tReq.ReqIdentifier = r.ReqIdentifier
+	tReq.Token = r.Token
+	tReq.SendID = r.SendID
+	tReq.OperationID = r.OperationID
+	tReq.MsgIncr = r.MsgIncr
+	return utils.StructToJsonString(tReq)
 }
 
 type Resp struct {
@@ -53,7 +59,13 @@ type Resp struct {
 }
 
 func (r *Resp) String() string {
-	return utils.StructToJsonString(r)
+	var tResp Resp
+	tResp.ReqIdentifier = r.ReqIdentifier
+	tResp.MsgIncr = r.MsgIncr
+	tResp.OperationID = r.OperationID
+	tResp.ErrCode = r.ErrCode
+	tResp.ErrMsg = r.ErrMsg
+	return utils.StructToJsonString(tResp)
 }
 
 type MessageHandler interface {
