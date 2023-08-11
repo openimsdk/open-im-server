@@ -19,6 +19,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/json"
+	"github.com/OpenIMSDK/tools/log"
 	"strconv"
 	"time"
 
@@ -339,7 +340,9 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 				return 0, err
 			}
 			sum := md5.Sum(val)
-			return binary.BigEndian.Uint64(sum[:]), nil
+			code := binary.BigEndian.Uint64(sum[:])
+			log.ZDebug(ctx, "GetGroupMembersHash", "groupID", groupID, "hashCode", code, "num", len(members))
+			return code, nil
 		},
 	)
 }
