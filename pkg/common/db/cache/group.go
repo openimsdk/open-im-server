@@ -299,6 +299,7 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 			if err != nil {
 				return 0, err
 			}
+			log.ZInfo(ctx, "GetGroupMembersHash", "groupID", groupID, "userIDs", userIDs)
 			var members []*relationTb.GroupMemberModel
 			if len(userIDs) > 0 {
 				members, err = g.GetGroupMembersInfo(ctx, groupID, userIDs)
@@ -331,6 +332,7 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 					member.Ex,
 				)
 			}
+			log.ZInfo(ctx, "hash data info", "userIDs.len", len(userIDs), "hash.data.len", len(data))
 			val, err := json.Marshal(data)
 			if err != nil {
 				return 0, err
