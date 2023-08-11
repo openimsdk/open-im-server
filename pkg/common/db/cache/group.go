@@ -341,7 +341,7 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 			}
 			sum := md5.Sum(val)
 			code := binary.BigEndian.Uint64(sum[:])
-			log.ZDebug(ctx, "GetGroupMembersHash", "groupID", groupID, "hashCode", code, "num", len(members))
+			log.ZInfo(ctx, "GetGroupMembersHash", "groupID", groupID, "hashCode", code, "num", len(members))
 			return code, nil
 		},
 	)
