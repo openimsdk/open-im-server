@@ -16,8 +16,10 @@ package cache
 
 import (
 	"context"
-	"math/big"
-	"strings"
+	"crypto/md5"
+	"encoding/binary"
+	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -300,10 +302,44 @@ func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID strin
 			if err != nil {
 				return 0, err
 			}
-			utils.Sort(userIDs, true)
-			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
-			return bi.Uint64(), nil
+			var members []*relationTb.GroupMemberModel
+			if len(userIDs) > 0 {
+				members, err = g.GetGroupMembersInfo(ctx, groupID, userIDs)
+				if err != nil {
+					return 0, err
+				}
+				utils.Sort(userIDs, true)
+			}
+			memberMap := make(map[string]*relationTb.GroupMemberModel)
+			for i, member := range members {
+				memberMap[member.UserID] = members[i]
+			}
+			data := make([]string, 0, len(members)*11)
+			for _, userID := range userIDs {
+				member, ok := memberMap[userID]
+				if !ok {
+					continue
+				}
+				data = append(data,
+					member.GroupID,
+					member.UserID,
+					member.Nickname,
+					member.FaceURL,
+					strconv.Itoa(int(member.RoleLevel)),
+					strconv.FormatInt(member.JoinTime.UnixMilli(), 10),
+					strconv.Itoa(int(member.JoinSource)),
+					member.InviterUserID,
+					member.OperatorUserID,
+					strconv.FormatInt(member.MuteEndTime.UnixMilli(), 10),
+					member.Ex,
+				)
+			}
+			val, err := json.Marshal(data)
+			if err != nil {
+				return 0, err
+			}
+			sum := md5.Sum(val)
+			return binary.BigEndian.Uint64(sum[:]), nil
 		},
 	)
 }
