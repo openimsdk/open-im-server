@@ -22,15 +22,6 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
 
-cd $SCRIPTS_ROOT
-
-echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${BACKGROUND_GREEN}${CYAN_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
-
-bin_dir="$BIN_DIR"
-logs_dir="$OPENIM_ROOT/logs"
-
 #service filename
 service_filename=(
   #api
@@ -106,7 +97,6 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
     if [ $i -eq 0 -o $i -eq 1 ]; then
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
     fi
-    echo $cmd
     echo "=====================start ${service_filename[$i]}======================">>$OPENIM_ROOT/logs/openIM.log
     nohup $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
     sleep 1

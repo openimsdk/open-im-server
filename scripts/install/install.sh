@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +14,6 @@
 # limitations under the License.
 
 
-object:
-  enable: "${OBJECT_ENABLE}"
-  apiURL: "${OBJECT_APIURL}"
-  minio:
-    bucket: "${MINIO_BUCKET}"
-    endpoint: "${MINIO_ENDPOINT}"
-    accessKeyID: "${MINIO_ACCESS_KEY}"
-    secretAccessKey: "${MINIO_SECRET_KEY}"
-    sessionToken: ""
-  cos:
-    bucketURL: "${COS_BUCKET_URL}"
-    secretID: ""
-    secretKey: ""
-    sessionToken: ""
-  oss:
-    endpoint: "${OSS_ENDPOINT}"
-    bucket: "${OSS_BUCKET}"
-    bucketURL: "${OSS_BUCKET_URL}"
-    accessKeyID: "${OSS_ACCESS_KEY_ID}"
-    accessKeySecret: ""
-    sessionToken: ""
+# The root of the build/dist directory
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
+source "${OPENIM_ROOT}/scripts/install/common.sh"

@@ -21,6 +21,8 @@
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
+trap 'openim::util::onCtrlC' INT
+
 #fixme Put the shell scripts name here
 need_to_start_server_shell=(
   ${SCRIPTS_ROOT}/start_rpc_service.sh

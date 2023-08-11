@@ -16,6 +16,8 @@
 clear
 . $(dirname ${BASH_SOURCE})/lib/util.sh
 
+trap 'openim::util::onCtrlC' INT
+
 openim::util::desc "========> Welcome to the OpenIM Demo"
 openim::util::desc "========> We'll help you get started with OpenIM quickly"
 openim::util::desc "========> Press Enter to continue...."

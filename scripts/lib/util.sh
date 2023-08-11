@@ -896,6 +896,13 @@ function openim::util::run::relative() {
     done
 }
 
+function openim::util::onCtrlC () {
+    #Capture CTRL+C, terminate the background process of the program when the script is terminated in the form of ctrl+c
+    kill -9 ${do_sth_pid} ${progress_pid}
+    echo
+    echo '!!! openim: Ctrl+C is captured'
+    exit 1
+}
 
 # input: [10023, 2323, 3434]
 # output: 10023 2323 3434

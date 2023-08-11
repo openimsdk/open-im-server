@@ -128,6 +128,11 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:latest
     # image: openim/openim-chat:latest
     container_name: openim-chat
+    healthcheck:
+      test: ["CMD-SHELL", "./scripts/check_all.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
       - ${DATA_DIR}/_output/openim/openim-chat/logs:/openim/openim-chat/logs
       - ${DATA_DIR}/_output/openim/openim-chat/config:/openim/openim-chat/config

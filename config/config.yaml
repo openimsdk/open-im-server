@@ -114,7 +114,7 @@ api:
   openImApiPort: [ 10002 ]
   listenIP: 0.0.0.0
 
-###################### Gateway ######################
+###################### Object ######################
 # Object storage configuration
 #
 # Use minio for object storage
@@ -165,7 +165,6 @@ rpcPort:
   openImConversationPort: [ 10180 ]
   openImThirdPort: [ 10190 ]
 
-# RPC service names for registration, it's not recommended to modify these
 rpcRegisterName:
   openImUserName: User
   openImFriendName: Friend
@@ -177,15 +176,6 @@ rpcRegisterName:
   openImConversationName: Conversation
   openImThirdName: Third
 
-# Log configuration
-#
-# Storage directory
-# Log rotation time
-# Maximum number of logs to retain
-# Log level, 6 means all levels
-# Whether to output to stdout
-# Whether to output in json format
-# Whether to include stack trace in logs
 log:
   storageLocation: ../../../../../logs/
   rotationTime: 24
@@ -195,25 +185,12 @@ log:
   isJson: false
   withStack: false
 
-# Long connection server configuration
-#
-# Websocket port for msg_gateway
-# Maximum number of websocket connections
-# Maximum length of websocket request package
-# Websocket connection handshake timeout
 longConnSvr:
   openImWsPort: [ 10001 ]
   websocketMaxConnNum: 100000
   websocketMaxMsgLen: 4096
   websocketTimeout: 10
 
-# Push notification service configuration
-#
-# Use GeTui for push notifications
-# GeTui offline push configuration
-# FCM offline push configuration
-# Account file, place it in the config directory
-# JPush configuration, modify these after applying in JPush backend
 push:
   enable: getui
   geTui:
@@ -231,61 +208,34 @@ push:
     pushUrl:
     pushIntent:
 
-# App manager configuration
-#
-# Built-in app manager user IDs
-# Built-in app manager nicknames
 manager:
   userID: [ "openIM123456","openIM654321","openIMAdmin" ]
   nickname: [ "system1","system2", "system3" ]
 
-# Multi-platform login policy
-# For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
 multiLoginPolicy: 1
 
-# Whether to store messages in MySQL, messages in MySQL are only used for management background
 chatPersistenceMysql: true
 
-# Message cache timeout in seconds, it's not recommended to modify
 msgCacheTimeout: 86400
 
-# Whether to enable read receipts for group chat
 groupMessageHasReadReceiptEnable: true
 
-# Whether to enable read receipts for single chat
 singleMessageHasReadReceiptEnable: true
 
-# MongoDB offline message retention period in days
 retainChatRecords: 365
 
-# Schedule to clear expired messages(older than retainChatRecords days) in MongoDB every Wednesday at 2am
-# This deletion is just for cleaning up disk usage according to previous configuration retainChatRecords, no notification will be sent
 chatRecordsClearTime: "0 2 * * 3"
 
-# Schedule to auto delete messages every day at 2am
-# This deletion is for messages that have been retained for more than msg_destruct_time (seconds) in the conversation field
 msgDestructTime: "0 2 * * *"
 
-# Secret key
 secret: openIM123
 
-# Token policy
-#
-# Token expiration period in days
 tokenPolicy:
   expire: 90
 
-# Message verification policy
-#
-# Whether to verify friendship when sending messages
 messageVerify:
   friendVerify: false
 
-# iOS push notification configuration
-#
-# iOS push notification sound
-# Whether to count badge
-# Whether it's production environment
 iosPush:
   pushSound: "xxx"
   badgeCount: true
