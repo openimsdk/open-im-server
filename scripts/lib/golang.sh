@@ -13,6 +13,121 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# The golang package that we are building.
+readonly KUBE_GO_PACKAGE=github.com/openimsdk/open-im-server
+readonly KUBE_GOPATH="${KUBE_GOPATH:-"${KUBE_OUTPUT}/go"}"
+export KUBE_GOPATH
+
+# The server platform we are building on.
+readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux_mips64
+  linux_mips64le
+  darwin_amd64
+  windows_amd64
+  linux_amd64
+  linux_arm64
+  linux_ppc64le
+)
+
+# If we update this we should also update the set of platforms whose standard
+readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux/ppc64le
+  windows/amd64
+)
+
+# openim chat
+readonly OPENIM_CHAT_SUPPORTED_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux/ppc64le
+  windows/amd64
+)
+
+# Which platforms we should compile test targets for.
+# Not all client platforms need these tests
+readonly KUBE_SUPPORTED_TEST_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux/ppc64le
+  darwin/amd64
+  darwin/arm64
+  windows/amd64
+  windows/arm64
+)
+
+# The set of server targets that we are only building for Linux
+# If you update this list, please also update build/BUILD.
+# TODO: Label
+openim::golang::server_targets() {
+  local targets=(
+    openim-api
+    openim-cmdutils
+    openim-crontask
+    openim-msggateway
+    openim-msgtransfer
+    openim-push
+    openim-rpc-auth
+    openim-rpc-conversation
+    openim-rpc-friend
+    openim-rpc-group
+    openim-rpc-msg
+    openim-rpc-third
+    openim-rpc-user
+  )
+  echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
+readonly OPENIM_SERVER_TARGETS
+readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
+
+
+openim::golang::tools_targets() {
+  local targets=(
+    yamlfmt
+    changelog
+    infra
+    ncpu
+  )
+  echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_TOOLS_TARGETS <<< "$(openim::golang::tools_targets)"
+readonly OPENIM_TOOLS_TARGETS
+readonly OPENIM_TOOLS_BINARIES=("${OPENIM_TOOLS_TARGETS[@]##*/}")
+
+# The set of server targets we build docker images for
+openim::golang::server_image_targets() {
+  # NOTE: this contains cmd targets for openim::build::get_docker_wrapped_binaries
+  local targets=(
+    cmd/openim-api
+    cmd/openim-cmdutils
+    cmd/openim-crontask
+    cmd/openim-msggateway
+    cmd/openim-msgtransfer
+    cmd/openim-push
+    cmd/openim-rpc-auth
+    cmd/openim-rpc-conversation
+    cmd/openim-rpc-friend
+    cmd/openim-rpc-group
+    cmd/openim-rpc-msg
+    cmd/openim-rpc-third
+    cmd/openim-rpc-user
+  )
+  echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_SERVER_IMAGE_TARGETS <<< "$(openim::golang::server_image_targets)"
+readonly OPENIM_SERVER_IMAGE_TARGETS
+readonly OPENIM_SERVER_IMAGE_BINARIES=("${OPENIM_SERVER_IMAGE_TARGETS[@]##*/}")
 
 # shellcheck disable=SC2034 # Variables sourced in other scripts.
 
@@ -33,11 +148,20 @@ openim::golang::dups() {
   printf "%s\n" "$@" | sort | uniq -d
 }
 
+# echo "aa: $OPENIM_SERVER_IMAGE_TARGETS"
+# echo "aa: $OPENIM_SERVER_IMAGE_BINARIES"
+
+openim::golang::dups $OPENIM_SERVER_IMAGE_TARGETS
+openim::golang::dups $OPENIM_SERVER_IMAGE_BINARIES
+
 # Returns a sorted newline-separated list with duplicated items removed.
 openim::golang::dedup() {
   # We use printf to insert newlines, which are required by sort.
   printf "%s\n" "$@" | sort -u
 }
+
+# openim::golang::dedup $OPENIM_SERVER_IMAGE_TARGETS
+# openim::golang::dedup $OPENIM_SERVER_IMAGE_BINARIES
 
 # Depends on values of user-facing OPENIM_BUILD_PLATFORMS, OPENIM_FASTBUILD,
 # and OPENIM_BUILDER_OS.

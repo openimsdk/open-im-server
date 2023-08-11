@@ -46,6 +46,12 @@ if [ "${missing}" ];then
     exit 1
 fi
 
+temp_output=$(mktemp)  # 创建一个临时文件存储原始输出
+
 eval "cat << EOF
 $(cat ${template_file})
-EOF"
+EOF" > $temp_output
+
+sed "s/''//g" $temp_output
+
+rm $temp_output

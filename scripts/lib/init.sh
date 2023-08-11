@@ -34,6 +34,7 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 OPENIM_OUTPUT_SUBPATH="${OPENIM_OUTPUT_SUBPATH:-_output}"
 OPENIM_OUTPUT="${OPENIM_ROOT}/${OPENIM_OUTPUT_SUBPATH}"
+
 OPENIM_OUTPUT_BINPATH="${OPENIM_OUTPUT}/bin/platforms"
 OPENIM_OUTPUT_BINTOOLPATH="${OPENIM_OUTPUT}/bin-tools"
 OPENIM_OUTPUT_TOOLS="${OPENIM_OUTPUT}/tools"
@@ -68,69 +69,6 @@ export OPENIM_OUTPUT_HOSTBIN
 
 export OPENIM_NONSERVER_GROUP_VERSIONS
 
-# The server platform we are building on.
-readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
-  linux/amd64
-  linux/arm64
-)
-
-# If we update this we should also update the set of platforms whose standard
-readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
-  linux/amd64
-  linux/arm64
-)
-
-# The set of server targets that we are only building for Linux
-# If you update this list, please also update build/BUILD.
-# TODO: Label
-openim::golang::server_targets() {
-  local targets=(
-    openim-api
-    openim-cmdutils
-    openim-crontask
-    openim-msggateway
-    openim-msgtransfer
-    openim-push
-    openim-rpc-auth
-    openim-rpc-conversation
-    openim-rpc-friend
-    openim-rpc-group
-    openim-rpc-msg
-    openim-rpc-third
-    openim-rpc-user
-  )
-  echo "${targets[@]}"
-}
-
-openim::golang::server_tools_targets() {
-  local targets=(
-    yamlfmt
-    changelog
-    infra
-    ncpu
-  )
-  echo "${targets[@]}"
-}
-
-IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
-readonly OPENIM_SERVER_TARGETS
-readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
-
-# The set of server targets we build docker images for
-openim::golang::server_image_targets() {
-  # NOTE: this contains cmd targets for openim::build::get_docker_wrapped_binaries
-  local targets=(
-    cmd/openim-apiserver
-    cmd/openim-authz-server
-    cmd/openim-pump
-    cmd/openim-watcher
-  )
-  echo "${targets[@]}"
-}
-
-IFS=" " read -ra OPENIM_SERVER_IMAGE_TARGETS <<< "$(openim::golang::server_image_targets)"
-readonly OPENIM_SERVER_IMAGE_TARGETS
-readonly OPENIM_SERVER_IMAGE_BINARIES=("${OPENIM_SERVER_IMAGE_TARGETS[@]##*/}")
 
 # This emulates "readlink -f" which is not available on MacOS X.
 # Test:

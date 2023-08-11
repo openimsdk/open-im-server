@@ -236,6 +236,7 @@ tokenPolicy:
 messageVerify:
   friendVerify: false
 
+# Whether it's production environment
 iosPush:
   pushSound: "xxx"
   badgeCount: true

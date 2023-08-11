@@ -22,11 +22,10 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 # 生成文件存放目录
 LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
 
-# 定义只读变量，如果变量未定义，则使用默认值
 function def() {
     local var_name="$1"
-    local default_value="$2"
-    eval "readonly $var_name=\${$var_name:-$default_value}"
+    local default_value="${2:-}"
+    eval "readonly $var_name=\"\${$var_name:-$(printf '%q' "$default_value")}\""
 }
 
 # app要能访问到此ip和端口或域名
@@ -39,6 +38,9 @@ def "USER" "root"
 # 设置统一的密码，方便记忆
 def "PASSWORD" "openIM123"
 
+# 设置统一的数据库名称，方便管理
+def "DATABASE_NAME" "openIM_v3"
+
 # Linux系统 openim 用户
 def "LINUX_USERNAME" "openim"
 def "LINUX_PASSWORD" "${PASSWORD}"
@@ -49,6 +51,11 @@ mkdir -p ${INSTALL_DIR}
 
 def "ENV_FILE" "${OPENIM_ROOT}/scripts/install/environment.sh"
 
+# 注意： 一般的配置都可以使用 def 来定义，如果是包含特殊字符，比如说:
+# readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
+# 使用 readonly 来定义合适，负责无法正常解析
+
+
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                      # Zookeeper的模式
 def "ZOOKEEPER_ADDRESS" "127.0.0.1:2181"             # Zookeeper的地址
@@ -57,9 +64,9 @@ def "ZOOKEEPER_PASSWORD"                           # Zookeeper的密码
 
 ###################### MySQL 配置信息 ######################
 def "MYSQL_ADDRESS" "127.0.0.1:13306"                # MySQL的地址
-def "MYSQL_USERNAME" "root"                          # MySQL的用户名
-def "MYSQL_PASSWORD" "openIM123"                     # MySQL的密码
-def "MYSQL_DATABASE" "openIM_v3"                     # MySQL的数据库名
+def "MYSQL_USERNAME" "${USER}"                       # MySQL的用户名
+def "MYSQL_PASSWORD" "${PASSWORD}"                   # MySQL的密码
+def "MYSQL_DATABASE" "${DATABASE_NAME}"              # MySQL的数据库名
 def "MYSQL_MAX_OPEN_CONN" "1000"                     # 最大打开的连接数
 def "MYSQL_MAX_IDLE_CONN" "100"                      # 最大空闲连接数
 def "MYSQL_MAX_LIFETIME" "60"                        # 连接可以重用的最大生命周期（秒）
@@ -69,9 +76,9 @@ def "MYSQL_SLOW_THRESHOLD" "500"                     # 慢查询阈值（毫秒�
 ###################### MongoDB 配置信息 ######################
 def "MONGO_URI"                                   # MongoDB的URI
 def "MONGO_ADDRESS" "127.0.0.1:37017"                # MongoDB的地址
-def "MONGO_DATABASE" "openIM_v3"                     # MongoDB的数据库名
-def "MONGO_USERNAME" "root"                          # MongoDB的用户名
-def "MONGO_PASSWORD" "openIM123"                     # MongoDB的密码
+def "MONGO_DATABASE" "${DATABASE_NAME}"                     # MongoDB的数据库名
+def "MONGO_USERNAME" "${USER}"                          # MongoDB的用户名
+def "MONGO_PASSWORD" "${PASSWORD}"                     # MongoDB的密码
 def "MONGO_MAX_POOL_SIZE" "100"                      # 最大连接池大小
 
 ###################### Object 配置信息 ######################
@@ -79,8 +86,8 @@ def "OBJECT_ENABLE" "minio"                    # 对象是否启用
 def "OBJECT_APIURL" "http://127.0.0.1:10002/object/"  # 对象的API地址
 def "MINIO_BUCKET" "openim"                    # MinIO的存储桶名称
 def "MINIO_ENDPOINT" "http://127.0.0.1:10005"  # MinIO的端点URL
-def "MINIO_ACCESS_KEY" "root"                  # MinIO的访问密钥ID
-def "MINIO_SECRET_KEY" "openIM123"             # MinIO的密钥
+def "MINIO_ACCESS_KEY" "${USER}"                  # MinIO的访问密钥ID
+def "MINIO_SECRET_KEY" "${PASSWORD}"             # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                    # MinIO的会话令牌
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com" # 腾讯云COS的存储桶URL
 def "COS_SECRET_ID"                          # 腾讯云COS的密钥ID
@@ -89,14 +96,14 @@ def "COS_SESSION_TOKEN"                      # 腾讯云COS的会话令牌
 def "OSS_ENDPOINT" "https://oss-cn-chengdu.aliyuncs.com"  # 阿里云OSS的端点URL
 def "OSS_BUCKET" "demo-9999999"                # 阿里云OSS的存储桶名称
 def "OSS_BUCKET_URL" "https://demo-9999999.oss-cn-chengdu.aliyuncs.com" # 阿里云OSS的存储桶URL
-def "OSS_ACCESS_KEY_ID" "root"                 # 阿里云OSS的访问密钥ID
+def "OSS_ACCESS_KEY_ID" "${USER}"                 # 阿里云OSS的访问密钥ID
 def "OSS_ACCESS_KEY_SECRET"                  # 阿里云OSS的密钥
 def "OSS_SESSION_TOKEN"                      # 阿里云OSS的会话令牌
 
 ###################### Redis 配置信息 ######################
 def "REDIS_ADDRESS" "127.0.0.1:16379"           # Redis的地址
-def "REDIS_USERNAME"                          # Redis的用户名
-def "REDIS_PASSWORD" "openIM123"                # Redis的密码
+def "REDIS_USERNAME"                            # Redis的用户名
+def "REDIS_PASSWORD" "${PASSWORD}"                # Redis的密码
 
 ###################### Kafka 配置信息 ######################
 def "KAFKA_USERNAME"                          # Kafka的用户名
@@ -141,13 +148,13 @@ def "OPENIM_CONVERSATION_NAME" "Conversation"   # OpenIM对话服务名称
 def "OPENIM_THIRD_NAME" "Third"                 # OpenIM第三方服务名称
 
 ###################### Log Configuration Variables ######################
-def "LOG_STORAGE_LOCATION" "../../../../../logs/" # 日志存储位置
-def "LOG_ROTATION_TIME" "24"                    # 日志轮替时间
-def "LOG_REMAIN_ROTATION_COUNT" "2"             # 保留的日志轮替数量
-def "LOG_REMAIN_LOG_LEVEL" "6"                  # 保留的日志级别
-def "LOG_IS_STDOUT" "false"                     # 是否将日志输出到标准输出
-def "LOG_IS_JSON" "false"                       # 日志是否为JSON格式
-def "LOG_WITH_STACK" "false"                    # 日志是否带有堆栈信息
+def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/log/"      # 日志存储位置
+def "LOG_ROTATION_TIME" "24"                          # 日志轮替时间
+def "LOG_REMAIN_ROTATION_COUNT" "2"                   # 保留的日志轮替数量
+def "LOG_REMAIN_LOG_LEVEL" "6"                        # 保留的日志级别
+def "LOG_IS_STDOUT" "false"                           # 是否将日志输出到标准输出
+def "LOG_IS_JSON" "false"                             # 日志是否为JSON格式
+def "LOG_WITH_STACK" "false"                          # 日志是否带有堆栈信息
 
 ###################### Variables definition ######################
 def "OPENIM_WS_PORT" "10001"                          # OpenIM WS端口
@@ -173,9 +180,11 @@ def "MSG_CACHE_TIMEOUT" "86400"                       # 消息缓存超时
 def "GROUP_MSG_READ_RECEIPT" "true"                   # 群消息已读回执启用
 def "SINGLE_MSG_READ_RECEIPT" "true"                  # 单一消息已读回执启用
 def "RETAIN_CHAT_RECORDS" "365"                       # 保留聊天记录
-def "CHAT_RECORDS_CLEAR_TIME" "0 2 * * 3"             # 聊天记录清理时间
-def "MSG_DESTRUCT_TIME" "0 2 * * *"                   # 消息销毁时间
-def "SECRET" "openIM123"                              # 密钥
+# 聊天记录清理时间
+readonly CHAT_RECORDS_CLEAR_TIME=${CHAT_RECORDS_CLEAR_TIME:-'0 2 * * *'}
+# 消息销毁时间
+readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
+def "SECRET" "${PASSWORD}"                              # 密钥
 def "TOKEN_EXPIRE" "90"                               # Token到期时间
 def "FRIEND_VERIFY" "false"                           # 朋友验证
 def "IOS_PUSH_SOUND" "xxx"                            # IOS推送声音
@@ -194,8 +203,9 @@ def "PUSH_PROM_PORT" "20170"                   # Push 服务的 Prometheus 端�
 def "CONVERSATION_PROM_PORT" "20230"           # Conversation 服务的 Prometheus 端口
 def "RTC_PROM_PORT" "21300"                    # RTC 服务的 Prometheus 端口
 def "THIRD_PROM_PORT" "21301"                  # Third 服务的 Prometheus 端口
-def "MSG_TRANSFER_PROM_PORTS" "21400, 21401, 21402, 21403" # Message Transfer 服务的 Prometheus 端口列表
 
+# Message Transfer 服务的 Prometheus 端口列表
+readonly MSG_TRANSFER_PROM_PORTS=${MSG_TRANSFER_PROM_PORTS:-'21400, 21401, 21402, 21403'}
 
 # openim 配置
 def "OPENIM_DATA_DIR" "/data/openim"
