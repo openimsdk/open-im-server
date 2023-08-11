@@ -16,15 +16,12 @@
 #FIXME This script is the startup script for multiple servers.
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
+set -o errexit
+set -o nounset
+set -o pipefail
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/lib/init.sh
-source $SCRIPTS_ROOT/path_info.sh
-
-cd $SCRIPTS_ROOT
+OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 if [ ! -d "${OPENIM_ROOT}/_output/bin/platforms" ]; then
   # exec build_all_service.sh

@@ -99,8 +99,10 @@ services:
     command: minio server /data --console-address ':9090'
 
   openim-server:
-    image: ghcr.io/openimsdk/openim-server:latest
-#    build: .
+    # image: ghcr.io/openimsdk/openim-server:latest
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:v3.2.1-beta.4
+    # image: openim/openim-server:latest
+    # build: .
     container_name: openim-server
     volumes:
       - ./logs:/openim/openim-server/logs
@@ -122,13 +124,16 @@ services:
         max-file: "2"
 
   openim-chat:
-    image: ghcr.io/openimsdk/openim-chat:latest
+    # image: ghcr.io/openimsdk/openim-chat:latest
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:latest
+    # image: openim/openim-chat:latest
     container_name: openim-chat
     volumes:
-      - ./_output/openim/openim-chat/logs:/openim/openim-chat/logs
-      - ./_output/openim/openim-chat/config:/openim/openim-chat/config
-      - ./_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
+      - ${DATA_DIR}/_output/openim/openim-chat/logs:/openim/openim-chat/logs
+      - ${DATA_DIR}/_output/openim/openim-chat/config:/openim/openim-chat/config
+      - ${DATA_DIR}/_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
     restart: always
+    user: root:root
     depends_on:
       - mysql
       - mongodb

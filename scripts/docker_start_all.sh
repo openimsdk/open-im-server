@@ -58,3 +58,10 @@ sleep 15
 
 #fixme prevents the openIM service exit after execution in the docker container
 tail -f /dev/null
+
+# nohup ./bin/seata-server.sh > ./logs/seata.log.out 2>&1 &
+
+# # seata注册到nacos的ip和端口，不配置默认获取本机ip（docker容器ip）
+# echo $SEATA_IP $SEATA_PORT
+
+# tail -f logs/seata.log.out

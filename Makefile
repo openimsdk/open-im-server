@@ -53,6 +53,11 @@ export USAGE_OPTIONS
 # ==============================================================================
 # Targets
 
+## demo: Run demo get started with Makefiles quickly ✨
+.PHONY: demo
+demo:
+	@$(MAKE) go.demo
+
 ## build: Build binaries by default ✨
 .PHONY: build
 build:
@@ -76,6 +81,11 @@ restart: clean stop build start
 .PHONY: multiarch
 multiarch:
 	@$(MAKE) go.build.multiarch
+
+## verify: execute all verity scripts. ✨
+.PHONY: verify
+verify:
+	@$(MAKE) go.verify
 
 ## install: Install deployment openim ✨
 .PHONY: install
@@ -204,11 +214,6 @@ advertise:
 .PHONY: release
 release: release.verify release.ensure-tag
 	@scripts/release.sh
-
-## demo: Run demo ✨
-.PHONY: demo
-demo:
-	@$(MAKE) go.demo
 
 ## help: Show this help info. ✨
 .PHONY: help

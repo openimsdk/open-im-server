@@ -19,7 +19,7 @@
 #   WHAT: Directory names to build.  If any of these directories has a 'main'
 #     package, the build will produce executable files under $(OUT_DIR)/bin/platforms OR $(OUT_DIR)/bin—tools/platforms.
 #     If not specified, "everything" will be built.
-# Usage: `scripts/build_all_server.sh`.
+# Usage: `scripts/build_all_service.sh`.
 # Example: `hack/build-go.sh WHAT=cmd/kubelet`.
 
 set -o errexit
@@ -45,7 +45,7 @@ else
 fi
 echo -e "${GREEN_PREFIX}======> cpu_count=$cpu_count${COLOR_SUFFIX}"
 
-openim::log::status "Building OpenIM, Parallel compilation compile=$cpu_count"
+openim::log::info "Building OpenIM, Parallel compilation compile=$cpu_count"
 compile_count=$((cpu_count / 2))
 
 # For help output
@@ -58,14 +58,24 @@ openim::color::echo $COLOR_CYAN "NOTE: $0 has been replaced by 'make multiarch' 
 echo
 echo "The equivalent of this invocation is: "
 echo "    make build ${ARGHELP}"
+echo "    ./scripts/build_all_service.sh ${ARGHELP}"
 echo
 echo " Example: "
 echo "    Print a single binary:"
 echo "    make build BINS=openim-api"
+echo "    ./scripts/build_all_service.sh BINS=openim-api"
 echo "    Print : Enable debugging and logging"
 echo "    make build BINS=openim-api V=1 DEBUG=1"
+echo "    ./scripts/build_all_service.sh BINS=openim-api V=1 DEBUG=1"
 echo
-make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build "$*"
+
+if [ -z "$*" ]; then
+    openim::log::info "no args, build all service"
+    make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build
+else
+    openim::log::info "build service: $*"
+    make --no-print-directory -C "${OPENIM_ROOT}" -j$compile_count build "$*"
+fi
 
 if [ $? -eq 0 ]; then
     openim::log::success "all service build success, run 'make start' or './scripts/start_all.sh'"

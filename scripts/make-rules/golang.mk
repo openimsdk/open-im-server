@@ -213,6 +213,18 @@ go.format: tools.verify.golines tools.verify.goimports
 go.imports: tools.verify.goimports
 	@$(TOOLS_DIR)/goimports -l -w $(SRC)
 
+## verify: execute all verity scripts.
+.PHONY: go.verify
+go.verify:
+	@echo "Starting verification..."
+	@scripts_list=$$(find $(ROOT_DIR)/scripts -type f -name 'verify-*' | sort); \
+	for script in $$scripts_list; do \
+		echo "Executing $$script..."; \
+		$$script || exit 1; \
+		echo "$$script completed successfully"; \
+	done
+	@echo "All verification scripts executed successfully."
+
 ## go.updates: Check for updates to go.mod dependencies
 .PHONY: go.updates
 go.updates: tools.verify.go-mod-outdated

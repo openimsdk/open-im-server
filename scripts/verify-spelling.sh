@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # This script checks commonly misspelled English words in all files in the
 # working directory by client9/misspell package.
 # Usage: `scripts/verify-spelling.sh`.
