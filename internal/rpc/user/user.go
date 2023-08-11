@@ -299,9 +299,23 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 				FromUserID: value.UserID,
 				ToUserID:   userID,
 				Status:     value.Status,
+				PlatformID: value.PlatformID,
 			}
 			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
 		}
 	}
 	return &pbuser.SetUserStatusResp{}, nil
+}
+
+// GetSubscribeUsersStatus Get the online status of subscribers
+func (s *userServer) GetSubscribeUsersStatus(ctx context.Context, req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
+	userList, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, userList)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
