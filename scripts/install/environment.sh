@@ -21,6 +21,9 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
 LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
+source "${OPENIM_ROOT}/scripts/lib/util.sh"
+
+IP=$(openim::util::get_server_ip)
 
 function def() {
     local var_name="$1"
@@ -29,7 +32,7 @@ function def() {
 }
 
 # app要能访问到此ip和端口或域名
-def "API_URL" "http://127.0.0.1:10002/object/"
+def "API_URL" "http://${IP}:10002/object/"
 def "DATA_DIR" "${OPENIM_ROOT}"
 
 # 设置统一的用户名，方便记忆
@@ -51,10 +54,9 @@ mkdir -p ${INSTALL_DIR}
 
 def "ENV_FILE" "${OPENIM_ROOT}/scripts/install/environment.sh"
 
-# 注意： 一般的配置都可以使用 def 来定义，如果是包含特殊字符，比如说:
-# readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
-# 使用 readonly 来定义合适，负责无法正常解析
-
+# TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
+# TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
+# TODO 使用 readonly 来定义合适，负责无法正常解析
 
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                      # Zookeeper的模式
@@ -85,7 +87,7 @@ def "MONGO_MAX_POOL_SIZE" "100"                      # 最大连接池大小
 def "OBJECT_ENABLE" "minio"                    # 对象是否启用
 def "OBJECT_APIURL" "http://127.0.0.1:10002/object/"  # 对象的API地址
 def "MINIO_BUCKET" "openim"                    # MinIO的存储桶名称
-def "MINIO_ENDPOINT" "http://127.0.0.1:10005"  # MinIO的端点URL
+def "MINIO_ENDPOINT" "http://${IP}:10005"  # MinIO的端点URL
 def "MINIO_ACCESS_KEY" "${USER}"                  # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "${PASSWORD}"             # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                    # MinIO的会话令牌
@@ -207,6 +209,9 @@ def "THIRD_PROM_PORT" "21301"                  # Third 服务的 Prometheus 端�
 # Message Transfer 服务的 Prometheus 端口列表
 readonly MSG_TRANSFER_PROM_PORTS=${MSG_TRANSFER_PROM_PORTS:-'21400, 21401, 21402, 21403'}
 
+
+
+###################### 设计中...暂时不需要######################################
 # openim 配置
 def "OPENIM_DATA_DIR" "/data/openim"
 def "OPENIM_INSTALL_DIR" "/opt/openim"
