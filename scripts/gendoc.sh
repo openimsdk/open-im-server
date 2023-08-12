@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Iterates over two directories: 'pkg' and 'internal/pkg'.
-for top in pkg internal/pkg tools
+for top in pkg internal/pkg
 do
     # Finds all subdirectories (including nested ones) under the current directory in the iteration ('pkg' or 'internal/pkg').
     for d in $(find $top -type d)

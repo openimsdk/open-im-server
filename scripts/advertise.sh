@@ -16,9 +16,9 @@
 set -e
 set -o pipefail
 
-. $(dirname ${BASH_SOURCE})/lib/color.sh
+. $(dirname ${BASH_SOURCE})/lib/init.sh
 
-trap 'openim::color::echo RED_PREFIX "Script interrupted."; exit 1' INT
+openim::util::onCtrlC
 
 print_with_delay() {
   text="$1"
@@ -89,7 +89,8 @@ O:::::::OOO:::::::O p:::::ppppp:::::::pe::::::::e            n::::n    n::::nII:
     print_with_delay "Open-IM-Server: Reinventing Instant Messaging" 0.01
     print_progress 50 0.02
 
-    print_with_delay "Open-IM-Server is not just a product; it's a revolution. It's about bringing the power of seamless, real-time messaging to your fingertips. And it's about joining a global community of developers, dedicated to pushing the boundaries of what's possible." 0.01
+    print_with_delay "Open-IM-Server is not just a product; it's a revolution. It's about bringing the power of seamless," 0.01
+    print_with_delay "real-time messaging to your fingertips. And it's about joining a global community of developers, dedicated to pushing the boundaries of what's possible." 0.01
 
     print_progress 50 0.02
 

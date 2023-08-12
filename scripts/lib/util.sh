@@ -128,7 +128,7 @@ openim::util::wait_for_url() {
   return 1
 }
 
-# Example:  openim::util::wait_for_success 120 5 "imctl get nodes|grep localhost"
+# Example:  openim::util::wait_for_success 120 5 "openimctl get nodes|grep localhost"
 # arguments: wait time, sleep time, shell command
 # returns 0 if the shell command get output, 1 otherwise.
 openim::util::wait_for_success(){
@@ -277,7 +277,7 @@ openim::util::find-binary() {
   openim::util::find-binary-for-platform "$1" "$(openim::util::host_platform)"
 }
 
-# Run all known doc generators (today gendocs and genman for imctl)
+# Run all known doc generators (today gendocs and genman for openimctl)
 # $1 is the directory to put those generated documents
 openim::util::gen-docs() {
   local dest="$1"
@@ -293,8 +293,8 @@ openim::util::gen-docs() {
   # least from k/k tree), remove it completely.
   openim::util::sourced_variable "${genfeddocs}"
 
-  mkdir -p "${dest}/docs/guide/en-US/cmd/imctl/"
-  "${gendocs}" "${dest}/docs/guide/en-US/cmd/imctl/"
+  mkdir -p "${dest}/docs/guide/en-US/cmd/openimctl/"
+  "${gendocs}" "${dest}/docs/guide/en-US/cmd/openimctl/"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/"
   "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-api"
@@ -310,7 +310,7 @@ openim::util::gen-docs() {
   "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-msg"
   "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-third"
   "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-user"
-  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/imctl" "imctl"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/openimctl" "openimctl"
 
   mkdir -p "${dest}/docs/man/man1/"
 "${genman}" "${dest}/docs/man/man1/" "openim-api"
@@ -327,8 +327,8 @@ openim::util::gen-docs() {
 "${genman}" "${dest}/docs/man/man1/" "openim-rpc-third"
 "${genman}" "${dest}/docs/man/man1/" "openim-rpc-user"
 
-  mkdir -p "${dest}/docs/guide/en-US/yaml/imctl/"
-  "${genyaml}" "${dest}/docs/guide/en-US/yaml/imct/"
+  mkdir -p "${dest}/docs/guide/en-US/yaml/openimctl/"
+  "${genyaml}" "${dest}/docs/guide/en-US/yaml/openimctl/"
 
   # create the list of generated files
   pushd "${dest}" > /dev/null || return 1
@@ -553,7 +553,7 @@ EOF
     # flatten the openimconfig files to make them self contained
     username=$(whoami)
     ${sudo} /usr/bin/env bash -e <<EOF
-    $(openim::util::find-binary imct) --openimconfig="${dest_dir}/${client_id}.openimconfig" config view --minify --flatten > "/tmp/${client_id}.openimconfig"
+    $(openim::util::find-binary openimctl) --openimconfig="${dest_dir}/${client_id}.openimconfig" config view --minify --flatten > "/tmp/${client_id}.openimconfig"
     mv -f "/tmp/${client_id}.openimconfig" "${dest_dir}/${client_id}.openimconfig"
     chown ${username} "${dest_dir}/${client_id}.openimconfig"
 EOF
@@ -895,6 +895,31 @@ function openim::util::run::relative() {
         echo "$(realpath $(dirname $(which $0)))/$arg" | sed "s|$(realpath $(pwd))|.|"
     done
 }
+
+# This function retrieves the IP address of the current server.
+# It primarily uses the `curl` command to fetch the public IP address from ifconfig.me.
+# If curl or the service is not available, it falls back 
+# to the internal IP address provided by the hostname command.
+function openim::util::get_server_ip() {
+    # Check if the 'curl' command is available
+    if command -v curl &> /dev/null; then
+        # Try to retrieve the public IP address using curl and ifconfig.me
+        IP=$(curl -s ifconfig.me)
+        
+        # Check if IP retrieval was successful
+        if [[ -z "$IP" ]]; then
+            # If not, get the internal IP address
+            IP=$(hostname -I | awk '{print $1}')
+        fi
+    else
+        # If curl is not available, get the internal IP address
+        IP=$(hostname -I | awk '{print $1}')
+    fi
+    
+    # Return the fetched IP address
+    echo "$IP"
+}
+
 
 function openim::util::onCtrlC () {
     #Capture CTRL+C, terminate the background process of the program when the script is terminated in the form of ctrl+c
