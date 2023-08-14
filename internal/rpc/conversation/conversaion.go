@@ -42,6 +42,7 @@ type conversationServer struct {
 	groupRpcClient                 *rpcclient.GroupRpcClient
 	conversationDatabase           controller.ConversationDatabase
 	conversationNotificationSender *notification.ConversationNotificationSender
+	Online                         bool
 }
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -77,6 +78,7 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 	}
 	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
+	resp.Conversation.Online = c.Online
 	return resp, nil
 }
 
@@ -120,58 +122,59 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	}
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
-		if err != nil {
-			return nil, err
-		}
-		if groupInfo.Status == constant.GroupStatusDismissed {
-			return nil, err
-		}
-		// for _, userID := range req.UserIDs {
-		// 	if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
-		// 		log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
-		// 		return nil, err
-		// 	}
-		// }
-	}
-	var conversation tableRelation.ConversationModel
-	conversation.ConversationID = req.Conversation.ConversationID
-	conversation.ConversationType = req.Conversation.ConversationType
-	conversation.UserID = req.Conversation.UserID
-	conversation.GroupID = req.Conversation.GroupID
-	m := make(map[string]interface{})
-	if req.Conversation.RecvMsgOpt != nil {
-		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
-	}
-	if req.Conversation.AttachedInfo != nil {
-		m["attached_info"] = req.Conversation.AttachedInfo.Value
-	}
-	if req.Conversation.Ex != nil {
-		m["ex"] = req.Conversation.Ex.Value
-	}
-	if req.Conversation.IsPinned != nil {
-		m["is_pinned"] = req.Conversation.IsPinned.Value
-	}
-	if req.Conversation.GroupAtType != nil {
-		m["group_at_type"] = req.Conversation.GroupAtType.Value
-	}
-	if req.Conversation.MsgDestructTime != nil {
-		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
-	}
-	if req.Conversation.IsMsgDestruct != nil {
-		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
-	}
-	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
-		var conversations []*tableRelation.ConversationModel
-		for _, ownerUserID := range req.UserIDs {
-			conversation2 := conversation
-			conversation2.OwnerUserID = ownerUserID
-			conversation2.IsPrivateChat = req.Conversation.IsPrivateChat.Value
-			conversations = append(conversations, &conversation2)
-		}
-		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
-			return nil, err
-		}
-		for _, userID := range req.UserIDs {
+  func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
+  	if req.Conversation == nil {
+  		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
+  	}
+  	if req.Conversation.ConversationType == constant.GroupChatType {
+  		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
+  		if err != nil {
+  			return nil, err
+  		}
+  		if groupInfo.Status == constant.GroupStatusDismissed {
+  			return nil, err
+  		}
+  	}
+  	var conversation tableRelation.ConversationModel
+  	conversation.ConversationID = req.Conversation.ConversationID
+  	conversation.ConversationType = req.Conversation.ConversationType
+  	conversation.UserID = req.Conversation.UserID
+  	conversation.GroupID = req.Conversation.GroupID
+  	conversation.Online = c.Online
+  	m := make(map[string]interface{})
+  	if req.Conversation.RecvMsgOpt != nil {
+  		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+  	}
+  	if req.Conversation.AttachedInfo != nil {
+  		m["attached_info"] = req.Conversation.AttachedInfo.Value
+  	}
+  	if req.Conversation.Ex != nil {
+  		m["ex"] = req.Conversation.Ex.Value
+  	}
+  	if req.Conversation.IsPinned != nil {
+  		m["is_pinned"] = req.Conversation.IsPinned.Value
+  	}
+  	if req.Conversation.GroupAtType != nil {
+  		m["group_at_type"] = req.Conversation.GroupAtType.Value
+  	}
+  	if req.Conversation.MsgDestructTime != nil {
+  		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+  	}
+  	if req.Conversation.IsMsgDestruct != nil {
+  		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
+  	}
+  	if req.Conversation.BurnDuration != nil {
+  		m["burn_duration"] = req.Conversation.BurnDuration.Value
+  	}
+  	err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m)
+  	if err != nil {
+  		return nil, err
+  	}
+  	for _, v := range req.UserIDs {
+  		c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+  	}
+  	return &pbConversation.SetConversationsResp{}, nil
+  }
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	}
@@ -233,6 +236,25 @@ func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbC
 		return nil, err
 	}
 	return &pbConversation.SetConversationMaxSeqResp{}, nil
+}
+
+func (c *conversationServer) UpdateStatus(ctx context.Context, subscriberID string, status bool) error {
+	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, subscriberID, "Online",
+		map[string]interface{}{"Online": status}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *conversationServer) SendStatusUpdate(ctx context.Context, subscriberID string, status bool) error {
+	statusUpdateMessage := &pbConversation.StatusUpdateMessage{
+		SubscriberID: subscriberID,
+		Status:       status,
+	}
+	if err := c.conversationNotificationSender.StatusUpdateNotification(ctx, statusUpdateMessage); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConversation.GetConversationIDsReq) (*pbConversation.GetConversationIDsResp, error) {
