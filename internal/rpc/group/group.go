@@ -16,6 +16,9 @@ package group
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -73,20 +76,33 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
-	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupDatabase: database,
-		User:          userRpcClient,
-		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
-			if err != nil {
-				return nil, err
-			}
-			return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
-		}),
-		conversationRpcClient: conversationRpcClient,
-		msgRpcClient:          msgRpcClient,
+	var gs groupServer
+	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), gs.groupMemberHashCode)
+	gs.GroupDatabase = database
+	gs.User = userRpcClient
+	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+		if err != nil {
+			return nil, err
+		}
+		return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
 	})
+	gs.conversationRpcClient = conversationRpcClient
+	gs.msgRpcClient = msgRpcClient
+	pbGroup.RegisterGroupServer(server, &gs)
+	//pbGroup.RegisterGroupServer(server, &groupServer{
+	//	GroupDatabase: database,
+	//	User:          userRpcClient,
+	//	Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+	//		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//		return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
+	//	}),
+	//	conversationRpcClient: conversationRpcClient,
+	//	msgRpcClient:          msgRpcClient,
+	//})
 	return nil
 }
 
@@ -1490,4 +1506,38 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	})
 	resp.Total = total
 	return resp, nil
+}
+
+func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (uint64, error) {
+	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, groupID)
+	if err != nil {
+		return 0, err
+	}
+	var members []*sdkws.GroupMemberFullInfo
+	if len(userIDs) > 0 {
+		resp, err := s.GetGroupMembersInfo(ctx, &pbGroup.GetGroupMembersInfoReq{GroupID: groupID, UserIDs: userIDs})
+		if err != nil {
+			return 0, err
+		}
+		members = resp.Members
+		utils.Sort(userIDs, true)
+	}
+	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
+		return e.UserID
+	})
+	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
+	for _, userID := range userIDs {
+		member, ok := memberMap[userID]
+		if !ok {
+			continue
+		}
+		member.AppMangerLevel = 0
+		res = append(res, member)
+	}
+	data, err := json.Marshal(res)
+	if err != nil {
+		return 0, err
+	}
+	sum := md5.Sum(data)
+	return binary.BigEndian.Uint64(sum[:]), nil
 }
