@@ -23,7 +23,23 @@ func (s *msgServer) SearchMsg(ctx context.Context, req *pb.SearchMsgReq) (*pb.Se
 		return &pb.SearchMsgResp{}, nil
 	}
 
-	// Rest of the function implementation
-	// ...
+	// Initialize a slice of pb.ChatLog objects
+	var pbChatLogs []*pb.ChatLog
+
+	// Iterate over the chatLogs slice
+	for _, chatLog := range chatLogs {
+		// Create a pb.ChatLog object for each chatLog and append it to the pbChatLogs slice
+		pbChatLog := &pb.ChatLog{
+			SenderID:    chatLog.SenderID,
+			ReceiverID:  chatLog.ReceiverID,
+			Content:     chatLog.Content,
+			ContentType: chatLog.ContentType,
+			Timestamp:   chatLog.Timestamp,
+		}
+		pbChatLogs = append(pbChatLogs, pbChatLog)
+	}
+
+	// Return the pbChatLogs slice in the pb.SearchMsgResp object
+	return &pb.SearchMsgResp{ChatLogs: pbChatLogs}, nil
 }
 
