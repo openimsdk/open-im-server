@@ -289,11 +289,13 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 	if err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "============SetUserStatus pre===========")
 	for _, value := range req.StatusList {
 		list, err := s.UserDatabase.GetSubscribedList(ctx, value.UserID)
 		if err != nil {
 			return nil, err
 		}
+		log.ZDebug(ctx, "============UserStatusChangeNotification pre pre===========", list)
 		for _, userID := range list {
 			tips := &sdkws.UserStatusChangeTips{
 				FromUserID: value.UserID,
@@ -305,6 +307,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
 		}
 	}
+	log.ZDebug(ctx, "============UserStatusChangeNotification after===========")
 	return &pbuser.SetUserStatusResp{}, nil
 }
 
