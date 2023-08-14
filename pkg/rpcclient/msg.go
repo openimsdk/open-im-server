@@ -56,7 +56,8 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.GroupInfoSetAnnouncementNotification:     config.Config.Notification.GroupInfoSetAnnouncement,
 		constant.GroupInfoSetNameNotification:             config.Config.Notification.GroupInfoSetName,
 		// user
-		constant.UserInfoUpdatedNotification: config.Config.Notification.UserInfoUpdated,
+		constant.UserInfoUpdatedNotification:  config.Config.Notification.UserInfoUpdated,
+		constant.UserStatusChangeNotification: config.Config.Notification.UserStatusChanged,
 		// friend
 		constant.FriendApplicationNotification:         config.Config.Notification.FriendApplicationAdded,
 		constant.FriendApplicationApprovedNotification: config.Config.Notification.FriendApplicationApproved,
