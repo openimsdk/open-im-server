@@ -1534,7 +1534,7 @@ func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (
 		member.AppMangerLevel = 0
 		res = append(res, member)
 	}
-	log.ZInfo(ctx, "groupMemberHashCode", "result", res)
+	log.ZInfo(ctx, "groupMemberHashCode", "groupID", groupID, "result", res)
 	data, err := json.Marshal(res)
 	if err != nil {
 		return 0, err
