@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/OpenIMSDK/tools/log"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/msg"
@@ -1166,6 +1167,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	if err != nil {
 		return 0, nil, err
 	}
+	log.ZDebug(ctx, "query mongoDB", "result", msgsDocs)
 	msgs := make([]*table.MsgInfoModel, 0)
 	for index := range msgsDocs {
 		msgInfo := msgsDocs[index].Msg
