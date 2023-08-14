@@ -295,7 +295,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 		if err != nil {
 			return nil, err
 		}
-		log.ZDebug(ctx, "============UserStatusChangeNotification pre pre===========", list)
+		log.ZDebug(ctx, "============UserStatusChangeNotification pre pre===========", "list", list)
 		for _, userID := range list {
 			tips := &sdkws.UserStatusChangeTips{
 				FromUserID: value.UserID,
