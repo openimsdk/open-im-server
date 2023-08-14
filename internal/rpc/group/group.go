@@ -89,6 +89,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	})
 	gs.conversationRpcClient = conversationRpcClient
 	gs.msgRpcClient = msgRpcClient
+	pbGroup.RegisterGroupServer(server, &gs)
 	//pbGroup.RegisterGroupServer(server, &groupServer{
 	//	GroupDatabase: database,
 	//	User:          userRpcClient,
