@@ -90,25 +90,30 @@ IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
 readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 
+# TODO: Label
 START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
 openim::golang::start_script_list() {
-    local targets=(
-        start_rpc_service.sh
-        push_start.sh
-        msg_transfer_start.sh
-        msg_gateway_start.sh
-        start_cron.sh
-    )
+  local targets=(
+      start_rpc_service.sh
+      push_start.sh
+      msg_transfer_start.sh
+      msg_gateway_start.sh
+      start_cron.sh
+  )
+  local result=()
+  for target in "${targets[@]}"; do
+      result+=("${START_SCRIPTS_PATH}${target}")
+  done
 
-    for target in "${targets[@]}"; do
-        local full_path="${START_SCRIPTS_PATH}${target}"
-        echo "$full_path"
-        chmod +x "$full_path"
-    done
+  echo "${result[@]}"
 }
 
+# Populate the OPENIM_SERVER_SCRIPT_START_LIST with the full path names of the scripts.
 IFS=" " read -ra OPENIM_SERVER_SCRIPT_START_LIST <<< "$(openim::golang::start_script_list)"
 readonly OPENIM_SERVER_SCRIPT_START_LIST
+
+# Extract just the script names from the full paths.
+readonly OPENIM_SERVER_SCRIPTARIES=("${OPENIM_SERVER_SCRIPT_START_LIST[@]##*/}")
 
 openim::golang::check_openim_binaries() {
     local missing_binaries=()

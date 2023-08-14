@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+# Common utilities, variables and checks for all build scripts.
+set -o errexit
+set +o nounset
+set -o pipefail
+
+OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+
 
 #Include shell font styles and some basic information
 source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
-
-cd $SCRIPTS_ROOT
-
-bin_dir="$BIN_DIR"
-logs_dir="$OPENIM_ROOT/logs"
 
 ulimit -n 200000
 
@@ -58,7 +58,7 @@ for ((i = 0; i < ${#ws_ports[@]}; i++)); do
   nohup ./${openim_msggateway} --port ${rpc_ports[$i]} --ws_port ${ws_ports[$i]} --prometheus_port ${prome_ports[$i]} --config_folder_path ${configfile_path}  >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 done
 
-#Check launched service process
+# Check launched service process
 sleep 3
 check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
 allPorts=""

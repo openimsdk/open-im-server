@@ -246,6 +246,182 @@ openim::util::host_arch() {
   echo "${host_arch}"
 }
 
+# The `openim::util::check_ports` function analyzes the state of processes based on given ports.
+# It accepts multiple ports as arguments and prints:
+# 1. The state of the process (whether it's running or not).
+# 2. The start time of the process if it's running.
+# User:
+# openim::util::check_ports 8080 8081 8082
+# The function returns a status of 1 if any of the processes is not running.
+openim::util::check_ports() {
+    # An array to collect ports of processes that are not running.
+    not_started=()
+
+    # An array to collect information about processes that are running.
+    started=()
+
+    # Iterate over each given port.
+    for port in "$@"; do
+        # Use the `lsof` command to find process information related to the given port.
+        info=$(lsof -i :$port -n -P | grep LISTEN || true)
+        
+        # If there's no process information, it means the process associated with the port is not running.
+        if [[ -z $info ]]; then
+            not_started+=($port)
+        else
+            # If there's process information, extract relevant details:
+            # Process ID, Command Name, and Start Time.
+            pid=$(echo $info | awk '{print $2}')
+            command=$(echo $info | awk '{print $1}')
+            start_time=$(ps -o lstart= -p $pid)
+            started+=("Port $port - Command: $command, PID: $pid, Start time: $start_time")
+        fi
+    done
+
+    # Print information about ports whose processes are not running.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        openim::log::info "Not started ports:"
+        for port in "${not_started[@]}"; do
+            openim::log::error "Port $port is not started."
+        done
+    fi
+
+    # Print information about ports whose processes are running.
+    if [[ ${#started[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Started ports:"
+        for info in "${started[@]}"; do
+            openim::log::info "$info"
+        done
+    fi
+
+    # If any of the processes is not running, return a status of 1.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        return 1
+    else
+        openim::log::success "All processes are running."
+        return 0
+    fi
+}
+
+# The `openim::util::stop_services_on_ports` function stops services running on specified ports.
+# It accepts multiple ports as arguments and performs the following:
+# 1. Attempts to stop any services running on the specified ports.
+# 2. Prints details of services successfully stopped and those that failed to stop.
+# Usage:
+# openim::util::stop_services_on_ports 8080 8081 8082
+# The function returns a status of 1 if any service couldn't be stopped.
+openim::util::stop_services_on_ports() {
+    # An array to collect ports of processes that couldn't be stopped.
+    not_stopped=()
+
+    # An array to collect information about processes that were stopped.
+    stopped=()
+
+    # Iterate over each given port.
+    for port in "$@"; do
+        # Use the `lsof` command to find process information related to the given port.
+        info=$(lsof -i :$port -n -P | grep LISTEN || true)
+        
+        # If there's process information, it means the process associated with the port is running.
+        if [[ -n $info ]]; then
+            # Extract the Process ID.
+            pid=$(echo $info | awk '{print $2}')
+            
+            # Try to stop the service by killing its process.
+            if kill -TERM $pid; then
+                stopped+=($port)
+            else
+                not_stopped+=($port)
+            fi
+        fi
+    done
+
+    # Print information about ports whose processes couldn't be stopped.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        openim::log::info "Ports that couldn't be stopped:"
+        for port in "${not_stopped[@]}"; do
+            openim::log::error "Failed to stop service on port $port."
+        done
+    fi
+
+    # Print information about ports whose processes were successfully stopped.
+    if [[ ${#stopped[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Stopped services on ports:"
+        for port in "${stopped[@]}"; do
+            openim::log::info "Successfully stopped service on port $port."
+        done
+    fi
+
+    # If any of the processes couldn't be stopped, return a status of 1.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        return 1
+    else
+        openim::log::success "All specified services were stopped."
+        return 0
+    fi
+}
+
+# The `openim::util::stop_services_with_name` function stops services with specified names.
+# It accepts multiple service names as arguments and performs the following:
+# 1. Attempts to stop any services with the specified names.
+# 2. Prints details of services successfully stopped and those that failed to stop.
+# Usage:
+# openim::util::stop_services_with_name nginx apache
+# The function returns a status of 1 if any service couldn't be stopped.
+openim::util::stop_services_with_name() {
+    # An array to collect names of processes that couldn't be stopped.
+    not_stopped=()
+
+    # An array to collect information about processes that were stopped.
+    stopped=()
+
+    # Iterate over each given service name.
+    for name in "$@"; do
+        # Use the `pgrep` command to find process IDs related to the given service name.
+        pids=$(pgrep -f $name)
+
+        for pid in $pids; do
+            # If there's a Process ID, it means the service with the name is running.
+            if [[ -n $pid ]]; then
+                # Try to stop the service by killing its process.
+                if kill -TERM $pid; then
+                    stopped+=($name)
+                else
+                    not_stopped+=($name)
+                fi
+            fi
+        done
+    done
+
+    # Print information about services whose processes couldn't be stopped.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        openim::log::info "Services that couldn't be stopped:"
+        for name in "${not_stopped[@]}"; do
+            openim::log::error "Failed to stop the $name service."
+        done
+    fi
+
+    # Print information about services whose processes were successfully stopped.
+    if [[ ${#stopped[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Stopped services:"
+        for name in "${stopped[@]}"; do
+            openim::log::info "Successfully stopped the $name service."
+        done
+    fi
+
+    # If any of the services couldn't be stopped, return a status of 1.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        return 1
+    else
+        openim::log::success "All specified services were stopped."
+        return 0
+    fi
+}
+
+
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
 # this info to figure out where the final binaries are placed.

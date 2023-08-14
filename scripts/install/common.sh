@@ -30,9 +30,28 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
 
-service_port_name={
-    
+# Storing all the defined ports in an array for easy management and access.
+# This array consolidates the port numbers for all the services defined above.
+openim::common::service_port_name() {
+  local targets=(
+    $OPENIM_USER_PORT            # User service
+    $OPENIM_FRIEND_PORT          # Friend service
+    $OPENIM_MESSAGE_PORT         # Message service
+    $OPENIM_MESSAGE_GATEWAY_PORT # Message gateway
+    $OPENIM_GROUP_PORT           # Group service
+    $OPENIM_AUTH_PORT            # Authorization service
+    $OPENIM_PUSH_PORT            # Push service
+    $OPENIM_CONVERSATION_PORT    # Conversation service
+    $OPENIM_THIRD_PORT           # Third-party service
+    $API_OPENIM_PORT             # API service
+    $OPENIM_WS_PORT              # WebSocket service
+  )
+  echo "${targets[@]}"
 }
+
+IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port_name)"
+readonly OPENIM_SERVER_PORT_TARGETS
+readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {

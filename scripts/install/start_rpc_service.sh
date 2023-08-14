@@ -14,12 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+# Common utilities, variables and checks for all build scripts.
+set -o errexit
+set +o nounset
+set -o pipefail
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/lib/init.sh
-source $SCRIPTS_ROOT/path_info.sh
+OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
 
 #service filename
 service_filename=(

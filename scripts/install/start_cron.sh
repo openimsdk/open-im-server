@@ -14,37 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+set -o errexit
+set +o nounset
+set -o pipefail
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/lib/init.sh
-source $SCRIPTS_ROOT/path_info.sh
+OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
 
-cd $SCRIPTS_ROOT
+readonly SERVER_NAME="openim-crontask"
+readonly SERVER_PATH="${OPENIM_OUTPUT_HOSTBIN}/openim-crontask"
 
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
+openim::log::status "Start OpenIM Cron, binary root: ${SERVER_NAME}"
+openim::log::info "Start OpenIM Cron, path: ${SERVER_PATH}"
 
-bin_dir="$BIN_DIR"
-logs_dir="$OPENIM_ROOT/logs"
+openim::util::stop_services_with_name ${SERVER_NAME}
 
-#Check if the service exists
-#If it is exists,kill this process
-check=`ps  | grep -w ./${cron_task_name} | grep -v grep| wc -l`
-if [ $check -ge 1 ]
-then
-oldPid=`ps | grep -w ./${cron_task_name} | grep -v grep|awk '{print $2}'`
- kill -9 $oldPid
-fi
-#Waiting port recycling
 sleep 1
 
-cd ${cron_task_binary_root}
-#for ((i = 0; i < ${cron_task_service_num}; i++)); do
-      echo "==========================start cron_task process===========================">>$OPENIM_ROOT/logs/openIM.log
+openim::log::status "start cron_task process"
+
 nohup ./${cron_task_name}  >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
 #done
 

@@ -13,29 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# This script is stop all openim service
+# 
+# Usage: `scripts/stop.sh`.
+# Encapsulated as: `make stop`.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-#Include shell font styles and some basic information
-source $OPENIM_ROOT/scripts/lib/init.sh
-source $OPENIM_ROOT/scripts/path_info.sh
+echo "Ready to stop port: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 
-bin_dir="$BIN_DIR"
-logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
-
-cd "$SCRIPTS_ROOT"
-
-for i in ${service_names[*]}; do
-  #Check whether the service exists
-  name="ps -aux |grep -w $i |grep -v grep"
-  count="${name}| wc -l"
-  if [ $(eval ${count}) -gt 0 ]; then
-    pid="${name}| awk '{print \$2}'"
-    echo -e "${SKY_BLUE_PREFIX}Killing service:$i pid:$(eval $pid)${COLOR_SUFFIX}"
-    #kill the service that existed
-    kill -9 $(eval $pid)
-    echo -e "${SKY_BLUE_PREFIX}service:$i was killed ${COLOR_SUFFIX}"
-  fi
-done
+openim::util::stop_services_on_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
