@@ -153,7 +153,7 @@ func NewGroupDatabase(
 	return database
 }
 
-func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.Database) GroupDatabase {
+func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.Database, hashCode func(ctx context.Context, groupID string) (uint64, error)) GroupDatabase {
 	rcOptions := rockscache.NewDefaultOptions()
 	rcOptions.StrongConsistency = true
 	rcOptions.RandomExpireAdjustment = 0.2
@@ -170,6 +170,7 @@ func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.D
 			relation.NewGroupMemberDB(db),
 			relation.NewGroupRequest(db),
 			unrelation.NewSuperGroupMongoDriver(database),
+			hashCode,
 			rcOptions,
 		),
 	)
@@ -315,7 +316,7 @@ func (g *groupDatabase) FindGroupMember(
 	userIDs []string,
 	roleLevels []int32,
 ) (totalGroupMembers []*relationTb.GroupMemberModel, err error) {
-	if roleLevels == nil {
+	if len(roleLevels) == 0 {
 		for _, groupID := range groupIDs {
 			groupMembers, err := g.cache.GetGroupMembersInfo(ctx, groupID, userIDs)
 			if err != nil {

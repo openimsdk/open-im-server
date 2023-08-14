@@ -113,7 +113,7 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 		if groupMemberInfo.RoleLevel == constant.GroupOwner {
 			return nil
 		} else {
-			if groupMemberInfo.MuteEndTime >= time.Now().Unix() {
+			if groupMemberInfo.MuteEndTime >= time.Now().UnixMilli() {
 				return errs.ErrMutedInGroup.Wrap()
 			}
 			if groupInfo.Status == constant.GroupStatusMuted && groupMemberInfo.RoleLevel != constant.GroupAdmin {
