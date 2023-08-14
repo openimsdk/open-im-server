@@ -1519,12 +1519,11 @@ func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (
 		if err != nil {
 			return 0, err
 		}
-		log.ZInfo(ctx, "groupMemberHashCode.GetGroupMembersInfo", "groupID", groupID, "userIDs", userIDs, "members", resp.Members)
 		members = resp.Members
 		utils.Sort(userIDs, true)
 	}
 	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
-		return e.GroupID
+		return e.UserID
 	})
 	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
 	for _, userID := range userIDs {
@@ -1535,7 +1534,6 @@ func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (
 		member.AppMangerLevel = 0
 		res = append(res, member)
 	}
-	log.ZInfo(ctx, "groupMemberHashCode", "groupID", groupID, "userIDs", userIDs, "result", res)
 	data, err := json.Marshal(res)
 	if err != nil {
 		return 0, err
