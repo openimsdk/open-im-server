@@ -16,69 +16,28 @@
 #FIXME This script is the startup script for multiple servers.
 #FIXME The full names of the shell scripts that need to be started are placed in the `need_to_start_server_shell` array.
 
-set -o errexit
 set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-if [ ! -d "${OPENIM_ROOT}/_output/bin/platforms" ]; then
-  # exec build_all_service.sh
-  "${SCRIPTS_ROOT}/build_all_service.sh"
+set +o errexit
+openim::golang::check_openim_binaries
+if [[ $? -ne 0 ]]; then
+  openim::log::error "OpenIM binaries are not found. Please run 'make' to build binaries."
+  ${OPENIM_ROOT}/scripts/build_all_service.sh
 fi
+set -o errexit
 
-bin_dir="$OPENIM_ROOT/_output/bin"
-logs_dir="$OPENIM_ROOT/logs"
+scripts_to_run=$(openim::golang::start_script_list)
 
-if [ ! -d "$bin_dir" ]; then
-    mkdir -p "$bin_dir"
-fi
-
-if [ ! -d "$logs_dir" ]; then
-    mkdir -p "$logs_dir"
-fi
-
-
-cd  $SCRIPTS_ROOT
-
-# FIXME Put the shell script names here
-need_to_start_server_shell=(
-  start_rpc_service.sh
-  push_start.sh
-  msg_transfer_start.sh
-  msg_gateway_start.sh
-  start_cron.sh
-)
-
-component_check=start_component_check.sh
-echo -e ""
-chmod +x $component_check
-echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
-echo -e ""
-./$component_check
-if [ $? -ne 0 ]; then
-  # Print error message and exit
-  echo -e "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
-  exit -1
-fi
-
-
-# Loop through the script names and execute them
-for i in ${need_to_start_server_shell[*]}; do
-  chmod +x $i
-
-  echo -e ""
-  # Print script execution message
-  echo -e "=========> ${BACKGROUND_GREEN}Executing ${i}...${COLOR_SUFFIX}"
-  echo -e ""
-
-  ./$i
-
-  # Check if the script executed successfully
-  if [ $? -ne 0 ]; then
+for script in $scripts_to_run; do
+    openim::log::info "Executing: $script"
+    "$script"
+    if [ $? -ne 0 ]; then
     # Print error message and exit
-    echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${i}. Exiting...${COLOR_SUFFIX}"
+    openim::log::error "Error executing ${i}. Exiting..."
     exit -1
   fi
 done

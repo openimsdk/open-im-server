@@ -4,6 +4,7 @@ use (
 	.
 	./test/typecheck
 	./tools/changelog
+	./tools/imctl
 	./tools/infra
 	./tools/ncpu
 	./tools/yamlfmt

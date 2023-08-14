@@ -35,7 +35,7 @@ RUN make clean
 RUN make build BINS=openim-api
 
 # FROM ghcr.io/openim-sigs/openim-bash-image:latest
-FROM test:v1
+FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 

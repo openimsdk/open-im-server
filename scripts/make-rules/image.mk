@@ -14,7 +14,6 @@
 
 # ==============================================================================
 # Makefile helper functions for docker image
-# TODO: For the time being only used for compilation, it can be arm or amd, please do not delete it, it can be extended with new functions
 # ==============================================================================
 # Path: scripts/make-rules/image.mk
 # docker registry: registry.example.com/namespace/image:tag as: registry.hub.docker.com/cubxxw/<image-name>:<tag>
@@ -24,8 +23,11 @@
 DOCKER := docker
 DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41
 
-REGISTRY_PREFIX ?= ghcr.io/OpenIMSDK
-IMAGES ?= lvscare
+# read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md
+REGISTRY_PREFIX ?= ghcr.io/openimsdk
+
+BASE_IMAGE ?= ghcr.io/openim-sigs/openim-bash-image
+
 IMAGE_PLAT ?= $(subst $(SPACE),$(COMMA),$(subst _,/,$(PLATFORMS)))
 
 EXTRA_ARGS ?= --no-cache
@@ -102,25 +104,26 @@ image.build.multiarch: image.verify $(foreach p,$(PLATFORMS),$(addprefix image.b
 
 ## image.build.%: Build docker image for a specific platform
 .PHONY: image.build.%
-image.build.%: go.bin.%
+image.build.%: go.build.%
 	$(eval IMAGE := $(COMMAND))
 	$(eval IMAGE_PLAT := $(subst _,/,$(PLATFORM)))
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
-	@echo "===========> Building LOCAL docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
+	@echo "===========> Building docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
 	@mkdir -p $(TMP_DIR)/$(IMAGE)/$(PLATFORM)
-	@cat $(ROOT_DIR)/docker/$(IMAGE)/Dockerfile\
-		>$(TMP_DIR)/$(IMAGE)/Dockerfile
-	@cp $(BIN_DIR)/$(PLATFORM)/$(IMAGE) $(TMP_DIR)/$(IMAGE)/$(PLATFORM)
-
-	$(eval BUILD_SUFFIX := --load --pull -t $(REGISTRY_PREFIX)/$(IMAGE):$(VERSION) $(TMP_DIR)/$(IMAGE))
-	$(eval BUILD_SUFFIX_ARM := --load --pull -t $(REGISTRY_PREFIX)/$(IMAGE).$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
-	@if [ "$(ARCH)" == "amd64" ]; then \
-		echo "===========> Creating LOCAL docker image tag $(REGISTRY_PREFIX)/$(IMAGE):$(VERSION) for $(ARCH)"; \
-		$(DOCKER) buildx build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX); \
+	@awk '/FROM/ {c++; if (c==2) {print; next}} c>=2' $(ROOT_DIR)/build/images/$(IMAGE)/Dockerfile \
+| sed -e "s#BASE_IMAGE#$(BASE_IMAGE)#g" \
+      -e 's/--from=builder //g' \
+      -e 's#COPY /openim/openim-server/#COPY ./#g' > $(TMP_DIR)/$(IMAGE)/Dockerfile
+	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
+	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
+	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
+		$(MAKE) image.daemon.verify ;\
+		$(DOCKER) build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX) ; \
 	else \
-		echo "===========> Creating LOCAL docker image tag $(REGISTRY_PREFIX)/$(IMAGE).$(ARCH):$(VERSION) for $(ARCH)"; \
-		$(DOCKER) buildx build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX_ARM); \
+		$(DOCKER) build $(BUILD_SUFFIX) ; \
 	fi
+	@rm -rf $(TMP_DIR)/$(IMAGE)
+
 
 # https://docs.docker.com/build/building/multi-platform/
 # busybox image supports amd64, arm32v5, arm32v6, arm32v7, arm64v8, i386, ppc64le, and s390x

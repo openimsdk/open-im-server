@@ -1,4 +1,4 @@
-# Ignore files and directories starting with a dot
+<!-- # Ignore files and directories starting with a dot
 
 # Ignore specific files
 .dockerignore
@@ -28,4 +28,4 @@ assets/
 components/
 
 # Ignore tools and scripts
-.github/
+.github/ -->

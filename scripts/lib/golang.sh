@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # The golang package that we are building.
+OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 readonly KUBE_GO_PACKAGE=github.com/openimsdk/open-im-server
 readonly KUBE_GOPATH="${KUBE_GOPATH:-"${KUBE_OUTPUT}/go"}"
 export KUBE_GOPATH
@@ -89,6 +90,45 @@ IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
 readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 
+START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
+openim::golang::start_script_list() {
+    local targets=(
+        start_rpc_service.sh
+        push_start.sh
+        msg_transfer_start.sh
+        msg_gateway_start.sh
+        start_cron.sh
+    )
+
+    for target in "${targets[@]}"; do
+        local full_path="${START_SCRIPTS_PATH}${target}"
+        echo "$full_path"
+        chmod +x "$full_path"
+    done
+}
+
+IFS=" " read -ra OPENIM_SERVER_SCRIPT_START_LIST <<< "$(openim::golang::start_script_list)"
+readonly OPENIM_SERVER_SCRIPT_START_LIST
+
+openim::golang::check_openim_binaries() {
+    local missing_binaries=()
+    for binary in "${OPENIM_SERVER_BINARIES[@]}"; do
+        if [[ ! -x "${OPENIM_OUTPUT_HOSTBIN}/${binary}" ]]; then
+            missing_binaries+=("${binary}")
+        fi
+    done
+
+    if [[ ${#missing_binaries[@]} -ne 0 ]]; then
+        echo "The following binaries were not found in ${OPENIM_OUTPUT_HOSTBIN}:"
+        for missing in "${missing_binaries[@]}"; do
+            echo "  - ${missing}"
+        done
+        return 1
+    else
+        echo "All binaries have been installed in ${OPENIM_OUTPUT_HOSTBIN}。"
+        return 0
+    fi
+}
 
 openim::golang::tools_targets() {
   local targets=(

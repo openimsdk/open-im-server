@@ -15,7 +15,6 @@
 # limitations under the License.
 
 #Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 #Include shell font styles and some basic information

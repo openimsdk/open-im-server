@@ -30,6 +30,10 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
 
+service_port_name={
+    
+}
+
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {
   echo ${LINUX_PASSWORD} | sudo -S $1

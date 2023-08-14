@@ -164,7 +164,8 @@ def "WEBSOCKET_MAX_CONN_NUM" "100000"                 # Websocket最大连接数
 def "WEBSOCKET_MAX_MSG_LEN" "4096"                    # Websocket最大消息长度
 def "WEBSOCKET_TIMEOUT" "10"                          # Websocket超时
 def "PUSH_ENABLE" "getui"                             # 推送是否启用
-def "GETUI_PUSH_URL" "https://restapi.getui.com/v2/$appId"  # GeTui推送URL
+# GeTui推送URL
+readonly GETUI_PUSH_URL=${GETUI_PUSH_URL:-'https://restapi.getui.com/v2/$appId'}
 def "FCM_SERVICE_ACCOUNT" "x.json"                    # FCM服务账户
 def "JPNS_APP_KEY"                                  # JPNS应用密钥
 def "JPNS_MASTER_SECRET"                            # JPNS主密钥

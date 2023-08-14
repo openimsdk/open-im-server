@@ -48,7 +48,7 @@ endif
 
 # BIN_TOOLS_DIR: Directory where executable files are stored.
 ifeq ($(origin BIN_TOOLS_DIR),undefined)
-BIN_TOOLS_DIR := $(OUTPUT_DIR)/bin-tools
+BIN_TOOLS_DIR := $(BIN_DIR)/tools
 $(shell mkdir -p $(BIN_TOOLS_DIR))
 endif
 
@@ -71,7 +71,7 @@ $(shell mkdir -p $(TMP_DIR))
 endif
 
 ifeq ($(origin VERSION), undefined)
-# VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')	#v2.3.3.dirty
+# VERSION := $(shell git describe --tags --always --match='v*')
 # git describe --tags --always --match="v*" --dirty
 VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
 # v2.3.3: git tag
