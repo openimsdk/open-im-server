@@ -64,6 +64,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
+		Online:                         false,
 	})
 	return nil
 }
@@ -122,19 +123,19 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	}
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
-  func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
-  	if req.Conversation == nil {
-  		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
-  	}
-  	if req.Conversation.ConversationType == constant.GroupChatType {
-  		groupInfo, err := c.groupRpcClient.GetGroupInfo(ctx, req.Conversation.GroupID)
-  		if err != nil {
-  			return nil, err
-  		}
-  		if groupInfo.Status == constant.GroupStatusDismissed {
-  			return nil, err
-  		}
-  	}
+		if err != nil {
+			return nil, err
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			return nil, err
+		}
+		for _, userID := range req.UserIDs {
+			if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
+				log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
+				return nil, err
+			}
+		}
+	}
   	var conversation tableRelation.ConversationModel
   	conversation.ConversationID = req.Conversation.ConversationID
   	conversation.ConversationType = req.Conversation.ConversationType
