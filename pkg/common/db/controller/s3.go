@@ -30,7 +30,7 @@ type S3Database interface {
 	AuthSign(ctx context.Context, uploadID string, partNumbers []int) (*s3.AuthSignResult, error)
 	InitiateMultipartUpload(ctx context.Context, hash string, size int64, expire time.Duration, maxParts int) (*cont.InitiateUploadResult, error)
 	CompleteMultipartUpload(ctx context.Context, uploadID string, parts []string) (*cont.UploadResult, error)
-	AccessURL(ctx context.Context, name string, expire time.Duration) (time.Time, string, error)
+	AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (time.Time, string, error)
 	SetObject(ctx context.Context, info *relation.ObjectModel) error
 }
 
@@ -70,14 +70,19 @@ func (s *s3Database) SetObject(ctx context.Context, info *relation.ObjectModel) 
 	return s.obj.SetObject(ctx, info)
 }
 
-func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Duration) (time.Time, string, error) {
+func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (time.Time, string, error) {
 	obj, err := s.obj.Take(ctx, name)
 	if err != nil {
 		return time.Time{}, "", err
 	}
-	opt := &s3.AccessURLOption{
-		ContentType: obj.ContentType,
-		Filename:    filepath.Base(obj.Name),
+	if opt == nil {
+		opt = &s3.AccessURLOption{}
+	}
+	if opt.ContentType == "" {
+		opt.ContentType = obj.ContentType
+	}
+	if opt.Filename == "" {
+		opt.Filename = filepath.Base(obj.Name)
 	}
 	expireTime := time.Now().Add(expire)
 	rawURL, err := s.s3.AccessURL(ctx, obj.Key, expire, opt)

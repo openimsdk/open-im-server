@@ -16,13 +16,15 @@ package friend
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+
+	pbFriend "github.com/OpenIMSDK/protocol/friend"
+	"github.com/OpenIMSDK/tools/mcontext"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	pbFriend "github.com/OpenIMSDK/protocol/friend"
-	"github.com/OpenIMSDK/tools/mcontext"
 )
 
 func (s *friendServer) GetPaginationBlacks(

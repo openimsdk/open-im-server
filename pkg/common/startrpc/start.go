@@ -16,10 +16,11 @@ package startrpc
 
 import (
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"

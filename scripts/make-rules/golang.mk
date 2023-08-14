@@ -44,8 +44,8 @@ ifeq ($(origin GOBIN), undefined)
 	GOBIN := $(GOPATH)/bin
 endif
 
-# COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ except those ending in.md
-COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/*))
+# COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ and ${ROOT_DIR}/tools/ except those ending in.md
+COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/*))
 ifeq (${COMMANDS},)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
@@ -120,15 +120,20 @@ go.build.%:
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
-		echo "===========> DEBUG: Compilation is not yet supported $(COMMAND)"; \
+		echo "===========> DEBUG: OpenIM-SDK-Core It is no longer supported for openim-server $(COMMAND)"; \
 	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
 		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
 			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
 		done; \
 	else \
-		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+		if [ -f $(ROOT_DIR)/cmd/$(COMMAND)/main.go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
+		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/main.go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
+		fi \
 	fi
 
 ## go.install: Install deployment openim
@@ -178,7 +183,7 @@ go.test.cover: go.test.junit-report
 ## go.format: Run unit test and format codes
 .PHONY: go.format
 go.format: tools.verify.golines tools.verify.goimports
-	@echo "===========> Formating codes"
+	@echo "===========> Formatting codes"
 	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) gofmt -s -w
 	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/goimports -w -local $(ROOT_PACKAGE)
 	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
@@ -197,8 +202,8 @@ go.updates: tools.verify.go-mod-outdated
 ## go.clean: Clean all builds directories and files
 .PHONY: go.clean
 go.clean:
-	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR))"
-	@-rm -vrf $(TMP_DIR) $(BIN_DIR)
+	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR)) AND BIN_TOOLS_DIR($(BIN_TOOLS_DIR))"
+	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR)
 	@echo "===========> End clean..."
 
 ## copyright.help: Show copyright help
