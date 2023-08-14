@@ -21,7 +21,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
-	"github.com/OpenIMSDK/tools/log"
 )
 
 type UserNotificationSender struct {
@@ -100,6 +99,5 @@ func (u *UserNotificationSender) UserStatusChangeNotification(
 	ctx context.Context,
 	tips *sdkws.UserStatusChangeTips,
 ) error {
-	log.ZDebug(ctx, "============UserStatusChangeNotification pre===========", "tips", tips)
 	return u.Notification(ctx, tips.FromUserID, tips.ToUserID, constant.UserStatusChangeNotification, tips)
 }
