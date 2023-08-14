@@ -1519,6 +1519,7 @@ func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (
 		if err != nil {
 			return 0, err
 		}
+		log.ZInfo(ctx, "groupMemberHashCode.GetGroupMembersInfo", "groupID", groupID, "userIDs", userIDs, "members", resp.Members)
 		members = resp.Members
 		utils.Sort(userIDs, true)
 	}
