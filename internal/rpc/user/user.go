@@ -301,6 +301,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 				Status:     value.Status,
 				PlatformID: value.PlatformID,
 			}
+			log.ZDebug(ctx, "============UserStatusChangeNotification pre===========", "tips", tips)
 			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
 		}
 	}
