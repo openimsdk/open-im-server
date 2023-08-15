@@ -47,9 +47,10 @@ import (
 
 type userServer struct {
 	controller.UserDatabase
-	notificationSender *notification.FriendNotificationSender
-	friendRpcClient    *rpcclient.FriendRpcClient
-	RegisterCenter     registry.SvcDiscoveryRegistry
+	friendNotificationSender *notification.FriendNotificationSender
+	userNotificationSender   *notification.UserNotificationSender
+	friendRpcClient          *rpcclient.FriendRpcClient
+	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -82,10 +83,11 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
-		UserDatabase:       database,
-		RegisterCenter:     client,
-		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		UserDatabase:             database,
+		RegisterCenter:           client,
+		friendRpcClient:          &friendRpcClient,
+		friendNotificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		userNotificationSender:   notification.NewUserNotificationSender(&msgRpcClient, notification.WithUserFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
@@ -118,13 +120,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	_ = s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	for _, friendID := range friends {
-		s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
 	return resp, nil
 }
@@ -139,7 +141,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return resp, nil
 }
 
@@ -272,6 +274,7 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
 }
 
+// GetUserStatus Get the online status of the user.
 func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
 	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
@@ -280,10 +283,39 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 	return &pbuser.GetUserStatusResp{StatusList: onlineStatusList}, nil
 }
 
+// SetUserStatus Synchronize user's online status.
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp, err error) {
 	err = s.UserDatabase.SetUserStatus(ctx, req.StatusList)
 	if err != nil {
 		return nil, err
 	}
+	for _, value := range req.StatusList {
+		list, err := s.UserDatabase.GetSubscribedList(ctx, value.UserID)
+		if err != nil {
+			return nil, err
+		}
+		for _, userID := range list {
+			tips := &sdkws.UserStatusChangeTips{
+				FromUserID: value.UserID,
+				ToUserID:   userID,
+				Status:     value.Status,
+				PlatformID: value.PlatformID,
+			}
+			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
+		}
+	}
 	return &pbuser.SetUserStatusResp{}, nil
+}
+
+// GetSubscribeUsersStatus Get the online status of subscribers.
+func (s *userServer) GetSubscribeUsersStatus(ctx context.Context, req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
+	userList, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, userList)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }
