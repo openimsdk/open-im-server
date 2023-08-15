@@ -13,7 +13,7 @@ type msgServer struct {
 
 func (s *msgServer) SearchMsg(ctx context.Context, req *pb.SearchMsgReq) (*pb.SearchMsgResp, error) {
 	// Assume that chatLogs is the result of the database query that retrieves the chatLogs
-	chatLogs, err := service.NewMsgService().SearchMsg(ctx, req)
+ 	chatLogs, err := service.NewMsgService().SearchMsgFromDB(ctx, req)
 	if err != nil {
 		return nil, err
 	}
