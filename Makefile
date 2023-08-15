@@ -76,7 +76,13 @@ check:
 ## tidy: tidy go.mod ✨
 .PHONY: tidy
 tidy:
-	@$(GO) mod tidy
+	# Ensure that the GO variable is set correctly
+	if [ -z "$(GO)" ]; then echo "GO variable is not set"; exit 1; fi
+	# Run the go mod tidy command and check for errors
+	@$(GO) mod tidy || (echo "go mod tidy failed"; exit 1)
+	if [ -z "$(GO)" ]; then echo "GO variable is not set"; exit 1; fi
+	# Run the go mod tidy command and check for errors
+	@$(GO) mod tidy || (echo "go mod tidy failed"; exit 1)
 
 ## vendor: vendor go.mod ✨
 .PHONY: vendor
