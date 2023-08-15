@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/logic/model"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/pb"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/model"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/protocol"
 )
 
 func SearchMsgFromDB(ctx context.Context, req *pb.SearchMsgReq) ([]*model.ChatLog, error) {
