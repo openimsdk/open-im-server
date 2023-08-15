@@ -960,3 +960,18 @@ func (db *commonMsgDatabase) SearchMessage(ctx context.Context, req *pbMsg.Searc
 func (db *commonMsgDatabase) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {
 	db.msgDocDatabase.ConvertMsgsDocLen(ctx, conversationIDs)
 }
+
+func (db *commonMsgDatabase) SearchMsg(ctx context.Context, req *pbMsg.SearchMessageReq) ([]*model.ChatLog, error) {
+	// Construct the database query using the req parameter
+	query := constructQuery(req)
+
+	// Execute the database query
+	chatLogs, err := executeQuery(query)
+	if err != nil {
+		// If the database query fails, return a nil slice and the error
+		return nil, err
+	}
+
+	// If the database query is successful, return the retrieved chatLogs and a nil error
+	return chatLogs, nil
+}
