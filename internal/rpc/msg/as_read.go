@@ -33,6 +33,8 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		conversationIDs = req.ConversationIDs
 	}
 	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
