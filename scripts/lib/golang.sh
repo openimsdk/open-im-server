@@ -98,7 +98,7 @@ openim::golang::start_script_list() {
       push_start.sh
       msg_transfer_start.sh
       msg_gateway_start.sh
-      start_cron.sh
+      openim-crontask.sh
   )
   local result=()
   for target in "${targets[@]}"; do

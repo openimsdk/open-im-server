@@ -58,7 +58,7 @@ scripts/
 ├── push_start.sh                  # Script to start push service
 ├── release.sh                     # Script to perform release process
 ├── start_all.sh                   # Script to start all services
-├── start_cron.sh                  # Script to start cron jobs
+├── openim-crontask.sh                  # Script to start cron jobs
 ├── start_rpc_service.sh           # Script to start RPC service
 ├── stop_all.sh                    # Script to stop all services
 └── style_info.sh                  # Script containing style related information

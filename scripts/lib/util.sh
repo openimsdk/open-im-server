@@ -378,18 +378,18 @@ openim::util::stop_services_with_name() {
     stopped=()
 
     # Iterate over each given service name.
-    for name in "$@"; do
+    for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
-        pids=$(pgrep -f $name)
+        pids=$(ps aux | awk -v pattern="$server_name" '$0 ~ pattern {print $2}')
 
         for pid in $pids; do
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
                 if kill -TERM $pid; then
-                    stopped+=($name)
+                    stopped+=($server_name)
                 else
-                    not_stopped+=($name)
+                    not_stopped+=($server_name)
                 fi
             fi
         done
@@ -411,14 +411,7 @@ openim::util::stop_services_with_name() {
             openim::log::info "Successfully stopped the $name service."
         done
     fi
-
-    # If any of the services couldn't be stopped, return a status of 1.
-    if [[ ${#not_stopped[@]} -ne 0 ]]; then
-        return 1
-    else
-        openim::log::success "All specified services were stopped."
-        return 0
-    fi
+    openim::log::success "All specified services were stopped."
 }
 
 

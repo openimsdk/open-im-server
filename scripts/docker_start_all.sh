@@ -29,7 +29,7 @@ need_to_start_server_shell=(
   ${SCRIPTS_ROOT}/msg_gateway_start.sh
   ${SCRIPTS_ROOT}/push_start.sh
   ${SCRIPTS_ROOT}/msg_transfer_start.sh
-  ${SCRIPTS_ROOT}/start_cron.sh
+  ${SCRIPTS_ROOT}/openim-crontask.sh
 )
 
 component_check=start_component_check.sh
