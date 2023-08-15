@@ -18,6 +18,10 @@
 # Usage: source scripts/lib/util.sh
 ################################################################################
 
+# TODO Debug: Just for testing, please comment out
+# OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+# source "${OPENIM_ROOT}/scripts/lib/logging.sh"
+
 #1、将IP写在一个文件里，比如文件名为hosts_file，一行一个IP地址。
 #2、修改ssh-mutual-trust.sh里面的用户名及密码，默认为root用户及密码123。
 # hosts_file_path="path/to/your/hosts/file"
@@ -260,6 +264,7 @@ openim::util::check_ports() {
     # An array to collect information about processes that are running.
     local started=()
 
+    openim::log::info "Checking ports: $*"
     # Iterate over each given port.
     for port in "$@"; do
         # Use the `lsof` command to find process information related to the given port.
@@ -303,6 +308,7 @@ openim::util::check_ports() {
         return 0
     fi
 }
+# openim::util::check_ports 9090 9092
 
 # The `openim::util::check_process_names` function analyzes the state of processes based on given names.
 # It accepts multiple process names as arguments and prints:
@@ -312,33 +318,37 @@ openim::util::check_ports() {
 # openim::util::check_process_names nginx mysql redis
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_process_names() {
-    # An array to collect names of processes that are not running.
+    # Arrays to collect details of processes
     local not_started=()
-
-    # An array to collect information about processes that are running.
     local started=()
 
-    # Iterate over each given process name.
+    openim::log::info "Checking processes: $*"
+    # Iterate over each given process name
     for process_name in "$@"; do
-        # Use the `pgrep` command to find process information related to the given process name.
-        local pid=$(pgrep -f $process_name)
-        # If there's no process information, it means the process with the given name is not running.
-        if [[ -z $pid ]]; then
+        # Use `pgrep` to find process IDs related to the given process name
+        local pids=($(pgrep -f $process_name))
+        
+        # Check if any process IDs were found
+        if [[ ${#pids[@]} -eq 0 ]]; then
             not_started+=($process_name)
         else
-            # If there's process information, extract relevant details:
-            # Command Name, and Start Time.
-            # local pid=$(echo $info | awk '{print $2}')
-            local command=$(ps -p $pid -o cmd=)
-            local start_time=$(ps -p $pid -o lstart=)
-            started+=("Process $process_name - Command: $command, PID: $pid, Start time: $start_time")
-            echo "---------------command=$command"
-            echo "---------------pid=$pid"
-            echo "---------------start_time=$start_time"
+            # If there are PIDs, loop through each one
+            for pid in "${pids[@]}"; do
+                local command=$(ps -p $pid -o cmd=)
+                local start_time=$(ps -p $pid -o lstart=)
+                local port=$(ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2)
+
+                # Check if port information was found for the PID
+                if [[ -z $port ]]; then
+                    port="N/A"
+                fi
+
+                started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
+            done
         fi
     done
 
-    # Print information about processes which are not running.
+    # Print information
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "Not started processes:"
         for process_name in "${not_started[@]}"; do
@@ -346,7 +356,6 @@ openim::util::check_process_names() {
         done
     fi
 
-    # Print information about processes which are running.
     if [[ ${#started[@]} -ne 0 ]]; then
         echo
         openim::log::info "Started processes:"
@@ -355,7 +364,7 @@ openim::util::check_process_names() {
         done
     fi
 
-    # If any of the processes is not running, return a status of 1.
+    # Return status
     if [[ ${#not_started[@]} -ne 0 ]]; then
         return 1
     else
@@ -363,6 +372,7 @@ openim::util::check_process_names() {
         return 0
     fi
 }
+# openim::util::check_process_names docker-pr
 
 # The `openim::util::stop_services_on_ports` function stops services running on specified ports.
 # It accepts multiple ports as arguments and performs the following:
@@ -378,22 +388,25 @@ openim::util::stop_services_on_ports() {
     # An array to collect information about processes that were stopped.
     local stopped=()
 
+    openim::log::info "Stopping services on ports: $*"
     # Iterate over each given port.
     for port in "$@"; do
         # Use the `lsof` command to find process information related to the given port.
         info=$(lsof -i :$port -n -P | grep LISTEN || true)
-        
+                
         # If there's process information, it means the process associated with the port is running.
         if [[ -n $info ]]; then
             # Extract the Process ID.
-            local pid=$(echo $info | awk '{print $2}')
-            
-            # Try to stop the service by killing its process.
-            if kill -TERM $pid; then
-                stopped+=($port)
-            else
-                not_stopped+=($port)
-            fi
+            while read -r line; do
+                local pid=$(echo $line | awk '{print $2}')
+                    
+                # Try to stop the service by killing its process.
+                if kill -TERM $pid; then
+                    stopped+=($port)
+                else
+                    not_stopped+=($port)
+                fi
+            done <<< "$info"
         fi
     done
 
@@ -422,6 +435,10 @@ openim::util::stop_services_on_ports() {
         return 0
     fi
 }
+# nc -l -p 12345
+# nc -l -p 123456
+# ps -ef | grep "nc -l"
+# openim::util::stop_services_on_ports 1234 12345 
 
 
 # The `openim::util::stop_services_with_name` function stops services with specified names.
@@ -438,22 +455,39 @@ openim::util::stop_services_with_name() {
     # An array to collect information about processes that were stopped.
     local stopped=()
 
+    openim::log::info "Stopping services with names: $*"
     # Iterate over each given service name.
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
-        local pids=$(ps aux | awk -v pattern="$server_name" '$0 ~ pattern {print $2}')
+        local pids=$(pgrep -f "$server_name")
 
+        # If no process was found with the name, add it to the not_stopped list
+        if [[ -z $pids ]]; then
+            not_stopped+=("$server_name")
+            continue
+        fi
+        local stopped_this_time=false
         for pid in $pids; do
+
+            # Exclude the PID of the current script
+            if [[ "$pid" == "$$" ]]; then
+                continue
+            fi
+
             # If there's a Process ID, it means the service with the name is running.
             if [[ -n $pid ]]; then
                 # Try to stop the service by killing its process.
-                if kill -TERM $pid; then
-                    stopped+=($server_name)
-                else
-                    not_stopped+=($server_name)
+                if kill -TERM $pid 2>/dev/null; then
+                    stopped_this_time=true
                 fi
             fi
         done
+
+        if $stopped_this_time; then
+            stopped+=("$server_name")
+        else
+            not_stopped+=("$server_name")
+        fi
     done
 
     # Print information about services whose processes couldn't be stopped.
@@ -472,9 +506,13 @@ openim::util::stop_services_with_name() {
             openim::log::info "Successfully stopped the $name service."
         done
     fi
+
     openim::log::success "All specified services were stopped."
 }
-
+# sleep 333333&
+# sleep 444444&
+# ps -ef | grep "sleep"
+# openim::util::stop_services_with_name "sleep 333333" "sleep 444444"
 
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
@@ -1149,7 +1187,6 @@ function openim::util::get_server_ip() {
     # Return the fetched IP address
     echo "$IP"
 }
-
 
 function openim::util::onCtrlC () {
     #Capture CTRL+C, terminate the background process of the program when the script is terminated in the form of ctrl+c

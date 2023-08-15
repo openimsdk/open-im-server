@@ -1,5 +1,26 @@
 # OpenIM Scripts Directory Structure
 
+- [OpenIM Scripts Directory Structure](#openim-scripts-directory-structure)
+  - [log directory](#log-directory)
+  - [Supported platforms](#supported-platforms)
+  - [Get started quickly - demo.sh](#get-started-quickly---demosh)
+  - [Guide: Using and Understanding OpenIM Utility Functions](#guide-using-and-understanding-openim-utility-functions)
+    - [Table of Contents](#table-of-contents)
+    - [1. Checking the Status of Services by Ports](#1-checking-the-status-of-services-by-ports)
+      - [Function: `openim::util::check_ports`](#function-openimutilcheck_ports)
+      - [Example:](#example)
+    - [2. Checking the Status of Services by Process Names](#2-checking-the-status-of-services-by-process-names)
+      - [Function: `openim::util::check_process_names`](#function-openimutilcheck_process_names)
+      - [Example:](#example-1)
+    - [3. Stopping Services by Ports](#3-stopping-services-by-ports)
+      - [Function: `openim::util::stop_services_on_ports`](#function-openimutilstop_services_on_ports)
+      - [Example:](#example-2)
+    - [4. Stopping Services by Process Names](#4-stopping-services-by-process-names)
+      - [Function: `openim::util::stop_services_with_name`](#function-openimutilstop_services_with_name)
+      - [Example:](#example-3)
+  - [examples](#examples)
+
+
 This document outlines the directory structure for scripts in the OpenIM Server project. These scripts play a critical role in various areas like building, deploying, running and managing the services of OpenIM.
 
 ```bash
@@ -124,6 +145,119 @@ asciinema rec
 # Once you are happy with the recording, use svg-term program to generate the svg
 
 svg-term --cast=<movie-id> --out _output/demo.svg --window
+```
+
+Here you will learn how to test a script, We take the four functions for starting and checking a service as an example.
+
+## Guide: Using and Understanding OpenIM Utility Functions
+
+This document provides an overview of the four utility functions designed for managing processes and services. These functions can check the status of services based on ports and process names, as well as stop services based on the same criteria.
+
+### Table of Contents
+- [1. Checking the Status of Services by Ports](#checking-the-status-of-services-by-ports)
+- [2. Checking the Status of Services by Process Names](#checking-the-status-of-services-by-process-names)
+- [3. Stopping Services by Ports](#stopping-services-by-ports)
+- [4. Stopping Services by Process Names](#stopping-services-by-process-names)
+
+### 1. Checking the Status of Services by Ports
+
+#### Function: `openim::util::check_ports`
+
+This function checks the status of services running on specified ports.
+
+**Usage**:
+
+```bash
+openim::util::check_ports <port1> <port2> ...
+```
+
+**Design**:
+
+- The function iterates through each provided port.
+- It uses the `lsof` command to identify if there is a service running on the specified port.
+- If a service is running, it logs the command, PID, and start time of the service.
+- If a service is not running, it logs that the port is not started.
+- If any service is not running, the function returns a status of 1.
+
+#### Example:
+
+```bash
+openim::util::check_ports 8080 8081 8082
+```
+
+### 2. Checking the Status of Services by Process Names
+
+#### Function: `openim::util::check_process_names`
+
+This function checks the status of services based on their process names.
+
+**Usage**:
+
+```bash
+openim::util::check_process_names <process_name1> <process_name2> ...
+```
+
+**Design**:
+
+- The function uses `pgrep` to find process IDs associated with the given process names.
+- If processes are found, it logs the command, PID, associated port, and start time.
+- If no processes are found for a name, it logs that the process is not started.
+- If any process is not running, the function returns a status of 1.
+
+#### Example:
+
+```bash
+openim::util::check_process_names nginx mysql redis
+```
+
+### 3. Stopping Services by Ports
+
+#### Function: `openim::util::stop_services_on_ports`
+
+This function attempts to stop services running on the specified ports.
+
+**Usage**:
+
+```bash
+openim::util::stop_services_on_ports <port1> <port2> ...
+```
+
+**Design**:
+
+- The function uses the `lsof` command to identify services running on the specified ports.
+- If a service is running on a port, it tries to terminate the associated process using the `kill` command.
+- It logs successful terminations and any failures.
+- If any service couldn't be stopped, the function returns a status of 1.
+
+#### Example:
+
+```bash
+openim::util::stop_services_on_ports 8080 8081 8082
+```
+
+### 4. Stopping Services by Process Names
+
+#### Function: `openim::util::stop_services_with_name`
+
+This function attempts to stop services based on their process names.
+
+**Usage**:
+
+```bash
+openim::util::stop_services_with_name <process_name1> <process_name2> ...
+```
+
+**Design**:
+
+- The function uses `pgrep` to identify processes associated with the specified names.
+- If processes are found, it tries to terminate them using the `kill` command.
+- It logs successful terminations and any failures.
+- If any service couldn't be stopped, the function returns a status of 1.
+
+#### Example:
+
+```bash
+openim::util::stop_services_with_name nginx apache
 ```
 
 

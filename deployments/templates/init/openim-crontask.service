@@ -6,7 +6,7 @@ Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/i
 WorkingDirectory=${OPENIM_DATA_DIR}/openim-crontask
 ExecStartPre=/usr/bin/mkdir -p ${OPENIM_DATA_DIR}/openim-crontask
 ExecStartPre=/usr/bin/mkdir -p ${OPENIM_LOG_DIR}
-ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-crontask --config=${OPENIM_CONFIG_DIR}/openim-crontask.yaml
+ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-crontask -c=${OPENIM_CONFIG_DIR}
 Restart=always
 RestartSec=5
 StartLimitInterval=0

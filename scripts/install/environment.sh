@@ -137,6 +137,8 @@ def "API_OPENIM_PORT" "10002"                      # API的开放端口
 def "API_LISTEN_IP" "0.0.0.0"                      # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################
+# For launching multiple programs, just fill in multiple ports separated by commas
+# For example, [10110, 10111]
 def "OPENIM_USER_PORT" "10110"                     # OpenIM用户服务端口
 def "OPENIM_FRIEND_PORT" "10120"                   # OpenIM朋友服务端口
 def "OPENIM_MESSAGE_PORT" "10130"                  # OpenIM消息服务端口
