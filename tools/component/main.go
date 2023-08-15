@@ -4,7 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"net"
+	"net/url"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/Shopify/sarama"
@@ -17,11 +22,8 @@ import (
 	"gopkg.in/yaml.v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"net"
-	"net/url"
-	"os"
-	"strings"
-	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
