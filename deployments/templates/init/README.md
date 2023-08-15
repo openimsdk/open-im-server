@@ -1,88 +1,124 @@
-# Systemd 配置、安装和启动
+# Systemd Configuration, Installation, and Startup
 
-- [Systemd 配置、安装和启动](#systemd-配置安装和启动)
-  - [0. 介绍](#0-介绍)
-  - [1. 前置操作（需要 root 权限）](#1-前置操作需要-root-权限)
-  - [2. 创建 openim-api systemd unit 模板文件](#2-创建-openim-api-systemd-unit-模板文件)
-  - [3. 创建 openim-crontask systemd unit 模板文件](#3-创建-openim-crontask-systemd-unit-模板文件)
-  - [6. 复制 systemd unit 模板文件到 sysmted 配置目录(需要有root权限)](#6-复制-systemd-unit-模板文件到-sysmted-配置目录需要有root权限)
-  - [7. 启动 systemd 服务](#7-启动-systemd-服务)
+- [Systemd Configuration, Installation, and Startup](#systemd-configuration-installation-and-startup)
+  - [1. Introduction](#1-introduction)
+  - [2. Prerequisites (Requires root permissions)](#2-prerequisites-requires-root-permissions)
+  - [3. Create `openim-api` systemd unit template file](#3-create-openim-api-systemd-unit-template-file)
+  - [4. Copy systemd unit template file to systemd config directory (Requires root permissions)](#4-copy-systemd-unit-template-file-to-systemd-config-directory-requires-root-permissions)
+  - [5. Start systemd service](#5-start-systemd-service)
 
-## 0. 介绍
+## 1. Introduction
 
-systemd是最新linux发行版管理后台的服务的默认形式，用以取代原有的init。
+Systemd is the default service management form for the latest Linux distributions, replacing the original init.
 
-格式介绍：
+Format introduction:
 
 ```bash
-[Unit] :服务单元
+[Unit] : Unit of the service
 
-Description：对该服务进行简单的描述
+Description: Brief description of the service
 
-[Service]:服务运行时行为配置
+[Service]: Configuration of the service's runtime behavior
 
-ExecStart：程序的完整路径
+ExecStart: Complete path of the program
 
-Restart:重启配置，no、always、on-success、on-failure、on-abnormal、on-abort、on-watchdog
+Restart: Restart configurations like no, always, on-success, on-failure, on-abnormal, on-abort, on-watchdog
 
-[Install]：安装配置
+[Install]: Installation configuration
 
-WantedBy：多用户等
+WantedBy: Multi-user, etc.
 ```
 
-更多介绍阅读：https://www.freedesktop.org/software/systemd/man/systemd.service.html
+For more details, refer to: [Systemd Service Manual](https://www.freedesktop.org/software/systemd/man/systemd.service.html)
 
-启动命令：
+Starting command:
 
 ```bash
 systemctl daemon-reload && systemctl enable openim-api && systemctl restart openim-api
 ```
 
-服务状态：
+Service status:
 
 ```bash
 systemctl status openim-api
 ```
 
-停止命令：
+Stop command:
 
 ```bash
 systemctl stop openim-api
 ```
 
-**为什么选择 systemd？**
+More command:
+```bash
+# 列出正在运行的Unit,可以直接使用systemctl
+systemctl list-units
 
-**高级需求：**
+# 列出所有Unit，包括没有找到配置文件的或者启动失败的
+systemctl list-units --all
 
-+ 方便分析问题的服务运行日志记录
+# 列出所有没有运行的 Unit
+systemctl list-units --all --state=inactive
 
-+ 服务管理的日志
+# 列出所有加载失败的 Unit
+systemctl list-units --failed
 
-+ 异常退出时可以根据需要重新启动
+# 列出所有正在运行的、类型为service的Unit
+systemctl list-units --type=service
 
-daemon不能实现上面的高级需求。
+# 显示某个 Unit 是否正在运行
+systemctl is-active application.service
 
-nohup 只能记录服务运行时的输出和出错日志。
+# 显示某个 Unit 是否处于启动失败状态
+systemctl is-failed application.service
 
-只有systemd能够实现上述所有需求。
+# 显示某个 Unit 服务是否建立了启动链接
+systemctl is-enabled application.service
 
-> 默认的日志中增加了时间、用户名、服务名称、PID等，非常人性化。还能看到服务运行异常退出的日志。还能通过/lib/systemd/system/下的配置文件定制各种需求。
+# 立即启动一个服务
+sudo systemctl start apache.service
 
-总而言之，systemd是目前linux管理后台服务的主流方式，所以我新版本的 bash 抛弃 nohup，改用 systemd 来管理服务。
+# 立即停止一个服务
+sudo systemctl stop apache.service
 
+# 重启一个服务
+sudo systemctl restart apache.service
 
+# 重新加载一个服务的配置文件
+sudo systemctl reload apache.service
 
-## 1. 前置操作（需要 root 权限）
-
-1. 根据注释配置 `environment.sh`
-
-2. 创建 data 目录
-
+# 重载所有修改过的配置文件
+sudo systemctl daemon-reload
 ```
+
+**Why choose systemd?**
+
+**Advanced requirements:**
+
+- Convenient service runtime log recording for problem analysis
+- Service management logs
+- Option to restart upon abnormal exit
+
+The daemon does not meet these advanced requirements.
+
+`nohup` only logs the service's runtime outputs and errors.
+
+Only systemd can fulfill all of the above requirements.
+
+> The default logs are enhanced with timestamps, usernames, service names, PIDs, etc., making them user-friendly. You can view logs of abnormal service exits. Advanced customization is possible through the configuration files in `/lib/systemd/system/`.
+
+In short, systemd is the current mainstream way to manage backend services on Linux, so I've abandoned `nohup` in my new versions of bash scripts, opting instead for systemd.
+
+## 2. Prerequisites (Requires root permissions)
+
+1. Configure `environment.sh` based on the comments.
+2. Create a data directory:
+
+```bash
 mkdir -p ${OPENIM_DATA_DIR}/{openim-api,openim-crontask}
 ```
 
-3. 创建 bin 目录，并将 `openim-api` 和 `openim-crontask` 可执行文件复制过去
+3. Create a bin directory and copy `openim-api` and `openim-crontask` executable files:
 
 ```bash
 source ./environment.sh
@@ -90,16 +126,18 @@ mkdir -p ${OPENIM_INSTALL_DIR}/bin
 cp openim-api openim-crontask ${OPENIM_INSTALL_DIR}/bin
 ```
 
-4. 将 `openim-api` 和 `openim-crontask` 配置文件拷贝到 `${OPENIM_CONFIG_DIR}` 目录下
+4. Copy the configuration files of `openim-api` and `openim-crontask` to the `${OPENIM_CONFIG_DIR}` directory:
 
 ```bash
 mkdir -p ${OPENIM_CONFIG_DIR}
 cp openim-api.yaml openim-crontask.yaml ${OPENIM_CONFIG_DIR}
 ```
 
-## 2. 创建 openim-api systemd unit 模板文件
+## 3. Create `openim-api` systemd unit template file
 
-执行如下 shell 脚本生成 `openim-api.service.template`
+For each OpenIM service, we will create a systemd unit template. Follow the steps below for each service:
+
+Run the following shell script to generate the `openim-api.service.template`:
 
 ```bash
 source ./environment.sh
@@ -110,7 +148,7 @@ Documentation=https://github.com/marmotedu/iam/blob/master/init/README.md
 
 [Service]
 WorkingDirectory=${OPENIM_DATA_DIR}/openim-api
-ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-api --apiconfig=${OPENIM_CONFIG_DIR}/openim-api.yaml
+ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-api --config=${OPENIM_CONFIG_DIR}/openim-api.yaml
 Restart=always
 RestartSec=5
 StartLimitInterval=0
@@ -120,22 +158,63 @@ WantedBy=multi-user.target
 EOF
 ```
 
-## 3. 创建 openim-crontask systemd unit 模板文件
-...
+Following the above style, create the respective template files or generate them in bulk:
 
-
-## 6. 复制 systemd unit 模板文件到 sysmted 配置目录(需要有root权限)
+First, make sure you've sourced the environment variables:
 
 ```bash
-cp openim-api.service.template /etc/systemd/system/openim-api.service
-cp openim-crontask.service.template /etc/systemd/system/openim-crontask.service
+source ./environment.sh
+```
+
+Use the shell script to generate the systemd unit template for each service:
+
+```bash
+declare -a services=(
+"openim-api"
+... [other services]
+)
+
+for service in "${services[@]}"
+do
+   cat > $service.service.template <<EOF
+[Unit]
+Description=OpenIM Server - $service
+Documentation=https://github.com/marmotedu/iam/blob/master/init/README.md
+
+[Service]
+WorkingDirectory=${OPENIM_DATA_DIR}/$service
+ExecStart=${OPENIM_INSTALL_DIR}/bin/$service --config=${OPENIM_CONFIG_DIR}/$service.yaml
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
+EOF
+done
+```
+
+## 4. Copy systemd unit template file to systemd config directory (Requires root permissions)
+
+Ensure you have root permissions to perform this operation:
+
+```bash
+for service in "${services[@]}"
+do
+   sudo cp $service.service.template /etc/systemd/system/$service.service
+done
 ...
 ```
 
-## 7. 启动 systemd 服务
+## 5. Start systemd service
+
+To start the OpenIM services:
 
 ```bash
-systemctl daemon-reload && systemctl enable openim-api && systemctl restart openim-api
-systemctl daemon-reload && systemctl enable openim-crontask && systemctl restart openim-crontask
-...
+for service in "${services[@]}"
+do
+   sudo systemctl daemon-reload 
+   sudo systemctl enable $service 
+   sudo systemctl restart $service
+done
 ```

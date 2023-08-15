@@ -55,6 +55,14 @@ mkdir -p ${INSTALL_DIR}
 
 def "ENV_FILE" "${OPENIM_ROOT}/scripts/install/environment.sh"
 
+###################### openim 配置 ######################
+# read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
+def "OPENIM_DATA_DIR" "/data/openim"
+def "OPENIM_INSTALL_DIR" "/opt/openim"
+def "OPENIM_CONFIG_DIR" "/etc/openim"
+def "OPENIM_LOG_DIR" "/var/log/openim"
+def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
+
 # TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
 # TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
 # TODO 使用 readonly 来定义合适，负责无法正常解析
@@ -288,12 +296,6 @@ def "OPENIM_RPC_THIRD_HOST" "127.0.0.1"
 def "OPENIM_RPC_USER_HOST" "127.0.0.1"
 
 ###################### 设计中...暂时不需要######################################
-# openim 配置
-def "OPENIM_DATA_DIR" "/data/openim"
-def "OPENIM_INSTALL_DIR" "/opt/openim"
-def "OPENIM_CONFIG_DIR" "/etc/openim"
-def "OPENIM_LOG_DIR" "/var/log/openim"
-def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 
 # openim-api 配置
 def "OPENIM_APISERVER_HOST" "127.0.0.1"
