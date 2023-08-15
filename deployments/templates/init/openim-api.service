@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenIM Server API
+Documentation=https://github.com/marmotedu/iam/blob/master/init/README.md
+
+[Service]
+WorkingDirectory=${OPENIM_DATA_DIR}/openim-api
+ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-api --apiconfig=${OPENIM_CONFIG_DIR}/openim-api.yaml
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
+EOF

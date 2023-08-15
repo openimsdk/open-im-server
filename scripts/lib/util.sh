@@ -255,15 +255,15 @@ openim::util::host_arch() {
 # The function returns a status of 1 if any of the processes is not running.
 openim::util::check_ports() {
     # An array to collect ports of processes that are not running.
-    not_started=()
+    local not_started=()
 
     # An array to collect information about processes that are running.
-    started=()
+    local started=()
 
     # Iterate over each given port.
     for port in "$@"; do
         # Use the `lsof` command to find process information related to the given port.
-        info=$(lsof -i :$port -n -P | grep LISTEN || true)
+        local info=$(lsof -i :$port -n -P | grep LISTEN || true)
         
         # If there's no process information, it means the process associated with the port is not running.
         if [[ -z $info ]]; then
@@ -271,9 +271,9 @@ openim::util::check_ports() {
         else
             # If there's process information, extract relevant details:
             # Process ID, Command Name, and Start Time.
-            pid=$(echo $info | awk '{print $2}')
-            command=$(echo $info | awk '{print $1}')
-            start_time=$(ps -o lstart= -p $pid)
+            local pid=$(echo $info | awk '{print $2}')
+            local command=$(echo $info | awk '{print $1}')
+            local start_time=$(ps -o lstart= -p $pid)
             started+=("Port $port - Command: $command, PID: $pid, Start time: $start_time")
         fi
     done
@@ -304,6 +304,66 @@ openim::util::check_ports() {
     fi
 }
 
+# The `openim::util::check_process_names` function analyzes the state of processes based on given names.
+# It accepts multiple process names as arguments and prints:
+# 1. The state of the process (whether it's running or not).
+# 2. The start time of the process if it's running.
+# User:
+# openim::util::check_process_names nginx mysql redis
+# The function returns a status of 1 if any of the processes is not running.
+openim::util::check_process_names() {
+    # An array to collect names of processes that are not running.
+    local not_started=()
+
+    # An array to collect information about processes that are running.
+    local started=()
+
+    # Iterate over each given process name.
+    for process_name in "$@"; do
+        # Use the `pgrep` command to find process information related to the given process name.
+        local pid=$(pgrep -f $process_name)
+        # If there's no process information, it means the process with the given name is not running.
+        if [[ -z $pid ]]; then
+            not_started+=($process_name)
+        else
+            # If there's process information, extract relevant details:
+            # Command Name, and Start Time.
+            # local pid=$(echo $info | awk '{print $2}')
+            local command=$(ps -p $pid -o cmd=)
+            local start_time=$(ps -p $pid -o lstart=)
+            started+=("Process $process_name - Command: $command, PID: $pid, Start time: $start_time")
+            echo "---------------command=$command"
+            echo "---------------pid=$pid"
+            echo "---------------start_time=$start_time"
+        fi
+    done
+
+    # Print information about processes which are not running.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        openim::log::info "Not started processes:"
+        for process_name in "${not_started[@]}"; do
+            openim::log::error "Process $process_name is not started."
+        done
+    fi
+
+    # Print information about processes which are running.
+    if [[ ${#started[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Started processes:"
+        for info in "${started[@]}"; do
+            openim::log::info "$info"
+        done
+    fi
+
+    # If any of the processes is not running, return a status of 1.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        return 1
+    else
+        openim::log::success "All processes are running."
+        return 0
+    fi
+}
+
 # The `openim::util::stop_services_on_ports` function stops services running on specified ports.
 # It accepts multiple ports as arguments and performs the following:
 # 1. Attempts to stop any services running on the specified ports.
@@ -313,10 +373,10 @@ openim::util::check_ports() {
 # The function returns a status of 1 if any service couldn't be stopped.
 openim::util::stop_services_on_ports() {
     # An array to collect ports of processes that couldn't be stopped.
-    not_stopped=()
+    local not_stopped=()
 
     # An array to collect information about processes that were stopped.
-    stopped=()
+    local stopped=()
 
     # Iterate over each given port.
     for port in "$@"; do
@@ -326,7 +386,7 @@ openim::util::stop_services_on_ports() {
         # If there's process information, it means the process associated with the port is running.
         if [[ -n $info ]]; then
             # Extract the Process ID.
-            pid=$(echo $info | awk '{print $2}')
+            local pid=$(echo $info | awk '{print $2}')
             
             # Try to stop the service by killing its process.
             if kill -TERM $pid; then
@@ -363,6 +423,7 @@ openim::util::stop_services_on_ports() {
     fi
 }
 
+
 # The `openim::util::stop_services_with_name` function stops services with specified names.
 # It accepts multiple service names as arguments and performs the following:
 # 1. Attempts to stop any services with the specified names.
@@ -372,15 +433,15 @@ openim::util::stop_services_on_ports() {
 # The function returns a status of 1 if any service couldn't be stopped.
 openim::util::stop_services_with_name() {
     # An array to collect names of processes that couldn't be stopped.
-    not_stopped=()
+    local not_stopped=()
 
     # An array to collect information about processes that were stopped.
-    stopped=()
+    local stopped=()
 
     # Iterate over each given service name.
     for server_name in "$@"; do
         # Use the `pgrep` command to find process IDs related to the given service name.
-        pids=$(ps aux | awk -v pattern="$server_name" '$0 ~ pattern {print $2}')
+        local pids=$(ps aux | awk -v pattern="$server_name" '$0 ~ pattern {print $2}')
 
         for pid in $pids; do
             # If there's a Process ID, it means the service with the name is running.
@@ -1117,8 +1178,20 @@ function openim::util::remove_space() {
 }
 
 function openim::util::gencpu() {
-    cpu=$(lscpu | grep -e '^CPU(s):' | awk '{print $2}')
-    echo $cpu
+    # Check the system type
+    system_type=$(uname)
+
+    if [[ "$system_type" == "Darwin" ]]; then
+        # macOS (using sysctl)
+        cpu_count=$(sysctl -n hw.ncpu)
+    elif [[ "$system_type" == "Linux" ]]; then
+        # Linux (using lscpu)
+        cpu_count=$(lscpu --parse | grep -E '^([^#].*,){3}[^#]' | sort -u | wc -l)
+    else
+        echo "Unsupported operating system: $system_type"
+        exit 1
+    fi
+    echo $cpu_count
 }
 
 function openim::util::gen_os_arch() {

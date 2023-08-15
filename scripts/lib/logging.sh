@@ -25,17 +25,17 @@ if [[ ! -v OPENIM_OUTPUT ]]; then
 fi
 
 # Set the log file path
-log_file="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
+LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
 
 if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
     mkdir -p "${OPENIM_OUTPUT}/logs"
-    touch "$log_file"
+    touch "$LOG_FILE"
 fi
 
 # Define the logging function
 function echo_log() {
     if $ENABLE_LOGGING; then
-        echo -e "$@" | tee -a "${log_file}"
+        echo -e "$@" | tee -a "${LOG_FILE}"
     else
         echo -e "$@"
     fi

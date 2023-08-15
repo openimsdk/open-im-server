@@ -45,7 +45,7 @@ ifeq ($(origin GOBIN), undefined)
 endif
 
 # COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ and ${ROOT_DIR}/tools/ except those ending in.md
-COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/*))
+COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/* ${ROOT_DIR}/cmd/openim-rpc/*))
 ifeq (${COMMANDS},)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
@@ -134,16 +134,13 @@ go.build.%:
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
 	@echo "=====> COMMAND=$(COMMAND)"
 	@echo "=====> PLATFORM=$(PLATFORM)"
-	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> DEBUG: OpenIM-SDK-Core It is no longer supported for openim-server $(COMMAND)"; \
-	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
-		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
-			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
-		done; \
+	elif [ -d $(ROOT_DIR)/cmd/openim-rpc/$(COMMAND) ]; then \
+		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/openim-rpc/$(COMMAND)/main.go; \
 	else \
 		if [ -f $(ROOT_DIR)/cmd/$(COMMAND)/main.go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \

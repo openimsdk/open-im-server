@@ -22,7 +22,7 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
 LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
-source "${OPENIM_ROOT}/scripts/lib/util.sh"
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 IP=$(openim::util::get_server_ip)
 
@@ -212,7 +212,8 @@ def "THIRD_PROM_PORT" "21301"        # Third 服务的 Prometheus 端口
 readonly MSG_TRANSFER_PROM_PORTS=${MSG_TRANSFER_PROM_PORTS:-'21400, 21401, 21402, 21403'}
 
 ###################### OpenIM openim-api ######################
-def "OPENIM_API_BINARY" "${LOCAL_OUTPUT_ROOT}/bin/platforms/linux/amd64/openim-api"           # OpenIM openim-api 二进制文件路径
+def "OPENIM_API_HOST" "127.0.0.1"
+def "OPENIM_API_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-api"           # OpenIM openim-api 二进制文件路径
 def "OPENIM_API_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                         # OpenIM openim-api 配置文件路径
 def "OPENIM_API_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-api"                                 # OpenIM openim-api 日志存储路径
 def "OPENIM_API_LOG_LEVEL" "info"                                                             # OpenIM openim-api 日志级别
@@ -223,7 +224,8 @@ def "OPENIM_API_LOG_COMPRESS" "false"                                           
 def "OPENIM_API_LOG_WITH_STACK" "${LOG_WITH_STACK}"                                           # OpenIM openim-api 日志是否带有堆栈信息
 
 ###################### OpenIM openim-cmdutils ######################
-def "OPENIM_CMDUTILS_BINARY" "${LOCAL_OUTPUT_ROOT}/bin/platforms/linux/amd64/openim-cmdutils" # OpenIM openim-cmdutils 二进制文件路径
+def "OPENIM_CMDUTILS_HOST" "127.0.0.1"
+def "OPENIM_CMDUTILS_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-cmdutils" # OpenIM openim-cmdutils 二进制文件路径
 def "OPENIM_CMDUTILS_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                    # OpenIM openim-cmdutils 配置文件路径
 def "OPENIM_CMDUTILS_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-cmdutils"                       # OpenIM openim-cmdutils 日志存储路径
 def "OPENIM_CMDUTILS_LOG_LEVEL" "info"                                                        # OpenIM openim-cmdutils 日志级别
@@ -234,7 +236,8 @@ def "OPENIM_CMDUTILS_LOG_COMPRESS" "false"                                      
 def "OPENIM_CMDUTILS_LOG_WITH_STACK" "${LOG_WITH_STACK}"                                      # OpenIM openim-cmdutils 日志是否带有堆栈信息
 
 ###################### OpenIM openim-crontask ######################
-def "OPENIM_CRONTASK_BINARY" "${LOCAL_OUTPUT_ROOT}/bin/platforms/linux/amd64/openim-crontask" # OpenIM openim-crontask 二进制文件路径
+def "OPENIM_CRONTASK_HOST" "127.0.0.1"
+def "OPENIM_CRONTASK_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-crontask" # OpenIM openim-crontask 二进制文件路径
 def "OPENIM_CRONTASK_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                    # OpenIM openim-crontask 配置文件路径
 def "OPENIM_CRONTASK_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-crontask"                       # OpenIM openim-crontask 日志存储路径
 def "OPENIM_CRONTASK_LOG_LEVEL" "info"                                                        # OpenIM openim-crontask 日志级别
@@ -246,33 +249,43 @@ def "OPENIM_CRONTASK_LOG_WITH_STACK" "${LOG_WITH_STACK}"                        
 
 ###################### OpenIM openim-msggateway ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-msggateway
+def "OPENIM_MSGGATEWAY_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-msgtransfer ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-msgtransfer
+def "OPENIM_MSGTRANSFER_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-push ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-push
+def "OPENIM_PUSH_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-auth ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-auth
+def "OPENIM_RPC_AUTH_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-conversation ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-conversation
+def "OPENIM_RPC_CONVERSATION_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-friend ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-friend
+def "OPENIM_RPC_FRIEND_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-group ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-group
+def "OPENIM_RPC_GROUP_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-msg ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-msg
+def "OPENIM_RPC_MSG_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-third ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-third
+def "OPENIM_RPC_THIRD_HOST" "127.0.0.1"
 
 ###################### OpenIM openim-rpc-user ######################
 # 和上述相似，仅替换 openim-crontask 为 openim-rpc-user
+def "OPENIM_RPC_USER_HOST" "127.0.0.1"
 
 ###################### 设计中...暂时不需要######################################
 # openim 配置
