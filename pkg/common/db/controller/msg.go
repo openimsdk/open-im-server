@@ -34,7 +34,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbMsg "github.com/OpenIMSDK/Open-IM-Server/pkg/protocol"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
 )
