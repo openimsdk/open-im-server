@@ -3,7 +3,7 @@ package msg
 import (
 	"context"
 	"github.com/OpenIMSDK/Open-IM-Server/internal/model"
-	"github.com/OpenIMSDK/Open-IM-Server/internal/service"
+	"github.com/OpenIMSDK/Open-IM-Server/internal/logic/service"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/protocol"
 )
 
