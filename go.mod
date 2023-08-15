@@ -26,7 +26,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/image v0.11.0
-	google.golang.org/api v0.136.0
+	google.golang.org/api v0.137.0
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -37,7 +37,7 @@ require (
 require github.com/google/uuid v1.3.0
 
 require (
-	github.com/OpenIMSDK/protocol v0.0.9
+	github.com/OpenIMSDK/protocol v0.0.10
 	github.com/OpenIMSDK/tools v0.0.13
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.8+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -73,7 +73,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/s2a-go v0.1.4 // indirect
+	github.com/google/s2a-go v0.1.5 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.5 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
