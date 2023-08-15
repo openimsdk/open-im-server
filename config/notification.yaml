@@ -304,6 +304,16 @@ userInfoUpdated:
     desc: "Remove a blocked user"
     ext: "Remove a blocked user"
 
+userStatusChanged:
+  isSendMsg: false
+  reliabilityLevel: 1
+  unreadCount: false
+  offlinePush:
+    enable: false
+    title: "user status changed"
+    desc: "user status changed"
+    ext: "user status changed"
+
 #####################conversation#########################
 conversationChanged:
   isSendMsg: false
