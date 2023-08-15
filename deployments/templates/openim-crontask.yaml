@@ -1,1 +1,3 @@
-# OpenIM Cronstask
+name: openim-crontask
+description: "This is a description for openim-crontask"
+type: "service"

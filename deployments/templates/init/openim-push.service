@@ -1,12 +1,12 @@
 [Unit]
-Description=OPENIM OPENIM API
+Description=OPENIM OPENIM PUSH
 Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
 
 [Service]
-WorkingDirectory=${OPENIM_DATA_DIR}/openim-api
-ExecStartPre=/usr/bin/mkdir -p ${OPENIM_DATA_DIR}/openim-api
+WorkingDirectory=${OPENIM_DATA_DIR}/openim-push
+ExecStartPre=/usr/bin/mkdir -p ${OPENIM_DATA_DIR}/openim-push
 ExecStartPre=/usr/bin/mkdir -p ${OPENIM_LOG_DIR}
-ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-api --config=${OPENIM_CONFIG_DIR}/openim-api.yaml
+ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-push --config=${OPENIM_CONFIG_DIR}/openim-push.yaml
 Restart=always
 RestartSec=5
 StartLimitInterval=0

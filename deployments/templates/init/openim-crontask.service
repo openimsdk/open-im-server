@@ -1,5 +1,5 @@
 [Unit]
-Description=OPENIM CRONTASK
+Description=OPENIM OPENIM CRONTASK
 Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
 
 [Service]

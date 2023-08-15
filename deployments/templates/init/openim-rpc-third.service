@@ -1,0 +1,15 @@
+[Unit]
+Description=OPENIM OPENIM RPC THIRD
+Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
+
+[Service]
+WorkingDirectory=${OPENIM_DATA_DIR}/openim-rpc-third
+ExecStartPre=/usr/bin/mkdir -p ${OPENIM_DATA_DIR}/openim-rpc-third
+ExecStartPre=/usr/bin/mkdir -p ${OPENIM_LOG_DIR}
+ExecStart=${OPENIM_INSTALL_DIR}/bin/openim-rpc-third --config=${OPENIM_CONFIG_DIR}/openim-rpc-third.yaml
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
