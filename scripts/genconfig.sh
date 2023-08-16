@@ -17,15 +17,16 @@
 # 示例：./scripts/genconfig.sh scripts/install/environment.sh scripts/template/openim_config.yaml
 # Read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/init_config.md
 
-# Path to the original script file
 env_file="$1"
-# Path to the generated config file
 template_file="$2"
 
-. $(dirname ${BASH_SOURCE})/lib/init.sh
+IAM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
+source "${IAM_ROOT}/scripts/lib/init.sh"
 
 if [ $# -ne 2 ];then
-    openim::log::error_exit "Usage: genconfig.sh scripts/environment.sh configs/openim-api.yaml"
+    iam::log::error "Usage: genconfig.sh scripts/environment.sh configs/iam-apiserver.yaml"
+    exit 1
 fi
 
 source "${env_file}"
@@ -36,22 +37,16 @@ set +u
 for env in $(sed -n 's/^[^#].*${\(.*\)}.*/\1/p' ${template_file})
 do
     if [ -z "$(eval echo \$${env})" ];then
-        openim::log::error "environment variable '${env}' not set"
+        iam::log::error "environment variable '${env}' not set"
         missing=true
     fi
 done
 
 if [ "${missing}" ];then
-    openim::log::error 'You may run `source scripts/environment.sh` to set these environment'
+    iam::log::error 'You may run `source scripts/environment.sh` to set these environment'
     exit 1
 fi
 
-temp_output=$(mktemp)  # 创建一个临时文件存储原始输出
-
 eval "cat << EOF
 $(cat ${template_file})
-EOF" > $temp_output
-
-sed "s/''//g" $temp_output
-
-rm $temp_output
+EOF"

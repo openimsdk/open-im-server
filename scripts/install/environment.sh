@@ -70,8 +70,8 @@ def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                                            # Zookeeper的模式
 def "ZOOKEEPER_ADDRESS" "127.0.0.1:2181"                                   # Zookeeper的地址
-def "ZOOKEEPER_USERNAME"                                                   # Zookeeper的用户名
-def "ZOOKEEPER_PASSWORD"                                                   # Zookeeper的密码
+def "ZOOKEEPER_USERNAME" ""                                                  # Zookeeper的用户名
+def "ZOOKEEPER_PASSWORD" ""                                                  # Zookeeper的密码
 
 ###################### MySQL 配置信息 ######################
 def "MYSQL_ADDRESS" "127.0.0.1:13306"                                      # MySQL的地址
@@ -138,16 +138,27 @@ def "API_LISTEN_IP" "0.0.0.0"                      # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
-# For example, [10110, 10111]
-def "OPENIM_USER_PORT" "10110"                     # OpenIM用户服务端口
-def "OPENIM_FRIEND_PORT" "10120"                   # OpenIM朋友服务端口
-def "OPENIM_MESSAGE_PORT" "10130"                  # OpenIM消息服务端口
-def "OPENIM_MESSAGE_GATEWAY_PORT" "10140"          # OpenIM消息网关服务端口
-def "OPENIM_GROUP_PORT" "10150"                    # OpenIM组服务端口
-def "OPENIM_AUTH_PORT" "10160"                     # OpenIM授权服务端口
-def "OPENIM_PUSH_PORT" "10170"                     # OpenIM推送服务端口
-def "OPENIM_CONVERSATION_PORT" "10180"             # OpenIM对话服务端口
-def "OPENIM_THIRD_PORT" "10190"                    # OpenIM第三方服务端口
+# For example:
+# readonly OPENIM_USER_PORT=${OPENIM_USER_PORT:-'10110, 10111, 10112'}
+
+# OpenIM用户服务端口
+readonly OPENIM_USER_PORT=${OPENIM_USER_PORT:-'10110'}
+# OpenIM朋友服务端口
+readonly OPENIM_FRIEND_PORT=${OPENIM_FRIEND_PORT:-'10120'}
+# OpenIM消息服务端口
+readonly OPENIM_MESSAGE_PORT=${OPENIM_MESSAGE_PORT:-'10130'}
+# OpenIM消息网关服务端口
+readonly OPENIM_MESSAGE_GATEWAY_PORT=${OPENIM_MESSAGE_GATEWAY_PORT:-'10140'}
+# OpenIM组服务端口
+readonly OPENIM_GROUP_PORT=${OPENIM_GROUP_PORT:-'10150'}
+# OpenIM授权服务端口
+readonly OPENIM_AUTH_PORT=${OPENIM_AUTH_PORT:-'10160'}
+# OpenIM推送服务端口
+readonly OPENIM_PUSH_PORT=${OPENIM_PUSH_PORT:-'10170'}
+# OpenIM对话服务端口
+readonly OPENIM_CONVERSATION_PORT=${OPENIM_CONVERSATION_PORT:-'10180'}
+# OpenIM第三方服务端口
+readonly OPENIM_THIRD_PORT=${OPENIM_THIRD_PORT:-'10190'}
 
 ###################### RPC Register Name Variables ######################
 def "OPENIM_USER_NAME" "User"                      # OpenIM用户服务名称
