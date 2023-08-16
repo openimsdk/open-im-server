@@ -54,7 +54,19 @@ fi
 cd $OPENIM_ROOT
 
 # CPU core number
-cpu_count=$(lscpu | grep -e '^CPU(s):' | awk '{print $2}')
+# Check the system type
+system_type=$(uname)
+
+if [[ "$system_type" == "Darwin" ]]; then
+    # macOS (using sysctl)
+    cpu_count=$(sysctl -n hw.ncpu)
+elif [[ "$system_type" == "Linux" ]]; then
+    # Linux (using lscpu)
+    cpu_count=$(lscpu --parse | grep -E '^([^#].*,){3}[^#]' | sort -u | wc -l)
+else
+    echo "Unsupported operating system: $system_type"
+    exit 1
+fi
 echo -e "${GREEN_PREFIX}======> cpu_count=$cpu_count${COLOR_SUFFIX}"
 
 # Count the number of concurrent compilations (half the number of cpus)
