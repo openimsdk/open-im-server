@@ -26,10 +26,15 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 )
 
-func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (*msg.GetConversationsHasReadAndMaxSeqResp, error) {
-	conversationIDs, err := m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
-	if err != nil {
-		return nil, err
+func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *msg.GetConversationsHasReadAndMaxSeqReq) (resp *msg.GetConversationsHasReadAndMaxSeqResp, err error) {
+	var conversationIDs []string
+	if len(req.ConversationIDs) == 0 {
+		conversationIDs, err = m.ConversationLocalCache.GetConversationIDs(ctx, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		conversationIDs = req.ConversationIDs
 	}
 	hasReadSeqs, err := m.MsgDatabase.GetHasReadSeqs(ctx, req.UserID, conversationIDs)
 	if err != nil {
@@ -49,7 +54,7 @@ func (m *msgServer) GetConversationsHasReadAndMaxSeq(ctx context.Context, req *m
 	if err != nil {
 		return nil, err
 	}
-	resp := &msg.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*msg.Seqs)}
+	resp = &msg.GetConversationsHasReadAndMaxSeqResp{Seqs: make(map[string]*msg.Seqs)}
 	for conversarionID, maxSeq := range maxSeqs {
 		resp.Seqs[conversarionID] = &msg.Seqs{
 			HasReadSeq: hasReadSeqs[conversarionID],
