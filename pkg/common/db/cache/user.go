@@ -268,6 +268,7 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineS
 					}
 				}
 			} else {
+				onlineStatus.Status = constant.Online
 				for _, val := range status.PlatformIDs {
 					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, val)
 				}
