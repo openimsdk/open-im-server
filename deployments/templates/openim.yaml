@@ -381,4 +381,4 @@ prometheus:
   conversationPrometheusPort: [ ${CONVERSATION_PROM_PORT} ]
   rtcPrometheusPort: [ ${RTC_PROM_PORT} ]
   thirdPrometheusPort: [ ${THIRD_PROM_PORT} ]
-  messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORTS} ] # List of ports
+  messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORT} ] # List of ports

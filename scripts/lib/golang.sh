@@ -95,9 +95,9 @@ readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
 openim::golang::start_script_list() {
   local targets=(
-      start-rpc_service.sh
+      openim-rpc.sh
       openim-push.sh
-      msg_transfer_start.sh
+      openim-msgtransfer.sh
       openim-msggateway.sh
       openim-crontask.sh
   )

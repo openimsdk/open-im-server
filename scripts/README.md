@@ -74,13 +74,13 @@ scripts/
 │   └── tools.mk                   # Make rules for tools and utilities
 ├── mongo-init.sh                  # Script to initialize MongoDB
 ├── openim-msggateway.sh           # Script to start message gateway service
-├── msg_transfer_start.sh          # Script to start message transfer service
+├── openim-msgtransfer.sh          # Script to start message transfer service
 ├── path_info.sh                   # Script containing path information
 ├── openim-push.sh                  # Script to start push service
 ├── release.sh                     # Script to perform release process
 ├── start_all.sh                   # Script to start all services
 ├── openim-crontask.sh                  # Script to start cron jobs
-├── start_rpc_service.sh           # Script to start RPC service
+├── openim-rpc.sh           # Script to start RPC service
 ├── stop_all.sh                    # Script to stop all services
 └── style_info.sh                  # Script containing style related information
 ```

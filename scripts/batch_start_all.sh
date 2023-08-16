@@ -26,10 +26,10 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 trap 'openim::util::onCtrlC' INT
 
 need_to_start_server_shell=(
-  "start_rpc_service.sh"
+  "openim-rpc.sh"
   "openim-msggateway.sh"
   "openim-push.sh"
-  "msg_transfer_start.sh"
+  "openim-msgtransfer.sh"
 )
 
 time=$(date +"%Y-%m-%d %H:%M:%S")

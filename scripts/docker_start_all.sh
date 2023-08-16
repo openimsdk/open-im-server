@@ -25,10 +25,10 @@ trap 'openim::util::onCtrlC' INT
 
 #fixme Put the shell scripts name here
 need_to_start_server_shell=(
-  ${SCRIPTS_ROOT}/start_rpc_service.sh
+  ${SCRIPTS_ROOT}/openim-rpc.sh
   ${SCRIPTS_ROOT}/openim-msggateway.sh
   ${SCRIPTS_ROOT}/openim-push.sh
-  ${SCRIPTS_ROOT}/msg_transfer_start.sh
+  ${SCRIPTS_ROOT}/openim-msgtransfer.sh
   ${SCRIPTS_ROOT}/openim-crontask.sh
 )
 

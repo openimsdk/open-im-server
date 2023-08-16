@@ -70,8 +70,8 @@ def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                                            # Zookeeper的模式
 def "ZOOKEEPER_ADDRESS" "127.0.0.1:2181"                                   # Zookeeper的地址
-def "ZOOKEEPER_USERNAME" ""                                                  # Zookeeper的用户名
-def "ZOOKEEPER_PASSWORD" ""                                                  # Zookeeper的密码
+def "ZOOKEEPER_USERNAME" ""                                                # Zookeeper的用户名
+def "ZOOKEEPER_PASSWORD" ""                                                # Zookeeper的密码
 
 ###################### MySQL 配置信息 ######################
 def "MYSQL_ADDRESS" "127.0.0.1:13306"                                      # MySQL的地址
@@ -129,12 +129,12 @@ def "KAFKA_CONSUMERGROUPID_MYSQL" "mysql"                   # Kafka的消费组I
 def "KAFKA_CONSUMERGROUPID_PUSH" "push"                     # Kafka的消费组ID到推送
 
 ###################### RPC 配置信息 ######################
-def "RPC_REGISTER_IP"                              # RPC的注册IP
-def "RPC_LISTEN_IP" "0.0.0.0"                      # RPC的监听IP
+def "RPC_REGISTER_IP"         # RPC的注册IP
+def "RPC_LISTEN_IP" "0.0.0.0" # RPC的监听IP
 
 ###################### API 配置信息 ######################
-def "API_OPENIM_PORT" "10002"                      # API的开放端口
-def "API_LISTEN_IP" "0.0.0.0"                      # API的监听IP
+def "API_OPENIM_PORT" "10002" # API的开放端口
+def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
@@ -173,12 +173,12 @@ def "OPENIM_THIRD_NAME" "Third"                    # OpenIM第三方服务名称
 
 ###################### Log Configuration Variables ######################
 def "LOG_STORAGE_LOCATION" "${OPENIM_ROOT}/logs/" # 日志存储位置
-def "LOG_ROTATION_TIME" "24"                     # 日志轮替时间
-def "LOG_REMAIN_ROTATION_COUNT" "2"              # 保留的日志轮替数量
-def "LOG_REMAIN_LOG_LEVEL" "6"                   # 保留的日志级别
-def "LOG_IS_STDOUT" "false"                      # 是否将日志输出到标准输出
-def "LOG_IS_JSON" "false"                        # 日志是否为JSON格式
-def "LOG_WITH_STACK" "false"                     # 日志是否带有堆栈信息
+def "LOG_ROTATION_TIME" "24"                      # 日志轮替时间
+def "LOG_REMAIN_ROTATION_COUNT" "2"               # 保留的日志轮替数量
+def "LOG_REMAIN_LOG_LEVEL" "6"                    # 保留的日志级别
+def "LOG_IS_STDOUT" "false"                       # 是否将日志输出到标准输出
+def "LOG_IS_JSON" "false"                         # 日志是否为JSON格式
+def "LOG_WITH_STACK" "false"                      # 日志是否带有堆栈信息
 
 ###################### Variables definition ######################
 def "OPENIM_WS_PORT" "10001"          # OpenIM WS端口
@@ -229,48 +229,48 @@ def "CONVERSATION_PROM_PORT" "20230" # Conversation 服务的 Prometheus 端口
 def "RTC_PROM_PORT" "21300"          # RTC 服务的 Prometheus 端口
 def "THIRD_PROM_PORT" "21301"        # Third 服务的 Prometheus 端口
 # Message Transfer 服务的 Prometheus 端口列表
-readonly MSG_TRANSFER_PROM_PORTS=${MSG_TRANSFER_PROM_PORTS:-'21400, 21401, 21402, 21403'}
+readonly MSG_TRANSFER_PROM_PORT=${MSG_TRANSFER_PROM_PORT:-'21400, 21401, 21402, 21403'}
 
 ###################### OpenIM openim-api ######################
 def "OPENIM_API_HOST" "127.0.0.1"
-def "OPENIM_API_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-api"           # OpenIM openim-api 二进制文件路径
-def "OPENIM_API_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                         # OpenIM openim-api 配置文件路径
-def "OPENIM_API_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-api"                                 # OpenIM openim-api 日志存储路径
-def "OPENIM_API_LOG_LEVEL" "info"                                                             # OpenIM openim-api 日志级别
-def "OPENIM_API_LOG_MAX_SIZE" "100"                                                           # OpenIM openim-api 日志最大大小（MB）
-def "OPENIM_API_LOG_MAX_BACKUPS" "7"                                                          # OpenIM openim-api 日志最大备份数
-def "OPENIM_API_LOG_MAX_AGE" "7"                                                              # OpenIM openim-api 日志最大保存时间（天）
-def "OPENIM_API_LOG_COMPRESS" "false"                                                         # OpenIM openim-api 日志是否压缩
-def "OPENIM_API_LOG_WITH_STACK" "${LOG_WITH_STACK}"                                           # OpenIM openim-api 日志是否带有堆栈信息
+def "OPENIM_API_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-api" # OpenIM openim-api 二进制文件路径
+def "OPENIM_API_CONFIG" "${OPENIM_ROOT}/config/"              # OpenIM openim-api 配置文件路径
+def "OPENIM_API_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-api" # OpenIM openim-api 日志存储路径
+def "OPENIM_API_LOG_LEVEL" "info"                             # OpenIM openim-api 日志级别
+def "OPENIM_API_LOG_MAX_SIZE" "100"                           # OpenIM openim-api 日志最大大小（MB）
+def "OPENIM_API_LOG_MAX_BACKUPS" "7"                          # OpenIM openim-api 日志最大备份数
+def "OPENIM_API_LOG_MAX_AGE" "7"                              # OpenIM openim-api 日志最大保存时间（天）
+def "OPENIM_API_LOG_COMPRESS" "false"                         # OpenIM openim-api 日志是否压缩
+def "OPENIM_API_LOG_WITH_STACK" "${LOG_WITH_STACK}"           # OpenIM openim-api 日志是否带有堆栈信息
 
 ###################### OpenIM openim-cmdutils ######################
 def "OPENIM_CMDUTILS_HOST" "127.0.0.1"
 def "OPENIM_CMDUTILS_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-cmdutils" # OpenIM openim-cmdutils 二进制文件路径
-def "OPENIM_CMDUTILS_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                    # OpenIM openim-cmdutils 配置文件路径
-def "OPENIM_CMDUTILS_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-cmdutils"                       # OpenIM openim-cmdutils 日志存储路径
-def "OPENIM_CMDUTILS_LOG_LEVEL" "info"                                                        # OpenIM openim-cmdutils 日志级别
-def "OPENIM_CMDUTILS_LOG_MAX_SIZE" "100"                                                      # OpenIM openim-cmdutils 日志最大大小（MB）
-def "OPENIM_CMDUTILS_LOG_MAX_BACKUPS" "7"                                                     # OpenIM openim-cmdutils 日志最大备份数
-def "OPENIM_CMDUTILS_LOG_MAX_AGE" "7"                                                         # OpenIM openim-cmdutils 日志最大保存时间（天）
-def "OPENIM_CMDUTILS_LOG_COMPRESS" "false"                                                    # OpenIM openim-cmdutils 日志是否压缩
-def "OPENIM_CMDUTILS_LOG_WITH_STACK" "${LOG_WITH_STACK}"                                      # OpenIM openim-cmdutils 日志是否带有堆栈信息
+def "OPENIM_CMDUTILS_CONFIG" "${OPENIM_ROOT}/config/"                   # OpenIM openim-cmdutils 配置文件路径
+def "OPENIM_CMDUTILS_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-cmdutils" # OpenIM openim-cmdutils 日志存储路径
+def "OPENIM_CMDUTILS_LOG_LEVEL" "info"                                  # OpenIM openim-cmdutils 日志级别
+def "OPENIM_CMDUTILS_LOG_MAX_SIZE" "100"                                # OpenIM openim-cmdutils 日志最大大小（MB）
+def "OPENIM_CMDUTILS_LOG_MAX_BACKUPS" "7"                               # OpenIM openim-cmdutils 日志最大备份数
+def "OPENIM_CMDUTILS_LOG_MAX_AGE" "7"                                   # OpenIM openim-cmdutils 日志最大保存时间（天）
+def "OPENIM_CMDUTILS_LOG_COMPRESS" "false"                              # OpenIM openim-cmdutils 日志是否压缩
+def "OPENIM_CMDUTILS_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM openim-cmdutils 日志是否带有堆栈信息
 
 ###################### OpenIM openim-crontask ######################
 def "OPENIM_CRONTASK_HOST" "127.0.0.1"
 def "OPENIM_CRONTASK_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-crontask" # OpenIM openim-crontask 二进制文件路径
-def "OPENIM_CRONTASK_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"                    # OpenIM openim-crontask 配置文件路径
-def "OPENIM_CRONTASK_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-crontask"                       # OpenIM openim-crontask 日志存储路径
-def "OPENIM_CRONTASK_LOG_LEVEL" "info"                                                        # OpenIM openim-crontask 日志级别
-def "OPENIM_CRONTASK_LOG_MAX_SIZE" "100"                                                      # OpenIM openim-crontask 日志最大大小（MB）
-def "OPENIM_CRONTASK_LOG_MAX_BACKUPS" "7"                                                     # OpenIM openim-crontask 日志最大备份数
-def "OPENIM_CRONTASK_LOG_MAX_AGE" "7"                                                         # OpenIM openim-crontask 日志最大保存时间（天）
-def "OPENIM_CRONTASK_LOG_COMPRESS" "false"                                                    # OpenIM openim-crontask 日志是否压缩
-def "OPENIM_CRONTASK_LOG_WITH_STACK" "${LOG_WITH_STACK}"                                      # OpenIM openim-crontask 日志是否带有堆栈信息
+def "OPENIM_CRONTASK_CONFIG" "${OPENIM_ROOT}/config/"                   # OpenIM openim-crontask 配置文件路径
+def "OPENIM_CRONTASK_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-crontask" # OpenIM openim-crontask 日志存储路径
+def "OPENIM_CRONTASK_LOG_LEVEL" "info"                                  # OpenIM openim-crontask 日志级别
+def "OPENIM_CRONTASK_LOG_MAX_SIZE" "100"                                # OpenIM openim-crontask 日志最大大小（MB）
+def "OPENIM_CRONTASK_LOG_MAX_BACKUPS" "7"                               # OpenIM openim-crontask 日志最大备份数
+def "OPENIM_CRONTASK_LOG_MAX_AGE" "7"                                   # OpenIM openim-crontask 日志最大保存时间（天）
+def "OPENIM_CRONTASK_LOG_COMPRESS" "false"                              # OpenIM openim-crontask 日志是否压缩
+def "OPENIM_CRONTASK_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM openim-crontask 日志是否带有堆栈信息
 
 ###################### OpenIM openim-msggateway ######################
 def "OPENIM_MSGGATEWAY_HOST" "127.0.0.1"
 def "OPENIM_MSGGATEWAY_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-msggateway"
-def "OPENIM_MSGGATEWAY_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml"
+def "OPENIM_MSGGATEWAY_CONFIG" "${OPENIM_ROOT}/config/"
 def "OPENIM_MSGGATEWAY_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-msggateway"
 def "OPENIM_MSGGATEWAY_LOG_LEVEL" "info"
 def "OPENIM_MSGGATEWAY_LOG_MAX_SIZE" "100"
@@ -279,127 +279,118 @@ def "OPENIM_MSGGATEWAY_LOG_MAX_AGE" "7"
 def "OPENIM_MSGGATEWAY_LOG_COMPRESS" "false"
 def "OPENIM_MSGGATEWAY_LOG_WITH_STACK" "${LOG_WITH_STACK}"
 
+# 定义 openim-msggateway 的数量, 默认为 4
+readonly OPENIM_MSGGATEWAY_NUM=${OPENIM_MSGGATEWAY_NUM:-'4'}
+
 ###################### OpenIM openim-msgtransfer ######################
 def "OPENIM_MSGTRANSFER_HOST" "127.0.0.1"
 def "OPENIM_MSGTRANSFER_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer" # OpenIM openim-msgtransfer 二进制文件路径
-def "OPENIM_MSGTRANSFER_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-msgtransfer 配置文件路径
+def "OPENIM_MSGTRANSFER_CONFIG" "${OPENIM_ROOT}/config/"                      # OpenIM openim-msgtransfer 配置文件路径
 def "OPENIM_MSGTRANSFER_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-msgtransfer" # OpenIM openim-msgtransfer 日志存储路径
-def "OPENIM_MSGTRANSFER_LOG_LEVEL" "info" # OpenIM openim-msgtransfer 日志级别
-def "OPENIM_MSGTRANSFER_LOG_MAX_SIZE" "100" # OpenIM openim-msgtransfer 日志最大大小（MB）
-def "OPENIM_MSGTRANSFER_LOG_MAX_BACKUPS" "7" # OpenIM openim-msgtransfer 日志最大备份数
-def "OPENIM_MSGTRANSFER_LOG_MAX_AGE" "7" # OpenIM openim-msgtransfer 日志最大保存时间（天）
-def "OPENIM_MSGTRANSFER_LOG_COMPRESS" "false" # OpenIM openim-msgtransfer 日志是否压缩
-def "OPENIM_MSGTRANSFER_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-msgtransfer 日志是否带有堆栈信息
+def "OPENIM_MSGTRANSFER_LOG_LEVEL" "info"                                     # OpenIM openim-msgtransfer 日志级别
+def "OPENIM_MSGTRANSFER_LOG_MAX_SIZE" "100"                                   # OpenIM openim-msgtransfer 日志最大大小（MB）
+def "OPENIM_MSGTRANSFER_LOG_MAX_BACKUPS" "7"                                  # OpenIM openim-msgtransfer 日志最大备份数
+def "OPENIM_MSGTRANSFER_LOG_MAX_AGE" "7"                                      # OpenIM openim-msgtransfer 日志最大保存时间（天）
+def "OPENIM_MSGTRANSFER_LOG_COMPRESS" "false"                                 # OpenIM openim-msgtransfer 日志是否压缩
+def "OPENIM_MSGTRANSFER_LOG_WITH_STACK" "${LOG_WITH_STACK}"                   # OpenIM openim-msgtransfer 日志是否带有堆栈信息
 
 ###################### OpenIM openim-push ######################
 def "OPENIM_PUSH_HOST" "127.0.0.1"
 def "OPENIM_PUSH_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-push" # OpenIM openim-push 二进制文件路径
-def "OPENIM_PUSH_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-push 配置文件路径
+def "OPENIM_PUSH_CONFIG" "${OPENIM_ROOT}/config/"               # OpenIM openim-push 配置文件路径
 def "OPENIM_PUSH_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-push" # OpenIM openim-push 日志存储路径
-def "OPENIM_PUSH_LOG_LEVEL" "info" # OpenIM openim-push 日志级别
-def "OPENIM_PUSH_LOG_MAX_SIZE" "100" # OpenIM openim-push 日志最大大小（MB）
-def "OPENIM_PUSH_LOG_MAX_BACKUPS" "7" # OpenIM openim-push 日志最大备份数
-def "OPENIM_PUSH_LOG_MAX_AGE" "7" # OpenIM openim-push 日志最大保存时间（天）
-def "OPENIM_PUSH_LOG_COMPRESS" "false" # OpenIM openim-push 日志是否压缩
-def "OPENIM_PUSH_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-push 日志是否带有堆栈信息
+def "OPENIM_PUSH_LOG_LEVEL" "info"                              # OpenIM openim-push 日志级别
+def "OPENIM_PUSH_LOG_MAX_SIZE" "100"                            # OpenIM openim-push 日志最大大小（MB）
+def "OPENIM_PUSH_LOG_MAX_BACKUPS" "7"                           # OpenIM openim-push 日志最大备份数
+def "OPENIM_PUSH_LOG_MAX_AGE" "7"                               # OpenIM openim-push 日志最大保存时间（天）
+def "OPENIM_PUSH_LOG_COMPRESS" "false"                          # OpenIM openim-push 日志是否压缩
+def "OPENIM_PUSH_LOG_WITH_STACK" "${LOG_WITH_STACK}"            # OpenIM openim-push 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-auth ######################
 def "OPENIM_RPC_AUTH_HOST" "127.0.0.1"
 def "OPENIM_RPC_AUTH_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-auth" # OpenIM openim-rpc-auth 二进制文件路径
-def "OPENIM_RPC_AUTH_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-auth 配置文件路径
+def "OPENIM_RPC_AUTH_CONFIG" "${OPENIM_ROOT}/config/"                   # OpenIM openim-rpc-auth 配置文件路径
 def "OPENIM_RPC_AUTH_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-auth" # OpenIM openim-rpc-auth 日志存储路径
-def "OPENIM_RPC_AUTH_LOG_LEVEL" "info" # OpenIM openim-rpc-auth 日志级别
-def "OPENIM_RPC_AUTH_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-auth 日志最大大小（MB）
-def "OPENIM_RPC_AUTH_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-auth 日志最大备份数
-def "OPENIM_RPC_AUTH_LOG_MAX_AGE" "7" # OpenIM openim-rpc-auth 日志最大保存时间（天）
-def "OPENIM_RPC_AUTH_LOG_COMPRESS" "false" # OpenIM openim-rpc-auth 日志是否压缩
-def "OPENIM_RPC_AUTH_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-auth 日志是否带有堆栈信息
+def "OPENIM_RPC_AUTH_LOG_LEVEL" "info"                                  # OpenIM openim-rpc-auth 日志级别
+def "OPENIM_RPC_AUTH_LOG_MAX_SIZE" "100"                                # OpenIM openim-rpc-auth 日志最大大小（MB）
+def "OPENIM_RPC_AUTH_LOG_MAX_BACKUPS" "7"                               # OpenIM openim-rpc-auth 日志最大备份数
+def "OPENIM_RPC_AUTH_LOG_MAX_AGE" "7"                                   # OpenIM openim-rpc-auth 日志最大保存时间（天）
+def "OPENIM_RPC_AUTH_LOG_COMPRESS" "false"                              # OpenIM openim-rpc-auth 日志是否压缩
+def "OPENIM_RPC_AUTH_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM openim-rpc-auth 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-conversation ######################
 def "OPENIM_RPC_CONVERSATION_HOST" "127.0.0.1"
 def "OPENIM_RPC_CONVERSATION_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-conversation" # OpenIM openim-rpc-conversation 二进制文件路径
-def "OPENIM_RPC_CONVERSATION_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-conversation 配置文件路径
+def "OPENIM_RPC_CONVERSATION_CONFIG" "${OPENIM_ROOT}/config/"                           # OpenIM openim-rpc-conversation 配置文件路径
 def "OPENIM_RPC_CONVERSATION_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-conversation" # OpenIM openim-rpc-conversation 日志存储路径
-def "OPENIM_RPC_CONVERSATION_LOG_LEVEL" "info" # OpenIM openim-rpc-conversation 日志级别
-def "OPENIM_RPC_CONVERSATION_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-conversation 日志最大大小（MB）
-def "OPENIM_RPC_CONVERSATION_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-conversation 日志最大备份数
-def "OPENIM_RPC_CONVERSATION_LOG_MAX_AGE" "7" # OpenIM openim-rpc-conversation 日志最大保存时间（天）
-def "OPENIM_RPC_CONVERSATION_LOG_COMPRESS" "false" # OpenIM openim-rpc-conversation 日志是否压缩
-def "OPENIM_RPC_CONVERSATION_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-conversation 日志是否带有堆栈信息
+def "OPENIM_RPC_CONVERSATION_LOG_LEVEL" "info"                                          # OpenIM openim-rpc-conversation 日志级别
+def "OPENIM_RPC_CONVERSATION_LOG_MAX_SIZE" "100"                                        # OpenIM openim-rpc-conversation 日志最大大小（MB）
+def "OPENIM_RPC_CONVERSATION_LOG_MAX_BACKUPS" "7"                                       # OpenIM openim-rpc-conversation 日志最大备份数
+def "OPENIM_RPC_CONVERSATION_LOG_MAX_AGE" "7"                                           # OpenIM openim-rpc-conversation 日志最大保存时间（天）
+def "OPENIM_RPC_CONVERSATION_LOG_COMPRESS" "false"                                      # OpenIM openim-rpc-conversation 日志是否压缩
+def "OPENIM_RPC_CONVERSATION_LOG_WITH_STACK" "${LOG_WITH_STACK}"                        # OpenIM openim-rpc-conversation 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-friend ######################
 def "OPENIM_RPC_FRIEND_HOST" "127.0.0.1"
 def "OPENIM_RPC_FRIEND_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-friend" # OpenIM openim-rpc-friend 二进制文件路径
-def "OPENIM_RPC_FRIEND_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-friend 配置文件路径
+def "OPENIM_RPC_FRIEND_CONFIG" "${OPENIM_ROOT}/config/"                     # OpenIM openim-rpc-friend 配置文件路径
 def "OPENIM_RPC_FRIEND_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-friend" # OpenIM openim-rpc-friend 日志存储路径
-def "OPENIM_RPC_FRIEND_LOG_LEVEL" "info" # OpenIM openim-rpc-friend 日志级别
-def "OPENIM_RPC_FRIEND_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-friend 日志最大大小（MB）
-def "OPENIM_RPC_FRIEND_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-friend 日志最大备份数
-def "OPENIM_RPC_FRIEND_LOG_MAX_AGE" "7" # OpenIM openim-rpc-friend 日志最大保存时间（天）
-def "OPENIM_RPC_FRIEND_LOG_COMPRESS" "false" # OpenIM openim-rpc-friend 日志是否压缩
-def "OPENIM_RPC_FRIEND_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-friend 日志是否带有堆栈信息
+def "OPENIM_RPC_FRIEND_LOG_LEVEL" "info"                                    # OpenIM openim-rpc-friend 日志级别
+def "OPENIM_RPC_FRIEND_LOG_MAX_SIZE" "100"                                  # OpenIM openim-rpc-friend 日志最大大小（MB）
+def "OPENIM_RPC_FRIEND_LOG_MAX_BACKUPS" "7"                                 # OpenIM openim-rpc-friend 日志最大备份数
+def "OPENIM_RPC_FRIEND_LOG_MAX_AGE" "7"                                     # OpenIM openim-rpc-friend 日志最大保存时间（天）
+def "OPENIM_RPC_FRIEND_LOG_COMPRESS" "false"                                # OpenIM openim-rpc-friend 日志是否压缩
+def "OPENIM_RPC_FRIEND_LOG_WITH_STACK" "${LOG_WITH_STACK}"                  # OpenIM openim-rpc-friend 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-group ######################
 def "OPENIM_RPC_GROUP_HOST" "127.0.0.1"
 def "OPENIM_RPC_GROUP_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-group" # OpenIM openim-rpc-group 二进制文件路径
-def "OPENIM_RPC_GROUP_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-group 配置文件路径
+def "OPENIM_RPC_GROUP_CONFIG" "${OPENIM_ROOT}/config/"                    # OpenIM openim-rpc-group 配置文件路径
 def "OPENIM_RPC_GROUP_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-group" # OpenIM openim-rpc-group 日志存储路径
-def "OPENIM_RPC_GROUP_LOG_LEVEL" "info" # OpenIM openim-rpc-group 日志级别
-def "OPENIM_RPC_GROUP_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-group 日志最大大小（MB）
-def "OPENIM_RPC_GROUP_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-group 日志最大备份数
-def "OPENIM_RPC_GROUP_LOG_MAX_AGE" "7" # OpenIM openim-rpc-group 日志最大保存时间（天）
-def "OPENIM_RPC_GROUP_LOG_COMPRESS" "false" # OpenIM openim-rpc-group 日志是否压缩
-def "OPENIM_RPC_GROUP_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-group 日志是否带有堆栈信息
+def "OPENIM_RPC_GROUP_LOG_LEVEL" "info"                                   # OpenIM openim-rpc-group 日志级别
+def "OPENIM_RPC_GROUP_LOG_MAX_SIZE" "100"                                 # OpenIM openim-rpc-group 日志最大大小（MB）
+def "OPENIM_RPC_GROUP_LOG_MAX_BACKUPS" "7"                                # OpenIM openim-rpc-group 日志最大备份数
+def "OPENIM_RPC_GROUP_LOG_MAX_AGE" "7"                                    # OpenIM openim-rpc-group 日志最大保存时间（天）
+def "OPENIM_RPC_GROUP_LOG_COMPRESS" "false"                               # OpenIM openim-rpc-group 日志是否压缩
+def "OPENIM_RPC_GROUP_LOG_WITH_STACK" "${LOG_WITH_STACK}"                 # OpenIM openim-rpc-group 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-msg ######################
 def "OPENIM_RPC_MSG_HOST" "127.0.0.1"
 def "OPENIM_RPC_MSG_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-msg" # OpenIM openim-rpc-msg 二进制文件路径
-def "OPENIM_RPC_MSG_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-msg 配置文件路径
+def "OPENIM_RPC_MSG_CONFIG" "${OPENIM_ROOT}/config/"                  # OpenIM openim-rpc-msg 配置文件路径
 def "OPENIM_RPC_MSG_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-msg" # OpenIM openim-rpc-msg 日志存储路径
-def "OPENIM_RPC_MSG_LOG_LEVEL" "info" # OpenIM openim-rpc-msg 日志级别
-def "OPENIM_RPC_MSG_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-msg 日志最大大小（MB）
-def "OPENIM_RPC_MSG_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-msg 日志最大备份数
-def "OPENIM_RPC_MSG_LOG_MAX_AGE" "7" # OpenIM openim-rpc-msg 日志最大保存时间（天）
-def "OPENIM_RPC_MSG_LOG_COMPRESS" "false" # OpenIM openim-rpc-msg 日志是否压缩
-def "OPENIM_RPC_MSG_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-msg 日志是否带有堆栈信息
+def "OPENIM_RPC_MSG_LOG_LEVEL" "info"                                 # OpenIM openim-rpc-msg 日志级别
+def "OPENIM_RPC_MSG_LOG_MAX_SIZE" "100"                               # OpenIM openim-rpc-msg 日志最大大小（MB）
+def "OPENIM_RPC_MSG_LOG_MAX_BACKUPS" "7"                              # OpenIM openim-rpc-msg 日志最大备份数
+def "OPENIM_RPC_MSG_LOG_MAX_AGE" "7"                                  # OpenIM openim-rpc-msg 日志最大保存时间（天）
+def "OPENIM_RPC_MSG_LOG_COMPRESS" "false"                             # OpenIM openim-rpc-msg 日志是否压缩
+def "OPENIM_RPC_MSG_LOG_WITH_STACK" "${LOG_WITH_STACK}"               # OpenIM openim-rpc-msg 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-third ######################
 def "OPENIM_RPC_THIRD_HOST" "127.0.0.1"
 def "OPENIM_RPC_THIRD_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-third" # OpenIM openim-rpc-third 二进制文件路径
-def "OPENIM_RPC_THIRD_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-third 配置文件路径
+def "OPENIM_RPC_THIRD_CONFIG" "${OPENIM_ROOT}/config/"                    # OpenIM openim-rpc-third 配置文件路径
 def "OPENIM_RPC_THIRD_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-third" # OpenIM openim-rpc-third 日志存储路径
-def "OPENIM_RPC_THIRD_LOG_LEVEL" "info" # OpenIM openim-rpc-third 日志级别
-def "OPENIM_RPC_THIRD_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-third 日志最大大小（MB）
-def "OPENIM_RPC_THIRD_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-third 日志最大备份数
-def "OPENIM_RPC_THIRD_LOG_MAX_AGE" "7" # OpenIM openim-rpc-third 日志最大保存时间（天）
-def "OPENIM_RPC_THIRD_LOG_COMPRESS" "false" # OpenIM openim-rpc-third 日志是否压缩
-def "OPENIM_RPC_THIRD_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-third 日志是否带有堆栈信息
+def "OPENIM_RPC_THIRD_LOG_LEVEL" "info"                                   # OpenIM openim-rpc-third 日志级别
+def "OPENIM_RPC_THIRD_LOG_MAX_SIZE" "100"                                 # OpenIM openim-rpc-third 日志最大大小（MB）
+def "OPENIM_RPC_THIRD_LOG_MAX_BACKUPS" "7"                                # OpenIM openim-rpc-third 日志最大备份数
+def "OPENIM_RPC_THIRD_LOG_MAX_AGE" "7"                                    # OpenIM openim-rpc-third 日志最大保存时间（天）
+def "OPENIM_RPC_THIRD_LOG_COMPRESS" "false"                               # OpenIM openim-rpc-third 日志是否压缩
+def "OPENIM_RPC_THIRD_LOG_WITH_STACK" "${LOG_WITH_STACK}"                 # OpenIM openim-rpc-third 日志是否带有堆栈信息
 
 ###################### OpenIM openim-rpc-user ######################
 def "OPENIM_RPC_USER_HOST" "127.0.0.1"
 def "OPENIM_RPC_USER_BINARY" "${OPENIM_OUTPUT_HOSTBIN}/openim-rpc-user" # OpenIM openim-rpc-user 二进制文件路径
-def "OPENIM_RPC_USER_CONFIG" "${LOCAL_OUTPUT_ROOT}/bin/openim_config.yaml" # OpenIM openim-rpc-user 配置文件路径
+def "OPENIM_RPC_USER_CONFIG" "${OPENIM_ROOT}/config/"                   # OpenIM openim-rpc-user 配置文件路径
 def "OPENIM_RPC_USER_LOG_DIR" "${LOG_STORAGE_LOCATION}/openim-rpc-user" # OpenIM openim-rpc-user 日志存储路径
-def "OPENIM_RPC_USER_LOG_LEVEL" "info" # OpenIM openim-rpc-user 日志级别
-def "OPENIM_RPC_USER_LOG_MAX_SIZE" "100" # OpenIM openim-rpc-user 日志最大大小（MB）
-def "OPENIM_RPC_USER_LOG_MAX_BACKUPS" "7" # OpenIM openim-rpc-user 日志最大备份数
-def "OPENIM_RPC_USER_LOG_MAX_AGE" "7" # OpenIM openim-rpc-user 日志最大保存时间（天）
-def "OPENIM_RPC_USER_LOG_COMPRESS" "false" # OpenIM openim-rpc-user 日志是否压缩
-def "OPENIM_RPC_USER_LOG_WITH_STACK" "${LOG_WITH_STACK}" # OpenIM openim-rpc-user 日志是否带有堆栈信息
+def "OPENIM_RPC_USER_LOG_LEVEL" "info"                                  # OpenIM openim-rpc-user 日志级别
+def "OPENIM_RPC_USER_LOG_MAX_SIZE" "100"                                # OpenIM openim-rpc-user 日志最大大小（MB）
+def "OPENIM_RPC_USER_LOG_MAX_BACKUPS" "7"                               # OpenIM openim-rpc-user 日志最大备份数
+def "OPENIM_RPC_USER_LOG_MAX_AGE" "7"                                   # OpenIM openim-rpc-user 日志最大保存时间（天）
+def "OPENIM_RPC_USER_LOG_COMPRESS" "false"                              # OpenIM openim-rpc-user 日志是否压缩
+def "OPENIM_RPC_USER_LOG_WITH_STACK" "${LOG_WITH_STACK}"                # OpenIM openim-rpc-user 日志是否带有堆栈信息
 
-
-###################### 设计中...暂时不需要######################################
-
-# openim-api 配置
-def "OPENIM_APISERVER_HOST" "127.0.0.1"
-def "OPENIM_APISERVER_GRPC_BIND_ADDRESS" "0.0.0.0"
-def "OPENIM_APISERVER_GRPC_BIND_PORT" "8081"
-def "OPENIM_APISERVER_INSECURE_BIND_ADDRESS" "127.0.0.1"
-def "OPENIM_APISERVER_INSECURE_BIND_PORT" "8080"
-def "OPENIM_APISERVER_SECURE_BIND_ADDRESS" "0.0.0.0"
-def "OPENIM_APISERVER_SECURE_BIND_PORT" "8443"
-def "OPENIM_APISERVER_SECURE_TLS_CERT_KEY_CERT_FILE" "${OPENIM_CONFIG_DIR}/cert/openim-apiserver.pem"
-def "OPENIM_APISERVER_SECURE_TLS_CERT_KEY_PRIVATE_KEY_FILE" "${OPENIM_CONFIG_DIR}/cert/openim-apiserver-key.pem"
+###################### 设计中...暂时不需要######################
 
 # openimctl 配置
 def "CONFIG_USER_USERNAME" "admin"

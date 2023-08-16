@@ -14,13 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Common utilities, variables and checks for all build scripts.
 set -o errexit
 set +o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+
+SERVER_NAME="openim-rpc"
 
 #service filename
 service_filename=(
@@ -90,9 +91,9 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   for ((j = 0; j < ${#service_ports[*]}; j++)); do
     #Start the service in the background
     if [ -z "${prome_ports[$j]}" ]; then
-      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --config_folder_path ${configfile_path} "
+      cmd="./${service_filename[$i]} --port ${service_ports[$j]} -c ${configfile_path} "
     else
-      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --prometheus_port ${prome_ports[$j]}  --config_folder_path ${configfile_path} "
+      cmd="./${service_filename[$i]} --port ${service_ports[$j]} --prometheus_port ${prome_ports[$j]}  -c ${configfile_path} "
     fi
     if [ $i -eq 0 -o $i -eq 1 ]; then
       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
