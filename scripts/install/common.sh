@@ -30,29 +30,10 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
 
-# Make sure the environment is only called via common to avoid too much nesting
-openim::common::rpc::service_port() {
-  local targets=(
-    $OPENIM_USER_PORT            # User service
-    $OPENIM_FRIEND_PORT          # Friend service
-    $OPENIM_MESSAGE_PORT         # Message service
-    $OPENIM_MESSAGE_GATEWAY_PORT # Message gateway
-    $OPENIM_GROUP_PORT           # Group service
-    $OPENIM_AUTH_PORT            # Authorization service
-    $OPENIM_PUSH_PORT            # Push service
-    $OPENIM_CONVERSATION_PORT    # Conversation service
-    $OPENIM_THIRD_PORT           # Third-party service
-  )
-  echo "${targets[@]}"
-}
-IFS=" " read -ra OPENIM_RPC_PORT_TARGETS <<< "$(openim::common::rpc::service_port)"
-readonly OPENIM_RPC_PORT_TARGETS
-readonly OPENIM_RPC_PORT_LISTARIES=("${OPENIM_RPC_PORT_TARGETS[@]##*/}")
-
 # This function returns a list of Prometheus ports for various services
 # based on the provided configuration. Each service has its own dedicated
 # port for monitoring purposes.
-openim::common::rpc::prometheus_port() {
+openim::common::prometheus_port() {
   # Declare an array to hold all the Prometheus ports for different services
   local targets=(
     ${USER_PROM_PORT}               # Prometheus port for user service
@@ -70,7 +51,7 @@ openim::common::rpc::prometheus_port() {
   # Print the list of ports
   echo "${targets[@]}"
 }
-IFS=" " read -ra OPENIM_PROM_PORT_TARGETS <<< "$(openim::common::rpc::prometheus_port)"
+IFS=" " read -ra OPENIM_PROM_PORT_TARGETS <<< "$(openim::common::prometheus_port)"
 readonly OPENIM_PROM_PORT_TARGETS
 readonly OPENIM_PROM_PORT_LISTARIES=("${OPENIM_PROM_PORT_TARGETS[@]##*/}")
 
@@ -78,19 +59,19 @@ readonly OPENIM_PROM_PORT_LISTARIES=("${OPENIM_PROM_PORT_TARGETS[@]##*/}")
 # This array consolidates the port numbers for all the services defined above.
 openim::common::service_port() {
   local targets=(
-    $OPENIM_USER_PORT            # User service
-    $OPENIM_FRIEND_PORT          # Friend service
-    $OPENIM_MESSAGE_PORT         # Message service
-    $OPENIM_MESSAGE_GATEWAY_PORT # Message gateway
-    $OPENIM_GROUP_PORT           # Group service
-    $OPENIM_AUTH_PORT            # Authorization service
-    $OPENIM_PUSH_PORT            # Push service
-    $OPENIM_CONVERSATION_PORT    # Conversation service
-    $OPENIM_THIRD_PORT           # Third-party service
+    ${OPENIM_USER_PORT}            # User service
+    ${OPENIM_FRIEND_PORT}          # Friend service
+    ${OPENIM_MESSAGE_PORT}         # Message service
+    ${OPENIM_MESSAGE_GATEWAY_PORT} # Message gateway
+    ${OPENIM_GROUP_PORT}           # Group service
+    ${OPENIM_AUTH_PORT}            # Authorization service
+    ${OPENIM_PUSH_PORT}            # Push service
+    ${OPENIM_CONVERSATION_PORT}    # Conversation service
+    ${OPENIM_THIRD_PORT}           # Third-party service
 
     # API PORT
-    $API_OPENIM_PORT             # API service
-    $OPENIM_WS_PORT              # WebSocket service
+    ${API_OPENIM_PORT}             # API service
+    ${OPENIM_WS_PORT}              # WebSocket service
   )
   echo "${targets[@]}"
 }
@@ -98,6 +79,31 @@ IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
+openim::rpc::service_name() {
+  local targets=(
+    openim-rpc-user
+    openim-rpc-friend
+    openim-rpc-msg
+    openim-rpc-group
+    openim-rpc-auth
+    openim-rpc-conversation
+    openim-rpc-third
+  )
+  echo "${targets[@]}"
+}
+IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
+readonly OPENIM_RPC_SERVICE_TARGETS
+readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
+
+readonly OPENIM_API_SERVICE_TARGETS=(
+  openim-api
+)
+readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
+
+readonly OPENIM_API_PORT_TARGETS=(
+  ${API_OPENIM_PORT}
+)
+readonly OPENIM_API_PORT_LISTARIES=("${OPENIM_API_PORT_TARGETS[@]##*/}")
 
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {

@@ -30,10 +30,10 @@ openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}
 
 openim::util::stop_services_with_name ${SERVER_NAME}
 
-# Message Transfer 服务的 Prometheus 端口列表
+# Message Transfer Prometheus port list
 MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
 
-openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[@]}"
+openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
 
 openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
 
