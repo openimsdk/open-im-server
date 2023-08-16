@@ -17,5 +17,5 @@
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
 
-# common.sh      environment.sh  mariadb_for_ubuntu.sh  msg_transfer_start.sh  push_start.sh        start_rpc_service.sh  vimrc
-# dependency.sh  install.sh      msg_gateway_start.sh   openim-crontask.sh     redis_for_ubuntu.sh  test.sh
+# common.sh      environment.sh  mariadb_for_ubuntu.sh  msg_transfer_start.sh  openim-push.sh        start_rpc_service.sh
+# dependency.sh  install.sh      msg_gateway_start.sh   openim-crontask.sh     redis_for_ubuntu.sh  test.sh man.sh

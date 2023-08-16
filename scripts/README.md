@@ -76,7 +76,7 @@ scripts/
 ├── msg_gateway_start.sh           # Script to start message gateway service
 ├── msg_transfer_start.sh          # Script to start message transfer service
 ├── path_info.sh                   # Script containing path information
-├── push_start.sh                  # Script to start push service
+├── openim-push.sh                  # Script to start push service
 ├── release.sh                     # Script to perform release process
 ├── start_all.sh                   # Script to start all services
 ├── openim-crontask.sh                  # Script to start cron jobs
@@ -263,6 +263,10 @@ openim::util::stop_services_with_name nginx apache
 
 ## examples
 Scripts to perform various build, install, analysis, etc operations.
+
+The script directory design of OpenIM and the writing of scripts and tools refer to many excellent open source projects, such as helm, iam, kubernetes, docker, etc.
+
+Maybe they'll give you inspiration for later maintenance...
 
 These scripts keep the root level Makefile small and simple.
 

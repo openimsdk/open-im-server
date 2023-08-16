@@ -12,7 +12,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
+# OpenIM Push Control Script
+# 
+# Description:
+# This script provides a control interface for the OpenIM Push service within a Linux environment. It supports two installation methods: installation via function calls to systemctl, and direct installation through background processes.
+# 
+# Features:
+# 1. Robust error handling leveraging Bash built-ins such as 'errexit', 'nounset', and 'pipefail'.
+# 2. Capability to source common utility functions and configurations, ensuring environmental consistency.
+# 3. Comprehensive logging tools, offering clear operational insights.
+# 4. Support for creating, managing, and interacting with Linux systemd services.
+# 5. Mechanisms to verify the successful running of the service.
+#
+# Usage:
+# 1. Direct Script Execution:
+#    This will start the OpenIM push directly through a background process.
+#    Example: ./openim-push.sh
+# 
+# 2. Controlling through Functions for systemctl operations:
+#    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
+#    Example: ./openim-push.sh openim::push::install
+# 
+# Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
+# 
 set -o errexit
 set +o nounset
 set -o pipefail
@@ -22,14 +45,14 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-push"
 
-# openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
-# openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
+openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
+openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
 
-# openim::util::stop_services_with_name ${SERVER_NAME}
+openim::util::stop_services_with_name ${SERVER_NAME}
 
-# openim::log::status "start push process, path: ${OPENIM_PUSH_BINARY}"
-# nohup ${OPENIM_PUSH_BINARY} >>${LOG_FILE} 2>&1 &
-# openim::util::check_process_names ${SERVER_NAME}
+openim::log::status "start push process, path: ${OPENIM_PUSH_BINARY}"
+nohup ${OPENIM_PUSH_BINARY} >>${LOG_FILE} 2>&1 &
+openim::util::check_process_names ${SERVER_NAME}
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
@@ -108,13 +131,6 @@ if [[ "$*" =~ ${SERVER_NAME}:: ]];then
 fi
 
 
-
-cd $SCRIPTS_ROOT
-
-bin_dir="$BIN_DIR"
-logs_dir="$OPENIM_ROOT/logs"
-
-cd "$OPENIM_ROOT/scripts/"
 
 list1=$(cat $config_path | grep openImPushPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep pushPrometheusPort | awk -F '[:]' '{print $NF}')

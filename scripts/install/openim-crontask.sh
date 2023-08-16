@@ -29,11 +29,11 @@
 # Usage:
 # 1. Direct Script Execution:
 #    This will start the OpenIM CronTask directly through a background process.
-#    Example: ./[script-name].sh
+#    Example: ./openim-crontask.sh
 # 
 # 2. Controlling through Functions for systemctl operations:
 #    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
-#    Example: ./[script-name].sh openim::crontask::install
+#    Example: ./openim-crontask.sh openim::crontask::install
 # 
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
 # 

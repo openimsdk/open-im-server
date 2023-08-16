@@ -27,7 +27,7 @@ trap 'openim::util::onCtrlC' INT
 need_to_start_server_shell=(
   ${SCRIPTS_ROOT}/start_rpc_service.sh
   ${SCRIPTS_ROOT}/msg_gateway_start.sh
-  ${SCRIPTS_ROOT}/push_start.sh
+  ${SCRIPTS_ROOT}/openim-push.sh
   ${SCRIPTS_ROOT}/msg_transfer_start.sh
   ${SCRIPTS_ROOT}/openim-crontask.sh
 )

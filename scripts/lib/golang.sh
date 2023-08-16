@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 # The golang package that we are building.
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 readonly KUBE_GO_PACKAGE=github.com/openimsdk/open-im-server
@@ -95,7 +96,7 @@ START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
 openim::golang::start_script_list() {
   local targets=(
       start-rpc_service.sh
-      push_start.sh
+      openim-push.sh
       msg_transfer_start.sh
       msg_gateway_start.sh
       openim-crontask.sh
