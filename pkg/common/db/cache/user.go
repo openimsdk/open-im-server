@@ -269,8 +269,16 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineS
 				}
 			} else {
 				onlineStatus.Status = constant.Online
-				for _, val := range status.PlatformIDs {
-					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, val)
+				// Judging whether to be kicked out.
+				flag := false
+				for _, val := range onlineStatus.PlatformIDs {
+					if val == status.PlatformIDs[0] {
+						flag = true
+						break
+					}
+				}
+				if !flag {
+					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, status.PlatformIDs[0])
 				}
 				newjsonData, err := json.Marshal(&onlineStatus)
 				if err != nil {
