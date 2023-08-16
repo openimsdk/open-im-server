@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright © 2023 OpenIM. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-name: openim-api
-description: "This is a description for openim-api"
-type: "service"
+OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+
+# common.sh      environment.sh  mariadb_for_ubuntu.sh  msg_transfer_start.sh  push_start.sh        start_rpc_service.sh  vimrc
+# dependency.sh  install.sh      msg_gateway_start.sh   openim-crontask.sh     redis_for_ubuntu.sh  test.sh

@@ -13,6 +13,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# 
+# OpenIM CronTask Control Script
+# 
+# Description:
+# This script provides a control interface for the OpenIM CronTask service within a Linux environment. It supports two installation methods: installation via function calls to systemctl, and direct installation through background processes.
+# 
+# Features:
+# 1. Robust error handling leveraging Bash built-ins such as 'errexit', 'nounset', and 'pipefail'.
+# 2. Capability to source common utility functions and configurations, ensuring environmental consistency.
+# 3. Comprehensive logging tools, offering clear operational insights.
+# 4. Support for creating, managing, and interacting with Linux systemd services.
+# 5. Mechanisms to verify the successful running of the service.
+#
+# Usage:
+# 1. Direct Script Execution:
+#    This will start the OpenIM CronTask directly through a background process.
+#    Example: ./[script-name].sh
+# 
+# 2. Controlling through Functions for systemctl operations:
+#    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
+#    Example: ./[script-name].sh openim::crontask::install
+# 
+# Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
+# 
 
 set -o errexit
 set +o nounset
