@@ -33,7 +33,11 @@
 # 2. Controlling through Functions for systemctl operations:
 #    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
 #    Example: ./openim-push.sh openim::push::install
-# 
+#
+# ENVIRONMENT VARIABLES:
+# export OPENIM_PUSH_BINARY="8080 8081 8082"
+# export OPENIM_PUSH_PORT="9090 9091 9092"
+#
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
 # 
 set -o errexit
@@ -50,8 +54,23 @@ openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
 
 openim::util::stop_services_with_name ${SERVER_NAME}
 
-openim::log::status "start push process, path: ${OPENIM_PUSH_BINARY}"
-nohup ${OPENIM_PUSH_BINARY} >>${LOG_FILE} 2>&1 &
+openim::log::status "prepare start push process, path: ${OPENIM_PUSH_BINARY}"
+openim::log::status "prepare start push process, port: ${OPENIM_PUSH_PORT}, prometheus port: ${PUSH_PROM_PORT}"
+
+OPENIM_PUSH_PORTS_ARRAY=( ${OPENIM_PUSH_PORT} )
+PUSH_PROM_PORTS_ARRAY=( ${PUSH_PROM_PORT} )
+
+openim::log::info "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}, prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
+
+if [ ${#OPENIM_PUSH_PORTS_ARRAY[@]} -ne ${#PUSH_PROM_PORTS_ARRAY[@]} ]; then
+    openim::log::error_exit "The length of the two port lists is different!"
+fi
+
+for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
+    openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
+    nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2>&1 &
+done
+
 openim::util::check_process_names ${SERVER_NAME}
 
 ###################################### Linux Systemd ######################################
@@ -96,7 +115,6 @@ function openim::push::install()
   popd
 }
 
-
 # Unload
 function openim::push::uninstall()
 {
@@ -128,48 +146,4 @@ function openim::push::status()
 
 if [[ "$*" =~ ${SERVER_NAME}:: ]];then
   eval $*
-fi
-
-
-
-list1=$(cat $config_path | grep openImPushPort | awk -F '[:]' '{print $NF}')
-list2=$(cat $config_path | grep pushPrometheusPort | awk -F '[:]' '{print $NF}')
-openim::util::list-to-string $list1
-rpc_ports=($ports_array)
-openim::util::list-to-string $list2
-prome_ports=($ports_array)
-
-#Check if the service exists
-#If it is exists,kill this process
-check=$(ps -aux | grep -w ./${push_name} | grep -v grep | wc -l)
-if [ $check -ge 1 ]; then
-  oldPid=$(ps -aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
-  kill -9 $oldPid
-fi
-#Waiting port recycling
-sleep 1
-cd ${push_binary_root}
-
-for ((i = 0; i < ${#rpc_ports[@]}; i++)); do
-  echo "==========================start push server===========================">>$OPENIM_ROOT/logs/openIM.log
-  nohup ./${push_name} --port ${rpc_ports[$i]} --prometheus_port ${prome_ports[$i]} >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
-done
-
-sleep 3
-#Check launched service process
-check=$(ps -aux | grep -w ./${push_name} | grep -v grep | wc -l)
-if [ $check -ge 1 ]; then
-  newPid=$(ps -aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
-  ports=$(netstat -netulp | grep -w ${newPid} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
-  allPorts=""
-
-  for i in $ports; do
-    allPorts=${allPorts}"$i "
-  done
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS "${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${push_name}${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${newPid}${COLOR_SUFFIX}
-  echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
-else
-  echo -e ${BACKGROUND_GREEN}${push_name}${COLOR_SUFFIX}${RED_PREFIX}"\n SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
 fi

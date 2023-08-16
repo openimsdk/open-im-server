@@ -1,5 +1,6 @@
 [Unit]
 Description=OPENIM OPENIM CMDUTILS
+Documentation=Utility toolkit for common OpenIM command-line operations.
 Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
 
 [Service]

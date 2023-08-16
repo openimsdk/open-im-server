@@ -18,15 +18,15 @@ set -o errexit
 set +o nounset
 set -o pipefail
 
-OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
-
-
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/lib/init.sh
-source $SCRIPTS_ROOT/path_info.sh
-
 ulimit -n 200000
+
+SERVER_NAME="openim-msggateway"
+
+openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
+openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
+
+openim::util::stop_services_with_name ${SERVER_NAME}
+
 
 list1=$(cat $config_path | grep openImMessageGatewayPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')

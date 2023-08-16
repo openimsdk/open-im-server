@@ -73,7 +73,7 @@ scripts/
 │   ├── swagger.mk                 # Make rules for swagger documentation
 │   └── tools.mk                   # Make rules for tools and utilities
 ├── mongo-init.sh                  # Script to initialize MongoDB
-├── msg_gateway_start.sh           # Script to start message gateway service
+├── openim-msggateway.sh           # Script to start message gateway service
 ├── msg_transfer_start.sh          # Script to start message transfer service
 ├── path_info.sh                   # Script containing path information
 ├── openim-push.sh                  # Script to start push service

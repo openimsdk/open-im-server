@@ -38,7 +38,7 @@ The scripts within the OpenIM Suite generally adhere to two primary execution me
 2. **Function-based Execution:** Invoking specific functions within the script for more specialized operations (e.g., install, uninstall).
 
    ```bash
-   ./[script-name].sh [function-name]
+   ./scripts/install/install.sh [function-name]
    ```
 
 ### 1. Direct Script Execution

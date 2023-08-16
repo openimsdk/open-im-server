@@ -877,6 +877,27 @@ function openim::util::join {
   echo "$*"
 }
 
+# Function: openim::util::list-to-string <list...>
+# Description: Converts a list to a string, removing spaces, brackets, and commas.
+# Example input: [1002 3 ,  2 32 3 ,  3 434 ,]
+# Example output: 10023 2323 3434
+# Example usage:
+# result=$(openim::util::list-to-string "[10023, 2323, 3434]")
+# echo $result
+function openim::util::list-to-string() {
+    # Capture all arguments into a single string
+    ports_list="$*"
+
+    # Use sed for transformations:
+    # 1. Remove spaces
+    # 2. Replace commas with spaces
+    # 3. Remove opening and closing brackets
+    ports_array=$(echo "$ports_list" | sed 's/ //g; s/,/ /g; s/^\[\(.*\)\]$/\1/')
+
+    # For external use, we might want to echo the result so that it can be captured by callers
+    echo "$ports_array"
+}
+
 # Downloads cfssl/cfssljson/cfssl-certinfo into $1 directory if they do not already exist in PATH
 #
 # Assumed vars:
@@ -1194,18 +1215,6 @@ function openim::util::onCtrlC () {
     echo
     echo '!!! openim: Ctrl+C is captured'
     exit 1
-}
-
-# input: [10023, 2323, 3434]
-# output: 10023 2323 3434
-# Function function: Converts a list to a string, removing Spaces and parentheses
-function openim::util::list-to-string() {
-    ports_list=$*  # 获取传入的参数列表
-    sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
-    sub_s2=${sub_s1//,/ }  # 将逗号替换为空格
-    sub_s3=${sub_s2#*[}  # 去除左括号及其之前的内容
-    sub_s4=${sub_s3%]*}  # 去除右括号及其之后的内容
-    ports_array=$sub_s4  # 将处理后的字符串赋值给变量 ports_array
 }
 
 # Function Function: Remove Spaces in the string

@@ -38,22 +38,19 @@
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
 # 
 
-set -o errexit
-set +o nounset
-set -o pipefail
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
 
 SERVER_NAME="openim-crontask"
 
-openim::log::status "Start OpenIM Cron, binary root: ${SERVER_NAME}"
-openim::log::info "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
+openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
+openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
 
 openim::util::stop_services_with_name ${SERVER_NAME}
 
 openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
-nohup ${OPENIM_CRONTASK_BINARY} >>${LOG_FILE} 2>&1 &
+nohup ${OPENIM_CRONTASK_BINARY} >> ${LOG_FILE} 2>&1 &
 openim::util::check_process_names ${SERVER_NAME}
 
 ###################################### Linux Systemd ######################################

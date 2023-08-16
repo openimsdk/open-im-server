@@ -1,5 +1,6 @@
 [Unit]
 Description=OPENIM OPENIM API
+Documentation=Control interface for the OpenIM API service.
 Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
 
 [Service]

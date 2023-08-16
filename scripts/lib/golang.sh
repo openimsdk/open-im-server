@@ -98,7 +98,7 @@ openim::golang::start_script_list() {
       start-rpc_service.sh
       openim-push.sh
       msg_transfer_start.sh
-      msg_gateway_start.sh
+      openim-msggateway.sh
       openim-crontask.sh
   )
   local result=()
