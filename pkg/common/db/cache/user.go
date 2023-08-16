@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/tools/log"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -205,7 +204,6 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 
 // SetUserStatus Set the user status and save it in redis.
 func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
-	log.ZDebug(ctx, "====================================SetUserStatus=============================", "list", list)
 	for _, status := range list {
 		var isNewKey int64
 		UserIDNum := crc32.ChecksumIEEE([]byte(status.UserID))
@@ -221,13 +219,11 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineS
 		}
 		if isNewKey == 0 {
 			_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
-			log.ZDebug(ctx, "====================================SetUserStatus  isNewKey == 0=============================", "userid", status.UserID, "jsonData", string(jsonData))
 			if err != nil {
 				return errs.Wrap(err)
 			}
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
 		} else {
-			log.ZDebug(ctx, "====================================SetUserStatus  isNewKey != 0=============================", "userid", status.UserID, "jsonData", string(jsonData))
 			result, err := u.rdb.HGet(ctx, key, status.UserID).Result()
 			if err != nil {
 				return errs.Wrap(err)
