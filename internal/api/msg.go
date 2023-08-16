@@ -55,28 +55,28 @@ func (MessageApi) SetOptions(options map[string]bool, value bool) {
 }
 
 func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
-	var newContent string
+	var newContent interface{}
 	var err error
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
 	case constant.Text:
-		newContent = params.Content["text"].(string)
-	case constant.Picture:
-		fallthrough
-	case constant.Custom:
-		fallthrough
-	case constant.Voice:
-		fallthrough
-	case constant.Video:
-		fallthrough
-	case constant.File:
-		fallthrough
-	case constant.CustomNotTriggerConversation:
-		fallthrough
-	case constant.CustomOnlineOnly:
-		fallthrough
+  newContent = params.Content["text"].(string)
+ case constant.Picture:
+ 	newContent = params.Content["picture"].(map[string]interface{})
+ case constant.Custom:
+ 	newContent = params.Content["custom"].(map[string]interface{})
+ case constant.Voice:
+ 	newContent = params.Content["voice"].(map[string]interface{})
+ case constant.Video:
+ 	newContent = params.Content["video"].(map[string]interface{})
+ case constant.File:
+ 	newContent = params.Content["file"].(map[string]interface{})
+ case constant.CustomNotTriggerConversation:
+ 	newContent = params.Content["customNotTriggerConversation"].(map[string]interface{})
+ case constant.CustomOnlineOnly:
+ 	newContent = params.Content["customOnlineOnly"].(map[string]interface{})
 	default:
-		newContent = utils.StructToJsonString(params.Content)
+  newContent = utils.StructToJsonString(params.Content)
 	}
 	if params.IsOnlineOnly {
 		m.SetOptions(options, false)
