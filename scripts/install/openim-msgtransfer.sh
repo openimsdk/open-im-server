@@ -43,7 +43,7 @@ if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
   opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
 fi
 
-if [ ${OPENIM_MSGGATEWAY_NUM} -ne ${#MSG_TRANSFER_PROM_PORTS[@]} -1]; then
+if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
   openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
 fi
 

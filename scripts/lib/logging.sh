@@ -175,6 +175,7 @@ openim::log::progress() {
   done
 }
 
+# Print out some info that isn't a top level status line
 openim::log::info_from_stdin() {
   local messages=()
   while read -r line; do
@@ -205,7 +206,8 @@ openim::log::success()
   if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
       return
   fi
-  echo_log -e "${BRIGHT_GREEN_PREFIX}[success] ${COLOR_SUFFIX}==> " "$@"
+  timestamp=$(date +"%m%d %H:%M:%S")
+  echo_log -e "${BRIGHT_GREEN_PREFIX}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
 }
 
 function openim::log::test_log() {
