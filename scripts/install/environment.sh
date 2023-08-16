@@ -63,6 +63,7 @@ def "OPENIM_CONFIG_DIR" "/etc/openim"
 def "OPENIM_LOG_DIR" "/var/log/openim"
 def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 
+def "OPNEIM_CONFIG" "${OPENIM_ROOT}/config"
 # TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
 # TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
 # TODO 使用 readonly 来定义合适，负责无法正常解析, 并且 yaml 模板需要加 "" 来包裹
@@ -133,13 +134,14 @@ def "RPC_REGISTER_IP"         # RPC的注册IP
 def "RPC_LISTEN_IP" "0.0.0.0" # RPC的监听IP
 
 ###################### API 配置信息 ######################
-def "API_OPENIM_PORT" "10002" # API的开放端口
+# API的开放端口
+readonly API_OPENIM_PORT=${API_OPENIM_PORT:-'10002'}
 def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example:
-# readonly OPENIM_USER_PORT=${OPENIM_USER_PORT:-'10110, 10111, 10112'}
+# readonly OPENIM_USER_PORT=${OPENIM_USER_PORT:-'10110, 10111, 10112'} #Try not to have Spaces
 
 # OpenIM用户服务端口
 readonly OPENIM_USER_PORT=${OPENIM_USER_PORT:-'10110'}

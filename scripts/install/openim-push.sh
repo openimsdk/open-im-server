@@ -57,8 +57,8 @@ openim::util::stop_services_with_name ${SERVER_NAME}
 openim::log::status "prepare start push process, path: ${OPENIM_PUSH_BINARY}"
 openim::log::status "prepare start push process, port: ${OPENIM_PUSH_PORT}, prometheus port: ${PUSH_PROM_PORT}"
 
-OPENIM_PUSH_PORTS_ARRAY=(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
-PUSH_PROM_PORTS_ARRAY=(openim::util::list-to-string ${PUSH_PROM_PORT} )
+OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
+PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
 
 openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
 openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"

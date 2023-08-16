@@ -79,31 +79,6 @@ IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
-openim::rpc::service_name() {
-  local targets=(
-    openim-rpc-user
-    openim-rpc-friend
-    openim-rpc-msg
-    openim-rpc-group
-    openim-rpc-auth
-    openim-rpc-conversation
-    openim-rpc-third
-  )
-  echo "${targets[@]}"
-}
-IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
-readonly OPENIM_RPC_SERVICE_TARGETS
-readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
-
-readonly OPENIM_API_SERVICE_TARGETS=(
-  openim-api
-)
-readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
-
-readonly OPENIM_API_PORT_TARGETS=(
-  ${API_OPENIM_PORT}
-)
-readonly OPENIM_API_PORT_LISTARIES=("${OPENIM_API_PORT_TARGETS[@]##*/}")
 
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {

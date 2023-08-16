@@ -31,11 +31,11 @@ openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
 openim::util::stop_services_with_name ${SERVER_NAME}
 
 # OpenIM message gateway service port
-OPENIM_RPC_PORTS=(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
+OPENIM_RPC_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
 # OpenIM WS port
-OPENIM_WS_PORTS=(openim::util::list-to-string ${OPENIM_WS_PORT} )
+OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
 # Message Gateway Prometheus port of the service
-MSG_GATEWAY_PROM_PORTS=(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
+MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
 
 openim::log::status "OpenIM RPC ports: ${OPENIM_RPC_PORTS[*]}"
 openim::log::status "OpenIM WS ports: ${OPENIM_WS_PORTS[*]}"
