@@ -38,7 +38,7 @@ const (
 	olineStatusKey            = "ONLINE_STATUS:"
 	userOlineStatusExpireTime = time.Second * 60 * 60 * 24
 	statusMod                 = 501
-	platformID                = "_PlatformID_"
+	platformID                = "_PlatformIDSuffix"
 )
 
 type UserCache interface {
@@ -95,7 +95,7 @@ func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
 }
 
 func (u *UserCacheRedis) getUserStatusHashKey(userID string, Id int32) string {
-	return userID + platformID + string(Id)
+	return userID + "_" + string(Id) + platformID
 }
 
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationTb.UserModel, err error) {
@@ -183,9 +183,9 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 			if err == redis.Nil {
 				// key or field does not exist
 				res = append(res, &user.OnlineStatus{
-					UserID:     userID,
-					Status:     constant.Offline,
-					PlatformID: -1,
+					UserID:      userID,
+					Status:      constant.Offline,
+					PlatformIDs: nil,
 				})
 				continue
 			} else {
@@ -217,14 +217,65 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineS
 		if err != nil {
 			return errs.Wrap(err)
 		}
-		//TODO 把平台号加到key上面保持key唯一
-		hashKey := u.getUserStatusHashKey(status.UserID, status.PlatformID)
-		_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		if isNewKey > 0 {
+		if isNewKey == 0 {
+			_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
+		} else {
+			result, err := u.rdb.HGet(ctx, key, status.UserID).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			var onlineStatus user.OnlineStatus
+			err = json.Unmarshal([]byte(result), &onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			onlineStatus.UserID = status.UserID
+			if status.Status == constant.Offline {
+				var newPlatformIDs []int32
+				for _, val := range onlineStatus.PlatformIDs {
+					if val != status.PlatformIDs[0] {
+						newPlatformIDs = append(newPlatformIDs, val)
+					}
+				}
+				if newPlatformIDs == nil {
+					onlineStatus.Status = constant.Offline
+					onlineStatus.PlatformIDs = nil
+					newjsonData, err := json.Marshal(&onlineStatus)
+					if err != nil {
+						return errs.Wrap(err)
+					}
+					_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
+					if err != nil {
+						return errs.Wrap(err)
+					}
+				} else {
+					onlineStatus.PlatformIDs = newPlatformIDs
+					newjsonData, err := json.Marshal(&onlineStatus)
+					if err != nil {
+						return errs.Wrap(err)
+					}
+					_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
+					if err != nil {
+						return errs.Wrap(err)
+					}
+				}
+			} else {
+				for _, val := range status.PlatformIDs {
+					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, val)
+				}
+				newjsonData, err := json.Marshal(&onlineStatus)
+				if err != nil {
+					return errs.Wrap(err)
+				}
+				_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
+				if err != nil {
+					return errs.Wrap(err)
+				}
+			}
 		}
 	}
 	return nil
