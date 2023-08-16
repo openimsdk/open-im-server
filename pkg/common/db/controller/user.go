@@ -53,7 +53,7 @@ type UserDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (int64, error)
 	// CountRangeEverydayTotal Get the user increment in the range
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
-	//SubscribeUsersStatus Subscribe a user's presence status
+	// SubscribeUsersStatus Subscribe a user's presence status
 	SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
 	// UnsubscribeUsersStatus unsubscribe a user's presence status
 	UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error

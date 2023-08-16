@@ -284,7 +284,8 @@ type notification struct {
 	GroupInfoSetAnnouncement NotificationConf `yaml:"groupInfoSetAnnouncement"`
 	GroupInfoSetName         NotificationConf `yaml:"groupInfoSetName"`
 	////////////////////////user///////////////////////
-	UserInfoUpdated NotificationConf `yaml:"userInfoUpdated"`
+	UserInfoUpdated   NotificationConf `yaml:"userInfoUpdated"`
+	UserStatusChanged NotificationConf `yaml:"userStatusChanged"`
 	//////////////////////friend///////////////////////
 	FriendApplicationAdded    NotificationConf `yaml:"friendApplicationAdded"`
 	FriendApplicationApproved NotificationConf `yaml:"friendApplicationApproved"`
