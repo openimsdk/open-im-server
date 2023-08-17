@@ -24,7 +24,7 @@ In the `scripts/init_config.sh` file, we defined some template files. These temp
 # Defines an associative array where the keys are the template files and the values are the corresponding output files.
 declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/scripts/template/config-tmpl/env.template"]="${OPENIM_OUTPUT_SUBPATH}/bin/.env"
-  ["${OPENIM_ROOT}/scripts/template/config-tmpl/openim_config.yaml"]="${OPENIM_OUTPUT_SUBPATH}/bin/openim_config.yaml"
+  ["${OPENIM_ROOT}/scripts/template/config-tmpl/config.yaml"]="${OPENIM_OUTPUT_SUBPATH}/bin/config.yaml"
 )
 ```
 

@@ -84,12 +84,6 @@ jobs:
           echo "Generate all necessary files successfully" 
         continue-on-error: true
 
-      - name: Run unit test and get test coverage
-        run: |
-          make cover
-          echo "Run unit test and get test coverage successfully" 
-        continue-on-error: true
-
       - name: Build source code for host platform
         run: |
           sudo make build

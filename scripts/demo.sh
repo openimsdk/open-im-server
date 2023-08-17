@@ -24,6 +24,13 @@ openim::util::desc "========> Press Enter to continue...."
 openim::util::run "make advertise"
 clear
 
+openim::util::desc "========> Initialize the project and generate configuration files"
+openim::util::run "make init"
+
+openim::util::desc "========> You can look git diff"
+openim::util::run "git diff"
+clear
+
 openim::util::desc "You can learn a lot about automation using make help"
 openim::util::run "make help"
 clear

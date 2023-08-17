@@ -14,7 +14,7 @@
 
 # -----------------------------------------------------------------
 # This config file is the template file
-# --| source: scripts/template/config-tmpl/openim_config.yaml
+# --| source: scripts/template/config-tmpl/config.yaml
 # --| env: scripts/install/environment.sh
 # --| target: config/config.yaml
 # -----------------------------------------------------------------

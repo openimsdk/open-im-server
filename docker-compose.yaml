@@ -98,86 +98,91 @@ services:
     restart: always
     command: minio server /data --console-address ':9090'
 
-  # openim-server:
-  #   # image: ghcr.io/openimsdk/openim-server:latest
-  #   image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:v3.2.1-beta.4
-  #   # image: openim/openim-server:latest
-  #   # build: .
-  #   container_name: openim-server
-  #   volumes:
-  #     - ./logs:/openim/openim-server/logs
-  #     - ./config:/openim/openim-server/config
-  #     - ./scripts:/openim/openim-server/scripts
-  #   restart: always
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #     - mysql
-  #     - mongodb
-  #     - redis
-  #     - minio
-  #   network_mode: "host"
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: "1g"
-  #       max-file: "2"
+  openim-server:
+    # image: ghcr.io/openimsdk/openim-server:latest
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
+    # image: openim/openim-server:latest
+    # build: .
+    container_name: openim-server
+    healthcheck:
+      test: ["CMD-SHELL", "./scripts/check_all.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ${DATA_DIR}/_output/openim/logs:/openim/openim-server/logs
+      - ${DATA_DIR}/config:/openim/openim-server/config
+      - ${DATA_DIR}/scripts:/openim/openim-server/scripts
+    restart: always
+    depends_on:
+      - zookeeper
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - minio
+    network_mode: "host"
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
 
-  # openim-chat:
-  #   # image: ghcr.io/openimsdk/openim-chat:latest
-  #   image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:latest
-  #   # image: openim/openim-chat:latest
-  #   container_name: openim-chat
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "./scripts/check_all.sh"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #   volumes:
-  #     - ${DATA_DIR}/_output/openim/openim-chat/logs:/openim/openim-chat/logs
-  #     - ${DATA_DIR}/_output/openim/openim-chat/config:/openim/openim-chat/config
-  #     - ${DATA_DIR}/_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
-  #   restart: always
-  #   user: root:root
-  #   depends_on:
-  #     - mysql
-  #     - mongodb
-  #     - redis
-  #     - minio
-  #     - openim-server
-  #   network_mode: "host"
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       max-size: "1g"
-  #       max-file: "2"
+  openim-chat:
+    # image: ghcr.io/openimsdk/openim-chat:latest
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:latest
+    # image: openim/openim-chat:latest
+    container_name: openim-chat
+    healthcheck:
+      test: ["CMD-SHELL", "./scripts/check_all.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ${DATA_DIR}/_output/openim/openim-chat/logs:/openim/openim-chat/logs
+      - ${DATA_DIR}/_output/openim/openim-chat/config:/openim/openim-chat/config
+      - ${DATA_DIR}/_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
+    restart: always
+    user: root:root
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+      - minio
+      - openim-server
+    network_mode: "host"
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./.docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
-  #   container_name: prometheus
-  #   #    ports:
-  #   #    - 9091:9091
-  #   depends_on:
-  #     - openim-server
-  #   command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
-  #   network_mode: "host"
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./.docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    #    ports:
+    #    - 9091:9091
+    depends_on:
+      - openim-server
+    command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
+    network_mode: "host"
 
-  # grafana:
-  #   image: grafana/grafana
-  #   volumes:
-  #     - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-  #     - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
-  #     - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
-  #   container_name: grafana
-  #   depends_on:
-  #     - prometheus
-  #   network_mode: "host"
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./.docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./.docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
+      - ./.docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
+    container_name: grafana
+    depends_on:
+      - prometheus
+    network_mode: "host"
 
-  # node-exporter:
-  #   image: quay.io/prometheus/node-exporter
-  #   container_name: node-exporter
-  #   restart: always
-  #   ports:
-  #     - "9100:9100"
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
