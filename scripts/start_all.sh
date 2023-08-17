@@ -102,7 +102,8 @@ for i in ${need_to_start_server_shell[*]}; do
   ./$i
 
   # Check if the script executed successfully
-  if [ $? -ne 0 ]; then
+  if [ $? -ne
+   ]; then
     # Print error message and exit
     echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${i}. Exiting...${COLOR_SUFFIX}"
     exit -1
