@@ -62,7 +62,7 @@ function style-info() {
     BACKGROUND_LIGHT_SKY_BLUE="\033[106m"  # Light sky blue background
     BACKGROUND_LIGHT_WHITE="\033[107m"  # Light white background
 
-    RED_BOLD = "\033[1;31m"
+    RED_BOLD="\033[1;31m"
 }
 
 style-info
