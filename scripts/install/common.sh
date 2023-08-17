@@ -75,6 +75,28 @@ IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
+# This function returns a list of ports for various services
+#  - zookeeper
+#  - kafka
+#  - mysql
+#  - mongodb
+#  - redis
+#  - minio
+openim::common::dependency_port() {
+  local targets=(
+    ${MYSQL_PORT} # MySQL port 
+    ${REDIS_PORT} # Redis port
+    ${ZOOKEEPER_PORT} # Zookeeper port
+    ${KAFKA_PORT} # Kafka port
+    ${MongoDB_PORT} # MongoDB port
+    ${MINIO_PORT} # MinIO port
+  )
+    echo "${targets[@]}"
+}
+IFS=" " read -ra OPENIM_DEPENDENCY_PORT_TARGETS <<< "$(openim::common::dependency_port)"
+readonly OPENIM_DEPENDENCY_PORT_TARGETS
+readonly OPENIM_DEPENDENCY_PORT_LISTARIES=("${OPENIM_DEPENDENCY_PORT_TARGETS[@]##*/}")
+
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {
   echo ${LINUX_PASSWORD} | sudo -S $1

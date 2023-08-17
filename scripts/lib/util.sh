@@ -282,10 +282,10 @@ openim::util::check_ports() {
             started+=("Port $port - Command: $command, PID: $pid, Start time: $start_time")
         fi
     done
-
+    echo 
     # Print information about ports whose processes are not running.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::log::info "Not started ports:"
+        openim::log::info "### Not started ports:"
         for port in "${not_started[@]}"; do
             openim::log::error "Port $port is not started."
         done
@@ -294,7 +294,7 @@ openim::util::check_ports() {
     # Print information about ports whose processes are running.
     if [[ ${#started[@]} -ne 0 ]]; then
         echo
-        openim::log::info "Started ports:"
+        openim::log::info "### Started ports:"
         for info in "${started[@]}"; do
             openim::log::info "$info"
         done
@@ -304,7 +304,7 @@ openim::util::check_ports() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         return 1
     else
-        openim::log::success "All processes are running."
+        openim::log::success "started[@] processes are running."
         return 0
     fi
 }
@@ -1196,7 +1196,7 @@ function openim::util::get_server_ip() {
     # Check if the 'curl' command is available
     if command -v curl &> /dev/null; then
         # Try to retrieve the public IP address using curl and ifconfig.me
-        IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com)
+        IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/"//g' | tr -d '\n')
         
         # Check if IP retrieval was successful
         if [[ -z "$IP" ]]; then

@@ -22,7 +22,7 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
 LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
-source "${OPENIM_ROOT}/scripts/lib/util.sh"
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 IP=$(openim::util::get_server_ip)
 
@@ -70,12 +70,14 @@ def "OPNEIM_CONFIG" "${OPENIM_ROOT}/config"
 
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                                            # Zookeeper的模式
-def "ZOOKEEPER_ADDRESS" "127.0.0.1:2181"                                   # Zookeeper的地址
+def "ZOOKEEPER_PORT" "2181"                                                # Zookeeper的端口
+def "ZOOKEEPER_ADDRESS" "127.0.0.1"                                        # Zookeeper的地址
 def "ZOOKEEPER_USERNAME" ""                                                # Zookeeper的用户名
 def "ZOOKEEPER_PASSWORD" ""                                                # Zookeeper的密码
 
 ###################### MySQL 配置信息 ######################
-def "MYSQL_ADDRESS" "127.0.0.1:13306"                                      # MySQL的地址
+def "MYSQL_PORT" "13306"                                                   # MySQL的端口
+def "MYSQL_ADDRESS" "127.0.0.1"                                            # MySQL的地址
 def "MYSQL_USERNAME" "${USER}"                                             # MySQL的用户名
 def "MYSQL_PASSWORD" "${PASSWORD}"                                         # MySQL的密码
 def "MYSQL_DATABASE" "${DATABASE_NAME}"                                    # MySQL的数据库名
@@ -87,7 +89,8 @@ def "MYSQL_SLOW_THRESHOLD" "500"                                           # 慢
 
 ###################### MongoDB 配置信息 ######################
 def "MONGO_URI"                                                            # MongoDB的URI
-def "MONGO_ADDRESS" "127.0.0.1:37017"                                      # MongoDB的地址
+def "MONGO_PORT" "37017"                                                   # MongoDB的端口
+def "MONGO_ADDRESS" "127.0.0.1"                                            # MongoDB的地址
 def "MONGO_DATABASE" "${DATABASE_NAME}"                                    # MongoDB的数据库名
 def "MONGO_USERNAME" "${USER}"                                             # MongoDB的用户名
 def "MONGO_PASSWORD" "${PASSWORD}"                                         # MongoDB的密码
@@ -97,7 +100,9 @@ def "MONGO_MAX_POOL_SIZE" "100"                                            # 最
 def "OBJECT_ENABLE" "minio"                                                # 对象是否启用
 def "OBJECT_APIURL" "http://127.0.0.1:10002/object/"                       # 对象的API地址
 def "MINIO_BUCKET" "openim"                                                # MinIO的存储桶名称
-def "MINIO_ENDPOINT" "http://${IP}:10005"                                  # MinIO的端点URL
+def "MINIO_PORT" "10005"                                                   # MinIO的端口
+# MinIO的端点URL
+readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${IP}:${MINIO_PORT}"}
 def "MINIO_ACCESS_KEY" "${USER}"                                           # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                       # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                  # MinIO的会话令牌
@@ -113,14 +118,16 @@ def "OSS_ACCESS_KEY_SECRET"                                                # 阿
 def "OSS_SESSION_TOKEN"                                                    # 阿里云OSS的会话令牌
 
 ###################### Redis 配置信息 ######################
-def "REDIS_ADDRESS" "127.0.0.1:16379"                       # Redis的地址
+def "REDIS_PORT" "16379"                                     # Redis的端口
+def "REDIS_ADDRESS" "127.0.0.1"                             # Redis的地址
 def "REDIS_USERNAME"                                        # Redis的用户名
 def "REDIS_PASSWORD" "${PASSWORD}"                          # Redis的密码
 
 ###################### Kafka 配置信息 ######################
 def "KAFKA_USERNAME"                                        # Kafka的用户名
 def "KAFKA_PASSWORD"                                        # Kafka的密码
-def "KAFKA_ADDR" "127.0.0.1:9092"                           # Kafka的地址
+def "KAFKA_PORT" "9092"                                     # Kafka的端口
+def "KAFKA_ADDR" "127.0.0.1"                                # Kafka的地址
 def "KAFKA_LATESTMSG_REDIS_TOPIC" "latestMsgToRedis"        # Kafka的最新消息到Redis的主题
 def "KAFKA_OFFLINEMSG_MONGO_TOPIC" "offlineMsgToMongoMysql" # Kafka的离线消息到Mongo的主题
 def "KAFKA_MSG_PUSH_TOPIC" "msgToPush"                      # Kafka的消息到推送的主题

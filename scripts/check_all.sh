@@ -17,6 +17,7 @@
 # 
 # Usage: `scripts/check_all.sh`.
 # Encapsulated as: `make check`.
+# READ: https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/install/environment.sh 
 
 set -o errexit
 set -o nounset
@@ -27,6 +28,19 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 OPENIM_VERBOSE=4
 
-echo "The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+echo "++++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 
+echo "++++ Check all dependent service ports"
+echo "+ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
+
+if [[ $? -ne 0 ]]; then
+  openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
+  echo "+++ https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/install/environment.sh +++"
+else
+  echo "++++ Check all dependent service ports successfully !"
+fi
+
+echo "++++ Check all OpenIM service ports"
+echo "+ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}

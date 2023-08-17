@@ -28,7 +28,7 @@
 # Zookeeper password
 zookeeper:
   schema: ${ZOOKEEPER_SCHEMA}
-  address: [ ${ZOOKEEPER_ADDRESS} ]
+  address: [ ${ZOOKEEPER_ADDRESS}:${ZOOKEEPER_PORT} ]
   username: ${ZOOKEEPER_USERNAME}
   password: ${ZOOKEEPER_PASSWORD}
 
@@ -42,7 +42,7 @@ zookeeper:
 # Log level: 1=slient, 2=error, 3=warn, 4=info
 # Slow query threshold in milliseconds
 mysql:
-  address: [ ${MYSQL_ADDRESS} ]
+  address: [ ${MYSQL_ADDRESS}:${MYSQL_PORT} ]
   username: ${MYSQL_USERNAME}
   password: ${MYSQL_PASSWORD}
   database: ${MYSQL_DATABASE}
@@ -61,7 +61,7 @@ mysql:
 # Maximum connection pool size
 mongo:
   uri: ${MONGO_URI}
-  address: [ ${MONGO_ADDRESS} ]
+  address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
   database: ${MONGO_DATABASE}
   username: ${MONGO_USERNAME}
   password: ${MONGO_PASSWORD}
@@ -72,7 +72,7 @@ mongo:
 #
 # Username is required only for Redis version 6.0+
 redis:
-  address: [ ${REDIS_ADDRESS} ]
+  address: [ ${REDIS_ADDRESS}:${REDIS_PORT} ]
   username: ${REDIS_USERNAME}
   password: ${REDIS_PASSWORD}
 
@@ -86,7 +86,7 @@ redis:
 kafka:
   username: ${KAFKA_USERNAME}
   password: ${KAFKA_PASSWORD}
-  addr: [ ${KAFKA_ADDR} ]
+  addr: [ ${KAFKA_ADDR}:${KAFKA_PORT} ]
   latestMsgToRedis:
     topic: ${KAFKA_LATESTMSG_REDIS_TOPIC}
   offlineMsgToMongo:

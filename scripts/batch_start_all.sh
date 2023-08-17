@@ -26,6 +26,7 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 trap 'openim::util::onCtrlC' INT
 
 need_to_start_server_shell=(
+  "oepnim-api.sh"
   "openim-rpc.sh"
   "openim-msggateway.sh"
   "openim-push.sh"
