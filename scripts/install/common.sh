@@ -21,15 +21,11 @@ set -o pipefail
 
 # Sourced flag
 COMMON_SOURCED=true
-
 # The root of the build/dist directory
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
-
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
-
 # This function returns a list of Prometheus ports for various services
 # based on the provided configuration. Each service has its own dedicated
 # port for monitoring purposes.
@@ -78,7 +74,6 @@ openim::common::service_port() {
 IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)"
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
-
 
 # Execute commands that require root permission without entering a password
 function openim::common::sudo {

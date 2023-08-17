@@ -22,7 +22,7 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
 # 生成文件存放目录
 LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
-source "${OPENIM_ROOT}/scripts/lib/init.sh"
+source "${OPENIM_ROOT}/scripts/lib/util.sh"
 
 IP=$(openim::util::get_server_ip)
 
@@ -134,8 +134,8 @@ def "RPC_REGISTER_IP"         # RPC的注册IP
 def "RPC_LISTEN_IP" "0.0.0.0" # RPC的监听IP
 
 ###################### API 配置信息 ######################
-# API的开放端口
-readonly API_OPENIM_PORT=${API_OPENIM_PORT:-'10002'}
+# API的开放端口, 只能设置一个端口
+def "API_OPENIM_PORT" "10002"
 def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################

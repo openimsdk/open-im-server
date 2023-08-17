@@ -13,12 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # The golang package that we are building.
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-readonly KUBE_GO_PACKAGE=github.com/openimsdk/open-im-server
-readonly KUBE_GOPATH="${KUBE_GOPATH:-"${KUBE_OUTPUT}/go"}"
-export KUBE_GOPATH
+readonly OPENIM_GO_PACKAGE=github.com/openimsdk/open-im-server
 
 # The server platform we are building on.
 readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
@@ -95,6 +92,7 @@ readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
 openim::golang::start_script_list() {
   local targets=(
+      openim-api.sh
       openim-rpc.sh
       openim-push.sh
       openim-msgtransfer.sh

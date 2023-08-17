@@ -308,7 +308,7 @@ openim::util::check_ports() {
         return 0
     fi
 }
-# openim::util::check_ports 9090 9092
+# openim::util::check_ports 10002 1004
 
 # The `openim::util::check_process_names` function analyzes the state of processes based on given names.
 # It accepts multiple process names as arguments and prints:
@@ -1191,11 +1191,12 @@ function openim::util::run::relative() {
 # It primarily uses the `curl` command to fetch the public IP address from ifconfig.me.
 # If curl or the service is not available, it falls back 
 # to the internal IP address provided by the hostname command.
+# TODO: If a delay is found, the delay needs to be addressed
 function openim::util::get_server_ip() {
     # Check if the 'curl' command is available
     if command -v curl &> /dev/null; then
         # Try to retrieve the public IP address using curl and ifconfig.me
-        IP=$(curl -s ifconfig.me)
+        IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com)
         
         # Check if IP retrieval was successful
         if [[ -z "$IP" ]]; then

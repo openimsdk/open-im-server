@@ -40,22 +40,6 @@ IFS=" " read -ra OPENIM_RPC_SERVICE_TARGETS <<< "$(openim::rpc::service_name)"
 readonly OPENIM_RPC_SERVICE_TARGETS
 readonly OPENIM_RPC_SERVICE_LISTARIES=("${OPENIM_RPC_SERVICE_TARGETS[@]##*/}")
 
-readonly OPENIM_API_SERVICE_TARGETS=(
-  openim-api
-)
-readonly OPENIM_API_SERVICE_LISTARIES=("${OPENIM_API_SERVICE_TARGETS[@]##*/}")
-
-readonly OPENIM_API_PORT_TARGETS=(
-  ${API_OPENIM_PORT}
-)
-readonly OPENIM_API_PORT_LISTARIES=("${OPENIM_API_PORT_TARGETS[@]##*/}")
-
-readonly OPENIM_RPC_ALL_NAME_TARGETS=(
-  "${OPENIM_API_SERVICE_TARGETS[@]}"
-  "${OPENIM_RPC_SERVICE_TARGETS[@]}"
-)
-readonly OPENIM_RPC_ALL_NAME_LISTARIES=("${OPENIM_RPC_ALL_NAME_TARGETS[@]##*/}")
-
 # Make sure the environment is only called via common to avoid too much nesting
 openim::rpc::service_port() {
   local targets=(
@@ -75,12 +59,6 @@ IFS=" " read -ra OPENIM_RPC_PORT_TARGETS <<< "$(openim::rpc::service_port)"
 readonly OPENIM_RPC_PORT_TARGETS
 readonly OPENIM_RPC_PORT_LISTARIES=("${OPENIM_RPC_PORT_TARGETS[@]##*/}")
 
-readonly OPENIM_RPC_ALL_PORT_TARGETS=(
-  "${OPENIM_API_PORT_TARGETS[@]}"
-  "${OPENIM_RPC_PORT_TARGETS[@]}"
-)
-readonly OPENIM_RPC_ALL_PORT_LISTARIES=("${OPENIM_RPC_ALL_PORT_TARGETS[@]##*/}")
-
 openim::rpc::prometheus_port() {
   # Declare an array to hold all the Prometheus ports for different services
   local targets=(
@@ -99,15 +77,9 @@ IFS=" " read -ra OPENIM_RPC_PROM_PORT_TARGETS <<< "$(openim::rpc::prometheus_por
 readonly OPENIM_RPC_PROM_PORT_TARGETS
 readonly OPENIM_RPC_PROM_PORT_LISTARIES=("${OPENIM_RPC_PROM_PORT_TARGETS[@]##*/}")
 
-readonly OPENIM_RPC_ALL_PROM_PORT_TARGETS=(
-  "${OPENIM_API_PORT_TARGETS[@]}"
-  "${OPENIM_RPC_PROM_PORT_TARGETS[@]}"
-)
-readonly OPENIM_RPC_ALL_PROM_PORT_LISTARIES=("${OPENIM_RPC_ALL_PROM_PORT_TARGETS[@]##*/}")
-
-echo "OPENIM_RPC_ALL_NAME_TARGETS: ${OPENIM_RPC_ALL_NAME_TARGETS[@]}"
-echo "OPENIM_RPC_ALL_PROM_PORT_TARGETS: ${OPENIM_RPC_ALL_PROM_PORT_TARGETS[@]}"
-echo "OPENIM_RPC_ALL_PORT_TARGETS: ${OPENIM_RPC_ALL_PORT_TARGETS[@]}"
+echo "OPENIM_RPC_SERVICE_LISTARIES: ${OPENIM_RPC_SERVICE_LISTARIES[@]}"
+echo "OPENIM_RPC_PROM_PORT_LISTARIES: ${OPENIM_RPC_PROM_PORT_LISTARIES[@]}"
+echo "OPENIM_RPC_PORT_LISTARIES: ${OPENIM_RPC_PORT_LISTARIES[@]}"
 
 openim::log::info "Starting ${SERVER_NAME} ..."
 
@@ -115,10 +87,10 @@ printf "+------------------------+-------+-----------------+\n"
 printf "| Service Name           | Port  | Prometheus Port |\n"
 printf "+------------------------+-------+-----------------+\n"
 
-length=${#OPENIM_RPC_ALL_NAME_LISTARIES[@]}
+length=${#OPENIM_RPC_SERVICE_LISTARIES[@]}
 
 for ((i=0; i<$length; i++)); do
-  printf "| %-22s | %-5s | %-15s |\n" "${OPENIM_RPC_ALL_NAME_LISTARIES[$i]}" "${OPENIM_RPC_ALL_PORT_LISTARIES[$i]}" "${OPENIM_RPC_ALL_PROM_PORT_LISTARIES[$i]}"
+  printf "| %-22s | %-5s | %-15s |\n" "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_PORT_LISTARIES[$i]}" "${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}"
   printf "+------------------------+-------+-----------------+\n"
 done
 
@@ -137,63 +109,20 @@ function openim::rpc::start_service() {
 }
 
 # start all rpc services
-for ((i = 0; i < ${#OPENIM_RPC_ALL_NAME_TARGETS[*]}; i++)); do
-  openim::util::stop_services_with_name ${OPENIM_RPC_ALL_NAME_TARGETS[$i]}
-  openim::log::info "OpenIM ${OPENIM_RPC_ALL_NAME_TARGETS[$i]} config path: ${OPENIM_RPC_CONFIG}"
+for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
+  openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[$i]}
+  openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
 
   # Get the service and Prometheus ports.
-  OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_ALL_PORT_LISTARIES[$i]}) )
-  OPENIM_RPC_PROM_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_ALL_PROM_PORT_LISTARIES[$i]}) )
+  OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
+  OPENIM_RPC_PROM_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}) )
 
   for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS[@]}; j++)); do
-    openim::log::info "Starting ${OPENIM_RPC_ALL_NAME_TARGETS[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_ALL_NAME_TARGETS[$i]}"
-    openim::rpc::start_service "${OPENIM_RPC_ALL_NAME_TARGETS[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
+    openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
+    openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
+    sleep 1
   done
 done
 
-
-openim::util::check_ports ${OPENIM_RPC_ALL_PORT_TARGETS[@]}
-openim::util::check_ports ${OPENIM_RPC_ALL_PROM_PORT_TARGETS[@]}
-
-# ---
-# for ((i = 0; i < ${#service_filename[*]}; i++)); do
-#   #Check whether the service exists
-#   service_name="ps |grep -w ${service_filename[$i]} |grep -v grep"
-#   count="${service_name}| wc -l"
-
-#   if [ $(eval ${count}) -gt 0 ]; then
-#     pid="${service_name}| awk '{print \$2}'"
-#     echo  "${service_filename[$i]} service has been started,pid:$(eval $pid)"
-#     echo  "killing the service ${service_filename[$i]} pid:$(eval $pid)"
-#     #kill the service that existed
-#     kill -9 $(eval $pid)
-#     sleep 0.5
-#   fi
-#   cd $OPENIM_ROOT
-#   cd $BIN_DIR
-#   # Get the rpc port in the configuration file
-#   portList=$(cat $config_path | grep ${service_port_name[$i]} | awk -F '[:]' '{print $NF}')
-#   openim::util::list-to-string ${portList}
-#   service_ports=($ports_array)
-
-#   portList2=$(cat $config_path | grep ${service_prometheus_port_name[$i]} | awk -F '[:]' '{print $NF}')
-#   openim::util::list-to-string $portList2
-#   prome_ports=($ports_array)
-#   #Start related rpc services based on the number of ports
-#   for ((j = 0; j < ${#service_ports[*]}; j++)); do
-#     #Start the service in the background
-#     if [ -z "${prome_ports[$j]}" ]; then
-#       cmd="./${service_filename[$i]} --port ${service_ports[$j]} -c ${configfile_path} "
-#     else
-#       cmd="./${service_filename[$i]} --port ${service_ports[$j]} --prometheus_port ${prome_ports[$j]}  -c ${configfile_path} "
-#     fi
-#     if [ $i -eq 0 -o $i -eq 1 ]; then
-#       cmd="./${service_filename[$i]} --port ${service_ports[$j]}"
-#     fi
-#     echo "=====================start ${service_filename[$i]}======================">>$OPENIM_ROOT/logs/openIM.log
-#     nohup $cmd >>$OPENIM_ROOT/logs/openIM.log 2>&1 &
-#     sleep 1
-#     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
-#     echo -e "${GREEN_PREFIX}${service_filename[$i]} start success,port number:${service_ports[$j]} pid:$(eval $pid)$COLOR_SUFFIX"
-#   done
-# done
+openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
+# openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
