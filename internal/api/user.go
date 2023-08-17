@@ -196,6 +196,12 @@ func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
 }
 
+// GetUserStatus Get the online status of the user.
 func (u *UserApi) GetUserStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
+}
+
+// GetSubscribeUsersStatus Get the online status of subscribers.
+func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
 }
