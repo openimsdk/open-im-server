@@ -287,7 +287,7 @@ openim::util::check_ports() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "### Not started ports:"
         for port in "${not_started[@]}"; do
-            openim::log::error "Port $port is not started."
+            openim::log::error "Port $port is not started. cat openim log >>> cat ${LOG_FILE}"
         done
     fi
 
@@ -352,7 +352,7 @@ openim::util::check_process_names() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "Not started processes:"
         for process_name in "${not_started[@]}"; do
-            openim::log::error "Process $process_name is not started."
+            openim::log::error "Process $process_name is not started. cat openim log >>> cat ${LOG_FILE}"
         done
     fi
 
@@ -414,7 +414,7 @@ openim::util::stop_services_on_ports() {
     if [[ ${#not_stopped[@]} -ne 0 ]]; then
         openim::log::info "Ports that couldn't be stopped:"
         for port in "${not_stopped[@]}"; do
-            openim::log::error "Failed to stop service on port $port."
+            openim::log::status "Failed to stop service on port $port."
         done
     fi
 
@@ -494,7 +494,7 @@ openim::util::stop_services_with_name() {
     if [[ ${#not_stopped[@]} -ne 0 ]]; then
         openim::log::info "Services that couldn't be stopped:"
         for name in "${not_stopped[@]}"; do
-            openim::log::error "Failed to stop the $name service."
+            openim::log::status "Failed to stop the $name service."
         done
     fi
 
