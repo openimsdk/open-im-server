@@ -16,11 +16,13 @@ package notification
 
 import (
 	"context"
+
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
 type UserNotificationSender struct {
