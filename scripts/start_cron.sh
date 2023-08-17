@@ -35,11 +35,11 @@ logs_dir="$OPENIM_ROOT/logs"
 #Check if the service exists
 #If it is exists,kill this process
 check=`ps  | grep -w ./${cron_task_name} | grep -v grep| wc -l`
-if [ $check -ge 1 ]
-then
-oldPid=`ps | grep -w ./${cron_task_name} | grep -v grep|awk '{print $2}'`
- kill -9 $oldPid
-fi
+#if [ $check -ge 1 ]
+#then
+#oldPid=`ps | grep -w ./${cron_task_name} | grep -v grep|awk '{print $2}'`
+# kill -9 $oldPid
+#fi
 #Waiting port recycling
 sleep 1
 
