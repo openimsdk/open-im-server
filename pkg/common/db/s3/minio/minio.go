@@ -84,6 +84,7 @@ func NewMinio() (s3.Interface, error) {
 		init:      false,
 	}
 	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+		m.opts = opts
 		m.sign = m.core.Client
 	} else {
 		su, err := url.Parse(conf.SignEndpoint)
