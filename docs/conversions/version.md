@@ -53,9 +53,15 @@ git merge release-v3.1
 # Push the updates to the main branch
 git push origin main
 ```
-##  Pre-release Process
-The pre-release process of OpenIM, including the three repositories Open-IM-Server/chat/open-im-sdk-core, is as follows:
-(1) Check out a new branch named 'develop' from the 'main' branch;
-(2) Generate the SDK on the 'develop' branch of open-im-sdk-core, and deploy the 'develop' branch in chat/Open-IM-Server;
-(3) Test by packaging the apk with the new version of SDK;
-(4) The bug-fixing process on the 'develop' branch: Fork from the 'develop' branch to the personal repository, then create a pull request to merge into the 'develop' branch, and finally merge into the 'main' branch.
+##  Release Process
+
+```
+Publishing v3.2.0: A Step-by-Step Guide
+(1) Create the tag v3.2.0-alpha.0 from the main branch.
+(2) Bugs are fixed on the main branch. Once the bugs are resolved, tag the main branch as v3.2.0-rc.0.
+(3) After further testing, if v3.2.0-rc.0 is deemed stable, create a branch named release-v3.2 from the tag v3.2.0-rc.0.
+(4) From the release-v3.2 branch, create the tag v3.2.0. At this point, the official release of v3.2.0 is complete.
+
+After the release of v3.2.0, if urgent bugs are discovered, fix them on the release-v3.2 branch. Then, submit two pull requests (PRs) to both the main and release-v3.2 branches. Tag the release-v3.2 branch as v3.2.1.
+```
+
