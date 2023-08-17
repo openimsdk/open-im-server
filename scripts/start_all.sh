@@ -85,7 +85,7 @@ echo -e ""
 ./$component_check
 if [ $? -ne 0 ]; then
   # Print error message and exit
-  echo -e "${BOLD_PREFIX}${RED_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+  echo -e "${RED_BOLD}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
   exit -1
 fi
 
