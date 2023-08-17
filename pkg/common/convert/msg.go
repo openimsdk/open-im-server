@@ -78,6 +78,7 @@ func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
 	msg.SendTime = msgModel.SendTime
 	msg.CreateTime = msgModel.CreateTime
 	msg.Status = msgModel.Status
+	msg.IsRead = msgModel.IsRead
 	msg.Options = msgModel.Options
 	if msgModel.OfflinePush != nil {
 		msg.OfflinePushInfo = &sdkws.OfflinePushInfo{
