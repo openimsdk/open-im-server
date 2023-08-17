@@ -61,8 +61,8 @@ jobs:
 
     - name: Build all services
       run: |
-        sudo chmod +x ./scripts/build_all_service.sh
-        sudo ./scripts/build_all_service.sh
+        sudo chmod +x ./scripts/build-all-service.sh
+        sudo ./scripts/build-all-service.sh
         sudo cat logs/openIM.log 2>/dev/null
       shell: bash
 

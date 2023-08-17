@@ -205,12 +205,12 @@ go.format: tools.verify.golines tools.verify.goimports
 	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
-## imports: task to automatically handle import packages in Go files using goimports tool
+## go.imports: task to automatically handle import packages in Go files using goimports tool
 .PHONY: go.imports
 go.imports: tools.verify.goimports
 	@$(TOOLS_DIR)/goimports -l -w $(SRC)
 
-## verify: execute all verity scripts.
+## go.verify: execute all verity scripts.
 .PHONY: go.verify
 go.verify:
 	@echo "Starting verification..."
@@ -234,7 +234,7 @@ go.clean:
 	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR) $(LOGS_DIR)
 	@echo "===========> End clean..."
 
-## copyright.help: Show copyright help
+## go.help: Show go tools help
 .PHONY: go.help
 go.help: scripts/make-rules/golang.mk
 	$(call smallhelp)

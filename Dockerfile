@@ -28,4 +28,4 @@ COPY --from=builder ${OPENIM_SERVER_CMDDIR} /openim/openim-server/scripts
 COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
 COPY --from=builder ${OPENIM_SERVER_BINDIR} /openim/openim-server/_output/bin
 
-CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker-start-all-all.sh"]
+CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker-start-all.sh"]

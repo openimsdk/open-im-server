@@ -19,7 +19,7 @@
 #   WHAT: Directory names to build.  If any of these directories has a 'main'
 #     package, the build will produce executable files under $(OUT_DIR)/bin/platforms OR $(OUT_DIR)/bin—tools/platforms.
 #     If not specified, "everything" will be built.
-# Usage: `scripts/build_all_service.sh`.
+# Usage: `scripts/build-all-service.sh`.
 # Example: `hack/build-go.sh WHAT=cmd/kubelet`.
 
 set -o errexit
@@ -58,15 +58,15 @@ openim::color::echo $COLOR_CYAN "NOTE: $0 has been replaced by 'make multiarch' 
 echo
 echo "The equivalent of this invocation is: "
 echo "    make build ${ARGHELP}"
-echo "    ./scripts/build_all_service.sh ${ARGHELP}"
+echo "    ./scripts/build-all-service.sh ${ARGHELP}"
 echo
 echo " Example: "
 echo "    Print a single binary:"
 echo "    make build BINS=openim-api"
-echo "    ./scripts/build_all_service.sh BINS=openim-api"
+echo "    ./scripts/build-all-service.sh BINS=openim-api"
 echo "    Print : Enable debugging and logging"
 echo "    make build BINS=openim-api V=1 DEBUG=1"
-echo "    ./scripts/build_all_service.sh BINS=openim-api V=1 DEBUG=1"
+echo "    ./scripts/build-all-service.sh BINS=openim-api V=1 DEBUG=1"
 echo
 
 if [ -z "$*" ]; then

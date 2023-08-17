@@ -53,6 +53,11 @@ export USAGE_OPTIONS
 # ==============================================================================
 # Targets
 
+## init: Initialize openim server project ✨
+.PHONY: init
+init:
+	@$(MAKE) gen.init
+
 ## demo: Run demo get started with Makefiles quickly ✨
 .PHONY: demo
 demo:

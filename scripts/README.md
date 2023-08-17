@@ -32,7 +32,7 @@ scripts/
 ├── advertise.sh                   # Script for advertisement services
 ├── batch_start-all.sh             # Script to start all services in batch
 ├── build.cmd                      # Windows build command script
-├── build_all_service.sh           # Script to build all services
+├── build-all-service.sh           # Script to build all services
 ├── build_push_k8s_images.sh       # Script to build and push images for Kubernetes
 ├── check_all.sh                   # Script to check status of all services
 ├── common.sh                      # Contains common functions used by other scripts
