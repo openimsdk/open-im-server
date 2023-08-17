@@ -16,7 +16,6 @@ package msg
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
@@ -187,4 +186,7 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 	}
 	resp.ChatLogsNum = total
 	return resp, nil
+}
+func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) (*msg.GetServerTimeResp, error) {
+	return &msg.GetServerTimeResp{ServerTime: utils.GetCurrentTimestampByMill()}, nil
 }
