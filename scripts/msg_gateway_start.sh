@@ -50,11 +50,11 @@ if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 fi
 #Check if the service exists
 #If it is exists,kill this process
-check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
-if [ $check -ge 1 ]; then
-  oldPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
-    kill -9 ${oldPid}
-fi
+#check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
+#if [ $check -ge 1 ]; then
+#  oldPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
+#    kill -9 ${oldPid}
+#fi
 #Waiting port recycling
 sleep 1
 cd ${msg_gateway_binary_root}
