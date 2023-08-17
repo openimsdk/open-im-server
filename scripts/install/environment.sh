@@ -36,7 +36,7 @@ function def() {
 }
 
 # app要能访问到此ip和端口或域名
-def "API_URL" "http://${IP}:10002/object/"
+def "API_URL" "${IP}:10002/object/"
 def "DATA_DIR" "${OPENIM_ROOT}"
 
 # 设置统一的用户名，方便记忆
@@ -105,11 +105,11 @@ def "OBJECT_APIURL" "http://127.0.0.1:10002/object/"                       # 对
 def "MINIO_BUCKET" "openim"                                                # MinIO的存储桶名称
 def "MINIO_PORT" "10005"                                                   # MinIO的端口
 # MinIO的端点URL
-readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${IP}:${MINIO_PORT}"}
+readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"${IP}:${MINIO_PORT}"}
 def "MINIO_ACCESS_KEY" "${USER}"                                           # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                       # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                  # MinIO的会话令牌
-readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址                                              # MinIO的会话令牌
+readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址                                              # MinIO的会话令牌
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com" # 腾讯云COS的存储桶URL
 def "COS_SECRET_ID"                                                        # 腾讯云COS的密钥ID
 def "COS_SECRET_KEY"                                                       # 腾讯云COS的密钥

@@ -22,12 +22,7 @@ source "$SCRIPTS_ROOT/style_info.sh"
 
 echo -e "${GREEN_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
 
-function openim::util::onCtrlC() {
-    kill -9 "${do_sth_pid}" "${progress_pid}" "${countdown_pid}"
-    echo
-    echo 'Ctrl+C is captured'
-    exit 1
-}
+
 
 cd "$OPENIM_ROOT"
 

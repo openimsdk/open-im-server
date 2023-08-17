@@ -18,7 +18,7 @@ set -o pipefail
 
 . $(dirname ${BASH_SOURCE})/lib/init.sh
 
-openim::util::onCtrlC
+trap 'openim::util::onCtrlC' INT
 
 print_with_delay() {
   text="$1"

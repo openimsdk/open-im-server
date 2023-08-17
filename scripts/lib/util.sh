@@ -1212,11 +1212,10 @@ function openim::util::get_server_ip() {
     echo "$IP"
 }
 
-function openim::util::onCtrlC () {
-    #Capture CTRL+C, terminate the background process of the program when the script is terminated in the form of ctrl+c
-    kill -9 ${do_sth_pid} ${progress_pid}
+function openim::util::onCtrlC() {
+    kill -9 "${do_sth_pid}" "${progress_pid}" "${countdown_pid}"
     echo
-    echo '!!! openim: Ctrl+C is captured'
+    echo 'Ctrl+C is captured'
     exit 1
 }
 

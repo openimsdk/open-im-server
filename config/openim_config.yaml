@@ -135,11 +135,11 @@ object:
   apiURL: "http://127.0.0.1:10002/object/"
   minio:
     bucket: "openim"
-    endpoint: "http://http://127.0.0.1:10005"
+    endpoint: "http://127.0.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://http://127.0.0.1:10005"
+    signEndpoint: "http://127.0.0.1:10005"
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
     secretID: ''
