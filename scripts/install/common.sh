@@ -87,7 +87,7 @@ openim::common::dependency_port() {
     ${MYSQL_PORT} # MySQL port 
     ${REDIS_PORT} # Redis port
     ${ZOOKEEPER_PORT} # Zookeeper port
-    # ${KAFKA_PORT} # Kafka port
+    ${KAFKA_PORT} # Kafka port
     ${MongoDB_PORT} # MongoDB port
     ${MINIO_PORT} # MinIO port
   )
