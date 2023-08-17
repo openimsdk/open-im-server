@@ -17,16 +17,19 @@ package msggateway
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+
+	"github.com/OpenIMSDK/protocol/constant"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/protocol/constant"
 
 	"github.com/redis/go-redis/v9"
 
@@ -74,6 +77,7 @@ type WsServer struct {
 	hubServer         *Server
 	validate          *validator.Validate
 	cache             cache.MsgModel
+	userClient        *rpcclient.UserRpcClient
 	Compressor
 	Encoder
 	MessageHandler
@@ -86,6 +90,27 @@ type kickHandler struct {
 
 func (ws *WsServer) SetDiscoveryRegistry(client discoveryregistry.SvcDiscoveryRegistry) {
 	ws.MessageHandler = NewGrpcHandler(ws.validate, client)
+	u := rpcclient.NewUserRpcClient(client)
+	ws.userClient = &u
+}
+
+func (ws *WsServer) SetUserOnlineStatus(ctx context.Context, client *Client, status int32) {
+	err := ws.userClient.SetUserStatus(ctx, client.UserID, status, client.PlatformID)
+	if err != nil {
+		log.ZWarn(ctx, "SetUserStatus err", err)
+	}
+	switch status {
+	case constant.Online:
+		err := CallbackUserOnline(ctx, client.UserID, client.PlatformID, client.IsBackground, client.ctx.GetConnID())
+		if err != nil {
+			log.ZWarn(ctx, "CallbackUserOnline err", err)
+		}
+	case constant.Offline:
+		err := CallbackUserOffline(ctx, client.UserID, client.PlatformID, client.ctx.GetConnID())
+		if err != nil {
+			log.ZWarn(ctx, "CallbackUserOffline err", err)
+		}
+	}
 }
 
 func (ws *WsServer) SetCacheHandler(cache cache.MsgModel) {
@@ -186,6 +211,7 @@ func (ws *WsServer) registerClient(client *Client) {
 			atomic.AddInt64(&ws.onlineUserConnNum, 1)
 		}
 	}
+	ws.SetUserOnlineStatus(client.ctx, client, constant.Online)
 	log.ZInfo(
 		client.ctx,
 		"user online",
@@ -292,14 +318,8 @@ func (ws *WsServer) unregisterClient(client *Client) {
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
-	log.ZInfo(
-		client.ctx,
-		"user offline",
-		"close reason",
-		client.closedErr,
-		"online user Num",
-		ws.onlineUserNum,
-		"online user conn Num",
+	ws.SetUserOnlineStatus(client.ctx, client, constant.Offline)
+	log.ZInfo(client.ctx, "user offline", "close reason", client.closedErr, "online user Num", ws.onlineUserNum, "online user conn Num",
 		ws.onlineUserConnNum,
 	)
 }

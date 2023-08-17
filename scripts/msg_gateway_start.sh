@@ -30,7 +30,6 @@ echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
 
 bin_dir="$BIN_DIR"
 logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 ulimit -n 200000
 
@@ -79,5 +78,5 @@ if [ $check -ge 1 ]; then
   echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allNewPid}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
 else
-  echo -e ${BACKGROUND_GREEN}${openim_msggateway}${COLOR_SUFFIX}${RED_PREFIX}"\n SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
+    exit -1
 fi

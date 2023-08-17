@@ -21,13 +21,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	// "google.golang.org/protobuf/proto".
 )
 
@@ -55,7 +56,8 @@ func newContentTypeConf() map[int32]config.NotificationConf {
 		constant.GroupInfoSetAnnouncementNotification:     config.Config.Notification.GroupInfoSetAnnouncement,
 		constant.GroupInfoSetNameNotification:             config.Config.Notification.GroupInfoSetName,
 		// user
-		constant.UserInfoUpdatedNotification: config.Config.Notification.UserInfoUpdated,
+		constant.UserInfoUpdatedNotification:  config.Config.Notification.UserInfoUpdated,
+		constant.UserStatusChangeNotification: config.Config.Notification.UserStatusChanged,
 		// friend
 		constant.FriendApplicationNotification:         config.Config.Notification.FriendApplicationAdded,
 		constant.FriendApplicationApprovedNotification: config.Config.Notification.FriendApplicationApproved,
@@ -101,7 +103,8 @@ func newSessionTypeConf() map[int32]int32 {
 		constant.GroupInfoSetAnnouncementNotification:     constant.SuperGroupChatType,
 		constant.GroupInfoSetNameNotification:             constant.SuperGroupChatType,
 		// user
-		constant.UserInfoUpdatedNotification: constant.SingleChatType,
+		constant.UserInfoUpdatedNotification:  constant.SingleChatType,
+		constant.UserStatusChangeNotification: constant.SingleChatType,
 		// friend
 		constant.FriendApplicationNotification:         constant.SingleChatType,
 		constant.FriendApplicationApprovedNotification: constant.SingleChatType,

@@ -17,13 +17,14 @@ package msgtransfer
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"

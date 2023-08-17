@@ -16,31 +16,31 @@ package group
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
+
 	pbConversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 
+	"github.com/OpenIMSDK/tools/mw/specialerror"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbGroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -49,6 +49,12 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
+	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -70,20 +76,33 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	userRpcClient := rpcclient.NewUserRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
-	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase())
-	pbGroup.RegisterGroupServer(server, &groupServer{
-		GroupDatabase: database,
-		User:          userRpcClient,
-		Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
-			users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
-			if err != nil {
-				return nil, err
-			}
-			return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
-		}),
-		conversationRpcClient: conversationRpcClient,
-		msgRpcClient:          msgRpcClient,
+	var gs groupServer
+	database := controller.InitGroupDatabase(db, rdb, mongo.GetDatabase(), gs.groupMemberHashCode)
+	gs.GroupDatabase = database
+	gs.User = userRpcClient
+	gs.Notification = notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+		if err != nil {
+			return nil, err
+		}
+		return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
 	})
+	gs.conversationRpcClient = conversationRpcClient
+	gs.msgRpcClient = msgRpcClient
+	pbGroup.RegisterGroupServer(server, &gs)
+	//pbGroup.RegisterGroupServer(server, &groupServer{
+	//	GroupDatabase: database,
+	//	User:          userRpcClient,
+	//	Notification: notification.NewGroupNotificationSender(database, &msgRpcClient, &userRpcClient, func(ctx context.Context, userIDs []string) ([]notification.CommonUser, error) {
+	//		users, err := userRpcClient.GetUsersInfo(ctx, userIDs)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//		return utils.Slice(users, func(e *sdkws.UserInfo) notification.CommonUser { return e }), nil
+	//	}),
+	//	conversationRpcClient: conversationRpcClient,
+	//	msgRpcClient:          msgRpcClient,
+	//})
 	return nil
 }
 
@@ -157,6 +176,9 @@ func (s *groupServer) GenGroupID(ctx context.Context, groupID *string) error {
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
 	if req.OwnerUserID == "" {
 		return nil, errs.ErrArgs.Wrap("no group owner")
+	}
+	if req.GroupInfo.GroupType != constant.WorkingGroup {
+		return nil, errs.ErrArgs.Wrap(fmt.Sprintf("group type %d not support", req.GroupInfo.GroupType))
 	}
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
@@ -687,8 +709,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, errs.ErrGroupRequestHandled.Wrap("group request already processed")
 	}
 	var inGroup bool
-	_, err = s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID)
-	if err == nil {
+	if _, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.FromUserID); err == nil {
 		inGroup = true // 已经在群里了
 	} else if !s.IsNotFound(err) {
 		return nil, err
@@ -715,20 +736,23 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 	}
+	log.ZDebug(ctx, "GroupApplicationResponse", "inGroup", inGroup, "HandleResult", req.HandleResult, "member", member)
 	if err := s.GroupDatabase.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
-		return nil, err
-	}
-	if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
 		return nil, err
 	}
 	switch req.HandleResult {
 	case constant.GroupResponseAgree:
+		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.FromUserID}); err != nil {
+			return nil, err
+		}
 		s.Notification.GroupApplicationAcceptedNotification(ctx, req)
+		if member == nil {
+			log.ZDebug(ctx, "GroupApplicationResponse", "member is nil")
+		} else {
+			s.Notification.MemberEnterNotification(ctx, req.GroupID, req.FromUserID)
+		}
 	case constant.GroupResponseRefuse:
 		s.Notification.GroupApplicationRejectedNotification(ctx, req)
-	}
-	if member != nil {
-		s.Notification.MemberEnterNotification(ctx, req)
 	}
 	return &pbGroup.GroupApplicationResponseResp{}, nil
 }
@@ -775,7 +799,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if err := s.conversationRpcClient.GroupChatFirstCreateConversation(ctx, req.GroupID, []string{req.InviterUserID}); err != nil {
 			return nil, err
 		}
-		s.Notification.MemberEnterDirectlyNotification(ctx, req.GroupID, req.InviterUserID)
+		s.Notification.MemberEnterNotification(ctx, req.GroupID, req.InviterUserID)
 		return resp, nil
 	}
 	groupRequest := relationTb.GroupRequestModel{
@@ -1039,7 +1063,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relationTb.GroupRequestModel) string {
 		return e.GroupID
 	}))
-	groups, err := s.GroupDatabase.FindGroup(ctx, groupIDs)
+	groups, err := s.GroupDatabase.FindNotDismissedGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -1482,4 +1506,38 @@ func (s *groupServer) GetGroupUsersReqApplicationList(ctx context.Context, req *
 	})
 	resp.Total = total
 	return resp, nil
+}
+
+func (s *groupServer) groupMemberHashCode(ctx context.Context, groupID string) (uint64, error) {
+	userIDs, err := s.GroupDatabase.FindGroupMemberUserID(ctx, groupID)
+	if err != nil {
+		return 0, err
+	}
+	var members []*sdkws.GroupMemberFullInfo
+	if len(userIDs) > 0 {
+		resp, err := s.GetGroupMembersInfo(ctx, &pbGroup.GetGroupMembersInfoReq{GroupID: groupID, UserIDs: userIDs})
+		if err != nil {
+			return 0, err
+		}
+		members = resp.Members
+		utils.Sort(userIDs, true)
+	}
+	memberMap := utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
+		return e.UserID
+	})
+	res := make([]*sdkws.GroupMemberFullInfo, 0, len(members))
+	for _, userID := range userIDs {
+		member, ok := memberMap[userID]
+		if !ok {
+			continue
+		}
+		member.AppMangerLevel = 0
+		res = append(res, member)
+	}
+	data, err := json.Marshal(res)
+	if err != nil {
+		return 0, err
+	}
+	sum := md5.Sum(data)
+	return binary.BigEndian.Uint64(sum[:]), nil
 }

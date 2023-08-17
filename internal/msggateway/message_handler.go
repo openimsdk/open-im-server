@@ -23,10 +23,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type Req struct {
@@ -39,7 +40,13 @@ type Req struct {
 }
 
 func (r *Req) String() string {
-	return utils.StructToJsonString(r)
+	var tReq Req
+	tReq.ReqIdentifier = r.ReqIdentifier
+	tReq.Token = r.Token
+	tReq.SendID = r.SendID
+	tReq.OperationID = r.OperationID
+	tReq.MsgIncr = r.MsgIncr
+	return utils.StructToJsonString(tReq)
 }
 
 type Resp struct {
@@ -52,7 +59,13 @@ type Resp struct {
 }
 
 func (r *Resp) String() string {
-	return utils.StructToJsonString(r)
+	var tResp Resp
+	tResp.ReqIdentifier = r.ReqIdentifier
+	tResp.MsgIncr = r.MsgIncr
+	tResp.OperationID = r.OperationID
+	tResp.ErrCode = r.ErrCode
+	tResp.ErrMsg = r.ErrMsg
+	return utils.StructToJsonString(tResp)
 }
 
 type MessageHandler interface {

@@ -20,9 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-
+	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/tx"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+
+	registry "github.com/OpenIMSDK/tools/discoveryregistry"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -32,23 +39,18 @@ import (
 	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
-	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/OpenIMSDK/protocol/sdkws"
+
 	pbuser "github.com/OpenIMSDK/protocol/user"
-	registry "github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/tx"
-
-	"google.golang.org/grpc"
-
 	"github.com/OpenIMSDK/tools/utils"
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
 	controller.UserDatabase
-	notificationSender *notification.FriendNotificationSender
-	friendRpcClient    *rpcclient.FriendRpcClient
-	RegisterCenter     registry.SvcDiscoveryRegistry
+	friendNotificationSender *notification.FriendNotificationSender
+	userNotificationSender   *notification.UserNotificationSender
+	friendRpcClient          *rpcclient.FriendRpcClient
+	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -57,6 +59,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 		return err
 	}
 	rdb, err := cache.NewRedis()
+	if err != nil {
+		return err
+	}
+	mongo, err := unrelation.NewMongo()
 	if err != nil {
 		return err
 	}
@@ -72,14 +78,16 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	}
 	userDB := relation.NewUserGorm(db)
 	cache := cache.NewUserCacheRedis(rdb, userDB, cache.GetDefaultOpt())
-	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db))
+	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
+	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
-		UserDatabase:       database,
-		RegisterCenter:     client,
-		friendRpcClient:    &friendRpcClient,
-		notificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		UserDatabase:             database,
+		RegisterCenter:           client,
+		friendRpcClient:          &friendRpcClient,
+		friendNotificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
+		userNotificationSender:   notification.NewUserNotificationSender(&msgRpcClient, notification.WithUserFunc(database.FindWithError)),
 	}
 	pbuser.RegisterUserServer(server, u)
 	return u.UserDatabase.InitOnce(context.Background(), users)
@@ -112,13 +120,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	_ = s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
+	_ = s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserInfo.UserID)
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
 	for _, friendID := range friends {
-		s.notificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
+		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)
 	}
 	return resp, nil
 }
@@ -133,7 +141,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Se
 	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
-	s.notificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
+	s.friendNotificationSender.UserInfoUpdatedNotification(ctx, req.UserID)
 	return resp, nil
 }
 
@@ -235,6 +243,7 @@ func (s *userServer) GetGlobalRecvMessageOpt(ctx context.Context, req *pbuser.Ge
 	return &pbuser.GetGlobalRecvMessageOptResp{GlobalRecvMsgOpt: user[0].GlobalRecvMsgOpt}, nil
 }
 
+// GetAllUserID Get user account by page.
 func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDReq) (resp *pbuser.GetAllUserIDResp, err error) {
 	userIDs, err := s.UserDatabase.GetAllUserID(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
@@ -243,6 +252,70 @@ func (s *userServer) GetAllUserID(ctx context.Context, req *pbuser.GetAllUserIDR
 	return &pbuser.GetAllUserIDResp{UserIDs: userIDs}, nil
 }
 
+// SubscribeOrCancelUsersStatus Subscribe online or cancel online users.
 func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbuser.SubscribeOrCancelUsersStatusReq) (resp *pbuser.SubscribeOrCancelUsersStatusResp, err error) {
-	panic("implement me")
+	if req.Genre == constant.SubscriberUser {
+		err = s.UserDatabase.SubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
+		var status []*pbuser.OnlineStatus
+		status, err = s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
+		return &pbuser.SubscribeOrCancelUsersStatusResp{StatusList: status}, nil
+	} else if req.Genre == constant.Unsubscribe {
+		err = s.UserDatabase.UnsubscribeUsersStatus(ctx, req.UserID, req.UserIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &pbuser.SubscribeOrCancelUsersStatusResp{}, nil
+}
+
+// GetUserStatus Get the online status of the user.
+func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
+	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.GetUserStatusResp{StatusList: onlineStatusList}, nil
+}
+
+// SetUserStatus Synchronize user's online status.
+func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp, err error) {
+	err = s.UserDatabase.SetUserStatus(ctx, req.StatusList)
+	if err != nil {
+		return nil, err
+	}
+	for _, value := range req.StatusList {
+		list, err := s.UserDatabase.GetSubscribedList(ctx, value.UserID)
+		if err != nil {
+			return nil, err
+		}
+		for _, userID := range list {
+			tips := &sdkws.UserStatusChangeTips{
+				FromUserID: value.UserID,
+				ToUserID:   userID,
+				Status:     value.Status,
+				PlatformID: value.PlatformIDs[0],
+			}
+			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
+		}
+	}
+	return &pbuser.SetUserStatusResp{}, nil
+}
+
+// GetSubscribeUsersStatus Get the online status of subscribers.
+func (s *userServer) GetSubscribeUsersStatus(ctx context.Context, req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
+	userList, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, userList)
+	if err != nil {
+		return nil, err
+	}
+	return &pbuser.GetSubscribeUsersStatusResp{StatusList: onlineStatusList}, nil
 }

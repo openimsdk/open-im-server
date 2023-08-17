@@ -51,6 +51,7 @@ type GroupModelInterface interface {
 	UpdateMap(ctx context.Context, groupID string, args map[string]interface{}) (err error)
 	UpdateStatus(ctx context.Context, groupID string, status int32) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
+	FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*GroupModel, err error)
 	Take(ctx context.Context, groupID string) (group *GroupModel, err error)
 	Search(
 		ctx context.Context,

@@ -22,10 +22,11 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/ormutil"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 var _ relation.GroupModelInterface = (*GroupGorm)(nil)
@@ -98,4 +99,8 @@ func (g *GroupGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time
 		v[r.Date.Format("2006-01-02")] = r.Count
 	}
 	return v, nil
+}
+
+func (g *GroupGorm) FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relation.GroupModel, err error) {
+	return groups, utils.Wrap(g.DB.Where("group_id in (?) and status != ?", groupIDs, constant.GroupStatusDismissed).Find(&groups).Error, "")
 }

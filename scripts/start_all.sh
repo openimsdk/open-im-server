@@ -27,18 +27,17 @@ source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
+echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
+echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
+
 if [ ! -d "${OPENIM_ROOT}/_output/bin/platforms" ]; then
   # exec build_all_service.sh
   "${SCRIPTS_ROOT}/build_all_service.sh"
 fi
 
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
-
 bin_dir="$OPENIM_ROOT/_output/bin"
 logs_dir="$OPENIM_ROOT/logs"
-sdk_db_dir="$OPENIM_ROOT/sdk/db/"
 
 if [ ! -d "$bin_dir" ]; then
     mkdir -p "$bin_dir"
@@ -78,6 +77,19 @@ need_to_start_server_shell=(
   start_cron.sh
 )
 
+component_check=start_component_check.sh
+echo -e ""
+chmod +x $component_check
+echo -e "=========> ${BACKGROUND_GREEN}Executing ${component_check}...${COLOR_SUFFIX}"
+echo -e ""
+./$component_check
+if [ $? -ne 0 ]; then
+  # Print error message and exit
+  echo -e "${RED_PREFIX}${BOLD_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+  exit -1
+fi
+
+
 # Loop through the script names and execute them
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
@@ -92,7 +104,7 @@ for i in ${need_to_start_server_shell[*]}; do
   # Check if the script executed successfully
   if [ $? -ne 0 ]; then
     # Print error message and exit
-    echo "${BOLD_PREFIX}${RED_PREFIX}Error executing ${i}. Exiting...${COLOR_SUFFIX}"
+    echo -e "${RED_PREFIX}${BOLD_PREFIX}Error executing ${i}. Exiting(please check open-im-server/logs/openIM.log)... ${COLOR_SUFFIX}"
     exit -1
   fi
 done

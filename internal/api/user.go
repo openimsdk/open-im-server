@@ -17,8 +17,6 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/user"
@@ -26,6 +24,9 @@ import (
 	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type UserApi rpcclient.User
@@ -51,7 +52,7 @@ func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 }
 
 func (u *UserApi) GetAllUsersID(c *gin.Context) {
-	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
+	a2r.Call(user.UserClient.GetAllUserID, u.Client, c)
 }
 
 func (u *UserApi) AccountCheck(c *gin.Context) {
@@ -62,6 +63,7 @@ func (u *UserApi) GetUsers(c *gin.Context) {
 	a2r.Call(user.UserClient.GetPaginationUsers, u.Client, c)
 }
 
+// GetUsersOnlineStatus Get user online status.
 func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 	var req msggateway.GetUsersOnlineStatusReq
 	if err := c.BindJSON(&req); err != nil {
@@ -95,13 +97,13 @@ func (u *UserApi) GetUsersOnlineStatus(c *gin.Context) {
 			wsResult = append(wsResult, reply.SuccessResult...)
 		}
 	}
-	// 遍历 api 请求体中的 userIDs
+	// Traversing the userIDs in the api request body
 	for _, v1 := range req.UserIDs {
 		flag = false
 		res := new(msggateway.GetUsersOnlineStatusResp_SuccessResult)
-		// 遍历从各个网关中获取的在线结果
+		// Iterate through the online results fetched from various gateways
 		for _, v2 := range wsResult {
-			// 如果匹配上说明在线，反之
+			// If matches the above description on the line, and vice versa
 			if v2.UserID == v1 {
 				flag = true
 				res.UserID = v1
@@ -123,6 +125,7 @@ func (u *UserApi) UserRegisterCount(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegisterCount, u.Client, c)
 }
 
+// GetUsersOnlineTokenDetail Get user online token details.
 func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	var wsResult []*msggateway.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*msggateway.SingleDetail
@@ -181,4 +184,24 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	}
 
 	apiresp.GinSuccess(c, respResult)
+}
+
+// SubscriberStatus Presence status of subscribed users.
+func (u *UserApi) SubscriberStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
+}
+
+// UnSubscriberStatus Unsubscribe a user's presence.
+func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
+}
+
+// GetUserStatus Get the online status of the user.
+func (u *UserApi) GetUserStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetUserStatus, u.Client, c)
+}
+
+// GetSubscribeUsersStatus Get the online status of subscribers.
+func (u *UserApi) GetSubscribeUsersStatus(c *gin.Context) {
+	a2r.Call(user.UserClient.GetSubscribeUsersStatus, u.Client, c)
 }

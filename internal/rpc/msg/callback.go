@@ -16,18 +16,20 @@ package msg
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"google.golang.org/protobuf/proto"
 
-	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 	"github.com/OpenIMSDK/protocol/constant"
 	pbChat "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
+
+	cbapi "github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 )
 
 func cbURL() string {

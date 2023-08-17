@@ -19,8 +19,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/tools/utils"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 type FriendRequestGorm struct {
@@ -70,10 +71,13 @@ func (f *FriendRequestGorm) UpdateByMap(
 
 // 更新记录 （非零值）.
 func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.FriendRequestModel) (err error) {
+	fr2 := *friendRequest
+	fr2.FromUserID = ""
+	fr2.ToUserID = ""
 	return utils.Wrap(
 		f.db(ctx).
 			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
-			Updates(friendRequest).
+			Updates(fr2).
 			Error,
 		"",
 	)

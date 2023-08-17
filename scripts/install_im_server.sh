@@ -37,12 +37,24 @@ function onCtrlC () {
     exit 1
 }
 
+# Load environment variables from .env file
+source ${OPENIM_ROOT}/.env
+
 # Get the public internet IP address
 internet_ip=$(curl ifconfig.me -s)
 echo -e "${PURPLE_PREFIX}=========> Your public internet IP address is ${internet_ip} ${COLOR_SUFFIX} \n"
 
-# Load environment variables from .env file
-source ${OPENIM_ROOT}/.env
+# Replace local IP address with the public IP address in .env file
+if [ $API_URL == "http://127.0.0.1:10002/object/" ]; then
+    sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
+fi
+
+if [ $MINIO_ENDPOINT == "http://127.0.0.1:10005" ]; then
+    sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
+fi 
+
+
+
 
 echo -e "${PURPLE_PREFIX}=========> Your minio endpoint is ${MINIO_ENDPOINT} ${COLOR_SUFFIX} \n"
 
@@ -58,15 +70,6 @@ ${SCRIPTS_ROOT}/init_pwd.sh
 echo -e "${PURPLE_PREFIX}=========> env_check.sh ${COLOR_SUFFIX} \n"
 
 ${SCRIPTS_ROOT}/env_check.sh
-
-# Replace local IP address with the public IP address in .env file
-if [ $API_URL == "http://127.0.0.1:10002/object/" ]; then
-    sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
-fi
-
-if [ $MINIO_ENDPOINT == "http://127.0.0.1:10005" ]; then
-    sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
-fi 
 
 # Go back to the previous directory
 cd ${OPENIM_ROOT}

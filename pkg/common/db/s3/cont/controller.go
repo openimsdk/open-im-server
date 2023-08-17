@@ -26,9 +26,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
 )
 
 func New(impl s3.Interface) *Controller {
@@ -256,5 +257,9 @@ func (c *Controller) IsNotFound(err error) bool {
 }
 
 func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+	if opt.Image != nil {
+		opt.Filename = ""
+		opt.ContentType = ""
+	}
 	return c.impl.AccessURL(ctx, name, expire, opt)
 }

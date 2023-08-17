@@ -16,18 +16,20 @@ package fcm
 
 import (
 	"context"
-	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"path/filepath"
+
+	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/api/option"
 
+	"github.com/OpenIMSDK/protocol/constant"
+
 	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/protocol/constant"
 )
 
 const SinglePushCountLimit = 400

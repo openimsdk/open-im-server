@@ -16,23 +16,24 @@ package cache
 
 import (
 	"context"
-	"math/big"
-	"strings"
 	"time"
+
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
 
+	"github.com/OpenIMSDK/tools/utils"
+
 	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	unrelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/tools/utils"
 )
 
 const (
 	groupExpireTime        = time.Second * 60 * 60 * 12
 	groupInfoKey           = "GROUP_INFO:"
 	groupMemberIDsKey      = "GROUP_MEMBER_IDS:"
-	groupMembersHashKey    = "GROUP_MEMBERS_HASH:"
+	groupMembersHashKey    = "GROUP_MEMBERS_HASH2:"
 	groupMemberInfoKey     = "GROUP_MEMBER_INFO:"
 	joinedSuperGroupsKey   = "JOIN_SUPER_GROUPS:"
 	SuperGroupMemberIDsKey = "SUPER_GROUP_MEMBER_IDS:"
@@ -95,6 +96,7 @@ type GroupCacheRedis struct {
 	mongoDB        unrelationTb.SuperGroupModelInterface
 	expireTime     time.Duration
 	rcClient       *rockscache.Client
+	hashCode       func(ctx context.Context, groupID string) (uint64, error)
 }
 
 func NewGroupCacheRedis(
@@ -103,13 +105,16 @@ func NewGroupCacheRedis(
 	groupMemberDB relationTb.GroupMemberModelInterface,
 	groupRequestDB relationTb.GroupRequestModelInterface,
 	mongoClient unrelationTb.SuperGroupModelInterface,
+	hashCode func(ctx context.Context, groupID string) (uint64, error),
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
-		mongoDB: mongoClient, metaCache: NewMetaCacheRedis(rcClient),
+		mongoDB:   mongoClient,
+		hashCode:  hashCode,
+		metaCache: NewMetaCacheRedis(rcClient),
 	}
 }
 
@@ -289,22 +294,61 @@ func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache 
 
 // groupMembersHash.
 func (g *GroupCacheRedis) GetGroupMembersHash(ctx context.Context, groupID string) (hashCode uint64, err error) {
-	return getCache(
-		ctx,
-		g.rcClient,
-		g.getGroupMembersHashKey(groupID),
-		g.expireTime,
-		func(ctx context.Context) (uint64, error) {
-			userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
-			if err != nil {
-				return 0, err
-			}
-			utils.Sort(userIDs, true)
-			bi := big.NewInt(0)
-			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
-			return bi.Uint64(), nil
-		},
-	)
+	return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime, func(ctx context.Context) (uint64, error) {
+		return g.hashCode(ctx, groupID)
+	})
+
+	//return getCache(ctx, g.rcClient, g.getGroupMembersHashKey(groupID), g.expireTime,
+	//	func(ctx context.Context) (uint64, error) {
+	//		userIDs, err := g.GetGroupMemberIDs(ctx, groupID)
+	//		if err != nil {
+	//			return 0, err
+	//		}
+	//		log.ZInfo(ctx, "GetGroupMembersHash", "groupID", groupID, "userIDs", userIDs)
+	//		var members []*relationTb.GroupMemberModel
+	//		if len(userIDs) > 0 {
+	//			members, err = g.GetGroupMembersInfo(ctx, groupID, userIDs)
+	//			if err != nil {
+	//				return 0, err
+	//			}
+	//			utils.Sort(userIDs, true)
+	//		}
+	//		memberMap := make(map[string]*relationTb.GroupMemberModel)
+	//		for i, member := range members {
+	//			memberMap[member.UserID] = members[i]
+	//		}
+	//		data := make([]string, 0, len(members)*11)
+	//		for _, userID := range userIDs {
+	//			member, ok := memberMap[userID]
+	//			if !ok {
+	//				continue
+	//			}
+	//			data = append(data,
+	//				member.GroupID,
+	//				member.UserID,
+	//				member.Nickname,
+	//				member.FaceURL,
+	//				strconv.Itoa(int(member.RoleLevel)),
+	//				strconv.FormatInt(member.JoinTime.UnixMilli(), 10),
+	//				strconv.Itoa(int(member.JoinSource)),
+	//				member.InviterUserID,
+	//				member.OperatorUserID,
+	//				strconv.FormatInt(member.MuteEndTime.UnixMilli(), 10),
+	//				member.Ex,
+	//			)
+	//		}
+	//		log.ZInfo(ctx, "hash data info", "userIDs.len", len(userIDs), "hash.data.len", len(data))
+	//		log.ZInfo(ctx, "json hash data", "groupID", groupID, "data", data)
+	//		val, err := json.Marshal(data)
+	//		if err != nil {
+	//			return 0, err
+	//		}
+	//		sum := md5.Sum(val)
+	//		code := binary.BigEndian.Uint64(sum[:])
+	//		log.ZInfo(ctx, "GetGroupMembersHash", "groupID", groupID, "hashCode", code, "num", len(members))
+	//		return code, nil
+	//	},
+	//)
 }
 
 func (g *GroupCacheRedis) GetGroupMemberHashMap(
@@ -317,6 +361,7 @@ func (g *GroupCacheRedis) GetGroupMemberHashMap(
 		if err != nil {
 			return nil, err
 		}
+		log.ZInfo(ctx, "GetGroupMemberHashMap", "groupID", groupID, "hash", hash)
 		num, err := g.GetGroupMemberNum(ctx, groupID)
 		if err != nil {
 			return nil, err
