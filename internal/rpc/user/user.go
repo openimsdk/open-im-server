@@ -299,7 +299,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 				FromUserID: value.UserID,
 				ToUserID:   userID,
 				Status:     value.Status,
-				PlatformID: value.PlatformID,
+				PlatformID: value.PlatformIDs[0],
 			}
 			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
 		}
