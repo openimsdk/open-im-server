@@ -85,7 +85,7 @@ echo -e ""
 ./$component_check
 if [ $? -ne 0 ]; then
   # Print error message and exit
-  echo -e "${RED_BOLD}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
+  echo -e "${RED_PREFIX}${BOLD_PREFIX}Error executing ${component_check}. Exiting...${COLOR_SUFFIX}"
   exit -1
 fi
 
@@ -102,8 +102,7 @@ for i in ${need_to_start_server_shell[*]}; do
   ./$i
 
   # Check if the script executed successfully
-  if [ $? -ne
-   ]; then
+  if [ $? -ne 0]; then
     # Print error message and exit
     echo -e "${RED_PREFIX}${BOLD_PREFIX}Error executing ${i}. Exiting(please check open-im-server/logs/openIM.log)... ${COLOR_SUFFIX}"
     exit -1
