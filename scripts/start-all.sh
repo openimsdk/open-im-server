@@ -52,6 +52,7 @@ function execute_scripts() {
         else
             openim::log::errexit "Script ${script_path##*/} is missing or not executable."
         fi
+        sleep 1
     done
 }
 

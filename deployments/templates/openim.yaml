@@ -88,11 +88,11 @@ kafka:
   password: ${KAFKA_PASSWORD}
   addr: [ ${KAFKA_ADDR}:${KAFKA_PORT} ]
   latestMsgToRedis:
-    topic: ${KAFKA_LATESTMSG_REDIS_TOPIC}
+    topic: "${KAFKA_LATESTMSG_REDIS_TOPIC}"
   offlineMsgToMongo:
-    topic: ${KAFKA_OFFLINEMSG_MONGO_TOPIC}
+    topic: "${KAFKA_OFFLINEMSG_MONGO_TOPIC}"
   msgToPush:
-    topic: ${KAFKA_MSG_PUSH_TOPIC}
+    topic: "${KAFKA_MSG_PUSH_TOPIC}"
   consumerGroupID:
     msgToRedis: ${KAFKA_CONSUMERGROUPID_REDIS}
     msgToMongo: ${KAFKA_CONSUMERGROUPID_MONGO}
@@ -127,25 +127,28 @@ api:
 # Session token
 # Configuration for Tencent COS
 # Configuration for Aliyun OSS
-# It can be set by an environment variable or by a script
+# apiURL is the address of the api, the access address of the app, use s3 must be configured
+# minio.endpoint can be configured as an intranet address,
+# minio.signEndpoint is minio public network address
 object:
-  enable: ${OBJECT_ENABLE}
-  apiURL: ${OBJECT_APIURL}
+  enable: "${OBJECT_ENABLE}"
+  apiURL: "${OBJECT_APIURL}"
   minio:
-    bucket: ${MINIO_BUCKET}
-    endpoint: ${MINIO_ENDPOINT}
-    accessKeyID: ${MINIO_ACCESS_KEY}
-    secretAccessKey: ${MINIO_SECRET_KEY}
+    bucket: "${MINIO_BUCKET}"
+    endpoint: "${MINIO_ENDPOINT}"
+    accessKeyID: "${MINIO_ACCESS_KEY}"
+    secretAccessKey: "${MINIO_SECRET_KEY}"
     sessionToken: ${MINIO_SESSION_TOKEN}
+    signEndpoint: "${MINIO_SIGN_ENDPOINT}"
   cos:
     bucketURL: ${COS_BUCKET_URL}
     secretID: ${COS_SECRET_ID}
     secretKey: ${COS_SECRET_KEY}
     sessionToken: ${COS_SESSION_TOKEN}
   oss:
-    endpoint: ${OSS_ENDPOINT}
-    bucket: ${OSS_BUCKET}
-    bucketURL: ${OSS_BUCKET_URL}
+    endpoint: "${OSS_ENDPOINT}"
+    bucket: "${OSS_BUCKET}"
+    bucketURL: "${OSS_BUCKET_URL}"
     accessKeyID: ${OSS_ACCESS_KEY_ID}
     accessKeySecret: ${OSS_ACCESS_KEY_SECRET}
     sessionToken: ${OSS_SESSION_TOKEN}
@@ -191,7 +194,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: "${LOG_STORAGE_LOCATION}"
+  storageLocation: ${LOG_STORAGE_LOCATION}
   rotationTime: ${LOG_ROTATION_TIME}
   remainRotationCount: ${LOG_REMAIN_ROTATION_COUNT}
   remainLogLevel: ${LOG_REMAIN_LOG_LEVEL}
@@ -223,18 +226,18 @@ push:
   enable: ${PUSH_ENABLE}
   geTui:
     pushUrl: "${GETUI_PUSH_URL}"
-    masterSecret: 
-    appKey: 
-    intent: 
-    channelID: 
-    channelName: 
+    masterSecret: ""
+    appKey: ""
+    intent: ""
+    channelID: ""
+    channelName: ""
   fcm:
     serviceAccount: ${FCM_SERVICE_ACCOUNT}
   jpns:
-    appKey: ${JPNS_APP_KEY}
-    masterSecret: ${JPNS_MASTER_SECRET}
-    pushUrl: ${JPNS_PUSH_URL}
-    pushIntent: ${JPNS_PUSH_INTENT}
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
 
 # App manager configuration
 #
@@ -242,7 +245,7 @@ push:
 # Built-in app manager nicknames
 manager:
   userID: [ "${MANAGER_USERID_1}", "${MANAGER_USERID_2}", "${MANAGER_USERID_3}" ]
-  nickname: [ ${NICKNAME_1}, ${NICKNAME_2}, ${NICKNAME_3} ]
+  nickname: [ "${NICKNAME_1}", "${NICKNAME_2}", "${NICKNAME_3}" ]
 
 # Multi-platform login policy
 # For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time

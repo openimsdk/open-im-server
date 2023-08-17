@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-USER="${USER}"
-PASSWORD="${PASSWORD}"
-MINIO_ENDPOINT="${MINIO_ENDPOINT}"
-API_URL="${API_URL}"
-DATA_DIR="${DATA_DIR}"
+USER=${USER}
+PASSWORD=${PASSWORD}
+MINIO_ENDPOINT=${MINIO_ENDPOINT}
+API_URL=${API_URL}
+DATA_DIR=${DATA_DIR}

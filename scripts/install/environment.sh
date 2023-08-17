@@ -26,6 +26,9 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 IP=$(openim::util::get_server_ip)
 
+#TODO
+IP=http://127.0.0.1
+
 function def() {
 	local var_name="$1"
 	local default_value="${2:-}"
@@ -106,6 +109,7 @@ readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${IP}:${MINIO_PORT}"}
 def "MINIO_ACCESS_KEY" "${USER}"                                           # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                       # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                  # MinIO的会话令牌
+readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址                                              # MinIO的会话令牌
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com" # 腾讯云COS的存储桶URL
 def "COS_SECRET_ID"                                                        # 腾讯云COS的密钥ID
 def "COS_SECRET_KEY"                                                       # 腾讯云COS的密钥
@@ -215,7 +219,7 @@ def "GROUP_MSG_READ_RECEIPT" "true"   # 群消息已读回执启用
 def "SINGLE_MSG_READ_RECEIPT" "true"  # 单一消息已读回执启用
 def "RETAIN_CHAT_RECORDS" "365"       # 保留聊天记录
 # 聊天记录清理时间
-readonly CHAT_RECORDS_CLEAR_TIME=${CHAT_RECORDS_CLEAR_TIME:-'0 2 * * *'}
+readonly CHAT_RECORDS_CLEAR_TIME=${CHAT_RECORDS_CLEAR_TIME:-'0 2 * * 3'}
 # 消息销毁时间
 readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
 def "SECRET" "${PASSWORD}"           # 密钥

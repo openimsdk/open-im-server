@@ -1,6 +1,6 @@
 # Copyright © 2023 OpenIM. All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -13,7 +13,10 @@
 # limitations under the License.
 
 # -----------------------------------------------------------------
-# Infrastructural configurations, please modify based on your setup
+# TODO: This config file is the template file
+# --| source: scripts/template/config-tmpl/openim_config.yaml
+# --| env: scripts/install/environment.sh
+# --| target: config/config.yaml
 # -----------------------------------------------------------------
 
 ###################### Zookeeper ######################
@@ -26,8 +29,8 @@
 zookeeper:
   schema: openim
   address: [ 127.0.0.1:2181 ]
-  username:
-  password:
+  username: ''
+  password: ''
 
 ###################### Mysql ######################
 # MySQL configuration
@@ -57,23 +60,23 @@ mysql:
 # Default MongoDB database name
 # Maximum connection pool size
 mongo:
-  uri:
+  uri: ''
   address: [ 127.0.0.1:37017 ]
   database: openIM_v3
   username: root
   password: openIM123
   maxPoolSize: 100
 
-###################### Redis ######################
+###################### Redis configuration information ######################
 # Redis configuration
 #
 # Username is required only for Redis version 6.0+
 redis:
   address: [ 127.0.0.1:16379 ]
-  username:
+  username: ''
   password: openIM123
 
-###################### Kafka ######################
+###################### Kafka configuration information ######################
 # Kafka configuration
 #
 # Kafka username
@@ -81,8 +84,8 @@ redis:
 # It's not recommended to modify this topic name
 # Consumer group ID, it's not recommended to modify
 kafka:
-  username:
-  password:
+  username: ''
+  password: ''
   addr: [ 127.0.0.1:9092 ]
   latestMsgToRedis:
     topic: "latestMsgToRedis"
@@ -96,16 +99,16 @@ kafka:
     msgToMySql: mysql
     msgToPush: push
 
-###################### RPC ######################
+###################### RPC configuration information ######################
 # RPC configuration
 #
 # IP address to register with zookeeper when starting RPC, the IP and corresponding rpcPort should be accessible by api/gateway
 # Default listen IP is 0.0.0.0
 rpc:
-  registerIP:
+  registerIP: ''
   listenIP: 0.0.0.0
 
-###################### API ######################
+###################### API configuration information ######################
 # API configuration
 #
 # API service port
@@ -114,7 +117,7 @@ api:
   openImApiPort: [ 10002 ]
   listenIP: 0.0.0.0
 
-###################### Gateway ######################
+###################### Object configuration information ######################
 # Object storage configuration
 #
 # Use minio for object storage
@@ -129,32 +132,34 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://127.0.0.1:10002"
+  apiURL: "http://127.0.0.1:10002/object/"
   minio:
     bucket: "openim"
-    endpoint: "http://127.0.0.1:10005"
+    endpoint: "http://http://127.0.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
-    sessionToken: ""
-    signEndpoint: "http://127.0.0.1:10005"
+    sessionToken: ''
+    signEndpoint: "http://http://127.0.0.1:10005"
   cos:
-    bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
-    secretID: ""
-    secretKey: ""
-    sessionToken: ""
+    bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
+    secretID: ''
+    secretKey: ''
+    sessionToken: ''
   oss:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
-    accessKeyID: ""
-    accessKeySecret: ""
-    sessionToken: ""
+    accessKeyID: root
+    accessKeySecret: ''
+    sessionToken: ''
 
+
+###################### RPC Port Configuration ######################
 # RPC service ports
 # These ports are passed into the program by the script and are not recommended to modify
 # For launching multiple programs, just fill in multiple ports separated by commas
 # For example, [10110, 10111]
-rpcPort:
+rpcPort: 
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
@@ -165,6 +170,7 @@ rpcPort:
   openImConversationPort: [ 10180 ]
   openImThirdPort: [ 10190 ]
 
+###################### RPC Register Name Configuration ######################
 # RPC service names for registration, it's not recommended to modify these
 rpcRegisterName:
   openImUserName: User
@@ -177,6 +183,7 @@ rpcRegisterName:
   openImConversationName: Conversation
   openImThirdName: Third
 
+###################### Log Configuration ######################
 # Log configuration
 #
 # Storage directory
@@ -187,14 +194,15 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../../../../../logs/
+  storageLocation: /root/workspaces/openim/openim-server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
-  isStdout: false
+  isStdout: false 
   isJson: false
   withStack: false
 
+###################### Variables definition ######################
 # Long connection server configuration
 #
 # Websocket port for msg_gateway
@@ -224,7 +232,7 @@ push:
     channelID: ""
     channelName: ""
   fcm:
-    serviceAccount: "x.json"
+    serviceAccount: x.json
   jpns:
     appKey:
     masterSecret:
@@ -236,8 +244,8 @@ push:
 # Built-in app manager user IDs
 # Built-in app manager nicknames
 manager:
-  userID: [ "openIM123456","openIM654321","openIMAdmin" ]
-  nickname: [ "system1","system2", "system3" ]
+  userID: [ "openIM123456", "openIM654321", "openIMAdmin" ]
+  nickname: [ "system1", "system2", "system3" ]
 
 # Multi-platform login policy
 # For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
@@ -291,6 +299,7 @@ iosPush:
   badgeCount: true
   production: false
 
+###################### Third-party service configuration ######################
 # Callback configuration
 #
 # Callback URL
@@ -360,7 +369,7 @@ callback:
     failedContinue: true
 
 ###################### Prometheus ######################
-# Prometheus configuration
+# Prometheus configuration for various services
 # The number of Prometheus ports per service needs to correspond to rpcPort
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
@@ -375,4 +384,4 @@ prometheus:
   conversationPrometheusPort: [ 20230 ]
   rtcPrometheusPort: [ 21300 ]
   thirdPrometheusPort: [ 21301 ]
-  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ]
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # List of ports
