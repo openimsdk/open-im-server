@@ -30,7 +30,7 @@ scripts/
 │   └── LICENSE_TEMPLATES          # Template for license file
 ├── README.md                      # Readme file for scripts directory
 ├── advertise.sh                   # Script for advertisement services
-├── batch_start_all.sh             # Script to start all services in batch
+├── batch_start-all.sh             # Script to start all services in batch
 ├── build.cmd                      # Windows build command script
 ├── build_all_service.sh           # Script to build all services
 ├── build_push_k8s_images.sh       # Script to build and push images for Kubernetes
@@ -39,7 +39,7 @@ scripts/
 ├── coverage.awk                   # AWK script for coverage report generation
 ├── coverage.sh                    # Script for generating coverage reports
 ├── docker_check_service.sh        # Docker specific service check script
-├── docker_start_all.sh            # Script to start all services in a docker environment
+├── docker-start-all-all.sh            # Script to start all services in a docker environment
 ├── ensure_tag.sh                  # Script to ensure proper tagging of docker images
 ├── enterprise                     # Scripts specific to enterprise version
 │   ├── check_all.sh               # Check status of all enterprise services
@@ -78,10 +78,10 @@ scripts/
 ├── path_info.sh                   # Script containing path information
 ├── openim-push.sh                  # Script to start push service
 ├── release.sh                     # Script to perform release process
-├── start_all.sh                   # Script to start all services
+├── start-all.sh                   # Script to start all services
 ├── openim-crontask.sh                  # Script to start cron jobs
 ├── openim-rpc.sh           # Script to start RPC service
-├── stop_all.sh                    # Script to stop all services
+├── stop-all.sh                    # Script to stop all services
 └── style_info.sh                  # Script containing style related information
 ```
 

@@ -78,7 +78,7 @@ else
 fi
 
 if [ $? -eq 0 ]; then
-    openim::log::success "all service build success, run 'make start' or './scripts/start_all.sh'"
+    openim::log::success "all service build success, run 'make start' or './scripts/start-all.sh'"
 else
     openim::log::error "make build Error, script exits"
 fi

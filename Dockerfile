@@ -26,7 +26,6 @@ WORKDIR ${SERVER_WORKDIR}
 # Copy scripts and binary files to the production image
 COPY --from=builder ${OPENIM_SERVER_CMDDIR} /openim/openim-server/scripts
 COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
-COPY --from=builder ${SERVER_WORKDIR}/_output/bin/platforms /openim/openim-server/_output/bin/platforms
-COPY --from=builder ${SERVER_WORKDIR}/_output/bin-tools/platforms /openim/openim-server/_output/bin-tools/platforms
+COPY --from=builder ${OPENIM_SERVER_BINDIR} /openim/openim-server/_output/bin
 
-CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker_start_all.sh"]
+CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker-start-all-all.sh"]

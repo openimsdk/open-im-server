@@ -105,13 +105,13 @@ go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BIN
 .PHONY: go.start
 go.start:
 	@echo "===========> Starting openim"
-	@$(ROOT_DIR)/scripts/start_all.sh
+	@$(ROOT_DIR)/scripts/start-all.sh
 
 ## go.stop: Stop openim
 .PHONY: go.stop
 go.stop:
 	@echo "===========> Stopping openim"
-	@$(ROOT_DIR)/scripts/stop_all.sh
+	@$(ROOT_DIR)/scripts/stop-all.sh
 
 ## go.check: Check openim
 .PHONY: go.check

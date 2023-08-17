@@ -260,7 +260,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
 
 ```
 bashCopy code
-./scripts/start_all.sh;
+./scripts/start-all.sh;
 ```
 
 检查服务
@@ -274,7 +274,7 @@ bashCopy code
 
 ```
 bashCopy code
-./scripts/stop_all.sh
+./scripts/stop-all.sh
 ```
 
 </details>

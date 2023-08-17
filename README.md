@@ -265,7 +265,7 @@ The config/config.yaml file has detailed configuration instructions for the stor
 Start services
 
 ```
-./scripts/start_all.sh;
+./scripts/start-all.sh;
 ```
 
 Check services
@@ -277,7 +277,7 @@ Check services
 Stop services
 
 ```
-./scripts/stop_all.sh
+./scripts/stop-all.sh
 ```
 
 </details> 
