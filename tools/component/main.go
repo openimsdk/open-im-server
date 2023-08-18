@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	cfgPath                  = "../../../../../config/config.yaml"
+	cfgPath                  = "../../config/config.yaml"
 	minioHealthCheckDuration = 1
 	maxRetry                 = 100
 	componentStartErrCode    = 6000
@@ -49,6 +49,7 @@ func initCfg() error {
 	if err = yaml.Unmarshal(data, &config.Config); err != nil {
 		return err
 	}
+	fmt.Println(config.Config.Mysql.Address)
 	return nil
 }
 
