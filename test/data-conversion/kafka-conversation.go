@@ -22,6 +22,7 @@ import (
 var (
 	topic = "latestMsgToRedis"
 	addr  = "127.0.0.1:9092"
+	//addr = "43.128.72.19:9092"
 )
 
 var consumer sarama.Consumer
@@ -77,10 +78,8 @@ func GetMessage() {
 			fmt.Printf("failed to start consumer for partition %d,err:%v\n", partition, err)
 		}
 		// Asynchronously consume information from each partition
-		go func(sarama.PartitionConsumer) {
-			for msg := range pc.Messages() {
-				fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v", msg.Partition, msg.Offset, msg.Key, msg.Value)
-			}
-		}(pc)
+		for msg := range pc.Messages() {
+			fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v", msg.Partition, msg.Offset, msg.Key, msg.Value)
+		}
 	}
 }
