@@ -125,9 +125,9 @@ services:
     image: ghcr.io/openimsdk/openim-chat:latest
     container_name: openim-chat
     volumes:
-      - ./_output/openim/openim-chat/logs:/openim/openim-chat/logs
-      - ./_output/openim/openim-chat/config:/openim/openim-chat/config
-      - ./_output/openim/openim-chat/scripts:/openim/openim-chat/scripts
+      - ./openim-chat/logs:/openim/openim-chat/logs
+      - ./openim-chat/config:/openim/openim-chat/config
+      - ./openim-chat/scripts:/openim/openim-chat/scripts
     restart: always
     depends_on:
       - mysql

@@ -17,6 +17,7 @@
 # Include shell font styles and some basic information
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+Chat_Script=$SCRIPTS_ROOT/../openim-chat/scripts
 
 source "$SCRIPTS_ROOT/style_info.sh"
 
@@ -94,6 +95,8 @@ do_sth() {
     kill "$_progress_pid" "$_countdown_pid"
 
     "${SCRIPTS_ROOT}/check_all.sh"
+    echo -e "${GREEN_PREFIX}=========> Check chat-compose status ${COLOR_SUFFIX} \n"
+    "${Chat_Script}/check_all.sh"
     echo -e "${PURPLE_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
 }
 
