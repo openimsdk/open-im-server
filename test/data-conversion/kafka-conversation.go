@@ -21,7 +21,7 @@ import (
 
 var (
 	topic = "latestMsgToRedis"
-	addr  = "43.128.72.19:9092"
+	addr  = "127.0.0.1:9092"
 )
 
 var consumer sarama.Consumer
