@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	cfgPath                  = "../../../../../config/config.yaml"
+	cfgPath                  = "../../config/config.yaml"
 	minioHealthCheckDuration = 1
 	maxRetry                 = 100
 	componentStartErrCode    = 6000
@@ -142,12 +142,12 @@ func checkMysql() error {
 		config.Config.Mysql.Username, config.Config.Mysql.Password, config.Config.Mysql.Address[0], "mysql")
 	db, err := gorm.Open(mysql.Open(dsn), nil)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	} else {
 		sqlDB, err = db.DB()
 		err = sqlDB.Ping()
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 	}
 	return nil
@@ -172,11 +172,11 @@ func checkMongo() error {
 		fmt.Sprintf("mongodb://%v:%v@%v/?authSource=admin",
 			config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts)))
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	} else {
 		err = client.Ping(context.TODO(), &readpref.ReadPref{})
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 	}
 	return nil
@@ -191,7 +191,7 @@ func checkMinio() error {
 			Secure: u.Scheme == "https",
 		})
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 
 		cancel, err := minioClient.HealthCheck(time.Duration(minioHealthCheckDuration) * time.Second)
@@ -201,7 +201,7 @@ func checkMinio() error {
 			}
 		}()
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		} else {
 			if minioClient.IsOffline() {
 				return ErrComponentStart.Wrap("Minio server is offline")
@@ -236,7 +236,7 @@ func checkRedis() error {
 	}
 	_, err := redisClient.Ping(context.Background()).Result()
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	}
 	return nil
 }
@@ -250,16 +250,16 @@ func checkZookeeper() error {
 	}()
 	c, _, err := zk.Connect(config.Config.Zookeeper.ZkAddr, time.Second)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	} else {
 		if config.Config.Zookeeper.Username != "" && config.Config.Zookeeper.Password != "" {
 			if err := c.AddAuth("digest", []byte(config.Config.Zookeeper.Username+":"+config.Config.Zookeeper.Password)); err != nil {
-				return err
+				return errs.Wrap(err)
 			}
 		}
 		_, _, err = c.Get("/")
 		if err != nil {
-			return err
+			return errs.Wrap(err)
 		}
 	}
 	return nil
@@ -280,7 +280,7 @@ func checkKafka() error {
 	}
 	kafkaClient, err := sarama.NewClient(config.Config.Kafka.Addr, cfg)
 	if err != nil {
-		return err
+		return errs.Wrap(err)
 	} else {
 		topics, err := kafkaClient.Topics()
 		if err != nil {
