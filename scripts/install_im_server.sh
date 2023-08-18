@@ -82,4 +82,4 @@ else
     docker compose up -d
 fi
 
-${SCRIPTS_ROOT}/docker_check_service.sh
+${SCRIPTS_ROOT}/docker-check-service.sh

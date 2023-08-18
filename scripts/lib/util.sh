@@ -287,7 +287,7 @@ openim::util::check_ports() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "### Not started ports:"
         for port in "${not_started[@]}"; do
-            openim::log::error "Port $port is not started. cat openim log >>> cat ${LOG_FILE}"
+            openim::log::error "Port $port is not started. OpenIM Log >>> cat ${LOG_FILE}"
         done
     fi
 
@@ -352,7 +352,7 @@ openim::util::check_process_names() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "Not started processes:"
         for process_name in "${not_started[@]}"; do
-            openim::log::error "Process $process_name is not started. cat openim log >>> cat ${LOG_FILE}"
+            openim::log::error "Process $process_name is not started. OpenIM Log >>> cat ${LOG_FILE}"
         done
     fi
 
@@ -1201,11 +1201,11 @@ function openim::util::get_server_ip() {
         # Check if IP retrieval was successful
         if [[ -z "$IP" ]]; then
             # If not, get the internal IP address
-            IP=$(hostname -I | awk '{print $1}')
+            IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
         fi
     else
         # If curl is not available, get the internal IP address
-        IP=$(hostname -I | awk '{print $1}')
+        IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
     fi
     
     # Return the fetched IP address

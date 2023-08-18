@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # --------------------------------------------------------------
 # OpenIM Protoc Tool v1.0.0
@@ -19,6 +19,10 @@
 # Note: The specific installation and usage instructions may vary based on the tool's actual implementation. It's advised to refer to official documentation.
 # --------------------------------------------------------------
 
+PROTOC_DOWNLOAD_URL="https://github.com/OpenIMSDK/Open-IM-Protoc/releases/download/v1.0.0/linux.zip"
+DOWNLOAD_DIR="/tmp/openim-protoc"
+INSTALL_DIR="/usr/local/bin"
+
 function help_message {
     echo "Usage: ./install-protobuf.sh [option]"
     echo "Options:"
@@ -31,14 +35,34 @@ function help_message {
 
 function install_protobuf {
     echo "Installing OpenIM Protoc tool..."
-    # Logic for installation based on the OS
-    # e.g., download, unzip, and add to PATH
+    
+    # Create temporary directory and download the zip file
+    mkdir -p $DOWNLOAD_DIR
+    wget $PROTOC_DOWNLOAD_URL -O $DOWNLOAD_DIR/linux.zip
+
+    # Unzip the file
+    unzip -o $DOWNLOAD_DIR/linux.zip -d $DOWNLOAD_DIR
+
+    # Move binaries to the install directory and make them executable
+    sudo cp $DOWNLOAD_DIR/linux/protoc $INSTALL_DIR/
+    sudo cp $DOWNLOAD_DIR/linux/protoc-gen-go $INSTALL_DIR/
+    sudo chmod +x $INSTALL_DIR/protoc
+    sudo chmod +x $INSTALL_DIR/protoc-gen-go
+    
+    # Clean up
+    rm -rf $DOWNLOAD_DIR
+
+    echo "OpenIM Protoc tool installed successfully!"
 }
 
 function uninstall_protobuf {
     echo "Uninstalling OpenIM Protoc tool..."
-    # Logic for uninstallation
-    # e.g., remove from PATH and delete files
+    
+    # Removing binaries from the install directory
+    sudo rm -f $INSTALL_DIR/protoc
+    sudo rm -f $INSTALL_DIR/protoc-gen-go
+
+    echo "OpenIM Protoc tool uninstalled successfully!"
 }
 
 function reinstall_protobuf {
@@ -49,8 +73,13 @@ function reinstall_protobuf {
 
 function check_protobuf {
     echo "Checking for OpenIM Protoc tool installation..."
-    # Logic to check if the tool is installed
-    # e.g., which protoc or checking PATH
+    
+    which protoc > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "OpenIM Protoc tool is installed."
+    else
+        echo "OpenIM Protoc tool is not installed."
+    fi
 }
 
 while [ "$1" != "" ]; do

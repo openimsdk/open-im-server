@@ -22,8 +22,6 @@ source "$SCRIPTS_ROOT/style_info.sh"
 
 echo -e "${GREEN_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
 
-
-
 cd "$OPENIM_ROOT"
 
 if command -v docker-compose &> /dev/null; then

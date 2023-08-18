@@ -60,7 +60,7 @@ start_docker_compose() {
         docker compose up -d
     fi
 
-    ${OPENIM_ROOT}/scripts/docker_check_service.sh
+    ${OPENIM_ROOT}/scripts/docker-check-service.sh
 }
 
 main() {

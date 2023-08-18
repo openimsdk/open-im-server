@@ -24,6 +24,8 @@ trap 'openim::util::onCtrlC' INT
 
 nohup ${OPENIM_ROOT}/scripts/start-all.sh > ${LOG_FILE} 2>&1 &
 
+sleep 15
+
 nohup ${OPENIM_ROOT}/scripts/check-all.sh > ${LOG_FILE} 2>&1 &
 
 tail -f ${LOG_FILE}

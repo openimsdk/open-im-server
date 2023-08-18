@@ -38,7 +38,7 @@ scripts/
 ├── common.sh                      # Contains common functions used by other scripts
 ├── coverage.awk                   # AWK script for coverage report generation
 ├── coverage.sh                    # Script for generating coverage reports
-├── docker_check_service.sh        # Docker specific service check script
+├── docker-check-service.sh        # Docker specific service check script
 ├── docker-start-all-all.sh            # Script to start all services in a docker environment
 ├── ensure_tag.sh                  # Script to ensure proper tagging of docker images
 ├── enterprise                     # Scripts specific to enterprise version
