@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	cfgPath                  = "../../config/config.yaml"
+	cfgPath                  = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
 	maxRetry                 = 100
 	componentStartErrCode    = 6000

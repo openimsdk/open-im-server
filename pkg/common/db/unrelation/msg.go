@@ -19,8 +19,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/log"
 	"time"
+
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/protocol/msg"
 
