@@ -33,17 +33,11 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Check the system type
 system_type=$(uname)
 
-if [[ "$system_type" == "Darwin" ]]; then
-    # macOS (using sysctl)
-    cpu_count=$(sysctl -n hw.ncpu)
-elif [[ "$system_type" == "Linux" ]]; then
-    # Linux (using lscpu)
-    cpu_count=$(lscpu --parse | grep -E '^([^#].*,){3}[^#]' | sort -u | wc -l)
-else
-    echo "Unsupported operating system: $system_type"
-    exit 1
-fi
-echo -e "${GREEN_PREFIX}======> cpu_count=$cpu_count${COLOR_SUFFIX}"
+pushd "${OPENIM_ROOT}/tools/ncpu" >/dev/null
+  cpu_count=$(go run .)
+popd >/dev/null
+
+openim::color::echo ${GREEN_PREFIX} "======> cpu_count=$cpu_count"
 
 openim::log::info "Building OpenIM, Parallel compilation compile=$cpu_count"
 compile_count=$((cpu_count / 2))
