@@ -34,7 +34,7 @@ scripts/
 ├── build.cmd                      # Windows build command script
 ├── build-all-service.sh           # Script to build all services
 ├── build_push_k8s_images.sh       # Script to build and push images for Kubernetes
-├── check_all.sh                   # Script to check status of all services
+├── check-all.sh                   # Script to check status of all services
 ├── common.sh                      # Contains common functions used by other scripts
 ├── coverage.awk                   # AWK script for coverage report generation
 ├── coverage.sh                    # Script for generating coverage reports
@@ -42,7 +42,7 @@ scripts/
 ├── docker-start-all-all.sh            # Script to start all services in a docker environment
 ├── ensure_tag.sh                  # Script to ensure proper tagging of docker images
 ├── enterprise                     # Scripts specific to enterprise version
-│   ├── check_all.sh               # Check status of all enterprise services
+│   ├── check-all.sh               # Check status of all enterprise services
 │   ├── function.sh                # Functions specific to enterprise version
 │   └── path_info.cfg              # Path information configuration for enterprise version
 ├── env_check.sh                   # Script to check the environment

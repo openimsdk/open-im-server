@@ -303,7 +303,7 @@ Start services
 Check services
 
 ```
-./scripts/check_all.sh
+./scripts/check-all.sh
 ```
 
 Stop services

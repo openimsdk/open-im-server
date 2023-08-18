@@ -104,11 +104,11 @@ services:
     # image: openim/openim-server:latest
     # build: .
     container_name: openim-server
-    healthcheck:
-      test: ["CMD-SHELL", "./scripts/check_all.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    # healthcheck:
+    #   test: ["CMD-SHELL", "./scripts/check-all.sh"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
     volumes:
       - ${DATA_DIR}/_output/openim/logs:/openim/openim-server/logs
       - ${DATA_DIR}/config:/openim/openim-server/config
@@ -134,7 +134,7 @@ services:
     # image: openim/openim-chat:latest
     container_name: openim-chat
     healthcheck:
-      test: ["CMD-SHELL", "./scripts/check_all.sh"]
+      test: ["CMD-SHELL", "./scripts/check-all.sh"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -76,8 +76,8 @@ jobs:
 
     - name: Check all services
       run: |
-        sudo chmod +x ./scripts/check_all.sh
-        sudo ./scripts/check_all.sh
+        sudo chmod +x ./scripts/check-all.sh
+        sudo ./scripts/check-all.sh
         sudo cat logs/openIM.log 2>/dev/null
       shell: bash
 

@@ -267,7 +267,7 @@ bashCopy code
 
 ```
 bashCopy code
-./scripts/check_all.sh
+./scripts/check-all.sh
 ```
 
 停止服务

@@ -117,7 +117,7 @@ go.stop:
 .PHONY: go.check
 go.check:
 	@echo "===========> Checking openim"
-	@$(ROOT_DIR)/scripts/check_all.sh
+	@$(ROOT_DIR)/scripts/check-all.sh
 
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify

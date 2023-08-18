@@ -86,7 +86,7 @@ do_sth() {
 
     kill "$_progress_pid" "$_countdown_pid"
 
-    "${SCRIPTS_ROOT}/check_all.sh"
+    "${SCRIPTS_ROOT}/check-all.sh"
     echo -e "${PURPLE_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
 }
 

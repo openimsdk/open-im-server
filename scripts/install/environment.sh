@@ -117,7 +117,7 @@ def "COS_SESSION_TOKEN"                                                    # 腾
 def "OSS_ENDPOINT" "https://oss-cn-chengdu.aliyuncs.com"                   # 阿里云OSS的端点URL
 def "OSS_BUCKET" "demo-9999999"                                            # 阿里云OSS的存储桶名称
 def "OSS_BUCKET_URL" "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"    # 阿里云OSS的存储桶URL
-def "OSS_ACCESS_KEY_ID" "${USER}"                                          # 阿里云OSS的访问密钥ID
+def "OSS_ACCESS_KEY_ID"                                          # 阿里云OSS的访问密钥ID
 def "OSS_ACCESS_KEY_SECRET"                                                # 阿里云OSS的密钥
 def "OSS_SESSION_TOKEN"                                                    # 阿里云OSS的会话令牌
 
