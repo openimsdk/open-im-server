@@ -104,9 +104,21 @@ git merge release-v3.1
 # Push the updates to the main branch
 git push origin main
 ```
+##  Release Process
+
+```
+Publishing v3.2.0: A Step-by-Step Guide
+(1) Create the tag v3.2.0-alpha.0 from the main branch.
+(2) Bugs are fixed on the main branch. Once the bugs are resolved, tag the main branch as v3.2.0-rc.0.
+(3) After further testing, if v3.2.0-rc.0 is deemed stable, create a branch named release-v3.2 from the tag v3.2.0-rc.0.
+(4) From the release-v3.2 branch, create the tag v3.2.0. At this point, the official release of v3.2.0 is complete.
+
+After the release of v3.2.0, if urgent bugs are discovered, fix them on the release-v3.2 branch. Then, submit two pull requests (PRs) to both the main and release-v3.2 branches. Tag the release-v3.2 branch as v3.2.1.
+```
 
 Throughout this process, active communication within the team is pivotal to maintaining transparency and consensus on changes.
 
 ## Docker Images Version Management
 
 For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md).
+
