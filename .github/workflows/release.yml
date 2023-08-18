@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: OpenIM Server Release
+name: OpenIM Server Release Workflow
 
 on:
   push:

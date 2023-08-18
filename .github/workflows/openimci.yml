@@ -80,7 +80,7 @@ jobs:
 
       - name: Generate all necessary files, such as error code files
         run: |
-          make generate
+          make gen
           echo "Generate all necessary files successfully" 
         continue-on-error: true
 
@@ -99,7 +99,7 @@ jobs:
       - name: Clean all build
         run: |
           sudo make clean
-          echo "Clean all build successfully" 
+          echo "Clean all build successfully"
 
       - name: push OpenIM 
         uses: stefanzweifel/git-auto-commit-action@v4
