@@ -50,11 +50,11 @@ if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 fi
 #Check if the service exists
 #If it is exists,kill this process
-check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
-if [ $check -ge 1 ]; then
-  oldPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
-    kill -9 ${oldPid}
-fi
+#check=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | wc -l)
+#if [ $check -ge 1 ]; then
+#  oldPid=$(ps aux | grep -w ./${openim_msggateway} | grep -v grep | awk '{print $2}')
+#    kill -9 ${oldPid}
+#fi
 #Waiting port recycling
 sleep 1
 cd ${msg_gateway_binary_root}
@@ -78,5 +78,5 @@ if [ $check -ge 1 ]; then
   echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allNewPid}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${BACKGROUND_GREEN}${allPorts}${COLOR_SUFFIX}
 else
-  echo -e ${BACKGROUND_GREEN}${openim_msggateway}${COLOR_SUFFIX}${RED_PREFIX}"\n SERVICE START ERROR, PLEASE CHECK openIM.log"${COLOR_SUFFIX}
+    exit -1
 fi
