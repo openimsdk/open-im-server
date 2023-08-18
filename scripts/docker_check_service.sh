@@ -17,7 +17,7 @@
 # Include shell font styles and some basic information
 SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-Chat_Script=$(SCRIPTS_ROOT)/../openim-chat/scripts
+Chat_Script=$SCRIPTS_ROOT/../openim-chat/scripts
 
 source "$SCRIPTS_ROOT/style_info.sh"
 
