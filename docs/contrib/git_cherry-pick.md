@@ -65,12 +65,12 @@ It is critical that our full community is actively engaged on enhancements in th
 
 ### Steps
 
-- Run the [cherry pick script](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/cherry_pick_pull.sh)
+- Run the [cherry pick script](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/cherry-pick.sh)
 
   This example applies a main branch PR #98765 to the remote branch `upstream/release-v3.1`:
 
   ```
-  scripts/cherry_pick_pull.sh upstream/release-v3.1 98765
+  scripts/cherry-pick.sh upstream/release-v3.1 98765
   ```
 
   - Be aware the cherry pick script assumes you have a git remote called `upstream` that points at the openim-server github org.

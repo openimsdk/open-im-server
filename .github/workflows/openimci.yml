@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         go_version: ["1.18","1.19","1.20","1.21"]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest,macos-latest]
 
     steps:
       - name: Set up Go ${{ matrix.go_version }}
@@ -89,19 +89,12 @@ jobs:
           sudo make build
           echo "Build source code for host platform successfully" 
 
-      - name: OpenIM verify copyright
-        run: |
-          sudo make verify-copyright
-          sudo make add-copyright
-          echo "OpenIM verify successfully" 
-        continue-on-error: true
-
       - name: Clean all build
         run: |
           sudo make clean
           echo "Clean all build successfully"
 
-      - name: push OpenIM 
+      - name: push OpenIM
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "cicd: robot automated Change"
@@ -112,14 +105,6 @@ jobs:
         #   commit_user_name: kubbot # defaults to "github-actions[bot]"
         #   commit_user_email: 3293172751ysy@gmail.com # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
         #   commit_author: Kubbot # defaults to author of the commit that triggered the run
-        continue-on-error: true
-
-      - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore(fmt): robot automated format and lint Change"
-          commit_options: '--no-verify --signoff'
-          branch: main
         continue-on-error: true
 
       - name: Set Current Directory
@@ -140,10 +125,6 @@ jobs:
         run: |
           echo "Test Coverage:"
           cat ${{ steps.collect_coverage.outputs.coverage_file }}
-        continue-on-error: true
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
         continue-on-error: true
 
   openim-start:

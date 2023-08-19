@@ -121,12 +121,16 @@ $ make demo
 
 <details>   <summary>Deploying with Docker Compose</summary>
 
+
+> docker compose will not be maintained in future versions, but it is still the easiest and most convenient way to organize docker compose deployments into a separate project https://github.com/openim-sigs/openim-docker to maintain.
+
 **1. Clone the project**
+
 
 ```bash
 # choose what you need, We take branch 3.2 as an example
 $ BRANCH=release-v3.2
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim
+$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim_dir=$(pwd)/openim && cd ${openim_dir}/openim-server
 ```
 
 > **Note**
@@ -157,7 +161,7 @@ API_URL=http://127.0.0.1:10002/object/ 	#the app must be able to access this IP 
 DATA_DIR=./  							#designate large disk directory
 ```
 
-3. **Deploy and start**
+**3. Deploy and start**
 
 > **Note**
 >
@@ -181,10 +185,12 @@ Looking at the command line at this point, there are two items in the output, ch
 
 <details>  <summary>Compile from Source</summary>
 
+
 Ur need `Go 1.18` or higher version, and `make`.
 
+
 ```bash
-$ go version; make --version
+go version && make --version || echo "Error: One of the commands failed."
 ```
 
 Version Details: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
@@ -192,23 +198,26 @@ Version Details: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conv
 ```bash
 # choose what you need
 $ BRANCH=release-v3.1
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
+$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make start
 ```
 
-Read about the [OpenIM Version Policy](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+> `make help` to help you see the instructions supported by OpenIM.
 
-`make help` to help you see the instructions supported by OpenIM.
+Use `make check` to check all component starts
 
-All services have been successfully built as shown in the figure
+```bash
+$ make check
+```
 
-![Successful Compilation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/build.png)
+You can use the `make help-all` see OpenIM in action.
 
 </details>
 
 <details>  <summary>Component Configuration Instructions</summary>
+The `config/config.yaml` file has detailed configuration instructions for the storage components.
 
 
-The config/config.yaml file has detailed configuration instructions for the storage components.
+The config file is available via [environment.sh](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/scripts/install/environment.sh) configuration [openim.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/templates/openim.yaml) template, and then through the `make init` to automatically generate a new configuration.
 
 - Zookeeper
 
@@ -291,26 +300,10 @@ The config/config.yaml file has detailed configuration instructions for the stor
 
 </details>
 
-<details>  <summary>Start and Stop Services</summary>
+<details>  <summary>Deployed with kubernetes</summary>
 
 
-Start services
-
-```
-./scripts/start-all.sh;
-```
-
-Check services
-
-```
-./scripts/check-all.sh
-```
-
-Stop services
-
-```
-./scripts/stop-all.sh
-```
+read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/README.md
 
 </details> 
 
@@ -336,6 +329,7 @@ Stop services
 | TCP:10009 | Management backend, such as statistics, banning etc | Port release or nginx reverse proxy, and firewall off |
 
 </details>
+
 
 ## :link: Relationship Between APP and OpenIM
 
