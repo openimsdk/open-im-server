@@ -75,6 +75,17 @@ OpenIMSDK/OpenKF:
     dest: .github/.codecov.yml
     replace: false
 
+openim-sigs/openim-docker:
+  - source: ./config
+    dest: ./openim-server/config
+    replace: true
+  - source: ./docs
+    dest: ./openim-server/docs
+    replace: true
+  - source: ./scripts
+    dest: ./openim-server/scripts
+    replace: true
+
 group:
   # first group：common to all warehouses
   # TODO: add the required warehouse here
