@@ -45,7 +45,7 @@ echo "++++ Check all OpenIM service ports"
 echo "+ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
-  echo "+++ cat OpenIM Log file >>> ${LOG_FILE}"
+  echo "+++ cat openim log file >>> ${LOG_FILE}"
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
 else
   echo "++++ Check all openim service ports successfully !"
