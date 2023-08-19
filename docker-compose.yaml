@@ -99,10 +99,9 @@ services:
     command: minio server /data --console-address ':9090'
 
   openim-server:
-    # image: ghcr.io/openimsdk/openim-server:latest
-    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
-    # image: openim/openim-server:latest
-    # build: .
+    # image: ghcr.io/openimsdk/openim-server:release-v3.2
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:release-v3.2
+    # image: openim/openim-server:release-v3.2
     container_name: openim-server
     # healthcheck:
     #   test: ["CMD-SHELL", "./scripts/check-all.sh"]
@@ -129,9 +128,9 @@ services:
         max-file: "2"
 
   openim-chat:
-    # image: ghcr.io/openimsdk/openim-chat:latest
-    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:latest
-    # image: openim/openim-chat:latest
+    # image: ghcr.io/openimsdk/openim-server:release-v1.2
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:release-v1.2
+    # image: openim/openim-server:release-v1.2
     container_name: openim-chat
     # healthcheck:
     #   test: ["CMD-SHELL", "./scripts/check-all.sh"]
@@ -181,7 +180,6 @@ services:
     network_mode: "host"
 
 volumes:
-  data_volume:
   openim-chat_logs:
   openim-chat_config:
   openim-chat_scripts:
