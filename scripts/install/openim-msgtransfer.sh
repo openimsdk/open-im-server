@@ -25,41 +25,43 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-msgtransfer"
 
-openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
-openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
+function openim::msgtransfer::start()
+{
+    openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
+    openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
 
-openim::util::stop_services_with_name ${SERVER_NAME}
+    openim::util::stop_services_with_name ${SERVER_NAME}
 
-# Message Transfer Prometheus port list
-MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
+    # Message Transfer Prometheus port list
+    MSG_TRANSFER_PROM_PORTS=(openim::util::list-to-string ${MSG_TRANSFER_PROM_PORT} )
 
-openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
+    openim::log::status "OpenIM Prometheus ports: ${MSG_TRANSFER_PROM_PORTS[*]}"
 
-openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
+    openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGTRANSFER_CONFIG}"
 
-openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
+    openim::log::info "openim maggateway num: ${OPENIM_MSGGATEWAY_NUM}"
 
-if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
-  opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
-fi
+    if [ "${OPENIM_MSGGATEWAY_NUM}" -lt 1 ]; then
+    opeim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be greater than 0"
+    fi
 
-if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
-  openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
-fi
+    if [ ${OPENIM_MSGGATEWAY_NUM} -ne $((${#MSG_TRANSFER_PROM_PORTS[@]} - 1)) ]; then
+    openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
+    fi
 
-for (( i=1; i<=$OPENIM_MSGGATEWAY_NUM; i++ )) do
-  openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
-  
-  PROMETHEUS_PORT_OPTION=""
-  if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
-    PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
-  fi
+    for (( i=1; i<=$OPENIM_MSGGATEWAY_NUM; i++ )) do
+    openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
+    
+    PROMETHEUS_PORT_OPTION=""
+    if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
+        PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
+    fi
 
-  nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} >> ${LOG_FILE} 2>&1 &
-done
+    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} >> ${LOG_FILE} 2>&1 &
+    done
 
-openim::util::check_process_names ${SERVER_NAME}
-
+    openim::util::check_process_names ${SERVER_NAME}
+}
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
@@ -133,6 +135,6 @@ function openim::msgtransfer::status()
   fi
 }
 
-if [[ "$*" =~ ${SERVER_NAME}:: ]];then
+if [[ "$*" =~ openim::msgtransfer:: ]];then
   eval $*
 fi

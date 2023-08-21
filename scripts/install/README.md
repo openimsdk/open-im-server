@@ -25,7 +25,7 @@ The OpenIM Suite represents a comprehensive collection of scripts, each tailored
 12. **openim-rpc-third:** Script dedicated to third-party integrations with OpenIM RPC.
 13. **openim-rpc-user:** Control interface for OpenIM RPC User operations.
 
-## Usage
+## OpenIM Server Installation Script Usage
 
 The scripts within the OpenIM Suite generally adhere to two primary execution methodologies. To illustrate these methodologies, we'll use `openim-crontask` as a representative example.
 
@@ -38,8 +38,37 @@ The scripts within the OpenIM Suite generally adhere to two primary execution me
 2. **Function-based Execution:** Invoking specific functions within the script for more specialized operations (e.g., install, uninstall).
 
    ```bash
-   ./scripts/install/install.sh [function-name]
+   ./scripts/install/install.sh [options]
    ```
+
+**Description:**  
+This script is designed to handle the installation, uninstallation, and status checking of OpenIM components on the server. OpenIM is a presumed communication or messaging platform.
+
+### Commands:
+- **-i, --install**:  
+    Initiate the installation of all OpenIM components.
+
+- **-u, --uninstall**:  
+    Uninstall or remove all OpenIM components from the server.
+
+- **-s, --status**:  
+    Check and report the current operational status of the installed OpenIM components.
+
+- **-h, --help**:  
+    Display the help menu for available commands.
+
+### Example Usage:
+To install all OpenIM components:
+```bash
+./scripts/install/install.sh -i
+```
+or
+```bash
+./scripts/install/install.sh --install
+```
+> **Note**: 
+> Ensure you have the necessary privileges to execute installation or uninstallation operations. It's generally recommended to take a backup before making major changes.
+
 
 ### 1. Direct Script Execution
 

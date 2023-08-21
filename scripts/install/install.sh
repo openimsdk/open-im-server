@@ -13,11 +13,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# OpenIM Server Installation Script
+# 
+# Description:
+#     This script is designed to handle the installation, uninstallation, and
+#     status checking of OpenIM components on the server. OpenIM is a presumed
+#     communication or messaging platform based on the context.
+# 
+# Usage:
+#     To utilize this script, you need to invoke it with specific commands 
+#     and options as detailed below.
+# 
+# Commands:
+#     -i, --install       : Use this command to initiate the installation of all 
+#                           OpenIM components.
+#     -u, --uninstall     : Use this command to uninstall or remove all 
+#                           OpenIM components from the server.
+#     -s, --status        : This command can be used to check and report the 
+#                           current operational status of the installed OpenIM components.
+#     -h, --help          : For any assistance or to view the available commands,
+#                           use this command to display the help menu.
+# 
+# Example Usage:
+#     To install all OpenIM components:
+#         ./scripts/install/install.sh -i  
+#     or 
+#         ./scripts/install/install.sh --install  
+# 
+# Note:
+#     Ensure you have the necessary privileges to execute installation or
+#     uninstallation operations. It's generally recommended to take a backup 
+#     before making major changes.
+# 
+###############################################################################
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
 
-source ${OPENIM_ROOT}/scripts/install/dependency.sh
 source ${OPENIM_ROOT}/scripts/install/openim-msggateway.sh
 source ${OPENIM_ROOT}/scripts/install/openim-msgtransfer.sh
 source ${OPENIM_ROOT}/scripts/install/openim-push.sh
@@ -28,7 +60,7 @@ source ${OPENIM_ROOT}/scripts/install/test.sh
 source ${OPENIM_ROOT}/scripts/install/man.sh
 
 # Detailed help function
-function show_help() {
+function openim::install::show_help() {
     echo "OpenIM Installer"
     echo "Usage: $0 <command> [options]"
     echo ""
@@ -86,6 +118,12 @@ function openim::install::status()
     openim::log::success "openim status success"
 }
 
+# If no arguments are provided, show help
+if [[ $# -eq 0 ]]; then
+    openim::install::show_help
+    exit 0
+fi
+
 # Argument parsing to call functions based on user input
 while (( "$#" )); do
     case "$1" in
@@ -102,14 +140,8 @@ while (( "$#" )); do
             shift
             ;;
         -h|--help|*)
-            show_help
+            openim::install::show_help
             exit 0
             ;;
     esac
 done
-
-# If no arguments are provided, show help
-if [[ $# -eq 0 ]]; then
-    show_help
-    exit 0
-fi

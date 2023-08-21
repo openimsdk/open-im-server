@@ -44,14 +44,17 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-crontask"
 
-openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
-openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
+function openim::crontask::start()
+{
+    openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
+    openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
 
-openim::util::stop_services_with_name ${SERVER_NAME}
+    openim::util::stop_services_with_name ${SERVER_NAME}
 
-openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
-nohup ${OPENIM_CRONTASK_BINARY} >> ${LOG_FILE} 2>&1 &
-openim::util::check_process_names ${SERVER_NAME}
+    openim::log::status "start cron_task process, path: ${OPENIM_CRONTASK_BINARY}"
+    nohup ${OPENIM_CRONTASK_BINARY} >> ${LOG_FILE} 2>&1 &
+    openim::util::check_process_names ${SERVER_NAME}
+}
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
@@ -125,6 +128,6 @@ function openim::crontask::status()
   fi
 }
 
-if [[ "$*" =~ ${SERVER_NAME}:: ]];then
+if [[ "$*" =~ openim::crontask:: ]];then
   eval $*
 fi

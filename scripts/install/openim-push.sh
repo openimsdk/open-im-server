@@ -49,30 +49,33 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-push"
 
-openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
-openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
+function openim::push::start()
+{
+    openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
+    openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
 
-openim::util::stop_services_with_name ${SERVER_NAME}
+    openim::util::stop_services_with_name ${SERVER_NAME}
 
-openim::log::status "prepare start push process, path: ${OPENIM_PUSH_BINARY}"
-openim::log::status "prepare start push process, port: ${OPENIM_PUSH_PORT}, prometheus port: ${PUSH_PROM_PORT}"
+    openim::log::status "prepare start push process, path: ${OPENIM_PUSH_BINARY}"
+    openim::log::status "prepare start push process, port: ${OPENIM_PUSH_PORT}, prometheus port: ${PUSH_PROM_PORT}"
 
-OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
-PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
+    OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
+    PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
 
-openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
-openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
+    openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
+    openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
 
-if [ ${#OPENIM_PUSH_PORTS_ARRAY[@]} -ne ${#PUSH_PROM_PORTS_ARRAY[@]} ]; then
-    openim::log::error_exit "The length of the two port lists is different!"
-fi
+    if [ ${#OPENIM_PUSH_PORTS_ARRAY[@]} -ne ${#PUSH_PROM_PORTS_ARRAY[@]} ]; then
+        openim::log::error_exit "The length of the two port lists is different!"
+    fi
 
-for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
-    openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
-    nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2>&1 &
-done
+    for (( i=0; i<${#OPENIM_PUSH_PORTS_ARRAY[@]}; i++ )); do
+        openim::log::info "start push process, port: ${OPENIM_PUSH_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_PROM_PORTS_ARRAY[$i]}"
+        nohup ${OPENIM_PUSH_BINARY} --port ${OPENIM_PUSH_PORTS_ARRAY[$i]} --prometheus_port ${PUSH_PROM_PORTS_ARRAY[$i]} >> ${LOG_FILE} 2>&1 &
+    done
 
-openim::util::check_process_names ${SERVER_NAME}
+    openim::util::check_process_names ${SERVER_NAME}
+}
 
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
@@ -145,6 +148,6 @@ function openim::push::status()
   fi
 }
 
-if [[ "$*" =~ ${SERVER_NAME}:: ]];then
+if [[ "$*" =~ openim::push:: ]];then
   eval $*
 fi
