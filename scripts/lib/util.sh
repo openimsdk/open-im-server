@@ -973,9 +973,6 @@ function openim::util::ensure-cfssl {
   popd > /dev/null || return 1
 }
 
-# openim::util::ensure-docker-buildx
-# Check if we have "docker buildx" commands available
-#
 function openim::util::ensure-docker-buildx {
   # podman returns 0 on `docker buildx version`, docker on `docker buildx`. One of them must succeed.
   if docker buildx version >/dev/null 2>&1 || docker buildx >/dev/null 2>&1; then
