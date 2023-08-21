@@ -287,7 +287,7 @@ openim::util::check_ports() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "### Not started ports:"
         for port in "${not_started[@]}"; do
-            openim::log::error "Port $port is not started. OpenIM Log >>> cat ${LOG_FILE}"
+            openim::log::error "Port $port is not started."
         done
     fi
 
@@ -302,6 +302,7 @@ openim::util::check_ports() {
 
     # If any of the processes is not running, return a status of 1.
     if [[ ${#not_started[@]} -ne 0 ]]; then
+        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
         return 1
     else
         openim::log::success "started[@] processes are running."
@@ -352,7 +353,7 @@ openim::util::check_process_names() {
     if [[ ${#not_started[@]} -ne 0 ]]; then
         openim::log::info "Not started processes:"
         for process_name in "${not_started[@]}"; do
-            openim::log::error "Process $process_name is not started. OpenIM Log >>> cat ${LOG_FILE}"
+            openim::log::error "Process $process_name is not started."
         done
     fi
 
@@ -366,6 +367,7 @@ openim::util::check_process_names() {
 
     # Return status
     if [[ ${#not_started[@]} -ne 0 ]]; then
+        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
         return 1
     else
         openim::log::success "All processes are running."

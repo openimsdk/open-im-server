@@ -19,11 +19,11 @@ ADD . .
 RUN make clean
 RUN make build
 
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
+FROM ghcr.io/openim-sigs/openim-ubuntu-image:latest
 
 WORKDIR ${SERVER_WORKDIR}
 
 # Copy scripts and binary files to the production image
 COPY --from=builder ${OPENIM_SERVER_BINDIR} /openim/openim-server/_output/bin
 
-CMD ["bash","-c","${OPENIM_SERVER_CMDDIR}/docker-start-all.sh"]
+CMD ["/openim/openim-server/scripts/docker-start-all.sh"]

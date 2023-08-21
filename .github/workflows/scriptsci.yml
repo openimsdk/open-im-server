@@ -54,21 +54,17 @@ jobs:
     - name: Build all services
       run: |
         sudo ./scripts/build-all-service.sh
-      shell: bash
 
     - name: Start all services
       run: |
         sudo ./scripts/start-all.sh
-      shell: bash
 
     - name: Check all services
       run: |
         sudo ./scripts/check-all.sh
-      shell: bash
 
     - name: Print openIM.log
       run: |
         sudo cat ./_output/logs/* 2>/dev/null
         sudo cat ./_output/logs/* 2>/dev/null >> "$GITHUB_OUTPUT"
-      shell: bash
       continue-on-error: true

@@ -13,25 +13,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Iterates over two directories: 'pkg' and 'internal/pkg'.
-for top in pkg internal/pkg
-do
-    # Finds all subdirectories (including nested ones) under the current directory in the iteration ('pkg' or 'internal/pkg').
-    for d in $(find $top -type d)
-    do
-        # Checks if 'doc.go' doesn't exist in the current subdirectory.
-        if [ ! -f $d/doc.go ]; then
-            # Checks if there are any '.go' files in the current subdirectory.
-            if ls $d/*.go > /dev/null 2>&1; then
-                # Echoes the path of the 'doc.go' file to the terminal. 
-                # This is likely for debugging or information purposes.
-                echo $d/doc.go
+DEFAULT_DIRS=(
+    "pkg"
+    "internal/pkg"
+)
+BASE_URL="github.com/OpenIMSDK/Open-IM-Server"
 
-                # Writes the package declaration and import comment to the 'doc.go' file in the current subdirectory.
-                # 'basename $d' retrieves the name of the current directory (last part of the path).
-                # The import comment is constructed based on a static base URL and the directory path.
-                echo "package $(basename $d) // import \"github.com/OpenIMSDK/Open-IM-Server/$d\"" > $d/doc.go
+usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo
+    echo "This script iterates over directories and generates doc.go if necessary."
+    echo "By default, it processes 'pkg' and 'internal/pkg' directories."
+    echo
+    echo "Options:"
+    echo "  -d DIRS, --dirs DIRS    Specify the directories to be processed, separated by commas. E.g., 'pkg,internal/pkg'."
+    echo "  -u URL,  --url URL     Set the base URL for the import path. Default is '$BASE_URL'."
+    echo "  -h,      --help        Show this help message."
+    echo
+}
+
+process_dir() {
+    local dir=$1
+    local base_url=$2
+
+    for d in $(find $dir -type d); do
+        if [ ! -f $d/doc.go ]; then
+            if ls $d/*.go > /dev/null 2>&1; then
+                echo $d/doc.go
+                echo "package $(basename $d) // import \"$base_url/$d\"" > $d/doc.go
             fi
         fi
     done
+}
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case $key in
+        -d|--dirs)
+            IFS=',' read -ra DIRS <<< "$2"
+            shift # shift past argument
+            shift # shift past value
+            ;;
+        -u|--url)
+            BASE_URL="$2"
+            shift # shift past argument
+            shift # shift past value
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+DIRS=${DIRS:-${DEFAULT_DIRS[@]}}
+
+for dir in "${DIRS[@]}"; do
+    process_dir $dir $BASE_URL
 done

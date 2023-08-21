@@ -26,6 +26,9 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
+
+
+
 # This function returns a list of Prometheus ports for various services
 # based on the provided configuration. Each service has its own dedicated
 # port for monitoring purposes.
@@ -51,6 +54,29 @@ IFS=" " read -ra OPENIM_PROM_PORT_TARGETS <<< "$(openim::common::prometheus_port
 readonly OPENIM_PROM_PORT_TARGETS
 readonly OPENIM_PROM_PORT_LISTARIES=("${OPENIM_PROM_PORT_TARGETS[@]##*/}")
 
+openim::common::service_name() {
+    local targets=(
+        openim-user
+        openim-friend
+        openim-msg
+        openim-msg-gateway
+        openim-group
+        openim-auth
+        openim-push
+        openim-conversation
+        openim-third
+        # openim-msg-transfer
+
+        # api
+        openim-api
+        openim-ws
+    )
+    echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_SERVER_NAME_TARGETS <<< "$(openim::common::service_name)"
+readonly OPENIM_SERVER_NAME_TARGETS
+
 # Storing all the defined ports in an array for easy management and access.
 # This array consolidates the port numbers for all the services defined above.
 openim::common::service_port() {
@@ -75,6 +101,21 @@ IFS=" " read -ra OPENIM_SERVER_PORT_TARGETS <<< "$(openim::common::service_port)
 readonly OPENIM_SERVER_PORT_TARGETS
 readonly OPENIM_SERVER_PORT_LISTARIES=("${OPENIM_SERVER_PORT_TARGETS[@]##*/}")
 
+openim::common::dependency_name() {
+    local targets=(
+        mysql
+        redis
+        zookeeper
+        kafka
+        mongodb
+        minio
+    )
+    echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_DEPENDENCY_TARGETS <<< "$(openim::common::dependency_name)"
+readonly OPENIM_DEPENDENCY_TARGETS
+
 # This function returns a list of ports for various services
 #  - zookeeper
 #  - kafka
@@ -88,7 +129,7 @@ openim::common::dependency_port() {
     ${REDIS_PORT} # Redis port
     ${ZOOKEEPER_PORT} # Zookeeper port
     ${KAFKA_PORT} # Kafka port
-    ${MongoDB_PORT} # MongoDB port
+    ${MONGO_PORT} # MongoDB port
     ${MINIO_PORT} # MinIO port
   )
     echo "${targets[@]}"

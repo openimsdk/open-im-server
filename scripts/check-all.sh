@@ -28,10 +28,36 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 OPENIM_VERBOSE=4
 
-echo "++++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+# OpenIM status
+# Elegant printing function
+print_services_and_ports() {
+    local -n service_names=$1
+    local -n service_ports=$2
 
-echo "++++ Check all dependent service ports"
-echo "+ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+    echo "+-------------------+-------+"
+    echo "| Service Name      | Port  |"
+    echo "+-------------------+-------+"
+
+    for index in "${!service_names[@]}"; do
+        printf "| %-17s | %-5s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+    done
+
+    echo "+-------------------+-------+"
+}
+
+# Print out services and their ports
+print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS
+
+# Print out dependencies and their ports
+print_services_and_ports OPENIM_DEPENDENCY_TARGETS OPENIM_DEPENDENCY_PORT_TARGETS
+
+
+# OpenIM check
+echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+echo "## Check all dependent service ports"
+echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
+
+set +e
 openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
 
 if [[ $? -ne 0 ]]; then
@@ -40,9 +66,10 @@ if [[ $? -ne 0 ]]; then
 else
   echo "++++ Check all dependent service ports successfully !"
 fi
-
-echo "++++ Check all OpenIM service ports"
-echo "+ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+set -e
+echo 
+echo "## Check all OpenIM service ports"
+echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
   echo "+++ cat openim log file >>> ${LOG_FILE}"
