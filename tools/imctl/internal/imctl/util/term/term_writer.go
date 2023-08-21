@@ -1,7 +1,3 @@
-// Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-// Use of this source code is governed by a MIT style
-// license that can be found in the LICENSE file.
-
 package term
 
 import (
@@ -20,9 +16,11 @@ type wordWrapWriter struct {
 // NewResponsiveWriter creates a Writer that detects the column width of the
 // terminal we are in, and adjusts every line width to fit and use recommended
 // terminal sizes for better readability. Does proper word wrapping automatically.
-//    if terminal width >= 120 columns		use 120 columns
-//    if terminal width >= 100 columns		use 100 columns
-//    if terminal width >=  80 columns		use  80 columns
+//
+//	if terminal width >= 120 columns		use 120 columns
+//	if terminal width >= 100 columns		use 100 columns
+//	if terminal width >=  80 columns		use  80 columns
+//
 // In case we're not in a terminal or if it's smaller than 80 columns width,
 // doesn't do any wrapping.
 func NewResponsiveWriter(w io.Writer) io.Writer {

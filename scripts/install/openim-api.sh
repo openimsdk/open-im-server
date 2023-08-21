@@ -86,3 +86,22 @@ done
 
 OPENIM_API_PORT_STRINGARIES=( $(openim::util::list-to-string ${OPENIM_API_PORT_LISTARIES[@]}) )
 openim::util::check_ports ${OPENIM_API_PORT_STRINGARIES[@]}
+
+###################################### Linux Systemd ######################################
+SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
+
+function openim::api::install() {
+
+}
+
+function openim::api::uninstall() {
+
+}
+
+function openim::api::status() {
+
+}
+
+if [[ "$*" =~ ${SERVER_NAME}:: ]];then
+  eval $*
+fi

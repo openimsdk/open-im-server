@@ -26,3 +26,90 @@ source ${OPENIM_ROOT}/scripts/install/openim-crontask.sh
 source ${OPENIM_ROOT}/scripts/install/openim-api.sh
 source ${OPENIM_ROOT}/scripts/install/test.sh
 source ${OPENIM_ROOT}/scripts/install/man.sh
+
+# Detailed help function
+function show_help() {
+    echo "OpenIM Installer"
+    echo "Usage: $0 <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  -i, --install        Install all OpenIM components."
+    echo "  -u, --uninstall      Remove all OpenIM components."
+    echo "  -s, --status         Check the current status of OpenIM components."
+    echo "  -h, --help           Show this help menu."
+    echo ""
+    echo "Example: "
+    echo "  $0 -i     Will install all OpenIM components."
+    echo "  $0 --install  Same as above."
+}
+
+function openim::install::install_openim()
+{
+    openim::log::info "check openim dependency"
+    openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
+
+    openim::msggateway::install || return 1
+    openim::msgtransfer::install || return 1
+    openim::push::install || return 1
+    openim::rpc::install || return 1
+    openim::crontask::install || return 1
+    openim::api::install || return 1
+
+    openim::log::success "openim install success"
+}
+
+function openim::uninstall::uninstall_openim()
+{
+    openim::log::info "uninstall openim"
+
+    openim::msggateway::uninstall || return 1
+    openim::msgtransfer::uninstall || return 1
+    openim::push::uninstall || return 1
+    openim::rpc::uninstall || return 1
+    openim::crontask::uninstall || return 1
+    openim::api::uninstall || return 1
+
+    openim::log::success "openim uninstall success"
+}
+
+function openim::install::status()
+{
+    openim::log::info "check openim status"
+
+    openim::msggateway::status || return 1
+    openim::msgtransfer::status || return 1
+    openim::push::status || return 1
+    openim::rpc::status || return 1
+    openim::crontask::status || return 1
+    openim::api::status || return 1
+
+    openim::log::success "openim status success"
+}
+
+# Argument parsing to call functions based on user input
+while (( "$#" )); do
+    case "$1" in
+        -i|--install)
+            openim::install::install_openim
+            shift
+            ;;
+        -u|--uninstall)
+            openim::uninstall::uninstall_openim
+            shift
+            ;;
+        -s|--status)
+            openim::install::status
+            shift
+            ;;
+        -h|--help|*)
+            show_help
+            exit 0
+            ;;
+    esac
+done
+
+# If no arguments are provided, show help
+if [[ $# -eq 0 ]]; then
+    show_help
+    exit 0
+fi

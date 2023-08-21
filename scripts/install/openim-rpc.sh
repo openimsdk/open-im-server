@@ -126,3 +126,22 @@ done
 
 openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
 # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
+
+###################################### Linux Systemd ######################################
+SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
+
+function openim::rpc::install() {
+
+}
+
+function openim::rpc::uninstall() {
+
+}
+
+function openim::rpc::status() {
+
+}
+
+if [[ "$*" =~ ${SERVER_NAME}:: ]];then
+  eval $*
+fi
