@@ -15,6 +15,7 @@
 package convert
 
 import (
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
@@ -78,7 +79,9 @@ func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
 	msg.SendTime = msgModel.SendTime
 	msg.CreateTime = msgModel.CreateTime
 	msg.Status = msgModel.Status
-	msg.IsRead = msgModel.IsRead
+	if msgModel.SessionType == constant.SingleChatType {
+		msg.IsRead = msgModel.IsRead
+	}
 	msg.Options = msgModel.Options
 	if msgModel.OfflinePush != nil {
 		msg.OfflinePushInfo = &sdkws.OfflinePushInfo{
