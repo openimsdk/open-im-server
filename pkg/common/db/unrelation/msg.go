@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/OpenIMSDK/tools/log"
+
 	"github.com/OpenIMSDK/protocol/msg"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -1166,9 +1168,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	if err != nil {
 		return 0, nil, err
 	}
-	if len(msgsDocs) == 0 {
-		return 0, nil, errs.Wrap(mongo.ErrNoDocuments)
-	}
+	log.ZDebug(ctx, "query mongoDB", "result", msgsDocs)
 	msgs := make([]*table.MsgInfoModel, 0)
 	for index := range msgsDocs {
 		msgInfo := msgsDocs[index].Msg
@@ -1207,7 +1207,9 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	}
 	start := (req.Pagination.PageNumber - 1) * req.Pagination.ShowNumber
 	n := int32(len(msgs))
-	if start+req.Pagination.ShowNumber < n {
+	if start >= n {
+		return n, []*table.MsgInfoModel{}, nil
+	} else if start+req.Pagination.ShowNumber < n {
 		msgs = msgs[start : start+req.Pagination.ShowNumber]
 	} else {
 		msgs = msgs[start:]
