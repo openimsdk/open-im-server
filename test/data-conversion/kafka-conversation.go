@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	topic = "latestMsgToRedis"
+	topic = "ws2ms_chat"
 	addr  = "127.0.0.1:9092"
 	//addr = "43.128.72.19:9092"
 )
