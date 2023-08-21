@@ -156,7 +156,7 @@ go.build.%:
 .PHONY: go.install
 go.install:
 	@echo "===========> Installing deployment openim"
-	@$(ROOT_DIR)/scripts/install_im_server.sh
+	@$(ROOT_DIR)/scripts/install-im-server.sh
 
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch

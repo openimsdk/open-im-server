@@ -53,7 +53,7 @@ scripts/
 │   └── pre-push                   # Script to run before each push
 ├── init_pwd.sh                    # Script to initialize password
 ├── install_im_compose.sh          # Script to install IM with Docker Compose
-├── install_im_server.sh           # Script to install IM server
+├── install-im-server.sh           # Script to install IM server
 ├── lib                            # Library scripts
 │   ├── color.sh                   # Script for console color manipulation
 │   ├── golang.sh                  # Script for golang related utility functions

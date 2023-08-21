@@ -14,13 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-
-source "$SCRIPTS_ROOT/style_info.sh"
-
-echo -e "${GREEN_PREFIX}=========> Check docker-compose status ${COLOR_SUFFIX} \n"
+source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 cd "$OPENIM_ROOT"
 
