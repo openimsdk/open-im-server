@@ -31,9 +31,10 @@ output/
 _output/
 
 ### OpenIM Config ###
+config/config.yaml
 ./config/config.yaml
 .env
-
+./.env
 
 ### OpenIM deploy ###
 deploy/openim_demo

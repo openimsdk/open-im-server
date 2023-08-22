@@ -203,8 +203,8 @@ func checkMinio() error {
 				return ErrComponentStart.Wrap("Minio server is offline")
 			}
 		}
-		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.Endpoint) == "127.0.0.1" {
-			return ErrConfig.Wrap("apiURL or Minio endpoint contain 127.0.0.1.")
+		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.SignEndpoint) == "127.0.0.1" {
+			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1.")
 		}
 	}
 	return nil
