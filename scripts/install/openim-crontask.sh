@@ -29,7 +29,7 @@
 # Usage:
 # 1. Direct Script Execution:
 #    This will start the OpenIM CronTask directly through a background process.
-#    Example: ./openim-crontask.sh
+#    Example: ./openim-crontask.sh openim::crontask::start
 # 
 # 2. Controlling through Functions for systemctl operations:
 #    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
@@ -37,7 +37,6 @@
 # 
 # Note: Ensure that the appropriate permissions and environmental variables are set prior to script execution.
 # 
-
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh

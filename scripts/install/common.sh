@@ -27,8 +27,6 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Make sure the environment is only called via common to avoid too much nesting
 source "${OPENIM_ROOT}/scripts/install/environment.sh"
 
-
-
 # This function returns a list of Prometheus ports for various services
 # based on the provided configuration. Each service has its own dedicated
 # port for monitoring purposes.

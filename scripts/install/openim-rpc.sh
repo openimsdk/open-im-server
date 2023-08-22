@@ -13,6 +13,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# OpenIM RPC Service Control Script
+# 
+# Description:
+# This script provides a control interface for the OpenIM RPC service within a Linux environment. It offers functionalities to start multiple RPC services, each denoted by their respective names under openim::rpc::service_name.
+# 
+# Features:
+# 1. Robust error handling using Bash built-ins like 'errexit', 'nounset', and 'pipefail'.
+# 2. The capability to source common utility functions and configurations to ensure uniform environmental settings.
+# 3. Comprehensive logging functionalities, providing a detailed understanding of operational processes.
+# 4. Provision for declaring and managing a set of RPC services, each associated with its unique name and corresponding ports.
+# 5. The ability to define and associate Prometheus ports for service monitoring purposes.
+# 6. Functionalities to start each RPC service, along with its designated ports, in a sequence.
+#
+# Usage:
+# 1. Direct Script Execution:
+#    This initiates all the RPC services declared under the function openim::rpc::service_name.
+#    Example: ./openim-rpc-{rpc-name}.sh  openim::rpc::start
+# 2. Controlling through Functions for systemctl operations:
+#    Specific operations like installation, uninstallation, and status check can be executed by passing the respective function name as an argument to the script.
+#    Example: ./openim-rpc-{rpc-name}.sh openim::rpc::install
+#
+# Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
+#
+
 
 set -o errexit
 set +o nounset
@@ -77,8 +102,7 @@ IFS=" " read -ra OPENIM_RPC_PROM_PORT_TARGETS <<< "$(openim::rpc::prometheus_por
 readonly OPENIM_RPC_PROM_PORT_TARGETS
 readonly OPENIM_RPC_PROM_PORT_LISTARIES=("${OPENIM_RPC_PROM_PORT_TARGETS[@]##*/}")
 
-function openim::rpc::start()
-{
+function openim::rpc::start() {
     echo "OPENIM_RPC_SERVICE_LISTARIES: ${OPENIM_RPC_SERVICE_LISTARIES[@]}"
     echo "OPENIM_RPC_PROM_PORT_LISTARIES: ${OPENIM_RPC_PROM_PORT_LISTARIES[@]}"
     echo "OPENIM_RPC_PORT_LISTARIES: ${OPENIM_RPC_PORT_LISTARIES[@]}"
@@ -98,18 +122,18 @@ function openim::rpc::start()
 
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-    openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[$i]}
-    openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
-
-    # Get the service and Prometheus ports.
-    OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
-    OPENIM_RPC_PROM_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}) )
-
-    for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS[@]}; j++)); do
-      openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
-      openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
-      sleep 0.5
-      done
+        openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[$i]}
+        openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
+    
+        # Get the service and Prometheus ports.
+        OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
+        OPENIM_RPC_PROM_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}) )
+    
+        for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS[@]}; j++)); do
+            openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
+            openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
+            sleep 0.5
+        done
     done
 
     openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}

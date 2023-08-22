@@ -34,16 +34,17 @@ print_services_and_ports() {
     local -n service_names=$1
     local -n service_ports=$2
 
-    echo "+-------------------+-------+"
-    echo "| Service Name      | Port  |"
-    echo "+-------------------+-------+"
+    echo "+-------------------------+----------+"
+    echo "| Service Name            | Port     |"
+    echo "+-------------------------+----------+"
 
     for index in "${!service_names[@]}"; do
-        printf "| %-17s | %-5s |\n" "${service_names[$index]}" "${service_ports[$index]}"
+        printf "| %-23s | %-8s |\n" "${service_names[$index]}" "${service_ports[$index]}"
     done
 
-    echo "+-------------------+-------+"
+    echo "+-------------------------+----------+"
 }
+
 
 # Print out services and their ports
 print_services_and_ports OPENIM_SERVER_NAME_TARGETS OPENIM_SERVER_PORT_TARGETS

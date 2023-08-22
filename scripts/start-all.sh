@@ -65,4 +65,10 @@ function execute_scripts() {
     done
 }
 
+# TODO Prelaunch tools, simple for now, can abstract functions later
+TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
+${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
+
 execute_scripts
+
+${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start

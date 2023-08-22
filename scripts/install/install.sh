@@ -56,8 +56,9 @@ source ${OPENIM_ROOT}/scripts/install/openim-push.sh
 source ${OPENIM_ROOT}/scripts/install/openim-rpc.sh
 source ${OPENIM_ROOT}/scripts/install/openim-crontask.sh
 source ${OPENIM_ROOT}/scripts/install/openim-api.sh
+source ${OPENIM_ROOT}/scripts/install/openim-man.sh
+source ${OPENIM_ROOT}/scripts/install/openim-tools.sh
 source ${OPENIM_ROOT}/scripts/install/test.sh
-source ${OPENIM_ROOT}/scripts/install/man.sh
 
 # Detailed help function
 function openim::install::show_help() {

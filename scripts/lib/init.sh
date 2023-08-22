@@ -51,6 +51,7 @@ export no_proxy="127.0.0.1,localhost${no_proxy:+,${no_proxy}}"
 
 # This is a symlink to binaries for "this platform", e.g. build tools.
 export THIS_PLATFORM_BIN="${OPENIM_ROOT}/_output/bin/platforms"
+export THIS_PLATFORM_BIN_TOOLS="${OPENIM_ROOT}/_output/bin/tools"
 
 . $(dirname ${BASH_SOURCE})/color.sh
 . $(dirname ${BASH_SOURCE})/util.sh
@@ -66,6 +67,8 @@ openim::util::ensure-bash-version
 
 OPENIM_OUTPUT_HOSTBIN="${OPENIM_OUTPUT_BINPATH}/$(openim::util::host_platform)"
 export OPENIM_OUTPUT_HOSTBIN
+OPENIM_OUTPUT_HOSTBIN_TOOLS="${OPENIM_OUTPUT_BINTOOLPATH}/$(openim::util::host_platform)"
+export OPENIM_OUTPUT_HOSTBIN_TOOLS
 
 export OPENIM_NONSERVER_GROUP_VERSIONS
 
