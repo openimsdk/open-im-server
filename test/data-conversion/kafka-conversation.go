@@ -74,7 +74,7 @@ func GetMessage() {
 	}
 	fmt.Println(partitionList)
 	for partition := range partitionList {
-		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetNewest)
+		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetOldest)
 		if err != nil {
 			panic(err)
 		}
