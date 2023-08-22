@@ -25,8 +25,10 @@ LOCAL_OUTPUT_ROOT="${OPENIM_ROOT}/${OUT_DIR:-_output}"
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 #TODO
-IP=http://127.0.0.1
-IP=$(openim::util::get_server_ip)
+# IP=http://127.0.0.1
+if [ -z "${IP}" ]; then
+    IP=$(openim::util::get_server_ip)
+fi
 
 function def() {
 	local var_name="$1"
