@@ -26,8 +26,10 @@ import (
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
@@ -107,13 +109,15 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 	if err != nil {
 		return nil, err
 	}
+	revokerUserID := mcontext.GetOpUserID(ctx)
 	tips := sdkws.RevokeMsgTips{
-		RevokerUserID:  req.UserID,
+		RevokerUserID:  revokerUserID,
 		ClientMsgID:    msgs[0].ClientMsgID,
 		RevokeTime:     now,
 		Seq:            req.Seq,
 		SesstionType:   msgs[0].SessionType,
 		ConversationID: req.ConversationID,
+		IsAdminRevoke:  utils.Contain(revokerUserID, config.Config.Manager.UserID...),
 	}
 	var recvID string
 	if msgs[0].SessionType == constant.SuperGroupChatType {
