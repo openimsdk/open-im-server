@@ -114,7 +114,7 @@ openim::log::error_exit() {
   if [[ ${OPENIM_VERBOSE} -ge 4 ]]; then
     local source_file=${BASH_SOURCE[${stack_skip}]}
     local source_line=${BASH_LINENO[$((stack_skip - 1))]}
-    echo_log "!!! Error in ${source_file}:${source_line}" >&2
+    echo_log -e "${COLOR_RED}!!! Error in ${source_file}:${source_line} ${COLOR_SUFFIX}" >&2
     [[ -z ${1-} ]] || {
       echo_log "  ${1}" >&2
     }
@@ -207,7 +207,7 @@ openim::log::success()
       return
   fi
   timestamp=$(date +"%m%d %H:%M:%S")
-  echo_log -e "${BRIGHT_GREEN_PREFIX}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
+  echo_log -e "${COLOR_GREEN}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
 }
 
 function openim::log::test_log() {
