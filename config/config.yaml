@@ -132,7 +132,7 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://127.0.0.1:10002/object/"
+  apiURL: "http://127.0.0.1:10002"
   minio:
     bucket: "openim"
     endpoint: "http://14.155.127.181:10005"
@@ -232,7 +232,7 @@ push:
     channelID: ""
     channelName: ""
   fcm:
-    serviceAccount: x.json
+    serviceAccount: "x.json"
   jpns:
     appKey:
     masterSecret:

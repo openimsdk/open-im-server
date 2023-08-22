@@ -16,7 +16,8 @@
 # OpenIM Server Installation Script
 # 
 # Description:
-#     This script is designed to handle the installation, uninstallation, and
+#     This script is designed to handle the installation, Is a deployment solution 
+#     that uses the Linux systen extension. uninstallation, and
 #     status checking of OpenIM components on the server. OpenIM is a presumed
 #     communication or messaging platform based on the context.
 # 

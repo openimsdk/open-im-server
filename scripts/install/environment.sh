@@ -36,7 +36,7 @@ function def() {
 }
 
 # app要能访问到此ip和端口或域名
-def "API_URL" "http://${IP}:10002/object/"
+def "API_URL" "http://${IP}:10002"
 def "DATA_DIR" "${OPENIM_ROOT}"
 
 # 设置统一的用户名，方便记忆
