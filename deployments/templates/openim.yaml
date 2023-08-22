@@ -232,7 +232,7 @@ push:
     channelID: ""
     channelName: ""
   fcm:
-    serviceAccount: ${FCM_SERVICE_ACCOUNT}
+    serviceAccount: "${FCM_SERVICE_ACCOUNT}"
   jpns:
     appKey:
     masterSecret:

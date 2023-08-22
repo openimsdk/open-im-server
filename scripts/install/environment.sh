@@ -101,7 +101,7 @@ def "MONGO_MAX_POOL_SIZE" "100"                                            # 最
 
 ###################### Object 配置信息 ######################
 def "OBJECT_ENABLE" "minio"                                                # 对象是否启用
-def "OBJECT_APIURL" "http://127.0.0.1:10002/object/"                       # 对象的API地址
+def "OBJECT_APIURL" "http://127.0.0.1:10002"                               # 对象的API地址
 def "MINIO_BUCKET" "openim"                                                # MinIO的存储桶名称
 def "MINIO_PORT" "10005"                                                   # MinIO的端口
 # MinIO的端点URL
