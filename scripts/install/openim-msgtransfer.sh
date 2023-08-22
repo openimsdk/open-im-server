@@ -69,12 +69,12 @@ function openim::msgtransfer::check()
     # NUM_PROCESSES=$(($NUM_PROCESSES - 1))
 
     if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
-    echo "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
-    for PID in $PIDS; do
+      openim::log::error_exit "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
+      for PID in $PIDS; do
         ps -p $PID -o pid,cmd
-    done
+      done
     else
-    echo "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+      echo "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
     fi
 }
 
