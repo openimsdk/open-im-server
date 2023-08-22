@@ -10,7 +10,7 @@ ENV GOPROXY=$GOPROXY
 # Set up the working directory
 WORKDIR /openim/openim-server
 
-COPY go.mod go.sum go.work go.work.sum ./
+COPY go.mod go.sum go.work ./
 #RUN go mod download
 
 # Copy all files to the container
