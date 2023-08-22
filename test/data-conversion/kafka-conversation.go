@@ -90,7 +90,7 @@ func GetMessage() {
 		}(pc)
 		//wg.Add(1)
 		//wg.Wait()
-		consumer.Close()
 	}
+	consumer.Close()
 	_ = <-ch
 }
