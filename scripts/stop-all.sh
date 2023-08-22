@@ -23,8 +23,13 @@ set -o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
-echo "Ready to stop port: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
+echo "++ Ready to stop port: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 
 openim::util::stop_services_on_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
+
+echo -e "\n++ Stop all processes in the path ${OPENIM_OUTPUT_HOSTBIN}"
+
+openim::util::stop_services_with_name "${OPENIM_OUTPUT_HOSTBIN}"

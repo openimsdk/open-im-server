@@ -50,17 +50,32 @@ function openim::msgtransfer::start()
     fi
 
     for (( i=1; i<=$OPENIM_MSGGATEWAY_NUM; i++ )) do
-    openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
-    
-    PROMETHEUS_PORT_OPTION=""
-    if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
+      openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
+      PROMETHEUS_PORT_OPTION=""
+      if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
         PROMETHEUS_PORT_OPTION="--prometheus_port ${OPENIM_PROMETHEUS_PORTS[$i]}"
-    fi
-
-    nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} >> ${LOG_FILE} 2>&1 &
+      fi
+      nohup ${OPENIM_MSGTRANSFER_BINARY} ${PROMETHEUS_PORT_OPTION} -c ${OPENIM_MSGTRANSFER_CONFIG} >> ${LOG_FILE} 2>&1 &
     done
 
-    openim::util::check_process_names ${SERVER_NAME}
+    openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
+}
+
+function openim::msgtransfer::check()
+{
+    PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
+
+    NUM_PROCESSES=$(echo "$PIDS" | wc -l)
+    NUM_PROCESSES=$(($NUM_PROCESSES - 1))
+
+    if [ "$NUM_PROCESSES" -eq "$OPENIM_MSGGATEWAY_NUM" ]; then
+    echo "Found $OPENIM_MSGGATEWAY_NUM processes named $OPENIM_OUTPUT_HOSTBIN"
+    for PID in $PIDS; do
+        ps -p $PID -o pid,cmd
+    done
+    else
+    echo "Expected $OPENIM_MSGGATEWAY_NUM openim msgtransfer processes, but found $NUM_PROCESSES msgtransfer processes."
+    fi
 }
 
 ###################################### Linux Systemd ######################################

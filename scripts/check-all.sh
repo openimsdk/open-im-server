@@ -67,8 +67,11 @@ else
   echo "++++ Check all dependent service ports successfully !"
 fi
 set -e
-echo 
-echo "## Check all OpenIM service ports"
+
+echo -e "\n## Check OpenIM service name"
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check || return 0
+
+echo -e "\n## Check all OpenIM service ports"
 echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then

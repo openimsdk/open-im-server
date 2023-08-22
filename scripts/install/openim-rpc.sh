@@ -108,7 +108,7 @@ function openim::rpc::start()
     for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS[@]}; j++)); do
       openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
       openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
-      sleep 1
+      sleep 0.5
       done
     done
 
