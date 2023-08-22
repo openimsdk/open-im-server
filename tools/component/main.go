@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"flag"
 	"fmt"
 	"net"
 	"net/url"
@@ -29,7 +30,8 @@ import (
 )
 
 const (
-	cfgPath                  = "../../../../../config/config.yaml"
+	// defaultCfgPath is the default path of the configuration file
+	defaultCfgPath           = "../../../../../config/config.yaml"
 	minioHealthCheckDuration = 1
 	maxRetry                 = 100
 	componentStartErrCode    = 6000
@@ -37,84 +39,64 @@ const (
 )
 
 var (
+	cfgPath = flag.String("c", defaultCfgPath, "Path to the configuration file")
+
 	ErrComponentStart = errs.NewCodeError(componentStartErrCode, "ComponentStartErr")
 	ErrConfig         = errs.NewCodeError(configErrCode, "Config file is incorrect")
 )
 
 func initCfg() error {
-	data, err := os.ReadFile(cfgPath)
+	data, err := os.ReadFile(*cfgPath)
 	if err != nil {
 		return err
 	}
-	if err = yaml.Unmarshal(data, &config.Config); err != nil {
-		return err
-	}
-	return nil
+	return yaml.Unmarshal(data, &config.Config)
+}
+
+type checkFunc struct {
+	name     string
+	function func() error
 }
 
 func main() {
-	err := initCfg()
-	if err != nil {
-		fmt.Printf("Read config failed: %v", err.Error())
+	flag.Parse()
+
+	if err := initCfg(); err != nil {
+		fmt.Printf("Read config failed: %v\n", err)
+		return
 	}
+
+	checks := []checkFunc{
+		{name: "Mysql", function: checkMysql},
+		{name: "Mongo", function: checkMongo},
+		{name: "Minio", function: checkMinio},
+		{name: "Redis", function: checkRedis},
+		{name: "Zookeeper", function: checkZookeeper},
+		{name: "Kafka", function: checkKafka},
+	}
+
 	for i := 0; i < maxRetry; i++ {
 		if i != 0 {
 			time.Sleep(3 * time.Second)
 		}
-		fmt.Printf("Checking components Round %v......\n", i+1)
-		// Check MySQL
-		if err := checkMysql(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Mysql failed: %v. Please make sure your mysql service has started", err.Error()))
-			continue
-		} else {
-			successPrint(fmt.Sprint("Mysql starts successfully"))
-		}
+		fmt.Printf("Checking components Round %v...\n", i+1)
 
-		// Check MongoDB
-		if err := checkMongo(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Mongo failed: %v. Please make sure your monngo service has started", err.Error()))
-			continue
-		} else {
-			successPrint(fmt.Sprint("Mongo starts successfully"))
-		}
-
-		// Check Minio
-		if err := checkMinio(); err != nil {
-			if index := strings.Index(err.Error(), utils.IntToString(configErrCode)); index != -1 {
-				successPrint(fmt.Sprint("Minio starts successfully"))
-				warningPrint(fmt.Sprintf("%v. Please modify your config file", err.Error()))
+		allSuccess := true
+		for _, check := range checks {
+			err := check.function()
+			if err != nil {
+				errorPrint(fmt.Sprintf("Starting %s failed: %v", check.name, err))
+				allSuccess = false
+				break
 			} else {
-				errorPrint(fmt.Sprintf("Starting Minio failed: %v. Please make sure your Minio service has started", err.Error()))
-				continue
+				successPrint(fmt.Sprintf("%s starts successfully", check.name))
 			}
-		} else {
-			successPrint(fmt.Sprint("Minio starts successfully"))
-		}
-		// Check Redis
-		if err := checkRedis(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Redis failed: %v.Please make sure your Redis service has started", err.Error()))
-			continue
-		} else {
-			successPrint(fmt.Sprint("Redis starts successfully"))
 		}
 
-		// Check Zookeeper
-		if err := checkZookeeper(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Zookeeper failed: %v.Please make sure your Zookeeper service has started", err.Error()))
-			continue
-		} else {
-			successPrint(fmt.Sprint("Zookeeper starts successfully"))
+		if allSuccess {
+			successPrint("All components started successfully!")
+			return
 		}
-
-		// Check Kafka
-		if err := checkKafka(); err != nil {
-			errorPrint(fmt.Sprintf("Starting Kafka failed: %v.Please make sure your Kafka service has started", err.Error()))
-			continue
-		} else {
-			successPrint(fmt.Sprint("Kafka starts successfully"))
-		}
-		successPrint(fmt.Sprint("All components starts successfully"))
-		os.Exit(0)
 	}
 	os.Exit(1)
 }
