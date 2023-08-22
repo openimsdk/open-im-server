@@ -70,7 +70,7 @@ fi
 set -e
 
 echo -e "\n## Check OpenIM service name"
-. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check || return 0
+. $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
 
 echo -e "\n## Check all OpenIM service ports"
 echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
