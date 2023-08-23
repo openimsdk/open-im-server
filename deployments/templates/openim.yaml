@@ -198,7 +198,7 @@ log:
   rotationTime: ${LOG_ROTATION_TIME}
   remainRotationCount: ${LOG_REMAIN_ROTATION_COUNT}
   remainLogLevel: ${LOG_REMAIN_LOG_LEVEL}
-  isStdout: ${LOG_IS_STDOUT} 
+  isStdout: ${LOG_IS_STDOUT}
   isJson: ${LOG_IS_JSON}
   withStack: ${LOG_WITH_STACK}
 

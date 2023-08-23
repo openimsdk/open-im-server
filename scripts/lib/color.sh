@@ -69,17 +69,6 @@ UNDERLINE_PREFIX="\033[4m"  # Underline prefix
 ITALIC_PREFIX="\033[3m"     # Italic prefix
 CYAN_PREFIX="\033[0;36m"     # Cyan prefix
 
-# --- make demo (run demo) ---
-reset=$(tput sgr0)
-bold=$(tput bold)
-black=$(tput setaf 0)
-red=$(tput setaf 1)
-green=$(tput bold; tput setaf 2)
-yellow=$(tput bold; tput setaf 3)
-blue=$(tput bold; tput setaf 6)
-timeout=$(if [ "$(uname)" == "Darwin" ]; then echo "1"; else echo "0.1"; fi)
-
-
 # Print colors you can use
 openim::color::print_color()
 {
