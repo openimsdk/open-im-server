@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
-
-#   Use this script to test if a given TCP host/port are available
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 WAITFORIT_cmdname=${0##*/}
 
-openim_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-source "${openim_root}/scripts/lib/color.sh"
-
-echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then info "$@" 1>&2; fi }
+echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
 
 usage()
 {
@@ -30,7 +34,7 @@ USAGE
     exit 1
 }
 
-function wait_for()
+wait_for()
 {
     if [[ $WAITFORIT_TIMEOUT -gt 0 ]]; then
         echoerr "$WAITFORIT_cmdname: waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
@@ -44,7 +48,7 @@ function wait_for()
             nc -z $WAITFORIT_HOST $WAITFORIT_PORT
             WAITFORIT_result=$?
         else
-            (echo > /dev/tcp/$WAITFORIT_HOST/$WAITFORIT_PORT) >/dev/null 2>&1
+            (echo -n > /dev/tcp/$WAITFORIT_HOST/$WAITFORIT_PORT) >/dev/null 2>&1
             WAITFORIT_result=$?
         fi
         if [[ $WAITFORIT_result -eq 0 ]]; then
@@ -57,7 +61,7 @@ function wait_for()
     return $WAITFORIT_result
 }
 
-function wait_for_wrapper()
+wait_for_wrapper()
 {
     # In order to support SIGINT during timeout: http://unix.stackexchange.com/a/57692
     if [[ $WAITFORIT_QUIET -eq 1 ]]; then
@@ -133,7 +137,7 @@ do
         usage
         ;;
         *)
-        warn "Unknown argument: $1"
+        echoerr "Unknown argument: $1"
         usage
         ;;
     esac
@@ -149,16 +153,20 @@ WAITFORIT_STRICT=${WAITFORIT_STRICT:-0}
 WAITFORIT_CHILD=${WAITFORIT_CHILD:-0}
 WAITFORIT_QUIET=${WAITFORIT_QUIET:-0}
 
-# check to see if timeout is from busybox?
+# Check to see if timeout is from busybox?
 WAITFORIT_TIMEOUT_PATH=$(type -p timeout)
 WAITFORIT_TIMEOUT_PATH=$(realpath $WAITFORIT_TIMEOUT_PATH 2>/dev/null || readlink -f $WAITFORIT_TIMEOUT_PATH)
-if [[ $WAITFORIT_TIMEOUT_PATH =~ "busybox" ]]; then
-        WAITFORIT_ISBUSY=1
-        WAITFORIT_BUSYTIMEFLAG="-t"
 
+WAITFORIT_BUSYTIMEFLAG=""
+if [[ $WAITFORIT_TIMEOUT_PATH =~ "busybox" ]]; then
+    WAITFORIT_ISBUSY=1
+    # Check if busybox timeout uses -t flag
+    # (recent Alpine versions don't support -t anymore)
+    if timeout &>/dev/stdout | grep -q -e '-t '; then
+        WAITFORIT_BUSYTIMEFLAG="-t"
+    fi
 else
-        WAITFORIT_ISBUSY=0
-        WAITFORIT_BUSYTIMEFLAG=""
+    WAITFORIT_ISBUSY=0
 fi
 
 if [[ $WAITFORIT_CHILD -gt 0 ]]; then

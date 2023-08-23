@@ -38,6 +38,7 @@ readonly RELEASE_IMAGES="${LOCAL_OUTPUT_ROOT}/release-images"
 # OpenIM github account info
 readonly OPENIM_GITHUB_ORG=OpenIMSDK
 readonly OPENIM_GITHUB_REPO=Open-IM-Server
+readonly CHAT_GITHUB_REPO=chat
 
 readonly ARTIFACT=openim.tar.gz
 readonly CHECKSUM=${ARTIFACT}.sha1sum
@@ -104,7 +105,7 @@ function openim::release::package_tarballs() {
   mkdir -p "${RELEASE_TARS}"
   openim::release::package_src_tarball &
   openim::release::package_client_tarballs &
-  openim::release::package_iam_manifests_tarball &
+  openim::release::package_openim_manifests_tarball &
   openim::release::package_server_tarballs &
   openim::util::wait-for-jobs || { openim::log::error "previous tarball phase failed"; return 1; }
 
@@ -143,8 +144,8 @@ function openim::release::package_src_tarball() {
       -path "${OPENIM_ROOT}"/.config\* -o \
       -path "${OPENIM_ROOT}"/.chglog\* -o \
       -path "${OPENIM_ROOT}"/.gitlint -o \
-      -path "${OPENIM_ROOT}"/.golangci.yml -o \
-      -path "${OPENIM_ROOT}"/.goreleaser.yml -o \
+      -path "${OPENIM_ROOT}"/scripts/golangci.yml -o \
+      -path "${OPENIM_ROOT}"/build/goreleaser.yaml -o \
       -path "${OPENIM_ROOT}"/.note.md -o \
       -path "${OPENIM_ROOT}"/.todo.md \
       \) -prune \
@@ -395,7 +396,7 @@ EOF
 }
 
 # This will pack openim-system manifests files for distros such as COS.
-function openim::release::package_iam_manifests_tarball() {
+function openim::release::package_openim_manifests_tarball() {
   openim::log::status "Building tarball: manifests"
 
   local src_dir="${OPENIM_ROOT}/deployments"
@@ -456,11 +457,6 @@ EOF
   cp -R "${OPENIM_ROOT}/scripts/release" "${release_stage}/"
   cat <<EOF > "${release_stage}/release/get-openim-binaries.sh"
 #!/usr/bin/env bash
-
-# Copyright 2020 Lingfei Kong <colin404@foxmail.com>. All rights reserved.
-# Use of this source code is governed by a MIT style
-# license that can be found in the LICENSE file.
-
 # This file download openim client and server binaries from tencent cos bucket.
 
 os=linux arch=amd64 version=${OPENIM_GIT_VERSION} && wget https://${BUCKET}.cos.${REGION}.myqcloud.com/${COS_RELEASE_DIR}/\$version/{openim-client-\$os-\$arch.tar.gz,openim-server-\$os-\$arch.tar.gz}

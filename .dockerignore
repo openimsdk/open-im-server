@@ -1,4 +1,4 @@
-# Ignore files and directories starting with a dot
+<!-- # Ignore files and directories starting with a dot
 
 # Ignore specific files
 .dockerignore
@@ -15,7 +15,7 @@ CHANGELOG/
 # LICENSE
 
 # Ignore testing and linting configuration
-.golangci.yml
+scripts/golangci.yml
 
 # Ignore deployment-related files
 docker-compose.yaml
@@ -28,4 +28,4 @@ assets/
 components/
 
 # Ignore tools and scripts
-.github/
+.github/ -->

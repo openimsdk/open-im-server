@@ -64,11 +64,10 @@ cmd/*
 # config directory
 config/*    @skiffer-git
 
-# db directory
-db/sdk  @cubxxw @FGadvancer  
-
 # internal directory
 internal/ @openimsdk/openim @skiffer-git @FGadvancer
+
+tools @openimsdk/openim @openimsdk/bot @cubxxw @skiffer-git @FGadvancer
 
 # logs directory
 logs/*  @skiffer-git @FGadvancer
@@ -77,7 +76,7 @@ logs/*  @skiffer-git @FGadvancer
 pkg/a2r  @openimsdk/openim @skiffer-git @cubxxw @openimsdk/bot
 
 # scripts directory
-scripts/LICENSE/*   @openimsdk/openim @cubxxw @skiffer-git @FGadvancer
+scripts/template/*   @openimsdk/openim @cubxxw @skiffer-git @FGadvancer
 scripts/enterprise/*  @openimsdk/openim @FGadvancer @cubxxw @skiffer-git @openimsdk/bot
 scripts/githooks/*   @openimsdk/openim @cubxxw @skiffer-git @FGadvancer
 scripts/lib/*   @openimsdk/openim @FGadvancer @cubxxw @skiffer-git @openimsdk/bot

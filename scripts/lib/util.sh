@@ -13,6 +13,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# this script is used to check whether the code is formatted by gofmt or not
+#
+# Usage: source scripts/lib/util.sh
+################################################################################
+
+# TODO Debug: Just for testing, please comment out
+# OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
+# source "${OPENIM_ROOT}/scripts/lib/logging.sh"
+
+#1、将IP写在一个文件里，比如文件名为hosts_file，一行一个IP地址。
+#2、修改ssh-mutual-trust.sh里面的用户名及密码，默认为root用户及密码123。
+# hosts_file_path="path/to/your/hosts/file"
+# openim:util::setup_ssh_key_copy "$hosts_file_path" "root" "123"
+function openim:util::setup_ssh_key_copy() {
+  local hosts_file="$1"
+  local username="${2:-root}"
+  local password="${3:-123}"
+
+  local sshkey_file=~/.ssh/id_rsa.pub
+
+  # check sshkey file 
+  if [[ ! -e $sshkey_file ]]; then
+    expect -c "
+    spawn ssh-keygen -t rsa
+    expect \"Enter*\" { send \"\n\"; exp_continue; }
+    "
+  fi
+
+  # get hosts list
+  local hosts=$(awk '/^[^#]/ {print $1}' "${hosts_file}")
+
+  ssh_key_copy() {
+    local target=$1
+
+    # delete history
+    sed -i "/$target/d" ~/.ssh/known_hosts
+
+    # copy key 
+    expect -c "
+    set timeout 100
+    spawn ssh-copy-id $username@$target
+    expect {
+      \"yes/no\" { send \"yes\n\"; exp_continue; }
+      \"*assword\" { send \"$password\n\"; }
+      \"already exist on the remote system\" { exit 1; }
+    }
+    expect eof
+    "
+  }
+
+  # auto sshkey pair
+  for host in $hosts; do
+    if ! ping -i 0.2 -c 3 -W 1 "$host" > /dev/null 2>&1; then
+      echo "[ERROR]: Can't connect $host"
+      continue
+    fi
+
+    local host_entry=$(awk "/$host/"'{print $1, $2}' /etc/hosts)
+    if [[ $host_entry ]]; then
+      local hostaddr=$(echo "$host_entry" | awk '{print $1}')
+      local hostname=$(echo "$host_entry" | awk '{print $2}')
+      ssh_key_copy "$hostaddr"
+      ssh_key_copy "$hostname"
+    else
+      ssh_key_copy "$host"
+    fi
+  done
+}
 
 function openim::util::sourced_variable {
   # Call this function to tell shellcheck that a variable is supposed to
@@ -64,7 +132,7 @@ openim::util::wait_for_url() {
   return 1
 }
 
-# Example:  openim::util::wait_for_success 120 5 "imctl get nodes|grep localhost"
+# Example:  openim::util::wait_for_success 120 5 "openimctl get nodes|grep localhost"
 # arguments: wait time, sleep time, shell command
 # returns 0 if the shell command get output, 1 otherwise.
 openim::util::wait_for_success(){
@@ -122,7 +190,7 @@ openim::util::cleanup-temp-dir() {
 #   OPENIM_TEMP
 openim::util::ensure-temp-dir() {
   if [[ -z ${OPENIM_TEMP-} ]]; then
-    OPENIM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t iamrnetes.XXXXXX)
+    OPENIM_TEMP=$(mktemp -d 2>/dev/null || mktemp -d -t openimrnetes.XXXXXX)
     openim::util::trap_add openim::util::cleanup-temp-dir EXIT
   fi
 }
@@ -182,6 +250,272 @@ openim::util::host_arch() {
   echo "${host_arch}"
 }
 
+# The `openim::util::check_ports` function analyzes the state of processes based on given ports.
+# It accepts multiple ports as arguments and prints:
+# 1. The state of the process (whether it's running or not).
+# 2. The start time of the process if it's running.
+# User:
+# openim::util::check_ports 8080 8081 8082
+# The function returns a status of 1 if any of the processes is not running.
+openim::util::check_ports() {
+    # An array to collect ports of processes that are not running.
+    local not_started=()
+
+    # An array to collect information about processes that are running.
+    local started=()
+
+    openim::log::info "Checking ports: $*"
+    # Iterate over each given port.
+    for port in "$@"; do
+        # Use the `lsof` command to find process information related to the given port.
+        local info=$(lsof -i :$port -n -P | grep LISTEN || true)
+        
+        # If there's no process information, it means the process associated with the port is not running.
+        if [[ -z $info ]]; then
+            not_started+=($port)
+        else
+            # If there's process information, extract relevant details:
+            # Process ID, Command Name, and Start Time.
+            local pid=$(echo $info | awk '{print $2}')
+            local command=$(echo $info | awk '{print $1}')
+            local start_time=$(ps -o lstart= -p $pid)
+            started+=("Port $port - Command: $command, PID: $pid, Start time: $start_time")
+        fi
+    done
+    echo 
+    # Print information about ports whose processes are not running.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        openim::log::info "### Not started ports:"
+        for port in "${not_started[@]}"; do
+            openim::log::error "Port $port is not started."
+        done
+    fi
+
+    # Print information about ports whose processes are running.
+    if [[ ${#started[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "### Started ports:"
+        for info in "${started[@]}"; do
+            openim::log::info "$info"
+        done
+    fi
+
+    # If any of the processes is not running, return a status of 1.
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        return 1
+    else
+        openim::log::success "started[@] processes are running."
+        return 0
+    fi
+}
+# openim::util::check_ports 10002 1004
+
+# The `openim::util::check_process_names` function analyzes the state of processes based on given names.
+# It accepts multiple process names as arguments and prints:
+# 1. The state of the process (whether it's running or not).
+# 2. The start time of the process if it's running.
+# User:
+# openim::util::check_process_names nginx mysql redis
+# The function returns a status of 1 if any of the processes is not running.
+openim::util::check_process_names() {
+    # Arrays to collect details of processes
+    local not_started=()
+    local started=()
+
+    openim::log::info "Checking processes: $*"
+    # Iterate over each given process name
+    for process_name in "$@"; do
+        # Use `pgrep` to find process IDs related to the given process name
+        local pids=($(pgrep -f $process_name))
+        
+        # Check if any process IDs were found
+        if [[ ${#pids[@]} -eq 0 ]]; then
+            not_started+=($process_name)
+        else
+            # If there are PIDs, loop through each one
+            for pid in "${pids[@]}"; do
+                local command=$(ps -p $pid -o cmd=)
+                local start_time=$(ps -p $pid -o lstart=)
+                local port=$(ss -ltnp 2>/dev/null | grep $pid | awk '{print $4}' | cut -d ':' -f2)
+
+                # Check if port information was found for the PID
+                if [[ -z $port ]]; then
+                    port="N/A"
+                fi
+
+                started+=("Process $process_name - Command: $command, PID: $pid, Port: $port, Start time: $start_time")
+            done
+        fi
+    done
+
+    # Print information
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        openim::log::info "Not started processes:"
+        for process_name in "${not_started[@]}"; do
+            openim::log::error "Process $process_name is not started."
+        done
+    fi
+
+    if [[ ${#started[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Started processes:"
+        for info in "${started[@]}"; do
+            openim::log::info "$info"
+        done
+    fi
+
+    # Return status
+    if [[ ${#not_started[@]} -ne 0 ]]; then
+        echo "++++ OpenIM Log >> cat ${LOG_FILE}"
+        return 1
+    else
+        openim::log::success "All processes are running."
+        return 0
+    fi
+}
+# openim::util::check_process_names docker-pr
+
+# The `openim::util::stop_services_on_ports` function stops services running on specified ports.
+# It accepts multiple ports as arguments and performs the following:
+# 1. Attempts to stop any services running on the specified ports.
+# 2. Prints details of services successfully stopped and those that failed to stop.
+# Usage:
+# openim::util::stop_services_on_ports 8080 8081 8082
+# The function returns a status of 1 if any service couldn't be stopped.
+openim::util::stop_services_on_ports() {
+    # An array to collect ports of processes that couldn't be stopped.
+    local not_stopped=()
+
+    # An array to collect information about processes that were stopped.
+    local stopped=()
+
+    openim::log::info "Stopping services on ports: $*"
+    # Iterate over each given port.
+    for port in "$@"; do
+        # Use the `lsof` command to find process information related to the given port.
+        info=$(lsof -i :$port -n -P | grep LISTEN || true)
+                
+        # If there's process information, it means the process associated with the port is running.
+        if [[ -n $info ]]; then
+            # Extract the Process ID.
+            while read -r line; do
+                local pid=$(echo $line | awk '{print $2}')
+                    
+                # Try to stop the service by killing its process.
+                if kill -TERM $pid; then
+                    stopped+=($port)
+                else
+                    not_stopped+=($port)
+                fi
+            done <<< "$info"
+        fi
+    done
+
+    # Print information about ports whose processes couldn't be stopped.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        openim::log::info "Ports that couldn't be stopped:"
+        for port in "${not_stopped[@]}"; do
+            openim::log::status "Failed to stop service on port $port."
+        done
+    fi
+
+    # Print information about ports whose processes were successfully stopped.
+    if [[ ${#stopped[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Stopped services on ports:"
+        for port in "${stopped[@]}"; do
+            openim::log::info "Successfully stopped service on port $port."
+        done
+    fi
+
+    # If any of the processes couldn't be stopped, return a status of 1.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        return 1
+    else
+        openim::log::success "All specified services were stopped."
+        return 0
+    fi
+}
+# nc -l -p 12345
+# nc -l -p 123456
+# ps -ef | grep "nc -l"
+# openim::util::stop_services_on_ports 1234 12345 
+
+
+# The `openim::util::stop_services_with_name` function stops services with specified names.
+# It accepts multiple service names as arguments and performs the following:
+# 1. Attempts to stop any services with the specified names.
+# 2. Prints details of services successfully stopped and those that failed to stop.
+# Usage:
+# openim::util::stop_services_with_name nginx apache
+# The function returns a status of 1 if any service couldn't be stopped.
+openim::util::stop_services_with_name() {
+    # An array to collect names of processes that couldn't be stopped.
+    local not_stopped=()
+
+    # An array to collect information about processes that were stopped.
+    local stopped=()
+
+    openim::log::info "Stopping services with names: $*"
+    # Iterate over each given service name.
+    for server_name in "$@"; do
+        # Use the `pgrep` command to find process IDs related to the given service name.
+        local pids=$(pgrep -f "$server_name")
+
+        # If no process was found with the name, add it to the not_stopped list
+        if [[ -z $pids ]]; then
+            not_stopped+=("$server_name")
+            continue
+        fi
+        local stopped_this_time=false
+        for pid in $pids; do
+
+            # Exclude the PID of the current script
+            if [[ "$pid" == "$$" ]]; then
+                continue
+            fi
+
+            # If there's a Process ID, it means the service with the name is running.
+            if [[ -n $pid ]]; then
+                # Try to stop the service by killing its process.
+                if kill -TERM $pid 2>/dev/null; then
+                    stopped_this_time=true
+                fi
+            fi
+        done
+
+        if $stopped_this_time; then
+            stopped+=("$server_name")
+        else
+            not_stopped+=("$server_name")
+        fi
+    done
+
+    # Print information about services whose processes couldn't be stopped.
+    if [[ ${#not_stopped[@]} -ne 0 ]]; then
+        openim::log::info "Services that couldn't be stopped:"
+        for name in "${not_stopped[@]}"; do
+            openim::log::status "Failed to stop the $name service."
+        done
+    fi
+
+    # Print information about services whose processes were successfully stopped.
+    if [[ ${#stopped[@]} -ne 0 ]]; then
+        echo
+        openim::log::info "Stopped services:"
+        for name in "${stopped[@]}"; do
+            openim::log::info "Successfully stopped the $name service."
+        done
+    fi
+
+    openim::log::success "All specified services were stopped."
+}
+# sleep 333333&
+# sleep 444444&
+# ps -ef | grep "sleep"
+# openim::util::stop_services_with_name "sleep 333333" "sleep 444444"
+
 # This figures out the host platform without relying on golang.  We need this as
 # we don't want a golang install to be a prerequisite to building yet we need
 # this info to figure out where the final binaries are placed.
@@ -213,14 +547,14 @@ openim::util::find-binary() {
   openim::util::find-binary-for-platform "$1" "$(openim::util::host_platform)"
 }
 
-# Run all known doc generators (today gendocs and genman for imctl)
+# Run all known doc generators (today gendocs and genman for openimctl)
 # $1 is the directory to put those generated documents
 openim::util::gen-docs() {
   local dest="$1"
 
   # Find binary
   gendocs=$(openim::util::find-binary "gendocs")
-  geniamdocs=$(openim::util::find-binary "geniamdocs")
+  genopenimdocs=$(openim::util::find-binary "genopenimdocs")
   genman=$(openim::util::find-binary "genman")
   genyaml=$(openim::util::find-binary "genyaml")
   genfeddocs=$(openim::util::find-binary "genfeddocs")
@@ -229,24 +563,24 @@ openim::util::gen-docs() {
   # least from k/k tree), remove it completely.
   openim::util::sourced_variable "${genfeddocs}"
 
-  mkdir -p "${dest}/docs/guide/en-US/cmd/imctl/"
-  "${gendocs}" "${dest}/docs/guide/en-US/cmd/imctl/"
+  mkdir -p "${dest}/docs/guide/en-US/cmd/openimctl/"
+  "${gendocs}" "${dest}/docs/guide/en-US/cmd/openimctl/"
 
   mkdir -p "${dest}/docs/guide/en-US/cmd/"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-api"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-cmdutils"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-crontask"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msggateway"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msgtransfer"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-push"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-auth"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-conversation"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-friend"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-group"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-msg"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-third"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-user"
-  "${geniamdocs}" "${dest}/docs/guide/en-US/cmd/imctl" "imctl"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-api"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-cmdutils"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-crontask"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msggateway"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-msgtransfer"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-push"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-auth"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-conversation"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-friend"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-group"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-msg"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-third"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/" "openim-rpc-user"
+  "${genopenimdocs}" "${dest}/docs/guide/en-US/cmd/openimctl" "openimctl"
 
   mkdir -p "${dest}/docs/man/man1/"
 "${genman}" "${dest}/docs/man/man1/" "openim-api"
@@ -263,8 +597,8 @@ openim::util::gen-docs() {
 "${genman}" "${dest}/docs/man/man1/" "openim-rpc-third"
 "${genman}" "${dest}/docs/man/man1/" "openim-rpc-user"
 
-  mkdir -p "${dest}/docs/guide/en-US/yaml/imctl/"
-  "${genyaml}" "${dest}/docs/guide/en-US/yaml/imct/"
+  mkdir -p "${dest}/docs/guide/en-US/yaml/openimctl/"
+  "${genyaml}" "${dest}/docs/guide/en-US/yaml/openimctl/"
 
   # create the list of generated files
   pushd "${dest}" > /dev/null || return 1
@@ -290,7 +624,7 @@ openim::util::remove-gen-docs() {
 # repo, e.g. "upstream" or "origin".
 openim::util::git_upstream_remote_name() {
   git remote -v | grep fetch |\
-    grep -E 'github.com[/:]marmotedu/openim|marmotedu.io/openim' |\
+    grep -E 'github.com[/:]OpenIMSDK/Open-IM-Server|openim.cc/server' |\
     head -n 1 | awk '{print $1}'
 }
 
@@ -455,8 +789,8 @@ function openim::util::create_serving_certkey {
 EOF
 }
 
-# creates a self-contained iamconfig: args are sudo, dest-dir, ca file, host, port, client id, token(optional)
-function openim::util::write_client_iamconfig {
+# creates a self-contained openimconfig: args are sudo, dest-dir, ca file, host, port, client id, token(optional)
+function openim::util::write_client_openimconfig {
     local sudo=$1
     local dest_dir=$2
     local ca_file=$3
@@ -464,7 +798,7 @@ function openim::util::write_client_iamconfig {
     local api_port=$5
     local client_id=$6
     local token=${7:-}
-    cat <<EOF | ${sudo} tee "${dest_dir}"/"${client_id}".iamconfig > /dev/null
+    cat <<EOF | ${sudo} tee "${dest_dir}"/"${client_id}".openimconfig > /dev/null
 apiVersion: v1
 kind: Config
 clusters:
@@ -486,12 +820,12 @@ contexts:
 current-context: local-up-cluster
 EOF
 
-    # flatten the iamconfig files to make them self contained
+    # flatten the openimconfig files to make them self contained
     username=$(whoami)
     ${sudo} /usr/bin/env bash -e <<EOF
-    $(openim::util::find-binary imct) --iamconfig="${dest_dir}/${client_id}.iamconfig" config view --minify --flatten > "/tmp/${client_id}.iamconfig"
-    mv -f "/tmp/${client_id}.iamconfig" "${dest_dir}/${client_id}.iamconfig"
-    chown ${username} "${dest_dir}/${client_id}.iamconfig"
+    $(openim::util::find-binary openimctl) --openimconfig="${dest_dir}/${client_id}.openimconfig" config view --minify --flatten > "/tmp/${client_id}.openimconfig"
+    mv -f "/tmp/${client_id}.openimconfig" "${dest_dir}/${client_id}.openimconfig"
+    chown ${username} "${dest_dir}/${client_id}.openimconfig"
 EOF
 }
 
@@ -544,6 +878,29 @@ function openim::util::join {
   shift
   echo "$*"
 }
+
+# Function: openim::util::list-to-string <list...>
+# Description: Converts a list to a string, removing spaces, brackets, and commas.
+# Example input: [1002 3 ,  2 32 3 ,  3 434 ,]
+# Example output: 10023 2323 3434
+# Example usage:
+# result=$(openim::util::list-to-string "[10023, 2323, 3434]")
+# echo $result
+function openim::util::list-to-string() {
+    # Capture all arguments into a single string
+    ports_list="$*"
+
+    # Use sed for transformations:
+    # 1. Remove spaces
+    # 2. Replace commas with spaces
+    # 3. Remove opening and closing brackets
+    ports_array=$(echo "$ports_list" | sed 's/ //g; s/,/ /g; s/^\[\(.*\)\]$/\1/')
+
+    # For external use, we might want to echo the result so that it can be captured by callers
+    echo "$ports_array"
+}
+# MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string "10023, 2323, 34 34")
+# echo ${MSG_GATEWAY_PROM_PORTS}
 
 # Downloads cfssl/cfssljson/cfssl-certinfo into $1 directory if they do not already exist in PATH
 #
@@ -616,6 +973,47 @@ function openim::util::ensure-cfssl {
   popd > /dev/null || return 1
 }
 
+function openim::util::ensure-docker-buildx {
+  # podman returns 0 on `docker buildx version`, docker on `docker buildx`. One of them must succeed.
+  if docker buildx version >/dev/null 2>&1 || docker buildx >/dev/null 2>&1; then
+    return 0
+  else
+    echo "ERROR: docker buildx not available. Docker 19.03 or higher is required with experimental features enabled"
+    exit 1
+  fi
+}
+
+# openim::util::ensure-bash-version
+# Check if we are using a supported bash version
+#
+function openim::util::ensure-bash-version {
+  # shellcheck disable=SC2004
+  if ((${BASH_VERSINFO[0]}<4)) || ( ((${BASH_VERSINFO[0]}==4)) && ((${BASH_VERSINFO[1]}<2)) ); then
+    echo "ERROR: This script requires a minimum bash version of 4.2, but got version of ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"
+    if [ "$(uname)" = 'Darwin' ]; then
+      echo "On macOS with homebrew 'brew install bash' is sufficient."
+    fi
+    exit 1
+  fi
+}
+
+# openim::util::ensure-install-nginx
+# Check if nginx is installed
+#
+function openim::util::ensure-install-nginx {
+  if ! command -v nginx &>/dev/null; then
+    echo "ERROR: nginx not found. Please install nginx."
+    exit 1
+  fi
+
+  for port in 80
+  do
+    if echo |telnet 127.0.0.1 $port 2>&1|grep refused &>/dev/null;then
+      exit 1
+    fi
+  done
+}
+
 # openim::util::ensure-gnu-sed
 # Determines which sed binary is gnu-sed on linux/darwin
 #
@@ -624,7 +1022,7 @@ function openim::util::ensure-cfssl {
 #
 function openim::util::ensure-gnu-sed {
   # NOTE: the echo below is a workaround to ensure sed is executed before the grep.
-  # see: https://github.com/iamrnetes/iamrnetes/issues/87251
+  # see: https://github.com/openimrnetes/openimrnetes/issues/87251
   sed_help="$(LANG=C sed --help 2>&1 || true)"
   if echo "${sed_help}" | grep -q "GNU\|BusyBox"; then
     SED="sed"
@@ -635,6 +1033,26 @@ function openim::util::ensure-gnu-sed {
     return 1
   fi
   openim::util::sourced_variable "${SED}"
+}
+
+# openim::util::ensure-gnu-date
+# Determines which date binary is gnu-date on linux/darwin
+#
+# Sets:
+#  DATE: The name of the gnu-date binary
+#
+function openim::util::ensure-gnu-date {
+  # NOTE: the echo below is a workaround to ensure date is executed before the grep.
+  date_help="$(LANG=C date --help 2>&1 || true)"
+  if echo "${date_help}" | grep -q "GNU\|BusyBox"; then
+    DATE="date"
+  elif command -v gdate &>/dev/null; then
+    DATE="gdate"
+  else
+    openim::log::error "Failed to find GNU date as date or gdate. If you are on Mac: brew install coreutils." >&2
+    return 1
+  fi
+  openim::util::sourced_variable "${DATE}"
 }
 
 # openim::util::check-file-in-alphabetical-order <file>
@@ -710,22 +1128,155 @@ fi
 
 # ex: ts=2 sw=2 et filetype=sh
 
+function openim::util::desc() {
+    openim::util:run::maybe_first_prompt
+    rate=25
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      rate=1000
+    fi
+    echo "$blue# $@$reset" | pv -qL $rate
+    openim::util:run::prompt
+}
 
-# input: [10023, 2323, 3434]
-# output: 10023 2323 3434
+function openim::util:run::prompt() {
+    echo -n "$yellow\$ $reset"
+}
 
-# Function function: Converts a list to a string, removing Spaces and parentheses
-function list_to_string() {
-    ports_list=$*  # 获取传入的参数列表
-    sub_s1=$(echo $ports_list | sed 's/ //g')  # 去除空格
-    sub_s2=${sub_s1//,/ }  # 将逗号替换为空格
-    sub_s3=${sub_s2#*[}  # 去除左括号及其之前的内容
-    sub_s4=${sub_s3%]*}  # 去除右括号及其之后的内容
-    ports_array=$sub_s4  # 将处理后的字符串赋值给变量 ports_array
+started=""
+function openim::util:run::maybe_first_prompt() {
+    if [ -z "$started" ]; then
+        openim::util:run::prompt
+        started=true
+    fi
+}
+
+# After a `run` this variable will hold the stdout of the command that was run.
+# If the command was interactive, this will likely be garbage.
+DEMO_RUN_STDOUT=""
+
+function openim::util::run() {
+    openim::util:run::maybe_first_prompt
+    rate=25
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      rate=1000
+    fi
+    echo "$green$1$reset" | pv -qL $rate
+    if [ -n "$DEMO_RUN_FAST" ]; then
+      sleep 0.5
+    fi
+    OFILE="$(mktemp -t $(basename $0).XXXXXX)"
+    if [ "$(uname)" == "Darwin" ]; then
+       script -q "$OFILE" $1
+    else
+       script -eq -c "$1" -f "$OFILE"
+    fi
+    r=$?
+    read -d '' -t "${timeout}" -n 10000 # clear stdin
+    openim::util:run::prompt
+    if [ -z "$DEMO_AUTO_RUN" ]; then
+      read -s
+    fi
+    DEMO_RUN_STDOUT="$(tail -n +2 $OFILE | sed 's/\r//g')"
+    return $r
+}
+
+function openim::util::run::relative() {
+    for arg; do
+        echo "$(realpath $(dirname $(which $0)))/$arg" | sed "s|$(realpath $(pwd))|.|"
+    done
+}
+
+# This function retrieves the IP address of the current server.
+# It primarily uses the `curl` command to fetch the public IP address from ifconfig.me.
+# If curl or the service is not available, it falls back 
+# to the internal IP address provided by the hostname command.
+# TODO: If a delay is found, the delay needs to be addressed
+function openim::util::get_server_ip() {
+    # Check if the 'curl' command is available
+    if command -v curl &> /dev/null; then
+        # Try to retrieve the public IP address using curl and ifconfig.me
+        IP=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | sed 's/"//g' | tr -d '\n')
+        
+        # Check if IP retrieval was successful
+        if [[ -z "$IP" ]]; then
+            # If not, get the internal IP address
+            IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+        fi
+    else
+        # If curl is not available, get the internal IP address
+        IP=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d'/' -f1 | head -n 1)
+    fi
+    
+    # Return the fetched IP address
+    echo "$IP"
+}
+
+function openim::util::onCtrlC() {
+    kill -9 "${do_sth_pid}" "${progress_pid}" "${countdown_pid}"
+    echo
+    echo 'Ctrl+C is captured'
+    exit 1
 }
 
 # Function Function: Remove Spaces in the string
-function remove_space() {
+function openim::util::remove_space() {
     value=$*  # 获取传入的参数
     result=$(echo $value | sed 's/ //g')  # 去除空格
+}
+
+function openim::util::gencpu() {
+    # Check the system type
+    system_type=$(uname)
+
+    if [[ "$system_type" == "Darwin" ]]; then
+        # macOS (using sysctl)
+        cpu_count=$(sysctl -n hw.ncpu)
+    elif [[ "$system_type" == "Linux" ]]; then
+        # Linux (using lscpu)
+        cpu_count=$(lscpu --parse | grep -E '^([^#].*,){3}[^#]' | sort -u | wc -l)
+    else
+        echo "Unsupported operating system: $system_type"
+        exit 1
+    fi
+    echo $cpu_count
+}
+
+function openim::util::gen_os_arch() {
+    # Get the current operating system and architecture
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    ARCH=$(uname -m)
+
+    # Select the repository home directory based on the operating system and architecture
+    if [[ "$OS" == "darwin" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="darwin/amd64"
+        else
+            REPO_DIR="darwin/386"
+        fi
+    elif [[ "$OS" == "linux" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="linux/amd64"
+        elif [[ "$ARCH" == "arm64" ]]; then
+            REPO_DIR="linux/arm64"
+        elif [[ "$ARCH" == "mips64" ]]; then
+            REPO_DIR="linux/mips64"
+        elif [[ "$ARCH" == "mips64le" ]]; then
+            REPO_DIR="linux/mips64le"
+        elif [[ "$ARCH" == "ppc64le" ]]; then
+            REPO_DIR="linux/ppc64le"
+        elif [[ "$ARCH" == "s390x" ]]; then
+            REPO_DIR="linux/s390x"
+        else
+            REPO_DIR="linux/386"
+        fi
+    elif [[ "$OS" == "windows" ]]; then
+        if [[ "$ARCH" == "x86_64" ]]; then
+            REPO_DIR="windows/amd64"
+        else
+            REPO_DIR="windows/386"
+        fi
+    else
+        echo -e "${RED_PREFIX}Unsupported OS: $OS${COLOR_SUFFIX}"
+        exit 1
+    fi
 }

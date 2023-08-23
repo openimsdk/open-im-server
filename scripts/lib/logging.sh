@@ -13,9 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # Controls verbosity of the script output and logging.
 OPENIM_VERBOSE="${OPENIM_VERBOSE:-5}"
+
+# Enable logging by default. Set to false to disable.
+ENABLE_LOGGING=true
+
+# If OPENIM_OUTPUT is not set, set it to the default value
+if [[ ! -v OPENIM_OUTPUT ]]; then
+    OPENIM_OUTPUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../_output" && pwd -P)"
+fi
+
+# Set the log file path
+LOG_FILE="${OPENIM_OUTPUT}/logs/openim_$(date '+%Y%m%d').log"
+
+if [[ ! -d "${OPENIM_OUTPUT}/logs" ]]; then
+    mkdir -p "${OPENIM_OUTPUT}/logs"
+    touch "$LOG_FILE"
+fi
+
+# Define the logging function
+function echo_log() {
+    if $ENABLE_LOGGING; then
+        echo -e "$@" | tee -a "${LOG_FILE}"
+    else
+        echo -e "$@"
+    fi
+}
+
+# MAX_LOG_SIZE=10485760 # 10MB
+
+# Clear logs from 5 days ago
+# find $OPENIM_OUTPUT_LOGS -type f -name "*.log" -mtime +5 -exec rm -f {} \;
 
 # Handler for when we exit automatically on an error.
 # Borrowed from https://gist.github.com/ahendrix/7030300
@@ -58,7 +87,7 @@ openim::log::stack() {
   local stack_skip=${1:-0}
   stack_skip=$((stack_skip + 1))
   if [[ ${#FUNCNAME[@]} -gt ${stack_skip} ]]; then
-    echo "Call stack:" >&2
+    echo_log "Call stack:" >&2
     local i
     for ((i=1 ; i <= ${#FUNCNAME[@]} - stack_skip ; i++))
     do
@@ -66,7 +95,7 @@ openim::log::stack() {
       local source_file=${BASH_SOURCE[${frame_no}]}
       local source_lineno=${BASH_LINENO[$((frame_no - 1))]}
       local funcname=${FUNCNAME[${frame_no}]}
-      echo "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
+      echo_log "  ${i}: ${source_file}:${source_lineno} ${funcname}(...)" >&2
     done
   fi
 }
@@ -85,14 +114,14 @@ openim::log::error_exit() {
   if [[ ${OPENIM_VERBOSE} -ge 4 ]]; then
     local source_file=${BASH_SOURCE[${stack_skip}]}
     local source_line=${BASH_LINENO[$((stack_skip - 1))]}
-    echo "!!! Error in ${source_file}:${source_line}" >&2
+    echo_log -e "${COLOR_RED}!!! Error in ${source_file}:${source_line} ${COLOR_SUFFIX}" >&2
     [[ -z ${1-} ]] || {
-      echo "  ${1}" >&2
+      echo_log "  ${1}" >&2
     }
 
     openim::log::stack ${stack_skip}
 
-    echo "Exiting with status ${code}" >&2
+    echo_log "Exiting with status ${code}" >&2
   fi
 
   exit "${code}"
@@ -101,21 +130,21 @@ openim::log::error_exit() {
 # Log an error but keep going.  Don't dump the stack or exit.
 openim::log::error() {
   timestamp=$(date +"[%m%d %H:%M:%S]")
-  echo "!!! ${timestamp} ${1-}" >&2
+  echo_log "!!! ${timestamp} ${1-}" >&2
   shift
   for message; do
-    echo "    ${message}" >&2
+    echo_log "    ${message}" >&2
   done
 }
 
 # Print an usage message to stderr.  The arguments are printed directly.
 openim::log::usage() {
-  echo >&2
+  echo_log >&2
   local message
   for message; do
-    echo "${message}" >&2
+    echo_log "${message}" >&2
   done
-  echo >&2
+  echo_log >&2
 }
 
 openim::log::usage_from_stdin() {
@@ -135,17 +164,18 @@ openim::log::info() {
   fi
 
   for message; do
-    echo "${message}"
+    echo_log "${message}"
   done
 }
 
 # Just like openim::log::info, but no \n, so you can make a progress bar
 openim::log::progress() {
   for message; do
-    echo -e -n "${message}"
+    echo_log -e -n "${message}"
   done
 }
 
+# Print out some info that isn't a top level status line
 openim::log::info_from_stdin() {
   local messages=()
   while read -r line; do
@@ -163,9 +193,31 @@ openim::log::status() {
   fi
 
   timestamp=$(date +"[%m%d %H:%M:%S]")
-  echo "+++ ${timestamp} ${1}"
+  echo_log "+++ ${timestamp} ${1}"
   shift
   for message; do
-    echo "    ${message}"
+    echo_log "    ${message}"
   done
 }
+
+openim::log::success()
+{
+  local V="${V:-0}"
+  if [[ ${OPENIM_VERBOSE} < ${V} ]]; then
+      return
+  fi
+  timestamp=$(date +"%m%d %H:%M:%S")
+  echo_log -e "${COLOR_GREEN}[success ${timestamp}] ${COLOR_SUFFIX}==> " "$@"
+}
+
+function openim::log::test_log() {
+    echo_log "test log"
+    openim::log::error "openim::log::error"
+    openim::log::info "openim::log::info"
+    openim::log::progress "openim::log::progress"
+    openim::log::status "openim::log::status"
+    openim::log::success "openim::log::success"
+    openim::log::error_exit "openim::log::error_exit"
+}
+
+# openim::log::test_log
