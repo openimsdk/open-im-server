@@ -1,0 +1,45 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: first-interaction
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    branches: [main]
+    types: [opened]
+
+jobs:
+  check_for_first_interaction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/first-interaction@main
+        with:
+          repo-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          issue-message: |
+            Hello! Thank you for filing an issue.
+
+            If this is a bug report, please include relevant logs to help us debug the problem.
+            
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) to connect and communicate with our developers.
+          pr-message: |
+            Hello! Thank you for your contribution.
+            
+            If you are fixing a bug, please reference the issue number in the description.
+
+            If you are implementing a feature request, please check with the maintainers that the feature will be accepted first.
+
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) to connect and communicate with our developers.

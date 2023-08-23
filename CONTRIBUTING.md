@@ -4,6 +4,10 @@ So, you want to hack on Open-IM-Server? Yay!
 
 First of all, thank you for considering contributing to our project! We appreciate your time and effort, and we value any contribution, whether it's reporting a bug, suggesting a new feature, or submitting a pull request.
 
+![Hello OpenIM Image](assets/demo/hello-openim.png)
+
+> Use `make demo` start contributing fast.
+
 This document provides guidelines and best practices to help you contribute effectively.
 
 ## 📇Topics

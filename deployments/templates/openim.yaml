@@ -1,0 +1,387 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# -----------------------------------------------------------------
+# TODO: This config file is the template file
+# --| source: deployments/templates/openim.yaml
+# --| env: scripts/install/environment
+# --| target: config/config.yaml
+# -----------------------------------------------------------------
+
+###################### Zookeeper ######################
+# Zookeeper configuration
+# It's not recommended to modify the schema
+# 
+# Zookeeper address
+# Zookeeper username
+# Zookeeper password
+zookeeper:
+  schema: ${ZOOKEEPER_SCHEMA}
+  address: [ ${ZOOKEEPER_ADDRESS}:${ZOOKEEPER_PORT} ]
+  username: ${ZOOKEEPER_USERNAME}
+  password: ${ZOOKEEPER_PASSWORD}
+
+###################### Mysql ######################
+# MySQL configuration
+# Currently, only single machine setup is supported
+#
+# Maximum number of open connections
+# Maximum number of idle connections
+# Maximum lifetime in seconds a connection can be reused
+# Log level: 1=slient, 2=error, 3=warn, 4=info
+# Slow query threshold in milliseconds
+mysql:
+  address: [ ${MYSQL_ADDRESS}:${MYSQL_PORT} ]
+  username: ${MYSQL_USERNAME}
+  password: ${MYSQL_PASSWORD}
+  database: ${MYSQL_DATABASE}
+  maxOpenConn: ${MYSQL_MAX_OPEN_CONN}
+  maxIdleConn: ${MYSQL_MAX_IDLE_CONN}
+  maxLifeTime: ${MYSQL_MAX_LIFETIME}
+  logLevel: ${MYSQL_LOG_LEVEL}
+  slowThreshold: ${MYSQL_SLOW_THRESHOLD}
+
+###################### Mongo ######################
+# MongoDB configuration
+# If uri is not empty, it will be used directly
+#
+# MongoDB address for standalone setup, Mongos address for sharded cluster setup
+# Default MongoDB database name
+# Maximum connection pool size
+mongo:
+  uri: ${MONGO_URI}
+  address: [ ${MONGO_ADDRESS}:${MONGO_PORT} ]
+  database: ${MONGO_DATABASE}
+  username: ${MONGO_USERNAME}
+  password: ${MONGO_PASSWORD}
+  maxPoolSize: ${MONGO_MAX_POOL_SIZE}
+
+###################### Redis configuration information ######################
+# Redis configuration
+#
+# Username is required only for Redis version 6.0+
+redis:
+  address: [ ${REDIS_ADDRESS}:${REDIS_PORT} ]
+  username: ${REDIS_USERNAME}
+  password: ${REDIS_PASSWORD}
+
+###################### Kafka configuration information ######################
+# Kafka configuration
+#
+# Kafka username
+# Kafka password
+# It's not recommended to modify this topic name
+# Consumer group ID, it's not recommended to modify
+kafka:
+  username: ${KAFKA_USERNAME}
+  password: ${KAFKA_PASSWORD}
+  addr: [ ${KAFKA_ADDR}:${KAFKA_PORT} ]
+  latestMsgToRedis:
+    topic: "${KAFKA_LATESTMSG_REDIS_TOPIC}"
+  offlineMsgToMongo:
+    topic: "${KAFKA_OFFLINEMSG_MONGO_TOPIC}"
+  msgToPush:
+    topic: "${KAFKA_MSG_PUSH_TOPIC}"
+  consumerGroupID:
+    msgToRedis: ${KAFKA_CONSUMERGROUPID_REDIS}
+    msgToMongo: ${KAFKA_CONSUMERGROUPID_MONGO}
+    msgToMySql: ${KAFKA_CONSUMERGROUPID_MYSQL}
+    msgToPush: ${KAFKA_CONSUMERGROUPID_PUSH}
+
+###################### RPC configuration information ######################
+# RPC configuration
+#
+# IP address to register with zookeeper when starting RPC, the IP and corresponding rpcPort should be accessible by api/gateway
+# Default listen IP is 0.0.0.0
+rpc:
+  registerIP: ${RPC_REGISTER_IP}
+  listenIP: ${RPC_LISTEN_IP}
+
+###################### API configuration information ######################
+# API configuration
+#
+# API service port
+# Default listen IP is 0.0.0.0
+api:
+  openImApiPort: [ ${API_OPENIM_PORT} ]
+  listenIP: ${API_LISTEN_IP}
+
+###################### Object configuration information ######################
+# Object storage configuration
+#
+# Use minio for object storage
+# API URL should be accessible by the app
+# It's not recommended to modify the bucket name
+# Endpoint should be accessible by the app
+# Session token
+# Configuration for Tencent COS
+# Configuration for Aliyun OSS
+# apiURL is the address of the api, the access address of the app, use s3 must be configured
+# minio.endpoint can be configured as an intranet address,
+# minio.signEndpoint is minio public network address
+object:
+  enable: "${OBJECT_ENABLE}"
+  apiURL: "${OBJECT_APIURL}"
+  minio:
+    bucket: "${MINIO_BUCKET}"
+    endpoint: "${MINIO_ENDPOINT}"
+    accessKeyID: "${MINIO_ACCESS_KEY}"
+    secretAccessKey: "${MINIO_SECRET_KEY}"
+    sessionToken: ${MINIO_SESSION_TOKEN}
+    signEndpoint: "${MINIO_SIGN_ENDPOINT}"
+  cos:
+    bucketURL: ${COS_BUCKET_URL}
+    secretID: ${COS_SECRET_ID}
+    secretKey: ${COS_SECRET_KEY}
+    sessionToken: ${COS_SESSION_TOKEN}
+  oss:
+    endpoint: "${OSS_ENDPOINT}"
+    bucket: "${OSS_BUCKET}"
+    bucketURL: "${OSS_BUCKET_URL}"
+    accessKeyID: ${OSS_ACCESS_KEY_ID}
+    accessKeySecret: ${OSS_ACCESS_KEY_SECRET}
+    sessionToken: ${OSS_SESSION_TOKEN}
+
+
+###################### RPC Port Configuration ######################
+# RPC service ports
+# These ports are passed into the program by the script and are not recommended to modify
+# For launching multiple programs, just fill in multiple ports separated by commas
+# For example, [10110, 10111]
+rpcPort: 
+  openImUserPort: [ ${OPENIM_USER_PORT} ]
+  openImFriendPort: [ ${OPENIM_FRIEND_PORT} ]
+  openImMessagePort: [ ${OPENIM_MESSAGE_PORT} ]
+  openImMessageGatewayPort: [ ${OPENIM_MESSAGE_GATEWAY_PORT} ]
+  openImGroupPort: [ ${OPENIM_GROUP_PORT} ]
+  openImAuthPort: [ ${OPENIM_AUTH_PORT} ]
+  openImPushPort: [ ${OPENIM_PUSH_PORT} ]
+  openImConversationPort: [ ${OPENIM_CONVERSATION_PORT} ]
+  openImThirdPort: [ ${OPENIM_THIRD_PORT} ]
+
+###################### RPC Register Name Configuration ######################
+# RPC service names for registration, it's not recommended to modify these
+rpcRegisterName:
+  openImUserName: ${OPENIM_USER_NAME}
+  openImFriendName: ${OPENIM_FRIEND_NAME}
+  openImMsgName: ${OPENIM_MSG_NAME}
+  openImPushName: ${OPENIM_PUSH_NAME}
+  openImMessageGatewayName: ${OPENIM_MESSAGE_GATEWAY_NAME}
+  openImGroupName: ${OPENIM_GROUP_NAME}
+  openImAuthName: ${OPENIM_AUTH_NAME}
+  openImConversationName: ${OPENIM_CONVERSATION_NAME}
+  openImThirdName: ${OPENIM_THIRD_NAME}
+
+###################### Log Configuration ######################
+# Log configuration
+#
+# Storage directory
+# Log rotation time
+# Maximum number of logs to retain
+# Log level, 6 means all levels
+# Whether to output to stdout
+# Whether to output in json format
+# Whether to include stack trace in logs
+log:
+  storageLocation: ${LOG_STORAGE_LOCATION}
+  rotationTime: ${LOG_ROTATION_TIME}
+  remainRotationCount: ${LOG_REMAIN_ROTATION_COUNT}
+  remainLogLevel: ${LOG_REMAIN_LOG_LEVEL}
+  isStdout: ${LOG_IS_STDOUT} 
+  isJson: ${LOG_IS_JSON}
+  withStack: ${LOG_WITH_STACK}
+
+###################### Variables definition ######################
+# Long connection server configuration
+#
+# Websocket port for msg_gateway
+# Maximum number of websocket connections
+# Maximum length of websocket request package
+# Websocket connection handshake timeout
+longConnSvr:
+  openImWsPort: [ ${OPENIM_WS_PORT} ]
+  websocketMaxConnNum: ${WEBSOCKET_MAX_CONN_NUM}
+  websocketMaxMsgLen: ${WEBSOCKET_MAX_MSG_LEN}
+  websocketTimeout: ${WEBSOCKET_TIMEOUT}
+
+# Push notification service configuration
+#
+# Use GeTui for push notifications
+# GeTui offline push configuration
+# FCM offline push configuration
+# Account file, place it in the config directory
+# JPush configuration, modify these after applying in JPush backend
+push:
+  enable: ${PUSH_ENABLE}
+  geTui:
+    pushUrl: "${GETUI_PUSH_URL}"
+    masterSecret: ""
+    appKey: ""
+    intent: ""
+    channelID: ""
+    channelName: ""
+  fcm:
+    serviceAccount: "${FCM_SERVICE_ACCOUNT}"
+  jpns:
+    appKey:
+    masterSecret:
+    pushUrl:
+    pushIntent:
+
+# App manager configuration
+#
+# Built-in app manager user IDs
+# Built-in app manager nicknames
+manager:
+  userID: [ "${MANAGER_USERID_1}", "${MANAGER_USERID_2}", "${MANAGER_USERID_3}" ]
+  nickname: [ "${NICKNAME_1}", "${NICKNAME_2}", "${NICKNAME_3}" ]
+
+# Multi-platform login policy
+# For each platform(Android, iOS, Windows, Mac, web), only one can be online at a time
+multiLoginPolicy: ${MULTILOGIN_POLICY}
+
+# Whether to store messages in MySQL, messages in MySQL are only used for management background
+chatPersistenceMysql: ${CHAT_PERSISTENCE_MYSQL}
+
+# Message cache timeout in seconds, it's not recommended to modify
+msgCacheTimeout: ${MSG_CACHE_TIMEOUT}
+
+# Whether to enable read receipts for group chat
+groupMessageHasReadReceiptEnable: ${GROUP_MSG_READ_RECEIPT}
+
+# Whether to enable read receipts for single chat
+singleMessageHasReadReceiptEnable: ${SINGLE_MSG_READ_RECEIPT}
+
+# MongoDB offline message retention period in days
+retainChatRecords: ${RETAIN_CHAT_RECORDS}
+
+# Schedule to clear expired messages(older than retainChatRecords days) in MongoDB every Wednesday at 2am
+# This deletion is just for cleaning up disk usage according to previous configuration retainChatRecords, no notification will be sent
+chatRecordsClearTime: "${CHAT_RECORDS_CLEAR_TIME}"
+
+# Schedule to auto delete messages every day at 2am
+# This deletion is for messages that have been retained for more than msg_destruct_time (seconds) in the conversation field
+msgDestructTime: "${MSG_DESTRUCT_TIME}"
+
+# Secret key
+secret: ${SECRET}
+
+# Token policy
+#
+# Token expiration period in days
+tokenPolicy:
+  expire: ${TOKEN_EXPIRE}
+
+# Message verification policy
+#
+# Whether to verify friendship when sending messages
+messageVerify:
+  friendVerify: false
+
+# iOS push notification configuration
+#
+# iOS push notification sound
+# Whether to count badge
+# Whether it's production environment
+iosPush:
+  pushSound: "xxx"
+  badgeCount: true
+  production: false
+
+###################### Third-party service configuration ######################
+# Callback configuration
+#
+# Callback URL
+# Whether to enable this callback event
+# Timeout in seconds
+# Whether to continue execution if callback fails
+callback:
+  url:
+  beforeSendSingleMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterSendSingleMsg:
+    enable: false
+    timeout: 5
+  beforeSendGroupMsg:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  afterSendGroupMsg:
+    enable: false
+    timeout: 5
+  msgModify:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  userOnline:
+    enable: false
+    timeout: 5
+  userOffline:
+    enable: false
+    timeout: 5
+  userKickOff:
+    enable: false
+    timeout: 5
+  offlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  onlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  superGroupOnlinePush:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeAddFriend:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeCreateGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeMemberJoinGroup:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeSetGroupMemberInfo:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  setMessageReactionExtensions:
+    enable: false
+    timeout: 5
+    failedContinue: true
+
+###################### Prometheus ######################
+# Prometheus configuration for various services
+# The number of Prometheus ports per service needs to correspond to rpcPort
+# The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
+prometheus:
+  enable: ${PROMETHEUS_ENABLE}
+  userPrometheusPort: [ ${USER_PROM_PORT} ]
+  friendPrometheusPort: [ ${FRIEND_PROM_PORT} ]
+  messagePrometheusPort: [ ${MESSAGE_PROM_PORT} ]
+  messageGatewayPrometheusPort: [ ${MSG_GATEWAY_PROM_PORT} ]
+  groupPrometheusPort: [ ${GROUP_PROM_PORT} ]
+  authPrometheusPort: [ ${AUTH_PROM_PORT} ]
+  pushPrometheusPort: [ ${PUSH_PROM_PORT} ]
+  conversationPrometheusPort: [ ${CONVERSATION_PROM_PORT} ]
+  rtcPrometheusPort: [ ${RTC_PROM_PORT} ]
+  thirdPrometheusPort: [ ${THIRD_PROM_PORT} ]
+  messageTransferPrometheusPort: [ ${MSG_TRANSFER_PROM_PORT} ] # List of ports

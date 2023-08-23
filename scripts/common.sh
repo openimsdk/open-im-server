@@ -37,7 +37,8 @@ readonly DOCKER_MACHINE_DRIVER=${DOCKER_MACHINE_DRIVER:-"virtualbox --virtualbox
 # This will canonicalize the path
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)
 
-source "${OPENIM_ROOT}/scripts/lib/init.sh"
+# Please do not refer to lib after referring to common
+. $(dirname ${BASH_SOURCE})/lib/init.sh
 
 # Constants
 readonly OPENIM_BUILD_IMAGE_REPO=openim-build

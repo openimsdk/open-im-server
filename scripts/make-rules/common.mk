@@ -48,8 +48,14 @@ endif
 
 # BIN_TOOLS_DIR: Directory where executable files are stored.
 ifeq ($(origin BIN_TOOLS_DIR),undefined)
-BIN_TOOLS_DIR := $(OUTPUT_DIR)/bin-tools
+BIN_TOOLS_DIR := $(BIN_DIR)/tools
 $(shell mkdir -p $(BIN_TOOLS_DIR))
+endif
+
+# LOGS_DIR: Directory where log files are stored.
+ifeq ($(origin LOGS_DIR),undefined)
+LOGS_DIR := $(OUTPUT_DIR)/logs
+$(shell mkdir -p $(LOGS_DIR))
 endif
 
 # TOOLS_DIR: The directory where tools are stored for build and testing.
@@ -65,7 +71,7 @@ $(shell mkdir -p $(TMP_DIR))
 endif
 
 ifeq ($(origin VERSION), undefined)
-# VERSION := $(shell git describe --abbrev=0 --dirty --always --tags | sed 's/-/./g')	#v2.3.3.dirty
+# VERSION := $(shell git describe --tags --always --match='v*')
 # git describe --tags --always --match="v*" --dirty
 VERSION := $(shell git describe --tags --always --match="v*" --dirty | sed 's/-/./g')	#v2.3.3.631.g00abdc9b.dirty
 # v2.3.3: git tag
@@ -94,7 +100,7 @@ endif
 # The OS must be linux when building docker images
 # PLATFORMS ?= linux_amd64 linux_arm64
 # The OS can be linux/windows/darwin when building binaries
-PLATFORMS ?= linux_s390x linux_mips64 linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64 linux_ppc64le
+PLATFORMS ?= linux_s390x linux_mips64 linux_mips64le darwin_amd64 windows_amd64 linux_amd64 linux_arm64 linux_ppc64le # wasip1_wasm
 
 # only support linux
 GOOS=linux
@@ -126,7 +132,7 @@ FIND := find . ! -path './utils/*' ! -path './vendor/*' ! -path './third_party/*
 XARGS := xargs -r --no-run-if-empty
 
 # Linux command settings-CODE DIRS Copyright
-CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/db $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/build $(ROOT_DIR)/deployments
+CODE_DIRS := $(ROOT_DIR)/pkg $(ROOT_DIR)/cmd $(ROOT_DIR)/config $(ROOT_DIR)/.docker-compose_cfg $(ROOT_DIR)/internal $(ROOT_DIR)/scripts $(ROOT_DIR)/test $(ROOT_DIR)/.github $(ROOT_DIR)/build $(ROOT_DIR)/tools $(ROOT_DIR)/deployments
 FINDS := find $(CODE_DIRS)
 
 # Makefile settings: Select different behaviors by determining whether V option is set

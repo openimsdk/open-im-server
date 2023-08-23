@@ -97,7 +97,7 @@ group:
       OpenIMSDK/community
       OpenIMSDK/openim-charts
       OpenIMSDK/openim-sdk-cpp@main
-    files: 
+    files:
       - source: LICENSE
         dest: LICENSE
         replace: false
