@@ -42,6 +42,6 @@ fi
 pushd "${OPENIM_ROOT}" >/dev/null
   ${DOCKER_COMPOSE_COMMAND} up -d
   sleep 60
-  ${DOCKER_COMPOSE_COMMAND} ps
   ${DOCKER_COMPOSE_COMMAND} logs
+  ${DOCKER_COMPOSE_COMMAND} ps
 popd >/dev/null

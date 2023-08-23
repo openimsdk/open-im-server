@@ -119,6 +119,12 @@ go.check:
 	@echo "===========> Checking openim"
 	@$(ROOT_DIR)/scripts/check-all.sh
 
+## go.check-component: Check openim component
+.PHONY: go.check-component
+go.check-component:
+	@echo "===========> Checking openim component"
+	@$(ROOT_DIR)/scripts/install/openim-tools.sh openim::tools::pre-start
+
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:

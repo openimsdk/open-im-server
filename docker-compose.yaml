@@ -99,19 +99,19 @@ services:
     command: minio server /data --console-address ':9090'
 
   openim-server:
-    # image: ghcr.io/openimsdk/openim-server:release-v3.2
-    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:release-v3.2
-    # image: openim/openim-server:release-v3.2
+    # image: ghcr.io/openimsdk/openim-server:main
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
+    # image: openim/openim-server:main
     container_name: openim-server
-    # healthcheck:
-    #   test: ["CMD-SHELL", "./scripts/check-all.sh"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
+    healthcheck:
+      test: ["CMD-SHELL", "./scripts/check-all.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
-      - ${DATA_DIR}/_output/openim/logs:/openim/openim-server/logs
-      - ${DATA_DIR}/config:/openim/openim-server/config
-      - ${DATA_DIR}/scripts:/openim/openim-server/scripts
+      - ./logs:/openim/openim-server/logs
+      - ./config:/openim/openim-server/config
+      - ./scripts:/openim/openim-server/scripts
     restart: always
     depends_on:
       - zookeeper

@@ -1212,9 +1212,7 @@ function openim::util::get_server_ip() {
 }
 
 function openim::util::onCtrlC() {
-    kill -9 "${do_sth_pid}" "${progress_pid}" "${countdown_pid}"
-    echo
-    echo 'Ctrl+C is captured'
+    echo -e "\n${t_reset}Ctrl+C Press it. It's exiting openim make init..."
     exit 1
 }
 

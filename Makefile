@@ -102,6 +102,11 @@ install:
 check:
 	@$(MAKE) go.check
 
+## check-component
+.PHONY: check-component
+check-component:
+	@$(MAKE) go.check-component
+
 ## tidy: tidy go.mod ✨
 .PHONY: tidy
 tidy:
