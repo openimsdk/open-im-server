@@ -40,11 +40,11 @@ for template in "${!TEMPLATES[@]}"; do
     openim::log::error_exit "template file ${template} does not exist..."
   fi
 
-  openim::log::info "Working with template file: ${template} to ${output_file}..."
+  openim::log::info "⌚  Working with template file: ${template} to ${output_file}..."
   "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
     openim::log::error "Error processing template file ${template}"
     exit 1
   }
 done
 
-openim::log::success "All configuration files have been successfully generated!"
+openim::log::success "✨  All configuration files have been successfully generated!"

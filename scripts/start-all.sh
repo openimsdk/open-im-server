@@ -72,3 +72,5 @@ ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 execute_scripts
 
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
+
+openim::log::success "✨  All OpenIM services have been successfully started!"
