@@ -15,7 +15,7 @@ CHANGELOG/
 # LICENSE
 
 # Ignore testing and linting configuration
-scripts/golangci.yml
+.golangci.yml
 
 # Ignore deployment-related files
 docker-compose.yaml

@@ -144,7 +144,7 @@ function openim::release::package_src_tarball() {
       -path "${OPENIM_ROOT}"/.config\* -o \
       -path "${OPENIM_ROOT}"/.chglog\* -o \
       -path "${OPENIM_ROOT}"/.gitlint -o \
-      -path "${OPENIM_ROOT}"/scripts/golangci.yml -o \
+      -path "${OPENIM_ROOT}"/.golangci.yml -o \
       -path "${OPENIM_ROOT}"/build/goreleaser.yaml -o \
       -path "${OPENIM_ROOT}"/.note.md -o \
       -path "${OPENIM_ROOT}"/.todo.md \
