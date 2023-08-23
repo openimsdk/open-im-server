@@ -97,7 +97,7 @@ func GetMessage() {
 			defer wg.Done()
 			for msg := range pc.Messages() {
 				Transfer([]*sarama.ConsumerMessage{msg})
-				fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
+				//fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
 		}(pc)
 
