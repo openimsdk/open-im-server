@@ -20,16 +20,13 @@ on:
       - 'README.md'
       - 'CONTRIBUTING.md'
       - 'docs/**'
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'README.md'
-      - 'CONTRIBUTING.md'
-      - 'docs/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
 
 permissions:
-  pull-requests: write
   contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -107,6 +104,7 @@ jobs:
           author: kubbot <kubbot@3293172751ysy@gmail.com>
           signoff: false
           draft: false
+          branch: "cicd/patch-${{ github.event.number }}"
           assignees: cubxxw
           reviewers: cubxxw
           delete-branch: true
@@ -115,10 +113,9 @@ jobs:
 
             - [ ] Disenchanter can connect and issue actions
             
-            This is an automated PR. @ ${{ github.actor }} 
+            This is an automated PR. @ ${{ github.actor }}
             <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
-          branch: cicd/patch-${{ github.event.number }}
           labels: |
             kind/documentation
             enhancement
