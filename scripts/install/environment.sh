@@ -162,7 +162,7 @@ readonly OPENIM_FRIEND_PORT=${OPENIM_FRIEND_PORT:-'10120'}
 # OpenIM消息服务端口
 readonly OPENIM_MESSAGE_PORT=${OPENIM_MESSAGE_PORT:-'10130'}
 # OpenIM消息网关服务端口
-readonly OPENIM_MESSAGE_GATEWAY_PORT=${OPENIM_MESSAGE_GATEWAY_PORT:-'10140,11140'}
+readonly OPENIM_MESSAGE_GATEWAY_PORT=${OPENIM_MESSAGE_GATEWAY_PORT:-'10140'}
 # OpenIM组服务端口
 readonly OPENIM_GROUP_PORT=${OPENIM_GROUP_PORT:-'10150'}
 # OpenIM授权服务端口
@@ -196,7 +196,7 @@ def "LOG_WITH_STACK" "false"                      # 日志是否带有堆栈信�
 
 ###################### Variables definition ######################
 # OpenIM WS端口
-readonly OPENIM_WS_PORT=${OPENIM_WS_PORT:-'10001,11001'}
+readonly OPENIM_WS_PORT=${OPENIM_WS_PORT:-'10001'}
 def "WEBSOCKET_MAX_CONN_NUM" "100000" # Websocket最大连接数
 def "WEBSOCKET_MAX_MSG_LEN" "4096"    # Websocket最大消息长度
 def "WEBSOCKET_TIMEOUT" "10"          # Websocket超时
@@ -240,7 +240,7 @@ readonly FRIEND_PROM_PORT=${FRIEND_PROM_PORT:-'20120'}
 # Message 服务的 Prometheus 端口
 readonly MESSAGE_PROM_PORT=${MESSAGE_PROM_PORT:-'20130'}
 # Message Gateway 服务的 Prometheus 端口
-readonly MSG_GATEWAY_PROM_PORT=${MSG_GATEWAY_PROM_PORT:-'20140,21140'}
+readonly MSG_GATEWAY_PROM_PORT=${MSG_GATEWAY_PROM_PORT:-'20140'}
 # Group 服务的 Prometheus 端口
 readonly GROUP_PROM_PORT=${GROUP_PROM_PORT:-'20150'}
 # Auth 服务的 Prometheus 端口
