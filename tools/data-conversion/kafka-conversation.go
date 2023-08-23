@@ -106,11 +106,12 @@ func GetMessage() {
 				msgFromMQ := &sdkws.MsgData{}
 				err := proto.Unmarshal(msg.Value, msgFromMQ)
 				if err != nil {
-					fmt.Printf("err:%s", err)
+					fmt.Printf("err:%s \n", err)
 				}
-				fmt.Printf("msg:%s", msgFromMQ)
+				fmt.Printf("msg:%s \n", msgFromMQ)
 				//fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
+
 		}(pc)
 
 	}
