@@ -34,15 +34,15 @@ function openim::msggateway::start()
 
     # OpenIM message gateway service port
     OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
-    read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< $(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
+    read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< ${OPENIM_MESSAGE_GATEWAY_PORTS}
     
     # OpenIM WS port
     OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
-    read -a OPENIM_WS_PORTS_ARRAY <<< $(openim::util::list-to-string ${OPENIM_WS_PORT} )
+    read -a OPENIM_WS_PORTS_ARRAY <<< ${OPENIM_WS_PORTS}
     
     # Message Gateway Prometheus port of the service
     MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
-    read -a MSG_GATEWAY_PROM_PORTS_ARRAY <<< $(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
+    read -a MSG_GATEWAY_PROM_PORTS_ARRAY <<< ${MSG_GATEWAY_PROM_PORTS}
 
     openim::log::status "OpenIM Mssage Getway ports: ${OPENIM_MESSAGE_GATEWAY_PORTS[*]}"
     openim::log::status "OpenIM WS ports: ${OPENIM_WS_PORTS[*]}"
