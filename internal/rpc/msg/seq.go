@@ -17,16 +17,16 @@ package msg
 import (
 	"context"
 
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 )
 
 func (m *msgServer) GetConversationMaxSeq(
 	ctx context.Context,
-	req *pbMsg.GetConversationMaxSeqReq,
-) (resp *pbMsg.GetConversationMaxSeqResp, err error) {
+	req *pbmsg.GetConversationMaxSeqReq,
+) (resp *pbmsg.GetConversationMaxSeqResp, err error) {
 	maxSeq, err := m.MsgDatabase.GetMaxSeq(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
 	}
-	return &pbMsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil
+	return &pbmsg.GetConversationMaxSeqResp{MaxSeq: maxSeq}, nil
 }

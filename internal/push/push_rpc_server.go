@@ -21,7 +21,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbPush "github.com/OpenIMSDK/protocol/push"
+	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
 
@@ -60,7 +60,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		pbPush.RegisterPushMsgServiceServer(server, &pushServer{
+		pbpush.RegisterPushMsgServiceServer(server, &pushServer{
 			pusher: pusher,
 		})
 	}()
@@ -74,7 +74,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	return nil
 }
 
-func (r *pushServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (resp *pbPush.PushMsgResp, err error) {
+func (r *pushServer) PushMsg(ctx context.Context, pbData *pbpush.PushMsgReq) (resp *pbpush.PushMsgResp, err error) {
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
 		err = r.pusher.Push2SuperGroup(ctx, pbData.MsgData.GroupID, pbData.MsgData)
@@ -88,15 +88,15 @@ func (r *pushServer) PushMsg(ctx context.Context, pbData *pbPush.PushMsgReq) (re
 			log.ZWarn(ctx, "offline push failed", err, "msg", pbData.String())
 		}
 	}
-	return &pbPush.PushMsgResp{}, nil
+	return &pbpush.PushMsgResp{}, nil
 }
 
 func (r *pushServer) DelUserPushToken(
 	ctx context.Context,
-	req *pbPush.DelUserPushTokenReq,
-) (resp *pbPush.DelUserPushTokenResp, err error) {
+	req *pbpush.DelUserPushTokenReq,
+) (resp *pbpush.DelUserPushTokenResp, err error) {
 	if err = r.pusher.database.DelFcmToken(ctx, req.UserID, int(req.PlatformID)); err != nil {
 		return nil, err
 	}
-	return &pbPush.DelUserPushTokenResp{}, nil
+	return &pbpush.DelUserPushTokenResp{}, nil
 }

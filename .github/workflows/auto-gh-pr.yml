@@ -26,7 +26,8 @@ on:
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'main' && github.event.pull_request.merged == true
+    if: github.event.pull_request.base.ref == 'main'
+    # && github.event.pull_request.merged == true
     steps:
         - name: Check out code
           uses: actions/checkout@v3

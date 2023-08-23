@@ -17,7 +17,7 @@ package convert
 import (
 	"time"
 
-	pbGroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
@@ -45,7 +45,7 @@ func Db2PbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint
 	}
 }
 
-func Pb2DbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID string) *relation.GroupRequestModel {
+func Pb2DbGroupRequest(req *pbgroup.GroupApplicationResponseReq, handleUserID string) *relation.GroupRequestModel {
 	return &relation.GroupRequestModel{
 		UserID:       req.FromUserID,
 		GroupID:      req.GroupID,
@@ -61,8 +61,8 @@ func Db2PbCMSGroup(
 	ownerUserID string,
 	ownerUserName string,
 	memberCount uint32,
-) *pbGroup.CMSGroup {
-	return &pbGroup.CMSGroup{
+) *pbgroup.CMSGroup {
+	return &pbgroup.CMSGroup{
 		GroupInfo:          Db2PbGroupInfo(m, ownerUserID, memberCount),
 		GroupOwnerUserID:   ownerUserID,
 		GroupOwnerUserName: ownerUserName,
@@ -110,8 +110,8 @@ func Db2PbGroupAbstractInfo(
 	groupID string,
 	groupMemberNumber uint32,
 	groupMemberListHash uint64,
-) *pbGroup.GroupAbstractInfo {
-	return &pbGroup.GroupAbstractInfo{
+) *pbgroup.GroupAbstractInfo {
+	return &pbgroup.GroupAbstractInfo{
 		GroupID:             groupID,
 		GroupMemberNumber:   groupMemberNumber,
 		GroupMemberListHash: groupMemberListHash,

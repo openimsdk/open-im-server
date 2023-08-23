@@ -27,7 +27,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 const (
@@ -54,7 +54,7 @@ type ConversationCache interface {
 	DelUserConversationIDsHash(ownerUserIDs ...string) ConversationCache
 
 	// get one conversation from msgCache
-	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationTb.ConversationModel, error)
+	GetConversation(ctx context.Context, ownerUserID, conversationID string) (*relationtb.ConversationModel, error)
 	DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from msgCache
@@ -62,9 +62,9 @@ type ConversationCache interface {
 		ctx context.Context,
 		ownerUserID string,
 		conversationIDs []string,
-	) ([]*relationTb.ConversationModel, error)
+	) ([]*relationtb.ConversationModel, error)
 	// get one user's all conversations from msgCache
-	GetUserAllConversations(ctx context.Context, ownerUserID string) ([]*relationTb.ConversationModel, error)
+	GetUserAllConversations(ctx context.Context, ownerUserID string) ([]*relationtb.ConversationModel, error)
 	// get user conversation recv msg from msgCache
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
 	DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache
@@ -81,14 +81,14 @@ type ConversationCache interface {
 	GetConversationsByConversationID(
 		ctx context.Context,
 		conversationIDs []string,
-	) ([]*relationTb.ConversationModel, error)
+	) ([]*relationtb.ConversationModel, error)
 	DelConversationByConversationID(conversationIDs ...string) ConversationCache
 }
 
 func NewConversationRedis(
 	rdb redis.UniversalClient,
 	opts rockscache.Options,
-	db relationTb.ConversationModelInterface,
+	db relationtb.ConversationModelInterface,
 ) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
 	return &ConversationRedisCache{
@@ -102,7 +102,7 @@ func NewConversationRedis(
 type ConversationRedisCache struct {
 	metaCache
 	rcClient       *rockscache.Client
-	conversationDB relationTb.ConversationModelInterface
+	conversationDB relationtb.ConversationModelInterface
 	expireTime     time.Duration
 }
 
@@ -214,13 +214,13 @@ func (c *ConversationRedisCache) DelUserConversationIDsHash(ownerUserIDs ...stri
 func (c *ConversationRedisCache) GetConversation(
 	ctx context.Context,
 	ownerUserID, conversationID string,
-) (*relationTb.ConversationModel, error) {
+) (*relationtb.ConversationModel, error) {
 	return getCache(
 		ctx,
 		c.rcClient,
 		c.getConversationKey(ownerUserID, conversationID),
 		c.expireTime,
-		func(ctx context.Context) (*relationTb.ConversationModel, error) {
+		func(ctx context.Context) (*relationtb.ConversationModel, error) {
 			return c.conversationDB.Take(ctx, ownerUserID, conversationID)
 		},
 	)
@@ -237,7 +237,7 @@ func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversati
 }
 
 func (c *ConversationRedisCache) getConversationIndex(
-	convsation *relationTb.ConversationModel,
+	convsation *relationtb.ConversationModel,
 	keys []string,
 ) (int, error) {
 	key := c.getConversationKey(convsation.OwnerUserID, convsation.ConversationID)
@@ -253,7 +253,7 @@ func (c *ConversationRedisCache) GetConversations(
 	ctx context.Context,
 	ownerUserID string,
 	conversationIDs []string,
-) ([]*relationTb.ConversationModel, error) {
+) ([]*relationtb.ConversationModel, error) {
 	var keys []string
 	for _, conversarionID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
@@ -264,7 +264,7 @@ func (c *ConversationRedisCache) GetConversations(
 		keys,
 		c.expireTime,
 		c.getConversationIndex,
-		func(ctx context.Context) ([]*relationTb.ConversationModel, error) {
+		func(ctx context.Context) ([]*relationtb.ConversationModel, error) {
 			return c.conversationDB.Find(ctx, ownerUserID, conversationIDs)
 		},
 	)
@@ -273,7 +273,7 @@ func (c *ConversationRedisCache) GetConversations(
 func (c *ConversationRedisCache) GetUserAllConversations(
 	ctx context.Context,
 	ownerUserID string,
-) ([]*relationTb.ConversationModel, error) {
+) ([]*relationtb.ConversationModel, error) {
 	conversationIDs, err := c.GetUserConversationIDs(ctx, ownerUserID)
 	if err != nil {
 		return nil, err
@@ -288,7 +288,7 @@ func (c *ConversationRedisCache) GetUserAllConversations(
 		keys,
 		c.expireTime,
 		c.getConversationIndex,
-		func(ctx context.Context) ([]*relationTb.ConversationModel, error) {
+		func(ctx context.Context) ([]*relationtb.ConversationModel, error) {
 			return c.conversationDB.FindUserIDAllConversations(ctx, ownerUserID)
 		},
 	)
@@ -425,7 +425,7 @@ func (c *ConversationRedisCache) DelUserAllHasReadSeqs(
 func (c *ConversationRedisCache) GetConversationsByConversationID(
 	ctx context.Context,
 	conversationIDs []string,
-) ([]*relationTb.ConversationModel, error) {
+) ([]*relationtb.ConversationModel, error) {
 	panic("implement me")
 }
 

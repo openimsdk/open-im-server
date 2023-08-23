@@ -18,15 +18,15 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/mcontext"
 )
 
 func (m *msgServer) SetSendMsgStatus(
 	ctx context.Context,
-	req *pbMsg.SetSendMsgStatusReq,
-) (*pbMsg.SetSendMsgStatusResp, error) {
-	resp := &pbMsg.SetSendMsgStatusResp{}
+	req *pbmsg.SetSendMsgStatusReq,
+) (*pbmsg.SetSendMsgStatusResp, error) {
+	resp := &pbmsg.SetSendMsgStatusResp{}
 	if err := m.MsgDatabase.SetSendMsgStatus(ctx, mcontext.GetOperationID(ctx), req.Status); err != nil {
 		return nil, err
 	}
@@ -35,9 +35,9 @@ func (m *msgServer) SetSendMsgStatus(
 
 func (m *msgServer) GetSendMsgStatus(
 	ctx context.Context,
-	req *pbMsg.GetSendMsgStatusReq,
-) (*pbMsg.GetSendMsgStatusResp, error) {
-	resp := &pbMsg.GetSendMsgStatusResp{}
+	req *pbmsg.GetSendMsgStatusReq,
+) (*pbmsg.GetSendMsgStatusResp, error) {
+	resp := &pbmsg.GetSendMsgStatusResp{}
 	status, err := m.MsgDatabase.GetSendMsgStatus(ctx, mcontext.GetOperationID(ctx))
 	if IsNotFound(err) {
 		resp.Status = constant.MsgStatusNotExist

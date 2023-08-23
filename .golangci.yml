@@ -58,7 +58,6 @@ run:
   skip-files:
     - ".*\\.my\\.go$"
     - _test.go
-    - ".*\\.pb\\.go"
 
   # by default isn't set. If set we pass it to "go list -mod={option}". From "go help modules":
   # If invoked with -mod=readonly, the go command is disallowed from the implicit
@@ -177,7 +176,7 @@ linters-settings:
     # put imports beginning with prefix after 3rd-party packages;
     # only support one prefix
     # if not set, use goimports.local-prefixes
-    prefix: github.com/OpenIMSDK/OpenKF
+    prefix: github.com/OpenIMSDK/Open-IM-Server
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
@@ -334,10 +333,8 @@ linters-settings:
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
-    local-prefixes: github.com/OpenIMSDK/OpenKF
-  golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.9
+    local-prefixes: github.com/OpenIMSDK/Open-IM-Server
+
   gomnd:
     settings:
       mnd:
@@ -443,12 +440,7 @@ linters-settings:
   #   packages-with-error-message:
   #     # specify an error message to output when a blacklisted package is used
   #     - github.com/Sirupsen/logrus: "logging is allowed only by logutils.Log"
-  ifshort:
-    # Maximum length of variable declaration measured in number of lines, after which linter won't suggest using short syntax.
-    # Has higher priority than max-decl-chars.
-    max-decl-lines: 1
-    # Maximum length of variable declaration measured in number of characters, after which linter won't suggest using short syntax.
-    max-decl-chars: 30
+
 
   importas:
     # if set to `true`, force to use alias.
@@ -723,7 +715,6 @@ linters:
     - asciicheck
     - bodyclose
     - cyclop
-    - deadcode
     # - depguard
     - dogsled
     - dupl
@@ -751,7 +742,6 @@ linters:
     - gosec
     - gosimple
     - govet
-    - ifshort
     - importas
     - ineffassign
     - lll
@@ -771,19 +761,16 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - structcheck
     - stylecheck
     - thelper
     - tparallel
     - unconvert
     - unparam
     - unused
-    - varcheck
     - wastedassign
     - whitespace
     - bidichk
     - wastedassign
-    - golint
     - execinquery
     - nosprintfhostport
     - grouper
@@ -814,10 +801,6 @@ issues:
 
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    - linters:
-      - golint
-      path: (internal/api/.*)\.go # exclude golint for internal/api/... files
-
     - linters:
       - revive
       path: (log/.*)\.go
@@ -857,9 +840,7 @@ issues:
 
     - path: (pkg/app/.*)\.go
       linters:
-        - deadcode
         - unused
-        - varcheck
         - forbidigo
 
     # Exclude some staticcheck messages

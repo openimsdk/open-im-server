@@ -21,7 +21,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -36,7 +36,7 @@ func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
 	return &ChatLogGorm{NewMetaDB(db, &relation.ChatLogModel{})}
 }
 
-func (c *ChatLogGorm) Create(msg *pbMsg.MsgDataToMQ) error {
+func (c *ChatLogGorm) Create(msg *pbmsg.MsgDataToMQ) error {
 	chatLog := new(relation.ChatLogModel)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {

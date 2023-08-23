@@ -25,17 +25,17 @@ docker_compose_file_name="docker-compose.yaml"
 
 # Load environment variables from .env file
 load_env() {
-    source ${OPENIM_ROOT}/.env
+    source "${OPENIM_ROOT}"/.env
 }
 
 # Replace local IP with public IP in .env
 replace_ip() {
     if [ "$API_URL" == "http://127.0.0.1:10002/object/" ]; then
-        sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
+        sed -i "s/127.0.0.1/${internet_ip}/" "${OPENIM_ROOT}"/.env
     fi
 
     if [ "$MINIO_ENDPOINT" == "http://127.0.0.1:10005" ]; then
-        sed -i "s/127.0.0.1/${internet_ip}/" ${OPENIM_ROOT}/.env
+        sed -i "s/127.0.0.1/${internet_ip}/" "${OPENIM_ROOT}"/.env
     fi 
 
     openim::log::info "Your minio endpoint is ${MINIO_ENDPOINT}"
@@ -43,12 +43,12 @@ replace_ip() {
 
 # Execute necessary scripts
 execute_scripts() {
-    chmod +x ${OPENIM_ROOT}/scripts/*.sh
+    chmod +x "${OPENIM_ROOT}"/scripts/*.sh
     openim::log::info "Executing init_pwd.sh"
-    ${OPENIM_ROOT}/scripts/init_pwd.sh
+    "${OPENIM_ROOT}"/scripts/init_pwd.sh
 
     openim::log::info "Executing env_check.sh"
-    ${OPENIM_ROOT}/scripts/env_check.sh
+    "${OPENIM_ROOT}"/scripts/env_check.sh
 }
 
 # Start docker compose
@@ -60,7 +60,7 @@ start_docker_compose() {
         docker compose up -d
     fi
 
-    ${OPENIM_ROOT}/scripts/docker-check-service.sh
+    "${OPENIM_ROOT}"/scripts/docker-check-service.sh
 }
 
 main() {

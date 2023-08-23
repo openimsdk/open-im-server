@@ -363,6 +363,7 @@ func (m *MessageApi) GetActiveGroup(c *gin.Context) {
 func (m *MessageApi) SearchMsg(c *gin.Context) {
 	a2r.Call(msg.MsgClient.SearchMessage, m.Client, c)
 }
+
 func (m *MessageApi) GetServerTime(c *gin.Context) {
 	a2r.Call(msg.MsgClient.GetServerTime, m.Client, c)
 }

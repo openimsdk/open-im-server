@@ -119,6 +119,12 @@ go.check:
 	@echo "===========> Checking openim"
 	@$(ROOT_DIR)/scripts/check-all.sh
 
+## go.check-component: Check openim component
+.PHONY: go.check-component
+go.check-component:
+	@echo "===========> Checking openim component"
+	@$(ROOT_DIR)/scripts/install/openim-tools.sh openim::tools::pre-start
+
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:
@@ -166,7 +172,7 @@ go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.buil
 .PHONY: go.lint
 go.lint: tools.verify.golangci-lint
 	@echo "===========> Run golangci to lint source codes"
-	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/scripts/golangci.yml $(ROOT_DIR)/... 
+	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/... 
 
 ## go.test: Run unit test
 .PHONY: go.test

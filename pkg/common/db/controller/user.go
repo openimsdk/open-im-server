@@ -20,7 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/user"
 
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/tx"
@@ -71,10 +71,10 @@ type userDatabase struct {
 	userDB  relation.UserModelInterface
 	cache   cache.UserCache
 	tx      tx.Tx
-	mongoDB unRelationTb.UserModelInterface
+	mongoDB unrelationtb.UserModelInterface
 }
 
-func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx, mongoDB unRelationTb.UserModelInterface) UserDatabase {
+func NewUserDatabase(userDB relation.UserModelInterface, cache cache.UserCache, tx tx.Tx, mongoDB unrelationtb.UserModelInterface) UserDatabase {
 	return &userDatabase{userDB: userDB, cache: cache, tx: tx, mongoDB: mongoDB}
 }
 

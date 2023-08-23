@@ -55,7 +55,7 @@ openim::chat::validate() {
   # validate installed version is at least equal to minimum
   version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
   if [[ $(openim::chat::version "${CHAT_VERSION}") -gt $(openim::chat::version "${version}") ]]; then
-   export PATH=${OPENIM_ROOT}/third_party/chat:${PATH}
+   export PATH="${OPENIM_ROOT}"/third_party/chat:${PATH}
    hash chat
    echo "${PATH}"
    version=$(chat --version | grep Version | head -n 1 | cut -d " " -f 3)
@@ -148,7 +148,7 @@ openim::chat::install() {
     os=$(openim::util::host_os)
     arch=$(openim::util::host_arch)
 
-    cd "${OPENIM_ROOT}/third_party" || return 1
+    cd ""${OPENIM_ROOT}"/third_party" || return 1
     if [[ $(readlink chat) == chat-v${CHAT_VERSION}-${os}-* ]]; then
       openim::log::info "chat v${CHAT_VERSION} already installed. To use:"
       openim::log::info "export PATH=\"$(pwd)/chat:\${PATH}\""
