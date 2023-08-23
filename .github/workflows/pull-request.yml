@@ -110,5 +110,5 @@ jobs:
             <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
           branch: cicd/patch-${{ github.event.number }}
-          labels: kind/documentation, area/test, ok-to-test
+          labels: kind/documentation
           token: ${{ secrets.REDBOT_GITHUB_TOKEN }}
