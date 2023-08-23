@@ -895,13 +895,13 @@ function openim::util::list-to-string() {
     # 2. Replace commas with spaces
     # 3. Remove opening and closing brackets
     ports_array=$(echo "$ports_list" | sed 's/ //g; s/,/ /g; s/^\[\(.*\)\]$/\1/')
-
     # For external use, we might want to echo the result so that it can be captured by callers
     echo "$ports_array"
 }
 # MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string "10023, 2323, 34 34")
+# read -a MSG_GATEWAY_PROM_PORTS <<< $(openim::util::list-to-string "10023, 2323, 34 34")
 # echo ${MSG_GATEWAY_PROM_PORTS}
-
+# echo "${#MSG_GATEWAY_PROM_PORTS[@]}"
 # Downloads cfssl/cfssljson/cfssl-certinfo into $1 directory if they do not already exist in PATH
 #
 # Assumed vars:

@@ -102,7 +102,7 @@ def "MONGO_MAX_POOL_SIZE" "100"                                            # 最
 
 ###################### Object 配置信息 ######################
 def "OBJECT_ENABLE" "minio"                                                # 对象是否启用
-def "OBJECT_APIURL" "http://${IP}:10002"                               # 对象的API地址
+def "OBJECT_APIURL" "http://${IP}:10002"                                   # 对象的API地址
 def "MINIO_BUCKET" "openim"                                                # MinIO的存储桶名称
 def "MINIO_PORT" "10005"                                                   # MinIO的端口
 # MinIO的端点URL
@@ -147,7 +147,7 @@ def "RPC_LISTEN_IP" "0.0.0.0" # RPC的监听IP
 
 ###################### API 配置信息 ######################
 # API的开放端口, 只能设置一个端口
-def "API_OPENIM_PORT" "10002"
+readonly API_OPENIM_PORT=${API_OPENIM_PORT:-'10002'}
 def "API_LISTEN_IP" "0.0.0.0" # API的监听IP
 
 ###################### RPC Port Configuration Variables ######################
@@ -162,7 +162,7 @@ readonly OPENIM_FRIEND_PORT=${OPENIM_FRIEND_PORT:-'10120'}
 # OpenIM消息服务端口
 readonly OPENIM_MESSAGE_PORT=${OPENIM_MESSAGE_PORT:-'10130'}
 # OpenIM消息网关服务端口
-readonly OPENIM_MESSAGE_GATEWAY_PORT=${OPENIM_MESSAGE_GATEWAY_PORT:-'10140'}
+readonly OPENIM_MESSAGE_GATEWAY_PORT=${OPENIM_MESSAGE_GATEWAY_PORT:-'10140,11140'}
 # OpenIM组服务端口
 readonly OPENIM_GROUP_PORT=${OPENIM_GROUP_PORT:-'10150'}
 # OpenIM授权服务端口
@@ -195,7 +195,8 @@ def "LOG_IS_JSON" "false"                         # 日志是否为JSON格式
 def "LOG_WITH_STACK" "false"                      # 日志是否带有堆栈信息
 
 ###################### Variables definition ######################
-def "OPENIM_WS_PORT" "10001"          # OpenIM WS端口
+# OpenIM WS端口
+readonly OPENIM_WS_PORT=${OPENIM_WS_PORT:-'10001,11001'}
 def "WEBSOCKET_MAX_CONN_NUM" "100000" # Websocket最大连接数
 def "WEBSOCKET_MAX_MSG_LEN" "4096"    # Websocket最大消息长度
 def "WEBSOCKET_TIMEOUT" "10"          # Websocket超时
@@ -232,16 +233,27 @@ def "IOS_PRODUCTION" "false"         # IOS生产
 
 ###################### Prometheus 配置信息 ######################
 def "PROMETHEUS_ENABLE" "false"      # 是否启用 Prometheus
-def "USER_PROM_PORT" "20110"         # User 服务的 Prometheus 端口
-def "FRIEND_PROM_PORT" "20120"       # Friend 服务的 Prometheus 端口
-def "MESSAGE_PROM_PORT" "20130"      # Message 服务的 Prometheus 端口
-def "MSG_GATEWAY_PROM_PORT" "20140"  # Message Gateway 服务的 Prometheus 端口
-def "GROUP_PROM_PORT" "20150"        # Group 服务的 Prometheus 端口
-def "AUTH_PROM_PORT" "20160"         # Auth 服务的 Prometheus 端口
-def "PUSH_PROM_PORT" "20170"         # Push 服务的 Prometheus 端口
-def "CONVERSATION_PROM_PORT" "20230" # Conversation 服务的 Prometheus 端口
-def "RTC_PROM_PORT" "21300"          # RTC 服务的 Prometheus 端口
-def "THIRD_PROM_PORT" "21301"        # Third 服务的 Prometheus 端口
+# User 服务的 Prometheus 端口
+readonly USER_PROM_PORT=${USER_PROM_PORT:-'20110'}
+# Friend 服务的 Prometheus 端口
+readonly FRIEND_PROM_PORT=${FRIEND_PROM_PORT:-'20120'}
+# Message 服务的 Prometheus 端口
+readonly MESSAGE_PROM_PORT=${MESSAGE_PROM_PORT:-'20130'}
+# Message Gateway 服务的 Prometheus 端口
+readonly MSG_GATEWAY_PROM_PORT=${MSG_GATEWAY_PROM_PORT:-'20140,21140'}
+# Group 服务的 Prometheus 端口
+readonly GROUP_PROM_PORT=${GROUP_PROM_PORT:-'20150'}
+# Auth 服务的 Prometheus 端口
+readonly AUTH_PROM_PORT=${AUTH_PROM_PORT:-'20160'}
+# Push 服务的 Prometheus 端口
+readonly PUSH_PROM_PORT=${PUSH_PROM_PORT:-'20170'}
+# Conversation 服务的 Prometheus 端口
+readonly CONVERSATION_PROM_PORT=${CONVERSATION_PROM_PORT:-'20230'}
+# RTC 服务的 Prometheus 端口
+readonly RTC_PROM_PORT=${RTC_PROM_PORT:-'21300'}
+# Third 服务的 Prometheus 端口
+readonly THIRD_PROM_PORT=${THIRD_PROM_PORT:-'21301'}
+
 # Message Transfer 服务的 Prometheus 端口列表
 readonly MSG_TRANSFER_PROM_PORT=${MSG_TRANSFER_PROM_PORT:-'21400, 21401, 21402, 21403'}
 

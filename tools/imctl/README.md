@@ -1,47 +1,89 @@
-# OpenIM CTL 模块
+# [RFC #0005] OpenIM CTL Module Proposal
 
+## Meta
 
-## 为什么设计这个模块
+- Name: OpenIM CTL Module Enhancement
+- Start Date: 2023-08-23
+- Author(s): @cubxxw
+- Status: Draft
+- RFC Pull Request: (leave blank)
+- OpenIMSDK Pull Request: (leave blank)
+- OpenIMSDK Issue: https://github.com/OpenIMSDK/Open-IM-Server/issues/924
+- Supersedes: N/A
 
-OpenIM 后期功能扩展，不能总依赖一些单独的模块，而是整合到 Imctl 中。
+## 📇Topics
 
-测试同学做自动化测试或者是 e2e 测试，接口测试等等，每一次调用 API 很麻烦，用 imctl 的方式为 api 的调用提供了方便
+- RFC #0000 OpenIMSDK CTL Module Proposal
+  - [Meta](#meta)
+  - [Summary](#summary)
+  - [Definitions](#definitions)
+  - [Motivation](#motivation)
+  - [What it is](#what-it-is)
+  - [How it Works](#how-it-works)
+  - [Migration](#migration)
+  - [Drawbacks](#drawbacks)
+  - [Alternatives](#alternatives)
+  - [Prior Art](#prior-art)
+  - [Unresolved Questions](#unresolved-questions)
+  - [Spec. Changes (OPTIONAL)](#spec-changes-optional)
+  - [History](#history)
 
-和 scripts 深度交互，同样减少了 IM 本身的耦合度，提高了 IM 的可扩展性。
+## Summary
 
+The OpenIM CTL module proposal aims to provide an integrated tool for the OpenIM system, offering utilities for user management, system monitoring, debugging, configuration, and more. This tool will enhance the extensibility of the OpenIM system and reduce dependencies on individual modules.
 
-## 功能设计
+## Definitions
 
-+ 用户管理：例如，添加、删除或禁用用户账户。
+- **OpenIM**: An Instant Messaging system.
+- **`imctl`**: The control command-line tool for OpenIM.
+- **E2E Testing**: End-to-End Testing.
+- **API**: Application Programming Interface.
 
-+ 系统监控：查看在线用户数量、消息传送速率等关键性能指标。
+## Motivation
 
-+ 调试：如查看日志、调整日志级别、查看系统状态等。
+- Improve the OpenIM system's extensibility and reduce dependencies on individual modules.
+- Simplify the process for testers to perform automated tests.
+- Enhance interaction with scripts and reduce the system's coupling.
+- Implement a consistent tool similar to kubectl for a streamlined user experience.
 
-+ 配置管理：更新系统设置、管理插件或模块等。
+## What it is
 
-+ 数据管理：备份和恢复数据、导入和导出数据等。
+`imctl` is a command-line utility designed for OpenIM to provide functionalities including:
 
-+ 系统维护：例如，执行更新、重启服务、进行维护模式等。
+- User Management: Add, delete, or disable user accounts.
+- System Monitoring: View metrics like online users, message transfer rate.
+- Debugging: View logs, adjust log levels, check system states.
+- Configuration Management: Update system settings, manage plugins/modules.
+- Data Management: Backup, restore, import, or export data.
+- System Maintenance: Update, restart services, or maintenance mode.
 
+## How it Works
 
-## 设计思路
+`imctl`, inspired by kubectl, will have sub-commands and options for the functionalities mentioned. Developers, operations, and testers can invoke these commands to manage and monitor the OpenIM system.
 
-参考 kubectl, 方便 开发、运维、测试同学使用系统功能，并且实现自动化功能。
+## Migration
 
-**自动化设计思路：**
-1. 为后面的扩展子模块或者子命令提供自动化的功能，提供子命令  `imctl new` 自动创建新的子命令
-2. 以通过 imctl 对用户、密钥和策略进行CURD操作
-3. 设置 imctl 自动补全脚本
-4. 版本管理，问题：https://github.com/OpenIMSDK/Open-IM-Server/issues/574，做 IM 自动化的版本管理，查看 IM 系统版本
+Currently, the `imctl` will be housed in `tools/imctl`, and later on, the plan is to move it to `cmd/imctl`. Migration guidelines will be provided to ensure smooth transitions.
 
-一些简单的 IM 解决方案可能不需要这样的工具，而复杂、高度定制的系统可能会从中受益。
+## Drawbacks
 
-所以暂时将这个模块放在 tools/imctl 中，后面迁移到 cmd/imctl 中
+- Overhead in learning and adapting to a new tool for existing users.
+- Potential complexities in implementing some of the advanced functionalities.
 
+## Alternatives
 
-## 目录结构设计
+- Continue using individual modules for OpenIM management.
+- Utilize third-party tools or platforms with similar functionalities, customizing them for OpenIM.
 
-为了方便迁移，将 imctl 工程化设计，命令工具放入到 tools/imctl/cmd 中，其他的模块放入到 tools/imctl/pkg 中
+## Prior Art
 
-```
+Kubectl from Kubernetes is a significant inspiration for `imctl`, offering a comprehensive command-line tool for managing clusters.
+
+## Unresolved Questions
+
+- What other functionalities might be required in future versions of `imctl`?
+- What's the expected timeline for transitioning from `tools/imctl` to `cmd/imctl`?
+
+## Spec. Changes (OPTIONAL)
+
+As of now, there are no proposed changes to the core specifications or extensions. Future changes based on community feedback might necessitate spec changes, which will be documented accordingly.
