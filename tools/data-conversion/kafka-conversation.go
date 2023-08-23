@@ -24,7 +24,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/Shopify/sarama"
-	"google.golang.org/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"strconv"
 	"strings"
 	"sync"
