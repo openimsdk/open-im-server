@@ -45,10 +45,10 @@ jobs:
           envs: OWNER,REPO
           script_stop: true
           script: |
-            mkdir -p /test/openim
-            cd /test/openim
+            mkdir -p /test/openim/openim-docker
+            cd /test/openim/openim-docker
             pwd;ls -al
             echo "OWNER: $OWNER"
             echo "REPO: $REPO"
-            git clone -b develop https://github.com/${OWNER}/${REPO}.git; cd ${REPO}
+            git clone https://github.com/OpenIMSDK/openim-docker; cd openim-docker
             docker compose up -d

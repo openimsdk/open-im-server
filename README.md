@@ -121,8 +121,12 @@ $ make demo
 
 <details>   <summary>Deploying with Docker Compose</summary>
 
+**🎯 We maintain a separate repository for OpenIM. If you wish to use production, please:**
 
 > docker compose will not be maintained in future versions, but it is still the easiest and most convenient way to organize docker compose deployments into a separate project https://github.com/openim-sigs/openim-docker to maintain.
+
+
+**🎯 If your experience is based solely on OpenIM repositories, or source deployments, go ahead:**
 
 **1. Clone the project**
 
