@@ -32,10 +32,10 @@ jobs:
           uses: golangci/golangci-lint-action@v3.7.0
           with:
             # Require: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-            version: v1.53
+            version: v1.54
 
             # Optional: working directory, useful for monorepos
-            working-directory: server
+            # working-directory: server
 
             # Optional: golangci-lint command line arguments.
             # 
@@ -47,4 +47,4 @@ jobs:
             only-new-issues: true
 
             # Optional:The mode to install golangci-lint. It can be 'binary' or 'goinstall'.
-            install-mode: "binary"
+            # install-mode: "goinstall"
