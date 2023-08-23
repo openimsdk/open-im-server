@@ -20,7 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
-	pbFriend "github.com/OpenIMSDK/protocol/friend"
+	pbfriend "github.com/OpenIMSDK/protocol/friend"
 	"github.com/OpenIMSDK/tools/mcontext"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
@@ -29,8 +29,8 @@ import (
 
 func (s *friendServer) GetPaginationBlacks(
 	ctx context.Context,
-	req *pbFriend.GetPaginationBlacksReq,
-) (resp *pbFriend.GetPaginationBlacksResp, err error) {
+	req *pbfriend.GetPaginationBlacksReq,
+) (resp *pbfriend.GetPaginationBlacksResp, err error) {
 	if err := s.userRpcClient.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *friendServer) GetPaginationBlacks(
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbFriend.GetPaginationBlacksResp{}
+	resp = &pbfriend.GetPaginationBlacksResp{}
 	resp.Blacks, err = convert.BlackDB2Pb(ctx, blacks, s.userRpcClient.GetUsersInfoMap)
 	if err != nil {
 		return nil, err
@@ -52,12 +52,12 @@ func (s *friendServer) GetPaginationBlacks(
 	return resp, nil
 }
 
-func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*pbFriend.IsBlackResp, error) {
+func (s *friendServer) IsBlack(ctx context.Context, req *pbfriend.IsBlackReq) (*pbfriend.IsBlackResp, error) {
 	in1, in2, err := s.blackDatabase.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbFriend.IsBlackResp{}
+	resp := &pbfriend.IsBlackResp{}
 	resp.InUser1Blacks = in1
 	resp.InUser2Blacks = in2
 	return resp, nil
@@ -65,8 +65,8 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*
 
 func (s *friendServer) RemoveBlack(
 	ctx context.Context,
-	req *pbFriend.RemoveBlackReq,
-) (*pbFriend.RemoveBlackResp, error) {
+	req *pbfriend.RemoveBlackReq,
+) (*pbfriend.RemoveBlackResp, error) {
 	if err := s.userRpcClient.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
@@ -74,10 +74,10 @@ func (s *friendServer) RemoveBlack(
 		return nil, err
 	}
 	s.notificationSender.BlackDeletedNotification(ctx, req)
-	return &pbFriend.RemoveBlackResp{}, nil
+	return &pbfriend.RemoveBlackResp{}, nil
 }
 
-func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) (*pbFriend.AddBlackResp, error) {
+func (s *friendServer) AddBlack(ctx context.Context, req *pbfriend.AddBlackReq) (*pbfriend.AddBlackResp, error) {
 	if err := authverify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
@@ -95,5 +95,5 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 		return nil, err
 	}
 	s.notificationSender.BlackAddedNotification(ctx, req)
-	return &pbFriend.AddBlackResp{}, nil
+	return &pbfriend.AddBlackResp{}, nil
 }

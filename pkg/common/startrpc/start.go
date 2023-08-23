@@ -22,7 +22,7 @@ import (
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -79,9 +79,9 @@ func Start(
 		prome.NewGrpcRequestCounter()
 		prome.NewGrpcRequestFailedCounter()
 		prome.NewGrpcRequestSuccessCounter()
-		unaryInterceptor := mw.InterceptChain(grpcPrometheus.UnaryServerInterceptor, mw.RpcServerInterceptor)
+		unaryInterceptor := mw.InterceptChain(grpcprometheus.UnaryServerInterceptor, mw.RpcServerInterceptor)
 		options = append(options, []grpc.ServerOption{
-			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.StreamInterceptor(grpcprometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(unaryInterceptor),
 		}...)
 	} else {

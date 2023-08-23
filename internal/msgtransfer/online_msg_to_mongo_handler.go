@@ -20,7 +20,7 @@ import (
 	"github.com/Shopify/sarama"
 	"google.golang.org/protobuf/proto"
 
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
@@ -52,7 +52,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 	session sarama.ConsumerGroupSession,
 ) {
 	msg := cMsg.Value
-	msgFromMQ := pbMsg.MsgDataToMongoByMQ{}
+	msgFromMQ := pbmsg.MsgDataToMongoByMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
 		log.ZError(ctx, "unmarshall failed", err, "key", key, "len", len(msg))

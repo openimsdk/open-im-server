@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbConversation "github.com/OpenIMSDK/protocol/conversation"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -33,7 +33,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	tableRelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
 )
@@ -49,7 +49,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	if err := db.AutoMigrate(&tableRelation.ConversationModel{}); err != nil {
+	if err := db.AutoMigrate(&tablerelation.ConversationModel{}); err != nil {
 		return err
 	}
 	rdb, err := cache.NewRedis()
@@ -59,7 +59,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	conversationDB := relation.NewConversationGorm(db)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
-	pbConversation.RegisterConversationServer(server, &conversationServer{
+	pbconversation.RegisterConversationServer(server, &conversationServer{
 		conversationNotificationSender: notification.NewConversationNotificationSender(&msgRpcClient),
 		groupRpcClient:                 &groupRpcClient,
 		conversationDatabase:           controller.NewConversationDatabase(conversationDB, cache.NewConversationRedis(rdb, cache.GetDefaultOpt(), conversationDB), tx.NewGorm(db)),
@@ -67,7 +67,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	return nil
 }
 
-func (c *conversationServer) GetConversation(ctx context.Context, req *pbConversation.GetConversationReq) (*pbConversation.GetConversationResp, error) {
+func (c *conversationServer) GetConversation(ctx context.Context, req *pbconversation.GetConversationReq) (*pbconversation.GetConversationResp, error) {
 	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, []string{req.ConversationID})
 	if err != nil {
 		return nil, err
@@ -75,46 +75,46 @@ func (c *conversationServer) GetConversation(ctx context.Context, req *pbConvers
 	if len(conversations) < 1 {
 		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
 	}
-	resp := &pbConversation.GetConversationResp{Conversation: &pbConversation.Conversation{}}
+	resp := &pbconversation.GetConversationResp{Conversation: &pbconversation.Conversation{}}
 	resp.Conversation = convert.ConversationDB2Pb(conversations[0])
 	return resp, nil
 }
 
-func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbConversation.GetAllConversationsReq) (*pbConversation.GetAllConversationsResp, error) {
+func (c *conversationServer) GetAllConversations(ctx context.Context, req *pbconversation.GetAllConversationsReq) (*pbconversation.GetAllConversationsResp, error) {
 	conversations, err := c.conversationDatabase.GetUserAllConversation(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbConversation.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
+	resp := &pbconversation.GetAllConversationsResp{Conversations: []*pbconversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
 	return resp, nil
 }
 
-func (c *conversationServer) GetConversations(ctx context.Context, req *pbConversation.GetConversationsReq) (*pbConversation.GetConversationsResp, error) {
+func (c *conversationServer) GetConversations(ctx context.Context, req *pbconversation.GetConversationsReq) (*pbconversation.GetConversationsResp, error) {
 	conversations, err := c.conversationDatabase.FindConversations(ctx, req.OwnerUserID, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp := &pbConversation.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
+	resp := &pbconversation.GetConversationsResp{Conversations: []*pbconversation.Conversation{}}
 	resp.Conversations = convert.ConversationsDB2Pb(conversations)
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversation(ctx context.Context, req *pbConversation.SetConversationReq) (*pbConversation.SetConversationResp, error) {
-	var conversation tableRelation.ConversationModel
+func (c *conversationServer) SetConversation(ctx context.Context, req *pbconversation.SetConversationReq) (*pbconversation.SetConversationResp, error) {
+	var conversation tablerelation.ConversationModel
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		return nil, err
 	}
-	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tableRelation.ConversationModel{&conversation})
+	err := c.conversationDatabase.SetUserConversations(ctx, req.Conversation.OwnerUserID, []*tablerelation.ConversationModel{&conversation})
 	if err != nil {
 		return nil, err
 	}
 	_ = c.conversationNotificationSender.ConversationChangeNotification(ctx, req.Conversation.OwnerUserID, []string{req.Conversation.ConversationID})
-	resp := &pbConversation.SetConversationResp{}
+	resp := &pbconversation.SetConversationResp{}
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversations(ctx context.Context, req *pbConversation.SetConversationsReq) (*pbConversation.SetConversationsResp, error) {
+func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
@@ -133,7 +133,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		// 	}
 		// }
 	}
-	var conversation tableRelation.ConversationModel
+	var conversation tablerelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
@@ -161,7 +161,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 	}
 	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
-		var conversations []*tableRelation.ConversationModel
+		var conversations []*tablerelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
 			conversation2.OwnerUserID = ownerUserID
@@ -185,26 +185,26 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbConver
 	for _, v := range req.UserIDs {
 		c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 	}
-	return &pbConversation.SetConversationsResp{}, nil
+	return &pbconversation.SetConversationsResp{}, nil
 }
 
 // 获取超级大群开启免打扰的用户ID.
-func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbConversation.GetRecvMsgNotNotifyUserIDsReq) (*pbConversation.GetRecvMsgNotNotifyUserIDsResp, error) {
+func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req *pbconversation.GetRecvMsgNotNotifyUserIDsReq) (*pbconversation.GetRecvMsgNotNotifyUserIDsResp, error) {
 	userIDs, err := c.conversationDatabase.FindRecvMsgNotNotifyUserIDs(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
+	return &pbconversation.GetRecvMsgNotNotifyUserIDsResp{UserIDs: userIDs}, nil
 }
 
 // create conversation without notification for msg redis transfer.
-func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbConversation.CreateSingleChatConversationsReq) (*pbConversation.CreateSingleChatConversationsResp, error) {
-	var conversation tableRelation.ConversationModel
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbconversation.CreateSingleChatConversationsReq) (*pbconversation.CreateSingleChatConversationsResp, error) {
+	var conversation tablerelation.ConversationModel
 	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
 	conversation.ConversationType = constant.SingleChatType
 	conversation.OwnerUserID = req.SendID
 	conversation.UserID = req.RecvID
-	err := c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation})
+	err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
 	if err != nil {
 		log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
 	}
@@ -212,52 +212,52 @@ func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, 
 	conversation2 := conversation
 	conversation2.OwnerUserID = req.RecvID
 	conversation2.UserID = req.SendID
-	err = c.conversationDatabase.CreateConversation(ctx, []*tableRelation.ConversationModel{&conversation2})
+	err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
 	if err != nil {
 		log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
 	}
-	return &pbConversation.CreateSingleChatConversationsResp{}, nil
+	return &pbconversation.CreateSingleChatConversationsResp{}, nil
 }
 
-func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbConversation.CreateGroupChatConversationsReq) (*pbConversation.CreateGroupChatConversationsResp, error) {
+func (c *conversationServer) CreateGroupChatConversations(ctx context.Context, req *pbconversation.CreateGroupChatConversationsReq) (*pbconversation.CreateGroupChatConversationsResp, error) {
 	err := c.conversationDatabase.CreateGroupChatConversation(ctx, req.GroupID, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.CreateGroupChatConversationsResp{}, nil
+	return &pbconversation.CreateGroupChatConversationsResp{}, nil
 }
 
-func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbConversation.SetConversationMaxSeqReq) (*pbConversation.SetConversationMaxSeqResp, error) {
+func (c *conversationServer) SetConversationMaxSeq(ctx context.Context, req *pbconversation.SetConversationMaxSeqReq) (*pbconversation.SetConversationMaxSeqResp, error) {
 	if err := c.conversationDatabase.UpdateUsersConversationFiled(ctx, req.OwnerUserID, req.ConversationID,
 		map[string]interface{}{"max_seq": req.MaxSeq}); err != nil {
 		return nil, err
 	}
-	return &pbConversation.SetConversationMaxSeqResp{}, nil
+	return &pbconversation.SetConversationMaxSeqResp{}, nil
 }
 
-func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbConversation.GetConversationIDsReq) (*pbConversation.GetConversationIDsResp, error) {
+func (c *conversationServer) GetConversationIDs(ctx context.Context, req *pbconversation.GetConversationIDsReq) (*pbconversation.GetConversationIDsResp, error) {
 	conversationIDs, err := c.conversationDatabase.GetConversationIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
+	return &pbconversation.GetConversationIDsResp{ConversationIDs: conversationIDs}, nil
 }
 
-func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req *pbConversation.GetUserConversationIDsHashReq) (*pbConversation.GetUserConversationIDsHashResp, error) {
+func (c *conversationServer) GetUserConversationIDsHash(ctx context.Context, req *pbconversation.GetUserConversationIDsHashReq) (*pbconversation.GetUserConversationIDsHashResp, error) {
 	hash, err := c.conversationDatabase.GetUserConversationIDsHash(ctx, req.OwnerUserID)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetUserConversationIDsHashResp{Hash: hash}, nil
+	return &pbconversation.GetUserConversationIDsHashResp{Hash: hash}, nil
 }
 
 func (c *conversationServer) GetConversationsByConversationID(
 	ctx context.Context,
-	req *pbConversation.GetConversationsByConversationIDReq,
-) (*pbConversation.GetConversationsByConversationIDResp, error) {
+	req *pbconversation.GetConversationsByConversationIDReq,
+) (*pbconversation.GetConversationsByConversationIDResp, error) {
 	conversations, err := c.conversationDatabase.GetConversationsByConversationID(ctx, req.ConversationIDs)
 	if err != nil {
 		return nil, err
 	}
-	return &pbConversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
+	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }

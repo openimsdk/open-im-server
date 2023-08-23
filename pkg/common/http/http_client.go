@@ -21,7 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	urlLib "net/url"
+	urllib "net/url"
 	"time"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -110,7 +110,7 @@ func callBackPostReturn(
 	callbackConfig config.CallBackConfig,
 ) error {
 	defer log.ZDebug(ctx, "callback", "url", url, "command", command, "input", input, "callbackConfig", callbackConfig)
-	v := urlLib.Values{}
+	v := urllib.Values{}
 	v.Set(constant.CallbackCommand, command)
 	url = url + "?" + v.Encode()
 	b, err := Post(ctx, url, nil, input, callbackConfig.CallbackTimeOut)

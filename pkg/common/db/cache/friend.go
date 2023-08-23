@@ -23,7 +23,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/utils"
 
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 const (
@@ -41,21 +41,21 @@ type FriendCache interface {
 	// call when friendID List changed
 	DelFriendIDs(ownerUserID ...string) FriendCache
 	// get single friendInfo from msgCache
-	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationTb.FriendModel, err error)
+	GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error)
 	// del friend when friend info changed
 	DelFriend(ownerUserID, friendUserID string) FriendCache
 }
 
 type FriendCacheRedis struct {
 	metaCache
-	friendDB   relationTb.FriendModelInterface
+	friendDB   relationtb.FriendModelInterface
 	expireTime time.Duration
 	rcClient   *rockscache.Client
 }
 
 func NewFriendCacheRedis(
 	rdb redis.UniversalClient,
-	friendDB relationTb.FriendModelInterface,
+	friendDB relationtb.FriendModelInterface,
 	options rockscache.Options,
 ) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
@@ -140,13 +140,13 @@ func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID s
 func (f *FriendCacheRedis) GetFriend(
 	ctx context.Context,
 	ownerUserID, friendUserID string,
-) (friend *relationTb.FriendModel, err error) {
+) (friend *relationtb.FriendModel, err error) {
 	return getCache(
 		ctx,
 		f.rcClient,
 		f.getFriendKey(ownerUserID, friendUserID),
 		f.expireTime,
-		func(ctx context.Context) (*relationTb.FriendModel, error) {
+		func(ctx context.Context) (*relationtb.FriendModel, error) {
 			return f.friendDB.Take(ctx, ownerUserID, friendUserID)
 		},
 	)

@@ -21,7 +21,7 @@ set -o pipefail
 
 # The root of the build/dist directory
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-source ${OPENIM_ROOT}/scripts/lib/util.sh
+source "${OPENIM_ROOT}"/scripts/lib/util.sh
 
 mkdir -p ${OPENIM_OUTPUT_TMP}
 cd ${OPENIM_OUTPUT_TMP}

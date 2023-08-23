@@ -33,7 +33,7 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 # Check the system type
 system_type=$(uname)
 
-pushd "${OPENIM_ROOT}/tools/ncpu" >/dev/null
+pushd ""${OPENIM_ROOT}"/tools/ncpu" >/dev/null
   cpu_count=$(go run .)
 popd >/dev/null
 

@@ -24,8 +24,8 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 trap 'openim::util::onCtrlC' INT
 
-chmod +x ${OPENIM_ROOT}/scripts/*.sh
-${OPENIM_ROOT}/scripts/init-config.sh
+chmod +x "${OPENIM_ROOT}"/scripts/*.sh
+"${OPENIM_ROOT}"/scripts/init-config.sh
 
 openim::util::ensure_docker_daemon_connectivity
 
