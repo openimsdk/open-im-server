@@ -80,7 +80,7 @@ stop:
 
 ## restart: Restart openim ✨
 .PHONY: restart
-restart: clean stop build start
+restart: clean stop build init start
 
 ## multiarch: Build binaries for multiple platforms. See option PLATFORMS. ✨
 .PHONY: multiarch

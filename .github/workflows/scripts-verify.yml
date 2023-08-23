@@ -1,0 +1,60 @@
+name: OpenIM executes the script validation code
+
+on: 
+  push:
+    branches:
+        - main
+    paths-ignore:
+        - "docs/**"
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+  pull_request:
+    branches:
+        - main
+    paths-ignore:
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+        - "docs/**"
+
+env:
+  GO_VERSION: "1.19"
+  GOLANGCI_VERSION: "v1.50.1"
+
+jobs:
+  openim:
+    name: Test with go ${{ matrix.go_version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+        contents: write
+    environment:
+      name: openim
+
+    strategy:
+      matrix:
+        go_version: ["1.21"]
+        os: [ubuntu-latest]
+
+    steps:
+    - name: Setup
+      uses: actions/checkout@v3
+      
+    - name: In ${{ matrix.os }} Execute the script validation code
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go_version }}
+      id: go
+
+    - name: scripts validation
+      run: |
+        sudo make verify
+      continue-on-error: true
+
+    - name: verify format
+      run: |
+        sudo make format
+
+    - name: verify license
+      run: |
+        sudo make verify-copyright

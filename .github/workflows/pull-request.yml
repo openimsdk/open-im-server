@@ -92,15 +92,23 @@ jobs:
           echo "OpenIM verify successfully" 
         continue-on-error: true
       
-      - name: Commit code
-        run: |
-            git add .
+    #   - name: Commit code
+    #     run: |
+    #         git add .
+    #         git commit -m "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
     
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.REDBOT_GITHUB_TOKEN }}
           commit-message: "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
           title: Bump League Patch to cicd/patch-${{ github.event.number }}
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          draft: false
+        #   assignees: ${{ github.actor }}
+        #   reviewers: ${{ github.actor }}
+          delete-branch: true
           body: |
             Review criteria:
             
@@ -110,5 +118,7 @@ jobs:
             <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
           branch: cicd/patch-${{ github.event.number }}
-          labels: kind/documentation
-          token: ${{ secrets.REDBOT_GITHUB_TOKEN }}
+          labels: |
+            kind/documentation
+            enhancement
+            report
