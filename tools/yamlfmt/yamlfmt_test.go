@@ -70,12 +70,12 @@ func Test_fetchYaml(t *testing.T) {
 				Tag:   "!!map",
 				Value: "",
 				Content: []*yaml.Node{
-					&yaml.Node{
+					{
 						Kind:  yaml.ScalarNode,
 						Tag:   "!!str",
 						Value: "key",
 					},
-					&yaml.Node{
+					{
 						Kind:  yaml.ScalarNode,
 						Tag:   "!!str",
 						Value: "value",
@@ -126,12 +126,12 @@ func Test_streamYaml(t *testing.T) {
 					Tag:   "!!map",
 					Value: "",
 					Content: []*yaml.Node{
-						&yaml.Node{
+						{
 							Kind:  yaml.ScalarNode,
 							Tag:   "!!str",
 							Value: "key",
 						},
-						&yaml.Node{
+						{
 							Kind:  yaml.ScalarNode,
 							Tag:   "!!str",
 							Value: "value",
