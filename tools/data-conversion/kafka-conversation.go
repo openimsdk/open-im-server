@@ -15,9 +15,20 @@
 package data_conversion
 
 import (
+	"context"
 	"fmt"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/OpenIMSDK/protocol/sdkws"
+	openKeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/Shopify/sarama"
+	"google.golang.org/protobuf/proto"
+	"strconv"
+	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -73,24 +84,74 @@ func GetMessage() {
 		fmt.Printf("fail to get list of partition:err%v\n", err)
 	}
 	fmt.Println(partitionList)
-	var ch chan int
+	//var ch chan int
 	for partition := range partitionList {
 		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetOldest)
 		if err != nil {
 			panic(err)
 		}
-
+		wg.Add(1)
 		defer pc.AsyncClose()
 
 		go func(sarama.PartitionConsumer) {
-			//defer wg.Done()
+			defer wg.Done()
 			for msg := range pc.Messages() {
+				Transfer([]*sarama.ConsumerMessage{msg})
 				fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
 		}(pc)
-		//wg.Add(1)
-		//wg.Wait()
+
 	}
+	wg.Wait()
 	consumer.Close()
-	_ = <-ch
+	//_ = <-ch
+}
+
+func Transfer(consumerMessages []*sarama.ConsumerMessage) {
+	for i := 0; i < len(consumerMessages); i++ {
+		msgFromMQ := &sdkws.MsgData{}
+		err := proto.Unmarshal(consumerMessages[i].Value, msgFromMQ)
+		if err != nil {
+			log.ZError(context.Background(), "msg_transfer Unmarshal msg err", err, string(consumerMessages[i].Value))
+			continue
+		}
+		var arr []string
+		for i, header := range consumerMessages[i].Headers {
+			arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
+		}
+		log.ZInfo(
+			context.Background(),
+			"consumer.kafka.GetContextWithMQHeader",
+			"len",
+			len(consumerMessages[i].Headers),
+			"header",
+			strings.Join(arr, ", "),
+		)
+		log.ZDebug(
+			context.Background(),
+			"single msg come to distribution center",
+			"message",
+			msgFromMQ,
+			"key",
+			string(consumerMessages[i].Key),
+		)
+	}
+}
+
+const (
+	ZkAddr     = "127.0.0.1:2181"
+	ZKSchema   = "openim"
+	ZKUsername = ""
+	ZKPassword = ""
+)
+
+func GetMsgRpcService() (rpcclient.MessageRpcClient, error) {
+	client, err := openKeeper.NewClient([]string{ZkAddr}, ZKSchema,
+		openKeeper.WithFreq(time.Hour), openKeeper.WithRoundRobin(), openKeeper.WithUserNameAndPassword(ZKPassword,
+			config.Config.Zookeeper.Password), openKeeper.WithTimeout(10), openKeeper.WithLogger(log.NewZkLogger()))
+	msgClient := rpcclient.NewMessageRpcClient(client)
+	if err != nil {
+		return msgClient, errs.Wrap(err)
+	}
+	return msgClient, nil
 }
