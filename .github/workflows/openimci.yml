@@ -162,6 +162,7 @@ jobs:
 
     - name: Build, Start and Check Services
       run: |
+        sudo make init
         sudo make build
         sudo make start
         sudo make check
