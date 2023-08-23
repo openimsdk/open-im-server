@@ -584,13 +584,13 @@ linters-settings:
         severity: warning
   staticcheck:
     # Select the Go version to target. The default is '1.13'.
-    go: "1.16"
+    go: "1.18"
     # https://staticcheck.io/docs/options#checks
     checks: [ "all" ]
 
   stylecheck:
     # Select the Go version to target. The default is '1.13'.
-    go: "1.16"
+    go: "1.18"
 
     # https://staticcheck.io/docs/options#checks
     checks: [ "all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022" ]
