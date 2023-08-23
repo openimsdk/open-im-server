@@ -18,6 +18,7 @@
     - [4. Stopping Services by Process Names](#4-stopping-services-by-process-names)
       - [Function: `openim::util::stop_services_with_name`](#function-openimutilstop_services_with_name)
       - [Example:](#example-3)
+    - [system management and installation of openim via Linux system](#system-management-and-installation-of-openim-via-linux-system)
   - [examples](#examples)
 
 
@@ -25,64 +26,92 @@ This document outlines the directory structure for scripts in the OpenIM Server 
 
 ```bash
 scripts/
-├── LICENSE                        # License related files
-│   ├── LICENSE                    # The license file
-│   └── LICENSE_TEMPLATES          # Template for license file
-├── README.md                      # Readme file for scripts directory
-├── advertise.sh                   # Script for advertisement services
-├── batch_start-all.sh             # Script to start all services in batch
-├── build.cmd                      # Windows build command script
-├── build-all-service.sh           # Script to build all services
-├── build_push_k8s_images.sh       # Script to build and push images for Kubernetes
-├── check-all.sh                   # Script to check status of all services
-├── common.sh                      # Contains common functions used by other scripts
-├── coverage.awk                   # AWK script for coverage report generation
-├── coverage.sh                    # Script for generating coverage reports
-├── docker-check-service.sh        # Docker specific service check script
-├── docker-start-all-all.sh            # Script to start all services in a docker environment
-├── ensure_tag.sh                  # Script to ensure proper tagging of docker images
-├── enterprise                     # Scripts specific to enterprise version
-│   ├── check-all.sh               # Check status of all enterprise services
-│   ├── function.sh                # Functions specific to enterprise version
-│   └── path_info.cfg              # Path information configuration for enterprise version
-├── env_check.sh                   # Script to check the environment
-├── function.sh                    # Contains functions used by other scripts
-├── githooks                       # Git hook scripts
-│   ├── commit-msg                 # Script to validate commit message
-│   ├── pre-commit                 # Script to run before each commit
-│   └── pre-push                   # Script to run before each push
-├── init_pwd.sh                    # Script to initialize password
-├── install_im_compose.sh          # Script to install IM with Docker Compose
-├── install-im-server.sh           # Script to install IM server
-├── lib                            # Library scripts
-│   ├── color.sh                   # Script for console color manipulation
-│   ├── golang.sh                  # Script for golang related utility functions
-│   ├── init.sh                    # Script for initialization tasks
-│   ├── logging.sh                 # Script for logging related utility functions
-│   ├── release.sh                 # Script for release related utility functions
-│   ├── util.sh                    # Script for generic utility functions
-│   └── version.sh                 # Script for versioning related tasks
-├── make-rules                     # Makefile rules
-│   ├── common.mk                  # Common Make rules
-│   ├── copyright.mk               # Copyright related Make rules
-│   ├── dependencies.mk            # Dependencies related Make rules
-│   ├── gen.mk                     # Make rules for code generation
-│   ├── golang.mk                  # Golang specific Make rules
-│   ├── image.mk                   # Make rules for image building
-│   ├── release.mk                 # Make rules for release process
-│   ├── swagger.mk                 # Make rules for swagger documentation
-│   └── tools.mk                   # Make rules for tools and utilities
-├── mongo-init.sh                  # Script to initialize MongoDB
-├── openim-msggateway.sh           # Script to start message gateway service
-├── openim-msgtransfer.sh          # Script to start message transfer service
-├── path_info.sh                   # Script containing path information
-├── openim-push.sh                  # Script to start push service
-├── release.sh                     # Script to perform release process
-├── start-all.sh                   # Script to start all services
-├── openim-crontask.sh                  # Script to start cron jobs
-├── openim-rpc.sh           # Script to start RPC service
-├── stop-all.sh                    # Script to stop all services
-└── style_info.sh                  # Script containing style related information
+├── README.md                           # Documentation for the scripts directory.
+├── advertise.sh                        # Script to advertise or broadcast services.
+├── batch_start_all.sh                  # Batch script to start all services.
+├── build-all-service.sh                # Script to build all services.
+├── build.cmd                           # Command script for building (usually for Windows).
+├── check-all.sh                        # Check script for all components or services.
+├── cherry-pick.sh                      # Helper script for git cherry-pick operations.
+├── common.sh                           # Common utilities and shared functions.
+├── coverage.awk                        # AWK script for processing code coverage data.
+├── coverage.sh                         # Script to gather and report code coverage.
+├── demo.sh                             # Demonstration or example script.
+├── docker-check-service.sh             # Docker script to check services' status.
+├── docker-start-all.sh                 # Docker script to start all containers/services.
+├── ensure_tag.sh                       # Ensure correct tags or labeling.
+├── env_check.sh                        # Environment verification and checking.
+├── gen-swagger-docs.sh                 # Script to generate Swagger documentation.
+├── genconfig.sh                        # Generate configuration files.
+├── gendoc.sh                           # General documentation generation script.
+├── githooks                            # Directory containing git hooks.
+│   ├── commit-msg                      # Git hook for commit messages.
+│   ├── pre-commit                      # Pre-commit git hook.
+│   └── pre-push                        # Pre-push git hook.
+├── golangci.yml                        # Configuration for GolangCI linting.
+├── init-config.sh                      # Initialize configurations.
+├── init-env.sh                         # Initialize the environment.
+├── init_pwd.sh                         # Initialize or set password.
+├── install                             # Installation scripts directory.
+│   ├── README.md                       # Installation documentation.
+│   ├── common.sh                       # Common utilities for installation.
+│   ├── dependency.sh                   # Script to install dependencies.
+│   ├── environment.sh                  # Set up the environment during installation.
+│   ├── install-protobuf.sh             # Install Protocol Buffers.
+│   ├── install.sh                      # Main installation script.
+│   ├── openim-api.sh                   # Install OpenIM API.
+│   ├── openim-crontask.sh              # Install OpenIM crontask.
+│   ├── openim-man.sh                   # Install OpenIM management tool.
+│   ├── openim-msggateway.sh            # Install OpenIM message gateway.
+│   ├── openim-msgtransfer.sh           # Install OpenIM message transfer.
+│   ├── openim-push.sh                  # Install OpenIM push service.
+│   ├── openim-rpc.sh                   # Install OpenIM RPC.
+│   ├── openim-tools.sh                 # Install OpenIM tools.
+│   ├── test.sh                         # Installation testing script.
+│   └── vimrc                           # Vim configuration file.
+├── install-im-server.sh                # Script to install the OpenIM server.
+├── install_im_compose.sh               # Install OpenIM using Docker Compose.
+├── lib                                 # Library or utility scripts directory.
+│   ├── chat.sh                         # Utilities related to chat.
+│   ├── color.sh                        # Color-related utilities.
+│   ├── golang.sh                       # Golang utilities.
+│   ├── init.sh                         # Initialization utilities.
+│   ├── logging.sh                      # Logging utilities.
+│   ├── release.sh                      # Release related utilities.
+│   ├── util.sh                         # General utility functions.
+│   └── version.sh                      # Version management utilities.
+├── list-feature-tests.sh               # Script to list feature tests.
+├── make-rules                          # Makefile rule templates.
+│   ├── common.mk                       # Common make rules.
+│   ├── copyright.mk                    # Copyright related make rules.
+│   ├── dependencies.mk                 # Dependency management rules.
+│   ├── gen.mk                          # Generic or general rules.
+│   ├── golang.mk                       # Golang-specific make rules.
+│   ├── image.mk                        # Image or container-related rules.
+│   ├── release.mk                      # Release specific rules.
+│   ├── swagger.mk                      # Swagger documentation rules.
+│   └── tools.mk                        # Tooling-related make rules.
+├── mongo-init.sh                       # MongoDB initialization script.
+├── release.sh                          # Script for releasing or deployment.
+├── run-in-gopath.sh                    # Script to run commands within GOPATH.
+├── start-all.sh                        # Script to start all services.
+├── start.bat                           # Batch file to start services (usually for Windows).
+├── stop-all.sh                         # Script to stop all services.
+├── template                            # Directory containing template files.
+│   ├── LICENSE                         # License template.
+│   ├── LICENSE_TEMPLATES               # Collection of license templates.
+│   ├── boilerplate.txt                 # Boilerplate template.
+│   ├── footer.md.tmpl                  # Footer template for markdown.
+│   ├── head.md.tmpl                    # Header template for markdown.
+│   └── project_README.md               # Project README template.
+├── update-generated-docs.sh            # Update generated documentation.
+├── update-yamlfmt.sh                   # Update YAML formatting.
+├── verify-pkg-names.sh                 # Verify package names.
+├── verify-shellcheck.sh                # Shell script linting verification.
+├── verify-spelling.sh                  # Spelling verification script.
+├── verify-typecheck.sh                 # Type checking verification.
+├── verify-yamlfmt.sh                   # Verify YAML format.
+└── wait-for-it.sh                      # Script to wait for a condition or service to be ready.
 ```
 
 The purpose of having a structured scripts directory like this is to make the operations of OpenIM Server clear and easy to manage. Each script has its own responsibility, making it easier to maintain and update. It's also helpful for newcomers who can easily understand what each part of the system is doing by just looking at this directory structure.
@@ -120,7 +149,7 @@ Is the `demo.sh` script teaching you how to quickly get started with OpenIM deve
 Steps to run demo:
 
 ```sh
-make demo
+$ make demo
 ```
 
 More about `make` read:
@@ -168,7 +197,7 @@ This function checks the status of services running on specified ports.
 **Usage**:
 
 ```bash
-openim::util::check_ports <port1> <port2> ...
+$ openim::util::check_ports <port1> <port2> ...
 ```
 
 **Design**:
@@ -182,7 +211,7 @@ openim::util::check_ports <port1> <port2> ...
 #### Example:
 
 ```bash
-openim::util::check_ports 8080 8081 8082
+$ openim::util::check_ports 8080 8081 8082
 ```
 
 ### 2. Checking the Status of Services by Process Names
@@ -194,7 +223,7 @@ This function checks the status of services based on their process names.
 **Usage**:
 
 ```bash
-openim::util::check_process_names <process_name1> <process_name2> ...
+$ openim::util::check_process_names <process_name1> <process_name2> ...
 ```
 
 **Design**:
@@ -207,7 +236,7 @@ openim::util::check_process_names <process_name1> <process_name2> ...
 #### Example:
 
 ```bash
-openim::util::check_process_names nginx mysql redis
+$ openim::util::check_process_names nginx mysql redis
 ```
 
 ### 3. Stopping Services by Ports
@@ -219,7 +248,7 @@ This function attempts to stop services running on the specified ports.
 **Usage**:
 
 ```bash
-openim::util::stop_services_on_ports <port1> <port2> ...
+$ openim::util::stop_services_on_ports <port1> <port2> ...
 ```
 
 **Design**:
@@ -232,7 +261,7 @@ openim::util::stop_services_on_ports <port1> <port2> ...
 #### Example:
 
 ```bash
-openim::util::stop_services_on_ports 8080 8081 8082
+$ openim::util::stop_services_on_ports 8080 8081 8082
 ```
 
 ### 4. Stopping Services by Process Names
@@ -244,7 +273,7 @@ This function attempts to stop services based on their process names.
 **Usage**:
 
 ```bash
-openim::util::stop_services_with_name <process_name1> <process_name2> ...
+$ openim::util::stop_services_with_name <process_name1> <process_name2> ...
 ```
 
 **Design**:
@@ -257,9 +286,14 @@ openim::util::stop_services_with_name <process_name1> <process_name2> ...
 #### Example:
 
 ```bash
-openim::util::stop_services_with_name nginx apache
+$ openim::util::stop_services_with_name nginx apache
 ```
 
+### system management and installation of openim via Linux system
+
+```bash
+$ ./scripts/install/install.sh
+```
 
 ## examples
 Scripts to perform various build, install, analysis, etc operations.
