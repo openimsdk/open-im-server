@@ -227,11 +227,11 @@ Stop services
 
 OpenIM is an open source instant messaging component, it is not an independent product. This image shows the relationship between AppServer, AppClient, Open-IM-Server and Open-IM-SDK.
 
-![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
 
 ## Overall Architecture
 
-![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
+![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
 
 ## To start developing OpenIM
 The [community repository](https://github.com/OpenIMSDK/community) hosts all information about building Kubernetes from source, how to contribute code and documentation, who to contact about what, etc.
