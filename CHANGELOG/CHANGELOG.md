@@ -3,6 +3,8 @@
 - [Changelog](#changelog)
   - [OpenIM versioning policy](#openim-versioning-policy)
   - [command](#command)
+    - [install](#install)
+  - [User](#user)
   - [create next tag](#create-next-tag)
   - [Release version logs](#release-version-logs)
   - [Introduction](#introduction)
@@ -22,9 +24,67 @@ All notable changes to this project will be documented in this file.
 
 ## command
 
+To use git-chglog you need to configure:
+
+1. CHANGELOG templates
+2. git-chglog configuration
+
+### install 
+
+```bash
+$ go get github.com/git-chglog/git-chglog/cmd/git-chglog
+```
+
+
+## User
+
+```bash
+$ git-chglog --init
+```
+
+**Options**
+
+- What is the URL of your repository?: https://github.com/OpenIMSDK/Open-IM-Server
+- What is your favorite style?: github
+- Choose the format of your favorite commit message: <type>(<scope>): <subject> -- feat(core): Add new feature
+- What is your favorite template style?: standard
+- Do you include Merge Commit in CHANGELOG?: n
+- Do you include Revert Commit in CHANGELOG?: y
+- In which directory do you output configuration files and templates?: .chglog
+
 ```bash
 git-chglog --tag-filter-pattern 'v2.0.*'  -o CHANGELOG-2.0.md
 ```
+
+**Other uses:**
+
+```bash
+$ git-chglog
+
+  If <tag query> is not specified, it corresponds to all tags.
+  This is the simplest example.
+
+$ git-chglog 1.0.0..2.0.0
+
+  The above is a command to generate CHANGELOG including commit of 1.0.0 to 2.0.0.
+
+$ git-chglog 1.0.0
+
+  The above is a command to generate CHANGELOG including commit of only 1.0.0.
+
+$ git-chglog $(git describe --tags $(git rev-list --tags --max-count=1))
+
+  The above is a command to generate CHANGELOG with the commit included in the latest tag.
+
+$ git-chglog --output CHANGELOG.md
+
+  The above is a command to output to CHANGELOG.md instead of standard output.
+
+$ git-chglog --config custom/dir/config.yml
+
+  The above is a command that uses a configuration file placed other than ".chglog/config.yml".
+```
+
 
 ## create next tag
 
@@ -51,6 +111,7 @@ git tag 2.0.0
 + [OpenIM CHANGELOG-V2.3](CHANGELOG-2.3.md)
 + [OpenIM CHANGELOG-V2.9](CHANGELOG-2.9.md)
 + [OpenIM CHANGELOG-V3.0](CHANGELOG-3.0.md)
++ [OpenIM CHANGELOG-V3.1](CHANGELOG-3.1.md)
 
 ## Introduction
 

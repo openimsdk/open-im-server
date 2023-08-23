@@ -30,6 +30,12 @@ bin/
 output/
 _output/
 
+### OpenIM Config ###
+config/config.yaml
+./config/config.yaml
+.env
+./.env
+
 ### OpenIM deploy ###
 deploy/openim_demo
 deploy/openim-api
@@ -153,10 +159,11 @@ flycheck_*.el
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 # go.work
+go.work.sum
 
 ### JetBrains ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider

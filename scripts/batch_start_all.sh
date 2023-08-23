@@ -16,26 +16,21 @@
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
-#Include shell font styles and some basic information
-SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+set -o errexit
+set -o nounset
+set -o pipefail
+
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-#Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.sh
-source $SCRIPTS_ROOT/path_info.sh
-source $SCRIPTS_ROOT/function.sh
-
-cd $SCRIPTS_ROOT
-
-echo -e "${YELLOW_PREFIX}=======>SCRIPTS_ROOT=$SCRIPTS_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>OPENIM_ROOT=$OPENIM_ROOT${COLOR_SUFFIX}"
-echo -e "${YELLOW_PREFIX}=======>pwd=$PWD${COLOR_SUFFIX}"
+trap 'openim::util::onCtrlC' INT
 
 need_to_start_server_shell=(
-  "start_rpc_service.sh"
-  "msg_gateway_start.sh"
-  "push_start.sh"
-  "msg_transfer_start.sh"
+  "oepnim-api.sh"
+  "openim-rpc.sh"
+  "openim-msggateway.sh"
+  "openim-push.sh"
+  "openim-msgtransfer.sh"
 )
 
 time=$(date +"%Y-%m-%d %H:%M:%S")

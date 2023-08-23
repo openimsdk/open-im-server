@@ -17,7 +17,7 @@
 #
 
 GO := go
-GO_SUPPORTED_VERSIONS ?= 1.18|1.19|1.20
+GO_SUPPORTED_VERSIONS ?= 1.18|1.19|1.20|1.21
 
 GO_LDFLAGS += -X $(VERSION_PACKAGE).gitVersion=$(GIT_TAG) \
 	-X $(VERSION_PACKAGE).gitCommit=$(GIT_COMMIT) \
@@ -45,7 +45,7 @@ ifeq ($(origin GOBIN), undefined)
 endif
 
 # COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ and ${ROOT_DIR}/tools/ except those ending in.md
-COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/*))
+COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/* ${ROOT_DIR}/cmd/openim-rpc/*))
 ifeq (${COMMANDS},)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
@@ -101,6 +101,24 @@ EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open
 go.build: go.build.verify $(addprefix go.build., $(addprefix $(PLATFORM)., $(BINS)))
 	@echo "===========> Building binary $(BINS) $(VERSION) for $(PLATFORM)"
 
+## go.start: Start openim
+.PHONY: go.start
+go.start:
+	@echo "===========> Starting openim"
+	@$(ROOT_DIR)/scripts/start-all.sh
+
+## go.stop: Stop openim
+.PHONY: go.stop
+go.stop:
+	@echo "===========> Stopping openim"
+	@$(ROOT_DIR)/scripts/stop-all.sh
+
+## go.check: Check openim
+.PHONY: go.check
+go.check:
+	@echo "===========> Checking openim"
+	@$(ROOT_DIR)/scripts/check-all.sh
+
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify
 go.build.verify:
@@ -116,23 +134,21 @@ go.build.%:
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
 	@echo "=====> COMMAND=$(COMMAND)"
 	@echo "=====> PLATFORM=$(PLATFORM)"
-	@echo "=====> BIN_DIR=$(BIN_DIR)"
 	@echo "===========> Building binary $(COMMAND) $(VERSION) for $(OS)_$(ARCH)"
 	@mkdir -p $(BIN_DIR)/platforms/$(OS)/$(ARCH)
 	@if [ "$(COMMAND)" == "openim-sdk-core" ]; then \
 		echo "===========> DEBUG: OpenIM-SDK-Core It is no longer supported for openim-server $(COMMAND)"; \
-	elif [ "$(COMMAND)" == "openim-rpc" ]; then \
-		for d in $(wildcard $(ROOT_DIR)/cmd/openim-rpc/*); do \
-			cd $${d} && CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$$(basename $${d})$(GO_OUT_EXT) $${d}/main.go; \
-		done; \
+	elif [ -d $(ROOT_DIR)/cmd/openim-rpc/$(COMMAND) ]; then \
+		CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+		$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/openim-rpc/$(COMMAND)/main.go; \
 	else \
 		if [ -f $(ROOT_DIR)/cmd/$(COMMAND)/main.go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
 			$(BIN_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/cmd/$(COMMAND)/main.go; \
-		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/main.go ]; then \
+		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
-			$(BIN_TOOLS_DIR)/platforms/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/main.go; \
+			$(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go; \
+			chmod +x $(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT); \
 		fi \
 	fi
 
@@ -140,13 +156,7 @@ go.build.%:
 .PHONY: go.install
 go.install:
 	@echo "===========> Installing deployment openim"
-	@$(ROOT_DIR)/scripts/install_im_server.sh
-
-## go.check: Check OpenIM deployment
-.PHONY: go.check
-go.check:
-	@echo "===========> Checking OpenIM deployment"
-	@$(ROOT_DIR)/scripts/check_all.sh
+	@$(ROOT_DIR)/scripts/install-im-server.sh
 
 ## go.multiarch: Build multi-arch binaries
 .PHONY: go.build.multiarch
@@ -156,12 +166,18 @@ go.build.multiarch: go.build.verify $(foreach p,$(PLATFORMS),$(addprefix go.buil
 .PHONY: go.lint
 go.lint: tools.verify.golangci-lint
 	@echo "===========> Run golangci to lint source codes"
-	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/.golangci.yml $(ROOT_DIR)/... 
+	@$(TOOLS_DIR)/golangci-lint run --color always -c $(ROOT_DIR)/scripts/golangci.yml $(ROOT_DIR)/... 
 
 ## go.test: Run unit test
 .PHONY: go.test
 go.test:
 	@$(GO) test ./...
+
+## go.demo: Run demo
+.PHONY: go.demo
+go.demo:
+	@echo "===========> Run demo"
+	@$(ROOT_DIR)/scripts/demo.sh
 
 ## go.test.junit-report: Run unit test
 .PHONY: go.test.junit-report
@@ -189,10 +205,22 @@ go.format: tools.verify.golines tools.verify.goimports
 	@$(FIND) -type f -name '*.go' -not -name '*pb*' | $(XARGS) $(TOOLS_DIR)/golines -w --max-len=200 --reformat-tags --shorten-comments --ignore-generated .
 	@$(GO) mod edit -fmt
 
-## imports: task to automatically handle import packages in Go files using goimports tool
+## go.imports: task to automatically handle import packages in Go files using goimports tool
 .PHONY: go.imports
 go.imports: tools.verify.goimports
 	@$(TOOLS_DIR)/goimports -l -w $(SRC)
+
+## go.verify: execute all verity scripts.
+.PHONY: go.verify
+go.verify:
+	@echo "Starting verification..."
+	@scripts_list=$$(find $(ROOT_DIR)/scripts -type f -name 'verify-*' | sort); \
+	for script in $$scripts_list; do \
+		echo "Executing $$script..."; \
+		$$script || exit 1; \
+		echo "$$script completed successfully"; \
+	done
+	@echo "All verification scripts executed successfully."
 
 ## go.updates: Check for updates to go.mod dependencies
 .PHONY: go.updates
@@ -202,11 +230,11 @@ go.updates: tools.verify.go-mod-outdated
 ## go.clean: Clean all builds directories and files
 .PHONY: go.clean
 go.clean:
-	@echo "===========> Cleaning all builds TMP_DIR($(TMP_DIR)) AND BIN_DIR($(BIN_DIR)) AND BIN_TOOLS_DIR($(BIN_TOOLS_DIR))"
-	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR)
+	@echo "===========> Cleaning all builds tmp, bin, logs directories and files"
+	@-rm -vrf $(TMP_DIR) $(BIN_DIR) $(BIN_TOOLS_DIR) $(LOGS_DIR)
 	@echo "===========> End clean..."
 
-## copyright.help: Show copyright help
+## go.help: Show go tools help
 .PHONY: go.help
 go.help: scripts/make-rules/golang.mk
 	$(call smallhelp)

@@ -13,24 +13,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# shellcheck disable=SC2034 # Variables sourced in other scripts.
+# The golang package that we are building.
+OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+readonly OPENIM_GO_PACKAGE=github.com/openimsdk/open-im-server
 
 # The server platform we are building on.
 readonly OPENIM_SUPPORTED_SERVER_PLATFORMS=(
   linux/amd64
   linux/arm64
+  linux/s390x
+  linux_mips64
+  linux_mips64le
+  darwin_amd64
+  windows_amd64
+  linux_amd64
+  linux_arm64
+  linux_ppc64le
 )
 
 # If we update this we should also update the set of platforms whose standard
-# library is precompiled for in build/build-image/cross/Dockerfile
 readonly OPENIM_SUPPORTED_CLIENT_PLATFORMS=(
   linux/amd64
   linux/arm64
+  linux/s390x
+  linux/ppc64le
+  windows/amd64
+)
+
+# openim chat
+readonly OPENIM_CHAT_SUPPORTED_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux/ppc64le
+  windows/amd64
+)
+
+# Which platforms we should compile test targets for.
+# Not all client platforms need these tests
+readonly KUBE_SUPPORTED_TEST_PLATFORMS=(
+  linux/amd64
+  linux/arm64
+  linux/s390x
+  linux/ppc64le
+  darwin/amd64
+  darwin/arm64
+  windows/amd64
+  windows/arm64
 )
 
 # The set of server targets that we are only building for Linux
 # If you update this list, please also update build/BUILD.
+# TODO: Label
 openim::golang::server_targets() {
   local targets=(
     openim-api
@@ -54,14 +88,84 @@ IFS=" " read -ra OPENIM_SERVER_TARGETS <<< "$(openim::golang::server_targets)"
 readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 
+# TODO: Label
+START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
+openim::golang::start_script_list() {
+  local targets=(
+      openim-api.sh
+      openim-rpc.sh
+      openim-push.sh
+      openim-msgtransfer.sh
+      openim-msggateway.sh
+      openim-crontask.sh
+      openim-tools.sh
+  )
+  local result=()
+  for target in "${targets[@]}"; do
+      result+=("${START_SCRIPTS_PATH}${target}")
+  done
+
+  echo "${result[@]}"
+}
+
+# Populate the OPENIM_SERVER_SCRIPT_START_LIST with the full path names of the scripts.
+IFS=" " read -ra OPENIM_SERVER_SCRIPT_START_LIST <<< "$(openim::golang::start_script_list)"
+readonly OPENIM_SERVER_SCRIPT_START_LIST
+
+# Extract just the script names from the full paths.
+readonly OPENIM_SERVER_SCRIPTARIES=("${OPENIM_SERVER_SCRIPT_START_LIST[@]##*/}")
+
+openim::golang::check_openim_binaries() {
+    local missing_binaries=()
+    for binary in "${OPENIM_SERVER_BINARIES[@]}"; do
+        if [[ ! -x "${OPENIM_OUTPUT_HOSTBIN}/${binary}" ]]; then
+            missing_binaries+=("${binary}")
+        fi
+    done
+
+    if [[ ${#missing_binaries[@]} -ne 0 ]]; then
+        echo "The following binaries were not found in ${OPENIM_OUTPUT_HOSTBIN}:"
+        for missing in "${missing_binaries[@]}"; do
+            echo "  - ${missing}"
+        done
+        return 1
+    else
+        echo "All binaries have been installed in ${OPENIM_OUTPUT_HOSTBIN}。"
+        return 0
+    fi
+}
+
+openim::golang::tools_targets() {
+  local targets=(
+    yamlfmt
+    changelog
+    infra
+    ncpu
+  )
+  echo "${targets[@]}"
+}
+
+IFS=" " read -ra OPENIM_TOOLS_TARGETS <<< "$(openim::golang::tools_targets)"
+readonly OPENIM_TOOLS_TARGETS
+readonly OPENIM_TOOLS_BINARIES=("${OPENIM_TOOLS_TARGETS[@]##*/}")
+
 # The set of server targets we build docker images for
 openim::golang::server_image_targets() {
   # NOTE: this contains cmd targets for openim::build::get_docker_wrapped_binaries
   local targets=(
-    cmd/openim-apiserver
-    cmd/openim-authz-server
-    cmd/openim-pump
-    cmd/openim-watcher
+    cmd/openim-api
+    cmd/openim-cmdutils
+    cmd/openim-crontask
+    cmd/openim-msggateway
+    cmd/openim-msgtransfer
+    cmd/openim-push
+    cmd/openim-rpc-auth
+    cmd/openim-rpc-conversation
+    cmd/openim-rpc-friend
+    cmd/openim-rpc-group
+    cmd/openim-rpc-msg
+    cmd/openim-rpc-third
+    cmd/openim-rpc-user
   )
   echo "${targets[@]}"
 }
@@ -69,6 +173,8 @@ openim::golang::server_image_targets() {
 IFS=" " read -ra OPENIM_SERVER_IMAGE_TARGETS <<< "$(openim::golang::server_image_targets)"
 readonly OPENIM_SERVER_IMAGE_TARGETS
 readonly OPENIM_SERVER_IMAGE_BINARIES=("${OPENIM_SERVER_IMAGE_TARGETS[@]##*/}")
+
+# shellcheck disable=SC2034 # Variables sourced in other scripts.
 
 # ------------
 # NOTE: All functions that return lists should use newlines.
@@ -87,11 +193,20 @@ openim::golang::dups() {
   printf "%s\n" "$@" | sort | uniq -d
 }
 
+# echo "aa: $OPENIM_SERVER_IMAGE_TARGETS"
+# echo "aa: $OPENIM_SERVER_IMAGE_BINARIES"
+
+openim::golang::dups $OPENIM_SERVER_IMAGE_TARGETS
+openim::golang::dups $OPENIM_SERVER_IMAGE_BINARIES
+
 # Returns a sorted newline-separated list with duplicated items removed.
 openim::golang::dedup() {
   # We use printf to insert newlines, which are required by sort.
   printf "%s\n" "$@" | sort -u
 }
+
+# openim::golang::dedup $OPENIM_SERVER_IMAGE_TARGETS
+# openim::golang::dedup $OPENIM_SERVER_IMAGE_BINARIES
 
 # Depends on values of user-facing OPENIM_BUILD_PLATFORMS, OPENIM_FASTBUILD,
 # and OPENIM_BUILDER_OS.
@@ -175,7 +290,7 @@ EOF
   local go_version
   IFS=" " read -ra go_version <<< "$(go version)"
   local minimum_go_version
-  minimum_go_version=go1.13.4
+  minimum_go_version=go1.18
   if [[ "${minimum_go_version}" != $(echo -e "${minimum_go_version}\n${go_version[2]}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "${go_version[2]}" != "devel" ]]; then
     openim::log::usage_from_stdin <<EOF
 Detected go version: ${go_version[*]}.

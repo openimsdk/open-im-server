@@ -12,26 +12,6 @@ As openim is using go1.18's [workspace feature](https://go.dev/doc/tutorial/work
 You can execute the following commands to do things above:
 
 ```bash
-# 4dd91a700d3f:/openim# tree
-# .
-# ├── LICENSE
-# ├── README.md
-# ├── openim-chat
-# │   ├── bin
-# │   ├── config
-# │   ├── logs
-# │   └── scripts
-# ├── openim-server
-# │   ├── bin
-# │   ├── config
-# │   ├── logs
-# │   └── scripts
-# ├── openkf
-# │   ├── bin
-# │   ├── config
-# │   ├── logs
-# │   └── scripts
-# cd tools_code_dir
 # edit the CRD_NAME and CRD_GROUP to your own
 export OPENIM_TOOLS_NAME=<Changeme>
 

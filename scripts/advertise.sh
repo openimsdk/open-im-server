@@ -13,61 +13,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 set -e
 set -o pipefail
 
-trap 'echo "Script interrupted."; exit 1' INT
+. $(dirname ${BASH_SOURCE})/lib/init.sh
 
-# Function for colored echo
-function color_echo() {
-    COLOR=$1
-    shift
-    echo -e "${COLOR}===> $* ${COLOR_SUFFIX}"
-}
+trap 'openim::util::onCtrlC' INT
 
-# Color definitions
-function openim_color() {
-    COLOR_SUFFIX="\033[0m"      # End all colors and special effects
-
-    BLACK_PREFIX="\033[30m"     # Black prefix
-    RED_PREFIX="\033[31m"       # Red prefix
-    GREEN_PREFIX="\033[32m"     # Green prefix
-    YELLOW_PREFIX="\033[33m"    # Yellow prefix
-    BLUE_PREFIX="\033[34m"      # Blue prefix
-    SKY_BLUE_PREFIX="\033[36m"  # Sky blue prefix
-    WHITE_PREFIX="\033[37m"     # White prefix
-    BOLD_PREFIX="\033[1m"       # Bold prefix
-    UNDERLINE_PREFIX="\033[4m"  # Underline prefix
-    ITALIC_PREFIX="\033[3m"     # Italic prefix
-
-    CYAN_PREFIX="\033[0;36m"     # Cyan prefix
-}
-
-function print_with_delay() {
+print_with_delay() {
   text="$1"
   delay="$2"
-  color="$3"
 
   for i in $(seq 0 $((${#text}-1))); do
-    printf "${color}${text:$i:1}${COLOR_SUFFIX}"
+    printf "${text:$i:1}"
     sleep $delay
   done
   printf "\n"
 }
 
-function print_progress() {
+print_progress() {
   total="$1"
   delay="$2"
-  color="$3"
 
-  printf "${color}["
+  printf "["
   for i in $(seq 1 $total); do
     printf "#"
     sleep $delay
   done
-  printf "]${COLOR_SUFFIX}\n"
+  printf "]\n"
 }
+
 function openim_logo() {
     # Set text color to cyan for header and URL
     echo -e "\033[0;36m"
@@ -114,7 +89,8 @@ O:::::::OOO:::::::O p:::::ppppp:::::::pe::::::::e            n::::n    n::::nII:
     print_with_delay "Open-IM-Server: Reinventing Instant Messaging" 0.01
     print_progress 50 0.02
 
-    print_with_delay "Open-IM-Server is not just a product; it's a revolution. It's about bringing the power of seamless, real-time messaging to your fingertips. And it's about joining a global community of developers, dedicated to pushing the boundaries of what's possible." 0.01
+    print_with_delay "Open-IM-Server is not just a product; it's a revolution. It's about bringing the power of seamless," 0.01
+    print_with_delay "real-time messaging to your fingertips. And it's about joining a global community of developers, dedicated to pushing the boundaries of what's possible." 0.01
 
     print_progress 50 0.02
 

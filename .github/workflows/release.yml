@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: OpenIM Server Release
+name: OpenIM Server Release Workflow
 
 on:
   push:
@@ -43,9 +43,12 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro':
           distribution: goreleaser
           version: latest
-          args: release --clean
+          workdir: .
+          args: release -f ./build/goreleaser.yaml --rm-dist --clean --release-footer-tmpl=scripts/template/footer.md.tmpl --release-header-tmpl=scripts/template/head.md.tmpl
         env:
+          USERNAME: ${{ github.repository_owner }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
           # Your GoReleaser Pro key, if you are using the 'goreleaser-pro'
           # distribution:
           # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
