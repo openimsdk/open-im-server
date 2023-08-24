@@ -214,5 +214,5 @@ func (s *Server) MultiTerminalLoginCheck(
 		}
 		s.LongConnServer.SetKickHandlerInfo(i)
 	}
-	return nil, nil
+	return &msggateway.MultiTerminalLoginCheckResp{}, nil
 }
