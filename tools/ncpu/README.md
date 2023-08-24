@@ -16,6 +16,15 @@ $ ncpu
 
 This will return an integer representing the number of available CPU cores.
 
+## install ncpu
+
+**User go module:**
+
+```bash
+$ go install github.com/OpenIMSDK/Open-IM-Server/tools/ncpu@latest
+$ ncpu
+```
+
 ### Example:
 
 Let's say you're compiling a project using `make`. To utilize all the CPU cores for the compilation process, you can use:
