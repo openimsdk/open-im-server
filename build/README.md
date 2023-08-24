@@ -28,6 +28,19 @@ Trigger condition:
 3. wait for the build to finish
 4. download the artifacts from the release page
 
+## Make images
+
+**help info:**
+
+```bash
+$ make image.help
+```
+
+**build images:**
+
+```bash
+$ make image
+```
 
 ## Overview
 
