@@ -33,8 +33,8 @@ import (
 
 var (
 	topic = "ws2ms_chat"
-	addr  = "127.0.0.1:9092"
-	//addr = "43.128.72.19:9092"
+	//addr  = "127.0.0.1:9092"
+	addr = "43.128.72.19:9092"
 )
 
 const (
@@ -95,7 +95,7 @@ func GetMessage() {
 	for partition := range partitionList {
 		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetOldest)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 		wg.Add(1)
 		defer pc.AsyncClose()
@@ -111,7 +111,7 @@ func GetMessage() {
 				if err != nil {
 					fmt.Printf("err:%s \n", err)
 				}
-				fmt.Printf("msg:%s \n", &msgFromMQV2)
+				fmt.Printf("msg:%s \n", msgFromMQV2)
 
 				//V3
 				//msgFromMQ := &sdkws.MsgData{}
@@ -120,7 +120,7 @@ func GetMessage() {
 				//	fmt.Printf("err:%s \n", err)
 				//}
 				//fmt.Printf("msg:%s \n", &msgFromMQ)
-				//fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
+				fmt.Printf("Partition:%d, Offset:%d, Key:%s, Value:%s\n", msg.Partition, msg.Offset, string(msg.Key), string(msg.Value))
 			}
 
 		}(pc)
