@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 
+	cliflag "github.com/marmotedu/component-base/pkg/cli/flag"
 	"github.com/marmotedu/iam/pkg/cli/genericclioptions"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +37,7 @@ func NewDefaultIMCtlCommand() *cobra.Command {
 }
 
 // NewIAMCtlCommand returns new initialized instance of 'imctl' root command.
-func NewIAMCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
+func NewIMCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	// Parent command to which all subcommands are added.
 	cmds := &cobra.Command{
 		Use:   "imctl",
