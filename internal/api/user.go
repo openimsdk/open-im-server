@@ -185,13 +185,8 @@ func (u *UserApi) GetUsersOnlineTokenDetail(c *gin.Context) {
 	apiresp.GinSuccess(c, respResult)
 }
 
-// SubscriberStatus Presence status of subscribed users.
-func (u *UserApi) SubscriberStatus(c *gin.Context) {
-	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
-}
-
-// UnSubscriberStatus Unsubscribe a user's presence.
-func (u *UserApi) UnSubscriberStatus(c *gin.Context) {
+// SubscribeOrCancelUsersStatus Presence status of subscribed users and Unsubscribe a user's presence.
+func (u *UserApi) SubscribeOrCancelUsersStatus(c *gin.Context) {
 	a2r.Call(user.UserClient.SubscribeOrCancelUsersStatus, u.Client, c)
 }
 
