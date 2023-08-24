@@ -134,7 +134,7 @@ func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID
 		return err
 	}
 	for _, v := range conns {
-		log.ZDebug(ctx, "forceKickOff", "conn", v.(*grpc.ClientConn).Target())
+		log.ZDebug(ctx, "forceKickOff", "conn", v.Target())
 	}
 	for _, v := range conns {
 		client := msggateway.NewMsgGatewayClient(v)
