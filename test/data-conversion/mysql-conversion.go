@@ -17,11 +17,13 @@ package data_conversion
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"time"
+
 	"github.com/OpenIMSDK/tools/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 var (
