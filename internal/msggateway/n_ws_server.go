@@ -334,7 +334,8 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 					m[k] = constant.KickedToken
 				}
 			}
-			log.ZDebug(newClient.ctx, "set token map is ", "token map", m, "userID", newClient.UserID)
+			log.ZDebug(newClient.ctx, "set token map is ", "token map", m, "userID",
+				newClient.UserID, "token", newClient.ctx.GetToken())
 			err = ws.cache.SetTokenMapByUidPid(newClient.ctx, newClient.UserID, newClient.PlatformID, m)
 			if err != nil {
 				log.ZWarn(newClient.ctx, "SetTokenMapByUidPid err", err, "userID", newClient.UserID, "platformID", newClient.PlatformID)
