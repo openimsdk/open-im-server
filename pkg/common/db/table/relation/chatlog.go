@@ -17,7 +17,7 @@ package relation
 import (
 	"time"
 
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 )
 
 const (
@@ -47,5 +47,5 @@ func (ChatLogModel) TableName() string {
 }
 
 type ChatLogModelInterface interface {
-	Create(msg *pbMsg.MsgDataToMQ) error
+	Create(msg *pbmsg.MsgDataToMQ) error
 }

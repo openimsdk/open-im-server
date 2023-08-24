@@ -2,7 +2,10 @@ go 1.20
 
 use (
 	.
-	./tools/component
+	./test/typecheck
+	./tools/changelog
+	./tools/imctl
 	./tools/infra
 	./tools/ncpu
+	./tools/yamlfmt
 )

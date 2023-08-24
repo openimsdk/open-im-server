@@ -1,0 +1,15 @@
+## Run the Tests
+
+To run a single test or set of tests, you'll need the [Ginkgo](https://github.com/onsi/ginkgo) tool installed on your
+machine:
+
+```console
+go install github.com/onsi/ginkgo/ginkgo@latest
+```
+
+```shell
+ginkgo --help
+  --focus value
+    	If set, ginkgo will only run specs that match this regular expression. Can be specified multiple times, values are ORed.
+
+```

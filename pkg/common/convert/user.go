@@ -19,10 +19,10 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
-func UsersDB2Pb(users []*relationTb.UserModel) (result []*sdkws.UserInfo) {
+func UsersDB2Pb(users []*relationtb.UserModel) (result []*sdkws.UserInfo) {
 	for _, user := range users {
 		var userPb sdkws.UserInfo
 		userPb.UserID = user.UserID
@@ -37,8 +37,8 @@ func UsersDB2Pb(users []*relationTb.UserModel) (result []*sdkws.UserInfo) {
 	return result
 }
 
-func UserPb2DB(user *sdkws.UserInfo) *relationTb.UserModel {
-	var userDB relationTb.UserModel
+func UserPb2DB(user *sdkws.UserInfo) *relationtb.UserModel {
+	var userDB relationtb.UserModel
 	userDB.UserID = user.UserID
 	userDB.Nickname = user.Nickname
 	userDB.FaceURL = user.FaceURL

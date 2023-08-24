@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -54,7 +54,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(
 ) {
 	msg := cMsg.Value
 	var tag bool
-	msgFromMQ := pbMsg.MsgDataToMQ{}
+	msgFromMQ := pbmsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
 		log.ZError(ctx, "msg_transfer Unmarshal msg err", err)

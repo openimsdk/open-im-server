@@ -39,9 +39,6 @@ import (
 _ "github.com/jinzhu/gorm/dialects/mysql"
 
 // inner package
-v1 "github.com/marmotedu/api/apiserver/v1"
-metav1 "github.com/marmotedu/apimachinery/pkg/meta/v1"
-"github.com/marmotedu/iam/pkg/cli/genericclioptions"
 )
 ```
 

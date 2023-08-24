@@ -80,7 +80,7 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 	if err != nil {
 		return nil, err
 	}
-	var pbGroups []*msg.ActiveGroup
+	var pbgroups []*msg.ActiveGroup
 	if len(groups) > 0 {
 		groupIDs := utils.Slice(groups, func(e *unrelation.GroupCount) string { return e.GroupID })
 		resp, err := m.Group.GetGroupInfos(ctx, groupIDs, false)
@@ -91,17 +91,17 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 		for i, group := range groups {
 			groupMap[group.GroupID] = resp[i]
 		}
-		pbGroups = make([]*msg.ActiveGroup, 0, len(groups))
+		pbgroups = make([]*msg.ActiveGroup, 0, len(groups))
 		for _, group := range groups {
-			pbGroup := groupMap[group.GroupID]
-			if pbGroup == nil {
-				pbGroup = &sdkws.GroupInfo{
+			pbgroup := groupMap[group.GroupID]
+			if pbgroup == nil {
+				pbgroup = &sdkws.GroupInfo{
 					GroupID:   group.GroupID,
 					GroupName: group.GroupID,
 				}
 			}
-			pbGroups = append(pbGroups, &msg.ActiveGroup{
-				Group: pbGroup,
+			pbgroups = append(pbgroups, &msg.ActiveGroup{
+				Group: pbgroup,
 				Count: group.Count,
 			})
 		}
@@ -110,6 +110,6 @@ func (m *msgServer) GetActiveGroup(ctx context.Context, req *msg.GetActiveGroupR
 		MsgCount:   msgCount,
 		GroupCount: groupCount,
 		DateCount:  dateCount,
-		Groups:     pbGroups,
+		Groups:     pbgroups,
 	}, nil
 }

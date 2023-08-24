@@ -16,11 +16,13 @@ package notification
 
 import (
 	"context"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/sdkws"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
 type UserNotificationSender struct {
@@ -39,7 +41,7 @@ func WithUserDB(db controller.UserDatabase) userNotificationSenderOptions {
 }
 
 func WithUserFunc(
-	fn func(ctx context.Context, userIDs []string) (users []*relationTb.UserModel, err error),
+	fn func(ctx context.Context, userIDs []string) (users []*relationtb.UserModel, err error),
 ) userNotificationSenderOptions {
 	return func(u *UserNotificationSender) {
 		f := func(ctx context.Context, userIDs []string) (result []CommonUser, err error) {

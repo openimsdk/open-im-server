@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	openKeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
+	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw"
 
@@ -30,7 +30,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
@@ -48,7 +48,7 @@ func StartTransfer(prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	if err := db.AutoMigrate(&relationTb.ChatLogModel{}); err != nil {
+	if err := db.AutoMigrate(&relationtb.ChatLogModel{}); err != nil {
 		fmt.Printf("gorm: AutoMigrate ChatLogModel err: %v\n", err)
 	}
 	rdb, err := cache.NewRedis()
@@ -62,9 +62,9 @@ func StartTransfer(prometheusPort int) error {
 	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	client, err := openKeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-		openKeeper.WithFreq(time.Hour), openKeeper.WithRoundRobin(), openKeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-			config.Config.Zookeeper.Password), openKeeper.WithTimeout(10), openKeeper.WithLogger(log.NewZkLogger()))
+	client, err := openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+		openkeeper.WithFreq(time.Hour), openkeeper.WithRoundRobin(), openkeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
+			config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))
 	if err != nil {
 		return err
 	}
