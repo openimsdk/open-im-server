@@ -279,7 +279,10 @@ func (ws *WsServer) multiTerminalLoginChecker(clientOK bool, oldClients []*Clien
 		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if clientOK {
-			ws.clients.deleteClients(newClient.UserID, oldClients)
+			isDeleteUser := ws.clients.deleteClients(newClient.UserID, oldClients)
+			if isDeleteUser {
+				atomic.AddInt64(&ws.onlineUserNum, -1)
+			}
 			for _, c := range oldClients {
 				err := c.KickOnlineMessage()
 				if err != nil {
