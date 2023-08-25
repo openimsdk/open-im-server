@@ -181,6 +181,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 			return nil, errs.ErrArgs.WithDetail(err.Error())
 		}
 		data = apistruct.TextElem{Text: string(bytes)}
+		log.ZDebug(c, "getSendMsgReq", "data", data)
 	case constant.Picture:
 		data = apistruct.PictureElem{}
 	case constant.Voice:
@@ -206,7 +207,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	if err := mapstructure.WeakDecode(req.Content, &data); err != nil {
 		return nil, err
 	}
-	log.ZDebug(c, "getSendMsgReq", "data", data)
+	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	if err := m.validate.Struct(data); err != nil {
 		return nil, err
 	}
