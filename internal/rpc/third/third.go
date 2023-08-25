@@ -34,7 +34,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 )
 
@@ -58,7 +58,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
-	if err := db.AutoMigrate(&relationTb.ObjectModel{}); err != nil {
+	if err := db.AutoMigrate(&relationtb.ObjectModel{}); err != nil {
 		return err
 	}
 	// 根据配置文件策略选择 oss 方式

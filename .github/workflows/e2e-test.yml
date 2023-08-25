@@ -12,5 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# name: OpenIM e2e Test
+name: e2e
 
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+  schedule:
+    # run e2e test every 4 hours
+    - cron: 0 */4 * * *
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+    steps:
+
+      - name: Set up Go 1.21
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Create e2e test
+        run: |
+          echo "...test e2e"

@@ -12,26 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controller
+package data_conversion
 
-import (
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
+import "testing"
 
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-)
-
-type ChatLogDatabase interface {
-	CreateChatLog(msg *pbmsg.MsgDataToMQ) error
+func TestGetMessage(t *testing.T) {
+	GetMessage()
 }
 
-func NewChatLogDatabase(chatLogModelInterface relationtb.ChatLogModelInterface) ChatLogDatabase {
-	return &chatLogDatabase{chatLogModel: chatLogModelInterface}
-}
-
-type chatLogDatabase struct {
-	chatLogModel relationtb.ChatLogModelInterface
-}
-
-func (c *chatLogDatabase) CreateChatLog(msg *pbmsg.MsgDataToMQ) error {
-	return c.chatLogModel.Create(msg)
+func TestSendMessage(t *testing.T) {
+	SendMessage()
 }

@@ -21,7 +21,7 @@ set -o pipefail
 ulimit -n 200000
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+[[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
 SERVER_NAME="openim-msggateway"
 
@@ -77,7 +77,7 @@ EOF
 # install openim-msggateway
 function openim::msggateway::install()
 {
-  pushd ${OPENIM_ROOT}
+  pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-msggateway
   make build BINS=${SERVER_NAME}

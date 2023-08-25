@@ -58,6 +58,5 @@ func main() {
 	// openim-rpc-user
 	switch module {
 	case "openim-api":
-
-		
+	}
 }

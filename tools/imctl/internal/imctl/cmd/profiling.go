@@ -26,8 +26,8 @@ import (
 
 // profiling configuration variables
 var (
-	profileName   string = "none"                       // Name of the profile to capture.
-	profileOutput string = "profile.pprof"              // File to write the profile data.
+	profileName   string = "none"          // Name of the profile to capture.
+	profileOutput string = "profile.pprof" // File to write the profile data.
 )
 
 // addProfilingFlags registers profiling related flags to the given FlagSet.
@@ -41,8 +41,8 @@ func addProfilingFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&profileOutput, "profile-output", "profile.pprof", "File to write the profile data")
 }
 
-// initProfiling sets up profiling based on the user's choice. 
-// If 'cpu' is selected, it starts the CPU profile. For block and mutex profiles, 
+// initProfiling sets up profiling based on the user's choice.
+// If 'cpu' is selected, it starts the CPU profile. For block and mutex profiles,
 // sampling rates are set up.
 func initProfiling() error {
 	switch profileName {
@@ -55,10 +55,10 @@ func initProfiling() error {
 		}
 		return pprof.StartCPUProfile(f)
 	case "block":
-		runtime.SetBlockProfileRate(1)  // Sampling every block event
+		runtime.SetBlockProfileRate(1) // Sampling every block event
 		return nil
 	case "mutex":
-		runtime.SetMutexProfileFraction(1)  // Sampling every mutex event
+		runtime.SetMutexProfileFraction(1) // Sampling every mutex event
 		return nil
 	default:
 		if profile := pprof.Lookup(profileName); profile == nil {
@@ -68,8 +68,8 @@ func initProfiling() error {
 	}
 }
 
-// flushProfiling writes the profiling data to the specified file. 
-// For heap profiles, it runs the GC before capturing the data. 
+// flushProfiling writes the profiling data to the specified file.
+// For heap profiles, it runs the GC before capturing the data.
 // It stops the CPU profile if it was started.
 func flushProfiling() error {
 	switch profileName {

@@ -113,7 +113,7 @@ if ${HAVE_SHELLCHECK}; then
 else
   openim::log::info "Using shellcheck ${SHELLCHECK_VERSION} docker image."
   "${DOCKER}" run \
-    --rm -v "${OPENIM_ROOT}:${OPENIM_ROOT}" -w "${OPENIM_ROOT}" \
+    --rm -v ""${OPENIM_ROOT}":"${OPENIM_ROOT}"" -w "${OPENIM_ROOT}" \
     "${SHELLCHECK_IMAGE}" \
   shellcheck "${SHELLCHECK_OPTIONS[@]}" "${all_shell_scripts[@]}" >&2 || res=$?
 fi

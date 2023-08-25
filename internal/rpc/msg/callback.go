@@ -21,7 +21,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbChat "github.com/OpenIMSDK/protocol/msg"
+	pbchat "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
@@ -36,7 +36,7 @@ func cbURL() string {
 	return config.Config.Callback.CallbackUrl
 }
 
-func toCommonCallback(ctx context.Context, msg *pbChat.SendMsgReq, command string) cbapi.CommonCallbackReq {
+func toCommonCallback(ctx context.Context, msg *pbchat.SendMsgReq, command string) cbapi.CommonCallbackReq {
 	return cbapi.CommonCallbackReq{
 		SendID:           msg.MsgData.SendID,
 		ServerMsgID:      msg.MsgData.ServerMsgID,
@@ -69,7 +69,7 @@ func GetContent(msg *sdkws.MsgData) string {
 	}
 }
 
-func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return nil
 	}
@@ -87,7 +87,7 @@ func callbackBeforeSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) er
 	return nil
 }
 
-func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackAfterSendSingleMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -105,7 +105,7 @@ func callbackAfterSendSingleMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 	return nil
 }
 
-func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -123,7 +123,7 @@ func callbackBeforeSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) err
 	return nil
 }
 
-func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackAfterSendGroupMsg(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -141,7 +141,7 @@ func callbackAfterSendGroupMsg(ctx context.Context, msg *pbChat.SendMsgReq) erro
 	return nil
 }
 
-func callbackMsgModify(ctx context.Context, msg *pbChat.SendMsgReq) error {
+func callbackMsgModify(ctx context.Context, msg *pbchat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackMsgModify.Enable || msg.MsgData.ContentType != constant.Text {
 		return nil
 	}

@@ -44,10 +44,10 @@ set +o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+[[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
 SERVER_NAME="openim-rpc"
-readonly OPENIM_RPC_CONFIG=${OPENIM_ROOT}/config
+readonly OPENIM_RPC_CONFIG="${OPENIM_ROOT}"/config
 
 openim::rpc::service_name() {
   local targets=(

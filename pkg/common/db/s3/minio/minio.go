@@ -77,15 +77,15 @@ func NewMinio() (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket:    conf.Bucket,
-		bucketURL: conf.Endpoint + "/" + conf.Bucket + "/",
-		core:      &minio.Core{Client: client},
-		lock:      &sync.Mutex{},
-		init:      false,
+		bucket: conf.Bucket,
+		core:   &minio.Core{Client: client},
+		lock:   &sync.Mutex{},
+		init:   false,
 	}
 	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
+		m.bucketURL = conf.Endpoint + "/" + conf.Bucket + "/"
 	} else {
 		su, err := url.Parse(conf.SignEndpoint)
 		if err != nil {
@@ -99,6 +99,7 @@ func NewMinio() (s3.Interface, error) {
 		if err != nil {
 			return nil, err
 		}
+		m.bucketURL = conf.SignEndpoint + "/" + conf.Bucket + "/"
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

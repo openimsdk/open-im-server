@@ -20,7 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/mcontext"
 
-	pbGroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
 )
 
@@ -49,6 +49,9 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	if group.ApplyMemberFriend != nil {
 		m["apply_member_friend"] = group.ApplyMemberFriend.Value
 	}
+	if group.Ex != nil {
+		m["ex"] = group.Ex.Value
+	}
 	return m
 }
 
@@ -64,7 +67,7 @@ func UpdateGroupMemberMutedTimeMap(t time.Time) map[string]any {
 	}
 }
 
-func UpdateGroupMemberMap(req *pbGroup.SetGroupMemberInfo) map[string]any {
+func UpdateGroupMemberMap(req *pbgroup.SetGroupMemberInfo) map[string]any {
 	m := make(map[string]any)
 	if req.Nickname != nil {
 		m["nickname"] = req.Nickname.Value

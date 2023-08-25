@@ -26,7 +26,7 @@ set +o errexit
 openim::golang::check_openim_binaries
 if [[ $? -ne 0 ]]; then
   openim::log::error "OpenIM binaries are not found. Please run 'make build' to build binaries."
-  ${OPENIM_ROOT}/scripts/build-all-service.sh
+  "${OPENIM_ROOT}"/scripts/build-all-service.sh
 fi
 set -o errexit
 
@@ -72,3 +72,5 @@ ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 execute_scripts
 
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
+
+openim::log::success "✨  All OpenIM services have been successfully started!"

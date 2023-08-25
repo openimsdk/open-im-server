@@ -45,7 +45,7 @@ set +o nounset
 set -o pipefail
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+[[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
 SERVER_NAME="openim-push"
 
@@ -90,7 +90,7 @@ EOF
 # install openim-push
 function openim::push::install()
 {
-  pushd ${OPENIM_ROOT}
+  pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-push
   make build BINS=${SERVER_NAME}

@@ -20,7 +20,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pbConversation "github.com/OpenIMSDK/protocol/conversation"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/errs"
 
@@ -28,7 +28,7 @@ import (
 )
 
 type Conversation struct {
-	Client pbConversation.ConversationClient
+	Client pbconversation.ConversationClient
 	conn   grpc.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
@@ -38,7 +38,7 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversatio
 	if err != nil {
 		panic(err)
 	}
-	client := pbConversation.NewConversationClient(conn)
+	client := pbconversation.NewConversationClient(conn)
 	return &Conversation{discov: discov, conn: conn, Client: client}
 }
 
@@ -49,7 +49,7 @@ func NewConversationRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) Con
 }
 
 func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Context, userID, conversationID string) (int32, error) {
-	var req pbConversation.GetConversationReq
+	var req pbconversation.GetConversationReq
 	req.OwnerUserID = userID
 	req.ConversationID = conversationID
 	conversation, err := c.Client.GetConversation(ctx, &req)
@@ -60,46 +60,46 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 }
 
 func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
-	_, err := c.Client.CreateSingleChatConversations(ctx, &pbConversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+	_, err := c.Client.CreateSingleChatConversations(ctx, &pbconversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
 	return err
 }
 
 func (c *ConversationRpcClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
-	_, err := c.Client.CreateGroupChatConversations(ctx, &pbConversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
+	_, err := c.Client.CreateGroupChatConversations(ctx, &pbconversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
 	return err
 }
 
 func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
-	_, err := c.Client.SetConversationMaxSeq(ctx, &pbConversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
+	_, err := c.Client.SetConversationMaxSeq(ctx, &pbconversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
 	return err
 }
 
-func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbConversation.ConversationReq) error {
-	_, err := c.Client.SetConversations(ctx, &pbConversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
+func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbconversation.ConversationReq) error {
+	_, err := c.Client.SetConversations(ctx, &pbconversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
 	return err
 }
 
 func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
-	resp, err := c.Client.GetConversationIDs(ctx, &pbConversation.GetConversationIDsReq{UserID: ownerUserID})
+	resp, err := c.Client.GetConversationIDs(ctx, &pbconversation.GetConversationIDsReq{UserID: ownerUserID})
 	if err != nil {
 		return nil, err
 	}
 	return resp.ConversationIDs, nil
 }
 
-func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbConversation.Conversation, error) {
-	resp, err := c.Client.GetConversation(ctx, &pbConversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
+func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID, conversationID string) (*pbconversation.Conversation, error) {
+	resp, err := c.Client.GetConversation(ctx, &pbconversation.GetConversationReq{OwnerUserID: ownerUserID, ConversationID: conversationID})
 	if err != nil {
 		return nil, err
 	}
 	return resp.Conversation, nil
 }
 
-func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbConversation.Conversation, error) {
+func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*pbconversation.Conversation, error) {
 	if len(conversationIDs) == 0 {
 		return nil, nil
 	}
-	resp, err := c.Client.GetConversationsByConversationID(ctx, &pbConversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs})
+	resp, err := c.Client.GetConversationsByConversationID(ctx, &pbconversation.GetConversationsByConversationIDReq{ConversationIDs: conversationIDs})
 	if err != nil {
 		return nil, err
 	}
@@ -113,13 +113,13 @@ func (c *ConversationRpcClient) GetConversations(
 	ctx context.Context,
 	ownerUserID string,
 	conversationIDs []string,
-) ([]*pbConversation.Conversation, error) {
+) ([]*pbconversation.Conversation, error) {
 	if len(conversationIDs) == 0 {
 		return nil, nil
 	}
 	resp, err := c.Client.GetConversations(
 		ctx,
-		&pbConversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs},
+		&pbconversation.GetConversationsReq{OwnerUserID: ownerUserID, ConversationIDs: conversationIDs},
 	)
 	if err != nil {
 		return nil, err
