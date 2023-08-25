@@ -144,7 +144,7 @@ function openim::release::package_src_tarball() {
       -path "${OPENIM_ROOT}"/.config\* -o \
       -path "${OPENIM_ROOT}"/.chglog\* -o \
       -path "${OPENIM_ROOT}"/.gitlint -o \
-      -path "${OPENIM_ROOT}"/scripts/golangci.yml -o \
+      -path "${OPENIM_ROOT}"/.golangci.yml -o \
       -path "${OPENIM_ROOT}"/build/goreleaser.yaml -o \
       -path "${OPENIM_ROOT}"/.note.md -o \
       -path "${OPENIM_ROOT}"/.todo.md \
@@ -354,7 +354,7 @@ function openim::release::create_docker_images_for_server() {
         rm -rf "${docker_build_path}"
         mkdir -p "${docker_build_path}"
         ln "${binary_file_path}" "${docker_build_path}/${binary_name}"
-        ln "${OPENIM_ROOT}/build/nsswitch.conf" "${docker_build_path}/nsswitch.conf"
+        ln ""${OPENIM_ROOT}"/build/nsswitch.conf" "${docker_build_path}/nsswitch.conf"
         chmod 0644 "${docker_build_path}/nsswitch.conf"
         cat <<EOF > "${docker_file_path}"
 FROM ${base_image}
@@ -399,7 +399,7 @@ EOF
 function openim::release::package_openim_manifests_tarball() {
   openim::log::status "Building tarball: manifests"
 
-  local src_dir="${OPENIM_ROOT}/deployments"
+  local src_dir=""${OPENIM_ROOT}"/deployments"
 
   local release_stage="${RELEASE_STAGE}/manifests/openim"
   rm -rf "${release_stage}"
@@ -420,7 +420,7 @@ function openim::release::package_openim_manifests_tarball() {
   #cp "${src_dir}/openim-rpc-msg.yaml" "${dst_dir}"
   #cp "${src_dir}/openim-rpc-third.yaml" "${dst_dir}"
   #cp "${src_dir}/openim-rpc-user.yaml" "${dst_dir}"
-  #cp "${OPENIM_ROOT}/cluster/gce/gci/health-monitor.sh" "${dst_dir}/health-monitor.sh"
+  #cp ""${OPENIM_ROOT}"/cluster/gce/gci/health-monitor.sh" "${dst_dir}/health-monitor.sh"
 
   openim::release::clean_cruft
 
@@ -454,7 +454,7 @@ EOF
 
   # We want everything in /scripts.
   mkdir -p "${release_stage}/release"
-  cp -R "${OPENIM_ROOT}/scripts/release" "${release_stage}/"
+  cp -R ""${OPENIM_ROOT}"/scripts/release" "${release_stage}/"
   cat <<EOF > "${release_stage}/release/get-openim-binaries.sh"
 #!/usr/bin/env bash
 # This file download openim client and server binaries from tencent cos bucket.
@@ -473,9 +473,9 @@ EOF
 
   # Include hack/lib as a dependency for the cluster/ scripts
   #mkdir -p "${release_stage}/hack"
-  #cp -R "${OPENIM_ROOT}/hack/lib" "${release_stage}/hack/"
+  #cp -R ""${OPENIM_ROOT}"/hack/lib" "${release_stage}/hack/"
 
-  cp -R ${OPENIM_ROOT}/{docs,configs,scripts,deployments,init,README.md,LICENSE} "${release_stage}/"
+  cp -R "${OPENIM_ROOT}"/{docs,configs,scripts,deployments,init,README.md,LICENSE} "${release_stage}/"
 
   echo "${OPENIM_GIT_VERSION}" > "${release_stage}/version"
 
@@ -613,10 +613,10 @@ function openim::release::github_release() {
 function openim::release::generate_changelog() {
   openim::log::info "generate CHANGELOG-${OPENIM_GIT_VERSION#v}.md and commit it"
 
-  git-chglog ${OPENIM_GIT_VERSION} > ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
+  git-chglog ${OPENIM_GIT_VERSION} > "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
 
   set +o errexit
-  git add ${OPENIM_ROOT}/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
+  git add "${OPENIM_ROOT}"/CHANGELOG/CHANGELOG-${OPENIM_GIT_VERSION#v}.md
   git commit -a -m "docs(changelog): add CHANGELOG-${OPENIM_GIT_VERSION#v}.md"
   git push -f origin main # 最后将 CHANGELOG 也 push 上去
 }

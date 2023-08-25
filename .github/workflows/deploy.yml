@@ -52,22 +52,3 @@ jobs:
             echo "REPO: $REPO"
             git clone -b develop https://github.com/${OWNER}/${REPO}.git; cd ${REPO}
             docker compose up -d
-
-
-    #   - name: deploy # Deployment
-    #     run: |
-    #       ssh work@182.92.xxx.xxx "
-    #         # 【Attention】Log in with the 'work' account, manually create /home/work/imooc-lego directory
-    #         # Then git clone https://username:password@github.com/imooc-lego/biz-editor-server.git -b dev (private repository, use GitHub username and password)
-    #         # Remember to delete origin to avoid exposing GitHub password
-    #         cd /home/work/imooc-lego/biz-editor-server;
-    #         git remote add origin https://openimbot:${{secrets.WFP_PASSWORD}}@github.com/OpenIMSDK/open-im-server.git;
-    #         git checkout dev;
-    #         git pull origin dev; # Download the latest code again
-    #         git remote remove origin; # Remove origin to avoid exposing GitHub password
-    #         # Start docker
-    #         docker-compose build editor-server; # Same as the service name in docker-compose.yml
-    #         docker-compose up -d;
-    #       "
-    #   - name: delete ssh key # Delete ssh key
-    #     run: rm -rf ~/.ssh/id_rsa

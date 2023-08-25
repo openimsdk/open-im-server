@@ -28,7 +28,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
 )
 
@@ -173,10 +173,10 @@ func Test_Insert(t *testing.T) {
 	var arr []any
 	for i := 0; i < 345; i++ {
 		if i%2 == 0 {
-			arr = append(arr, (*unRelationTb.MsgDataModel)(nil))
+			arr = append(arr, (*unrelationtb.MsgDataModel)(nil))
 			continue
 		}
-		arr = append(arr, &unRelationTb.MsgDataModel{
+		arr = append(arr, &unrelationtb.MsgDataModel{
 			Seq:     int64(i),
 			Content: fmt.Sprintf("test-%d", i),
 		})
@@ -191,7 +191,7 @@ func Test_Revoke(t *testing.T) {
 	ctx := context.Background()
 	var arr []any
 	for i := 0; i < 456; i++ {
-		arr = append(arr, &unRelationTb.RevokeModel{
+		arr = append(arr, &unrelationtb.RevokeModel{
 			UserID:   "uid_" + strconv.Itoa(i),
 			Nickname: "uname_" + strconv.Itoa(i),
 			Time:     time.Now().UnixMilli(),
@@ -254,7 +254,7 @@ func Test_FindBySeq(t *testing.T) {
 //
 //	c := mongo.GetClient().Database("openIM").Collection("msg")
 //
-//	var o unRelationTb.MsgDocModel
+//	var o unrelationtb.MsgDocModel
 //
 //	err = c.FindOne(context.Background(), bson.M{"doc_id": "test:0"}).Decode(&o)
 //	if err != nil {

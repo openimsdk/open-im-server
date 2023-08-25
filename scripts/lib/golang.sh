@@ -89,7 +89,7 @@ readonly OPENIM_SERVER_TARGETS
 readonly OPENIM_SERVER_BINARIES=("${OPENIM_SERVER_TARGETS[@]##*/}")
 
 # TODO: Label
-START_SCRIPTS_PATH="${OPENIM_ROOT}/scripts/install/"
+START_SCRIPTS_PATH=""${OPENIM_ROOT}"/scripts/install/"
 openim::golang::start_script_list() {
   local targets=(
       openim-api.sh

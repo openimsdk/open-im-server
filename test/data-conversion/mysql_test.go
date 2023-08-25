@@ -12,26 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controller
+package data_conversion
 
-import (
-	pbmsg "github.com/OpenIMSDK/protocol/msg"
+import "testing"
 
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-)
-
-type ChatLogDatabase interface {
-	CreateChatLog(msg *pbmsg.MsgDataToMQ) error
+// pass
+func TestUserConversion(t *testing.T) {
+	UserConversion()
 }
 
-func NewChatLogDatabase(chatLogModelInterface relationtb.ChatLogModelInterface) ChatLogDatabase {
-	return &chatLogDatabase{chatLogModel: chatLogModelInterface}
+// pass
+func TestFriendConversion(t *testing.T) {
+	FriendConversion()
 }
 
-type chatLogDatabase struct {
-	chatLogModel relationtb.ChatLogModelInterface
+// pass
+func TestGroupConversion(t *testing.T) {
+	GroupConversion()
+	GroupMemberConversion()
 }
 
-func (c *chatLogDatabase) CreateChatLog(msg *pbmsg.MsgDataToMQ) error {
-	return c.chatLogModel.Create(msg)
+// pass
+func TestBlacksConversion(t *testing.T) {
+	BlacksConversion()
+}
+
+// pass
+func TestRequestConversion(t *testing.T) {
+	RequestConversion()
+}
+
+// pass
+func TestChatLogsConversion(t *testing.T) {
+	// If the printed result is too long, the console will not display it, but it can run normally
+	ChatLogsConversion()
 }

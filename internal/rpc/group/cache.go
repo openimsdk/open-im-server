@@ -17,31 +17,31 @@ package group
 import (
 	"context"
 
-	pbGroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
 )
 
 func (s *groupServer) GetGroupInfoCache(
 	ctx context.Context,
-	req *pbGroup.GetGroupInfoCacheReq,
-) (resp *pbGroup.GetGroupInfoCacheResp, err error) {
+	req *pbgroup.GetGroupInfoCacheReq,
+) (resp *pbgroup.GetGroupInfoCacheResp, err error) {
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbGroup.GetGroupInfoCacheResp{GroupInfo: convert.Db2PbGroupInfo(group, "", 0)}
+	resp = &pbgroup.GetGroupInfoCacheResp{GroupInfo: convert.Db2PbGroupInfo(group, "", 0)}
 	return resp, nil
 }
 
 func (s *groupServer) GetGroupMemberCache(
 	ctx context.Context,
-	req *pbGroup.GetGroupMemberCacheReq,
-) (resp *pbGroup.GetGroupMemberCacheResp, err error) {
+	req *pbgroup.GetGroupMemberCacheReq,
+) (resp *pbgroup.GetGroupMemberCacheResp, err error) {
 	members, err := s.GroupDatabase.TakeGroupMember(ctx, req.GroupID, req.GroupMemberID)
 	if err != nil {
 		return nil, err
 	}
-	resp = &pbGroup.GetGroupMemberCacheResp{Member: convert.Db2PbGroupMember(members)}
+	resp = &pbgroup.GetGroupMemberCacheResp{Member: convert.Db2PbGroupMember(members)}
 	return resp, nil
 }

@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbGroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -317,7 +317,7 @@ func (g *GroupNotificationSender) GroupInfoSetAnnouncementNotification(ctx conte
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), tips.Group.GroupID, constant.GroupInfoSetAnnouncementNotification, tips, rpcclient.WithRpcGetUserName())
 }
 
-func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGroupReq) (err error) {
+func (g *GroupNotificationSender) JoinGroupApplicationNotification(ctx context.Context, req *pbgroup.JoinGroupReq) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
@@ -362,7 +362,7 @@ func (g *GroupNotificationSender) MemberQuitNotification(ctx context.Context, me
 	return g.Notification(ctx, mcontext.GetOpUserID(ctx), member.GroupID, constant.MemberQuitNotification, tips)
 }
 
-func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (err error) {
+func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
@@ -390,7 +390,7 @@ func (g *GroupNotificationSender) GroupApplicationAcceptedNotification(ctx conte
 	return nil
 }
 
-func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (err error) {
+func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx context.Context, req *pbgroup.GroupApplicationResponseReq) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {
@@ -418,7 +418,7 @@ func (g *GroupNotificationSender) GroupApplicationRejectedNotification(ctx conte
 	return nil
 }
 
-func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.Context, req *pbGroup.TransferGroupOwnerReq) (err error) {
+func (g *GroupNotificationSender) GroupOwnerTransferredNotification(ctx context.Context, req *pbgroup.TransferGroupOwnerReq) (err error) {
 	defer log.ZDebug(ctx, "return")
 	defer func() {
 		if err != nil {

@@ -20,8 +20,8 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbConversation "github.com/OpenIMSDK/protocol/conversation"
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbconversation "github.com/OpenIMSDK/protocol/conversation"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/protocol/wrapperspb"
 	"github.com/OpenIMSDK/tools/errs"
@@ -29,11 +29,11 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
-	promePkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	promepkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
 )
 
-func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, error error) {
-	resp = &pbMsg.SendMsgResp{}
+func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {
+	resp = &pbmsg.SendMsgResp{}
 	if req.MsgData != nil {
 		flag := isMessageHasReadEnabled(req.MsgData)
 		if !flag {
@@ -57,11 +57,11 @@ func (m *msgServer) SendMsg(ctx context.Context, req *pbMsg.SendMsgReq) (resp *p
 
 func (m *msgServer) sendMsgSuperGroupChat(
 	ctx context.Context,
-	req *pbMsg.SendMsgReq,
-) (resp *pbMsg.SendMsgResp, err error) {
-	promePkg.Inc(promePkg.WorkSuperGroupChatMsgRecvSuccessCounter)
+	req *pbmsg.SendMsgReq,
+) (resp *pbmsg.SendMsgResp, err error) {
+	promepkg.Inc(promepkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
-		promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessFailedCounter)
+		promepkg.Inc(promepkg.WorkSuperGroupChatMsgProcessFailedCounter)
 		return nil, err
 	}
 	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
@@ -80,8 +80,8 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
 		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
-	promePkg.Inc(promePkg.WorkSuperGroupChatMsgProcessSuccessCounter)
-	resp = &pbMsg.SendMsgResp{}
+	promepkg.Inc(promepkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	resp = &pbmsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
 	resp.ServerMsgID = req.MsgData.ServerMsgID
 	resp.ClientMsgID = req.MsgData.ClientMsgID
@@ -92,7 +92,7 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 	log.ZDebug(nctx, "setConversationAtInfo", "msg", msg)
 	ctx := mcontext.NewCtx("@@@" + mcontext.GetOperationID(nctx))
 	var atUserID []string
-	conversation := &pbConversation.ConversationReq{
+	conversation := &pbconversation.ConversationReq{
 		ConversationID:   msgprocessor.GetConversationIDByMsg(msg),
 		ConversationType: msg.SessionType,
 		GroupID:          msg.GroupID,
@@ -131,14 +131,14 @@ func (m *msgServer) setConversationAtInfo(nctx context.Context, msg *sdkws.MsgDa
 
 func (m *msgServer) sendMsgNotification(
 	ctx context.Context,
-	req *pbMsg.SendMsgReq,
-) (resp *pbMsg.SendMsgResp, err error) {
-	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
+	req *pbmsg.SendMsgReq,
+) (resp *pbmsg.SendMsgResp, err error) {
+	promepkg.Inc(promepkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
+		promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
 		return nil, err
 	}
-	resp = &pbMsg.SendMsgResp{
+	resp = &pbmsg.SendMsgResp{
 		ServerMsgID: req.MsgData.ServerMsgID,
 		ClientMsgID: req.MsgData.ClientMsgID,
 		SendTime:    req.MsgData.SendTime,
@@ -146,8 +146,8 @@ func (m *msgServer) sendMsgNotification(
 	return resp, nil
 }
 
-func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq) (resp *pbMsg.SendMsgResp, err error) {
-	promePkg.Inc(promePkg.SingleChatMsgRecvSuccessCounter)
+func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
+	promepkg.Inc(promepkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 		}
 	}
 	if !isSend {
-		promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
+		promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
 		return nil, nil
 	} else {
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
@@ -176,23 +176,23 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbMsg.SendMsgReq
 			return nil, err
 		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-			promePkg.Inc(promePkg.SingleChatMsgProcessFailedCounter)
+			promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
 			return nil, err
 		}
 		err = callbackAfterSendSingleMsg(ctx, req)
 		if err != nil {
 			log.ZWarn(ctx, "CallbackAfterSendSingleMsg", err, "req", req)
 		}
-		resp = &pbMsg.SendMsgResp{
+		resp = &pbmsg.SendMsgResp{
 			ServerMsgID: req.MsgData.ServerMsgID,
 			ClientMsgID: req.MsgData.ClientMsgID,
 			SendTime:    req.MsgData.SendTime,
 		}
-		promePkg.Inc(promePkg.SingleChatMsgProcessSuccessCounter)
+		promepkg.Inc(promepkg.SingleChatMsgProcessSuccessCounter)
 		return resp, nil
 	}
 }
 
-func (m *msgServer) BatchSendMsg(ctx context.Context, in *pbMsg.BatchSendMessageReq) (*pbMsg.BatchSendMessageResp, error) {
+func (m *msgServer) BatchSendMsg(ctx context.Context, in *pbmsg.BatchSendMessageReq) (*pbmsg.BatchSendMessageResp, error) {
 	return nil, nil
 }

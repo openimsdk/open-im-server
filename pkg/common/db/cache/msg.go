@@ -33,7 +33,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -143,7 +143,7 @@ type msgCache struct {
 	rdb            redis.UniversalClient
 	expireTime     time.Duration
 	rcClient       *rockscache.Client
-	msgDocDatabase unRelationTb.MsgDocModelInterface
+	msgDocDatabase unrelationtb.MsgDocModelInterface
 }
 
 func (c *msgCache) getMaxSeqKey(conversationID string) string {

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	mysqlDriver "github.com/go-sql-driver/mysql"
+	mysqldriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 
 	"github.com/OpenIMSDK/tools/errs"
@@ -94,7 +94,7 @@ func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 		if err == nil {
 			return db, nil
 		}
-		if mysqlErr, ok := err.(*mysqlDriver.MySQLError); ok && mysqlErr.Number == 1045 {
+		if mysqlErr, ok := err.(*mysqldriver.MySQLError); ok && mysqlErr.Number == 1045 {
 			return nil, err
 		}
 		time.Sleep(time.Duration(1) * time.Second)
@@ -117,7 +117,7 @@ func replaceDuplicateKey(err error) errs.CodeError {
 }
 
 func IsMysqlDuplicateKey(err error) bool {
-	if mysqlErr, ok := err.(*mysqlDriver.MySQLError); ok {
+	if mysqlErr, ok := err.(*mysqldriver.MySQLError); ok {
 		return mysqlErr.Number == 1062
 	}
 	return false

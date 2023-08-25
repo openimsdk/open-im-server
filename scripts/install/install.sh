@@ -49,17 +49,17 @@
 ###############################################################################
 
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
-[[ -z ${COMMON_SOURCED} ]] && source ${OPENIM_ROOT}/scripts/install/common.sh
+[[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-source ${OPENIM_ROOT}/scripts/install/openim-msggateway.sh
-source ${OPENIM_ROOT}/scripts/install/openim-msgtransfer.sh
-source ${OPENIM_ROOT}/scripts/install/openim-push.sh
-source ${OPENIM_ROOT}/scripts/install/openim-rpc.sh
-source ${OPENIM_ROOT}/scripts/install/openim-crontask.sh
-source ${OPENIM_ROOT}/scripts/install/openim-api.sh
-source ${OPENIM_ROOT}/scripts/install/openim-man.sh
-source ${OPENIM_ROOT}/scripts/install/openim-tools.sh
-source ${OPENIM_ROOT}/scripts/install/test.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-msggateway.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-msgtransfer.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-push.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-rpc.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-crontask.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-api.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-man.sh
+source "${OPENIM_ROOT}"/scripts/install/openim-tools.sh
+source "${OPENIM_ROOT}"/scripts/install/test.sh
 
 # Detailed help function
 function openim::install::show_help() {

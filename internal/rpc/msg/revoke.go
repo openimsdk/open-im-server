@@ -30,7 +30,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	unRelationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
 )
 
 func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.RevokeMsgResp, error) {
@@ -100,7 +100,7 @@ func (m *msgServer) RevokeMsg(ctx context.Context, req *msg.RevokeMsgReq) (*msg.
 		}
 	}
 	now := time.Now().UnixMilli()
-	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unRelationTb.RevokeModel{
+	err = m.MsgDatabase.RevokeMsg(ctx, req.ConversationID, req.Seq, &unrelationtb.RevokeModel{
 		Role:     role,
 		UserID:   req.UserID,
 		Nickname: user.Nickname,

@@ -151,7 +151,7 @@ jobs:
         version: 2.x
     - name: Docker Operations
       run: |
-        curl -o docker-compose.yaml https://gist.githubusercontent.com/cubxxw/b1d5cbd2edfa23fee911118aa3e8249e/raw/openim-server.sh
+        curl -o docker-compose.yaml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
         sudo docker compose up -d
         sudo sleep 60
 
@@ -162,9 +162,10 @@ jobs:
 
     - name: Build, Start and Check Services
       run: |
-        make build
-        make start
-        make check
+        sudo make init
+        sudo make build
+        sudo make start
+        sudo make check
 
     - name: Print OpenIM Logs
       run: sudo cat ./_output/logs/* 2>/dev/null

@@ -18,7 +18,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 jobs:
     golangci:
       name: lint
@@ -27,25 +26,25 @@ jobs:
         - uses: actions/checkout@v3
         - uses: actions/setup-go@v4
           with:
-            go-version: '1.20'
+            go-version: '1.21'
             cache: false
         - name: golangci-lint
-          uses: golangci/golangci-lint-action@v3
+          uses: golangci/golangci-lint-action@v3.7.0
           with:
             # Require: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-            version: v1.53
+            version: v1.54
 
             # Optional: working directory, useful for monorepos
-            working-directory: server
+            # working-directory: server
 
             # Optional: golangci-lint command line arguments.
             # 
             # Note: by default the `.golangci.yml` file should be at the root of the repository.
             # The location of the configuration file can be changed by using `--config=`
-            args: --timeout=30m --config=/scripts/golangci.yml # --issues-exit-code=0
+            # args: --timeout=30m --config=/scripts/.golangci.yml --issues-exit-code=0
 
             # Optional: show only new issues if it's a pull request. The default value is `false`.
-            # only-new-issues: true
+            only-new-issues: true
 
             # Optional:The mode to install golangci-lint. It can be 'binary' or 'goinstall'.
-            install-mode: "goinstall"
+            # install-mode: "goinstall"

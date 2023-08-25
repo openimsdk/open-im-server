@@ -6,7 +6,7 @@
 
 ## all: Run tidy, gen, add-copyright, format, lint, cover, build ✨
 .PHONY: all
-all: tidy gen add-copyright lint cover restart
+all: tidy gen add-copyright verify lint cover restart
 
 # ==============================================================================
 # Build set
@@ -80,7 +80,7 @@ stop:
 
 ## restart: Restart openim ✨
 .PHONY: restart
-restart: clean stop build start
+restart: clean stop build init start
 
 ## multiarch: Build binaries for multiple platforms. See option PLATFORMS. ✨
 .PHONY: multiarch
@@ -101,6 +101,11 @@ install:
 .PHONY: check
 check:
 	@$(MAKE) go.check
+
+## check-component
+.PHONY: check-component
+check-component:
+	@$(MAKE) go.check-component
 
 ## tidy: tidy go.mod ✨
 .PHONY: tidy

@@ -24,24 +24,26 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 trap 'openim::util::onCtrlC' INT
 
-chmod +x ${OPENIM_ROOT}/scripts/*.sh
-${OPENIM_ROOT}/scripts/init-config.sh
+chmod +x "${OPENIM_ROOT}"/scripts/*.sh
+"${OPENIM_ROOT}"/scripts/init-config.sh
 
 openim::util::ensure_docker_daemon_connectivity
 
 DOCKER_COMPOSE_COMMAND=
 # Check if docker-compose command is available
-if command -v docker-compose &> /dev/null
+if command -v docker compose &> /dev/null
 then
-    openim::log::info "docker-compose command is available"
-    DOCKER_COMPOSE_COMMAND="docker-compose"
-else
+    openim::log::info "docker compose command is available"
     DOCKER_COMPOSE_COMMAND="docker compose"
+else
+    DOCKER_COMPOSE_COMMAND="docker-compose"
 fi
 
-pushd "${OPENIM_ROOT}" >/dev/null
-  ${DOCKER_COMPOSE_COMMAND} up -d
-  sleep 60
-  ${DOCKER_COMPOSE_COMMAND} ps
-  ${DOCKER_COMPOSE_COMMAND} logs
-popd >/dev/null
+pushd "${OPENIM_ROOT}"
+
+${DOCKER_COMPOSE_COMMAND} up -d
+sleep 60
+${DOCKER_COMPOSE_COMMAND} logs
+${DOCKER_COMPOSE_COMMAND} ps
+
+popd

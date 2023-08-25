@@ -21,7 +21,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pbAuth "github.com/OpenIMSDK/protocol/auth"
+	pbauth "github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -49,7 +49,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		return err
 	}
 	userRpcClient := rpcclient.NewUserRpcClient(client)
-	pbAuth.RegisterAuthServer(server, &authServer{
+	pbauth.RegisterAuthServer(server, &authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
@@ -61,8 +61,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	return nil
 }
 
-func (s *authServer) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
-	resp := pbAuth.UserTokenResp{}
+func (s *authServer) UserToken(ctx context.Context, req *pbauth.UserTokenReq) (*pbauth.UserTokenResp, error) {
+	resp := pbauth.UserTokenResp{}
 	if req.Secret != config.Config.Secret {
 		return nil, errs.ErrNoPermission.Wrap("secret invalid")
 	}
@@ -105,9 +105,9 @@ func (s *authServer) parseToken(ctx context.Context, tokensString string) (claim
 
 func (s *authServer) ParseToken(
 	ctx context.Context,
-	req *pbAuth.ParseTokenReq,
-) (resp *pbAuth.ParseTokenResp, err error) {
-	resp = &pbAuth.ParseTokenResp{}
+	req *pbauth.ParseTokenReq,
+) (resp *pbauth.ParseTokenResp, err error) {
+	resp = &pbauth.ParseTokenResp{}
 	claims, err := s.parseToken(ctx, req.Token)
 	if err != nil {
 		return nil, err
@@ -118,14 +118,14 @@ func (s *authServer) ParseToken(
 	return resp, nil
 }
 
-func (s *authServer) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
+func (s *authServer) ForceLogout(ctx context.Context, req *pbauth.ForceLogoutReq) (*pbauth.ForceLogoutResp, error) {
 	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, mcontext.GetOperationID(ctx)); err != nil {
 		return nil, err
 	}
-	return &pbAuth.ForceLogoutResp{}, nil
+	return &pbauth.ForceLogoutResp{}, nil
 }
 
 func (s *authServer) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {

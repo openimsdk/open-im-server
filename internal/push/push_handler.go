@@ -21,8 +21,8 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbChat "github.com/OpenIMSDK/protocol/msg"
-	pbPush "github.com/OpenIMSDK/protocol/push"
+	pbchat "github.com/OpenIMSDK/protocol/msg"
+	pbpush "github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 
@@ -47,12 +47,12 @@ func NewConsumerHandler(pusher *Pusher) *ConsumerHandler {
 }
 
 func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
-	msgFromMQ := pbChat.PushMsgDataToMQ{}
+	msgFromMQ := pbchat.PushMsgDataToMQ{}
 	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
 		log.ZError(ctx, "push Unmarshal msg err", err, "msg", string(msg))
 		return
 	}
-	pbData := &pbPush.PushMsgReq{
+	pbData := &pbpush.PushMsgReq{
 		MsgData:        msgFromMQ.MsgData,
 		ConversationID: msgFromMQ.ConversationID,
 	}
