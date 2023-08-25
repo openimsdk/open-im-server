@@ -189,7 +189,7 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 	if err != nil {
 		return err
 	}
-	// Online push message
+	// Online push user online message to other node
 	for _, v := range conns {
 		if v.Target() == ws.disCov.GetSelfConnTarget() {
 			log.ZDebug(ctx, "Filter out this node", "node", v.Target())
