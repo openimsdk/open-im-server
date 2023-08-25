@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/mcontext"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"

@@ -17,12 +17,13 @@ package msggateway
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/protocol/msggateway"
 	"net/http"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/msggateway"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
