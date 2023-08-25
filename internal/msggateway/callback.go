@@ -26,7 +26,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/http"
 )
 
-func url() string {
+func callBackURL() string {
 	return config.Config.Callback.CallbackUrl
 }
 
@@ -49,7 +49,7 @@ func CallbackUserOnline(ctx context.Context, userID string, platformID int, isAp
 		ConnID:          connID,
 	}
 	resp := cbapi.CommonCallbackResp{}
-	return http.CallBackPostReturn(ctx, url(), &req, &resp, config.Config.Callback.CallbackUserOnline)
+	return http.CallBackPostReturn(ctx, callBackURL(), &req, &resp, config.Config.Callback.CallbackUserOnline)
 }
 
 func CallbackUserOffline(ctx context.Context, userID string, platformID int, connID string) error {
@@ -70,7 +70,7 @@ func CallbackUserOffline(ctx context.Context, userID string, platformID int, con
 		ConnID: connID,
 	}
 	resp := &cbapi.CallbackUserOfflineResp{}
-	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackUserOffline)
+	return http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
 }
 
 func CallbackUserKickOff(ctx context.Context, userID string, platformID int) error {
@@ -90,7 +90,7 @@ func CallbackUserKickOff(ctx context.Context, userID string, platformID int) err
 		Seq: time.Now().UnixMilli(),
 	}
 	resp := &cbapi.CommonCallbackResp{}
-	return http.CallBackPostReturn(ctx, url(), req, resp, config.Config.Callback.CallbackUserOffline)
+	return http.CallBackPostReturn(ctx, callBackURL(), req, resp, config.Config.Callback.CallbackUserOffline)
 }
 
 // func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackground bool, connID
