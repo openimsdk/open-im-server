@@ -1,0 +1,46 @@
+syntax = "proto3";
+option go_package = "github.com/OpenIMSDK/Open-IM-Server/tools/data-conversion/msg";
+package msg;
+
+message MsgDataToMQ{
+  string token =1;
+  string operationID = 2;
+  MsgData msgData = 3;
+}
+
+message MsgData {
+  string  sendID = 1;
+  string  recvID = 2;
+  string groupID = 3;
+  string clientMsgID = 4;
+  string serverMsgID = 5;
+  int32 senderPlatformID = 6;
+  string  senderNickname = 7;
+  string  senderFaceURL = 8;
+  int32   sessionType = 9;
+  int32 msgFrom = 10;
+  int32 contentType = 11;
+  bytes content = 12;
+  uint32 seq = 14;
+  int64 sendTime = 15;
+  int64 createTime = 16;
+  int32 status = 17;
+  map<string, bool> options = 18;
+  OfflinePushInfo offlinePushInfo = 19;
+  repeated string atUserIDList = 20;
+  bytes msgDataList = 21;
+  string attachedInfo = 22;
+  string  ex = 23;
+
+  bool   isReact = 40;
+  bool isExternalExtensions = 41;
+  int64 msgFirstModifyTime = 42;
+
+}
+message OfflinePushInfo{
+  string title = 1;
+  string desc = 2;
+  string ex = 3;
+  string iOSPushSound = 4;
+  bool iOSBadgeCount = 5;
+}

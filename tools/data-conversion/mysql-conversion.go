@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -153,6 +154,7 @@ func GroupConversion() {
 		var results []relation.GroupModel
 		MysqldbV2.Limit(batchSize).Offset(offset).Find(&results)
 		for i, val := range results {
+			val.GroupType = constant.WorkingGroup // After version 3.0, there is only one group type, which is the work group
 			temp := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
 			if val.NotificationUpdateTime.Equal(temp) {
 				results[i].NotificationUpdateTime = time.Now()
