@@ -41,11 +41,12 @@ import (
 )
 
 type friendServer struct {
-	friendDatabase     controller.FriendDatabase
-	blackDatabase      controller.BlackDatabase
-	userRpcClient      *rpcclient.UserRpcClient
-	notificationSender *notification.FriendNotificationSender
-	RegisterCenter     registry.SvcDiscoveryRegistry
+	friendDatabase        controller.FriendDatabase
+	blackDatabase         controller.BlackDatabase
+	userRpcClient         *rpcclient.UserRpcClient
+	notificationSender    *notification.FriendNotificationSender
+	conversationRpcClient rpcclient.ConversationRpcClient
+	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -79,9 +80,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 			blackDB,
 			cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt()),
 		),
-		userRpcClient:      &userRpcClient,
-		notificationSender: notificationSender,
-		RegisterCenter:     client,
+		userRpcClient:         &userRpcClient,
+		notificationSender:    notificationSender,
+		RegisterCenter:        client,
+		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
 	})
 	return nil
 }
@@ -131,16 +133,19 @@ func (s *friendServer) ImportFriends(
 	if _, err := s.userRpcClient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
 		return nil, err
 	}
-
 	if utils.Contain(req.OwnerUserID, req.FriendUserIDs...) {
 		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
-
 	if err := s.friendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
+	}
+	for _, userID := range req.FriendUserIDs {
+		if err := s.conversationRpcClient.SingleChatFirstCreateConversation(ctx, req.OwnerUserID, userID); err != nil {
+			log.ZError(ctx, "ImportFriends SingleChatFirstCreateConversation", err, "ownerUserID", req.OwnerUserID, "friendUserID", userID)
+		}
 	}
 	return &pbfriend.ImportFriendResp{}, nil
 }
