@@ -15,18 +15,14 @@
 package data_conversion
 
 import (
-	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
 	pbMsg "github.com/OpenIMSDK/protocol/msg"
-	"github.com/OpenIMSDK/protocol/sdkws"
 	openKeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -45,7 +41,7 @@ const (
 )
 
 var consumer sarama.Consumer
-var producer sarama.SyncProducer
+var producerV2 sarama.SyncProducer
 var wg sync.WaitGroup
 
 func init() {
@@ -61,7 +57,7 @@ func init() {
 	if err != nil {
 		fmt.Println("producer closed, err:", err)
 	}
-	producer = client
+	producerV2 = client
 
 	//Consumer
 	consumerT, err := sarama.NewConsumer([]string{addr}, sarama.NewConfig())
@@ -78,7 +74,7 @@ func SendMessage() {
 	msg.Value = sarama.StringEncoder("this is a test log")
 
 	// Send a message
-	pid, offset, err := producer.SendMessage(msg)
+	pid, offset, err := producerV2.SendMessage(msg)
 	if err != nil {
 		fmt.Println("send msg failed, err:", err)
 	}
@@ -92,10 +88,15 @@ func GetMessage() {
 	}
 	fmt.Println(partitionList)
 	//var ch chan int
+	msgRpcClient, err := GetMsgRpcService()
+	if err != nil {
+		fmt.Printf("rpc err:%s", err)
+	}
+
 	for partition := range partitionList {
 		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetOldest)
 		if err != nil {
-			fmt.Println(err)
+			panic(err)
 		}
 		wg.Add(1)
 		defer pc.AsyncClose()
@@ -103,15 +104,15 @@ func GetMessage() {
 		go func(sarama.PartitionConsumer) {
 			defer wg.Done()
 			for msg := range pc.Messages() {
-				//Transfer([]*sarama.ConsumerMessage{msg})
+				Transfer([]*sarama.ConsumerMessage{msg}, msgRpcClient)
 
 				//V2
-				msgFromMQV2 := pbMsg.MsgDataToMQ{}
-				err := proto.Unmarshal(msg.Value, &msgFromMQV2)
-				if err != nil {
-					fmt.Printf("err:%s \n", err)
-				}
-				fmt.Printf("msg:%s \n", msgFromMQV2)
+				//msgFromMQV2 := pbMsg.MsgDataToMQ{}
+				//err := proto.Unmarshal(msg.Value, &msgFromMQV2)
+				//if err != nil {
+				//	fmt.Printf("err:%s \n", err)
+				//}
+				//fmt.Printf("msg:%s \n", &msgFromMQV2)
 
 				//V3
 				//msgFromMQ := &sdkws.MsgData{}
@@ -131,34 +132,15 @@ func GetMessage() {
 	//_ = <-ch
 }
 
-func Transfer(consumerMessages []*sarama.ConsumerMessage) {
+func Transfer(consumerMessages []*sarama.ConsumerMessage, msgRpcClient rpcclient.MessageRpcClient) {
 	for i := 0; i < len(consumerMessages); i++ {
-		msgFromMQ := &sdkws.MsgData{}
-		err := proto.Unmarshal(consumerMessages[i].Value, msgFromMQ)
+		msgFromMQV2 := pbMsg.MsgDataToMQ{}
+		err := proto.Unmarshal(consumerMessages[i].Value, &msgFromMQV2)
 		if err != nil {
-			log.ZError(context.Background(), "msg_transfer Unmarshal msg err", err, string(consumerMessages[i].Value))
-			continue
+			fmt.Printf("err:%s \n", err)
 		}
-		var arr []string
-		for i, header := range consumerMessages[i].Headers {
-			arr = append(arr, strconv.Itoa(i), string(header.Key), string(header.Value))
-		}
-		log.ZInfo(
-			context.Background(),
-			"consumer.kafka.GetContextWithMQHeader",
-			"len",
-			len(consumerMessages[i].Headers),
-			"header",
-			strings.Join(arr, ", "),
-		)
-		log.ZDebug(
-			context.Background(),
-			"single msg come to distribution center",
-			"message",
-			msgFromMQ,
-			"key",
-			string(consumerMessages[i].Key),
-		)
+		fmt.Printf("msg:%s \n", &msgFromMQV2)
+		//msgRpcClient.SendMsg(context.Background(),msgFromMQV2)
 	}
 }
 
