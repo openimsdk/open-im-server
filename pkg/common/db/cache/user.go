@@ -244,7 +244,7 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineS
 				}
 				if newPlatformIDs == nil {
 					onlineStatus.Status = constant.Offline
-					onlineStatus.PlatformIDs = nil
+					onlineStatus.PlatformIDs = []int32{}
 					newjsonData, err := json.Marshal(&onlineStatus)
 					if err != nil {
 						return errs.Wrap(err)
