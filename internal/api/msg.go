@@ -15,6 +15,8 @@
 package api
 
 import (
+	"encoding/json"
+
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -167,9 +169,18 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 
 func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendMsgReq *msg.SendMsgReq, err error) {
 	var data interface{}
+	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
-		data = apistruct.TextElem{}
+		text, ok := req.Content["text"].(string)
+		if !ok {
+			return nil, errs.ErrArgs.WithDetail("text is not string")
+		}
+		bytes, err := json.Marshal(apistruct.TextContentElem{Content: text})
+		if err != nil {
+			return nil, errs.ErrArgs.WithDetail(err.Error())
+		}
+		data = apistruct.TextElem{Text: string(bytes)}
 	case constant.Picture:
 		data = apistruct.PictureElem{}
 	case constant.Voice:
