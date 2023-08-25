@@ -164,30 +164,31 @@ func (m *msgServer) SearchMessage(ctx context.Context, req *msg.SearchMessageReq
 		}
 	}
 	for _, chatLog := range chatLogs {
-		pbChatLog := &msg.ChatLog{}
-		utils.CopyStructFields(pbChatLog, chatLog)
-		pbChatLog.SendTime = chatLog.SendTime
-		pbChatLog.CreateTime = chatLog.CreateTime
+		pbchatLog := &msg.ChatLog{}
+		utils.CopyStructFields(pbchatLog, chatLog)
+		pbchatLog.SendTime = chatLog.SendTime
+		pbchatLog.CreateTime = chatLog.CreateTime
 		if chatLog.SenderNickname == "" {
-			pbChatLog.SenderNickname = sendMap[chatLog.SendID]
+			pbchatLog.SenderNickname = sendMap[chatLog.SendID]
 		}
 		switch chatLog.SessionType {
 		case constant.SingleChatType:
-			pbChatLog.RecvNickname = recvMap[chatLog.RecvID]
+			pbchatLog.RecvNickname = recvMap[chatLog.RecvID]
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			pbChatLog.SenderFaceURL = groupMap[chatLog.GroupID].FaceURL
-			pbChatLog.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
-			pbChatLog.RecvID = groupMap[chatLog.GroupID].GroupID
-			pbChatLog.GroupName = groupMap[chatLog.GroupID].GroupName
-			pbChatLog.GroupOwner = groupMap[chatLog.GroupID].OwnerUserID
-			pbChatLog.GroupType = groupMap[chatLog.GroupID].GroupType
+			pbchatLog.SenderFaceURL = groupMap[chatLog.GroupID].FaceURL
+			pbchatLog.GroupMemberCount = groupMap[chatLog.GroupID].MemberCount
+			pbchatLog.RecvID = groupMap[chatLog.GroupID].GroupID
+			pbchatLog.GroupName = groupMap[chatLog.GroupID].GroupName
+			pbchatLog.GroupOwner = groupMap[chatLog.GroupID].OwnerUserID
+			pbchatLog.GroupType = groupMap[chatLog.GroupID].GroupType
 		}
-		resp.ChatLogs = append(resp.ChatLogs, pbChatLog)
+		resp.ChatLogs = append(resp.ChatLogs, pbchatLog)
 	}
 	resp.ChatLogsNum = total
 	return resp, nil
 }
+
 func (m *msgServer) GetServerTime(ctx context.Context, _ *msg.GetServerTimeReq) (*msg.GetServerTimeResp, error) {
 	return &msg.GetServerTimeResp{ServerTime: utils.GetCurrentTimestampByMill()}, nil
 }

@@ -15,23 +15,23 @@
 package controller
 
 import (
-	pbMsg "github.com/OpenIMSDK/protocol/msg"
+	pbmsg "github.com/OpenIMSDK/protocol/msg"
 
-	relationTb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 type ChatLogDatabase interface {
-	CreateChatLog(msg *pbMsg.MsgDataToMQ) error
+	CreateChatLog(msg *pbmsg.MsgDataToMQ) error
 }
 
-func NewChatLogDatabase(chatLogModelInterface relationTb.ChatLogModelInterface) ChatLogDatabase {
+func NewChatLogDatabase(chatLogModelInterface relationtb.ChatLogModelInterface) ChatLogDatabase {
 	return &chatLogDatabase{chatLogModel: chatLogModelInterface}
 }
 
 type chatLogDatabase struct {
-	chatLogModel relationTb.ChatLogModelInterface
+	chatLogModel relationtb.ChatLogModelInterface
 }
 
-func (c *chatLogDatabase) CreateChatLog(msg *pbMsg.MsgDataToMQ) error {
+func (c *chatLogDatabase) CreateChatLog(msg *pbmsg.MsgDataToMQ) error {
 	return c.chatLogModel.Create(msg)
 }

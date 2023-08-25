@@ -152,7 +152,7 @@ EOF
     cd ..;
     docker-compose up -d;
     cd scripts;
-    ./docker_check_service.sh;
+    ./docker-check-service.sh;
 }
 
 read choice

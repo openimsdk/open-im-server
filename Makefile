@@ -6,13 +6,13 @@
 
 ## all: Run tidy, gen, add-copyright, format, lint, cover, build ✨
 .PHONY: all
-all: tidy gen add-copyright format lint cover build
+all: tidy gen add-copyright verify lint cover restart
 
 # ==============================================================================
 # Build set
 
 ROOT_PACKAGE=github.com/OpenIMSDK/Open-IM-Server
-# TODO: This is version control for the future
+# TODO: This is version control for the future https://github.com/OpenIMSDK/Open-IM-Server/issues/574
 VERSION_PACKAGE=github.com/OpenIMSDK/Open-IM-Server/pkg/version
 
 # ==============================================================================
@@ -53,15 +53,44 @@ export USAGE_OPTIONS
 # ==============================================================================
 # Targets
 
+## init: Initialize openim server project ✨
+.PHONY: init
+init:
+	@$(MAKE) gen.init
+
+## demo: Run demo get started with Makefiles quickly ✨
+.PHONY: demo
+demo:
+	@$(MAKE) go.demo
+
 ## build: Build binaries by default ✨
 .PHONY: build
 build:
 	@$(MAKE) go.build
 
+## start: Start openim ✨
+.PHONY: start
+start:
+	@$(MAKE) go.start
+
+## stop: Stop openim ✨
+.PHONY: stop
+stop:
+	@$(MAKE) go.stop
+
+## restart: Restart openim ✨
+.PHONY: restart
+restart: clean stop build init start
+
 ## multiarch: Build binaries for multiple platforms. See option PLATFORMS. ✨
 .PHONY: multiarch
 multiarch:
 	@$(MAKE) go.build.multiarch
+
+## verify: execute all verity scripts. ✨
+.PHONY: verify
+verify:
+	@$(MAKE) go.verify
 
 ## install: Install deployment openim ✨
 .PHONY: install
@@ -72,6 +101,11 @@ install:
 .PHONY: check
 check:
 	@$(MAKE) go.check
+
+## check-component
+.PHONY: check-component
+check-component:
+	@$(MAKE) go.check-component
 
 ## tidy: tidy go.mod ✨
 .PHONY: tidy

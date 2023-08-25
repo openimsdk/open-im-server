@@ -20,16 +20,13 @@ on:
       - 'README.md'
       - 'CONTRIBUTING.md'
       - 'docs/**'
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'README.md'
-      - 'CONTRIBUTING.md'
-      - 'docs/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
 
 permissions:
-  pull-requests: write
   contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -60,6 +57,12 @@ jobs:
           echo "Run go format successfully" 
         continue-on-error: true
 
+      - name: Run go lint
+        run: |
+          sudo make lint
+          echo "Run go lint successfully" 
+        continue-on-error: true
+
       - name: Generate all necessary files, such as error code files
         run: |
           make generate
@@ -72,18 +75,13 @@ jobs:
           echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: go
+    #   - name: Initialize CodeQL
+    #     uses: github/codeql-action/init@v2
+    #     with:
+    #       languages: go
 
-      - name: Build source code for host platform
-        run: |
-          sudo make build
-          echo "Build source code for host platform successfully" 
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+    #   - name: Perform CodeQL Analysis
+        # uses: github/codeql-action/analyze@v2
 
       - name: OpenIM verify copyright
         run: |
@@ -92,23 +90,33 @@ jobs:
           echo "OpenIM verify successfully" 
         continue-on-error: true
       
-      - name: Commit code
-        run: |
-            git add .
+    #   - name: Commit code
+    #     run: |
+    #         git add .
+    #         git commit -m "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
     
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
           title: Bump League Patch to cicd/patch-${{ github.event.number }}
+          author: kubbot <kubbot@3293172751ysy@gmail.com>
+          signoff: false
+          draft: false
+          branch: "cicd/patch-${{ github.event.number }}"
+          assignees: cubxxw
+          reviewers: cubxxw
+          delete-branch: true
           body: |
             Review criteria:
-            
+
             - [ ] Disenchanter can connect and issue actions
             
-            This is an automated PR.
+            This is an automated PR. @ ${{ github.actor }}
             <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
-          branch: cicd/patch-${{ github.event.number }}
-          labels: kind/documentation, area/test, ok-to-test
-          token: ${{ secrets.REDBOT_GITHUB_TOKEN }}
+          labels: |
+            kind/documentation
+            enhancement
+            report

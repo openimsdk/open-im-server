@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	pbGroup "github.com/OpenIMSDK/protocol/group"
+	pbgroup "github.com/OpenIMSDK/protocol/group"
 	sdkws "github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
@@ -32,9 +32,9 @@ import (
 
 func (s *groupServer) GetJoinedSuperGroupList(
 	ctx context.Context,
-	req *pbGroup.GetJoinedSuperGroupListReq,
-) (*pbGroup.GetJoinedSuperGroupListResp, error) {
-	resp := &pbGroup.GetJoinedSuperGroupListResp{}
+	req *pbgroup.GetJoinedSuperGroupListReq,
+) (*pbgroup.GetJoinedSuperGroupListResp, error) {
+	resp := &pbgroup.GetJoinedSuperGroupListResp{}
 	groupIDs, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
 	if err != nil {
 		return nil, err
@@ -80,9 +80,9 @@ func (s *groupServer) GetJoinedSuperGroupList(
 
 func (s *groupServer) GetSuperGroupsInfo(
 	ctx context.Context,
-	req *pbGroup.GetSuperGroupsInfoReq,
-) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
-	resp = &pbGroup.GetSuperGroupsInfoResp{}
+	req *pbgroup.GetSuperGroupsInfoReq,
+) (resp *pbgroup.GetSuperGroupsInfoResp, err error) {
+	resp = &pbgroup.GetSuperGroupsInfoResp{}
 	if len(req.GroupIDs) == 0 {
 		return nil, errs.ErrArgs.Wrap("groupIDs empty")
 	}

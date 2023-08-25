@@ -14,7 +14,6 @@
 
 # ==============================================================================
 # Makefile helper functions for docker image
-# TODO: For the time being only used for compilation, it can be arm or amd, please do not delete it, it can be extended with new functions
 # ==============================================================================
 # Path: scripts/make-rules/image.mk
 # docker registry: registry.example.com/namespace/image:tag as: registry.hub.docker.com/cubxxw/<image-name>:<tag>
@@ -24,8 +23,11 @@
 DOCKER := docker
 DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41
 
-REGISTRY_PREFIX ?= ghcr.io/OpenIMSDK
-IMAGES ?= lvscare
+# read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md
+REGISTRY_PREFIX ?= ghcr.io/openimsdk
+
+BASE_IMAGE ?= ghcr.io/openim-sigs/openim-bash-image
+
 IMAGE_PLAT ?= $(subst $(SPACE),$(COMMA),$(subst _,/,$(PLATFORMS)))
 
 EXTRA_ARGS ?= --no-cache
@@ -39,8 +41,8 @@ ifneq ($(EXTRA_ARGS), )
 _DOCKER_BUILD_EXTRA_ARGS += $(EXTRA_ARGS)
 endif
 
-# Determine image files by looking into build/docker/*/Dockerfile
-IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/docker/*)
+# Determine image files by looking into build/images/*/Dockerfile
+IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/images/*)
 # Determine images names by stripping out the dir names
 IMAGES ?= $(filter-out tools,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 
@@ -58,11 +60,11 @@ endif
 # - have enable BuildKit, More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 # - be able to push the image for your registry (i.e. if you do not inform a valid value via IMG=<myregistry/image:<tag>> then the export will fail)
 # To properly provided solutions that supports more than one platform you should use this option.
-## Build and push docker image for the manager for cross-platform support
+## image.docker-buildx: Build and push docker image for the manager for cross-platform support
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 # copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
-.PHONY: docker-buildx
-docker-buildx:
+.PHONY: image.docker-buildx
+image.docker-buildx:
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
 	- $(CONTAINER_TOOL) buildx create --name project-v3-builder
 	$(CONTAINER_TOOL) buildx use project-v3-builder
@@ -102,25 +104,26 @@ image.build.multiarch: image.verify $(foreach p,$(PLATFORMS),$(addprefix image.b
 
 ## image.build.%: Build docker image for a specific platform
 .PHONY: image.build.%
-image.build.%: go.bin.%
+image.build.%: go.build.%
 	$(eval IMAGE := $(COMMAND))
 	$(eval IMAGE_PLAT := $(subst _,/,$(PLATFORM)))
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
-	@echo "===========> Building LOCAL docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
+	@echo "===========> Building docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
 	@mkdir -p $(TMP_DIR)/$(IMAGE)/$(PLATFORM)
-	@cat $(ROOT_DIR)/docker/$(IMAGE)/Dockerfile\
-		>$(TMP_DIR)/$(IMAGE)/Dockerfile
-	@cp $(BIN_DIR)/$(PLATFORM)/$(IMAGE) $(TMP_DIR)/$(IMAGE)/$(PLATFORM)
-
-	$(eval BUILD_SUFFIX := --load --pull -t $(REGISTRY_PREFIX)/$(IMAGE):$(VERSION) $(TMP_DIR)/$(IMAGE))
-	$(eval BUILD_SUFFIX_ARM := --load --pull -t $(REGISTRY_PREFIX)/$(IMAGE).$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
-	@if [ "$(ARCH)" == "amd64" ]; then \
-		echo "===========> Creating LOCAL docker image tag $(REGISTRY_PREFIX)/$(IMAGE):$(VERSION) for $(ARCH)"; \
-		$(DOCKER) buildx build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX); \
+	@awk '/FROM/ {c++; if (c==2) {print; next}} c>=2' $(ROOT_DIR)/build/images/$(IMAGE)/Dockerfile \
+| sed -e "s#BASE_IMAGE#$(BASE_IMAGE)#g" \
+      -e 's/--from=builder //g' \
+      -e 's#COPY /openim/openim-server/#COPY ./#g' > $(TMP_DIR)/$(IMAGE)/Dockerfile
+	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
+	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
+	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
+		$(MAKE) image.daemon.verify ;\
+		$(DOCKER) build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX) ; \
 	else \
-		echo "===========> Creating LOCAL docker image tag $(REGISTRY_PREFIX)/$(IMAGE).$(ARCH):$(VERSION) for $(ARCH)"; \
-		$(DOCKER) buildx build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX_ARM); \
+		$(DOCKER) build $(BUILD_SUFFIX) ; \
 	fi
+	@rm -rf $(TMP_DIR)/$(IMAGE)
+
 
 # https://docs.docker.com/build/building/multi-platform/
 # busybox image supports amd64, arm32v5, arm32v6, arm32v7, arm64v8, i386, ppc64le, and s390x
@@ -179,7 +182,7 @@ image.manifest.push.multiarch: image.push.multiarch $(addprefix image.manifest.p
 .PHONY: image.manifest.push.multiarch.%
 image.manifest.push.multiarch.%:
 	@echo "===========> Pushing manifest $* $(VERSION) to $(REGISTRY_PREFIX) and then remove the local manifest list"
-	REGISTRY_PREFIX=$(REGISTRY_PREFIX) PLATFROMS="$(PLATFORMS)" IMAGE=$* VERSION=$(VERSION) DOCKER_CLI_EXPERIMENTAL=enabled \
+	REGISTRY_PREFIX=$(REGISTRY_PREFIX) PLATFORMS="$(PLATFORMS)" IMAGE=$* VERSION=$(VERSION) DOCKER_CLI_EXPERIMENTAL=enabled \
 	  $(ROOT_DIR)/build/lib/create-manifest.sh
 
 ## image.help: Print help for image targets

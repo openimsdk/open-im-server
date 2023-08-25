@@ -19,9 +19,8 @@ SCRIPTS_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 OPENIM_ROOT=$(dirname "${SCRIPTS_ROOT}")/..
 
 #Include shell font styles and some basic information
-source $SCRIPTS_ROOT/style_info.sh
+source $SCRIPTS_ROOT/lib/init.sh
 source $SCRIPTS_ROOT/path_info.sh
-source $SCRIPTS_ROOT/function.sh
 
 cd $SCRIPTS_ROOT
 
@@ -44,10 +43,10 @@ echo -e "===> ${PURPLE_PREFIX} you api url is:$API_URL ${COLOR_SUFFIX}"
 echo ""
 
 # Specify the config file
-config_file=${OPENIM_ROOT}/config/config.yaml
+config_file="${OPENIM_ROOT}"/config/config.yaml
 
 # Load variables from .env file
-source ${OPENIM_ROOT}/.env
+source "${OPENIM_ROOT}"/.env
 
 # Replace the password and username field for mysql
 sed -i "/mysql:/,/database:/ s/password:.*/password: $PASSWORD/" $config_file
