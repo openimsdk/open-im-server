@@ -129,7 +129,7 @@ func (c *UserConnContext) GetToken() string {
 	return c.Req.URL.Query().Get(Token)
 }
 func (c *UserConnContext) SetToken(token string) {
-	c.Req.URL.Query().Set(Token, token)
+	c.Req.URL.RawQuery = Token + "=" + token
 }
 
 func (c *UserConnContext) GetBackground() bool {
