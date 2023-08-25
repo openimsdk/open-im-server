@@ -15,8 +15,6 @@
 package api
 
 import (
-	"encoding/json"
-
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -176,11 +174,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		if !ok {
 			return nil, errs.ErrArgs.WithDetail("text is not string")
 		}
-		bytes, err := json.Marshal(apistruct.TextContentElem{Content: text})
-		if err != nil {
-			return nil, errs.ErrArgs.WithDetail(err.Error())
-		}
-		data = apistruct.TextElem{Text: string(bytes)}
+		data = apistruct.TextContentElem{Content: text}
 		log.ZDebug(c, "getSendMsgReq", "data", data)
 	case constant.Picture:
 		data = apistruct.PictureElem{}
