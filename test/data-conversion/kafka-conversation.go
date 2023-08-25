@@ -16,6 +16,7 @@ package data_conversion
 
 import (
 	"fmt"
+
 	"github.com/Shopify/sarama"
 )
 
