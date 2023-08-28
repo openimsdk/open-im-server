@@ -29,8 +29,8 @@
 zookeeper:
   schema: openim
   address: [ 127.0.0.1:2181 ]
-  username:
-  password:
+  username: ''
+  password: ''
 
 ###################### Mysql ######################
 # MySQL configuration
@@ -60,7 +60,7 @@ mysql:
 # Default MongoDB database name
 # Maximum connection pool size
 mongo:
-  uri:
+  uri: ''
   address: [ 127.0.0.1:37017 ]
   database: openIM_v3
   username: root
@@ -73,7 +73,7 @@ mongo:
 # Username is required only for Redis version 6.0+
 redis:
   address: [ 127.0.0.1:16379 ]
-  username:
+  username: ''
   password: openIM123
 
 ###################### Kafka configuration information ######################
@@ -84,8 +84,8 @@ redis:
 # It's not recommended to modify this topic name
 # Consumer group ID, it's not recommended to modify
 kafka:
-  username:
-  password:
+  username: ''
+  password: ''
   addr: [ 127.0.0.1:9092 ]
   latestMsgToRedis:
     topic: "latestMsgToRedis"
@@ -105,7 +105,7 @@ kafka:
 # IP address to register with zookeeper when starting RPC, the IP and corresponding rpcPort should be accessible by api/gateway
 # Default listen IP is 0.0.0.0
 rpc:
-  registerIP:
+  registerIP: ''
   listenIP: 0.0.0.0
 
 ###################### API configuration information ######################
@@ -132,26 +132,27 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://127.0.0.1:10002"
+  apiURL: "http://14.153.17.42:10002"
   minio:
     bucket: "openim"
     endpoint: "http://127.0.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
-    sessionToken: ""
-    signEndpoint: "http://127.0.0.1:10005"
+    sessionToken: ''
+    signEndpoint: "http://14.153.17.42:10005"
   cos:
-    bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
-    secretID: ""
-    secretKey: ""
-    sessionToken: ""
+    bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
+    secretID: ''
+    secretKey: ''
+    sessionToken: ''
   oss:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
     bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
-    accessKeyID: ""
-    accessKeySecret: ""
-    sessionToken: ""
+    accessKeyID: ''
+    accessKeySecret: ''
+    sessionToken: ''
+
 
 ###################### RPC Port Configuration ######################
 # RPC service ports
@@ -193,11 +194,11 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../../../../../logs/
+  storageLocation: /root/workspaces/openim/openim-server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
-  isStdout: false 
+  isStdout: false
   isJson: false
   withStack: false
 
