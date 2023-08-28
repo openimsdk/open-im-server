@@ -1,9 +1,10 @@
 package kafka
 
 import (
+	"github.com/Shopify/sarama"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tls"
-	"github.com/Shopify/sarama"
 )
 
 // SetupTLSConfig set up the TLS config from config file.
