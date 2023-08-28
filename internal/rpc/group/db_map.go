@@ -49,6 +49,9 @@ func UpdateGroupInfoMap(ctx context.Context, group *sdkws.GroupInfoForSet) map[s
 	if group.ApplyMemberFriend != nil {
 		m["apply_member_friend"] = group.ApplyMemberFriend.Value
 	}
+	if group.Ex != nil {
+		m["ex"] = group.Ex.Value
+	}
 	return m
 }
 
