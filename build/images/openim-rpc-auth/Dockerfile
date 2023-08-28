@@ -49,4 +49,5 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 EXPOSE 10160
 
+# ENTRYPOINT
 CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-auth --port 10160 -c ${SERVER_WORKDIR}/config"]
