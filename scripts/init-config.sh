@@ -31,8 +31,8 @@ readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 # 定义关联数组，其中键是模板文件，值是对应的输出文件 
 # (en: Defines an associative array where the keys are the template files and the values are the corresponding output files.)
 declare -A TEMPLATES=(
-  ["${OPENIM_ROOT}/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
-  ["${OPENIM_ROOT}/templates/openim.yaml"]="${OPENIM_ROOT}/openim-server/main/config/config.yaml"
+  ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
+  ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
 )
 
 for template in "${!TEMPLATES[@]}"; do
