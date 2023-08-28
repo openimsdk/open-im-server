@@ -10,7 +10,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 )
 
-
 func decryptPEM(data []byte, passphrase []byte) ([]byte, error) {
 	if len(passphrase) == 0 {
 		return data, nil
