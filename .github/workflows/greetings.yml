@@ -44,3 +44,4 @@ jobs:
             If this is a bug report, please include relevant logs to help us debug the problem.
             
             [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) to connect and communicate with our developers.
+        continue-on-error: true
