@@ -19,7 +19,7 @@ ADD . .
 RUN make clean
 RUN make build
 
-FROM ghcr.io/openim-sigs/openim-bash-image:latest
+FROM ghcr.io/openim-sigs/openim-ubuntu-image:latest
 
 WORKDIR ${SERVER_WORKDIR}
 
