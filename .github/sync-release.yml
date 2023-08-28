@@ -1,12 +1,12 @@
 OpenIMSDK/openim-docker:
   - source: ./config
-    dest: ./openim-server/main/config
+    dest: ./openim-server/release/config
     replace: true
   - source: ./docs
-    dest: ./openim-server/main/docs
+    dest: ./openim-server/release/docs
     replace: true
   - source: ./scripts
-    dest: ./openim-server/main/scripts
+    dest: ./openim-server/release/scripts
     replace: true
   - source: ./scripts
     dest: ./scripts
