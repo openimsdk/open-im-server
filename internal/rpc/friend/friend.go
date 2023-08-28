@@ -143,9 +143,6 @@ func (s *friendServer) ImportFriends(
 		return nil, err
 	}
 	for _, userID := range req.FriendUserIDs {
-		if err := s.conversationRpcClient.SingleChatFirstCreateConversation(ctx, req.OwnerUserID, userID); err != nil {
-			log.ZError(ctx, "ImportFriends SingleChatFirstCreateConversation", err, "ownerUserID", req.OwnerUserID, "friendUserID", userID)
-		}
 		s.notificationSender.FriendApplicationAgreedNotification(ctx, &pbfriend.RespondFriendApplyReq{
 			FromUserID:   req.OwnerUserID,
 			ToUserID:     userID,
