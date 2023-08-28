@@ -220,4 +220,4 @@ function openim::log::test_log() {
     openim::log::error_exit "openim::log::error_exit"
 }
 
-openim::log::test_log
+# openim::log::test_log
