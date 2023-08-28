@@ -10,7 +10,7 @@ OpenIMSDK/openim-docker:
     replace: true
   - source: ./scripts
     dest: ./scripts
-    replace: true
+    replace: false
   - source: ./Makefile
     dest: ./Makefile
-    replace: true
+    replace: false
