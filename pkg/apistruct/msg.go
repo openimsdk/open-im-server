@@ -76,6 +76,10 @@ type TextElem struct {
 	Text string `mapstructure:"text" validate:"required"`
 }
 
+type TextContentElem struct {
+	Content string `json:"content" validate:"required"`
+}
+
 type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }

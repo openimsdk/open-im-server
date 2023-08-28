@@ -81,9 +81,16 @@ type configStruct struct {
 	} `yaml:"redis"`
 
 	Kafka struct {
-		Username         string   `yaml:"username"`
-		Password         string   `yaml:"password"`
-		Addr             []string `yaml:"addr"`
+		Username string   `yaml:"username"`
+		Password string   `yaml:"password"`
+		Addr     []string `yaml:"addr"`
+		TLS      *struct {
+			CACrt              string `yaml:"caCrt"`
+			ClientCrt          string `yaml:"clientCrt"`
+			ClientKey          string `yaml:"clientKey"`
+			ClientKeyPwd       string `yaml:"clientKeyPwd"`
+			InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+		} `yaml:"tls"`
 		LatestMsgToRedis struct {
 			Topic string `yaml:"topic"`
 		} `yaml:"latestMsgToRedis"`

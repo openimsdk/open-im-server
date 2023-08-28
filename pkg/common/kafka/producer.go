@@ -60,6 +60,7 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	}
 	p.addr = addr
 	p.topic = topic
+	SetupTLSConfig(p.config)
 	var producer sarama.SyncProducer
 	var err error
 	for i := 0; i <= maxRetry; i++ {

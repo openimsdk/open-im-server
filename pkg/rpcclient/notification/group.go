@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/protocol/sdkws"
@@ -235,11 +237,20 @@ func (g *GroupNotificationSender) fillOpUser(ctx context.Context, opUser **sdkws
 	}
 	userID := mcontext.GetOpUserID(ctx)
 	if groupID != "" {
-		member, err := g.db.TakeGroupMember(ctx, groupID, userID)
-		if err == nil {
-			*opUser = g.groupMemberDB2PB(member, 0)
-		} else if !errs.ErrRecordNotFound.Is(err) {
-			return err
+		if authverify.IsManagerUserID(userID) {
+			*opUser = &sdkws.GroupMemberFullInfo{
+				GroupID:        groupID,
+				UserID:         userID,
+				RoleLevel:      constant.GroupAdmin,
+				AppMangerLevel: constant.AppAdmin,
+			}
+		} else {
+			member, err := g.db.TakeGroupMember(ctx, groupID, userID)
+			if err == nil {
+				*opUser = g.groupMemberDB2PB(member, 0)
+			} else if !errs.ErrRecordNotFound.Is(err) {
+				return err
+			}
 		}
 	}
 	user, err := g.getUser(ctx, userID)
