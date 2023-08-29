@@ -20,7 +20,7 @@
 #     package, the build will produce executable files under $(OUT_DIR)/bin/platforms OR $(OUT_DIR)/bin—tools/platforms.
 #     If not specified, "everything" will be built.
 # Usage: `scripts/build-all-service.sh`.
-# Example: `hack/build-go.sh WHAT=cmd/kubelet`.
+# Example: `scripts/build-go.sh WHAT=cmd/kubelet`.
 
 set -o errexit
 set -o nounset
