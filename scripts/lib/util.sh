@@ -289,7 +289,7 @@ openim::util::check_ports() {
 
     # Print information about ports whose processes are not running.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::log::info "### Not started ports:"
+        openim::log::info "\n### Not started ports:"
         for port in "${not_started[@]}"; do
             openim::log::error "Port $port is not started."
         done
@@ -297,7 +297,7 @@ openim::util::check_ports() {
 
     # Print information about ports whose processes are running.
     if [[ ${#started[@]} -ne 0 ]]; then
-        openim::log::info "### Started ports:"
+        openim::log::info "\n### Started ports:"
         for info in "${started[@]}"; do
             openim::log::info "$info"
         done
