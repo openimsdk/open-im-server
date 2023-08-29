@@ -27,6 +27,9 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 trap 'openim::util::onCtrlC' INT
 
 "${OPENIM_ROOT}"/scripts/start-all.sh
+
+sleep 5
+
 "${OPENIM_ROOT}"/scripts/check-all.sh
 
 tail -f ${LOG_FILE}

@@ -62,9 +62,9 @@ function execute_scripts() {
             openim::log::errexit "Script ${script_path##*/} is missing or not executable."
         fi
     done
+    sleep 0.5
 }
 
-sleep 0.5
 
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
