@@ -103,6 +103,9 @@ services:
     # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
     # image: openim/openim-server:main
     container_name: openim-server
+    ports:
+      - 10001:10001
+      - 10002:10002
     healthcheck:
       test: ["CMD-SHELL", "./scripts/check-all.sh"]
       interval: 30s
