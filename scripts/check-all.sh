@@ -28,6 +28,8 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 OPENIM_VERBOSE=4
 
+openim::log::info "\n# Begin to check all openim service"
+
 # OpenIM status
 # Elegant printing function
 print_services_and_ports() {
@@ -55,7 +57,7 @@ print_services_and_ports OPENIM_DEPENDENCY_TARGETS OPENIM_DEPENDENCY_PORT_TARGET
 
 # OpenIM check
 echo "++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
-echo "## Check all dependent service ports"
+openim::log::info "\n## Check all dependent service ports"
 echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 set +e
@@ -69,10 +71,10 @@ else
 fi
 set -e
 
-echo -e "\n## Check OpenIM service name"
+openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
 
-echo -e "\n## Check all OpenIM service ports"
+openim::log::info "\n## Check all OpenIM service ports"
 echo "+++ The port being checked: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 openim::util::check_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}
 if [[ $? -ne 0 ]]; then
