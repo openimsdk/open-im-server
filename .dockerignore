@@ -4,7 +4,7 @@
 .dockerignore
 
 # Ignore build artifacts
-_output/
+# _output/
 logs/
 
 # Ignore non-essential documentation
