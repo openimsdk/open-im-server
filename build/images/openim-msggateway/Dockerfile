@@ -41,10 +41,13 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-ENV OS ${OS}
-ENV ARCH ${ARCH}
+ENV PORT 10140
+ENV WS_PORT 10001
+ENV CONFIG=/openim/openim-server/config
 
-EXPOSE 10140
-EXPOSE 10001
+EXPOSE $PORT
+EXPOSE $WS_PORT
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway --port 10140 --ws_port 10001
+RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway /usr/bin/openim-msggateway
+
+CMD ["bash", "-c", "openim-msggateway -c $CONFIG --port $PORT --ws_port $WS_PORT"]

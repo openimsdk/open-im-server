@@ -47,13 +47,16 @@ FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-ENV OS ${OS}
-ENV ARCH ${ARCH}
-
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms/
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-EXPOSE 10120
-EXPOSE 20120
+ENV PORT 10120 \
+    PROMETHEUS_PORT 20120 \
+    CONFIG=/openim/openim-server/config
 
-CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-friend --port 10120 --prometheus_port 20120 -c ${SERVER_WORKDIR}/config"]
+EXPOSE $PORT
+EXPOSE $PROMETHEUS_PORT
+
+RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-friend /usr/bin/openim-rpc-friend
+
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-friend --port $PORT -c $CONFIG" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-friend --port $PORT -c $CONFIG"; fi"]
