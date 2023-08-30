@@ -36,12 +36,12 @@ jobs:
 
             If you are implementing a feature request, please check with the maintainers that the feature will be accepted first.
 
-            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) to connect and communicate with our developers.
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) to connect and communicate with our developers.
 
           issue-message: |
             Hello! Thank you for filing an issue.
 
             If this is a bug report, please include relevant logs to help us debug the problem.
             
-            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) to connect and communicate with our developers.
+            [Join slack 🤖](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) to connect and communicate with our developers.
         continue-on-error: true
