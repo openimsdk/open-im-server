@@ -94,6 +94,16 @@ services:
     restart: always
     command: minio server /data --console-address ':9090'
 
+  # openim-web:
+  #   image: ghcr.io/openimsdk/openim-web:main
+  #   container_name: openim-web
+  #   environment:
+  #     - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
+  #     - OPENIM_WEB_PPRT=${OPENIM_WEB_PPRT}
+  #   restart: always
+  #   ports:
+  #     - "${OPENIM_WEB_PPRT}:11001"
+
   openim-server:
     image: ghcr.io/openimsdk/openim-server:main
     # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
