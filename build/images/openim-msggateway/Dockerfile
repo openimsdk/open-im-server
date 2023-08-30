@@ -41,9 +41,9 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-ENV PORT 10140
-ENV WS_PORT 10001
-ENV CONFIG=/openim/openim-server/config
+ENV PORT 10140 \
+    WS_PORT 10001 \
+    CONFIG=/openim/openim-server/config
 
 EXPOSE $PORT
 EXPOSE $WS_PORT
