@@ -41,6 +41,6 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer /usr/bin/openim-msgtransfer
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer /usr/bin/openim-msgtransfer
 
 ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-msgtransfer -c $CONFIG --prometheus_port $PROMETHEUS_PORT; else openim-msgtransfer -c $CONFIG; fi"]

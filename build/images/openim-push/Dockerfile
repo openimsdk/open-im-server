@@ -48,6 +48,6 @@ ENV PORT 10170 \
 
 EXPOSE $PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push /usr/bin/openim-push
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push /usr/bin/openim-push
 
 ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-push -c $CONFIG --port $PORT --prometheus_port $PROMETHEUS_PORT; else openim-push -c $CONFIG --port $PORT; fi"]

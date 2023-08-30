@@ -47,6 +47,6 @@ ENV CONFIG=/openim/openim-server/config
 
 EXPOSE $PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-api /usr/bin/openim-api
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-api /usr/bin/openim-api
 
 CMD ["bash", "-c", "openim-api -c $CONFIG --port $PORT"]

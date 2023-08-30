@@ -61,6 +61,11 @@ mkdir -p ${INSTALL_DIR}
 
 def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
 
+###################### Docker compose ###################
+# OPENIM AND CHAT 
+def "CHAT_BRANCH" "main"
+def "SERVER_BRANCH" "main"
+
 ###################### openim 配置 ######################
 # read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
