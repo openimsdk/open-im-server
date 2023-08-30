@@ -123,10 +123,8 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 	}
 	for _, member := range members {
 		if member.Nickname != "" && member.FaceURL != "" {
-			log.ZDebug(ctx, "NotificationUserInfoUpdate continue", "member", member)
 			continue
 		}
-		log.ZDebug(ctx, "NotificationUserInfoUpdate send", "member", member)
 		if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
 			log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
 		}
