@@ -43,4 +43,4 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer /usr/bin/openim-msgtransfer
 
-ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-msgtransfer -c $CONFIG --prometheus_port $PROMETHEUS_PORT; else openim-msgtransfer -c $CONFIG; fi"]
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-msgtransfer -c $OPENIM_SERVER_CONFIG_NAME --prometheus_port $PROMETHEUS_PORT; else openim-msgtransfer -c $OPENIM_SERVER_CONFIG_NAME; fi"]

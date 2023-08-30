@@ -43,11 +43,11 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms/
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-ENV PORT 10200 \
-    CONFIG=/openim/openim-server/config
+ENV PORT 10190 \
+    PROMETHEUS_PORT 21301
 
-EXPOSE $PORT
+EXPOSE 10190
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-third /usr/bin/openim-rpc-third
 
-ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-third --port $PORT -c $CONFIG" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-third --port $PORT -c $CONFIG"; fi"]
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-third --port $PORT -c $OPENIM_SERVER_CONFIG_NAME" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-third --port $PORT -c $OPENIM_SERVER_CONFIG_NAME"; fi"]

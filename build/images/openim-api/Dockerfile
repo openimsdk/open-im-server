@@ -43,10 +43,8 @@ COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-s
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV PORT 10002
-ENV CONFIG=/openim/openim-server/config
-
-EXPOSE $PORT
+EXPOSE 10002
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-api /usr/bin/openim-api
 
-ENTRYPOINT ["bash", "-c", "openim-api -c $CONFIG --port $PORT"]
+ENTRYPOINT ["bash", "-c", "openim-api -c $OPENIM_SERVER_CONFIG_NAME --port $PORT"]

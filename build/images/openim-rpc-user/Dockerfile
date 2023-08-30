@@ -43,10 +43,10 @@ COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-s
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV PORT 10110 \
-    CONFIG=/openim/openim-server/config
+    PROMETHEUS_PORT 20110
 
-EXPOSE $PORT
+EXPOSE 10110
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-user /usr/bin/openim-rpc-user
 
-ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-user --port $PORT -c $CONFIG" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-user --port $PORT -c $CONFIG"; fi"]
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-user --port $PORT -c $OPENIM_SERVER_CONFIG_NAME" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-user --port $PORT -c $OPENIM_SERVER_CONFIG_NAME"; fi"]
