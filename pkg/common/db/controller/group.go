@@ -412,13 +412,8 @@ func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string
 	return m, nil
 }
 
-func (g *groupDatabase) TransferGroupOwner(
-	ctx context.Context,
-	groupID string,
-	oldOwnerUserID, newOwnerUserID string,
-	roleLevel int32,
-) error {
-	if err := g.tx.Transaction(func(tx any) error {
+func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string, roleLevel int32) error {
+	return g.tx.Transaction(func(tx any) error {
 		rowsAffected, err := g.groupMemberDB.NewTx(tx).UpdateRoleLevel(ctx, groupID, oldOwnerUserID, roleLevel)
 		if err != nil {
 			return err
@@ -433,11 +428,8 @@ func (g *groupDatabase) TransferGroupOwner(
 		if rowsAffected != 1 {
 			return utils.Wrap(fmt.Errorf("newOwnerUserID %s rowsAffected = %d", newOwnerUserID, rowsAffected), "")
 		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).ExecDel(ctx)
+		return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).DelGroupMembersHash(groupID).ExecDel(ctx)
+	})
 }
 
 func (g *groupDatabase) UpdateGroupMember(
