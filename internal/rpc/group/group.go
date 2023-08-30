@@ -114,6 +114,26 @@ type groupServer struct {
 	msgRpcClient          rpcclient.MessageRpcClient
 }
 
+func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
+	groupIDs, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, []string{req.UserID}, nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range members {
+		if member.Nickname != "" {
+			continue
+		}
+		if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
+			log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+		}
+	}
+	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
+}
+
 func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
 	if !authverify.IsAppManagerUid(ctx) {
 		groupMember, err := s.GroupDatabase.TakeGroupMember(ctx, groupID, mcontext.GetOpUserID(ctx))
