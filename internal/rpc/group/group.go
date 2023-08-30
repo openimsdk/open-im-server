@@ -116,6 +116,7 @@ type groupServer struct {
 
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
 	defer log.ZDebug(ctx, "return")
+
 	members, err := s.GroupDatabase.FindGroupMember(ctx, nil, []string{req.UserID}, nil)
 	if err != nil {
 		return nil, err
