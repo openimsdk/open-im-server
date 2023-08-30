@@ -147,7 +147,10 @@ func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 	resp, err := u.Client.GetGlobalRecvMessageOpt(ctx, &user.GetGlobalRecvMessageOptReq{
 		UserID: userID,
 	})
-	return resp.GlobalRecvMsgOpt, err
+	if err != nil {
+		return 0, err
+	}
+	return resp.GlobalRecvMsgOpt, nil
 }
 
 // Access verifies the access rights for the provided user ID.
