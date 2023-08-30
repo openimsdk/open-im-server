@@ -124,7 +124,7 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 		return nil, err
 	}
 	for _, member := range members {
-		if member.Nickname != "" {
+		if member.Nickname != "" && member.FaceURL != "" {
 			continue
 		}
 		if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
