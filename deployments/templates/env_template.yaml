@@ -1,19 +1,68 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+# ================= Basic Configuration ===================
+# User for authentication or system operations
 USER=${USER}
+
+# Password associated with the specified user for authentication
 PASSWORD=${PASSWORD}
+
+# Endpoint for the MinIO object storage service
 MINIO_ENDPOINT=${MINIO_ENDPOINT}
+
+# Base URL for the application programming interface (API)
 API_URL=${API_URL}
+
+# Directory path for storing data files or related information
 DATA_DIR=${DATA_DIR}
+
+
+# ============ Component Extension Configuration ==========
+# Address or hostname for the ZooKeeper service (often used in distributed systems for maintaining configuration information)
+ZOOKEEPER_ADDRESS=${ZOOKEEPER_ADDRESS}
+
+# Port on which MySQL database service is running
+MYSQL_PORT=${MYSQL_PORT}
+
+# Password to authenticate with the MySQL database service
+MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+# Port on which MongoDB service is running
+MONGO_PORT=${MONGO_PORT}
+
+# Username to authenticate with the MongoDB service
+MONGO_USERNAME=${MONGO_USERNAME}
+
+# Password to authenticate with the MongoDB service
+MONGO_PASSWORD=${MONGO_PASSWORD}
+
+# Name of the database in MongoDB to be used
+MONGO_DATABASE=${MONGO_DATABASE}
+
+# Port on which Redis in-memory data structure store is running
+REDIS_PORT=${REDIS_PORT}
+
+# Password to authenticate with the Redis service
+REDIS_PASSWORD=${REDIS_PASSWORD}
+
+# Port on which Kafka distributed streaming platform is running
+KAFKA_PORT=${KAFKA_PORT}
+
+# Address or hostname for the Kafka service
+KAFKA_ADDR=${KAFKA_ADDR}
+
+# Topic in Kafka for storing the latest messages in Redis
+KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}
+
+# Topic in Kafka for pushing messages (e.g. notifications or updates)
+KAFKA_MSG_PUSH_TOPIC=${KAFKA_MSG_PUSH_TOPIC}
+
+# Topic in Kafka for storing offline messages in MongoDB
+KAFKA_OFFLINEMSG_MONGO_TOPIC=${KAFKA_OFFLINEMSG_MONGO_TOPIC}
+
+# Port on which MinIO object storage service is running
+MINIO_PORT=${MINIO_PORT}
+
+# Access key to authenticate with the MinIO service
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+
+# Secret key corresponding to the access key for MinIO authentication
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
