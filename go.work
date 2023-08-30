@@ -9,5 +9,5 @@ use (
 	./tools/ncpu
 	./tools/yamlfmt
 	./tools/data-conversion
-	tools/component
+	./tools/component
 )
