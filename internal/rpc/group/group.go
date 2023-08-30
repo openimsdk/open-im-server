@@ -115,11 +115,8 @@ type groupServer struct {
 }
 
 func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgroup.NotificationUserInfoUpdateReq) (*pbgroup.NotificationUserInfoUpdateResp, error) {
-	groupIDs, err := s.GroupDatabase.FindJoinSuperGroup(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, []string{req.UserID}, nil)
+	defer log.ZDebug(ctx, "return")
+	members, err := s.GroupDatabase.FindGroupMember(ctx, nil, []string{req.UserID}, nil)
 	if err != nil {
 		return nil, err
 	}
