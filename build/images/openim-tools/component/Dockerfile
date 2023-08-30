@@ -32,21 +32,18 @@ RUN go mod download
 COPY . .
 
 RUN make clean
-RUN make build BINS=openim-api
+RUN make build BINS=component
 
 # FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
+COPY --from=builder /openim/openim-server/_output/bin/tools /openim/openim-server/_output/bin/tools/
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-ENV PORT 10002
 ENV CONFIG=/openim/openim-server/config
 
-EXPOSE $PORT
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/component /usr/bin/component
 
-RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-api /usr/bin/openim-api
-
-ENTRYPOINT ["bash", "-c", "openim-api -c $CONFIG --port $PORT"]
+ENTRYPOINT ["bash", "-c", "component -c $CONFIG"]
