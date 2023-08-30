@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	. "github.com/OpenIMSDK/Open-IM-Server/tools/conversion/common"
 	pbmsg "github.com/OpenIMSDK/Open-IM-Server/tools/conversion/proto/msg"
 	"github.com/OpenIMSDK/protocol/constant"
 	msgv3 "github.com/OpenIMSDK/protocol/msg"
@@ -31,20 +32,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"sync"
 	"time"
-)
-
-var (
-	topic = "ws2ms_chat"
-	addr  = "127.0.0.1:9092"
-	//addr = "43.128.72.19:9092"
-)
-
-const (
-	ZkAddr     = "43.134.63.160:2181"
-	ZKSchema   = "openim"
-	ZKUsername = ""
-	ZKPassword = ""
-	MsgName    = "Msg"
 )
 
 var consumer sarama.Consumer
@@ -62,14 +49,14 @@ func init() {
 	config.Producer.RequiredAcks = sarama.WaitForAll        // Set producer Message Reply level 0 1 all
 	config.Producer.Partitioner = sarama.NewHashPartitioner // Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
 
-	client, err := sarama.NewSyncProducer([]string{addr}, config)
+	client, err := sarama.NewSyncProducer([]string{KafkaAddr}, config)
 	if err != nil {
 		fmt.Println("producer closed, err:", err)
 	}
 	producerV2 = client
 
 	//Consumer
-	consumerT, err := sarama.NewConsumer([]string{addr}, sarama.NewConfig())
+	consumerT, err := sarama.NewConsumer([]string{KafkaAddr}, sarama.NewConfig())
 	if err != nil {
 		fmt.Printf("fail to start consumer, err:%v\n", err)
 	}
@@ -81,7 +68,7 @@ func init() {
 func SendMessage() {
 	// construct a message
 	msg := &sarama.ProducerMessage{}
-	msg.Topic = topic
+	msg.Topic = Topic
 	msg.Value = sarama.StringEncoder("this is a test log")
 
 	// Send a message
@@ -93,7 +80,7 @@ func SendMessage() {
 }
 
 func GetMessage() {
-	partitionList, err := consumer.Partitions(topic) // Get all partitions according to topic
+	partitionList, err := consumer.Partitions(Topic) // Get all partitions according to topic
 	if err != nil {
 		fmt.Printf("fail to get list of partition:err%v\n", err)
 	}
@@ -105,7 +92,7 @@ func GetMessage() {
 	}
 
 	for partition := range partitionList {
-		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetOldest)
+		pc, err := consumer.ConsumePartition(Topic, int32(partition), sarama.OffsetOldest)
 		if err != nil {
 			panic(err)
 		}
@@ -329,7 +316,7 @@ func NewMessage() msgv3.MsgClient {
 		fmt.Printf("discov, err:%s", err)
 	}
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	conn, err := discov.GetConn(context.Background(), MsgName)
+	conn, err := discov.GetConn(context.Background(), MsgRpcName)
 	if err != nil {
 		fmt.Printf("conn, err:%s", err)
 		panic(err)
