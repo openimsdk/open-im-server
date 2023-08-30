@@ -24,12 +24,27 @@ OpenIM Web Service is a lightweight containerized service built with Go. The ser
 example：
 
 ```bash
-# ./web -h
-Usage of ./web:
+$ ./openim-web -h
+Usage of ./openim-web:
   -distPath string
         Path to the distribution (default "/app/dist")
   -port string
         Port to run the server on (default "20001")
+```
+
+Variables can be set as above, Environment variables can also be set
+
+example:
+
+```bash
+$ export OPENIM_WEB_DIST_PATH="/app/dist"
+$ export OPENIM_WEB_PPRT="11001"
+```
+
+Initialize the env configuration file:
+
+```bash
+$ make init
 ```
 
 ## Docker Deployment
@@ -40,16 +55,16 @@ Even though we've implemented automation, it's to make the developer experience 
 
 To build the Docker image for OpenIM Web Service:
 
-```
-docker build -t openim-web .
+```bash
+$ docker build -t openim-web .
 ```
 
 ### Run the Docker Container
 
 To run the service:
 
-```
-docker run -e DIST_PATH=/app/dist -e PORT=20001 -p 20001:20001 openim-web
+```bash
+$ docker run -e DIST_PATH=/app/dist -e PORT=20001 -p 20001:20001 openim-web
 ```
 
 ## Configuration

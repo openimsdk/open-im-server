@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/NYTimes/gziphandler"
 )
 
 var (
@@ -22,7 +24,10 @@ func main() {
 
 	distPath := getConfigValue("DIST_PATH", distPathFlag, "/app/dist")
 	fs := http.FileServer(http.Dir(distPath))
-	http.Handle("/", fs)
+
+	withGzip := gziphandler.GzipHandler(fs)
+
+	http.Handle("/", withGzip)
 
 	port := getConfigValue("PORT", portFlag, "11001")
 	log.Printf("Server listening on port %s in %s...", port, distPath)
