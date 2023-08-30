@@ -363,6 +363,8 @@ builds:
       - "6"
       - "7"
 
+# TODO：Need a script, such as the init - release to help binary to find the right directory
+# ,which can be compiled binary
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of uname.
@@ -375,17 +377,23 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     # use zip for windows archives
     files:
-      - LICENSE
-      - README.md
-      - README-zh_CN.md
-      - CODE_OF_CONDUCT.md
       - CHANGELOG/*
+      - deployment/*
+      - config/*
+      - build/*
       - scripts/*
       - Makefile
-      - CONTRIBUTING.md
+      - install.sh
       - docs/*
       - src: "*.md"
         dst: docs
+
+        # Set this to true if you want all files in the archive to be in a single directory.
+        # If set to true and you extract the archive 'goreleaser_Linux_arm64.tar.gz',
+        # you'll get a folder 'goreleaser_Linux_arm64'.
+        # If set to false, all files are extracted separately.
+        # You can also set it to a custom folder name (templating is supported).
+        wrap_in_directory: true
 
         # Strip parent folders when adding files to the archive.
         strip_parent: true

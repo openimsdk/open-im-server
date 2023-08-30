@@ -1,64 +1,60 @@
 #fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
-version: "3"
+version: '3'
+
 services:
   mysql:
     image: mysql:5.7
     ports:
-      - 13306:3306
-      - 23306:33060
+      - "${MYSQL_PORT}:3306"
     container_name: mysql
     volumes:
-      - ${DATA_DIR}/components/mysql/data:/var/lib/mysql
-      - /etc/localtime:/etc/localtime
+      - "${DATA_DIR}/components/mysql/data:/var/lib/mysql"
+      - "/etc/localtime:/etc/localtime"
     environment:
-      MYSQL_ROOT_PASSWORD: ${PASSWORD}
+      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
     restart: always
 
   mongodb:
     image: mongo:6.0.2
     ports:
-      - 37017:27017
+      - "${MONGO_PORT}:27017"
     container_name: mongo
     command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
-      - ${DATA_DIR}/components/mongodb/data/db:/data/db
-      - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
-      - ${DATA_DIR}/components/mongodb/data/conf:/etc/mongo
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+      - "${DATA_DIR}/components/mongodb/data/db:/data/db"
+      - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
+      - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
+      - "./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
     environment:
       - TZ=Asia/Shanghai
-      # cache
       - wiredTigerCacheSizeGB=1
-      - MONGO_INITDB_ROOT_USERNAME=${USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${PASSWORD}
-      - MONGO_INITDB_DATABASE=openIM
-      - MONGO_USERNAME=${USER}
-      - MONGO_PASSWORD=${PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
     restart: always
 
   redis:
     image: redis:7.0.0
     ports:
-      - 16379:6379
+      - "${REDIS_PORT}:6379"
     container_name: redis
     volumes:
-      - ${DATA_DIR}/components/redis/data:/data
-      #redis config file
-      - ${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - "${DATA_DIR}/components/redis/data:/data"
+      - "${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
     environment:
       TZ: Asia/Shanghai
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server --requirepass ${PASSWORD} --appendonly yes
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
 
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
-      - 2181:2181
+      - "${ZOOKEEPER_PORT}:2181"
     container_name: zookeeper
     volumes:
-      - /etc/localtime:/etc/localtime
+      - "/etc/localtime:/etc/localtime"
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -69,13 +65,13 @@ services:
     container_name: kafka
     restart: always
     ports:
-      - 9092:9092
+      - "${KAFKA_PORT}:9092"
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-      KAFKA_CREATE_TOPICS: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
+      KAFKA_ZOOKEEPER_CONNECT: "${ZOOKEEPER_ADDRESS}:${ZOOKEEPER_PORT}"
+      KAFKA_CREATE_TOPICS: "${KAFKA_LATESTMSG_REDIS_TOPIC}:8:1,${KAFKA_MSG_PUSH_TOPIC}:8:1,${KAFKA_OFFLINEMSG_MONGO_TOPIC}:8:1"
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://${KAFKA_ADDR}:${KAFKA_PORT},OUTSIDE://CHANGE_TO_YOUR_EXTERNAL_IP:${KAFKA_PORT}
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
@@ -86,15 +82,15 @@ services:
   minio:
     image: minio/minio
     ports:
-      - 10005:9000
-      - 9090:9090
+      - "${MINIO_PORT}:9000"
+      - "9090:9090"
     container_name: minio
     volumes:
-      - ${DATA_DIR}/components/mnt/data:/data
-      - ${DATA_DIR}/components/mnt/config:/root/.minio
+      - "${DATA_DIR}/components/mnt/data:/data"
+      - "${DATA_DIR}/components/mnt/config:/root/.minio"
     environment:
-      MINIO_ROOT_USER: ${USER}
-      MINIO_ROOT_PASSWORD: ${PASSWORD}
+      MINIO_ROOT_USER: "${MINIO_ACCESS_KEY}"
+      MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY}"
     restart: always
     command: minio server /data --console-address ':9090'
 
