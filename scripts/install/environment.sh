@@ -70,6 +70,11 @@ def "OPENIM_LOG_DIR" "/var/log/openim"
 def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 
 def "OPNEIM_CONFIG" ""${OPENIM_ROOT}"/config"
+
+# OpenIM Web 
+def "OPENIM_WEB_DIST_PATH" "/app/dist"
+def "OPENIM_WEB_PPRT" "11001"
+
 # TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
 # TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
 # TODO 使用 readonly 来定义合适，负责无法正常解析, 并且 yaml 模板需要加 "" 来包裹
