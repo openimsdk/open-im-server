@@ -20,7 +20,6 @@
 set -e
 set -o pipefail
 
-
 ############################## OpenIM Github ##############################
 # ... rest of the script ...
 

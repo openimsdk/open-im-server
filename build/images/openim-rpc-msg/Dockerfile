@@ -49,6 +49,6 @@ ENV PORT 10130 \
 EXPOSE $PORT
 EXPOSE $PROMETHEUS_PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-msg /usr/bin/openim-rpc-msg
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-msg /usr/bin/openim-rpc-msg
 
 ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-msg --port $PORT -c $CONFIG" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-msg --port $PORT -c $CONFIG"; fi"]

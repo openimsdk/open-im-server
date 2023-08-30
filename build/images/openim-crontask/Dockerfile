@@ -43,6 +43,6 @@ COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV CONFIG=/openim/openim-server/config
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-crontask /usr/bin/openim-crontask
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-crontask /usr/bin/openim-crontask
 
 CMD ["bash", "-c", "openim-crontask -c $CONFIG"]
