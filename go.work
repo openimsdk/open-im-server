@@ -8,6 +8,6 @@ use (
 	./tools/infra
 	./tools/ncpu
 	./tools/versionchecker
-	./tools/web
+	./tools/openim-web
 	./tools/yamlfmt
 )
