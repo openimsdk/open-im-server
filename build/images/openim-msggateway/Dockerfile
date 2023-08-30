@@ -48,6 +48,6 @@ ENV CONFIG=/openim/openim-server/config
 EXPOSE $PORT
 EXPOSE $WS_PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway /usr/bin/openim-msggateway
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway /usr/bin/openim-msggateway
 
 CMD ["bash", "-c", "openim-msggateway -c $CONFIG --port $PORT --ws_port $WS_PORT"]

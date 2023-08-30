@@ -32,6 +32,7 @@ DATA_DIR=${DATA_DIR}
 # ============ Component Extension Configuration ==========
 # Address or hostname for the ZooKeeper service (often used in distributed systems for maintaining configuration information)
 ZOOKEEPER_ADDRESS=${ZOOKEEPER_ADDRESS}
+ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
 
 # Port on which MySQL database service is running
 MYSQL_PORT=${MYSQL_PORT}
@@ -84,3 +85,8 @@ MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 # ================== OpenIM Web ===========================
 OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
 OPENIM_WEB_PPRT=${OPENIM_WEB_PPRT}
+
+
+# =================== BRANCH NAME =========================
+CHAT_BRANCH=${CHAT_BRANCH}
+SERVER_BRANCH=${SERVER_BRANCH}

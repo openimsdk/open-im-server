@@ -47,6 +47,6 @@ ENV CONFIG=/openim/openim-server/config
 
 EXPOSE $PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-auth /usr/bin/openim-rpc-auth
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-auth /usr/bin/openim-rpc-auth
 
 ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-auth --port $PORT -c $CONFIG" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-auth --port $PORT -c $CONFIG"; fi"]

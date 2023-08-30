@@ -52,6 +52,6 @@ ENV DISTPATH /openim/openim-server/dist
 
 EXPOSE $PORT
 
-RUN ln ${OPENIM_SERVER_BINDIR}/tools/$(get_os)/$(get_arch)/openim-web /usr/bin/openim-web
+RUN mv ${OPENIM_SERVER_BINDIR}/tools/$(get_os)/$(get_arch)/openim-web /usr/bin/openim-web
 
 ENTRYPOINT ["bash", "-c", "openim-web -port $PORT -distPath $DISTPATH"]
