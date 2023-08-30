@@ -44,16 +44,14 @@ FROM ghcr.io/openim-sigs/openim-ubuntu-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms/
-COPY --from=builder /app/dist /app/dist
+COPY --from=builder /openim/openim-server/_output/bin/tools /openim/openim-server/_output/bin/tools/
+COPY --from=builder /openim/openim-server/dist /openim/openim-server/dist
 
 ENV PORT 11001
-ENV DISTPATH /app/dist
+ENV DISTPATH /openim/openim-server/dist
 
 EXPOSE $PORT
 
-RUN cp -r ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-web /usr/bin/openim-web
+RUN ln ${OPENIM_SERVER_BINDIR}/tools/$(get_os)/$(get_arch)/openim-web /usr/bin/openim-web
 
-ENTRYPOINT ["bash", "-c", "openim-web -port $PORT"]
-
-CMD ["-distPath","/app/dist"]
+ENTRYPOINT ["bash", "-c", "openim-web -port $PORT -distPath $DISTPATH"]
