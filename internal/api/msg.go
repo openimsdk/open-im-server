@@ -170,6 +170,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
+
 		data = apistruct.TextElem{}
 	case constant.Picture:
 		data = apistruct.PictureElem{}
