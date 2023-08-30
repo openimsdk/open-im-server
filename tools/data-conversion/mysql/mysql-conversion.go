@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package data_conversion
+package mysql
 
 import (
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	config "github.com/OpenIMSDK/Open-IM-Server/tools/conversion/common"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
 	"gorm.io/driver/mysql"
@@ -30,26 +31,12 @@ var (
 	MysqldbV3 *gorm.DB
 )
 
-const (
-	usernameV2 = "root"
-	passwordV2 = "123456"
-	ipV2       = "127.0.0.1:3306"
-	databaseV2 = "openim_v2"
-)
-
-const (
-	usernameV3 = "root"
-	passwordV3 = "123456"
-	ipV3       = "127.0.0.1:3306"
-	databaseV3 = "openim_v3"
-)
-
 func init() {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		usernameV2,
-		passwordV2,
-		ipV2,
-		databaseV2,
+		config.UsernameV2,
+		config.PasswordV2,
+		config.IpV2,
+		config.DatabaseV2,
 	)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	MysqldbV2 = db
@@ -58,10 +45,10 @@ func init() {
 	}
 
 	dsnV3 := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		usernameV3,
-		passwordV3,
-		ipV3,
-		databaseV3,
+		config.UsernameV3,
+		config.PasswordV3,
+		config.IpV3,
+		config.DatabaseV3,
 	)
 	dbV3, err := gorm.Open(mysql.Open(dsnV3), &gorm.Config{})
 	MysqldbV3 = dbV3
