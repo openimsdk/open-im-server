@@ -43,11 +43,10 @@ COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-s
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV PORT 10170 \
-    PROMETHEUS_PORT 20170 \
-    CONFIG=/openim/openim-server/config
+    PROMETHEUS_PORT 20170
 
-EXPOSE $PORT
+EXPOSE 10170
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push /usr/bin/openim-push
 
-ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-push -c $CONFIG --port $PORT --prometheus_port $PROMETHEUS_PORT; else openim-push -c $CONFIG --port $PORT; fi"]
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-push -c $OPENIM_SERVER_CONFIG_NAME --port $PORT --prometheus_port $PROMETHEUS_PORT; else openim-push -c $OPENIM_SERVER_CONFIG_NAME --port $PORT; fi"]

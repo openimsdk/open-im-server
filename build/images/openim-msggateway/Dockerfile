@@ -42,12 +42,11 @@ COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-s
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV PORT 10140 \
-    WS_PORT 10001 \
-    CONFIG=/openim/openim-server/config
+    WS_PORT 10001
 
-EXPOSE $PORT
-EXPOSE $WS_PORT
+EXPOSE 10140
+EXPOSE 10001
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway /usr/bin/openim-msggateway
 
-CMD ["bash", "-c", "openim-msggateway -c $CONFIG --port $PORT --ws_port $WS_PORT"]
+CMD ["bash", "-c", "openim-msggateway -c $OPENIM_SERVER_CONFIG_NAME --port $PORT --ws_port $WS_PORT"]

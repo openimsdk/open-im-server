@@ -42,8 +42,8 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/tools /openim/openim-server/_output/bin/tools/
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-ENV CONFIG=/openim/openim-server/config
+ENV OPENIM_SERVER_CONFIG_NAME=/openim/openim-server/config
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/component /usr/bin/component
 
-ENTRYPOINT ["bash", "-c", "component -c $CONFIG"]
+ENTRYPOINT ["bash", "-c", "component -c $OPENIM_SERVER_CONFIG_NAME"]
