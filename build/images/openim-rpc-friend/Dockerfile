@@ -33,15 +33,7 @@ COPY . .
 
 RUN make clean
 
-RUN make build BINS=openim-rpc
-# RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-friend ./cmd/openim-rpc/openim-rpc-friend
-
-RUN rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-group && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-msg && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-user && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-conversation && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth
+RUN make build BINS=openim-rpc-friend
 
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 

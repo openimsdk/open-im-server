@@ -42,14 +42,9 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-EXPOSE 10170
-ENV PROMETHEUS_PORT 20170
-
-CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push --port 10170
-
-ENV PORT 10170
-
-ENV CONFIG=/openim/openim-server/config
+ENV PORT 10170 \
+    PROMETHEUS_PORT 20170 \
+    CONFIG=/openim/openim-server/config
 
 EXPOSE $PORT
 
