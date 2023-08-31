@@ -61,11 +61,11 @@ func main() {
 		defer wg.Done()
 		mysql.BlacksConversion()
 	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		mysql.ChatLogsConversion()
-	}()
+	//wg.Add(1)
+	//go func() {
+	//	defer wg.Done()
+	//	mysql.ChatLogsConversion()
+	//}()
 	wg.Wait()
 	SuccessPrint(fmt.Sprintf("Successfully completed the MySQL conversion. \n"))
 
