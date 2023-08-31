@@ -17,6 +17,8 @@ package relation
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"github.com/OpenIMSDK/tools/ormutil"
 
 	"gorm.io/gorm"
@@ -102,4 +104,8 @@ func (b *BlackGorm) FindBlackUserIDs(ctx context.Context, ownerUserID string) (b
 		b.db(ctx).Where("owner_user_id = ?", ownerUserID).Pluck("block_user_id", &blackUserIDs).Error,
 		"",
 	)
+}
+
+func (b *BlackGorm) FindOwnerBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*relation.BlackModel, err error) {
+	return blacks, errs.Wrap(b.db(ctx).Where("owner_user_id = ? and block_user_id in ?", ownerUserID, userIDs).Find(&blacks).Error)
 }
