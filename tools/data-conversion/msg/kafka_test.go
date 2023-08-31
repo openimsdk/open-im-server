@@ -16,10 +16,12 @@ package data_conversion
 
 import "testing"
 
+// pass
 func TestGetMessage(t *testing.T) {
 	GetMessage()
 }
 
+// pass
 func TestSendMessage(t *testing.T) {
 	SendMessage()
 }

@@ -141,7 +141,7 @@ func GroupConversion() {
 		var results []relation.GroupModel
 		MysqldbV2.Limit(batchSize).Offset(offset).Find(&results)
 		for i, val := range results {
-			val.GroupType = constant.WorkingGroup // After version 3.0, there is only one group type, which is the work group
+			results[i].GroupType = constant.WorkingGroup // After version 3.0, there is only one group type, which is the work group
 			temp := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
 			if val.NotificationUpdateTime.Equal(temp) {
 				results[i].NotificationUpdateTime = time.Now()
