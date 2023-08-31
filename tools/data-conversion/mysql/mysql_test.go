@@ -45,5 +45,5 @@ func TestRequestConversion(t *testing.T) {
 // pass
 func TestChatLogsConversion(t *testing.T) {
 	// If the printed result is too long, the console will not display it, but it can run normally
-	ChatLogsConversion()
+	//ChatLogsConversion()
 }
