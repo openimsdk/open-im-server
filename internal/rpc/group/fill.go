@@ -22,12 +22,7 @@ import (
 	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
-func (s *groupServer) FindGroupMember(
-	ctx context.Context,
-	groupIDs []string,
-	userIDs []string,
-	roleLevels []int32,
-) ([]*relationtb.GroupMemberModel, error) {
+func (s *groupServer) FindGroupMember(ctx context.Context, groupIDs []string, userIDs []string, roleLevels []int32) ([]*relationtb.GroupMemberModel, error) {
 	members, err := s.GroupDatabase.FindGroupMember(ctx, groupIDs, userIDs, roleLevels)
 	if err != nil {
 		return nil, err

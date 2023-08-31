@@ -17,6 +17,8 @@ package friend
 import (
 	"context"
 
+	"github.com/OpenIMSDK/protocol/sdkws"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/tools/log"
@@ -354,6 +356,69 @@ func (s *friendServer) GetFriendIDs(
 	resp.FriendIDs, err = s.friendDatabase.FindFriendUserIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfriend.GetSpecifiedFriendsInfoReq) (*pbfriend.GetSpecifiedFriendsInfoResp, error) {
+	if len(req.UserIDList) == 0 {
+		return nil, errs.ErrArgs.Wrap("userIDList is empty")
+	}
+	if utils.Duplicate(req.UserIDList) {
+		return nil, errs.ErrArgs.Wrap("userIDList repeated")
+	}
+	userMap, err := s.userRpcClient.GetUsersInfoMap(ctx, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	blacks, err := s.blackDatabase.FindBlackInfos(ctx, req.OwnerUserID, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	friendMap := utils.SliceToMap(friends, func(e *tablerelation.FriendModel) string {
+		return e.FriendUserID
+	})
+	blackMap := utils.SliceToMap(blacks, func(e *tablerelation.BlackModel) string {
+		return e.BlockUserID
+	})
+	resp := &pbfriend.GetSpecifiedFriendsInfoResp{
+		Infos: make([]*pbfriend.GetSpecifiedFriendsInfoInfo, 0, len(req.UserIDList)),
+	}
+	for _, userID := range req.UserIDList {
+		user := userMap[userID]
+		if user == nil {
+			continue
+		}
+		var friendInfo *sdkws.FriendInfo
+		if friend := friendMap[userID]; friend != nil {
+			friendInfo = &sdkws.FriendInfo{
+				OwnerUserID:    friend.OwnerUserID,
+				Remark:         friend.Remark,
+				CreateTime:     friend.CreateTime.UnixMilli(),
+				AddSource:      friend.AddSource,
+				OperatorUserID: friend.OperatorUserID,
+				Ex:             friend.Ex,
+			}
+		}
+		var blackInfo *sdkws.BlackInfo
+		if black := blackMap[userID]; black != nil {
+			blackInfo = &sdkws.BlackInfo{
+				OwnerUserID:    black.OwnerUserID,
+				CreateTime:     black.CreateTime.UnixMilli(),
+				AddSource:      black.AddSource,
+				OperatorUserID: black.OperatorUserID,
+				Ex:             black.Ex,
+			}
+		}
+		resp.Infos = append(resp.Infos, &pbfriend.GetSpecifiedFriendsInfoInfo{
+			UserInfo:   user,
+			FriendInfo: friendInfo,
+			BlackInfo:  blackInfo,
+		})
 	}
 	return resp, nil
 }
