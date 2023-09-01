@@ -136,7 +136,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 	var unequal int
 	var conv tablerelation.ConversationModel
 	if len(req.UserIDs) == 1 {
-		cs, err := c.conversationDatabase.FindConversations(ctx, req.Conversation.UserID, []string{req.Conversation.ConversationID})
+		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
 		if err != nil {
 			return nil, err
 		}
