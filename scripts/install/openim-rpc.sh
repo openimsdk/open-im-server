@@ -38,7 +38,6 @@
 # Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
 #
 
-
 set -o errexit
 set +o nounset
 set -o pipefail
@@ -122,7 +121,8 @@ function openim::rpc::start() {
 
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-        openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[$i]}
+        # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
+        openim::util::stop_services_on_ports {OPENIM_RPC_PORT_LISTARIES[$i]}
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
     
         # Get the service and Prometheus ports.

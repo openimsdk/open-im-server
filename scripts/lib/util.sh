@@ -281,7 +281,12 @@ openim::util::check_ports() {
             local fd=$(echo $details | awk '{print $3}')
             
             # Get the start time of the process using the PID
-            local start_time=$(ps -p $pid -o lstart=)
+            if [[ -z $pid ]]; then
+                local start_time="N/A"
+            else
+                # Get the start time of the process using the PID
+                local start_time=$(ps -p $pid -o lstart=)
+            fi
             
             started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
         fi
