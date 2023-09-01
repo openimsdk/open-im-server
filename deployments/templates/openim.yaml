@@ -86,7 +86,7 @@ redis:
 kafka:
   username: ${KAFKA_USERNAME}
   password: ${KAFKA_PASSWORD}
-  addr: [ ${KAFKA_ADDR}:${KAFKA_PORT} ]
+  addr: [ ${KAFKA_ADDRESS}:${KAFKA_PORT} ]
   latestMsgToRedis:
     topic: "${KAFKA_LATESTMSG_REDIS_TOPIC}"
   offlineMsgToMongo:

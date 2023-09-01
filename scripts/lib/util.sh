@@ -268,7 +268,7 @@ openim::util::check_ports() {
     # Iterate over each given port.
     for port in "$@"; do
         # Use the `ss` command to find process information related to the given port.
-        local info=$(ss -ltnp | grep -w ":$port" || true)
+        local info=$(ss -ltnp | grep ":$port" || true)
         
         # If there's no process information, it means the process associated with the port is not running.
         if [[ -z $info ]]; then
