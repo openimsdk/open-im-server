@@ -133,7 +133,7 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		// 	}
 		// }
 	}
-	cs, err := c.conversationDatabase.GetConversationsByConversationID(ctx, []string{req.Conversation.ConversationID})
+	cs, err := c.conversationDatabase.FindConversations(ctx, req.Conversation.UserID, []string{req.Conversation.ConversationID})
 	if err != nil {
 		return nil, err
 	}
