@@ -133,34 +133,42 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		// 	}
 		// }
 	}
+	cs, err := c.conversationDatabase.GetConversationsByConversationID(ctx, []string{req.Conversation.ConversationID})
+	if err != nil {
+		return nil, err
+	}
+	if len(cs) == 0 {
+		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
+	}
+	conv := cs[0]
 	var conversation tablerelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
 	m := make(map[string]interface{})
-	if req.Conversation.RecvMsgOpt != nil {
+	if req.Conversation.RecvMsgOpt != nil && req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
 		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
 	}
-	if req.Conversation.AttachedInfo != nil {
+	if req.Conversation.AttachedInfo != nil && req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
 		m["attached_info"] = req.Conversation.AttachedInfo.Value
 	}
-	if req.Conversation.Ex != nil {
+	if req.Conversation.Ex != nil && req.Conversation.Ex.Value != conv.Ex {
 		m["ex"] = req.Conversation.Ex.Value
 	}
-	if req.Conversation.IsPinned != nil {
+	if req.Conversation.IsPinned != nil && req.Conversation.IsPinned.Value != conv.IsPinned {
 		m["is_pinned"] = req.Conversation.IsPinned.Value
 	}
-	if req.Conversation.GroupAtType != nil {
+	if req.Conversation.GroupAtType != nil && req.Conversation.GroupAtType.Value != conv.GroupAtType {
 		m["group_at_type"] = req.Conversation.GroupAtType.Value
 	}
-	if req.Conversation.MsgDestructTime != nil {
+	if req.Conversation.MsgDestructTime != nil && req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
 		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
 	}
-	if req.Conversation.IsMsgDestruct != nil {
+	if req.Conversation.IsMsgDestruct != nil && req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
 		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
 	}
-	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
+	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType && len(m) > 0 {
 		var conversations []*tablerelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
@@ -175,15 +183,16 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	}
-	if req.Conversation.BurnDuration != nil {
+	if req.Conversation.BurnDuration != nil && req.Conversation.BurnDuration.Value != conv.BurnDuration {
 		m["burn_duration"] = req.Conversation.BurnDuration.Value
 	}
-	err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range req.UserIDs {
-		c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+	if len(m) > 0 {
+		if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m); err != nil {
+			return nil, err
+		}
+		for _, v := range req.UserIDs {
+			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
+		}
 	}
 	return &pbconversation.SetConversationsResp{}, nil
 }

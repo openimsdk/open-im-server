@@ -167,6 +167,7 @@ func (m *MessageApi) DeleteMsgPhysical(c *gin.Context) {
 
 func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendMsgReq *msg.SendMsgReq, err error) {
 	var data interface{}
+	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
 		data = apistruct.TextElem{}
@@ -195,7 +196,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	if err := mapstructure.WeakDecode(req.Content, &data); err != nil {
 		return nil, err
 	}
-	log.ZDebug(c, "getSendMsgReq", "data", data)
+	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	if err := m.validate.Struct(data); err != nil {
 		return nil, err
 	}

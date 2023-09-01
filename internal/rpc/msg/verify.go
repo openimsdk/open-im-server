@@ -128,7 +128,9 @@ func (m *msgServer) messageVerification(ctx context.Context, data *msg.SendMsgRe
 
 func (m *msgServer) encapsulateMsgData(msg *sdkws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
-	msg.SendTime = utils.GetCurrentTimestampByMill()
+	if msg.SendTime == 0 {
+		msg.SendTime = utils.GetCurrentTimestampByMill()
+	}
 	switch msg.ContentType {
 	case constant.Text:
 		fallthrough

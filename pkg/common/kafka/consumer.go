@@ -40,6 +40,7 @@ func NewKafkaConsumer(addr []string, topic string) *Consumer {
 		consumerConfig.Net.SASL.User = config.Config.Kafka.Username
 		consumerConfig.Net.SASL.Password = config.Config.Kafka.Password
 	}
+	SetupTLSConfig(consumerConfig)
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
 		panic(err.Error())

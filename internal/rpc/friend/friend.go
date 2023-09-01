@@ -17,6 +17,8 @@ package friend
 import (
 	"context"
 
+	"github.com/OpenIMSDK/protocol/sdkws"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/tools/log"
@@ -41,11 +43,12 @@ import (
 )
 
 type friendServer struct {
-	friendDatabase     controller.FriendDatabase
-	blackDatabase      controller.BlackDatabase
-	userRpcClient      *rpcclient.UserRpcClient
-	notificationSender *notification.FriendNotificationSender
-	RegisterCenter     registry.SvcDiscoveryRegistry
+	friendDatabase        controller.FriendDatabase
+	blackDatabase         controller.BlackDatabase
+	userRpcClient         *rpcclient.UserRpcClient
+	notificationSender    *notification.FriendNotificationSender
+	conversationRpcClient rpcclient.ConversationRpcClient
+	RegisterCenter        registry.SvcDiscoveryRegistry
 }
 
 func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -79,9 +82,10 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 			blackDB,
 			cache.NewBlackCacheRedis(rdb, blackDB, cache.GetDefaultOpt()),
 		),
-		userRpcClient:      &userRpcClient,
-		notificationSender: notificationSender,
-		RegisterCenter:     client,
+		userRpcClient:         &userRpcClient,
+		notificationSender:    notificationSender,
+		RegisterCenter:        client,
+		conversationRpcClient: rpcclient.NewConversationRpcClient(client),
 	})
 	return nil
 }
@@ -131,16 +135,21 @@ func (s *friendServer) ImportFriends(
 	if _, err := s.userRpcClient.GetUsersInfo(ctx, append([]string{req.OwnerUserID}, req.FriendUserIDs...)); err != nil {
 		return nil, err
 	}
-
 	if utils.Contain(req.OwnerUserID, req.FriendUserIDs...) {
 		return nil, errs.ErrCanNotAddYourself.Wrap()
 	}
 	if utils.Duplicate(req.FriendUserIDs) {
 		return nil, errs.ErrArgs.Wrap("friend userID repeated")
 	}
-
 	if err := s.friendDatabase.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport); err != nil {
 		return nil, err
+	}
+	for _, userID := range req.FriendUserIDs {
+		s.notificationSender.FriendApplicationAgreedNotification(ctx, &pbfriend.RespondFriendApplyReq{
+			FromUserID:   req.OwnerUserID,
+			ToUserID:     userID,
+			HandleResult: constant.FriendResponseAgree,
+		})
 	}
 	return &pbfriend.ImportFriendResp{}, nil
 }
@@ -347,6 +356,69 @@ func (s *friendServer) GetFriendIDs(
 	resp.FriendIDs, err = s.friendDatabase.FindFriendUserIDs(ctx, req.UserID)
 	if err != nil {
 		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *friendServer) GetSpecifiedFriendsInfo(ctx context.Context, req *pbfriend.GetSpecifiedFriendsInfoReq) (*pbfriend.GetSpecifiedFriendsInfoResp, error) {
+	if len(req.UserIDList) == 0 {
+		return nil, errs.ErrArgs.Wrap("userIDList is empty")
+	}
+	if utils.Duplicate(req.UserIDList) {
+		return nil, errs.ErrArgs.Wrap("userIDList repeated")
+	}
+	userMap, err := s.userRpcClient.GetUsersInfoMap(ctx, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	friends, err := s.friendDatabase.FindFriendsWithError(ctx, req.OwnerUserID, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	blacks, err := s.blackDatabase.FindBlackInfos(ctx, req.OwnerUserID, req.UserIDList)
+	if err != nil {
+		return nil, err
+	}
+	friendMap := utils.SliceToMap(friends, func(e *tablerelation.FriendModel) string {
+		return e.FriendUserID
+	})
+	blackMap := utils.SliceToMap(blacks, func(e *tablerelation.BlackModel) string {
+		return e.BlockUserID
+	})
+	resp := &pbfriend.GetSpecifiedFriendsInfoResp{
+		Infos: make([]*pbfriend.GetSpecifiedFriendsInfoInfo, 0, len(req.UserIDList)),
+	}
+	for _, userID := range req.UserIDList {
+		user := userMap[userID]
+		if user == nil {
+			continue
+		}
+		var friendInfo *sdkws.FriendInfo
+		if friend := friendMap[userID]; friend != nil {
+			friendInfo = &sdkws.FriendInfo{
+				OwnerUserID:    friend.OwnerUserID,
+				Remark:         friend.Remark,
+				CreateTime:     friend.CreateTime.UnixMilli(),
+				AddSource:      friend.AddSource,
+				OperatorUserID: friend.OperatorUserID,
+				Ex:             friend.Ex,
+			}
+		}
+		var blackInfo *sdkws.BlackInfo
+		if black := blackMap[userID]; black != nil {
+			blackInfo = &sdkws.BlackInfo{
+				OwnerUserID:    black.OwnerUserID,
+				CreateTime:     black.CreateTime.UnixMilli(),
+				AddSource:      black.AddSource,
+				OperatorUserID: black.OperatorUserID,
+				Ex:             black.Ex,
+			}
+		}
+		resp.Infos = append(resp.Infos, &pbfriend.GetSpecifiedFriendsInfoInfo{
+			UserInfo:   user,
+			FriendInfo: friendInfo,
+			BlackInfo:  blackInfo,
+		})
 	}
 	return resp, nil
 }

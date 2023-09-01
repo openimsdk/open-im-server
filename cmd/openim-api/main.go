@@ -18,9 +18,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"net/http"
-	"os"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -44,16 +41,6 @@ func main() {
 	if err := apiCmd.Execute(); err != nil {
 		panic(err.Error())
 	}
-}
-
-func startPprof() {
-	runtime.GOMAXPROCS(1)
-	runtime.SetMutexProfileFraction(1)
-	runtime.SetBlockProfileRate(1)
-	if err := http.ListenAndServe(":6060", nil); err != nil {
-		panic(err)
-	}
-	os.Exit(0)
 }
 
 func run(port int) error {
@@ -92,7 +79,6 @@ func run(port int) error {
 	}
 	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
 	log.ZInfo(context.Background(), "start server success", "address", address, "version", config.Version)
-	go startPprof()
 	err = router.Run(address)
 	if err != nil {
 		log.ZError(context.Background(), "api run failed ", err, "address", address)
