@@ -13,80 +13,86 @@
 # limitations under the License.
 
 # ================= Basic Configuration ===================
-# User for authentication or system operations
-USER=${USER}
+USER=${USER}                                                   # User for authentication or system operations
+PASSWORD=${PASSWORD}                                           # Password associated with the specified user for authentication
+MINIO_ENDPOINT=${MINIO_ENDPOINT}                               # Endpoint for the MinIO object storage service
+API_URL=${API_URL}                                             # Base URL for the application programming interface (API)
+DATA_DIR=${DATA_DIR}                                           # Directory path for storing data files or related information
 
-# Password associated with the specified user for authentication
-PASSWORD=${PASSWORD}
-
-# Endpoint for the MinIO object storage service
-MINIO_ENDPOINT=${MINIO_ENDPOINT}
-
-# Base URL for the application programming interface (API)
-API_URL=${API_URL}
-
-# Directory path for storing data files or related information
-DATA_DIR=${DATA_DIR}
-
+# ================= Network Configuration =================
+DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET}                   # Subnet for the Docker network
+DOCKER_BRIDGE_GATEWAY=${DOCKER_BRIDGE_GATEWAY}                 # Gateway for the Docker network
+MYSQL_NETWORK_ADDRESS=${MYSQL_NETWORK_ADDRESS}                 # Address or hostname for the MySQL network
+MONGO_NETWORK_ADDRESS=${MONGO_NETWORK_ADDRESS}                 # Address or hostname for the MongoDB network
+REDIS_NETWORK_ADDRESS=${REDIS_NETWORK_ADDRESS}                 # Address or hostname for the Redis network
+KAFKA_NETWORK_ADDRESS=${KAFKA_NETWORK_ADDRESS}                 # Address or hostname for the Kafka network
+ZOOKEEPER_NETWORK_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}         # Address or hostname for the ZooKeeper network
+MINIO_NETWORK_ADDRESS=${MINIO_NETWORK_ADDRESS}                 # Address or hostname for the MinIO network
+OPENIM_WEB_NETWORK_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}       # Address or hostname for the OpenIM web network
+OPENIM_SERVER_NETWORK_ADDRESS=${OPENIM_SERVER_NETWORK_ADDRESS} # Address or hostname for the OpenIM server network
+OPENIM_CHAT_NETWORK_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}     # Address or hostname for the OpenIM chat network
+PROMETHEUS_NETWORK_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}       # Address or hostname for the Prometheus network
+GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}             # Address or hostname for the Grafana network
 
 # ============ Component Extension Configuration ==========
-# Address or hostname for the ZooKeeper service (often used in distributed systems for maintaining configuration information)
-ZOOKEEPER_ADDRESS=${ZOOKEEPER_ADDRESS}
-ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
+# ----- ZooKeeper Configuration -----
+ZOOKEEPER_ADDRESS=${ZOOKEEPER_ADDRESS}                       # Address or hostname for the ZooKeeper service
+ZOOKEEPER_PORT=${ZOOKEEPER_PORT}                             # Port for ZooKeeper service
 
-# Port on which MySQL database service is running
-MYSQL_PORT=${MYSQL_PORT}
+# ----- MySQL Configuration -----
+MYSQL_ADDRESS=${MYSQL_ADDRESS}                               # Address or hostname for the MySQL service
+MYSQL_PORT=${MYSQL_PORT}                                     # Port on which MySQL database service is running
+MYSQL_PASSWORD=${MYSQL_PASSWORD}                             # Password to authenticate with the MySQL database service
 
-# Password to authenticate with the MySQL database service
-MYSQL_PASSWORD=${MYSQL_PASSWORD}
+# ----- MongoDB Configuration -----
+MONGO_ADDRESS=${MONGO_ADDRESS}                               # Address or hostname for the MongoDB service
+MONGO_PORT=${MONGO_PORT}                                     # Port on which MongoDB service is running
+MONGO_USERNAME=${MONGO_USERNAME}                             # Username to authenticate with the MongoDB service
+MONGO_PASSWORD=${MONGO_PASSWORD}                             # Password to authenticate with the MongoDB service
+MONGO_DATABASE=${MONGO_DATABASE}                             # Name of the database in MongoDB to be used
 
-# Port on which MongoDB service is running
-MONGO_PORT=${MONGO_PORT}
+# ----- Redis Configuration -----
+REDIS_ADDRESS=${REDIS_ADDRESS}                               # Address or hostname for the Redis service
+REDIS_PORT=${REDIS_PORT}                                     # Port on which Redis in-memory data structure store is running
+REDIS_PASSWORD=${REDIS_PASSWORD}                             # Password to authenticate with the Redis service
 
-# Username to authenticate with the MongoDB service
-MONGO_USERNAME=${MONGO_USERNAME}
+# ----- Kafka Configuration -----
+KAFKA_ADDRESS=${KAFKA_ADDRESS}                               # Address or hostname for the Kafka service
+KAFKA_PORT=${KAFKA_PORT}                                     # Port on which Kafka distributed streaming platform is running
+KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}   # Topic in Kafka for storing the latest messages in Redis
+KAFKA_MSG_PUSH_TOPIC=${KAFKA_MSG_PUSH_TOPIC}                 # Topic in Kafka for pushing messages (e.g. notifications or updates)
+KAFKA_OFFLINEMSG_MONGO_TOPIC=${KAFKA_OFFLINEMSG_MONGO_TOPIC} # Topic in Kafka for storing offline messages in MongoDB
 
-# Password to authenticate with the MongoDB service
-MONGO_PASSWORD=${MONGO_PASSWORD}
+# ----- MinIO Configuration -----
+MINIO_ADDRESS=${MINIO_ADDRESS}                 # Address or hostname for the MinIO object storage service
+MINIO_PORT=${MINIO_PORT}                       # Port on which MinIO object storage service is running
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}           # Access key to authenticate with the MinIO service
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}           # Secret key corresponding to the access key for MinIO authentication
 
-# Name of the database in MongoDB to be used
-MONGO_DATABASE=${MONGO_DATABASE}
+# ----- Prometheus Configuration -----
+PROMETHEUS_ADDRESS=${PROMETHEUS_ADDRESS}       # Address or hostname for the Prometheus service
+PROMETHEUS_PORT=${PROMETHEUS_PORT}             # Port on which Prometheus service is running
 
-# Port on which Redis in-memory data structure store is running
-REDIS_PORT=${REDIS_PORT}
-
-# Password to authenticate with the Redis service
-REDIS_PASSWORD=${REDIS_PASSWORD}
-
-# Port on which Kafka distributed streaming platform is running
-KAFKA_PORT=${KAFKA_PORT}
-
-# Address or hostname for the Kafka service
-KAFKA_ADDR=${KAFKA_ADDR}
-
-# Topic in Kafka for storing the latest messages in Redis
-KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}
-
-# Topic in Kafka for pushing messages (e.g. notifications or updates)
-KAFKA_MSG_PUSH_TOPIC=${KAFKA_MSG_PUSH_TOPIC}
-
-# Topic in Kafka for storing offline messages in MongoDB
-KAFKA_OFFLINEMSG_MONGO_TOPIC=${KAFKA_OFFLINEMSG_MONGO_TOPIC}
-
-# Port on which MinIO object storage service is running
-MINIO_PORT=${MINIO_PORT}
-
-# Access key to authenticate with the MinIO service
-MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-
-# Secret key corresponding to the access key for MinIO authentication
-MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+# ----- Grafana Configuration -----
+GRAFANA_ADDRESS=${GRAFANA_ADDRESS}             # Address or hostname for the Grafana service
+GRAFANA_PORT=${GRAFANA_PORT}                   # Port on which Grafana service is running
 
 # ================== OpenIM Web ===========================
-OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
-OPENIM_WEB_PPRT=${OPENIM_WEB_PPRT}
+OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}   # Path to the OpenIM web distribution
+OPENIM_WEB_PORT=${OPENIM_WEB_PORT}             # Port on which OpenIM web service is running
+OPENIM_WEB_ADDRESS=${OPENIM_WEB_ADDRESS}       # Address or hostname for the OpenIM web service
 
+# =================== OpenIM Server =========================
+OPENIM_SERVER_ADDRESS=${OPENIM_SERVER_ADDRESS} # Address or hostname for the OpenIM server
+OPENIM_WS_PORT=${OPENIM_WS_PORT}               # Port for the OpenIM WebSockets
+API_OPENIM_PORT=${API_OPENIM_PORT}             # Port for the OpenIM API
 
-# =================== BRANCH NAME =========================
-CHAT_BRANCH=${CHAT_BRANCH}
-SERVER_BRANCH=${SERVER_BRANCH}
+# =================== OpenIM Chat ===========================
+CHAT_BRANCH=${CHAT_BRANCH}                     # Branch name for OpenIM chat
+OPENIM_CHAT_ADDRESS=${OPENIM_CHAT_ADDRESS}     # Address or hostname for the OpenIM chat service
+OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}   # Port for the OpenIM chat API
+OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}   # Directory path for storing data files or related information
+
+# =================== OpenIM Admin ==========================
+SERVER_BRANCH=${SERVER_BRANCH}                 # Branch name for OpenIM server
+OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT} # Port for the OpenIM admin API
