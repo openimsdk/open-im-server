@@ -133,42 +133,67 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		// 	}
 		// }
 	}
-	cs, err := c.conversationDatabase.FindConversations(ctx, req.Conversation.UserID, []string{req.Conversation.ConversationID})
-	if err != nil {
-		return nil, err
+	var unequal int
+	var conv tablerelation.ConversationModel
+	if len(req.UserIDs) == 1 {
+		cs, err := c.conversationDatabase.FindConversations(ctx, req.UserIDs[0], []string{req.Conversation.ConversationID})
+		if err != nil {
+			return nil, err
+		}
+		if len(cs) == 0 {
+			return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
+		}
+		conv = *cs[0]
 	}
-	if len(cs) == 0 {
-		return nil, errs.ErrRecordNotFound.Wrap("conversation not found")
-	}
-	conv := cs[0]
 	var conversation tablerelation.ConversationModel
 	conversation.ConversationID = req.Conversation.ConversationID
 	conversation.ConversationType = req.Conversation.ConversationType
 	conversation.UserID = req.Conversation.UserID
 	conversation.GroupID = req.Conversation.GroupID
 	m := make(map[string]interface{})
-	if req.Conversation.RecvMsgOpt != nil && req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
+	if req.Conversation.RecvMsgOpt != nil {
 		m["recv_msg_opt"] = req.Conversation.RecvMsgOpt.Value
+		if req.Conversation.RecvMsgOpt.Value != conv.RecvMsgOpt {
+			unequal++
+		}
 	}
-	if req.Conversation.AttachedInfo != nil && req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
+	if req.Conversation.AttachedInfo != nil {
 		m["attached_info"] = req.Conversation.AttachedInfo.Value
+		if req.Conversation.AttachedInfo.Value != conv.AttachedInfo {
+			unequal++
+		}
 	}
-	if req.Conversation.Ex != nil && req.Conversation.Ex.Value != conv.Ex {
+	if req.Conversation.Ex != nil {
 		m["ex"] = req.Conversation.Ex.Value
+		if req.Conversation.Ex.Value != conv.Ex {
+			unequal++
+		}
 	}
-	if req.Conversation.IsPinned != nil && req.Conversation.IsPinned.Value != conv.IsPinned {
+	if req.Conversation.IsPinned != nil {
 		m["is_pinned"] = req.Conversation.IsPinned.Value
+		if req.Conversation.IsPinned.Value != conv.IsPinned {
+			unequal++
+		}
 	}
-	if req.Conversation.GroupAtType != nil && req.Conversation.GroupAtType.Value != conv.GroupAtType {
+	if req.Conversation.GroupAtType != nil {
 		m["group_at_type"] = req.Conversation.GroupAtType.Value
+		if req.Conversation.GroupAtType.Value != conv.GroupAtType {
+			unequal++
+		}
 	}
-	if req.Conversation.MsgDestructTime != nil && req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
+	if req.Conversation.MsgDestructTime != nil {
 		m["msg_destruct_time"] = req.Conversation.MsgDestructTime.Value
+		if req.Conversation.MsgDestructTime.Value != conv.MsgDestructTime {
+			unequal++
+		}
 	}
-	if req.Conversation.IsMsgDestruct != nil && req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
+	if req.Conversation.IsMsgDestruct != nil {
 		m["is_msg_destruct"] = req.Conversation.IsMsgDestruct.Value
+		if req.Conversation.IsMsgDestruct.Value != conv.IsMsgDestruct {
+			unequal++
+		}
 	}
-	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType && len(m) > 0 {
+	if req.Conversation.IsPrivateChat != nil && req.Conversation.ConversationType != constant.SuperGroupChatType {
 		var conversations []*tablerelation.ConversationModel
 		for _, ownerUserID := range req.UserIDs {
 			conversation2 := conversation
@@ -179,17 +204,22 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
-		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+		if len(req.UserIDs) != 1 || unequal > 0 {
+			for _, userID := range req.UserIDs {
+				c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			}
 		}
 	}
-	if req.Conversation.BurnDuration != nil && req.Conversation.BurnDuration.Value != conv.BurnDuration {
+	if req.Conversation.BurnDuration != nil {
 		m["burn_duration"] = req.Conversation.BurnDuration.Value
-	}
-	if len(m) > 0 {
-		if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m); err != nil {
-			return nil, err
+		if req.Conversation.BurnDuration.Value != conv.BurnDuration {
+			unequal++
 		}
+	}
+	if err := c.conversationDatabase.SetUsersConversationFiledTx(ctx, req.UserIDs, &conversation, m); err != nil {
+		return nil, err
+	}
+	if len(req.UserIDs) != 1 || unequal > 0 {
 		for _, v := range req.UserIDs {
 			c.conversationNotificationSender.ConversationChangeNotification(ctx, v, []string{req.Conversation.ConversationID})
 		}
