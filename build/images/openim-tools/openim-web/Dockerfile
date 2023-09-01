@@ -50,7 +50,7 @@ COPY --from=builder /openim/openim-server/dist /openim/openim-server/dist
 ENV PORT 11001
 ENV DISTPATH /openim/openim-server/dist
 
-EXPOSE $PORT
+EXPOSE 11001
 
 RUN mv ${OPENIM_SERVER_BINDIR}/tools/$(get_os)/$(get_arch)/openim-web /usr/bin/openim-web
 

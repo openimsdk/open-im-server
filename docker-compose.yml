@@ -105,8 +105,8 @@ services:
   #     - "${OPENIM_WEB_PPRT}:11001"
 
   openim-server:
-    image: ghcr.io/openimsdk/openim-server:main
-    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
+    # image: ghcr.io/openimsdk/openim-server:main
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
     # image: openim/openim-server:main
     container_name: openim-server
     healthcheck:

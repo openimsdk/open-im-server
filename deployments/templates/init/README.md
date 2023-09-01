@@ -144,7 +144,7 @@ source ./environment.sh
 cat > openim-api.service.template <<EOF
 [Unit]
 Description=OpenIM Server API
-Documentation=https://github.com/marmotedu/iam/blob/master/init/README.md
+Documentation=https://github.com/oepnimsdk/open-im-server/blob/master/init/README.md
 
 [Service]
 WorkingDirectory=${OPENIM_DATA_DIR}/openim-api
@@ -179,7 +179,7 @@ do
    cat > $service.service.template <<EOF
 [Unit]
 Description=OpenIM Server - $service
-Documentation=https://github.com/marmotedu/iam/blob/master/init/README.md
+Documentation=https://github.com/oepnimsdk/open-im-server/blob/master/init/README.md
 
 [Service]
 WorkingDirectory=${OPENIM_DATA_DIR}/$service
