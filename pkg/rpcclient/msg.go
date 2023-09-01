@@ -250,7 +250,11 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
-	options := config.GetOptionsByNotification(s.contentTypeConf[contentType])
+	optionsConfig := s.contentTypeConf[contentType]
+	if sesstionType == constant.SuperGroupChatType && contentType == constant.HasReadReceipt {
+		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
+	}
+	options := config.GetOptionsByNotification(optionsConfig)
 	msg.Options = options
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
