@@ -118,6 +118,8 @@ services:
       bash -c "
       /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
       "
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
        - KAFKA_CFG_NODE_ID=0
        - TZ=Asia/Shanghai
@@ -161,40 +163,40 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 
-  openim-server:
-    # image: ghcr.io/openimsdk/openim-server:main
-    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
-    # image: openim/openim-server:main
-#    build: .
-    container_name: openim-server
-    ports:
-      - ${OPENIM_WS_PORT}:10001
-      - ${API_OPENIM_PORT}:10002
-    healthcheck:
-      test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
-      interval: 300s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - ./logs:/openim/openim-server/logs
-      - ./_output:/openim/openim-server/_output
-      - ./config:/openim/openim-server/config
-      - ./scripts:/openim/openim-server/scripts
-    restart: always
-    depends_on:
-      - kafka
-      - mysql
-      - mongodb
-      - redis
-      - minio
-    logging:
-      driver: json-file
-      options:
-        max-size: "1g"
-        max-file: "2"
-    networks:
-      server:
-        ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
+#   openim-server:
+#     # image: ghcr.io/openimsdk/openim-server:main
+#     image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
+#     # image: openim/openim-server:main
+# #    build: .
+#     container_name: openim-server
+#     ports:
+#       - ${OPENIM_WS_PORT}:10001
+#       - ${API_OPENIM_PORT}:10002
+#     healthcheck:
+#       test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
+#       interval: 300s
+#       timeout: 10s
+#       retries: 5
+#     volumes:
+#       - ./logs:/openim/openim-server/logs
+#       - ./_output:/openim/openim-server/_output
+#       - ./config:/openim/openim-server/config
+#       - ./scripts:/openim/openim-server/scripts
+#     restart: always
+#     depends_on:
+#       - kafka
+#       - mysql
+#       - mongodb
+#       - redis
+#       - minio
+#     logging:
+#       driver: json-file
+#       options:
+#         max-size: "1g"
+#         max-file: "2"
+#     networks:
+#       server:
+#         ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
 
   # openim-chat:
   #   # image: ghcr.io/openimsdk/openim-chat:main
@@ -231,30 +233,30 @@ services:
   #     server:
   #       ipv4_address: ${OPENIM_CHAT_NETWORK_ADDRESS}
 
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - openim_server_prometheus_config:/etc/prometheus
-    container_name: prometheus
-    ports:
-      - ${PROMETHEUS_PORT}:9091
-    command: --web.listen-address=:9091 --config.file="/etc/prometheus"
-    networks:
-      server:
-        ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - openim_server_prometheus_config:/etc/prometheus
+  #   container_name: prometheus
+  #   ports:
+  #     - ${PROMETHEUS_PORT}:9091
+  #   command: --web.listen-address=:9091 --config.file="/etc/prometheus"
+  #   networks:
+  #     server:
+  #       ipv4_address: ${PROMETHEUS_NETWORK_ADDRESS}
 
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - openim_server_grafana_datasource:/etc/grafana/provisioning/datasources
-      - openim_server_grafana_config:/etc/grafana
-      - openim_server_grafana_dashboard:/var/lib/grafana/dashboards
-    container_name: grafana
-    ports:
-      - ${GRAFANA_PORT}:3000
-    networks:
-      server:
-        ipv4_address: ${GRAFANA_NETWORK_ADDRESS}
+  # grafana:
+  #   image: grafana/grafana
+  #   volumes:
+  #     - openim_server_grafana_datasource:/etc/grafana/provisioning/datasources
+  #     - openim_server_grafana_config:/etc/grafana
+  #     - openim_server_grafana_dashboard:/var/lib/grafana/dashboards
+  #   container_name: grafana
+  #   ports:
+  #     - ${GRAFANA_PORT}:3000
+  #   networks:
+  #     server:
+  #       ipv4_address: ${GRAFANA_NETWORK_ADDRESS}
 
   # node-exporter:
   #   image: quay.io/prometheus/node-exporter
