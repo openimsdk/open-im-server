@@ -128,9 +128,7 @@ $ make demo
 
 
 ```bash
-# choose what you need, We take branch 3.2 as an example
-$ BRANCH=release-v3.2
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim_dir=$(pwd)/openim && cd ${openim_dir}/openim-server
+git clone -b feat/test https://github.com/openim-sigs/openim-docker openim/openim-docker && export openim=$(pwd)/openim && cd $openim/openim-docker  && ./scripts/init-config.sh && docker-compose up -d
 ```
 
 > **Note**
@@ -144,42 +142,36 @@ If you tried to get started quickly with `make demo`, then you know that our con
 
 You can use `make init` to quickly initialize a configuration file
 
+Modify the automation script:
+
+```bash
+cat scripts/install/environment.sh
+```
+
+1. Recommended using environment variables:
+
+```bash
+export PASSWORD="openIM123" # Set password
+export USER="root" # Set username
+# Choose chat version and server version https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md, eg: main, release-v*.*
+export CHAT_BRANCH="main"
+export SERVER_BRANCH="main"
+#... Other environment variables
+# MONGO_USERNAME: This sets the MongoDB username
+# MONGO_PASSWORD: Set the MongoDB password
+# MONGO_DATABASE: Sets the MongoDB database name
+# MINIO_ENDPOINT: set the MinIO service address
+# API_URL: under network environment, set OpenIM Server API address
+export API_URL="http://127.0.0.1:10002"
+```
+
+Next, update the configuration using make init:
+
 ```bash
 $ make init
 $ git diff
 ```
 
-Then feel free to modify your current config file,  you can also modify `/scripts/install/environment.sh` document template, `make init` is essentially rendering `environment.sh` template, and then through the `make init` to automatically generate a new configuration.
-
-If you only need to change the config file for a short time, or if you don't want to make any major changes in the future, you can modify the `.env file directly
-
-```bash
-USER=root 								#no need to modify
-PASSWORD=openIM123  					#A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
-ENDPOINT=http://127.0.0.1:10005 		#minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
-API_URL=http://127.0.0.1:10002/object/ 	#the app must be able to access this IP and port or domain,
-DATA_DIR=./  							#designate large disk directory
-```
-
-**3. Deploy and start**
-
-> **Note**
->
-> You can deploy either directly with `make install` or with `docker compose up`, the logic is the same
-
-```bash
-$ make install
-# OR
-$ docker-compose up
-```
-
-4. Check the service
-
-```bash
-$ make check
-```
-
-Looking at the command line at this point, there are two items in the output, checking for the start of the component port that OpenIM depends on, and the start of the OpenIM core component
 
 </details> 
 
