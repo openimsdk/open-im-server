@@ -90,7 +90,6 @@ verifyCode:
 
 ###################### Admin List ######################
 adminList:
-adminList:
   - adminID: admin1
     nickname: chat1
     imAdmin: openIM123456
