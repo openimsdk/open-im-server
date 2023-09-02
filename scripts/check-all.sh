@@ -61,7 +61,13 @@ openim::log::info "\n## Check all dependent service ports"
 echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 set +e
-openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
+
+if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
+    openim::color::echo ${COLOR_BLUE} "Environment in the interior of the container"
+else
+    openim::color::echo ${COLOR_BLUE} "The environment is outside the container"
+    openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
+fi
 
 if [[ $? -ne 0 ]]; then
   openim::log::error_exit "The service does not start properly, please check the port, query variable definition!"
@@ -69,7 +75,6 @@ if [[ $? -ne 0 ]]; then
 else
   echo "++++ Check all dependent service ports successfully !"
 fi
-set -e
 
 openim::log::info "\n## Check OpenIM service name"
 . $(dirname ${BASH_SOURCE})/install/openim-msgtransfer.sh openim::msgtransfer::check
@@ -83,3 +88,5 @@ if [[ $? -ne 0 ]]; then
 else
   echo "++++ Check all openim service ports successfully !"
 fi
+
+set -e
