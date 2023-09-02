@@ -176,10 +176,10 @@ services:
       timeout: 10s
       retries: 5
     volumes:
-      - openim_server_logs:/openim/openim-server/logs
-      - openim_server_output:/openim/openim-server/_output
-      - openim_server_config:/openim/openim-server/config
-      - openim_server_scripts:/openim/openim-server/scripts
+      - ./logs:/openim/openim-server/logs
+      - ./_output:/openim/openim-server/_output
+      - ./config:/openim/openim-server/config
+      - ./scripts:/openim/openim-server/scripts
     restart: always
     depends_on:
       - kafka
