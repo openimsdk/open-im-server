@@ -116,7 +116,7 @@ services:
       - ${DATA_DIR}/components/kafka:/bitnami/kafka
     command: >
       bash -c "
-      /opt/bitnami/scripts/kafka/run.sh & sleep 1; /opt/bitnami/kafka/create_topic.sh; wait
+      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
       "
     extra_hosts:
       - "host.docker.internal:host-gateway"
