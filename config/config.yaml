@@ -28,7 +28,7 @@
 # Zookeeper password
 zookeeper:
   schema: openim
-  address: [ 172.21.0.1:12181 ]
+  address: [ 172.28.0.1:12181 ]
   username: ''
   password: ''
 
@@ -42,7 +42,7 @@ zookeeper:
 # Log level: 1=slient, 2=error, 3=warn, 4=info
 # Slow query threshold in milliseconds
 mysql:
-  address: [ 172.21.0.1:13306 ]
+  address: [ 172.28.0.1:13306 ]
   username: root
   password: openIM123
   database: openIM_v3
@@ -61,7 +61,7 @@ mysql:
 # Maximum connection pool size
 mongo:
   uri: ''
-  address: [ 172.21.0.1:37017 ]
+  address: [ 172.28.0.1:37017 ]
   database: openIM_v3
   username: root
   password: openIM123
@@ -72,7 +72,7 @@ mongo:
 #
 # Username is required only for Redis version 6.0+
 redis:
-  address: [ 172.21.0.1:16379 ]
+  address: [ 172.28.0.1:16379 ]
   username: ''
   password: openIM123
 
@@ -86,7 +86,7 @@ redis:
 kafka:
   username: ''
   password: ''
-  addr: [ 172.21.0.1:19094 ]
+  addr: [ 172.28.0.1:19094 ]
   latestMsgToRedis:
     topic: "latestMsgToRedis"
   offlineMsgToMongo:
@@ -135,7 +135,7 @@ object:
   apiURL: "http://14.153.6.114:10002"
   minio:
     bucket: "openim"
-    endpoint: "http://172.21.0.1:10005"
+    endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
@@ -194,7 +194,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: /root/workspaces/openim/openim-server/logs/
+  storageLocation: ../logs
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
