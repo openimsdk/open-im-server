@@ -110,26 +110,24 @@ services:
     user: root
     restart: always
     ports:
-    - "${KAFKA_PORT}:9092"
-    - "9093:9093"
-    - "9094:9094"
+    - "${KAFKA_PORT}:9094"
     volumes:
       - ./scripts/create_topic.sh:/opt/bitnami/kafka/create_topic.sh
       - ${DATA_DIR}/components/kafka:/bitnami/kafka
     command: >
       bash -c "
-      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
+      /opt/bitnami/scripts/kafka/run.sh & sleep 1; /opt/bitnami/kafka/create_topic.sh; wait
       "
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-       - KAFKA_CFG_NODE_ID=0
        - TZ=Asia/Shanghai
+       - KAFKA_CFG_NODE_ID=0
        - KAFKA_CFG_PROCESS_ROLES=controller,broker
-       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-       - KAFKA_CFG_ADVERTISED_LISTENERS=INSIDE://${KAFKA_NETWORK_ADDRESS}:9094,OUTSIDE://${KAFKA_NETWORK_ADDRESS}:9092
-       - KAFKA_CFG_LISTENERS=PLAINTEXT://${KAFKA_NETWORK_ADDRESS}:9092,CONTROLLER://${KAFKA_NETWORK_ADDRESS}:9093,EXTERNAL://${KAFKA_NETWORK_ADDRESS}:9094
-       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
+       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY}:${KAFKA_PORT}
+       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
        - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       server:
