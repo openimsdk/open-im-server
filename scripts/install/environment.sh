@@ -206,7 +206,7 @@ def "REDIS_PASSWORD" "${PASSWORD}"                          # Redis的密码
 ###################### Kafka 配置信息 ######################
 def "KAFKA_USERNAME"                                        # `Kafka` 的用户名
 def "KAFKA_PASSWORD"                                        # `Kafka` 的密码
-def "KAFKA_PORT" "19092"                                    # `Kafka` 的端口
+def "KAFKA_PORT" "19094"                                    # `Kafka` 的端口
 def "KAFKA_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}"              # `Kafka` 的地址
 def "KAFKA_LATESTMSG_REDIS_TOPIC" "latestMsgToRedis"        # `Kafka` 的最新消息到Redis的主题
 def "KAFKA_OFFLINEMSG_MONGO_TOPIC" "offlineMsgToMongoMysql" # `Kafka` 的离线消息到Mongo的主题

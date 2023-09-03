@@ -35,7 +35,7 @@ function openim::msggateway::start()
     # OpenIM message gateway service port
     OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
     read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< ${OPENIM_MESSAGE_GATEWAY_PORTS}
-    
+
     # OpenIM WS port
     OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
     read -a OPENIM_WS_PORTS_ARRAY <<< ${OPENIM_WS_PORTS}
