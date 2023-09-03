@@ -105,15 +105,17 @@ services:
         ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS}
 
   kafka:
-    image: 'bitnami/kafka:latest'
+    image: 'bitnami/kafka:3.5.1'
     container_name: kafka
     user: root
     restart: always
     ports:
     - "${KAFKA_PORT}:9092"
+    - "9093:9093"
+    - "9094:9094"
     volumes:
       - ./scripts/create_topic.sh:/opt/bitnami/kafka/create_topic.sh
-      - kafka_data:/bitnami/kafka
+      - ${DATA_DIR}/components/kafka:/bitnami/kafka
     command: >
       bash -c "
       /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
@@ -124,8 +126,9 @@ services:
        - KAFKA_CFG_NODE_ID=0
        - TZ=Asia/Shanghai
        - KAFKA_CFG_PROCESS_ROLES=controller,broker
-       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
        - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+       - KAFKA_CFG_ADVERTISED_LISTENERS=INSIDE://${KAFKA_NETWORK_ADDRESS}:9094,OUTSIDE://${KAFKA_NETWORK_ADDRESS}:9092
+       - KAFKA_CFG_LISTENERS=PLAINTEXT://${KAFKA_NETWORK_ADDRESS}:9092,CONTROLLER://${KAFKA_NETWORK_ADDRESS}:9093,EXTERNAL://${KAFKA_NETWORK_ADDRESS}:9094
        - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
        - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
