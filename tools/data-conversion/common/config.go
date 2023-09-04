@@ -19,7 +19,7 @@ package common
 const (
 	UsernameV2 = "root"
 	PasswordV2 = "openIM"
-	IpV2       = "121.5.182.23:13306"
+	IpV2       = "127.0.0.1:13306"
 	DatabaseV2 = "openIM_v2"
 )
 
@@ -27,7 +27,7 @@ const (
 const (
 	UsernameV3 = "root"
 	PasswordV3 = "openIM123"
-	IpV3       = "43.134.63.160:13306"
+	IpV3       = "127.0.0.1:13306"
 	DatabaseV3 = "openIM_v3"
 )
 
@@ -39,7 +39,7 @@ const (
 
 // Zookeeper
 const (
-	ZkAddr     = "43.134.63.160:2181"
+	ZkAddr     = "127.0.0.1:2181"
 	ZKSchema   = "openim"
 	ZKUsername = ""
 	ZKPassword = ""
