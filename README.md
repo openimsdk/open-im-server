@@ -349,7 +349,7 @@ Before you start, please make sure your changes are in demand. The best for that
 - [Commit Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
 - [Versioning Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 - [Interface Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
-- [Log Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/log.md)
+- [Log Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/logging.md)
 - [Error Code Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
 
 ## :busts_in_silhouette: Community

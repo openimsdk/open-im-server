@@ -324,7 +324,7 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 - [提交标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
 - [版本控制标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 - [接口标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
-- [日志标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/log.md)
+- [日志标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/)
 - [错误代码标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
 
 ## :busts_in_silhouette: 社区

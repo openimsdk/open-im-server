@@ -37,11 +37,3 @@ The above command will ensure the build process takes advantage of all the avail
 ## Installation
 
 (Include installation steps here, e.g., how to clone the repo, build the tool, or install via package manager.)
-
-## Contributing
-
-If you have any suggestions, bug reports, or wish to contribute to the development of `ncpu`, please refer to our contribution guidelines (link to guidelines).
-
-## License
-
-`ncpu` is released under the [LICENSE_NAME](LINK_TO_LICENSE). Please refer to the license file for more details.
