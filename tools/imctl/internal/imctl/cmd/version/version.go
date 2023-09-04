@@ -28,7 +28,7 @@ import (
 
 	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/marmotedu/iam/pkg/cli/genericclioptions"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 // Version is a struct for version information.

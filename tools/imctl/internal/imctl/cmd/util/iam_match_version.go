@@ -26,7 +26,7 @@ import (
 	"github.com/openim-sigs/component-base/pkg/version"
 	"github.com/spf13/pflag"
 
-	"github.com/marmotedu/iam/pkg/cli/genericclioptions"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 const (

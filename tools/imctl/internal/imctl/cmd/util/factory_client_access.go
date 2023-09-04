@@ -21,7 +21,7 @@ import (
 	restclient "github.com/marmotedu/marmotedu-sdk-go/rest"
 	"github.com/marmotedu/marmotedu-sdk-go/tools/clientcmd"
 
-	"github.com/marmotedu/iam/pkg/cli/genericclioptions"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 type factoryImpl struct {

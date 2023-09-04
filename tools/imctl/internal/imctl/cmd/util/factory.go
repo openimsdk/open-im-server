@@ -18,7 +18,7 @@ import (
 	"github.com/marmotedu/marmotedu-sdk-go/marmotedu/service/iam"
 	restclient "github.com/marmotedu/marmotedu-sdk-go/rest"
 
-	"github.com/marmotedu/iam/pkg/cli/genericclioptions"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 // Factory provides abstractions that allow the IAM command to be extended across multiple types
