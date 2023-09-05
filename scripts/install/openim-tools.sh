@@ -71,6 +71,7 @@ readonly OPENIM_TOOLS_PRE_START_NAME_LISTARIES=("${OPENIM_TOOLS_PRE_START_NAME_T
 openim::tools::post_start_name() {
   local targets=(
     infra
+    versionchecker
   )
   echo "${targets[@]}"
 }

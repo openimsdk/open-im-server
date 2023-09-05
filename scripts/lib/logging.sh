@@ -212,11 +212,11 @@ openim::log::success()
 
 function openim::log::test_log() {
     echo_log "test log"
-    openim::log::error "openim::log::error"
     openim::log::info "openim::log::info"
     openim::log::progress "openim::log::progress"
     openim::log::status "openim::log::status"
     openim::log::success "openim::log::success"
+    openim::log::error "openim::log::error"
     openim::log::error_exit "openim::log::error_exit"
 }
 

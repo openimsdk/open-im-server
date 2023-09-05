@@ -58,6 +58,16 @@ export USAGE_OPTIONS
 init:
 	@$(MAKE) gen.init
 
+## init-githooks: Initialize git hooks ✨
+.PHONY: init-githooks
+init-githooks:
+	@$(MAKE) gen.init-githooks
+
+## gen: Generate all necessary files. ✨
+.PHONY: gen
+gen:
+	@$(MAKE) gen.run
+
 ## demo: Run demo get started with Makefiles quickly ✨
 .PHONY: demo
 demo:
@@ -189,11 +199,6 @@ push.multiarch:
 .PHONY: tools
 tools:
 	@$(MAKE) tools.install
-
-## gen: Generate all necessary files. ✨
-.PHONY: gen
-gen:
-	@$(MAKE) gen.run
 
 ## swagger: Generate swagger document. ✨
 .PHONY: swagger

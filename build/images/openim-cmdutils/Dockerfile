@@ -42,4 +42,8 @@ WORKDIR /openim/openim-server
 COPY --from=builder $OPENIM_SERVER_BINDIR/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
 
-CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-cmdutils"]
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-cmdutils /usr/bin/openim-cmdutils
+
+ENTRYPOINT ["openim-cmdutils"]
+
+CMD ["--help"]

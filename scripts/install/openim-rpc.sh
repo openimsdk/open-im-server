@@ -38,7 +38,6 @@
 # Note: Before executing this script, ensure that the necessary permissions are granted and relevant environmental variables are set.
 #
 
-
 set -o errexit
 set +o nounset
 set -o pipefail
@@ -122,19 +121,24 @@ function openim::rpc::start() {
 
     # start all rpc services
     for ((i = 0; i < ${#OPENIM_RPC_SERVICE_LISTARIES[*]}; i++)); do
-        openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES[$i]}
+        # openim::util::stop_services_with_name ${OPENIM_RPC_SERVICE_LISTARIES
+        openim::util::stop_services_on_ports ${OPENIM_RPC_PORT_LISTARIES[$i]}
         openim::log::info "OpenIM ${OPENIM_RPC_SERVICE_LISTARIES[$i]} config path: ${OPENIM_RPC_CONFIG}"
     
         # Get the service and Prometheus ports.
         OPENIM_RPC_SERVICE_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PORT_LISTARIES[$i]}) )
+        read -a OPENIM_RPC_SERVICE_PORTS_ARRAY <<< ${OPENIM_RPC_SERVICE_PORTS}
+        
         OPENIM_RPC_PROM_PORTS=( $(openim::util::list-to-string ${OPENIM_RPC_PROM_PORT_LISTARIES[$i]}) )
-    
-        for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS[@]}; j++)); do
+        read -a OPENIM_RPC_PROM_PORTS_ARRAY <<< ${OPENIM_RPC_PROM_PORTS}
+
+        for ((j = 0; j < ${#OPENIM_RPC_SERVICE_PORTS_ARRAY[@]}; j++)); do
             openim::log::info "Starting ${OPENIM_RPC_SERVICE_LISTARIES[$i]} service, port: ${OPENIM_RPC_SERVICE_PORTS[j]}, prometheus port: ${OPENIM_RPC_PROM_PORTS[j]}, binary root: ${OPENIM_OUTPUT_HOSTBIN}/${OPENIM_RPC_SERVICE_LISTARIES[$i]}"
             openim::rpc::start_service "${OPENIM_RPC_SERVICE_LISTARIES[$i]}" "${OPENIM_RPC_SERVICE_PORTS[j]}" "${OPENIM_RPC_PROM_PORTS[j]}"
-            sleep 0.5
         done
     done
+
+    sleep 0.5
 
     openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
     # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}

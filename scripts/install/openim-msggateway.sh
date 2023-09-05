@@ -33,32 +33,36 @@ function openim::msggateway::start()
     openim::util::stop_services_with_name ${SERVER_NAME}
 
     # OpenIM message gateway service port
-    OPENIM_RPC_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
+    OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
+    read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< ${OPENIM_MESSAGE_GATEWAY_PORTS}
+
     # OpenIM WS port
     OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
+    read -a OPENIM_WS_PORTS_ARRAY <<< ${OPENIM_WS_PORTS}
+    
     # Message Gateway Prometheus port of the service
     MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string ${MSG_GATEWAY_PROM_PORT} )
+    read -a MSG_GATEWAY_PROM_PORTS_ARRAY <<< ${MSG_GATEWAY_PROM_PORTS}
 
-    openim::log::status "OpenIM RPC ports: ${OPENIM_RPC_PORTS[*]}"
+    openim::log::status "OpenIM Mssage Getway ports: ${OPENIM_MESSAGE_GATEWAY_PORTS[*]}"
     openim::log::status "OpenIM WS ports: ${OPENIM_WS_PORTS[*]}"
     openim::log::status "OpenIM Prometheus ports: ${MSG_GATEWAY_PROM_PORTS[*]}"
 
     openim::log::status "OpenIM Msggateway config path: ${OPENIM_MSGGATEWAY_CONFIG}"
 
-    if [ ${#OPENIM_RPC_PORTS[@]} -ne ${#OPENIM_WS_PORTS[@]} ]; then
-    openim::log::error "ws_ports does not match push_rpc_ports or prome_ports in quantity!!!"
-    exit 1
+    if [ ${#OPENIM_MSGGATEWAY_PORTS_ARRAY[@]} -ne ${#OPENIM_WS_PORTS_ARRAY[@]} ]; then
+        openim::log::error_exit "ws_ports does not match push_rpc_ports or prome_ports in quantity!!!"
     fi
 
-    for ((i = 0; i < ${#OPENIM_WS_PORTS[@]}; i++)); do
-    openim::log::info "start push process, port: ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]}, prometheus port: ${PUSH_MSGGATEWAY_PORTS_ARRAY[$i]}"
-    
-    PROMETHEUS_PORT_OPTION=""
-    if [[ -n "${MSG_GATEWAY_PROM_PORTS[$i]}" ]]; then
-        PROMETHEUS_PORT_OPTION="--prometheus_port ${MSG_GATEWAY_PROM_PORTS[$i]}"
-    fi
+    for ((i = 0; i < ${#OPENIM_WS_PORTS_ARRAY[@]}; i++)); do
+        openim::log::info "start push process, port: ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]}, prometheus port: ${MSG_GATEWAY_PROM_PORTS_ARRAY[$i]}"
 
-    nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_RPC_PORTS[$i]} --ws_port ${OPENIM_WS_PORTS[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2>&1 &
+        PROMETHEUS_PORT_OPTION=""
+        if [[ -n "${MSG_GATEWAY_PROM_PORTS_ARRAY[$i]}" ]]; then
+            PROMETHEUS_PORT_OPTION="--prometheus_port ${MSG_GATEWAY_PROM_PORTS_ARRAY[$i]}"
+        fi
+
+        nohup ${OPENIM_MSGGATEWAY_BINARY} --port ${OPENIM_MSGGATEWAY_PORTS_ARRAY[$i]} --ws_port ${OPENIM_WS_PORTS_ARRAY[$i]} $PROMETHEUS_PORT_OPTION -c ${OPENIM_MSGGATEWAY_CONFIG} >> ${LOG_FILE} 2>&1 &
     done
 
     openim::util::check_process_names ${SERVER_NAME}

@@ -22,6 +22,8 @@ set -o pipefail
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd -P)
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
+openim::log::info "\n# Begin Install OpenIM Config"
+
 for file in "${OPENIM_SERVER_TARGETS[@]}"; do
     VARNAME="$(echo $file | tr '[:lower:]' '[:upper:]' | tr '.' '_' | tr '-' '_')"
     VARVALUE="$OPENIM_OUTPUT_HOSTBIN/$file"
