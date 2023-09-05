@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Setup
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Set up Go ${{ matrix.go_version }}
       uses: actions/setup-go@v4
@@ -118,7 +118,7 @@ jobs:
         os: ["ubuntu-latest"]
     steps:
     - name: Checkout and Install OpenIM
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
@@ -138,7 +138,7 @@ jobs:
         os: ["ubuntu-latest"]
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Go ${{ matrix.go_version }}
       uses: actions/setup-go@v4
