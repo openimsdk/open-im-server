@@ -13,7 +13,7 @@
 <a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/OpenIMSDK/Open-IM-Server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server"><img src="https://img.shields.io/github/stars/OpenIMSDK/Open-IM-Server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
+<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
@@ -316,7 +316,7 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 
 如果您想为这个 Open-IM-Server 仓库做贡献，请阅读我们的 [贡献者文档](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md)。
 
-在您开始之前，请确保您的更改是需要的。最好的方法是创建一个 [新的讨论](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) 或 [Slack 通讯](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg)，或者如果您发现一个问题，首先 [报告它](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose)。
+在您开始之前，请确保您的更改是需要的。最好的方法是创建一个 [新的讨论](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) 或 [Slack 通讯](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)，或者如果您发现一个问题，首先 [报告它](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose)。
 
 - [代码标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/go_code.md)
 - [Docker 图像标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
@@ -324,21 +324,21 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 - [提交标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
 - [版本控制标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 - [接口标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
-- [日志标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/log.md)
+- [日志标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/)
 - [错误代码标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
 
 ## :busts_in_silhouette: 社区
 
 - 📚 [OpenIM 社区](https://github.com/OpenIMSDK/community)
 - 💕 [OpenIM 兴趣小组](https://github.com/Openim-sigs)
-- 🚀 [加入我们的 Slack 社区](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg)
+- 🚀 [加入我们的 Slack 社区](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
 - :eyes: [加入我们的微信群 (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: 社区会议
 
 我们希望任何人都可以参与我们的社区并贡献代码，我们提供礼物和奖励，欢迎您每周四晚上加入我们。
 
-我们的会议在 [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 🎯，然后您可以搜索 Open-IM-Server 管道加入。
+我们的会议在 [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯，然后您可以搜索 Open-IM-Server 管道加入。
 
 我们在 [GitHub 讨论](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting) 中记下每次 [双周会议](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) 的笔记，我们的历史会议记录以及会议回放都可在 [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) 中找到。
 

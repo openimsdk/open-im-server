@@ -197,8 +197,10 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 			continue
 		}
 		msgClient := msggateway.NewMsgGatewayClient(v)
-		_, err := msgClient.MultiTerminalLoginCheck(ctx, &msggateway.MultiTerminalLoginCheckReq{UserID: client.UserID,
-			PlatformID: int32(client.PlatformID), Token: client.token})
+		_, err := msgClient.MultiTerminalLoginCheck(ctx, &msggateway.MultiTerminalLoginCheckReq{
+			UserID:     client.UserID,
+			PlatformID: int32(client.PlatformID), Token: client.token,
+		})
 		if err != nil {
 			log.ZWarn(ctx, "MultiTerminalLoginCheck err", err, "node", v.Target())
 			continue
@@ -206,6 +208,7 @@ func (ws *WsServer) sendUserOnlineInfoToOtherNode(ctx context.Context, client *C
 	}
 	return nil
 }
+
 func (ws *WsServer) SetKickHandlerInfo(i *kickHandler) {
 	ws.kickHandlerChan <- i
 }

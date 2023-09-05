@@ -1,4 +1,4 @@
-go 1.20
+go 1.18
 
 use (
 	.
@@ -7,5 +7,7 @@ use (
 	./tools/imctl
 	./tools/infra
 	./tools/ncpu
+	./tools/versionchecker
+	./tools/openim-web
 	./tools/yamlfmt
 )

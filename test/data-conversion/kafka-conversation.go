@@ -25,11 +25,12 @@ var (
 	addr  = "127.0.0.1:9092"
 )
 
-var consumer sarama.Consumer
-var producer sarama.SyncProducer
+var (
+	consumer sarama.Consumer
+	producer sarama.SyncProducer
+)
 
 func init() {
-
 	//Producer
 	config := sarama.NewConfig()            // Instantiate a sarama Config
 	config.Producer.Return.Successes = true // Whether to enable the successes channel to be notified after the message is sent successfully
@@ -43,7 +44,7 @@ func init() {
 	}
 	producer = client
 
-	//Consumer
+	// Consumer
 	consumerT, err := sarama.NewConsumer([]string{addr}, sarama.NewConfig())
 	if err != nil {
 		fmt.Printf("fail to start consumer, err:%v\n", err)
