@@ -21,12 +21,12 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
-	"github.com/openim-sigs/component-base/pkg/util/stringutil"
+	"github.com/openim-sigs/component-base/util/stringutil"
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 )
 
 // ColorOptions is an options struct to support color subcommands.

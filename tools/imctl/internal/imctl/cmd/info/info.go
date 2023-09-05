@@ -21,12 +21,12 @@ import (
 	"strconv"
 
 	hoststat "github.com/likexian/host-stat-go"
-	"github.com/openim-sigs/component-base/pkg/util/iputil"
+	"github.com/openim-sigs/component-base/util/iputil"
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 )
 
 // Info defines the host information struct.
@@ -46,7 +46,7 @@ type InfoOptions struct {
 
 var infoExample = templates.Examples(`
 		# Print the host information
-		iamctl info`)
+		imctl info`)
 
 // NewInfoOptions returns an initialized InfoOptions instance.
 func NewInfoOptions(ioStreams genericclioptions.IOStreams) *InfoOptions {

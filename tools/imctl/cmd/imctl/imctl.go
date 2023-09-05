@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// iamctl is the command line tool for iam platform.
+// iactl is the command line tool for openim platform.
 package main
 
 import (

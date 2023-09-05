@@ -21,14 +21,13 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	restclient "github.com/marmotedu/marmotedu-sdk-go/rest"
 	"github.com/openim-sigs/component-base/pkg/json"
 	"github.com/openim-sigs/component-base/pkg/version"
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 )
 
 // Version is a struct for version information.
@@ -39,7 +38,7 @@ type Version struct {
 
 var versionExample = templates.Examples(`
 		# Print the client and server versions for the current context
-		iamctl version`)
+		imctl version`)
 
 // Options is a struct to support version command.
 type Options struct {

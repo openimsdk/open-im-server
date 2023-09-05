@@ -21,8 +21,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
 	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 )
 
 const defaultBoilerPlate = `
@@ -45,11 +45,11 @@ var (
 	completionLong = templates.LongDesc(`
 		Output shell completion code for the specified shell (bash or zsh).
 		The shell code must be evaluated to provide interactive
-		completion of iamctl commands.  This can be done by sourcing it from
+		completion of imctl commands.  This can be done by sourcing it from
 		the .bash_profile.
 
 		Detailed instructions on how to do this are available here:
-		http://github.com/marmotedu/iam/docs/installation/iamctl.md#enabling-shell-autocompletion
+		http://github.com/marmotedu/iam/docs/installation/imctl.md#enabling-shell-autocompletion
 
 		Note for zsh users: [1] zsh completions are only supported in versions of zsh >= 5.2`)
 
@@ -59,28 +59,28 @@ var (
 		    brew install bash-completion
 		## or, if running Bash 4.1+
 		    brew install bash-completion@2
-		## If iamctl is installed via homebrew, this should start working immediately.
+		## If imctl is installed via homebrew, this should start working immediately.
 		## If you've installed via other means, you may need add the completion to your completion directory
-		    iamctl completion bash > $(brew --prefix)/etc/bash_completion.d/iamctl
+		    imctl completion bash > $(brew --prefix)/etc/bash_completion.d/imctl
 
 
 		# Installing bash completion on Linux
 		## If bash-completion is not installed on Linux, please install the 'bash-completion' package
 		## via your distribution's package manager.
-		## Load the iamctl completion code for bash into the current shell
-		    source <(iamctl completion bash)
+		## Load the imctl completion code for bash into the current shell
+		    source <(imctl completion bash)
 		## Write bash completion code to a file and source if from .bash_profile
-		    iamctl completion bash > ~/.iam/completion.bash.inc
+		    imctl completion bash > ~/.iam/completion.bash.inc
 		    printf "
 		      # IAM shell completion
 		      source '$HOME/.iam/completion.bash.inc'
 		      " >> $HOME/.bash_profile
 		    source $HOME/.bash_profile
 
-		# Load the iamctl completion code for zsh[1] into the current shell
-		    source <(iamctl completion zsh)
-		# Set the iamctl completion code for zsh[1] to autoload on startup
-		    iamctl completion zsh > "${fpath[1]}/_iamctl"`)
+		# Load the imctl completion code for zsh[1] into the current shell
+		    source <(imctl completion zsh)
+		# Set the imctl completion code for zsh[1] to autoload on startup
+		    imctl completion zsh > "${fpath[1]}/_imctl"`)
 )
 
 var completionShells = map[string]func(out io.Writer, boilerPlate string, cmd *cobra.Command) error{
@@ -129,7 +129,7 @@ func RunCompletion(out io.Writer, boilerPlate string, cmd *cobra.Command, args [
 	return run(out, boilerPlate, cmd.Parent())
 }
 
-func runCompletionBash(out io.Writer, boilerPlate string, iamctl *cobra.Command) error {
+func runCompletionBash(out io.Writer, boilerPlate string, imctl *cobra.Command) error {
 	if len(boilerPlate) == 0 {
 		boilerPlate = defaultBoilerPlate
 	}
@@ -138,11 +138,11 @@ func runCompletionBash(out io.Writer, boilerPlate string, iamctl *cobra.Command)
 		return err
 	}
 
-	return iamctl.GenBashCompletion(out)
+	return imctl.GenBashCompletion(out)
 }
 
-func runCompletionZsh(out io.Writer, boilerPlate string, iamctl *cobra.Command) error {
-	zshHead := "#compdef iamctl\n"
+func runCompletionZsh(out io.Writer, boilerPlate string, imctl *cobra.Command) error {
+	zshHead := "#compdef imctl\n"
 
 	if _, err := out.Write([]byte(zshHead)); err != nil {
 		return err
@@ -157,7 +157,7 @@ func runCompletionZsh(out io.Writer, boilerPlate string, iamctl *cobra.Command) 
 	}
 
 	zshInitialization := `
-__iamctl_bash_source() {
+__imctl_bash_source() {
 	alias shopt=':'
 	emulate -L sh
 	setopt kshglob noshglob braceexpand
@@ -165,7 +165,7 @@ __iamctl_bash_source() {
 	source "$@"
 }
 
-__iamctl_type() {
+__imctl_type() {
 	# -t is not supported by zsh
 	if [ "$1" == "-t" ]; then
 		shift
@@ -174,7 +174,7 @@ __iamctl_type() {
 		# "compopt +-o nospace" is used in the code to toggle trailing
 		# spaces. We don't support that, but leave trailing spaces on
 		# all the time
-		if [ "$1" = "__iamctl_compopt" ]; then
+		if [ "$1" = "__imctl_compopt" ]; then
 			echo builtin
 			return 0
 		fi
@@ -182,7 +182,7 @@ __iamctl_type() {
 	type "$@"
 }
 
-__iamctl_compgen() {
+__imctl_compgen() {
 	local completions w
 	completions=( $(compgen "$@") ) || return $?
 
@@ -201,11 +201,11 @@ __iamctl_compgen() {
 	done
 }
 
-__iamctl_compopt() {
+__imctl_compopt() {
 	true # don't do anything. Not supported by bashcompinit in zsh
 }
 
-__iamctl_ltrim_colon_completions()
+__imctl_ltrim_colon_completions()
 {
 	if [[ "$1" == *:* && "$COMP_WORDBREAKS" == *:* ]]; then
 		# Remove colon-word prefix from COMPREPLY items
@@ -217,14 +217,14 @@ __iamctl_ltrim_colon_completions()
 	fi
 }
 
-__iamctl_get_comp_words_by_ref() {
+__imctl_get_comp_words_by_ref() {
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[${COMP_CWORD}-1]}"
 	words=("${COMP_WORDS[@]}")
 	cword=("${COMP_CWORD[@]}")
 }
 
-__iamctl_filedir() {
+__imctl_filedir() {
 	# Don't need to do anything here.
 	# Otherwise we will get trailing space without "compopt -o nospace"
 	true
@@ -240,20 +240,20 @@ if sed --help 2>&1 | grep -q 'GNU\|BusyBox'; then
 	RWORD='\>'
 fi
 
-__iamctl_convert_bash_to_zsh() {
+__imctl_convert_bash_to_zsh() {
 	sed \
 	-e 's/declare -F/whence -w/' \
 	-e 's/_get_comp_words_by_ref "\$@"/_get_comp_words_by_ref "\$*"/' \
 	-e 's/local \([a-zA-Z0-9_]*\)=/local \1; \1=/' \
 	-e 's/flags+=("\(--.*\)=")/flags+=("\1"); two_word_flags+=("\1")/' \
 	-e 's/must_have_one_flag+=("\(--.*\)=")/must_have_one_flag+=("\1")/' \
-	-e "s/${LWORD}_filedir${RWORD}/__iamctl_filedir/g" \
-	-e "s/${LWORD}_get_comp_words_by_ref${RWORD}/__iamctl_get_comp_words_by_ref/g" \
-	-e "s/${LWORD}__ltrim_colon_completions${RWORD}/__iamctl_ltrim_colon_completions/g" \
-	-e "s/${LWORD}compgen${RWORD}/__iamctl_compgen/g" \
-	-e "s/${LWORD}compopt${RWORD}/__iamctl_compopt/g" \
+	-e "s/${LWORD}_filedir${RWORD}/__imctl_filedir/g" \
+	-e "s/${LWORD}_get_comp_words_by_ref${RWORD}/__imctl_get_comp_words_by_ref/g" \
+	-e "s/${LWORD}__ltrim_colon_completions${RWORD}/__imctl_ltrim_colon_completions/g" \
+	-e "s/${LWORD}compgen${RWORD}/__imctl_compgen/g" \
+	-e "s/${LWORD}compopt${RWORD}/__imctl_compopt/g" \
 	-e "s/${LWORD}declare${RWORD}/builtin declare/g" \
-	-e "s/\\\$(type${RWORD}/\$(__iamctl_type/g" \
+	-e "s/\\\$(type${RWORD}/\$(__imctl_type/g" \
 	<<'BASH_COMPLETION_EOF'
 `
 	if _, err := out.Write([]byte(zshInitialization)); err != nil {
@@ -261,7 +261,7 @@ __iamctl_convert_bash_to_zsh() {
 	}
 
 	buf := new(bytes.Buffer)
-	if err := iamctl.GenBashCompletion(buf); err != nil {
+	if err := imctl.GenBashCompletion(buf); err != nil {
 		return err
 	}
 
@@ -273,7 +273,7 @@ __iamctl_convert_bash_to_zsh() {
 BASH_COMPLETION_EOF
 }
 
-__iamctl_bash_source <(__iamctl_convert_bash_to_zsh)
+__imctl_bash_source <(__imctl_convert_bash_to_zsh)
 `
 	if _, err := out.Write([]byte(zshTail)); err != nil {
 		return err

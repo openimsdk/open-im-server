@@ -28,9 +28,9 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 )
 
 const (
@@ -45,16 +45,16 @@ This can improve your R&D efficiency.`)
 
 	newExample = templates.Examples(`
 		# Create a default 'test' command file without a description
-		iamctl new test
+		imctl new test
 
 		# Create a default 'test' command file in /tmp/
-		iamctl new test -d /tmp/
+		imctl new test -d /tmp/
 
 		# Create a default 'test' command file with a description
-		iamctl new test "This is a test command"
+		imctl new test "This is a test command"
 
 		# Create command 'test' with two subcommands
-		iamctl new -g test "This is a test command with two subcommands"`)
+		imctl new -g test "This is a test command with two subcommands"`)
 
 	newUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nat least CMD_NAME is a required argument for the new command",
@@ -68,7 +68,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
@@ -103,7 +103,7 @@ to quickly create a Cobra application.{{.Dot}})
 
 	{{.CommandName}}Example = templates.Examples({{.Dot}}
 		# Print all option values for {{.CommandName}} 
-		iamctl {{.CommandName}} marmotedu marmotedupass{{.Dot}})
+		imctl {{.CommandName}} marmotedu marmotedupass{{.Dot}})
 
 	{{.CommandName}}UsageErrStr = fmt.Sprintf("expected '%s'.\nUSERNAME and PASSWORD are required arguments for the {{.CommandName}} command", {{.CommandName}}UsageStr)
 )
@@ -205,7 +205,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
@@ -253,7 +253,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
@@ -288,10 +288,10 @@ to quickly create a Cobra application.{{.Dot}})
 
 	subcmd1Example = templates.Examples({{.Dot}}
 		# Print all option values for subcmd1
-		iamctl {{.CommandName}} subcmd1 marmotedu marmotedupass
+		imctl {{.CommandName}} subcmd1 marmotedu marmotedupass
 
 		# Print all option values for subcmd1 with --persistent specified
-		iamctl {{.CommandName}} subcmd1 marmotedu marmotedupass --persistent="specified persistent option in command line"{{.Dot}})
+		imctl {{.CommandName}} subcmd1 marmotedu marmotedupass --persistent="specified persistent option in command line"{{.Dot}})
 
 	subcmd1UsageErrStr = fmt.Sprintf("expected '%s'.\nUSERNAME and PASSWORD are required arguments for the subcmd1 command", subcmd1UsageStr)
 )
@@ -386,7 +386,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 )
@@ -411,7 +411,7 @@ to quickly create a Cobra application.{{.Dot}})
 
 	subcmd2Example = templates.Examples({{.Dot}}
 		# Print all option values for subcmd2
-		iamctl {{.CommandName}} subcmd2{{.Dot}})
+		imctl {{.CommandName}} subcmd2{{.Dot}})
 )
 
 // NewSubCmd2Options returns an initialized SubCmd2Options instance.
