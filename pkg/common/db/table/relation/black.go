@@ -43,10 +43,7 @@ type BlackModelInterface interface {
 	Update(ctx context.Context, blacks []*BlackModel) (err error)
 	Find(ctx context.Context, blacks []*BlackModel) (blackList []*BlackModel, err error)
 	Take(ctx context.Context, ownerUserID, blockUserID string) (black *BlackModel, err error)
-	FindOwnerBlacks(
-		ctx context.Context,
-		ownerUserID string,
-		pageNumber, showNumber int32,
-	) (blacks []*BlackModel, total int64, err error)
+	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*BlackModel, total int64, err error)
+	FindOwnerBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*BlackModel, err error)
 	FindBlackUserIDs(ctx context.Context, ownerUserID string) (blackUserIDs []string, err error)
 }

@@ -53,7 +53,7 @@ function openim::api::start()
     done
     # start all api services
     for ((i = 0; i < ${#OPENIM_API_SERVICE_LISTARIES[*]}; i++)); do
-    openim::util::stop_services_with_name ${OPENIM_API_SERVICE_LISTARIES[$i]}
+    openim::util::stop_services_on_ports ${OPENIM_API_PORT_LISTARIES[$i]}
     openim::log::info "OpenIM ${OPENIM_API_SERVICE_LISTARIES[$i]} config path: ${OPENIM_API_CONFIG}"
 
     # Get the service and Prometheus ports.

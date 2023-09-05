@@ -75,7 +75,7 @@ OpenIMSDK/OpenKF:
     dest: .github/.codecov.yml
     replace: false
 
-openim-docker/openim-docker:
+OpenIMSDK/openim-docker:
   - source: ./config
     dest: ./openim-server/main/config
     replace: true
@@ -84,6 +84,12 @@ openim-docker/openim-docker:
     replace: true
   - source: ./scripts
     dest: ./openim-server/main/scripts
+    replace: true
+  - source: ./scripts
+    dest: ./scripts
+    replace: true
+  - source: ./Makefile
+    dest: ./Makefile
     replace: true
 
 group:

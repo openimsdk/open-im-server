@@ -17,6 +17,8 @@ package msggateway
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/mcontext"
+
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
 
 	"github.com/OpenIMSDK/tools/errs"
@@ -35,13 +37,13 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/startrpc"
 )
 
-func (s *Server) InitServer(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func (s *Server) InitServer(disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
 	msgModel := cache.NewMsgCacheModel(rdb)
-	s.LongConnServer.SetDiscoveryRegistry(client)
+	s.LongConnServer.SetDiscoveryRegistry(disCov)
 	s.LongConnServer.SetCacheHandler(msgModel)
 	msggateway.RegisterMsgGatewayServer(server, s)
 	return nil
@@ -198,6 +200,20 @@ func (s *Server) MultiTerminalLoginCheck(
 	ctx context.Context,
 	req *msggateway.MultiTerminalLoginCheckReq,
 ) (*msggateway.MultiTerminalLoginCheckResp, error) {
-	// TODO implement me
-	panic("implement me")
+	if oldClients, userOK, clientOK := s.LongConnServer.GetUserPlatformCons(req.UserID, int(req.PlatformID)); userOK {
+		tempUserCtx := newTempContext()
+		tempUserCtx.SetToken(req.Token)
+		tempUserCtx.SetOperationID(mcontext.GetOperationID(ctx))
+		client := &Client{}
+		client.ctx = tempUserCtx
+		client.UserID = req.UserID
+		client.PlatformID = int(req.PlatformID)
+		i := &kickHandler{
+			clientOK:   clientOK,
+			oldClients: oldClients,
+			newClient:  client,
+		}
+		s.LongConnServer.SetKickHandlerInfo(i)
+	}
+	return &msggateway.MultiTerminalLoginCheckResp{}, nil
 }

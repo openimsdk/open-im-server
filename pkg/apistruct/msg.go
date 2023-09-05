@@ -72,8 +72,9 @@ type CustomElem struct {
 	Description string `mapstructure:"description"`
 	Extension   string `mapstructure:"extension"`
 }
+
 type TextElem struct {
-	Text string `mapstructure:"text" validate:"required"`
+	Content string `json:"content" validate:"required"`
 }
 
 type RevokeElem struct {

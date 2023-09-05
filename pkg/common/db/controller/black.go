@@ -36,6 +36,7 @@ type BlackDatabase interface {
 		pageNumber, showNumber int32,
 	) (blacks []*relation.BlackModel, total int64, err error)
 	FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error)
+	FindBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*relation.BlackModel, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 	CheckIn(ctx context.Context, userID1, userID2 string) (inUser1Blacks bool, inUser2Blacks bool, err error)
 }
@@ -101,4 +102,8 @@ func (b *blackDatabase) CheckIn(
 
 func (b *blackDatabase) FindBlackIDs(ctx context.Context, ownerUserID string) (blackIDs []string, err error) {
 	return b.cache.GetBlackIDs(ctx, ownerUserID)
+}
+
+func (b *blackDatabase) FindBlackInfos(ctx context.Context, ownerUserID string, userIDs []string) (blacks []*relation.BlackModel, err error) {
+	return b.black.FindOwnerBlackInfos(ctx, ownerUserID, userIDs)
 }

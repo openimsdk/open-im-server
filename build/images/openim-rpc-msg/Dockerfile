@@ -33,27 +33,20 @@ COPY . .
 
 RUN make clean
 
-RUN make build BINS=openim-rpc
-# RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-msg ./cmd/openim-rpc/openim-rpc-msg
-
-RUN rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-friend && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-group && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-user && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-conversation && \
-    rm -rf ./_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-auth
+RUN make build BINS=openim-rpc-msg
 
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-ENV OS ${OS}
-ENV ARCH ${ARCH}
-
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms/
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-EXPOSE 10130
-EXPOSE 20130
+ENV PORT 10130 \
+    PROMETHEUS_PORT 20130
 
-CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-msg --port 10130 --prometheus_port 20130 -c ${SERVER_WORKDIR}/config"]
+EXPOSE 10130
+
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-msg /usr/bin/openim-rpc-msg
+
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-msg --port $PORT -c $OPENIM_SERVER_CONFIG_NAME" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-msg --port $PORT -c $OPENIM_SERVER_CONFIG_NAME"; fi"]

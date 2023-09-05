@@ -50,6 +50,7 @@ type userServer struct {
 	friendNotificationSender *notification.FriendNotificationSender
 	userNotificationSender   *notification.UserNotificationSender
 	friendRpcClient          *rpcclient.FriendRpcClient
+	groupRpcClient           *rpcclient.GroupRpcClient
 	RegisterCenter           registry.SvcDiscoveryRegistry
 }
 
@@ -81,11 +82,13 @@ func Start(client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
 	userMongoDB := unrelation.NewUserMongoDriver(mongo.GetDatabase())
 	database := controller.NewUserDatabase(userDB, cache, tx.NewGorm(db), userMongoDB)
 	friendRpcClient := rpcclient.NewFriendRpcClient(client)
+	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgRpcClient := rpcclient.NewMessageRpcClient(client)
 	u := &userServer{
 		UserDatabase:             database,
 		RegisterCenter:           client,
 		friendRpcClient:          &friendRpcClient,
+		groupRpcClient:           &groupRpcClient,
 		friendNotificationSender: notification.NewFriendNotificationSender(&msgRpcClient, notification.WithDBFunc(database.FindWithError)),
 		userNotificationSender:   notification.NewUserNotificationSender(&msgRpcClient, notification.WithUserFunc(database.FindWithError)),
 	}
@@ -124,6 +127,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	friends, err := s.friendRpcClient.GetFriendIDs(ctx, req.UserInfo.UserID)
 	if err != nil {
 		return nil, err
+	}
+	if req.UserInfo.Nickname != "" || req.UserInfo.FaceURL != "" {
+		if err := s.groupRpcClient.NotificationUserInfoUpdate(ctx, req.UserInfo.UserID); err != nil {
+			log.ZError(ctx, "NotificationUserInfoUpdate", err)
+		}
 	}
 	for _, friendID := range friends {
 		s.friendNotificationSender.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, friendID)

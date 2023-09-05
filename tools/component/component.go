@@ -39,6 +39,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -274,6 +275,7 @@ func checkKafka() error {
 		cfg.Net.SASL.User = config.Config.Kafka.Username
 		cfg.Net.SASL.Password = config.Config.Kafka.Password
 	}
+	kafka.SetupTLSConfig(cfg)
 	kafkaClient, err := sarama.NewClient(config.Config.Kafka.Addr, cfg)
 	if err != nil {
 		return errs.Wrap(err)

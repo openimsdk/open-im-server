@@ -17,11 +17,13 @@ package data_conversion
 import (
 	"context"
 	"fmt"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"time"
+
 	"github.com/OpenIMSDK/tools/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
 )
 
 var (
@@ -156,7 +158,7 @@ func GroupConversion() {
 			temp := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
 			if val.NotificationUpdateTime.Equal(temp) {
 				results[i].NotificationUpdateTime = time.Now()
-				//fmt.Println(val.NotificationUpdateTime)
+				// fmt.Println(val.NotificationUpdateTime)
 			}
 		}
 		// Process query results
@@ -218,7 +220,7 @@ func ChatLogsConversion() {
 		MysqlDb_v2.Limit(batchSize).Offset(offset).Find(&results)
 		// Process query results
 		fmt.Println("============================batch data===================", offset, batchSize)
-		//fmt.Println(results)
+		// fmt.Println(results)
 		MysqlDb_v3.Create(results)
 		fmt.Println("======================================================")
 		offset += batchSize
