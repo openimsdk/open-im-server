@@ -107,20 +107,17 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
 	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userIDs)
 	p.successCount++
-	for _, userID := range userIDs {
-		if isOfflinePush && userID != msg.SendID {
-			// save invitation info for offline push
-			for _, v := range wsResults {
-				if v.OnlinePush {
-					return nil
+	if isOfflinePush {
+		for _, v := range wsResults {
+			if msg.SendID != v.UserID && (!v.OnlinePush) {
+				if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
+					return err
 				}
-			}
-			if err := callbackOfflinePush(ctx, userIDs, msg, &[]string{}); err != nil {
-				return err
-			}
-			err = p.offlinePushMsg(ctx, userID, msg, userIDs)
-			if err != nil {
-				return err
+				err = p.offlinePushMsg(ctx, msg.SendID, msg, []string{v.UserID})
+				if err != nil {
+					return err
+				}
+				break
 			}
 		}
 	}
