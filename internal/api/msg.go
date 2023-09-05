@@ -170,12 +170,7 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 	log.ZDebug(c, "getSendMsgReq", "req", req.Content)
 	switch req.ContentType {
 	case constant.Text:
-		text, ok := req.Content["text"].(string)
-		if !ok {
-			return nil, errs.ErrArgs.WithDetail("text is not string")
-		}
-		data = apistruct.TextContentElem{Content: text}
-		log.ZDebug(c, "getSendMsgReq", "data", data)
+		data = apistruct.TextElem{}
 	case constant.Picture:
 		data = apistruct.PictureElem{}
 	case constant.Voice:
