@@ -22,10 +22,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/cobra"
 
+	"github.com/marmotedu/iam/internal/pkg/middleware/auth"
+
 	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
-	"github.com/marmotedu/iam/internal/pkg/middleware/auth"
 )
 
 const (

@@ -48,13 +48,13 @@ Find more information at:
 
 	colorExample = templates.Examples(`
 		# Print supported foreground and background colors
-		iamctl color
+		imctl color
 
 		# Print supported colors by type
-		iamctl color -t fg-hi
+		imctl color -t fg-hi
 
 		# Print all supported colors
-		iamctl color -t all`)
+		imctl color -t all`)
 
 	availableTypes = []string{"fg", "fg-hi", "bg", "bg-hi", "base", "all"}
 

@@ -19,11 +19,13 @@ import (
 	"io"
 	"os"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 	cliflag "github.com/openimsdk/component-base/pkg/cli/flag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+
+	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/inernal/iamctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/color"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/completion"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/info"
@@ -34,7 +36,6 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/secret"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/set"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/user"
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/inernal/iamctl/cmd/util"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/validate"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/version"
 	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
