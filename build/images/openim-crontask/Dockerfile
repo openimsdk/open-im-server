@@ -41,4 +41,8 @@ WORKDIR /openim/openim-server
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-CMD ["bash", "-c","${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-crontask"]
+ENV OPENIM_SERVER_CONFIG_NAME=/openim/openim-server/config
+
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-crontask /usr/bin/openim-crontask
+
+CMD ["bash", "-c", "openim-crontask -c $OPENIM_SERVER_CONFIG_NAME"]

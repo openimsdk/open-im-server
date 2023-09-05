@@ -19,13 +19,27 @@ Kubernetes: >= 1.16.0-0
 Helm: >= 3.0
 ```
 
-假设 OpenIM 项目根目录路径为 `OpenIM_ROOT`
 
-进入 OpenIM 项目根目录
+### 最低配置
 
-$ cd ${OpenIM_ROOT}
+建议生产环境的最低配置如下：
 
+```bash
+CPU: 4
+Memory: 8G
+Disk: 100G
+```
 
+## 生成配置文件
+
+我们将自动文件全部自动化处理了，所以生成配置文件对于 openim 来说是可选的，但是如果你想要自定义配置，可以参考下面的步骤：
+
+```bash
+$ make init
+# 或者是使用脚本:
+# ./scripts/init-config.sh
+```
+此时会帮你在 `deployments/openim/config` 目录下生成配置文件，你可以根据自己的需求进行修改。
 
 ### 容器化安装
 
