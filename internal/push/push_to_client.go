@@ -288,7 +288,7 @@ func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg 
 }
 
 func (p *Pusher) GetOfflinePushOpts(msg *sdkws.MsgData) (opts *offlinepush.Opts, err error) {
-	opts = &offlinepush.Opts{}
+	opts = &offlinepush.Opts{Signal: &offlinepush.Signal{}}
 	// if msg.ContentType > constant.SignalingNotificationBegin && msg.ContentType < constant.SignalingNotificationEnd {
 	// 	req := &sdkws.SignalReq{}
 	// 	if err := proto.Unmarshal(msg.Content, req); err != nil {
