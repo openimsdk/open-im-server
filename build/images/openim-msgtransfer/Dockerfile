@@ -36,12 +36,11 @@ RUN make build BINS=openim-msgtransfer
 
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
-ENV OS ${OS}
-ENV ARCH ${ARCH}
-
 WORKDIR /openim/openim-server
 
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msgtransfer /usr/bin/openim-msgtransfer
+
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-msgtransfer -c $OPENIM_SERVER_CONFIG_NAME --prometheus_port $PROMETHEUS_PORT; else openim-msgtransfer -c $OPENIM_SERVER_CONFIG_NAME; fi"]

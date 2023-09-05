@@ -14,18 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 #fixme This scripts is the total startup scripts
 #fixme The full name of the shell scripts that needs to be started is placed in the need_to_start_server_shell array
 
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
+openim::log::info "\n# Use Docker to start all openim service"
+
 trap 'openim::util::onCtrlC' INT
 
-nohup "${OPENIM_ROOT}"/scripts/start-all.sh >> ${LOG_FILE} 2>&1 &
+"${OPENIM_ROOT}"/scripts/start-all.sh
 
-sleep 15
+sleep 5
 
-nohup "${OPENIM_ROOT}"/scripts/check-all.sh >> ${LOG_FILE} 2>&1 &
+"${OPENIM_ROOT}"/scripts/check-all.sh
 
 tail -f ${LOG_FILE}

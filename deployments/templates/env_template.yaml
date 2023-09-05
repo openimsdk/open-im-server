@@ -12,8 +12,268 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ======================================
+# ========= Basic Configuration ========
+# ======================================
+
+# The user for authentication or system operations.
+# Default: USER=root
 USER=${USER}
+
+# Password associated with the specified user for authentication.
+# Default: PASSWORD=openIM123
 PASSWORD=${PASSWORD}
+
+# Endpoint for the MinIO object storage service.
+# Default: MINIO_ENDPOINT=http://172.28.0.1:10005
 MINIO_ENDPOINT=${MINIO_ENDPOINT}
+
+# Base URL for the application programming interface (API).
+# Default: API_URL=http://172.28.0.1:10002
 API_URL=${API_URL}
+
+# Directory path for storing data files or related information.
+# Default: DATA_DIR=./
 DATA_DIR=${DATA_DIR}
+
+# ======================================
+# ========= Network Configuration ======
+# ======================================
+
+# Subnet for the Docker network.
+# Default: DOCKER_BRIDGE_SUBNET=172.28.0.0/16
+DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET}
+
+# Gateway for the Docker network.
+# Default: DOCKER_BRIDGE_GATEWAY=172.28.0.1
+DOCKER_BRIDGE_GATEWAY=${DOCKER_BRIDGE_GATEWAY}
+
+# Address or hostname for the MySQL network.
+# Default: MYSQL_NETWORK_ADDRESS=172.28.0.2
+MYSQL_NETWORK_ADDRESS=${MYSQL_NETWORK_ADDRESS}
+
+# Address or hostname for the MongoDB network.
+# Default: MONGO_NETWORK_ADDRESS=172.28.0.3
+MONGO_NETWORK_ADDRESS=${MONGO_NETWORK_ADDRESS}
+
+# Address or hostname for the Redis network.
+# Default: REDIS_NETWORK_ADDRESS=172.28.0.4
+REDIS_NETWORK_ADDRESS=${REDIS_NETWORK_ADDRESS}
+
+# Address or hostname for the Kafka network.
+# Default: KAFKA_NETWORK_ADDRESS=172.28.0.5
+KAFKA_NETWORK_ADDRESS=${KAFKA_NETWORK_ADDRESS}
+
+# Address or hostname for the ZooKeeper network.
+# Default: ZOOKEEPER_NETWORK_ADDRESS=172.28.0.6
+ZOOKEEPER_NETWORK_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}
+
+# Address or hostname for the MinIO network.
+# Default: MINIO_NETWORK_ADDRESS=172.28.0.7
+MINIO_NETWORK_ADDRESS=${MINIO_NETWORK_ADDRESS}
+
+# Address or hostname for the OpenIM web network.
+# Default: OPENIM_WEB_NETWORK_ADDRESS=172.28.0.8
+OPENIM_WEB_NETWORK_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}
+
+# Address or hostname for the OpenIM server network.
+# Default: OPENIM_SERVER_NETWORK_ADDRESS=172.28.0.9
+OPENIM_SERVER_NETWORK_ADDRESS=${OPENIM_SERVER_NETWORK_ADDRESS}
+
+# Address or hostname for the OpenIM chat network.
+# Default: OPENIM_CHAT_NETWORK_ADDRESS=172.28.0.10
+OPENIM_CHAT_NETWORK_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}
+
+# Address or hostname for the Prometheus network.
+# Default: PROMETHEUS_NETWORK_ADDRESS=172.28.0.11
+PROMETHEUS_NETWORK_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
+
+# Address or hostname for the Grafana network.
+# Default: GRAFANA_NETWORK_ADDRESS=172.28.0.12
+GRAFANA_NETWORK_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
+
+
+# ===============================================
+# = Component Extension Configuration =
+# ===============================================
+
+# ============ Component Extension Configuration ==========
+# ----- ZooKeeper Configuration -----
+# Address or hostname for the ZooKeeper service.
+# Default: ZOOKEEPER_ADDRESS=172.28.0.1
+ZOOKEEPER_ADDRESS=${ZOOKEEPER_NETWORK_ADDRESS}
+
+# Port for ZooKeeper service.
+# Default: ZOOKEEPER_PORT=12181
+ZOOKEEPER_PORT=${ZOOKEEPER_PORT}
+
+# ----- MySQL Configuration -----
+
+# Address or hostname for the MySQL service.
+# Default: MYSQL_ADDRESS=172.28.0.1
+MYSQL_ADDRESS=${MYSQL_NETWORK_ADDRESS}
+
+# Port on which MySQL database service is running.
+# Default: MYSQL_PORT=13306
+MYSQL_PORT=${MYSQL_PORT}
+
+# Password to authenticate with the MySQL database service.
+# Default: MYSQL_PASSWORD=openIM123
+MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+# ----- MongoDB Configuration -----
+# Address or hostname for the MongoDB service.
+# Default: MONGO_ADDRESS=172.28.0.1
+MONGO_ADDRESS=${MONGO_NETWORK_ADDRESS}
+
+# Port on which MongoDB service is running.
+# Default: MONGO_PORT=37017
+MONGO_PORT=${MONGO_PORT}
+
+# Username to authenticate with the MongoDB service.
+# Default: MONGO_USERNAME=root
+MONGO_USERNAME=${MONGO_USERNAME}
+
+# Password to authenticate with the MongoDB service.
+# Default: MONGO_PASSWORD=openIM123
+MONGO_PASSWORD=${MONGO_PASSWORD}
+
+# Name of the database in MongoDB to be used.
+# Default: MONGO_DATABASE=openIM_v3
+MONGO_DATABASE=${MONGO_DATABASE}
+
+# ----- Redis Configuration -----
+# Address or hostname for the Redis service.
+# Default: REDIS_ADDRESS=172.28.0.1
+REDIS_ADDRESS=${REDIS_NETWORK_ADDRESS}
+
+# Port on which Redis in-memory data structure store is running.
+# Default: REDIS_PORT=16379
+REDIS_PORT=${REDIS_PORT}
+
+# Password to authenticate with the Redis service.
+# Default: REDIS_PASSWORD=openIM123
+REDIS_PASSWORD=${REDIS_PASSWORD}
+
+# ----- Kafka Configuration -----
+# Address or hostname for the Kafka service.
+# Default: KAFKA_ADDRESS=172.28.0.1
+KAFKA_ADDRESS=${KAFKA_NETWORK_ADDRESS}
+
+# Port on which Kafka distributed streaming platform is running.
+# Default: KAFKA_PORT=19092
+KAFKA_PORT=${KAFKA_PORT}
+
+# Topic in Kafka for storing the latest messages in Redis.
+# Default: KAFKA_LATESTMSG_REDIS_TOPIC=latestMsgToRedis
+KAFKA_LATESTMSG_REDIS_TOPIC=${KAFKA_LATESTMSG_REDIS_TOPIC}
+
+# Topic in Kafka for pushing messages (e.g. notifications or updates).
+# Default: KAFKA_MSG_PUSH_TOPIC=msgToPush
+KAFKA_MSG_PUSH_TOPIC=${KAFKA_MSG_PUSH_TOPIC}
+
+# Topic in Kafka for storing offline messages in MongoDB.
+# Default: KAFKA_OFFLINEMSG_MONGO_TOPIC=offlineMsgToMongoMysql
+KAFKA_OFFLINEMSG_MONGO_TOPIC=${KAFKA_OFFLINEMSG_MONGO_TOPIC}
+
+# ----- MinIO Configuration ----
+# Address or hostname for the MinIO object storage service.
+# Default: MINIO_ADDRESS=172.28.0.1
+MINIO_ADDRESS=${MINIO_NETWORK_ADDRESS}
+
+# Port on which MinIO object storage service is running.
+# Default: MINIO_PORT=10005
+MINIO_PORT=${MINIO_PORT}
+
+# Access key to authenticate with the MinIO service.
+# Default: MINIO_ACCESS_KEY=root
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+
+# Secret key corresponding to the access key for MinIO authentication.
+# Default: MINIO_SECRET_KEY=openIM123
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+
+# ----- Prometheus Configuration -----
+# Address or hostname for the Prometheus service.
+# Default: PROMETHEUS_ADDRESS=172.28.0.1
+PROMETHEUS_ADDRESS=${PROMETHEUS_NETWORK_ADDRESS}
+
+# Port on which Prometheus service is running.
+# Default: PROMETHEUS_PORT=19090
+PROMETHEUS_PORT=${PROMETHEUS_PORT}
+
+# ----- Grafana Configuration -----
+# Address or hostname for the Grafana service.
+# Default: GRAFANA_ADDRESS=172.28.0.1
+GRAFANA_ADDRESS=${GRAFANA_NETWORK_ADDRESS}
+
+# Port on which Grafana service is running.
+# Default: GRAFANA_PORT=3000
+GRAFANA_PORT=${GRAFANA_PORT}
+
+# ======================================
+# ============ OpenIM Web ===============
+# ======================================
+
+# Path to the OpenIM web distribution.
+# Default: OPENIM_WEB_DIST_PATH=/app/dist
+OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
+
+# Port on which OpenIM web service is running.
+# Default: OPENIM_WEB_PORT=11001
+OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
+
+# Address or hostname for the OpenIM web service.
+# Default: OPENIM_WEB_ADDRESS=172.28.0.1
+OPENIM_WEB_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}
+
+
+# ======================================
+# ========= OpenIM Server ==============
+# ======================================
+
+# Address or hostname for the OpenIM server.
+# Default: OPENIM_SERVER_ADDRESS=172.28.0.1
+OPENIM_SERVER_ADDRESS=${OPENIM_SERVER_NETWORK_ADDRESS}
+
+# Port for the OpenIM WebSockets.
+# Default: OPENIM_WS_PORT=10001
+OPENIM_WS_PORT=${OPENIM_WS_PORT}
+
+# Port for the OpenIM API.
+# Default: API_OPENIM_PORT=10002
+API_OPENIM_PORT=${API_OPENIM_PORT}
+
+
+# ======================================
+# ========== OpenIM Chat ===============
+# ======================================
+
+# Branch name for OpenIM chat.
+# Default: CHAT_BRANCH=main
+CHAT_BRANCH=${CHAT_BRANCH}
+
+# Address or hostname for the OpenIM chat service.
+# Default: OPENIM_CHAT_ADDRESS=172.28.0.1
+OPENIM_CHAT_ADDRESS=${OPENIM_CHAT_NETWORK_ADDRESS}
+
+# Port for the OpenIM chat API.
+# Default: OPENIM_CHAT_API_PORT=10008
+OPENIM_CHAT_API_PORT=${OPENIM_CHAT_API_PORT}
+
+# Directory path for storing data files or related information for OpenIM chat.
+# Default: OPENIM_CHAT_DATA_DIR=./openim-chat/main
+OPENIM_CHAT_DATA_DIR=${OPENIM_CHAT_DATA_DIR}
+
+
+# ======================================
+# ========== OpenIM Admin ==============
+# ======================================
+
+# Branch name for OpenIM server.
+# Default: SERVER_BRANCH=main
+SERVER_BRANCH=${SERVER_BRANCH}
+
+# Port for the OpenIM admin API.
+# Default: OPENIM_ADMIN_API_PORT=10009
+OPENIM_ADMIN_API_PORT=${OPENIM_ADMIN_API_PORT}

@@ -15,6 +15,7 @@
 # OpenIM base image: https://github.com/openim-sigs/openim-base-image
 
 # Set go mod installation source and proxy
+# docker run -e "PORT=10003" -e "PROMETHEUSORT=4321"  --network host  -it 67ef891ad1ff
 
 FROM golang:1.20 AS builder
 
@@ -38,12 +39,14 @@ FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-ENV OS ${OS}
-ENV ARCH ${ARCH}
-
 COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
+ENV PORT 10170 \
+    PROMETHEUS_PORT 20170
+
 EXPOSE 10170
 
-CMD ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push --port 10170
+RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-push /usr/bin/openim-push
+
+ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then openim-push -c $OPENIM_SERVER_CONFIG_NAME --port $PORT --prometheus_port $PROMETHEUS_PORT; else openim-push -c $OPENIM_SERVER_CONFIG_NAME --port $PORT; fi"]

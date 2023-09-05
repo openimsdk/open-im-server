@@ -2,6 +2,7 @@
 
 # Ignore specific files
 .dockerignore
+.git
 
 # Ignore build artifacts
 _output/

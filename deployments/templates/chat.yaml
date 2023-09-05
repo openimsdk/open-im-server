@@ -1,0 +1,124 @@
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Configuration for OpenIMServer
+
+# -----------------------------------------------------------------
+# TODO: This config file is the template file
+# --| source: deployments/templates/chat.yaml
+# --| env: scripts/install/environment
+# --| target: config/config.yaml
+# -----------------------------------------------------------------
+
+###################### Zookeeper ######################
+# Zookeeper configuration
+# It's not recommended to modify the schema
+zookeeper:
+  schema: ${ZOOKEEPER_SCHEMA}
+  zkAddr:
+    - ${ZOOKEEPER_ADDRESS}:${ZOOKEEPER_PORT}
+  username: ${ZOOKEEPER_USERNAME}
+  password: ${ZOOKEEPER_PASSWORD}
+
+###################### Chat API ######################
+chatApi:
+  openImChatApiPort: [ ${OPENIM_CHAT_API_PORT} ]
+  listenIP: ${CHAT_API_LISTEN_IP}
+
+###################### Admin API ######################
+adminApi:
+  openImAdminApiPort: [ ${OPENIM_ADMIN_API_PORT} ]
+  listenIP: ${ADMIN_API_LISTEN_IP}
+
+###################### RPC ######################
+rpc:
+  registerIP:                             #作为rpc启动时，注册到zookeeper的IP，api/gateway能访问到此ip和对应的rpcPort中的端口
+  listenIP:                               #默认为0.0.0.0
+
+rpcPort:
+  openImAdminPort: [ ${OPENIM_ADMIN_PORT} ]
+  openImChatPort: [ ${OPENIM_CHAT_PORT} ]
+rpcRegisterName:
+  openImAdminName: ${OPENIM_ADMIN_NAME}
+  openImChatName: ${OPENIM_CHAT_NAME}
+
+###################### MySQL ######################
+mysql:
+  #  address: [ 127.0.0.1:13306 ]            #目前仅支持单机
+  #  username: root                          #用户名
+  #  password: openIM123                     #密码
+  #  database: openIM_v2                     #不建议修改
+  #  maxOpenConn: 1000                       #最大连接数
+  #  maxIdleConn: 100                        #最大空闲连接数
+  #  maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
+  #  logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
+  #  slowThreshold: 500                      #慢语句阈值 （毫秒）
+  database: openim_enterprise
+
+###################### Log ######################
+log:
+  storageLocation: ../logs/           #存放目录
+#  rotationTime: 24                    #日志旋转时间
+#  remainRotationCount: 2              #日志数量
+#  remainLogLevel: 6                   #日志级别 6表示全都打印，
+#  isStdout: false
+#  isJson: false
+#  withStack: false
+
+###################### Secret & Token Policy ######################
+# secret: openIM123
+#tokenPolicy:
+#  expire: 86400
+
+###################### Verify Code ######################
+verifyCode:
+  validTime: 300 # 验证码有效时间
+  validCount: 5 # 验证码有效次数
+  uintTime: 86400 # 单位时间间隔
+  maxCount: 10 # 单位时间内最大获取次数
+  superCode: "666666" # 超级验证码(只有use为空时使用)
+  len: 6 # 验证码长度
+  use: "" # 使用的验证码服务(use: "ali")
+  ali:
+    endpoint: "dysmsapi.aliyuncs.com"
+    accessKeyId: ""
+    accessKeySecret: ""
+    signName: ""
+    verificationCodeTemplateCode: ""
+
+
+###################### Proxy Header ######################
+# 获取ip的header,没有配置直接获取远程地址
+#proxyHeader: "X-Forwarded-For"
+
+###################### Admin List ######################
+adminList:
+  - adminID: admin1
+    nickname: chat1
+    imAdmin: openIM123456
+  - adminID: admin2
+    nickname: chat2
+    imAdmin: openIM654321
+  - adminID: admin3
+    nickname: chat3
+    imAdmin: openIMAdmin
+
+###################### OpenIM URL ######################
+openIMUrl: ${OPENIM_SERVER_ADDRESS}:${API_OPENIM_PORT}
+
+###################### Redis ######################
+redis:
+  # address: [ 127.0.0.1:16379 ]
+  # username:
+  # password: openIM123

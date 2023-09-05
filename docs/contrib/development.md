@@ -10,12 +10,11 @@ Since OpenIM is written in Go, it is fair to assume that the Go tools are all on
     - [Go](#go)
     - [Docker](#docker)
     - [Vagrant](#vagrant)
-  - [Cloning, Building and Testing OpenIM](#cloning-building-and-testing-openim)
   - [Dependency management](#dependency-management)
 
 ## Non-Linux environment prerequisites
 
-All the test and build scripts within this repository were created to be run on GNU Linux development environments. Due to this, it is suggested to use the virtual machine defined on this repository's [Vagrantfile](../../Vagrantfile) to use them.
+All the test and build scripts within this repository were created to be run on GNU Linux development environments. Due to this, it is suggested to use the virtual machine defined on this repository's [Vagrantfile](https://developer.hashicorp.com/vagrant/docs/vagrantfile) to use them.
 
 Either way, if one still wants to build and test OpenIM on non-Linux environments, specific setups are to be followed.
 
@@ -62,18 +61,11 @@ OpenIM build and test processes development require Docker to run certain steps.
 
 ### Vagrant
 
-As described in the [Testing documentation](../../tests/TESTING.md), all the smoke tests are run in virtual machines managed by Vagrant.  To install Vagrant in the development environment, [follow the instructions from the Hashicorp website](https://www.vagrantup.com/downloads), alongside any of the following hypervisors:
+As described in the [Testing documentation](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/test/readme), all the smoke tests are run in virtual machines managed by Vagrant.  To install Vagrant in the development environment, [follow the instructions from the Hashicorp website](https://www.vagrantup.com/downloads), alongside any of the following hypervisors:
 
 - [VirtualBox](https://www.virtualbox.org/)
 - [libvirt](https://libvirt.org/) and the [vagrant-libvirt plugin](https://github.com/vagrant-libvirt/vagrant-libvirt#installation)
 
-## Cloning, Building and Testing OpenIM
-
-These topics already have been addressed on their respective documents:
-
-- [Git Workflow](./git-workflow.md)
-- [Building](../../BUILDING.md)
-- [Testing](../../tests/TESTING.md)
 
 ## Dependency management
 
