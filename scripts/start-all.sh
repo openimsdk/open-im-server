@@ -22,6 +22,8 @@ set -o pipefail
 OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
+openim::log::info "\n# Begin to start all openim service scripts"
+
 set +o errexit
 openim::golang::check_openim_binaries
 if [[ $? -ne 0 ]]; then
@@ -61,16 +63,21 @@ function execute_scripts() {
         else
             openim::log::errexit "Script ${script_path##*/} is missing or not executable."
         fi
-        sleep 0.5
     done
+    sleep 0.5
 }
+
 
 # TODO Prelaunch tools, simple for now, can abstract functions later
 TOOLS_START_SCRIPTS_PATH=${START_SCRIPTS_PATH}/openim-tools.sh
+
+openim::log::info "\n## Pre Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::pre-start
 
+openim::log::info "\n## Starting OpenIM services"
 execute_scripts
 
+openim::log::info "\n## Post Starting OpenIM services"
 ${TOOLS_START_SCRIPTS_PATH} openim::tools::post-start
 
 openim::log::success "✨  All OpenIM services have been successfully started!"

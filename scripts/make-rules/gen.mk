@@ -28,6 +28,12 @@ gen.init:
 	@echo "===========> Initializing openim server project"
 	@${ROOT_DIR}/scripts/init-config.sh
 
+## gen.init-githooks: Initialize git hooks ✨
+.PHONY: gen.init-githooks
+gen.init-githooks:
+	@echo "===========> Initializing git hooks"
+	@${ROOT_DIR}/scripts/init-githooks.sh
+
 ## gen.run: Generate necessary files and docs ✨
 .PHONY: gen.run
 #gen.run: gen.errcode gen.docgo

@@ -13,7 +13,7 @@
 <a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/OpenIMSDK/Open-IM-Server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server"><img src="https://img.shields.io/github/stars/OpenIMSDK/Open-IM-Server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
+<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
 <a href="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
@@ -128,9 +128,7 @@ $ make demo
 
 
 ```bash
-# choose what you need, We take branch 3.2 as an example
-$ BRANCH=release-v3.2
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim_dir=$(pwd)/openim && cd ${openim_dir}/openim-server
+git clone -b feat/test https://github.com/openim-sigs/openim-docker openim/openim-docker && export openim=$(pwd)/openim && cd $openim/openim-docker  && ./scripts/init-config.sh && docker-compose up -d
 ```
 
 > **Note**
@@ -144,42 +142,36 @@ If you tried to get started quickly with `make demo`, then you know that our con
 
 You can use `make init` to quickly initialize a configuration file
 
+Modify the automation script:
+
+```bash
+cat scripts/install/environment.sh
+```
+
+1. Recommended using environment variables:
+
+```bash
+export PASSWORD="openIM123" # Set password
+export USER="root" # Set username
+# Choose chat version and server version https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md, eg: main, release-v*.*
+export CHAT_BRANCH="main"
+export SERVER_BRANCH="main"
+#... Other environment variables
+# MONGO_USERNAME: This sets the MongoDB username
+# MONGO_PASSWORD: Set the MongoDB password
+# MONGO_DATABASE: Sets the MongoDB database name
+# MINIO_ENDPOINT: set the MinIO service address
+# API_URL: under network environment, set OpenIM Server API address
+export API_URL="http://127.0.0.1:10002"
+```
+
+Next, update the configuration using make init:
+
 ```bash
 $ make init
 $ git diff
 ```
 
-Then feel free to modify your current config file,  you can also modify `/scripts/install/environment.sh` document template, `make init` is essentially rendering `environment.sh` template, and then through the `make init` to automatically generate a new configuration.
-
-If you only need to change the config file for a short time, or if you don't want to make any major changes in the future, you can modify the `.env file directly
-
-```bash
-USER=root 								#no need to modify
-PASSWORD=openIM123  					#A combination of 8 or more numbers and letters, this password applies to redis, mysql, mongo, as well as accessSecret in config/config.yaml
-ENDPOINT=http://127.0.0.1:10005 		#minio's external service IP and port, or use the domain name storage.xx.xx, the app must be able to access this IP and port or domain,
-API_URL=http://127.0.0.1:10002/object/ 	#the app must be able to access this IP and port or domain,
-DATA_DIR=./  							#designate large disk directory
-```
-
-**3. Deploy and start**
-
-> **Note**
->
-> You can deploy either directly with `make install` or with `docker compose up`, the logic is the same
-
-```bash
-$ make install
-# OR
-$ docker-compose up
-```
-
-4. Check the service
-
-```bash
-$ make check
-```
-
-Looking at the command line at this point, there are two items in the output, checking for the start of the component port that OpenIM depends on, and the start of the OpenIM core component
 
 </details> 
 
@@ -349,7 +341,7 @@ OpenIM Our goal is to build a top-level open source community. We have a set of 
 
 If you'd like to contribute to this Open-IM-Server repository, please read our [contributor documentation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md).
 
-Before you start, please make sure your changes are in demand. The best for that is to create a [new discussion](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) OR [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg), or if you find an issue, [report it](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose) first.
+Before you start, please make sure your changes are in demand. The best for that is to create a [new discussion](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) OR [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), or if you find an issue, [report it](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose) first.
 
 - [Code Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/go_code.md)
 - [Docker Images Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
@@ -357,21 +349,21 @@ Before you start, please make sure your changes are in demand. The best for that
 - [Commit Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
 - [Versioning Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
 - [Interface Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
-- [Log Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/log.md)
+- [Log Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/logging.md)
 - [Error Code Standards](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
 
 ## :busts_in_silhouette: Community
 
 + 📚 [OpenIM Community](https://github.com/OpenIMSDK/community)
 + 💕 [OpenIM Interest Group](https://github.com/Openim-sigs)
-+ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg)
++ 🚀 [Join our Slack community](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
 + :eyes: [Join our wechat (微信群)](https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg)
 
 ## :calendar: Community Meetings
 
 We want anyone to get involved in our community and contributing code, we offer gifts and rewards, and we welcome you to join us every Thursday night.
 
-Our conference is in the [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-1tmoj26uf-_FDy3dowVHBiGvLk9e5Xkg) 🎯, then you can search the Open-IM-Server pipeline to join
+Our conference is in the [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯, then you can search the Open-IM-Server pipeline to join
 
 We take notes of each [biweekly meeting](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) in [GitHub discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting), Our historical meeting notes, as well as replays of the meetings are available at [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing).
 

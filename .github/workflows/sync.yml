@@ -6,10 +6,6 @@
 name: Synchronize kubecub public code to other repositories
 on:
     push:
-        paths:
-            - scripts/*
-            - docs/*
-            - config/*
         branches:
           - main
     workflow_dispatch:

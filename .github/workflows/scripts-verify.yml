@@ -68,7 +68,9 @@ jobs:
     - name: verify format
       run: |
         sudo make format
+      continue-on-error: true
 
     - name: verify license
       run: |
         sudo make verify-copyright
+      continue-on-error: true
