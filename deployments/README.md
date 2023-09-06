@@ -46,7 +46,10 @@ $ make init
 
 如果你已经有了一个 `kubernetes` 集群，或者是你希望自己从头开始搭建一个 `kubernetes` 那么你可以直接跳过这一步。
 
-为了快速开始，我使用 
+为了快速开始，我使用 [sealos](https://github.com/labring/sealos) 来快速搭建集群:
+
+```bash
+
 
 
 ### 容器化安装
