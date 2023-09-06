@@ -30,52 +30,58 @@ function openim::util::onCtrlC() {
     exit 0
 }
 
-# openim::util::desc "========> Welcome to the OpenIM Demo"
-# openim::util::desc "========> We'll help you get started with OpenIM quickly"
-# openim::util::desc "========> Press Enter to continue...."
-# openim::util::run "make advertise"
-# clear
+openim::util::desc "========> Welcome to the OpenIM Demo"
+openim::util::desc "========> We'll help you get started with OpenIM quickly"
+openim::util::desc "========> Press Enter to continue...."
+openim::util::run "make advertise"
+clear
 
-# openim::util::desc "========> Initialize the project and generate configuration files"
-# openim::util::run "make init"
+openim::util::desc "========> Initialize the project and generate configuration files"
+openim::util::run "make init"
+clear
 
 # openim::util::desc "========> You can look git diff"
 # openim::util::run "git diff"
 # clear
 
-# openim::util::desc "You can learn a lot about automation using make help"
-# openim::util::run "make help"
-# clear
+openim::util::desc "You can learn a lot about automation using make help"
+openim::util::run "make help"
+clear
 
-# openim::util::desc "You can learn a lot about automation using make help-all"
-# openim::util::run "make help-all"
-# clear
+openim::util::desc "You can learn a lot about automation using make help-all"
+openim::util::run "make help-all"
+clear
 
-# openim::util::desc "First, let's verify and install some necessary tools"
-# openim::util::run "make tools"
-# clear
+openim::util::desc "First, let's verify and install some necessary tools"
+openim::util::run "make tools"
+clear
 
-# openim::util::desc "The specification is pretty high, you need to be bound on your branch name, as well as commit messages"
-# openim::util::run "git commit -a -s -m 'feta: commit demo against specification'"
-# openim::util::run "# git commit -a -s -m 'feat: commit demo against specification' --amend"
-# clear
+openim::util::desc "========> Start the basic openim docker components"
+openim::util::desc "========> You can use docker-compose ps to check the status of the container"
+openim::util::run "curl https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml -o basic-openim-server-dependency.yml"
+openim::util::run "docker compose up --f basic-openim-server-dependency.yml up -d"
+clear
 
-# openim::util::desc "How did we teach you how to build OpenIM"
-# openim::util::desc "A full build startup check"
-# openim::util::run "# make all"
-# clear
+openim::util::desc "The specification is pretty high, you need to be bound on your branch name, as well as commit messages"
+openim::util::run "git commit -a -s -m 'feta: commit demo against specification'"
+openim::util::run "# git commit -a -s -m 'feat: commit demo against specification' --amend"
+clear
 
-# openim::util::desc "Build one OpenIM binary"
-# openim::util::desc "BINS: openim-api openim-cmdutils openim-crontask openim-msggateway openim-msgtransfer openim-push openim-rpc changelog infra ncpu yamlfmt"
-# openim::util::run "make build BINS=openim-api"
+openim::util::desc "How did we teach you how to build OpenIM"
+openim::util::desc "A full build startup check"
+openim::util::run "# make all"
+openim::util::desc "Build one OpenIM binary"
+openim::util::desc "BINS: openim-api openim-cmdutils openim-crontask openim-msggateway openim-msgtransfer openim-push openim-rpc changelog infra ncpu yamlfmt"
+openim::util::run "make build BINS=openim-api"
+openim::util::run "make build"
 
-# openim::util::desc "Build binaries for all platforms"
-# openim::util::run "make multiarch -j BINS=openim-crontask PLATFORMS='linux_arm64 linux_amd64' "
+openim::util::desc "Build binaries for all platforms"
+openim::util::run "make multiarch -j BINS=openim-crontask PLATFORMS='linux_arm64 linux_amd64' "
 
-# openim::util::desc "If you wish to use dlv for debugging, either binary or process"
-# openim::util::desc "You need to enable debug mode"
-# openim::util::run "make build BINS=openim-cmdutils DEBUG=1"
-# clear
+openim::util::desc "If you wish to use dlv for debugging, either binary or process"
+openim::util::desc "You need to enable debug mode"
+openim::util::run "make build BINS=openim-cmdutils DEBUG=1"
+clear
 
 openim::util::desc "Next, let's learn how to start the OpenIM service. For starting, we have two ways"
 openim::util::desc "The first is Background startup"
