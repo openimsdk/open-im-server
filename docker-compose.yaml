@@ -95,7 +95,7 @@ services:
     command: minio server /data --console-address ':9090'
 
   openim-server:
-    image: ghcr.io/openimsdk/openim-server:release-v3.2
+    image: openim/openim-server:release-v3.2
 #    build: .
     container_name: openim-server
     volumes:
@@ -118,7 +118,7 @@ services:
         max-file: "2"
 
   openim-chat:
-    image: ghcr.io/openimsdk/openim-chat:release-v3.2
+    image: openim/openim-chat:release-v1.2
     container_name: openim-chat
     volumes:
       - ./openim-chat/logs:/openim/openim-chat/logs
