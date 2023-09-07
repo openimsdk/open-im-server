@@ -25,13 +25,13 @@ import (
 
 	"github.com/OpenIMSDK/protocol/msggateway"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 
 	"github.com/OpenIMSDK/protocol/constant"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 
 	"github.com/redis/go-redis/v9"
 

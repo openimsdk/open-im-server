@@ -26,7 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 var ExcludeContentType = []int{constant.HasReadReceipt}

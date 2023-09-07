@@ -17,7 +17,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/internal/tools"
+	"github.com/openimsdk/open-im-server/v3/internal/tools"
 )
 
 type MsgUtilsCmd struct {

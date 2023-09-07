@@ -17,7 +17,7 @@ package conversation
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"google.golang.org/grpc"
 
@@ -29,13 +29,13 @@ import (
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	tablerelation "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient/notification"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
+	tablerelation "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
 )
 
 type conversationServer struct {

@@ -25,7 +25,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 type BlackGorm struct {

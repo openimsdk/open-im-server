@@ -37,7 +37,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 
-	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")

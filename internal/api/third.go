@@ -26,7 +26,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/mcontext"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type ThirdApi rpcclient.Third

@@ -18,7 +18,7 @@ import (
 	"context"
 	"path/filepath"
 
-	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -27,9 +27,9 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 
-	"github.com/OpenIMSDK/Open-IM-Server/internal/push/offlinepush"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
 const SinglePushCountLimit = 400

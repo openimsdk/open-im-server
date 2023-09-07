@@ -19,7 +19,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 func UsersDB2Pb(users []*relationtb.UserModel) (result []*sdkws.UserInfo) {

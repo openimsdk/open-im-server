@@ -17,7 +17,7 @@ package controller
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/golang-jwt/jwt/v4"
 
@@ -25,7 +25,7 @@ import (
 	"github.com/OpenIMSDK/tools/tokenverify"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
 type AuthDatabase interface {

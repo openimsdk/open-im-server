@@ -22,7 +22,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 )
 
 type RpcCmd struct {

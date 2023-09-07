@@ -1,4 +1,4 @@
-module github.com/OpenIMSDK/Open-IM-Server/tools/openim-web
+module github.com/openimsdk/open-im-server/v3/tools/openim-web
 
 go 1.18
 

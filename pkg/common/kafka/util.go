@@ -17,8 +17,8 @@ package kafka
 import (
 	"github.com/IBM/sarama"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/tls"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/tls"
 )
 
 // SetupTLSConfig set up the TLS config from config file.

@@ -20,7 +20,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/conversation"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type ConversationLocalCache struct {

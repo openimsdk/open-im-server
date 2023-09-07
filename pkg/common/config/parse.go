@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"gopkg.in/yaml.v3"
 

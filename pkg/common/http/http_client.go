@@ -27,8 +27,8 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/callbackstruct"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/callbackstruct"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 var client http.Client

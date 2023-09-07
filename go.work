@@ -10,4 +10,5 @@ use (
 	./tools/openim-web
 	./tools/versionchecker
 	./tools/yamlfmt
+	./tools/component
 )

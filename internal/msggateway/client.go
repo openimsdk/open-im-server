@@ -21,7 +21,7 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"google.golang.org/protobuf/proto"
 

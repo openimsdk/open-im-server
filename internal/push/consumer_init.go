@@ -15,7 +15,7 @@
 package push
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 )
 
 type Consumer struct {
