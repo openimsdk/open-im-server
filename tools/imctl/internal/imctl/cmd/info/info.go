@@ -24,9 +24,9 @@ import (
 	"github.com/openim-sigs/component-base/util/iputil"
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
 	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
 )
 
 // Info defines the host information struct.
