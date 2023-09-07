@@ -136,7 +136,6 @@ func (c *Client) readMessage() {
 		}
 		switch messageType {
 		case MessageBinary:
-			_ = c.conn.SetReadDeadline(pongWait)
 			parseDataErr := c.handleMessage(message)
 			if parseDataErr != nil {
 				c.closedErr = parseDataErr
