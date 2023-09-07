@@ -17,6 +17,7 @@
 # You need to supplement the script according to the specification.
 # Read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/init_config.md
 # 格式化 bash 注释：https://tool.lu/shell/
+# 配置中心文档：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/environment.md
 
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 

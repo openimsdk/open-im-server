@@ -164,40 +164,40 @@ services:
       server:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 
-  openim-server:
-    # image: ghcr.io/openimsdk/openim-server:main
-    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
-    # image: openim/openim-server:main
-#    build: .
-    container_name: openim-server
-    ports:
-      - ${OPENIM_WS_PORT}:10001
-      - ${API_OPENIM_PORT}:10002
-    healthcheck:
-      test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
-      interval: 300s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - ./logs:/openim/openim-server/logs
-      - ./_output:/openim/openim-server/_output
-      - ./config:/openim/openim-server/config
-      - ./scripts:/openim/openim-server/scripts
-    restart: always
-    depends_on:
-      - kafka
-      - mysql
-      - mongodb
-      - redis
-      - minio
-    logging:
-      driver: json-file
-      options:
-        max-size: "1g"
-        max-file: "2"
-    networks:
-      server:
-        ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
+#   openim-server:
+#     # image: ghcr.io/openimsdk/openim-server:main
+#     image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main
+#     # image: openim/openim-server:main
+# #    build: .
+#     container_name: openim-server
+#     ports:
+#       - ${OPENIM_WS_PORT}:10001
+#       - ${API_OPENIM_PORT}:10002
+#     healthcheck:
+#       test: ["CMD", "/openim/openim-server/scripts/check-all.sh"]
+#       interval: 300s
+#       timeout: 10s
+#       retries: 5
+#     volumes:
+#       - ./logs:/openim/openim-server/logs
+#       - ./_output:/openim/openim-server/_output
+#       - ./config:/openim/openim-server/config
+#       - ./scripts:/openim/openim-server/scripts
+#     restart: always
+#     depends_on:
+#       - kafka
+#       - mysql
+#       - mongodb
+#       - redis
+#       - minio
+#     logging:
+#       driver: json-file
+#       options:
+#         max-size: "1g"
+#         max-file: "2"
+#     networks:
+#       server:
+#         ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
 
   # openim-chat:
   #   # image: ghcr.io/openimsdk/openim-chat:main

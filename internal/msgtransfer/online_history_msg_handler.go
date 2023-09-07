@@ -25,7 +25,7 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"github.com/go-redis/redis"
 	"google.golang.org/protobuf/proto"
 

@@ -17,7 +17,7 @@ package msgtransfer
 import (
 	"context"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 
 	pbmsg "github.com/OpenIMSDK/protocol/msg"

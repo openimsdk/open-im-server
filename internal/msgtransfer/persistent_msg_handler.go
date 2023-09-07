@@ -26,7 +26,7 @@ import (
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
 	kfk "github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 )
 
