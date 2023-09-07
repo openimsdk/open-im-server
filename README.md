@@ -189,8 +189,10 @@ Version Details: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conv
 
 ```bash
 # choose what you need
-$ BRANCH=release-v3.1
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make start
+$ BRANCH=release-v3.2
+# install openim dependency
+$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server
+$ curl https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml -o basic-openim-server-dependency.yml && make init && docker compose -f basic-openim-server-dependency.yml up -d && make start
 ```
 
 > `make help` to help you see the instructions supported by OpenIM.
