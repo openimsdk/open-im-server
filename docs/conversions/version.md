@@ -82,7 +82,7 @@ We reinforce our approach to branch management and versioning with stringent tes
 The workflow to address a bug fix might follow these steps:
 
 ```bash
-bashCopy codebashCopy code# Checkout the branch for the version that needs the bug fix
+# Checkout the branch for the version that needs the bug fix
 git checkout release-v3.1
 
 # Create a new branch for the bug fix
@@ -121,4 +121,3 @@ Throughout this process, active communication within the team is pivotal to main
 ## Docker Images Version Management
 
 For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md).
-

@@ -17,7 +17,7 @@ package push
 import (
 	"context"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/OpenIMSDK/protocol/constant"

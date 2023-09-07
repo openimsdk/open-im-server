@@ -25,9 +25,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
-	"github.com/Shopify/sarama"
 	"github.com/go-zookeeper/zk"
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"

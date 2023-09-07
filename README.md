@@ -128,12 +128,11 @@ $ make demo
 
 
 ```bash
-git clone -b feat/test https://github.com/openim-sigs/openim-docker openim/openim-docker && export openim=$(pwd)/openim && cd $openim/openim-docker  && ./scripts/init-config.sh && docker-compose up -d
+git clone -b main https://github.com/openim-sigs/openim-docker openim/openim-docker && export openim=$(pwd)/openim && cd $openim/openim-docker  && ./scripts/init-config.sh && docker-compose up -d
 ```
 
 > **Note**
 > If you don't know OpenIM's versioning policy, 📚Read our release policy: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
-
 
 
 **2. Configure the config file**
@@ -161,9 +160,14 @@ export SERVER_BRANCH="main"
 # MONGO_PASSWORD: Set the MongoDB password
 # MONGO_DATABASE: Sets the MongoDB database name
 # MINIO_ENDPOINT: set the MinIO service address
+# DOCKER_BRIDGE_SUBNET: set the docker bridge network address
+export DOCKER_BRIDGE_SUBNET="172.28.0.0/16"
 # API_URL: under network environment, set OpenIM Server API address
 export API_URL="http://127.0.0.1:10002"
 ```
+
+If you wish to use more custom features, read our [config documentation](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/environment.md).
+
 
 Next, update the configuration using make init:
 
@@ -187,11 +191,26 @@ go version && make --version || echo "Error: One of the commands failed."
 
 Version Details: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
 
+You can get the version number from the command below or from [github releases](https://github.com/OpenIMSDK/Open-IM-Server/tags).
+
 ```bash
-# choose what you need
-$ BRANCH=release-v3.2
+$ curl --silent "https://api.github.com/repos/OpenIMSDK/Open-IM-Server/releases" | jq -r '.[].tag_name'
+```
+
+We have our own version management policy, if you are interested in our version management, I recommend reading [📚 OpenIM Version](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md), We recommend using stable versions such as `v3.3.0` and `v3.2.0` whenever possible. `v3.1.1-alpha.3` as well as `v3.3.0-beta.0` and `v3.2.0-rc.0` are pre-release or beta versions and are not recommended.
+
+Set `OPENIM_VERSION` environment variables for the latest `OPENIM_VERSION` number, or replace the `OPENIM_VERSION` for you to install the OpenIM-Server `OPENIM_VERSION`:
+
+```bash
+$ OPENIM_VERSION=`curl -s https://api.github.com/repos/OpenIMSDK/Open-IM-Server/releases/latest | grep -oE '"tag_name": "[^"]+"' | head -n1 | cut -d'"' -f4`
+# OPENIM_VERSION=v3.3.0
+```
+
+Deploy basic components at the click of a command:
+
+```bash
 # install openim dependency
-$ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server
+$ git clone https://github.com/OpenIMSDK/Open-IM-Server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server && git checkout $OPENIM_VERSION
 $ curl https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml -o basic-openim-server-dependency.yml && make init && docker compose -f basic-openim-server-dependency.yml up -d && make start
 ```
 
@@ -208,96 +227,16 @@ You can use the `make help-all` see OpenIM in action.
 </details>
 
 <details>  <summary>Component Configuration Instructions</summary>
-The `config/config.yaml` file has detailed configuration instructions for the storage components.
 
-
-The config file is available via [environment.sh](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/scripts/install/environment.sh) configuration [openim.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/templates/openim.yaml) template, and then through the `make init` to automatically generate a new configuration.
-
-- Zookeeper
-
-  - Used for RPC service discovery and registration, cluster support.
-
-    ```bash
-    zookeeper:
-      schema: openim                          #Not recommended to modify
-      address: [ 127.0.0.1:2181 ]             #address
-      username:                               #username
-      password:                               #password
-    ```
-
-- MySQL
-
-  - Used for storing users, relationships, and groups, supports master-slave database.
-
-    ```bash
-    mysql:
-      address: [ 127.0.0.1:13306 ]            #address
-      username: root                          #username
-      password: openIM123                     #password
-      database: openIM_v2                     #Not recommended to modify
-      maxOpenConn: 1000                       #maximum connection
-      maxIdleConn: 100                        #maximum idle connection
-      maxLifeTime: 60                         #maximum time a connection can be reused (seconds)
-      logLevel: 4                             #log level 1=slient 2=error 3=warn 4=info
-      slowThreshold: 500                      #slow statement threshold (milliseconds)
-    ```
-
-- Mongo
-
-  - Used for storing offline messages, supports mongo sharded clusters.
-
-    ```bash
-    mongo:
-      uri:                                    #Use this value directly if not empty
-      address: [ 127.0.0.1:37017 ]            #address
-      database: openIM                        #default mongo db
-      username: root                          #username
-      password: openIM123                     #password
-      maxPoolSize: 100                        #maximum connections
-    ```
-
-- Redis
-
-  - Used for storing message sequence numbers, latest messages, user tokens, and mysql cache, supports cluster deployment.
-
-    ```bash
-    redis:
-      address: [ 127.0.0.1:16379 ]            #address
-      username:                               #username
-      password: openIM123                     #password
-    ```
-
-- Kafka
-
-  - Used for message queues, for message decoupling, supports cluster deployment.
-
-    ```bash
-    kafka:
-      username:                               #username
-      password:                               #password
-      addr: [ 127.0.0.1:9092 ]                #address
-      latestMsgToRedis:
-        topic: "latestMsgToRedis"
-      offlineMsgToMongo:
-        topic: "offlineMsgToMongoMysql"
-      msgToPush:
-        topic: "msqToPush"
-      msgToModify:
-        topic: "msgToModify"
-      consumerGroupID:
-        msgToRedis: redis
-        msgToMongo: mongo
-        msgToMySql: mysql
-        msgToPush: push
-        msgToModify: modify
-    ```
+Read: Configuration center document：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/environment.md
 
 </details>
+
 
 <details>  <summary>Deployed with kubernetes</summary>
 
 
-read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/README.md
+Read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/README.md
 
 </details> 
 

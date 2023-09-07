@@ -116,7 +116,7 @@ Open-IM-Server 不仅仅是一个即时消息服务器；它是将实时网络�
 1. 克隆项目
 
 ```
-bashCopy code# 选择您需要的
+# 选择您需要的
 BRANCH=release-v3.1
 git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
@@ -126,7 +126,7 @@ git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && expor
 1. 修改 `.env`
 
 ```
-bashCopy codeUSER=root #无需修改
+USER=root #无需修改
 PASSWORD=openIM123  #8位或更多数字和字母的组合，此密码适用于redis、mysql、mongo，以及config/config.yaml中的accessSecret
 ENDPOINT=http://127.0.0.1:10005 #minio的外部服务IP和端口，或使用域名storage.xx.xx，应用程序必须能够访问此IP和端口或域名，
 API_URL=http://127.0.0.1:10002/object/ #应用程序必须能够访问此IP和端口或域名，
@@ -138,14 +138,14 @@ DATA_DIR=./  #指定大磁盘目录
 > **注意** 此命令只能执行一次。它会基于 `.env` 中的 `PASSWORD` 变量修改 docker-compose 中的组件密码，并修改 `config/config.yaml` 中的组件密码。如果 `.env` 中的密码发生变化，您需要首先执行 `docker-compose down`；`rm components -rf` 然后执行此命令。
 
 ```
-bashCopy code
+
 make install
 ```
 
 1. 检查服务
 
 ```
-bashCopy code
+
 make check
 ```
 
@@ -158,7 +158,7 @@ make check
 版本详情：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
 
 ```
-bashCopy code# 选择您需要的
+# 选择您需要的
 BRANCH=release-v3.1
 git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
@@ -180,7 +180,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
   - 用于 RPC 服务发现和注册，支持集群。
 
     ```
-    bashCopy codezookeeper:
+    zookeeper:
       schema: openim                          #不建议修改
       address: [ 127.0.0.1:2181 ]             #地址
       username:                               #用户名
@@ -192,7 +192,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
   - 用于存储用户、关系和群组，支持主从数据库。
 
     ```
-    bashCopy codemysql:
+    mysql:
       address: [ 127.0.0.1:13306 ]            #地址
       username: root                          #用户名
       password: openIM123                     #密码
@@ -209,7 +209,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
   - 用于存储离线消息，支持 mongo 分片集群。
 
     ```
-    bashCopy codemongo:
+    mongo:
       uri:                                    #如果不为空，则直接使用此值
       address: [ 127.0.0.1:37017 ]            #地址
       database: openIM                        #默认 mongo 数据库
@@ -223,7 +223,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
   - 用于存储消息序列号、最新消息、用户令牌和 mysql 缓存，支持集群部署。
 
     ```
-    bashCopy coderedis:
+    redis:
       address: [ 127.0.0.1:16379 ]            #地址
       username:                               #用户名
       password: openIM123                     #密码
@@ -234,7 +234,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
   - 用于消息队列，用于消息解耦，支持集群部署。
 
     ```
-    bashCopy codekafka:
+    kafka:
       username:                               #用户名
       password:                               #密码
       addr: [ 127.0.0.1:9092 ]                #地址
@@ -259,21 +259,21 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
 启动服务
 
 ```
-bashCopy code
+
 ./scripts/start-all.sh;
 ```
 
 检查服务
 
 ```
-bashCopy code
+
 ./scripts/check-all.sh
 ```
 
 停止服务
 
 ```
-bashCopy code
+
 ./scripts/stop-all.sh
 ```
 
