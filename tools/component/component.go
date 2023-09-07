@@ -19,14 +19,15 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/minio/minio-go/v7"
-	"github.com/redis/go-redis/v9"
-	"gopkg.in/yaml.v3"
 	"net"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/yaml.v3"
 
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/tools/errs"
