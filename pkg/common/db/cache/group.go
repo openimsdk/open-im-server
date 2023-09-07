@@ -25,8 +25,8 @@ import (
 
 	"github.com/OpenIMSDK/tools/utils"
 
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 const (

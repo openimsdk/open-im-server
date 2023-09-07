@@ -24,12 +24,12 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
 
-	prome "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	prome "github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 )
 
 const (

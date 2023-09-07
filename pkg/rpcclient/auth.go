@@ -22,7 +22,7 @@ import (
 	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {

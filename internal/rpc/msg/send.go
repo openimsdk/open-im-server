@@ -17,7 +17,7 @@ package msg
 import (
 	"context"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
@@ -29,7 +29,7 @@ import (
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
 
-	promepkg "github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
+	promepkg "github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {

@@ -17,7 +17,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/internal/msgtransfer"
+	"github.com/openimsdk/open-im-server/v3/internal/msgtransfer"
 )
 
 type MsgTransferCmd struct {

@@ -17,13 +17,13 @@ package cmd
 import (
 	"fmt"
 
-	config2 "github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type RootCmd struct {

@@ -24,7 +24,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func Secret() jwt.Keyfunc {

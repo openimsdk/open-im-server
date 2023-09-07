@@ -19,12 +19,12 @@ import (
 
 	"github.com/OpenIMSDK/tools/mcontext"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"google.golang.org/grpc"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
@@ -32,9 +32,9 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/prome"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/startrpc"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 )
 
 func (s *Server) InitServer(disCov discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {

@@ -19,9 +19,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cont"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cont"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 type S3Database interface {

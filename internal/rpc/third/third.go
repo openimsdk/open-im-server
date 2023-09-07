@@ -20,22 +20,22 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/cos"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/minio"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3/oss"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/cos"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/minio"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3/oss"
 
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/controller"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/relation"
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
