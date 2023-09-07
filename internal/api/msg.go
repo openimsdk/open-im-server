@@ -15,12 +15,13 @@
 package api
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
+
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
