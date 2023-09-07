@@ -72,6 +72,7 @@ func newContext(respWriter http.ResponseWriter, req *http.Request) *UserConnCont
 		ConnID:     utils.Md5(req.RemoteAddr + "_" + strconv.Itoa(int(utils.GetCurrentTimestampByMill()))),
 	}
 }
+
 func newTempContext() *UserConnContext {
 	return &UserConnContext{
 		Req: &http.Request{URL: &url.URL{}},
@@ -125,9 +126,11 @@ func (c *UserConnContext) GetOperationID() string {
 func (c *UserConnContext) SetOperationID(operationID string) {
 	c.Req.URL.Query().Set(OperationID, operationID)
 }
+
 func (c *UserConnContext) GetToken() string {
 	return c.Req.URL.Query().Get(Token)
 }
+
 func (c *UserConnContext) SetToken(token string) {
 	c.Req.URL.RawQuery = Token + "=" + token
 }

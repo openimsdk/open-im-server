@@ -26,6 +26,8 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 source "${OPENIM_ROOT}/scripts/install/common.sh"
 
+openim::log::info "\n# Begin to stop all openim service"
+
 echo "++ Ready to stop port: ${OPENIM_SERVER_PORT_LISTARIES[@]}"
 
 openim::util::stop_services_on_ports ${OPENIM_SERVER_PORT_LISTARIES[@]}

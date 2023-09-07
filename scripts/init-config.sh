@@ -24,27 +24,30 @@ OPENIM_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-# 定义一个配置文件数组，其中包含需要生成的配置文件的名称路径 (en: Define a profile array that contains the name path of the profile to be generated.)
-readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}"/scripts/install/environment.sh}
+# 定义一个配置文件数组，其中包含需要生成的配置文件的名称路径 
+# (en: Define a profile array that contains the name path of the profile to be generated.)
+readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 
-# 定义关联数组，其中键是模板文件，值是对应的输出文件 (en: Defines an associative array where the keys are the template files and the values are the corresponding output files.)
+# 定义关联数组，其中键是模板文件，值是对应的输出文件 
+# (en: Defines an associative array where the keys are the template files and the values are the corresponding output files.)
 declare -A TEMPLATES=(
-  [""${OPENIM_ROOT}"/deployments/templates/env_template.yaml"]=""${OPENIM_ROOT}"/.env"
-  [""${OPENIM_ROOT}"/deployments/templates/openim.yaml"]=""${OPENIM_ROOT}"/config/config.yaml"
+  ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
+  ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
 )
 
 for template in "${!TEMPLATES[@]}"; do
-  output_file=${TEMPLATES[$template]}
-
   if [[ ! -f "${template}" ]]; then
     openim::log::error_exit "template file ${template} does not exist..."
   fi
 
-  openim::log::info "⌚  Working with template file: ${template} to ${output_file}..."
-  ""${OPENIM_ROOT}"/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
-    openim::log::error "Error processing template file ${template}"
-    exit 1
-  }
+  IFS=';' read -ra OUTPUT_FILES <<< "${TEMPLATES[$template]}"
+  for output_file in "${OUTPUT_FILES[@]}"; do
+    openim::log::info "⌚  Working with template file: ${template} to ${output_file}..."
+    "${OPENIM_ROOT}/scripts/genconfig.sh" "${ENV_FILE}" "${template}" > "${output_file}" || {
+      openim::log::error "Error processing template file ${template}"
+      exit 1
+    }
+  done
 done
 
 openim::log::success "✨  All configuration files have been successfully generated!"

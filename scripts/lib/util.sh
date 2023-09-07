@@ -267,25 +267,34 @@ openim::util::check_ports() {
     openim::log::info "Checking ports: $*"
     # Iterate over each given port.
     for port in "$@"; do
-        # Use the `lsof` command to find process information related to the given port.
-        local info=$(lsof -i :$port -n -P | grep LISTEN || true)
+        # Use the `ss` command to find process information related to the given port.
+        local info=$(ss -ltnp | grep ":$port" || true)
         
         # If there's no process information, it means the process associated with the port is not running.
         if [[ -z $info ]]; then
             not_started+=($port)
         else
-            # If there's process information, extract relevant details:
-            # Process ID, Command Name, and Start Time.
-            local pid=$(echo $info | awk '{print $2}')
-            local command=$(echo $info | awk '{print $1}')
-            local start_time=$(ps -o lstart= -p $pid)
-            started+=("Port $port - Command: $command, PID: $pid, Start time: $start_time")
+            # Extract relevant details: Process Name, PID, and FD.
+            local details=$(echo $info | sed -n 's/.*users:(("\([^"]*\)",pid=\([^,]*\),fd=\([^)]*\))).*/\1 \2 \3/p')
+            local command=$(echo $details | awk '{print $1}')
+            local pid=$(echo $details | awk '{print $2}')
+            local fd=$(echo $details | awk '{print $3}')
+            
+            # Get the start time of the process using the PID
+            if [[ -z $pid ]]; then
+                local start_time="N/A"
+            else
+                # Get the start time of the process using the PID
+                local start_time=$(ps -p $pid -o lstart=)
+            fi
+            
+            started+=("Port $port - Command: $command, PID: $pid, FD: $fd, Started: $start_time")
         fi
     done
-    echo 
+
     # Print information about ports whose processes are not running.
     if [[ ${#not_started[@]} -ne 0 ]]; then
-        openim::log::info "### Not started ports:"
+        openim::log::info "\n### Not started ports:"
         for port in "${not_started[@]}"; do
             openim::log::error "Port $port is not started."
         done
@@ -293,8 +302,7 @@ openim::util::check_ports() {
 
     # Print information about ports whose processes are running.
     if [[ ${#started[@]} -ne 0 ]]; then
-        echo
-        openim::log::info "### Started ports:"
+        openim::log::info "\n### Started ports:"
         for info in "${started[@]}"; do
             openim::log::info "$info"
         done
@@ -305,11 +313,14 @@ openim::util::check_ports() {
         echo "++++ OpenIM Log >> cat ${LOG_FILE}"
         return 1
     else
-        openim::log::success "started[@] processes are running."
+        openim::log::success "All specified processes are running."
         return 0
     fi
 }
-# openim::util::check_ports 10002 1004
+# set +o errexit
+# Sample call for testing:
+# openim::util::check_ports 10002 1004 12345 13306
+# set -o errexit
 
 # The `openim::util::check_process_names` function analyzes the state of processes based on given names.
 # It accepts multiple process names as arguments and prints:
@@ -895,13 +906,13 @@ function openim::util::list-to-string() {
     # 2. Replace commas with spaces
     # 3. Remove opening and closing brackets
     ports_array=$(echo "$ports_list" | sed 's/ //g; s/,/ /g; s/^\[\(.*\)\]$/\1/')
-
     # For external use, we might want to echo the result so that it can be captured by callers
     echo "$ports_array"
 }
 # MSG_GATEWAY_PROM_PORTS=$(openim::util::list-to-string "10023, 2323, 34 34")
+# read -a MSG_GATEWAY_PROM_PORTS <<< $(openim::util::list-to-string "10023, 2323, 34 34")
 # echo ${MSG_GATEWAY_PROM_PORTS}
-
+# echo "${#MSG_GATEWAY_PROM_PORTS[@]}"
 # Downloads cfssl/cfssljson/cfssl-certinfo into $1 directory if they do not already exist in PATH
 #
 # Assumed vars:

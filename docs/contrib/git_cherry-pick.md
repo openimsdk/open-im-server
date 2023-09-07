@@ -75,15 +75,14 @@ It is critical that our full community is actively engaged on enhancements in th
 
   - Be aware the cherry pick script assumes you have a git remote called `upstream` that points at the openim-server github org.
 
-    Please see our [recommended Git workflow](https://github.com/openim-server/community/blob/main/contributors/guide/github-workflow.md#workflow).
+    Please see our [recommended Git workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contributors/github-workflow.md#workflow).
 
-  - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/openim-server/website/blob/main/content/en/releases/patch-releases.md#detailed-release-history-for-active-branches) release branches where the fix is applicable.
+  - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/OpenIMSDK/Open-IM-Server/releases) release branches where the fix is applicable.
 
   - If `GITHUB_TOKEN` is not set you will be asked for your github password: provide the github [personal access token](https://github.com/settings/tokens) rather than your actual github password. If you can securely set the environment variable `GITHUB_TOKEN` to your personal access token then you can avoid an interactive prompt. Refer [mislav/hub#2655 (comment)](https://github.com/mislav/hub/issues/2655#issuecomment-735836048)
 
 - Your cherry pick PR will immediately get the `do-not-merge/cherry-pick-not-approved` label.
 
-  [Normal rules apply for code merge](https://github.com/openim-server/community/blob/main/contributors/devel/sig-release/release.md#tldr), with some additional caveats outlined in the next section of this document.
 
 ## Cherry Pick Review
 
