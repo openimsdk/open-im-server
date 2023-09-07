@@ -1,4 +1,4 @@
-module github.com/OpenIMSDK/Open-IM-Server/tools/imctl
+module 	github.com/openimsdk/open-im-server/v3/tools/imctl
 
 go 1.18
 
