@@ -19,7 +19,7 @@ You can use tools like PuTTY or other SSH clients to log in to your Ubuntu serve
 Generally, a project will involve multiple developers. Instead of provisioning a server for every developer, many organizations share a single development machine among developers. To simulate this real-world scenario, we'll use a standard user for development. To create the `openim` user:
 
 ```
-bashCopy code# adduser openim # Create the openim user, which developers will use for login and development.
+# adduser openim # Create the openim user, which developers will use for login and development.
 # passwd openim # Set the login password for openim.
 ```
 
@@ -30,7 +30,7 @@ Working with a non-root user ensures the system's safety and is a good practice.
 Often, even standard users need root privileges. Instead of frequently asking the system administrator for the root password, you can add the standard user to the sudoers. This allows them to temporarily gain root access using the sudo command. To add the `openim` user to sudoers:
 
 ```
-bashCopy code
+
 # sed -i '/^root.*ALL=(ALL:ALL).*ALL/a\openim\tALL=(ALL) \tALL' /etc/sudoers
 ```
 
@@ -45,7 +45,7 @@ Assuming we're using the **openim** user, log in using PuTTY or other SSH client
 The first step after logging into a new server is to configure the `$HOME/.bashrc` file. It makes the Linux shell more user-friendly by setting environment variables like `LANG` and `PS1`. Here's how the configuration would look:
 
 ```
-bashCopy code# .bashrc
+# .bashrc
 
 # User specific aliases and functions
 
@@ -82,7 +82,7 @@ The OpenIM project on Ubuntu may have various dependencies. Some are direct, and
 You can use the `apt` command to install the required tools on Ubuntu:
 
 ```
-bashCopy code$ sudo apt-get update 
+$ sudo apt-get update 
 $ sudo apt-get install build-essential autoconf automake cmake perl libcurl4-gnutls-dev libtool gcc g++ glibc-doc-reference zlib1g-dev git-lfs telnet lrzsz jq libexpat1-dev libssl-dev
 $ sudo apt install libcurl4-openssl-dev
 ```
@@ -92,7 +92,7 @@ $ sudo apt install libcurl4-openssl-dev
 A higher version of Git ensures compatibility with certain commands like `git fetch --unshallow`. To install a recent version:
 
 ```
-bashCopy code$ cd /tmp
+$ cd /tmp
 $ wget --no-check-certificate https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.36.1.tar.gz
 $ tar -xvzf git-2.36.1.tar.gz
 $ cd git-2.36.1/
@@ -105,7 +105,7 @@ $ git --version
 Then, add Git's binary directory to the `PATH`:
 
 ```
-bashCopy code
+
 $ echo 'export PATH=/usr/local/libexec/git-core:$PATH' >> $HOME/.bashrc
 ```
 
@@ -114,7 +114,7 @@ $ echo 'export PATH=/usr/local/libexec/git-core:$PATH' >> $HOME/.bashrc
 To set up Git:
 
 ```
-bashCopy code$ git config --global user.name "Your Name"
+$ git config --global user.name "Your Name"
 $ git config --global user.email "your_email@example.com"
 $ git config --global credential.helper store
 $ git config --global core.longpaths true
@@ -123,14 +123,14 @@ $ git config --global core.longpaths true
 Other Git configurations include:
 
 ```
-bashCopy code
+
 $ git config --global core.quotepath off
 ```
 
 And for handling larger files:
 
 ```
-bashCopy code
+
 $ git lfs install --skip-repo
 ```
 

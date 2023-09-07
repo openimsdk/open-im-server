@@ -44,7 +44,7 @@ For Linux:
 The OpenIM Protoc tool provides a multitude of options for parsing `.proto` files and generating output:
 
 ```
-bashCopy code
+
 ./protoc [OPTION] PROTO_FILES
 ```
 
