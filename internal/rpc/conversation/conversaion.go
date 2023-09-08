@@ -301,7 +301,10 @@ func (c *conversationServer) GetConversationsByConversationID(
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
 
-func (c *conversationServer) GetConversationNeedOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationNeedOfflinePushUserIDsReq) (*pbconversation.GetConversationNeedOfflinePushUserIDsResp, error) {
+func (c *conversationServer) GetConversationNeedOfflinePushUserIDs(
+	ctx context.Context,
+	req *pbconversation.GetConversationNeedOfflinePushUserIDsReq,
+) (*pbconversation.GetConversationNeedOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.Wrap("conversationID is empty")
 	}

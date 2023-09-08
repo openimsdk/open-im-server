@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/OpenIMSDK/protocol/conversation"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -235,7 +236,10 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			resp, err := p.conversationRpcClient.Client.GetConversationNeedOfflinePushUserIDs(ctx, &conversation.GetConversationNeedOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), OwnerUserIDs: needOfflinePushUserIDs})
+			resp, err := p.conversationRpcClient.Client.GetConversationNeedOfflinePushUserIDs(
+				ctx,
+				&conversation.GetConversationNeedOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), OwnerUserIDs: needOfflinePushUserIDs},
+			)
 			if err != nil {
 				return err
 			}

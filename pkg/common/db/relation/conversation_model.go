@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/errs"
 
 	"gorm.io/gorm"
@@ -218,5 +219,11 @@ func (c *ConversationGorm) GetConversationIDsNeedDestruct(
 
 func (c *ConversationGorm) GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error) {
 	var userIDs []string
-	return userIDs, errs.Wrap(c.db(ctx).Model(&relation.ConversationModel{}).Where("conversation_id = ? and owner_user_id in ? and recv_msg_opt = ?", conversationID, ownerUserIDs, constant.ReceiveMessage).Pluck("owner_user_id", &userIDs).Error)
+	return userIDs, errs.Wrap(
+		c.db(ctx).
+			Model(&relation.ConversationModel{}).
+			Where("conversation_id = ? and owner_user_id in ? and recv_msg_opt = ?", conversationID, ownerUserIDs, constant.ReceiveMessage).
+			Pluck("owner_user_id", &userIDs).
+			Error,
+	)
 }
