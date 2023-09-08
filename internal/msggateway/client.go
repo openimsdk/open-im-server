@@ -59,7 +59,7 @@ const (
 	PongMessage = 10
 )
 
-type PongHandler func(string) error
+type PingPongHandler func(string) error
 
 type Client struct {
 	w              *sync.Mutex
@@ -107,7 +107,7 @@ func (c *Client) ResetClient(
 	c.token = token
 }
 
-func (c *Client) pongHandler(_ string) error {
+func (c *Client) pingHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
 	return nil
 }
@@ -122,7 +122,7 @@ func (c *Client) readMessage() {
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(pongWait)
-	c.conn.SetPongHandler(c.pongHandler)
+	c.conn.SetPingHandler(c.pingHandler)
 	for {
 		messageType, message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
