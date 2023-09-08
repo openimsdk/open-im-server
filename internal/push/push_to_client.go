@@ -119,7 +119,6 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 				if err != nil {
 					return err
 				}
-				break
 			}
 		}
 	}
