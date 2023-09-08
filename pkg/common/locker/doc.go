@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package locker // import "github.com/OpenIMSDK/Open-IM-Server/pkg/common/locker"
+package locker // import "github.com/openimsdk/open-im-server/v3/pkg/common/locker"

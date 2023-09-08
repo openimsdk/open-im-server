@@ -1,7 +1,7 @@
 [Unit]
 Description=OPENIM OPENIM CRONTASK
 Documentation=Manages the OpenIM CronTask service, with both direct and systemctl installation methods.
-Documentation=https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
+Documentation=https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
 
 [Service]
 WorkingDirectory=${OPENIM_DATA_DIR}/openim-crontask

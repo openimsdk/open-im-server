@@ -28,9 +28,9 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
 )
 
 const (
@@ -68,9 +68,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 const (
@@ -205,9 +205,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 const maxStringLength = 17
@@ -253,9 +253,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 const (
@@ -386,9 +386,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 // SubCmd2Options is an options struct to support subcmd2 subcommands.

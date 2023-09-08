@@ -114,7 +114,7 @@ jobs:
             - [ ] Disenchanter can connect and issue actions
             
             This is an automated PR. @ ${{ github.actor }}
-            <sub>[workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/.github/workflows/pull-request.yml).</sub>
+            <sub>[workflow](https://github.com/openimsdk/open-im-server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
           labels: |
             kind/documentation

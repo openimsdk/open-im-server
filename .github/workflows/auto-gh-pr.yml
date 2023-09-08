@@ -51,7 +51,7 @@ jobs:
             # git checkout -b bot/merge-to-release-$ISSUEID
             # git push origin bot/merge-to-release-$ISSUEID
             # gh pr create --base release --head bot/merge-to-release-$ISSUEID --title "Merge main to release" --body ""
-            # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo OpenIMSDK/Open-IM-Server --reviewer "cubxxw"
+            # gh pr create --base main --head feat/auto-release-pr-624  --title "The bug is fixed" --body "$x" --repo openimsdk/open-im-server --reviewer "cubxxw"
           continue-on-error: true
           env:
               GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}

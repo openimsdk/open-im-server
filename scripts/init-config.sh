@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # This script automatically initializes the various configuration files
-# Read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/init_config.md
+# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init_config.md
 
 set -o errexit
 set -o nounset

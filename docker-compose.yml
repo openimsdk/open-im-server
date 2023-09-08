@@ -1,4 +1,4 @@
-#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
+#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/openimsdk/open-im-server.git
 version: '3'
 
 networks:
@@ -140,7 +140,7 @@ services:
       - "9090:9090"
     container_name: minio
     volumes:
-      - minio_data:/data
+      - minio_data:/data 
       - minio_config:/root/.minio
     environment:
       MINIO_ROOT_USER: "${MINIO_ACCESS_KEY}"

@@ -30,12 +30,12 @@ function openim::msggateway::start()
     openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
     openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
 
-    openim::util::stop_services_with_name ${SERVER_NAME}
+    openim::util::stop_services_with_name ${OPENIM_MSGGATEWAY_BINARY}
 
     # OpenIM message gateway service port
     OPENIM_MESSAGE_GATEWAY_PORTS=$(openim::util::list-to-string ${OPENIM_MESSAGE_GATEWAY_PORT} )
     read -a OPENIM_MSGGATEWAY_PORTS_ARRAY <<< ${OPENIM_MESSAGE_GATEWAY_PORTS}
-
+    openim::util::stop_services_on_ports ${OPENIM_MSGGATEWAY_PORTS_ARRAY[*]}
     # OpenIM WS port
     OPENIM_WS_PORTS=$(openim::util::list-to-string ${OPENIM_WS_PORT} )
     read -a OPENIM_WS_PORTS_ARRAY <<< ${OPENIM_WS_PORTS}

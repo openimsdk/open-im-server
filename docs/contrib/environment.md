@@ -13,7 +13,7 @@ Three ways to modify the configuration:
 ```bash
 export PASSWORD="openIM123" # Set password
 export USER="root" # Set username
-# Choose chat version and server version https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md, eg: main, release-v*.*
+# Choose chat version and server version https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md, eg: main, release-v*.*
 export CHAT_BRANCH="main"
 export SERVER_BRANCH="main"
 #... Other environment variables
@@ -48,9 +48,76 @@ make init
 The `config/config.yaml` file has detailed configuration instructions for the storage components.
 
 
-The config file is available via [environment.sh](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/scripts/install/environment.sh) configuration [openim.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployments/templates/openim.yaml) template, and then through the `make init` to automatically generate a new configuration.
+The config file is available via [environment.sh](https://github.com/openimsdk/open-im-server/blob/main/scripts/install/environment.sh) configuration [openim.yaml](https://github.com/openimsdk/open-im-server/blob/main/deployments/templates/openim.yaml) template, and then through the `make init` to automatically generate a new configuration.
 
 
+## Environment variable
+
+By setting the environment variable below, You can then refresh the configuration using `make init` or `./scripts/init-config.sh`
+
+##### MINIO
+
++ [MINIO DOCS](https://min.io/docs/minio/kubernetes/upstream/index.html)
+
+apiURL is the address of the api, the access address of the app, use s3 must be configured
+
+#### Overview
+
+MinIO is an object storage server that is API compatible with Amazon S3. It's best suited for storing unstructured data such as photos, videos, log files, backups, and container/VM images. In this guide, we'll walk through the process of configuring MinIO with custom settings.
+
+#### Default Configuration
+
+Configuration can be achieved by modifying the default variables in the `./scripts/install/environment.sh` file. However, for more flexibility and dynamic adjustments, setting environment variables is recommended.
+
+#### Setting Up the Environment Variables
+
+##### IP Configuration
+
+By default, the system generates the public IP of the machine. To manually set a public or local IP address, use:
+
+```bash
+export IP=127.0.0.1
+```
+
+##### API URL
+
+This is the address your application uses to communicate with MinIO. By default, it uses the public IP. However, you can adjust it to a public domain or another IP.
+
+```bash
+export API_URL=127.0.0.1:10002
+```
+
+##### MinIO Endpoint Configuration
+
+This is the primary address MinIO uses for communications:
+
+```bash
+export MINIO_ENDPOINT="127.0.0.1"
+```
+
+##### MinIO Sign Endpoint
+
+For direct external access to stored content:
+
+```bash
+export MINIO_SIGN_ENDPOINT=127.0.0.1:10005
+```
+
+##### Modifying MinIO's Port
+
+If you need to adjust MinIO's port from the default:
+
+```bash
+export MINIO_PORT="10005"
+```
+
+#### Applying the Configuration
+
+After setting your desired environment variables, restart the MinIO server to apply the changes.
+
+#### Verification
+
+It's crucial to verify the configurations by checking the connectivity between your application and MinIO using the set API URL and ensuring that the data can be directly accessed using the `signEndpoint`.
 
 
 ## Configuration Details
@@ -133,6 +200,16 @@ The config file is available via [environment.sh](https://github.com/OpenIMSDK/O
 
 
 
+
+
 ## Config options
 
 ...
+
+## Use the default values
+
+A method to revert to the default value:
+
+```bash
+export IP=127.0.0.1
+```

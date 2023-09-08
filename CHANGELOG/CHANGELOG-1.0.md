@@ -47,10 +47,10 @@
 - update
 
 
-[Unreleased]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.7...HEAD
-[v1.0.7]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.6...v1.0.7
-[v1.0.6]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.5...v1.0.6
-[v1.0.5]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.4...v1.0.5
-[v1.0.4]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.3...v1.0.4
-[v1.0.3]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.1...v1.0.3
-[v1.0.1]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v1.0.0...v1.0.1
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v1.0.7...HEAD
+[v1.0.7]: https://github.com/openimsdk/open-im-server/compare/v1.0.6...v1.0.7
+[v1.0.6]: https://github.com/openimsdk/open-im-server/compare/v1.0.5...v1.0.6
+[v1.0.5]: https://github.com/openimsdk/open-im-server/compare/v1.0.4...v1.0.5
+[v1.0.4]: https://github.com/openimsdk/open-im-server/compare/v1.0.3...v1.0.4
+[v1.0.3]: https://github.com/openimsdk/open-im-server/compare/v1.0.1...v1.0.3
+[v1.0.1]: https://github.com/openimsdk/open-im-server/compare/v1.0.0...v1.0.1

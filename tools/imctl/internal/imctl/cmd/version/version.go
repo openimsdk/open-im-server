@@ -25,9 +25,9 @@ import (
 	"github.com/openim-sigs/component-base/pkg/version"
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/pkg/util"
 )
 
 // Version is a struct for version information.

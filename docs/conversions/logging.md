@@ -2,7 +2,7 @@
 
 ### Log Standards
 
-- The unified log package `github.com/OpenIMSDK/Open-IM-Server/internal/pkg/log` should be used for all logging;
+- The unified log package `github.com/openimsdk/open-im-server/internal/pkg/log` should be used for all logging;
 - Use structured logging formats: `log.Infow`, `log.Warnw`, `log.Errorw`, etc. For example: `log.Infow("Update post function called")`;
 - All logs should start with an uppercase letter and should not end with a `.`. For example: `log.Infow("Update post function called")`;
 - Use past tense. For example, use `Could not delete B` instead of `Cannot delete B`;

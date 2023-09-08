@@ -16,7 +16,7 @@
 
 All notable changes to this project will be documented in this file.
 
-+ [https://github.com/OpenIMSDK/Open-IM-Server/releases](https://github.com/OpenIMSDK/Open-IM-Server/releases)
++ [https://github.com/openimsdk/open-im-server/releases](https://github.com/openimsdk/open-im-server/releases)
 
 ## OpenIM versioning policy
 
@@ -44,7 +44,7 @@ $ git-chglog --init
 
 **Options**
 
-- What is the URL of your repository?: https://github.com/OpenIMSDK/Open-IM-Server
+- What is the URL of your repository?: https://github.com/openimsdk/open-im-server
 - What is your favorite style?: github
 - Choose the format of your favorite commit message: <type>(<scope>): <subject> -- feat(core): Add new feature
 - What is your favorite template style?: standard

@@ -10,11 +10,11 @@
 
 
 <p align=center>
-<a href="https://goreportcard.com/report/github.com/OpenIMSDK/Open-IM-Server"><img src="https://goreportcard.com/badge/github.com/OpenIMSDK/Open-IM-Server" alt="A+"></a>
-<a href="https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/OpenIMSDK/Open-IM-Server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
-<a href="https://github.com/OpenIMSDK/Open-IM-Server"><img src="https://img.shields.io/github/stars/OpenIMSDK/Open-IM-Server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
+<a href="https://goreportcard.com/report/github.com/openimsdk/open-im-server"><img src="https://goreportcard.com/badge/github.com/openimsdk/open-im-server" alt="A+"></a>
+<a href="https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
+<a href="https://github.com/openimsdk/open-im-server"><img src="https://img.shields.io/github/stars/openimsdk/open-im-server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
 <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
-<a href="https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
+<a href="https://github.com/openimsdk/open-im-server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
 </p>
 
@@ -99,9 +99,9 @@ Open-IM-Server 不仅仅是一个即时消息服务器；它是将实时网络�
 
 9. **终极部署体验 🤖**
 
-   ✅ 支持 [集群部署](https://github.com/OpenIMSDK/Open-IM-Server/edit/main/deployments/README.md)
+   ✅ 支持 [集群部署](https://github.com/openimsdk/open-im-server/edit/main/deployments/README.md)
 
-   ✅ 支持多架构镜像，我们的 Docker 镜像不仅托管在 GitHub 上，而且还在阿里云和 Docker Hub 上支持多个架构。请访问 [我们的 GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) 并阅读我们的 [版本管理文档](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md) 以获取更多信息。
+   ✅ 支持多架构镜像，我们的 Docker 镜像不仅托管在 GitHub 上，而且还在阿里云和 Docker Hub 上支持多个架构。请访问 [我们的 GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) 并阅读我们的 [版本管理文档](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md) 以获取更多信息。
 
 10. **开源社区的大生态系统 🤲**
 
@@ -118,10 +118,10 @@ Open-IM-Server 不仅仅是一个即时消息服务器；它是将实时网络�
 ```
 # 选择您需要的
 BRANCH=release-v3.1
-git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
+git clone -b $BRANCH https://github.com/openimsdk/open-im-server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
 
-> **注意** 阅读我们的发布策略：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
+> **注意** 阅读我们的发布策略：https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md
 
 1. 修改 `.env`
 
@@ -149,27 +149,27 @@ make install
 make check
 ```
 
-![https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/docker_build.png)
+![https://github.com/openimsdk/open-im-server/blob/main/docs/images/docker_build.png](https://github.com/openimsdk/open-im-server/blob/main/docs/images/docker_build.png)
 
 </details>  <details>  <summary>从源码编译</summary>
 
 您需要 `Go 1.18` 或更高版本，以及 `make`。
 
-版本详情：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md
+版本详情：https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md
 
 ```
 # 选择您需要的
 BRANCH=release-v3.1
-git clone -b $BRANCH https://github.com/OpenIMSDK/Open-IM-Server openim && export openim=$(pwd)/openim && cd $openim && make build
+git clone -b $BRANCH https://github.com/openimsdk/open-im-server openim && export openim=$(pwd)/openim && cd $openim && make build
 ```
 
-阅读关于 [OpenIM 版本策略](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+阅读关于 [OpenIM 版本策略](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
 
 使用 `make help` 来查看 OpenIM 支持的指令。
 
 如图所示，所有服务已成功构建
 
-![成功编译](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/build.png)
+![成功编译](https://github.com/openimsdk/open-im-server/blob/main/docs/images/build.png)
 
 </details> <details>  <summary>组件配置说明</summary>
 
@@ -302,30 +302,30 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
 
 OpenIM 不仅仅是一个开源的即时消息组件，它是您的应用程序生态系统的一个不可分割的部分。查看此图表以了解 AppServer、AppClient、Open-IM-Server 和 Open-IM-SDK 如何互动。
 
-![App-OpenIM 关系](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/open-im-server.png)
+![App-OpenIM 关系](https://github.com/openimsdk/open-im-server/blob/main/docs/images/open-im-server.png)
 
 ## :building_construction: 总体架构
 
 深入了解 Open-IM-Server 的功能与我们的架构图。
 
-![总体架构](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/images/Architecture.jpg)
+![总体架构](https://github.com/openimsdk/open-im-server/blob/main/docs/images/Architecture.jpg)
 
 ## :hammer_and_wrench: 开始开发 OpenIM
 
 OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标准，在 [Community repository](https://github.com/OpenIMSDK/community) 中。
 
-如果您想为这个 Open-IM-Server 仓库做贡献，请阅读我们的 [贡献者文档](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md)。
+如果您想为这个 Open-IM-Server 仓库做贡献，请阅读我们的 [贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)。
 
-在您开始之前，请确保您的更改是需要的。最好的方法是创建一个 [新的讨论](https://github.com/OpenIMSDK/Open-IM-Server/discussions/new/choose) 或 [Slack 通讯](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)，或者如果您发现一个问题，首先 [报告它](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose)。
+在您开始之前，请确保您的更改是需要的。最好的方法是创建一个 [新的讨论](https://github.com/openimsdk/open-im-server/discussions/new/choose) 或 [Slack 通讯](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)，或者如果您发现一个问题，首先 [报告它](https://github.com/openimsdk/open-im-server/issues/new/choose)。
 
-- [代码标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/go_code.md)
-- [Docker 图像标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
-- [目录标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/directory.md)
-- [提交标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/commit.md)
-- [版本控制标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
-- [接口标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/api.md)
-- [日志标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/)
-- [错误代码标准](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/error_code.md)
+- [代码标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/go_code.md)
+- [Docker 图像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
+- [目录标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/directory.md)
+- [提交标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/commit.md)
+- [版本控制标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
+- [接口标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/api.md)
+- [日志标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/)
+- [错误代码标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/error_code.md)
 
 ## :busts_in_silhouette: 社区
 
@@ -340,18 +340,18 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 
 我们的会议在 [OpenIM Slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) 🎯，然后您可以搜索 Open-IM-Server 管道加入。
 
-我们在 [GitHub 讨论](https://github.com/OpenIMSDK/Open-IM-Server/discussions/categories/meeting) 中记下每次 [双周会议](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) 的笔记，我们的历史会议记录以及会议回放都可在 [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) 中找到。
+我们在 [GitHub 讨论](https://github.com/openimsdk/open-im-server/discussions/categories/meeting) 中记下每次 [双周会议](https://github.com/orgs/OpenIMSDK/discussions/categories/meeting) 的笔记，我们的历史会议记录以及会议回放都可在 [Google Docs :bookmark_tabs:](https://docs.google.com/document/d/1nx8MDpuG74NASx081JcCpxPgDITNTpIIos0DS6Vr9GU/edit?usp=sharing) 中找到。
 
 ## :eyes: 谁在使用 OpenIM
 
-查看我们的 [用户案例研究](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) 页面以获取项目用户列表。不要犹豫，留下一个 [📝评论](https://github.com/OpenIMSDK/Open-IM-Server/issues/379) 并分享您的使用案例。
+查看我们的 [用户案例研究](https://github.com/OpenIMSDK/community/blob/main/ADOPTERS.md) 页面以获取项目用户列表。不要犹豫，留下一个 [📝评论](https://github.com/openimsdk/open-im-server/issues/379) 并分享您的使用案例。
 
 ## :page_facing_up: 许可证
 
-OpenIM 根据 Apache 2.0 许可证授权。请查看 [LICENSE](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/LICENSE) 以获取完整的许可证文本。
+OpenIM 根据 Apache 2.0 许可证授权。请查看 [LICENSE](https://github.com/openimsdk/open-im-server/tree/main/LICENSE) 以获取完整的许可证文本。
 
-OpenIM logo，包括其变体和动画版本，在此存储库 [OpenIM](https://github.com/OpenIMSDK/Open-IM-Server) 下的 [assets/logo](./assets/logo) 和 [assets/logo-gif](./assets/logo-gif) 目录中显示，受版权法保护。
+OpenIM logo，包括其变体和动画版本，在此存储库 [OpenIM](https://github.com/openimsdk/open-im-server) 下的 [assets/logo](./assets/logo) 和 [assets/logo-gif](./assets/logo-gif) 目录中显示，受版权法保护。
 
 ## 🔮 感谢我们的贡献者！
 
-<a href="https://github.com/OpenIMSDK/Open-IM-Server/graphs/contributors">   <img src="https://contrib.rocks/image?repo=OpenIMSDK/Open-IM-Server" /> </a>
+<a href="https://github.com/openimsdk/open-im-server/graphs/contributors">   <img src="https://contrib.rocks/image?repo=openimsdk/open-im-server" /> </a>

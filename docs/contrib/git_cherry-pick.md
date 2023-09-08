@@ -27,8 +27,8 @@ Ensuring this strategy's success extends beyond just documentation; it hinges on
 
 - [Contributor License Agreement](https://github.com/openim-sigs/cla) is considered implicit for all code within cherry pick pull requests, **unless there is a large conflict**.
 - A pull request merged against the `main` branch.
-- The release branch exists (example: [`release-1.18`](https://github.com/OpenIMSDK/Open-IM-Server/tree/release-v3.1))
-- The normal git and GitHub configured shell environment for pushing to your openim-server `origin` fork on GitHub and making a pull request against a configured remote `upstream` that tracks `https://github.com/OpenIMSDK/Open-IM-Server.git`, including `GITHUB_USER`.
+- The release branch exists (example: [`release-1.18`](https://github.com/openimsdk/open-im-server/tree/release-v3.1))
+- The normal git and GitHub configured shell environment for pushing to your openim-server `origin` fork on GitHub and making a pull request against a configured remote `upstream` that tracks `https://github.com/openimsdk/open-im-server.git`, including `GITHUB_USER`.
 - Have GitHub CLI (`gh`) installed following [installation instructions](https://github.com/cli/cli#installation).
 - A github personal access token which has permissions "repo" and "read:org". Permissions are required for [gh auth login](https://cli.github.com/manual/gh_auth_login) and not used for anything unrelated to cherry-pick creation process (creating a branch and initiating PR).
 
@@ -65,7 +65,7 @@ It is critical that our full community is actively engaged on enhancements in th
 
 ### Steps
 
-- Run the [cherry pick script](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/scripts/cherry-pick.sh)
+- Run the [cherry pick script](https://github.com/openimsdk/open-im-server/tree/main/scripts/cherry-pick.sh)
 
   This example applies a main branch PR #98765 to the remote branch `upstream/release-v3.1`:
 
@@ -75,9 +75,9 @@ It is critical that our full community is actively engaged on enhancements in th
 
   - Be aware the cherry pick script assumes you have a git remote called `upstream` that points at the openim-server github org.
 
-    Please see our [recommended Git workflow](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contributors/github-workflow.md#workflow).
+    Please see our [recommended Git workflow](https://github.com/openimsdk/open-im-server/blob/main/docs/contributors/github-workflow.md#workflow).
 
-  - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/OpenIMSDK/Open-IM-Server/releases) release branches where the fix is applicable.
+  - You will need to run the cherry pick script separately for each patch release you want to cherry pick to. Cherry picks should be applied to all [active](https://github.com/openimsdk/open-im-server/releases) release branches where the fix is applicable.
 
   - If `GITHUB_TOKEN` is not set you will be asked for your github password: provide the github [personal access token](https://github.com/settings/tokens) rather than your actual github password. If you can securely set the environment variable `GITHUB_TOKEN` to your personal access token then you can avoid an interactive prompt. Refer [mislav/hub#2655 (comment)](https://github.com/mislav/hub/issues/2655#issuecomment-735836048)
 

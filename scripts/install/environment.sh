@@ -15,9 +15,9 @@
 
 # This is a file that initializes variables for the automation script that initializes the config file
 # You need to supplement the script according to the specification.
-# Read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/init_config.md
+# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init_config.md
 # 格式化 bash 注释：https://tool.lu/shell/
-# 配置中心文档：https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/environment.md
+# 配置中心文档：https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md
 
 OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
@@ -26,7 +26,7 @@ LOCAL_OUTPUT_ROOT=""${OPENIM_ROOT}"/${OUT_DIR:-_output}"
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
 #TODO: Access to the IP networks outside, or you want to use the IP network
-# IP=http://127.0.0.1
+# IP=127.0.0.1
 if [ -z "${IP}" ]; then
 	IP=$(openim::util::get_server_ip)
 fi
@@ -41,9 +41,6 @@ function def() {
 	local default_value="${2:-}"
 	eval "readonly $var_name=\"\${$var_name:-$(printf '%q' "$default_value")}\""
 }
-
-# app要能访问到此ip和端口或域名
-readonly API_URL=${API_URL:-"http://${IP}:10002"}
 
 # OpenIM Docker Compose 数据存储的默认路径
 def "DATA_DIR" "${OPENIM_ROOT}"
@@ -109,7 +106,7 @@ LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
 
 ###################### openim 配置 ######################
-# read: https://github.com/OpenIMSDK/Open-IM-Server/blob/main/deployment/init/README.md
+# read: https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
 def "OPENIM_INSTALL_DIR" "/opt/openim"
 def "OPENIM_CONFIG_DIR" "/etc/openim"
@@ -174,9 +171,12 @@ def "MONGO_PASSWORD" "${PASSWORD}"             # MongoDB的密码
 def "MONGO_MAX_POOL_SIZE" "100"                # 最大连接池大小
 
 ###################### Object 配置信息 ######################
+# app要能访问到此ip和端口或域名
+readonly API_URL=${API_URL:-"http://${IP}:${API_OPENIM_PORT}"}
+
 def "OBJECT_ENABLE" "minio" # 对象是否启用
 # 对象的API地址
-readonly OBJECT_APIURL=${OBJECT_APIURL:-"http://${IP}:10002"}
+readonly OBJECT_APIURL=${OBJECT_APIURL:-"http://${API_URL}"}
 def "MINIO_BUCKET" "openim" # MinIO的存储桶名称
 def "MINIO_PORT" "10005"    # MinIO的端口
 # MinIO的端点URL
@@ -185,7 +185,7 @@ readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${MINIO_ADDRESS}:${MINIO_PORT}
 def "MINIO_ACCESS_KEY" "${USER}"                                                  # MinIO的访问密钥ID
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                              # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                         # MinIO的会话令牌
-readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址                                              # MinIO的会话令牌
+readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址
 # 腾讯云COS的存储桶URL
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
 def "COS_SECRET_ID"                                                     # 腾讯云COS的密钥ID
