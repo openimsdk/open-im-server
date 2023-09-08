@@ -21,7 +21,7 @@ import (
 	"github.com/OpenIMSDK/protocol/group"
 	"github.com/OpenIMSDK/tools/errs"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type GroupLocalCache struct {

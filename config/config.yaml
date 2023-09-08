@@ -132,14 +132,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://14.153.6.114:10002"
+  apiURL: "http://172.28.0.1:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://14.153.6.114:10005"
+    signEndpoint: "http://172.28.0.1:10005"
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
     secretID: ''
@@ -194,7 +194,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../logs
+  storageLocation: /root/workspaces/openim/openim-server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6

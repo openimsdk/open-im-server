@@ -61,7 +61,7 @@ OpenIM build and test processes development require Docker to run certain steps.
 
 ### Vagrant
 
-As described in the [Testing documentation](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/test/readme), all the smoke tests are run in virtual machines managed by Vagrant.  To install Vagrant in the development environment, [follow the instructions from the Hashicorp website](https://www.vagrantup.com/downloads), alongside any of the following hypervisors:
+As described in the [Testing documentation](https://github.com/openimsdk/open-im-server/tree/main/test/readme), all the smoke tests are run in virtual machines managed by Vagrant.  To install Vagrant in the development environment, [follow the instructions from the Hashicorp website](https://www.vagrantup.com/downloads), alongside any of the following hypervisors:
 
 - [VirtualBox](https://www.virtualbox.org/)
 - [libvirt](https://libvirt.org/) and the [vagrant-libvirt plugin](https://github.com/vagrant-libvirt/vagrant-libvirt#installation)

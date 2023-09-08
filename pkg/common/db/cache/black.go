@@ -21,7 +21,7 @@ import (
 	"github.com/dtm-labs/rockscache"
 	"github.com/redis/go-redis/v9"
 
-	relationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/relation"
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 const (

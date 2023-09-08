@@ -20,7 +20,7 @@ import (
 	"github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/a2r"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
 type StatisticsApi rpcclient.User

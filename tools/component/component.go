@@ -25,21 +25,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/utils"
-	"github.com/Shopify/sarama"
-	"github.com/go-zookeeper/zk"
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
+	"gopkg.in/yaml.v3"
+
+	"github.com/IBM/sarama"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/utils"
+	"github.com/go-zookeeper/zk"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"gopkg.in/yaml.v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/kafka"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
 
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -205,7 +206,7 @@ func checkMinio() error {
 			}
 		}
 		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.SignEndpoint) == "127.0.0.1" {
-			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1.")
+			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1")
 		}
 	}
 	return nil

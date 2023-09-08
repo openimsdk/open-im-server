@@ -19,7 +19,7 @@ import (
 
 	pbgroup "github.com/OpenIMSDK/protocol/group"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/convert"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/convert"
 )
 
 func (s *groupServer) GetGroupInfoCache(

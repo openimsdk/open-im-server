@@ -1,4 +1,4 @@
-module github.com/OpenIMSDK/Open-IM-Server/tools/yamlfmt
+module github.com/openimsdk/open-im-server/v3/tools/yamlfmt
 
 go 1.18
 

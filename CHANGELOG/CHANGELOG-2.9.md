@@ -38,15 +38,15 @@
 <a name="v2.9.0"></a>
 ## v2.9.0 - 2023-07-04
 ### Reverts
-- update etcd to v3.5.2 ([#206](https://github.com/OpenIMSDK/Open-IM-Server/issues/206))
+- update etcd to v3.5.2 ([#206](https://github.com/openimsdk/open-im-server/issues/206))
 
 ### Pull Requests
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0+1.839643f...HEAD
-[v2.9.0+1.839643f]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0+2.35f07fe...v2.9.0+1.839643f
-[v2.9.0+2.35f07fe]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0+1.b5072b1...v2.9.0+2.35f07fe
-[v2.9.0+1.b5072b1]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0+3.2667a3a...v2.9.0+1.b5072b1
-[v2.9.0+3.2667a3a]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0+7.04818ca...v2.9.0+3.2667a3a
-[v2.9.0+7.04818ca]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.9.0...v2.9.0+7.04818ca
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v2.9.0+1.839643f...HEAD
+[v2.9.0+1.839643f]: https://github.com/openimsdk/open-im-server/compare/v2.9.0+2.35f07fe...v2.9.0+1.839643f
+[v2.9.0+2.35f07fe]: https://github.com/openimsdk/open-im-server/compare/v2.9.0+1.b5072b1...v2.9.0+2.35f07fe
+[v2.9.0+1.b5072b1]: https://github.com/openimsdk/open-im-server/compare/v2.9.0+3.2667a3a...v2.9.0+1.b5072b1
+[v2.9.0+3.2667a3a]: https://github.com/openimsdk/open-im-server/compare/v2.9.0+7.04818ca...v2.9.0+3.2667a3a
+[v2.9.0+7.04818ca]: https://github.com/openimsdk/open-im-server/compare/v2.9.0...v2.9.0+7.04818ca

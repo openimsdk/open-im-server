@@ -14,7 +14,7 @@
 
 package cont
 
-import "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+import "github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 
 type InitiateUploadResult struct {
 	UploadID string             `json:"uploadID"` // 上传ID

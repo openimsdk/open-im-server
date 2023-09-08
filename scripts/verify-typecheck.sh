@@ -36,6 +36,6 @@ scripts/run-in-gopath.sh \
     go run test/typecheck/typecheck.go "$@" "--serial=$TYPECHECK_SERIAL" || ret=$?
 if [[ $ret -ne 0 ]]; then
   openim::log::error "Type Check has failed. This may cause cross platform build failures." >&2
-  openim::log::error "Please see https://github.com/OpenIMSDK/Open-IM-Server/tree/main/test/typecheck for more information." >&2
+  openim::log::error "Please see https://github.com/openimsdk/open-im-server/tree/main/test/typecheck for more information." >&2
   exit 1
 fi

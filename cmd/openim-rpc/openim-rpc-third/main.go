@@ -15,9 +15,9 @@
 package main
 
 import (
-	"github.com/OpenIMSDK/Open-IM-Server/internal/rpc/third"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/cmd"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/internal/rpc/third"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func main() {

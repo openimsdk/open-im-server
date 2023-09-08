@@ -18,7 +18,7 @@ OpenIM project uses the [GitHub flow](https://docs.github.com/en/get-started/qui
 
 ### Branch naming conventions
 
-Every forked repository works independently, meaning that any contributor can create branches with the name they see fit. However, it is worth noting that OpenIM mirrors [OpenIM version skew policy](https://github.com/OpenIMSDK/Open-IM-Server/releases) by maintaining release branches for the most recent three minor releases. The only exception is that the main branch mirrors the latest OpenIM release (3.10) instead of using a `release-` prefixed one.
+Every forked repository works independently, meaning that any contributor can create branches with the name they see fit. However, it is worth noting that OpenIM mirrors [OpenIM version skew policy](https://github.com/openimsdk/open-im-server/releases) by maintaining release branches for the most recent three minor releases. The only exception is that the main branch mirrors the latest OpenIM release (3.10) instead of using a `release-` prefixed one.
 
 ```text
 main          -------------------------------------------. (OpenIM 3.10)
@@ -39,7 +39,7 @@ There are everyday tasks related to git that every contributor needs to perform,
 
 Creating a OpenIM fork, cloning it, and setting its upstream remote can be summarized on:
 
-1. Visit <https://github.com/OpenIMSDK/Open-IM-Server>
+1. Visit <https://github.com/openimsdk/open-im-server>
 2. Click the `Fork` button (top right) to establish a cloud-based fork
 3. Clone fork to local storage
 4. Add to your fork OpenIM remote as upstream
@@ -54,8 +54,8 @@ git clone https://github.com/$user/OpenIM.git
 
 ## Add OpenIM as upstream to your fork
 cd OpenIM 
-git remote add upstream https://github.com/OpenIMSDK/Open-IM-Server.git
-# or: git remote add upstream git@github.com:OpenIMSDK/Open-IM-Server.git
+git remote add upstream https://github.com/openimsdk/open-im-server.git
+# or: git remote add upstream git@github.com:openimsdk/open-im-server.git
 
 ## Ensure to never push to upstream directly
 git remote set-url --push upstream no_push

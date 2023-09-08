@@ -26,11 +26,11 @@ docker pull minio/minio
 
 ## 2. OpenIM & Chat Images
 
-**For detailed understanding of version management and storage of OpenIM and Chat**: [version.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/version.md)
+**For detailed understanding of version management and storage of OpenIM and Chat**: [version.md](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
 
 ### OpenIM Image
 
-- Get image version info: [images.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md)
+- Get image version info: [images.md](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
 - Depending on the required version, execute the following command:
 
 ```bash
@@ -111,6 +111,6 @@ docker-compose ps
 
 ## 6. Reference Links
 
-- [OpenIMSDK Issue #432](https://github.com/OpenIMSDK/Open-IM-Server/issues/432)
+- [OpenIMSDK Issue #432](https://github.com/openimsdk/open-im-server/issues/432)
 - [Notion Link](https://nsddd.notion.site/435ee747c0bc44048da9300a2d745ad3?pvs=25)
-- [OpenIMSDK Issue #474](https://github.com/OpenIMSDK/Open-IM-Server/issues/474)
+- [OpenIMSDK Issue #474](https://github.com/openimsdk/open-im-server/issues/474)

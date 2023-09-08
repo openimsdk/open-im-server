@@ -22,7 +22,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	table "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
+	table "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 )
 
 func (m *MsgMongoDriver) ConvertMsgsDocLen(ctx context.Context, conversationIDs []string) {

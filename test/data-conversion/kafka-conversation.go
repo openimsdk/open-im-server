@@ -17,7 +17,7 @@ package data_conversion
 import (
 	"fmt"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	//Producer
+	// Producer
 	config := sarama.NewConfig()            // Instantiate a sarama Config
 	config.Producer.Return.Successes = true // Whether to enable the successes channel to be notified after the message is sent successfully
 	config.Producer.Return.Errors = true

@@ -103,12 +103,12 @@ v := make([]string, 0, 4)
 
 ```go
 // bad
-var_s string = F()
+var s string = F()
 
 func F() string { return "A" }
 
 // good
-var_s = F()
+var s = F()
 // Since F already explicitly returns a string type, we don't need to explicitly specify the type of _s
 // still of that type
 
@@ -439,7 +439,7 @@ const (
      // ErrUnknown - 0: An unknown error occurred.
      ErrUnknown Code = iota
      // ErrFatal - 1: An fatal error occurred.
-     Err Fatal
+     ErrFatal
 )
 ```
 
@@ -495,7 +495,7 @@ package superman
 ### 3.1 Package Notes
 
 - Each package has one and only one package-level annotation.
-- Package comments are uniformly commented with // in the format of `// Package package name package description`, for example:
+- Package comments are uniformly commented with // in the format of `// Package <package name> package description`, for example:
 
 ```go
 // Package genericclioptions contains flags which can be added to you command, bound, completed, and produce
@@ -757,7 +757,7 @@ defer fd. Close()
 - If only the first item (key) is needed, discard the second.
 
 ```go
-for key := range keys {
+for keyIndex := range keys {
 // normal code
 }
 ```

@@ -27,9 +27,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
-	unrelationtb "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/table/unrelation"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 )
 
 func Test_BatchInsertChat2DB(t *testing.T) {

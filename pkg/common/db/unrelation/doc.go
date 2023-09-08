@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package unrelation // import "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/unrelation"
+package unrelation // import "github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"

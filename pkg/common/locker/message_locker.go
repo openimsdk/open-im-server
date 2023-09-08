@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/cache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
 const GlOBALLOCK = "GLOBAL_LOCK"

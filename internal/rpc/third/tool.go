@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"github.com/OpenIMSDK/protocol/third"
 	"github.com/OpenIMSDK/tools/errs"

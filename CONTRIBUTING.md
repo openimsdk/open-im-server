@@ -46,7 +46,7 @@ The [Makefile](./Makefile) is for every developer, even if you don't know how to
 
 #### Code and doc contribution
 
-Every action to make project Open-IM-Server better is encouraged. On GitHub, every improvement for Open-IM-Server could be via a [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls) (short for pull request).
+Every action to make project Open-IM-Server better is encouraged. On GitHub, every improvement for Open-IM-Server could be via a [PR](https://github.com/openimsdk/open-im-server/pulls) (short for pull request).
 
 + If you find a typo, try to fix it!
 + If you find a bug, try to fix it!
@@ -61,14 +61,14 @@ Every action to make project Open-IM-Server better is encouraged. On GitHub, eve
 
 #### Where should I start?
 
-+ If you are new to the project, don't know how to contribute Open-IM-Server, please check out the [good first issue](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aopen+label%3A"good+first+issue"+sort%3Aupdated-desc) label.
-+ You should be good at filtering the Open-IM-Server issue tags and finding the ones you like, such as [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) for big initiatives, features for [feature](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Afeature) proposals, and [bug](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+label%3Abug+) fixes.
-+ If you are looking for something to work on, check out our [open issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
-+ If you have an idea for a new feature, please [open an issue](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose), and we can discuss it.
++ If you are new to the project, don't know how to contribute Open-IM-Server, please check out the [good first issue](https://github.com/openimsdk/open-im-server/issues?q=is%3Aopen+label%3A"good+first+issue"+sort%3Aupdated-desc) label.
++ You should be good at filtering the Open-IM-Server issue tags and finding the ones you like, such as [RFC](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) for big initiatives, features for [feature](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+label%3Afeature) proposals, and [bug](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+label%3Abug+) fixes.
++ If you are looking for something to work on, check out our [open issues](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
++ If you have an idea for a new feature, please [open an issue](https://github.com/openimsdk/open-im-server/issues/new/choose), and we can discuss it.
 
 #### Design documents
 
-For any substantial design, there should be a well-crafted design document. This document is not just a simple record, but also a detailed description and manifestation, which can help team members better understand the design thinking and grasp the design direction. In the process of writing the design document, we can choose to use tools such as `Google Docs` or `Notion`, and even mark RFC in [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) or [discussions](https://github.com/OpenIMSDK/Open-IM-Server/discussions) for better collaboration. Of course, after completing the design document, we should also add it to our [Shared Drive](https://drive.google.com/drive/) and notify the appropriate working group to let everyone know of its existence. Only by doing so can we maximize the effectiveness of the design document and provide strong support for the smooth progress of the project.
+For any substantial design, there should be a well-crafted design document. This document is not just a simple record, but also a detailed description and manifestation, which can help team members better understand the design thinking and grasp the design direction. In the process of writing the design document, we can choose to use tools such as `Google Docs` or `Notion`, and even mark RFC in [issues](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) or [discussions](https://github.com/openimsdk/open-im-server/discussions) for better collaboration. Of course, after completing the design document, we should also add it to our [Shared Drive](https://drive.google.com/drive/) and notify the appropriate working group to let everyone know of its existence. Only by doing so can we maximize the effectiveness of the design document and provide strong support for the smooth progress of the project.
 
 Anybody can access the shared Drive for reading. To get access to comment. Once you've done that, head to the [shared Drive](https://drive.google.com/) and behold all the docs.
 
@@ -95,10 +95,10 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
 
 2. **CLONE** your own repository to main locally. Use `git clone https://github.com/<your-username>/Open-IM-Server.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
 
-3. **Set Remote** upstream to be `https://github.com/OpenIMSDK/Open-IM-Server.git` using the following two commands:
+3. **Set Remote** upstream to be `https://github.com/openimsdk/open-im-server.git` using the following two commands:
 
    ```bash
-   ❯ git remote add upstream https://github.com/OpenIMSDK/Open-IM-Server.git
+   ❯ git remote add upstream https://github.com/openimsdk/open-im-server.git
    ❯ git remote set-url --push upstream no-pushing
    ```
 
@@ -108,7 +108,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    ❯ git remote -v
    origin     https://github.com/<your-username>/Open-IM-Server.git (fetch)
    origin     https://github.com/<your-username>/Open-IM-Server.git (push)
-   upstream   https://github.com/OpenIMSDK/Open-IM-Server.git (fetch)
+   upstream   https://github.com/openimsdk/open-im-server.git (fetch)
    upstream   no-pushing (push)
    ```
 
@@ -174,7 +174,7 @@ To propose PR for the Open-IM-Server item, we assume you have registered a GitHu
    # then create pull request, and merge
    ```
 
-7. **Open a pull request** to `OpenIMSDK/Open-IM-Server:main`
+7. **Open a pull request** to `openimsdk/open-im-server:main`
 
    It is recommended to review your changes before filing a pull request. Check if your code doesn't conflict with the main branch and no redundant code is included.
 
@@ -190,7 +190,7 @@ Instead we encourage you to send us a private email to winxu81@gmail.com to repo
 
 #### Reporting general issues
 
-To be honest, we regard every user of Open-IM-Serveras a very kind contributor. After experiencing Open-IM-Server, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/OpenIMSDK/Open-IM-Server/issues/new/choose).
+To be honest, we regard every user of Open-IM-Serveras a very kind contributor. After experiencing Open-IM-Server, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/openimsdk/open-im-server/issues/new/choose).
 
 Since we collaborate project Open-IM-Server in a distributed way, we appreciate **WELL-WRITTEN**, **DETAILED**, **EXPLICIT** issue reports. To make the communication more efficient, we wish everyone could search if your issue is an existing one in the searching list. If you find it existing, please add your details in comments under the existing issue instead of opening a brand new one.
 
@@ -258,7 +258,7 @@ An example for this could be:
 
 PR is the only way to make change to Open-IM-Server project files. To help reviewers better get your purpose, PR description could not be too detailed. We encourage contributors to follow the [PR template](https://github.com/OpenIMSDK/.github/tree/main/.github/PULL_REQUEST_TEMPLATE.md) to finish the pull request.
 
-You can find some very formal PR in [RFC](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) issues and learn about them.
+You can find some very formal PR in [RFC](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+RFC+label%3ARFC) issues and learn about them.
 
 **📖 Opening PRs:**
 
@@ -307,8 +307,8 @@ git() {
 
 The documentation for Open-IM-Server includes:
 
-+ [README.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/README.md): This file includes the basic information and instructions for getting started with Open-IM-Server.
-+ [CONTRIBUTING.md](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to Open-IM-Server's codebase, such as how to submit issues, pull requests, and code reviews.
++ [README.md](https://github.com/openimsdk/open-im-server/blob/main/README.md): This file includes the basic information and instructions for getting started with Open-IM-Server.
++ [CONTRIBUTING.md](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md): This file contains guidelines for contributing to Open-IM-Server's codebase, such as how to submit issues, pull requests, and code reviews.
 + [Official Documentation](https://doc.rentsoft.cn/): This is the official documentation for Open-IM-Server, which includes comprehensive information on all of its features, configuration options, and troubleshooting tips.
 
 Please obey the following rules to better format the docs, which would greatly improve the reading experience.
@@ -324,9 +324,9 @@ Please obey the following rules to better format the docs, which would greatly i
 
 We choose GitHub as the primary place for Open-IM-Server to collaborate. So the latest updates of Open-IM-Server are always here. Although contributions via PR is an explicit way to help, we still call for any other ways.
 
-+ reply to other's [issues](https://github.com/OpenIMSDK/Open-IM-Server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) if you could;
++ reply to other's [issues](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) if you could;
 + help solve other user's problems;
-+ help review other's [PR](https://github.com/OpenIMSDK/Open-IM-Server/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc) design; 
++ help review other's [PR](https://github.com/openimsdk/open-im-server/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc) design; 
 + discuss about Open-IM-Server to make things clearer;
 + advocate [Open-IM-Server](https://google.com/search?q=Open-IM-Server) technology beyond GitHub;
 + write blogs on Open-IM-Server and so on.

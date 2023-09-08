@@ -18,7 +18,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
 	"google.golang.org/grpc"
 
@@ -28,7 +28,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 // User represents a structure holding connection details for the User RPC client.
