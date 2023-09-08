@@ -15,14 +15,12 @@
 package api
 
 import (
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
+	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"google.golang.org/protobuf/proto"
-
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/authverify"
-	"github.com/OpenIMSDK/Open-IM-Server/pkg/common/config"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
@@ -56,7 +54,6 @@ func (MessageApi) SetOptions(options map[string]bool, value bool) {
 
 func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
 	var newContent string
-	var err error
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
 	case constant.Text:
@@ -106,14 +103,14 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 			OfflinePushInfo:  params.OfflinePushInfo,
 		},
 	}
-	if params.ContentType == constant.OANotification {
-		var tips sdkws.TipsComm
-		tips.JsonDetail = utils.StructToJsonString(params.Content)
-		pbData.MsgData.Content, err = proto.Marshal(&tips)
-		if err != nil {
-			log.ZError(c, "Marshal failed ", err, "tips", tips.String())
-		}
-	}
+	//if params.ContentType == constant.OANotification {
+	//	var tips sdkws.TipsComm
+	//	tips.JsonDetail = utils.StructToJsonString(params.Content)
+	//	pbData.MsgData.Content, err = proto.Marshal(&tips)
+	//	if err != nil {
+	//		log.ZError(c, "Marshal failed ", err, "tips", tips.String())
+	//	}
+	//}
 	return &pbData
 }
 
