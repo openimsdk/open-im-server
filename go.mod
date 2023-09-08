@@ -26,7 +26,7 @@ require (
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/image v0.12.0
 	google.golang.org/api v0.138.0
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.58.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.1
@@ -37,13 +37,13 @@ require github.com/google/uuid v1.3.1
 
 require (
 	github.com/IBM/sarama v1.41.1
-	github.com/OpenIMSDK/protocol v0.0.18
+	github.com/OpenIMSDK/protocol v0.0.19
 	github.com/OpenIMSDK/tools v0.0.14
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/redis/go-redis/v9 v9.1.0
-	github.com/tencentyun/cos-go-sdk-v5 v0.7.42
+	github.com/tencentyun/cos-go-sdk-v5 v0.7.43
 )
 
 require (
