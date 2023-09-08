@@ -1,6 +1,6 @@
 # utils go 
 
-+ [toold readme](https://github.com/OpenIMSDK/Open-IM-Server/tree/main/tools)
++ [toold readme](https://github.com/openimsdk/open-im-server/tree/main/tools)
 
 about scripts fix:
 ```

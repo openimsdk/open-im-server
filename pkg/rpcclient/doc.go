@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpcclient // import "github.com/OpenIMSDK/Open-IM-Server/pkg/rpcclient"
+package rpcclient // import "github.com/openimsdk/open-im-server/v3/pkg/rpcclient"

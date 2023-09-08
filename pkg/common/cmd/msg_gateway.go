@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	//"github.com/OpenIMSDK/Open-IM-Server/internal/msggateway".
+	//"github.com/openimsdk/open-im-server/internal/msggateway".
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"

@@ -73,7 +73,7 @@ ifeq ($(strip $(BINS)),)
 endif
 
 # TODO: EXCLUDE_TESTS variable, which contains the name of the package to be excluded from the test
-EXCLUDE_TESTS=github.com/OpenIMSDK/Open-IM-Server/test github.com/OpenIMSDK/Open-IM-Server/pkg/log github.com/OpenIMSDK/Open-IM-Server/db github.com/OpenIMSDK/Open-IM-Server/scripts github.com/OpenIMSDK/Open-IM-Server/config
+EXCLUDE_TESTS=github.com/openimsdk/open-im-server/test github.com/openimsdk/open-im-server/v3/pkg/log github.com/openimsdk/open-im-server/db github.com/openimsdk/open-im-server/scripts github.com/openimsdk/open-im-server/config
 
 # ==============================================================================
 # ❯ tree -L 1 cmd

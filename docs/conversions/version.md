@@ -27,15 +27,15 @@ In the OpenIM repository, version identification strictly complies with the `MAJ
 
 ## Main Branch: The Heart of OpenIM Development
 
-The `main` branch is the operational heart of our development process. Housing the most recent and advanced features, this branch serves as the nerve center for all enhancements and updates. It encapsulates the freshest, though possibly unstable, facets of the software. Visit our `main` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/main).
+The `main` branch is the operational heart of our development process. Housing the most recent and advanced features, this branch serves as the nerve center for all enhancements and updates. It encapsulates the freshest, though possibly unstable, facets of the software. Visit our `main` branch [here](https://github.com/openimsdk/open-im-server/tree/main).
 
 ## Release Branch: The Beacon of Stability
 
-For every major release, we curate a corresponding `release` branch, e.g., `release-v3.1`. This branch symbolizes an embodiment of stability and ensures an updated version of the software, providing a dependable option for users favoring stability over nascent, yet possibly unstable, features. Visit the `release-v3.1` branch [here](https://github.com/OpenIMSDK/Open-IM-Server/tree/release-v3.1).
+For every major release, we curate a corresponding `release` branch, e.g., `release-v3.1`. This branch symbolizes an embodiment of stability and ensures an updated version of the software, providing a dependable option for users favoring stability over nascent, yet possibly unstable, features. Visit the `release-v3.1` branch [here](https://github.com/openimsdk/open-im-server/tree/release-v3.1).
 
 ## Tag Management: The Cornerstone of Version Control
 
-In OpenIM's version control system, the role of `tags` stands paramount. Owing to their immutable nature, tags can be effectively utilized to retrieve a specific version of the software. Explore our library of tags [here](https://github.com/OpenIMSDK/Open-IM-Server/tags).
+In OpenIM's version control system, the role of `tags` stands paramount. Owing to their immutable nature, tags can be effectively utilized to retrieve a specific version of the software. Explore our library of tags [here](https://github.com/openimsdk/open-im-server/tags).
 
 Our Docker image versions are intimately entwined with these tripartite components. For instance, a Docker image tag may correspond to `ghcr.io/openimsdk/openim-server:v3.1.0`, a release to `ghcr.io/openimsdk/openim-server:release-v3.0`, and the main branch to `ghcr.io/openimsdk/openim-server:main` or `ghcr.io/openimsdk/openim-server:latest`.
 
@@ -55,7 +55,7 @@ Whenever a project undergoes a partial functional addition, the minor version nu
 
 ## Release Management: A Guided Tour
 
-Our GitHub repository at https://github.com/OpenIMSDK/Open-IM-Server/releases associates a release with each tag, with a distinction between Pre-release and Latest, determined by the branch source. Every significant feature launch prompts the issue of a `release` branch, such as `release-v3.2`, as a beacon of stability and Latest release.
+Our GitHub repository at https://github.com/openimsdk/open-im-server/releases associates a release with each tag, with a distinction between Pre-release and Latest, determined by the branch source. Every significant feature launch prompts the issue of a `release` branch, such as `release-v3.2`, as a beacon of stability and Latest release.
 
 Pre-releases correspond to releases from the `main` branch, denoting tags with Version modifiers such as `v3.2.1-beta.0`, `v3.2.1-rc.1`, etc. If you are seeking the most recent, albeit possibly unstable, release with new features, these tags, originating from the latest `main` branch code, are your go-to.
 
@@ -65,9 +65,9 @@ Conversely, if stability is your primary concern, you should opt for the release
 
 **About:**
 
-+ [OpenIM Milestones](https://github.com/OpenIMSDK/Open-IM-Server/milestones)
-+ [OpenIM Tags](https://github.com/OpenIMSDK/Open-IM-Server/tags)
-+ [OpenIM Branches](https://github.com/OpenIMSDK/Open-IM-Server/branches)
++ [OpenIM Milestones](https://github.com/openimsdk/open-im-server/milestones)
++ [OpenIM Tags](https://github.com/openimsdk/open-im-server/tags)
++ [OpenIM Branches](https://github.com/openimsdk/open-im-server/branches)
 
 We create a new branch, such as `release-v3.1`, for each significant milestone (e.g., v3.1.0), housing all relevant code for that release. All enhancements and bug fixes targeting the subsequent version (e.g., v3.2.0) are integrated into this branch.
 
@@ -120,4 +120,4 @@ Throughout this process, active communication within the team is pivotal to main
 
 ## Docker Images Version Management
 
-For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/conversions/images.md).
+For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md).

@@ -176,7 +176,7 @@ linters-settings:
     # put imports beginning with prefix after 3rd-party packages;
     # only support one prefix
     # if not set, use goimports.local-prefixes
-    prefix: github.com/OpenIMSDK/Open-IM-Server
+    prefix: github.com/openimsdk/open-im-server
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 30
@@ -333,7 +333,7 @@ linters-settings:
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
-    local-prefixes: github.com/OpenIMSDK/Open-IM-Server
+    local-prefixes: github.com/openimsdk/open-im-server
 
   gomnd:
     settings:

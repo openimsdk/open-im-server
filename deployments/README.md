@@ -7,7 +7,7 @@ OpenIM 支持很多种集群化部署方式，包括但不限于 helm, sealos, k
 目前各个贡献者，以及之前的官方有出过一些可以参考的方案：
 
 - https://github.com/OpenIMSDK/k8s-jenkins
-- https://github.com/OpenIMSDK/Open-IM-Server-k8s-deploy
+- https://github.com/openimsdk/open-im-server-k8s-deploy
 - https://github.com/OpenIMSDK/openim-charts
 - https://github.com/showurl/deploy-openim
 

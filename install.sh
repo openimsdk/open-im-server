@@ -103,9 +103,9 @@ function check_git_repo() {
         # Inside a git repository
         for remote in $(git remote); do
             repo_url=$(git remote get-url $remote)
-            if [[ $repo_url == "https://github.com/OpenIMSDK/Open-IM-Server.git" || \
-                  $repo_url == "https://github.com/OpenIMSDK/Open-IM-Server" || \
-                  $repo_url == "git@github.com:OpenIMSDK/Open-IM-Server.git" ]]; then
+            if [[ $repo_url == "https://github.com/openimsdk/open-im-server.git" || \
+                  $repo_url == "https://github.com/openimsdk/open-im-server" || \
+                  $repo_url == "git@github.com:openimsdk/open-im-server.git" ]]; then
                 # If it's OpenIMSDK repository
                 info "Current directory is OpenIMSDK git repository."
                 info "Executing installation directly."
@@ -515,7 +515,7 @@ O:::::::OOO:::::::O p:::::ppppp:::::::pe::::::::e            n::::n    n::::nII:
     ' 0.0001
 
     # Display product URL
-    print_with_delay "Discover more and contribute at: https://github.com/OpenIMSDK/Open-IM-Server" 0.01
+    print_with_delay "Discover more and contribute at: https://github.com/openimsdk/open-im-server" 0.01
 
     # Reset text color back to normal
     echo -e "\033[0m"

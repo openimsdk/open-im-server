@@ -91,7 +91,7 @@ install_docker_compose() {
     fi
     rm -rf ./Open-IM-Server
     set -e
-    git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive;
+    git clone https://github.com/openimsdk/open-im-server.git --recursive;
     set +e
     cd ./Open-IM-Server
     git checkout errcode

@@ -21,7 +21,7 @@
 <a name="v2.2.0"></a>
 ## v2.2.0 - 2022-07-01
 ### Reverts
-- update etcd to v3.5.2 ([#206](https://github.com/OpenIMSDK/Open-IM-Server/issues/206))
+- update etcd to v3.5.2 ([#206](https://github.com/openimsdk/open-im-server/issues/206))
 - friend modify
 - update
 
@@ -47,4 +47,4 @@
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v2.2.0...HEAD

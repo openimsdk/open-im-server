@@ -12,4 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package s3 // import "github.com/OpenIMSDK/Open-IM-Server/pkg/common/db/s3"
+package s3 // import "github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"

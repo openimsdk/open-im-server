@@ -14,7 +14,7 @@
 <a name="v2.0.9"></a>
 ## [v2.0.9] - 2022-04-29
 ### Reverts
-- update etcd to v3.5.2 ([#206](https://github.com/OpenIMSDK/Open-IM-Server/issues/206))
+- update etcd to v3.5.2 ([#206](https://github.com/openimsdk/open-im-server/issues/206))
 
 ### Pull Requests
 - Merge branch 'tuoyun'
@@ -74,14 +74,14 @@
 - update
 
 
-[Unreleased]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.10...HEAD
-[v2.0.10]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.9...v2.0.10
-[v2.0.9]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.8...v2.0.9
-[v2.0.8]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.7...v2.0.8
-[v2.0.7]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.6...v2.0.7
-[v2.0.6]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.5...v2.0.6
-[v2.0.5]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.04...v2.0.5
-[v2.04]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.3...v2.04
-[v2.0.3]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.2...v2.0.3
-[v2.0.2]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.1...v2.0.2
-[v2.0.1]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.0.0...v2.0.1
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v2.0.10...HEAD
+[v2.0.10]: https://github.com/openimsdk/open-im-server/compare/v2.0.9...v2.0.10
+[v2.0.9]: https://github.com/openimsdk/open-im-server/compare/v2.0.8...v2.0.9
+[v2.0.8]: https://github.com/openimsdk/open-im-server/compare/v2.0.7...v2.0.8
+[v2.0.7]: https://github.com/openimsdk/open-im-server/compare/v2.0.6...v2.0.7
+[v2.0.6]: https://github.com/openimsdk/open-im-server/compare/v2.0.5...v2.0.6
+[v2.0.5]: https://github.com/openimsdk/open-im-server/compare/v2.04...v2.0.5
+[v2.04]: https://github.com/openimsdk/open-im-server/compare/v2.0.3...v2.04
+[v2.0.3]: https://github.com/openimsdk/open-im-server/compare/v2.0.2...v2.0.3
+[v2.0.2]: https://github.com/openimsdk/open-im-server/compare/v2.0.1...v2.0.2
+[v2.0.1]: https://github.com/openimsdk/open-im-server/compare/v2.0.0...v2.0.1
