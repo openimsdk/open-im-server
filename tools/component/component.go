@@ -206,7 +206,7 @@ func checkMinio() error {
 			}
 		}
 		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.SignEndpoint) == "127.0.0.1" {
-			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1.")
+			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1")
 		}
 	}
 	return nil
