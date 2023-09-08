@@ -109,6 +109,10 @@ func (c *Client) ResetClient(
 
 func (c *Client) pingHandler(_ string) error {
 	c.conn.SetReadDeadline(pongWait)
+	err := c.writePongMsg()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
