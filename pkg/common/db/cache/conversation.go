@@ -58,11 +58,8 @@ type ConversationCache interface {
 	DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache
 	DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache
 	// get one conversation from msgCache
-	GetConversations(
-		ctx context.Context,
-		ownerUserID string,
-		conversationIDs []string,
-	) ([]*relationtb.ConversationModel, error)
+	GetConversations(ctx context.Context, ownerUserID string,
+		conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	// get one user's all conversations from msgCache
 	GetUserAllConversations(ctx context.Context, ownerUserID string) ([]*relationtb.ConversationModel, error)
 	// get user conversation recv msg from msgCache
@@ -78,10 +75,8 @@ type ConversationCache interface {
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	DelUserAllHasReadSeqs(ownerUserID string, conversationIDs ...string) ConversationCache
 
-	GetConversationsByConversationID(
-		ctx context.Context,
-		conversationIDs []string,
-	) ([]*relationtb.ConversationModel, error)
+	GetConversationsByConversationID(ctx context.Context,
+		conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	DelConversationByConversationID(conversationIDs ...string) ConversationCache
 }
 
@@ -411,10 +406,8 @@ func (c *ConversationRedisCache) GetUserAllHasReadSeqs(
 	)
 }
 
-func (c *ConversationRedisCache) DelUserAllHasReadSeqs(
-	ownerUserID string,
-	conversationIDs ...string,
-) ConversationCache {
+func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string,
+	conversationIDs ...string) ConversationCache {
 	cache := c.NewCache()
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationHasReadSeqKey(ownerUserID, conversationID))

@@ -126,6 +126,7 @@ func (c *Client) readMessage() {
 	for {
 		messageType, message, returnErr := c.conn.ReadMessage()
 		if returnErr != nil {
+			log.ZWarn(c.ctx, "readMessage", returnErr, "messageType", messageType)
 			c.closedErr = returnErr
 			return
 		}
