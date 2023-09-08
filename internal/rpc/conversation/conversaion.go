@@ -16,7 +16,6 @@ package conversation
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
 	"google.golang.org/grpc"
@@ -299,4 +298,18 @@ func (c *conversationServer) GetConversationsByConversationID(
 		return nil, err
 	}
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
+}
+
+func (c *conversationServer) GetConversationNeedOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationNeedOfflinePushUserIDsReq) (*pbconversation.GetConversationNeedOfflinePushUserIDsResp, error) {
+	if req.ConversationID == "" {
+		return nil, errs.ErrArgs.Wrap("conversationID is empty")
+	}
+	if len(req.OwnerUserIDs) == 0 {
+		return &pbconversation.GetConversationNeedOfflinePushUserIDsResp{}, nil
+	}
+	userIDs, err := c.conversationDatabase.GetConversationNeedOfflinePushUserIDs(ctx, req.ConversationID, req.OwnerUserIDs)
+	if err != nil {
+		return nil, err
+	}
+	return &pbconversation.GetConversationNeedOfflinePushUserIDsResp{UserIDs: userIDs}, nil
 }

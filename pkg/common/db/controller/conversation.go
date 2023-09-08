@@ -53,6 +53,7 @@ type ConversationDatabase interface {
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
+	GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error)
 }
 
 func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -295,4 +296,8 @@ func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Cont
 
 func (c *conversationDatabase) GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error) {
 	return c.conversationDB.GetConversationIDsNeedDestruct(ctx)
+}
+
+func (c *conversationDatabase) GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error) {
+	return c.conversationDB.GetConversationNeedOfflinePushUserIDs(ctx, conversationID, ownerUserIDs)
 }

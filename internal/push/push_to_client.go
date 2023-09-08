@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/OpenIMSDK/protocol/conversation"
 
 	"github.com/OpenIMSDK/Open-IM-Server/pkg/msgprocessor"
 
@@ -234,15 +235,20 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			err = p.offlinePushMsg(ctx, groupID, msg, offlinePushUserIDs)
+			resp, err := p.conversationRpcClient.Client.GetConversationNeedOfflinePushUserIDs(ctx, &conversation.GetConversationNeedOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), OwnerUserIDs: needOfflinePushUserIDs})
 			if err != nil {
-				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 				return err
 			}
-			_, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
-			if err != nil {
-				log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
-				return err
+			if len(resp.UserIDs) > 0 {
+				err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
+				if err != nil {
+					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
+					return err
+				}
+				if _, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(resp.UserIDs, WebAndPcBackgroundUserIDs)); err != nil {
+					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
+					return err
+				}
 			}
 		}
 	}

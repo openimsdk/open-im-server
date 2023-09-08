@@ -66,5 +66,6 @@ type ConversationModelInterface interface {
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hashReadSeqs map[string]int64, err error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*ConversationModel, error)
+	GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error)
 	NewTx(tx any) ConversationModelInterface
 }
