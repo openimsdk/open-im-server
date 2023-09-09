@@ -153,6 +153,8 @@ services:
 
   openim-web:
     image: ghcr.io/openimsdk/openim-web:latest
+    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
+    # image: openim/openim-web:latest
     container_name: openim-web
     environment:
       - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
@@ -165,8 +167,8 @@ services:
         ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 
 #   openim-server:
-#     # image: ghcr.io/openimsdk/openim-server:main
-#     image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:release-v3.3
+#     image: ghcr.io/openimsdk/openim-server:main
+#     # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:release-v3.3
 #     # image: openim/openim-server:main
 # #    build: .
 #     container_name: openim-server
@@ -200,8 +202,8 @@ services:
 #         ipv4_address: ${OPENIM_SERVER_NETWORK_ADDRESS}
 
   # openim-chat:
-  #   # image: ghcr.io/openimsdk/openim-chat:main
-  #   image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:main
+  #   image: ghcr.io/openimsdk/openim-chat:main
+  #   # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-chat:main
   #   # image: ghcr.io/openimsdk/openim-chat:main
   #   container_name: openim-chat
   #   healthcheck:
