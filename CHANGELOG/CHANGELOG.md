@@ -89,9 +89,9 @@ $ git-chglog --config custom/dir/config.yml
 ## create next tag
 
 ```bash
-git-chglog --next-tag 2.0.0 -o CHANGELOG.md
-git commit -am "release 2.0.0"
-git tag 2.0.0
+$ git-chglog --next-tag 2.0.0 -o CHANGELOG.md
+$ git commit -am "release 2.0.0"
+$ git tag 2.0.0
 ```
 
 | Query          | Description                                    | Example                     |
@@ -112,6 +112,9 @@ git tag 2.0.0
 + [OpenIM CHANGELOG-V2.9](CHANGELOG-2.9.md)
 + [OpenIM CHANGELOG-V3.0](CHANGELOG-3.0.md)
 + [OpenIM CHANGELOG-V3.1](CHANGELOG-3.1.md)
++ [OpenIM CHANGELOG-V3.2](CHANGELOG-3.2.md)
++ [OpenIM CHANGELOG-V3.3](CHANGELOG-3.3.md)
+
 
 ## Introduction
 
@@ -121,7 +124,7 @@ In both the open-source and closed-source software development communities, it i
 
 The most common format for version numbers is as follows:
 
-```
+```bash
 major.minor[.patch[.build]]
 ```
 
