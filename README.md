@@ -166,7 +166,7 @@ Deploy basic components at the click of a command:
 ```bash
 # install openim dependency
 $ git clone https://github.com/openimsdk/open-im-server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server && git checkout $OPENIM_VERSION
-$ make init && docker compose -f basic-openim-server-dependency.yml up -d && make start && make check
+$ make init && docker compose up -d && make start && make check
 ```
 
 > `make help` to help you see the instructions supported by OpenIM.
