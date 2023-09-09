@@ -13,6 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if ! command -v pv &> /dev/null
+then
+    echo "pv not found, installing..."
+    if [ -e /etc/debian_version ]; then
+        sudo apt-get update
+        sudo apt-get install -y pv
+    elif [ -e /etc/redhat-release ]; then
+        sudo yum install -y pv
+    else
+        echo "Unsupported OS, please install pv manually."
+        exit 1
+    fi
+fi
+
 readonly t_reset=$(tput sgr0)
 readonly  green=$(tput bold; tput setaf 2)
 readonly yellow=$(tput bold; tput setaf 3)
@@ -58,8 +72,11 @@ clear
 
 openim::util::desc "========> Start the basic openim docker components"
 openim::util::desc "========> You can use docker-compose ps to check the status of the container"
-openim::util::run "curl https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml -o basic-openim-server-dependency.yml"
-openim::util::run "docker compose up --f basic-openim-server-dependency.yml up -d"
+openim::util::run "docker compose up -d"
+clear
+
+openim::util::desc "========> Use make init-githooks Initialize git hooks "
+openim::util::run "make init-githooks"
 clear
 
 openim::util::desc "The specification is pretty high, you need to be bound on your branch name, as well as commit messages"
@@ -133,3 +150,5 @@ clear
 openim::util::desc "Add copyright"
 openim::util::run "make add-copyright"
 clear
+
+exit 0
