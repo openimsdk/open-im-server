@@ -25,7 +25,6 @@ source "${OPENIM_ROOT}/scripts/lib/init.sh"
 trap 'openim::util::onCtrlC' INT
 
 chmod +x "${OPENIM_ROOT}"/scripts/*.sh
-"${OPENIM_ROOT}"/scripts/init-config.sh
 
 openim::util::ensure_docker_daemon_connectivity
 
@@ -40,10 +39,12 @@ else
 fi
 
 pushd "${OPENIM_ROOT}"
-
-${DOCKER_COMPOSE_COMMAND} up -d
+${DOCKER_COMPOSE_COMMAND} stop
+curl https://gitee.com/openimsdk/openim-docker/raw/main/example/full-openim-server-and-chat.yml -o docker-compose.yml &&  make init && docker compose up -d
+"${OPENIM_ROOT}"/scripts/init-config.sh
+${DOCKER_COMPOSE_COMMAND} up --remove-orphans -d
 sleep 60
-${DOCKER_COMPOSE_COMMAND} logs
+${DOCKER_COMPOSE_COMMAND} logs openim-server
 ${DOCKER_COMPOSE_COMMAND} ps
 
 popd

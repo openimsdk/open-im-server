@@ -151,7 +151,7 @@ jobs:
         version: 2.x
     - name: Docker Operations
       run: |
-        curl -o docker-compose.yaml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
+        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
         sudo docker compose up -d
         sudo sleep 60
 
