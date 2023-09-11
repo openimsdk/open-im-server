@@ -235,7 +235,10 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(ctx, &conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs})
+			resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(
+				ctx,
+				&conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs},
+			)
 			if err != nil {
 				return err
 			}
