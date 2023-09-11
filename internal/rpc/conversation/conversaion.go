@@ -301,19 +301,32 @@ func (c *conversationServer) GetConversationsByConversationID(
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
 
-func (c *conversationServer) GetConversationNeedOfflinePushUserIDs(
+func (c *conversationServer) GetConversationNotOfflinePushUserIDs(
 	ctx context.Context,
-	req *pbconversation.GetConversationNeedOfflinePushUserIDsReq,
-) (*pbconversation.GetConversationNeedOfflinePushUserIDsResp, error) {
+	req *pbconversation.GetConversationNotOfflinePushUserIDsReq,
+) (*pbconversation.GetConversationNotOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.Wrap("conversationID is empty")
 	}
-	if len(req.OwnerUserIDs) == 0 {
-		return &pbconversation.GetConversationNeedOfflinePushUserIDsResp{}, nil
-	}
-	userIDs, err := c.conversationDatabase.GetConversationNeedOfflinePushUserIDs(ctx, req.ConversationID, req.OwnerUserIDs)
+	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
 	}
-	return &pbconversation.GetConversationNeedOfflinePushUserIDsResp{UserIDs: userIDs}, nil
+	if len(req.UserIDs) == 0 {
+		return &pbconversation.GetConversationNotOfflinePushUserIDsResp{UserIDs: userIDs}, nil
+	}
+	if len(userIDs) == 0 {
+		return &pbconversation.GetConversationNotOfflinePushUserIDsResp{}, nil
+	}
+	userIDSet := make(map[string]struct{})
+	for _, userID := range userIDs {
+		userIDSet[userID] = struct{}{}
+	}
+	resp := &pbconversation.GetConversationNotOfflinePushUserIDsResp{UserIDs: make([]string, 0, len(req.UserIDs))}
+	for _, userID := range req.UserIDs {
+		if _, ok := userIDSet[userID]; !ok {
+			resp.UserIDs = append(resp.UserIDs, userID)
+		}
+	}
+	return resp, nil
 }

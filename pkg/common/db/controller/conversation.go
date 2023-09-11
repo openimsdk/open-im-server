@@ -53,7 +53,7 @@ type ConversationDatabase interface {
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
-	GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error)
+	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
 }
 
 func NewConversationDatabase(conversation relationtb.ConversationModelInterface, cache cache.ConversationCache, tx tx.Tx) ConversationDatabase {
@@ -89,6 +89,9 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 					cache = cache.DelUserAllHasReadSeqs(userID, conversation.ConversationID)
 				}
 			}
+			if _, ok := filedMap["recv_msg_opt"]; ok {
+				cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
+			}
 		}
 		NotUserIDs := utils.DifferenceString(haveUserIDs, userIDs)
 		log.ZDebug(ctx, "SetUsersConversationFiledTx", "NotUserIDs", NotUserIDs, "haveUserIDs", haveUserIDs, "userIDs", userIDs)
@@ -122,7 +125,12 @@ func (c *conversationDatabase) UpdateUsersConversationFiled(ctx context.Context,
 	if err != nil {
 		return err
 	}
-	return c.cache.DelUsersConversation(conversationID, userIDs...).ExecDel(ctx)
+	cache := c.cache.NewCache()
+	cache = cache.DelUsersConversation(conversationID, userIDs...)
+	if _, ok := args["recv_msg_opt"]; ok {
+		cache = cache.DelConversationNotReceiveMessageUserIDs(conversationID)
+	}
+	return cache.ExecDel(ctx)
 }
 
 func (c *conversationDatabase) CreateConversation(ctx context.Context, conversations []*relationtb.ConversationModel) error {
@@ -133,6 +141,7 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	cache := c.cache.NewCache()
 	for _, conversation := range conversations {
 		cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
+		cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
 	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
@@ -225,7 +234,7 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
+			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID).DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
 		}
 		return nil
 	}); err != nil {
@@ -251,7 +260,7 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range notExistUserIDs {
 			conversation := relationtb.ConversationModel{ConversationType: constant.SuperGroupChatType, GroupID: groupID, OwnerUserID: v, ConversationID: conversationID}
 			conversations = append(conversations, &conversation)
-			cache = cache.DelConversations(v, conversationID)
+			cache = cache.DelConversations(v, conversationID).DelConversationNotReceiveMessageUserIDs(conversationID)
 		}
 		cache = cache.DelConversationIDs(notExistUserIDs...).DelUserConversationIDsHash(notExistUserIDs...)
 		if len(conversations) > 0 {
@@ -298,6 +307,6 @@ func (c *conversationDatabase) GetConversationIDsNeedDestruct(ctx context.Contex
 	return c.conversationDB.GetConversationIDsNeedDestruct(ctx)
 }
 
-func (c *conversationDatabase) GetConversationNeedOfflinePushUserIDs(ctx context.Context, conversationID string, ownerUserIDs []string) ([]string, error) {
-	return c.conversationDB.GetConversationNeedOfflinePushUserIDs(ctx, conversationID, ownerUserIDs)
+func (c *conversationDatabase) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	return c.cache.GetConversationNotReceiveMessageUserIDs(ctx, conversationID)
 }
