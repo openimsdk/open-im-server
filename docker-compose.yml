@@ -127,8 +127,8 @@ services:
         ipv4_address: ${MINIO_NETWORK_ADDRESS}
 
   openim-web:
-    image: ghcr.io/openimsdk/openim-web:latest
-    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
+    # image: ghcr.io/openimsdk/openim-web:latest
+    image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
     # image: openim/openim-web:latest
     container_name: openim-web
     environment:
