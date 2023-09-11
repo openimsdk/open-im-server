@@ -17,6 +17,8 @@ package relation
 import (
 	"context"
 
+	"github.com/OpenIMSDK/tools/errs"
+
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -212,5 +214,26 @@ func (c *ConversationGorm) GetConversationIDsNeedDestruct(
 			Find(&conversations).
 			Error,
 		"",
+	)
+}
+
+func (c *ConversationGorm) GetConversationRecvMsgOpt(ctx context.Context, userID string, conversationID string) (int32, error) {
+	var recvMsgOpt int32
+	return recvMsgOpt, errs.Wrap(
+		c.db(ctx).
+			Model(&relation.ConversationModel{}).
+			Where("conversation_id = ? and owner_user_id in ?", conversationID, userID).
+			Pluck("recv_msg_opt", &recvMsgOpt).
+			Error,
+	)
+}
+
+func (c *ConversationGorm) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	var userIDs []string
+	return userIDs, errs.Wrap(
+		c.db(ctx).
+			Model(&relation.ConversationModel{}).
+			Where("conversation_id = ? and recv_msg_opt <> ?", conversationID, constant.ReceiveMessage).
+			Pluck("owner_user_id", &userIDs).Error,
 	)
 }

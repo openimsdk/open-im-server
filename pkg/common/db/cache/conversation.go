@@ -38,6 +38,7 @@ const (
 	recvMsgOptKey                            = "RECV_MSG_OPT:"
 	superGroupRecvMsgNotNotifyUserIDsKey     = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
 	superGroupRecvMsgNotNotifyUserIDsHashKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS_HASH:"
+	conversationNotReceiveMessageUserIDsKey  = "CONVERSATION_NOT_RECEIVE_MESSAGE_USER_IDS:"
 
 	conversationExpireTime = time.Second * 60 * 60 * 12
 )
@@ -83,6 +84,8 @@ type ConversationCache interface {
 		conversationIDs []string,
 	) ([]*relationtb.ConversationModel, error)
 	DelConversationByConversationID(conversationIDs ...string) ConversationCache
+	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
+	DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache
 }
 
 func NewConversationRedis(
@@ -151,6 +154,10 @@ func (c *ConversationRedisCache) getSuperGroupRecvNotNotifyUserIDsHashKey(groupI
 
 func (c *ConversationRedisCache) getConversationHasReadSeqKey(ownerUserID, conversationID string) string {
 	return conversationHasReadSeqKey + ownerUserID + ":" + conversationID
+}
+
+func (c *ConversationRedisCache) getConversationNotReceiveMessageUserIDsKey(conversationID string) string {
+	return conversationNotReceiveMessageUserIDsKey + conversationID
 }
 
 func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) ([]string, error) {
@@ -431,4 +438,24 @@ func (c *ConversationRedisCache) GetConversationsByConversationID(
 
 func (c *ConversationRedisCache) DelConversationByConversationID(conversationIDs ...string) ConversationCache {
 	panic("implement me")
+}
+
+func (c *ConversationRedisCache) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
+	return getCache(
+		ctx,
+		c.rcClient,
+		c.getConversationNotReceiveMessageUserIDsKey(conversationID),
+		c.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			return c.conversationDB.GetConversationNotReceiveMessageUserIDs(ctx, conversationID)
+		},
+	)
+}
+
+func (c *ConversationRedisCache) DelConversationNotReceiveMessageUserIDs(conversationIDs ...string) ConversationCache {
+	cache := c.NewCache()
+	for _, conversationID := range conversationIDs {
+		cache.AddKeys(c.getConversationNotReceiveMessageUserIDsKey(conversationID))
+	}
+	return cache
 }
