@@ -235,25 +235,17 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 			if len(offlinePushUserIDs) > 0 {
 				needOfflinePushUserIDs = offlinePushUserIDs
 			}
-			resp, err := p.conversationRpcClient.Client.GetConversationNotOfflinePushUserIDs(ctx, &conversation.GetConversationNotOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs})
+			resp, err := p.conversationRpcClient.Client.GetConversationOfflinePushUserIDs(ctx, &conversation.GetConversationOfflinePushUserIDsReq{ConversationID: utils.GenGroupConversationID(groupID), UserIDs: needOfflinePushUserIDs})
 			if err != nil {
 				return err
 			}
-			userIDSet := make(map[string]struct{})
-			for _, userID := range needOfflinePushUserIDs {
-				userIDSet[userID] = struct{}{}
-			}
-			for _, userID := range resp.UserIDs {
-				delete(userIDSet, userID)
-			}
-			if len(userIDSet) > 0 {
-				userIDs := utils.Keys(userIDSet)
-				err = p.offlinePushMsg(ctx, groupID, msg, userIDs)
+			if len(resp.UserIDs) > 0 {
+				err = p.offlinePushMsg(ctx, groupID, msg, resp.UserIDs)
 				if err != nil {
 					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg)
 					return err
 				}
-				if _, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(userIDs, WebAndPcBackgroundUserIDs)); err != nil {
+				if _, err := p.GetConnsAndOnlinePush(ctx, msg, utils.IntersectString(resp.UserIDs, WebAndPcBackgroundUserIDs)); err != nil {
 					log.ZError(ctx, "offlinePushMsg failed", err, "groupID", groupID, "msg", msg, "userIDs", utils.IntersectString(needOfflinePushUserIDs, WebAndPcBackgroundUserIDs))
 					return err
 				}

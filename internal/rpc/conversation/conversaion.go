@@ -301,32 +301,26 @@ func (c *conversationServer) GetConversationsByConversationID(
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
 
-func (c *conversationServer) GetConversationNotOfflinePushUserIDs(
-	ctx context.Context,
-	req *pbconversation.GetConversationNotOfflinePushUserIDsReq,
-) (*pbconversation.GetConversationNotOfflinePushUserIDsResp, error) {
+func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Context, req *pbconversation.GetConversationOfflinePushUserIDsReq) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
 	if req.ConversationID == "" {
 		return nil, errs.ErrArgs.Wrap("conversationID is empty")
+	}
+	if len(req.UserIDs) == 0 {
+		return &pbconversation.GetConversationOfflinePushUserIDsResp{}, nil
 	}
 	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
 	if err != nil {
 		return nil, err
 	}
-	if len(req.UserIDs) == 0 {
-		return &pbconversation.GetConversationNotOfflinePushUserIDsResp{UserIDs: userIDs}, nil
-	}
 	if len(userIDs) == 0 {
-		return &pbconversation.GetConversationNotOfflinePushUserIDsResp{}, nil
+		return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: req.UserIDs}, nil
 	}
 	userIDSet := make(map[string]struct{})
-	for _, userID := range userIDs {
+	for _, userID := range req.UserIDs {
 		userIDSet[userID] = struct{}{}
 	}
-	resp := &pbconversation.GetConversationNotOfflinePushUserIDsResp{UserIDs: make([]string, 0, len(req.UserIDs))}
 	for _, userID := range req.UserIDs {
-		if _, ok := userIDSet[userID]; !ok {
-			resp.UserIDs = append(resp.UserIDs, userID)
-		}
+		delete(userIDSet, userID)
 	}
-	return resp, nil
+	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: utils.Keys(userIDSet)}, nil
 }

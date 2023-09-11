@@ -198,7 +198,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		conversationGroup.POST("/get_conversation", c.GetConversation)
 		conversationGroup.POST("/get_conversations", c.GetConversations)
 		conversationGroup.POST("/set_conversations", c.SetConversations)
-		conversationGroup.POST("/get_conversation_not_offline_push_user_ids", c.GetConversationNotOfflinePushUserIDs)
+		conversationGroup.POST("/get_conversation_offline_push_user_ids", c.GetConversationOfflinePushUserIDs)
 	}
 
 	statisticsGroup := r.Group("/statistics", ParseToken)
