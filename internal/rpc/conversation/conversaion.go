@@ -319,7 +319,7 @@ func (c *conversationServer) GetConversationOfflinePushUserIDs(ctx context.Conte
 	for _, userID := range req.UserIDs {
 		userIDSet[userID] = struct{}{}
 	}
-	for _, userID := range req.UserIDs {
+	for _, userID := range userIDs {
 		delete(userIDSet, userID)
 	}
 	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: utils.Keys(userIDSet)}, nil
