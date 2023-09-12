@@ -176,7 +176,7 @@ readonly API_URL=${API_URL:-"http://${IP}:${API_OPENIM_PORT}"}
 
 def "OBJECT_ENABLE" "minio" # 对象是否启用
 # 对象的API地址
-readonly OBJECT_APIURL=${OBJECT_APIURL:-"http://${API_URL}"}
+readonly OBJECT_APIURL=${OBJECT_APIURL:-"${API_URL}"}
 def "MINIO_BUCKET" "openim" # MinIO的存储桶名称
 def "MINIO_PORT" "10005"    # MinIO的端口
 # MinIO的端点URL
