@@ -37,7 +37,7 @@
 <a name="v2.3.0-rc0"></a>
 ## v2.3.0-rc0 - 2022-07-15
 ### Reverts
-- update etcd to v3.5.2 ([#206](https://github.com/OpenIMSDK/Open-IM-Server/issues/206))
+- update etcd to v3.5.2 ([#206](https://github.com/openimsdk/open-im-server/issues/206))
 - friend modify
 - update
 
@@ -63,8 +63,8 @@
 - Merge branch 'tuoyun'
 
 
-[Unreleased]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.3.3...HEAD
-[v2.3.3]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.3.2...v2.3.3
-[v2.3.2]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.3.0-rc2...v2.3.2
-[v2.3.0-rc2]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.3.0-rc1...v2.3.0-rc2
-[v2.3.0-rc1]: https://github.com/OpenIMSDK/Open-IM-Server/compare/v2.3.0-rc0...v2.3.0-rc1
+[Unreleased]: https://github.com/openimsdk/open-im-server/compare/v2.3.3...HEAD
+[v2.3.3]: https://github.com/openimsdk/open-im-server/compare/v2.3.2...v2.3.3
+[v2.3.2]: https://github.com/openimsdk/open-im-server/compare/v2.3.0-rc2...v2.3.2
+[v2.3.0-rc2]: https://github.com/openimsdk/open-im-server/compare/v2.3.0-rc1...v2.3.0-rc2
+[v2.3.0-rc1]: https://github.com/openimsdk/open-im-server/compare/v2.3.0-rc0...v2.3.0-rc1

@@ -8,7 +8,7 @@
 - Status: Draft
 - RFC Pull Request: (leave blank)
 - OpenIMSDK Pull Request: (leave blank)
-- OpenIMSDK Issue: https://github.com/OpenIMSDK/Open-IM-Server/issues/924
+- OpenIMSDK Issue: https://github.com/openimsdk/open-im-server/issues/924
 - Supersedes: N/A
 
 ## 📇Topics

@@ -21,8 +21,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/util/templates"
 )
 
 const defaultBoilerPlate = `

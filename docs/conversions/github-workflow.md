@@ -83,7 +83,7 @@ You may now edit files on the `myfeature` branch.
 
 ### Building open-im-server
 
-This workflow is process-specific. For quick-start build instructions for [openimsdk/open-im-server](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/contrib/util_makefile.md)
+This workflow is process-specific. For quick-start build instructions for [openimsdk/open-im-server](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/util_makefile.md)
 
 ## 4. Keep your branch in sync
 

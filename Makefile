@@ -11,9 +11,9 @@ all: tidy gen add-copyright verify lint cover restart
 # ==============================================================================
 # Build set
 
-ROOT_PACKAGE=github.com/OpenIMSDK/Open-IM-Server
-# TODO: This is version control for the future https://github.com/OpenIMSDK/Open-IM-Server/issues/574
-VERSION_PACKAGE=github.com/OpenIMSDK/Open-IM-Server/pkg/version
+ROOT_PACKAGE=github.com/openimsdk/open-im-server
+# TODO: This is version control for the future https://github.com/openimsdk/open-im-server/issues/574
+VERSION_PACKAGE=github.com/openimsdk/open-im-server/v3/pkg/version
 
 # ==============================================================================
 # Includes
@@ -112,7 +112,7 @@ install:
 check:
 	@$(MAKE) go.check
 
-## check-component
+## check-component: Check OpenIM component deployment ✨
 .PHONY: check-component
 check-component:
 	@$(MAKE) go.check-component

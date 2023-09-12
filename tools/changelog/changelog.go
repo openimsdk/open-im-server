@@ -299,7 +299,7 @@ func sortAndUniq(lines []string) []string {
 
 func upstreamLinkify(line string) string {
 	if m := upstreamKube.FindStringSubmatch(line); len(m) > 0 {
-		return fmt.Sprintf("UPSTREAM: [#%s](https://github.com/OpenIMSDK/Open-IM-Server/pull/%s):%s", m[1], m[1], m[2])
+		return fmt.Sprintf("UPSTREAM: [#%s](https://github.com/openimsdk/open-im-server/pull/%s):%s", m[1], m[1], m[2])
 	}
 	if m := upstreamRepo.FindStringSubmatch(line); len(m) > 0 {
 		return fmt.Sprintf("UPSTREAM: [%s#%s](https://github.com/%s/pull/%s):%s", m[1], m[2], m[1], m[2], m[3])

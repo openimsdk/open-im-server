@@ -484,8 +484,8 @@ changelog:
 #     use: buildx
 #     build_flag_templates:
 #       - "--pull"
-#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
-#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
+#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/openimsdk/open-im-server/main/README.md"
+#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/openimsdk/open-im-server/blob/main/assets/logo/openim-logo-green.png"
 #       - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
 #       - "--label=io.artifacthub.package.license=Apace-2.0"
 #       - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
@@ -504,8 +504,8 @@ changelog:
 #     use: buildx
 #     build_flag_templates:
 #       - "--pull"
-#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/OpenIMSDK/Open-IM-Server/main/README.md"
-#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/OpenIMSDK/Open-IM-Server/blob/main/assets/logo/openim-logo-green.png"
+#       - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/openimsdk/open-im-server/main/README.md"
+#       - "--label=io.artifacthub.package.logo-url=hhttps://github.com/openimsdk/open-im-server/blob/main/assets/logo/openim-logo-green.png"
 #       - '--label=io.artifacthub.package.maintainers=[{"name":"Xinwei Xiong","email":"3293172751nss@gmail.com"}]'
 #       - "--label=io.artifacthub.package.license=Apace-2.0"
 #       - "--label=org.opencontainers.image.description=OpenIM Open source top instant messaging system"
@@ -555,7 +555,7 @@ nfpms:
       - openim-rpc-user
     # Your app's vendor.
     vendor: OpenIMSDK
-    homepage: https://github.com/OpenIMSDK/Open-IM-Server
+    homepage: https://github.com/openimsdk/open-im-server
     maintainer: kubbot <https://github.com/kubbot>
     description: |-
       Auto sync github labels

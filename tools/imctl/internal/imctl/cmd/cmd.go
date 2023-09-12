@@ -23,24 +23,24 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 
-	cmdutil "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/inernal/iamctl/cmd/util"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/color"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/completion"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/info"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/jwt"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/new"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/options"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/policy"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/secret"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/set"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/user"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/validate"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd/version"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/util/templates"
-	genericapiserver "github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/pkg/server"
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/cli/genericclioptions"
+	cmdutil "github.com/openimsdk/open-im-server/tools/imctl/inernal/iamctl/cmd/util"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/color"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/completion"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/info"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/jwt"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/new"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/options"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/policy"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/secret"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/set"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/user"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/validate"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/cmd/version"
+	"github.com/openimsdk/open-im-server/tools/imctl/internal/imctl/util/templates"
+	genericapiserver "github.com/openimsdk/open-im-server/tools/imctl/internal/pkg/server"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/cli/genericclioptions"
 )
 
 // NewDefaultIAMCtlCommand creates the `imctl` command with default arguments.
@@ -59,7 +59,7 @@ func NewIMCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 
 		Find more information at:
 			// TODO: add link to docs, from auto scripts and gendocs
-			https://github.com/OpenIMSDK/Open-IM-Server/tree/main/docs`),
+			https://github.com/openimsdk/open-im-server/tree/main/docs`),
 		Run: runHelp,
 		// Hook before and after Run initialize and write profiles to disk,
 		// respectively.

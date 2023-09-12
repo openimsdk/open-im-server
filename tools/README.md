@@ -18,7 +18,7 @@ export OPENIM_TOOLS_NAME=<Changeme>
 # copy and paste to create a new CRD and Controller
 mkdir tools/${OPENIM_TOOLS_NAME}
 cd tools/${OPENIM_TOOLS_NAME}
-go mod init github.com/OpenIMSDK/Open-IM-Server/tools/${OPENIM_TOOLS_NAME}
+go mod init github.com/openimsdk/open-im-server/tools/${OPENIM_TOOLS_NAME}
 go mod tidy
 go work use -r .
 cd ../..

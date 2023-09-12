@@ -300,3 +300,30 @@ func (c *conversationServer) GetConversationsByConversationID(
 	}
 	return &pbconversation.GetConversationsByConversationIDResp{Conversations: convert.ConversationsDB2Pb(conversations)}, nil
 }
+
+func (c *conversationServer) GetConversationOfflinePushUserIDs(
+	ctx context.Context,
+	req *pbconversation.GetConversationOfflinePushUserIDsReq,
+) (*pbconversation.GetConversationOfflinePushUserIDsResp, error) {
+	if req.ConversationID == "" {
+		return nil, errs.ErrArgs.Wrap("conversationID is empty")
+	}
+	if len(req.UserIDs) == 0 {
+		return &pbconversation.GetConversationOfflinePushUserIDsResp{}, nil
+	}
+	userIDs, err := c.conversationDatabase.GetConversationNotReceiveMessageUserIDs(ctx, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	if len(userIDs) == 0 {
+		return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: req.UserIDs}, nil
+	}
+	userIDSet := make(map[string]struct{})
+	for _, userID := range req.UserIDs {
+		userIDSet[userID] = struct{}{}
+	}
+	for _, userID := range userIDs {
+		delete(userIDSet, userID)
+	}
+	return &pbconversation.GetConversationOfflinePushUserIDsResp{UserIDs: utils.Keys(userIDSet)}, nil
+}

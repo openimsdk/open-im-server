@@ -1,4 +1,4 @@
-module github.com/OpenIMSDK/Open-IM-Server/test/typecheck
+module github.com/openimsdk/open-im-server/test/typecheck
 
 go 1.18
 

@@ -17,7 +17,7 @@ DEFAULT_DIRS=(
     "pkg"
     "internal/pkg"
 )
-BASE_URL="github.com/OpenIMSDK/Open-IM-Server"
+BASE_URL="github.com/openimsdk/open-im-server"
 
 usage() {
     echo "Usage: $0 [OPTIONS]"

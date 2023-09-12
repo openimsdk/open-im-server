@@ -18,7 +18,7 @@ package main
 import (
 	"os"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/internal/imctl/cmd"
+	"github.com/openimsdk/open-im-server/v3/tools/imctl/internal/imctl/cmd"
 )
 
 func main() {

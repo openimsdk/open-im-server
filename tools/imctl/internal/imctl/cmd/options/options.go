@@ -20,7 +20,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/OpenIMSDK/Open-IM-Server/tools/imctl/pkg/util/templates"
+	"github.com/openimsdk/open-im-server/tools/imctl/pkg/util/templates"
 )
 
 var optionsExample = templates.Examples(`

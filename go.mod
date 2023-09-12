@@ -37,7 +37,7 @@ require github.com/google/uuid v1.3.1
 
 require (
 	github.com/IBM/sarama v1.41.1
-	github.com/OpenIMSDK/protocol v0.0.18
+	github.com/OpenIMSDK/protocol v0.0.21
 	github.com/OpenIMSDK/tools v0.0.14
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible

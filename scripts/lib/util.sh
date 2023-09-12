@@ -635,7 +635,7 @@ openim::util::remove-gen-docs() {
 # repo, e.g. "upstream" or "origin".
 openim::util::git_upstream_remote_name() {
   git remote -v | grep fetch |\
-    grep -E 'github.com[/:]OpenIMSDK/Open-IM-Server|openim.cc/server' |\
+    grep -E 'github.com[/:]openimsdk/open-im-server|openim.cc/server' |\
     head -n 1 | awk '{print $1}'
 }
 
