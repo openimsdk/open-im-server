@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+/*take.txt
+{"url":"http://xxx/xxxx","name":"xxxx","contentType":"image/jpeg"}
+{"url":"http://xxx/xxxx","name":"xxxx","contentType":"image/jpeg"}
+{"url":"http://xxx/xxxx","name":"xxxx","contentType":"image/jpeg"}
+*/
+
 func main() {
 	var conf pkg.Config                                                  // 后面带*的为必填项
 	flag.StringVar(&conf.TaskPath, "task", "take.txt", "task path")      // 任务日志文件*
