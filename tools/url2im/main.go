@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/openimsdk/open-im-server/v3/tools/url2im/pkg"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/tools/url2im/pkg"
 )
 
 /*take.txt

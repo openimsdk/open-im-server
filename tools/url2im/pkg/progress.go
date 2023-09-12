@@ -2,9 +2,10 @@ package pkg
 
 import (
 	"bufio"
-	"github.com/kelindar/bitmap"
 	"os"
 	"strconv"
+
+	"github.com/kelindar/bitmap"
 )
 
 func ReadProgress(path string) (*Progress, error) {
