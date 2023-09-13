@@ -23,7 +23,6 @@ import (
 )
 
 type Upload struct {
-	UserID      string `json:"userID"`
 	URL         string `json:"url"`
 	Name        string `json:"name"`
 	ContentType string `json:"contentType"`
