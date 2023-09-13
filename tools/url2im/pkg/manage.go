@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/protocol/third"
 	"io"
 	"log"
 	"net/http"
@@ -20,6 +19,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/OpenIMSDK/protocol/third"
 )
 
 type Upload struct {
