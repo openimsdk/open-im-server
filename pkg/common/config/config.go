@@ -128,12 +128,14 @@ type configStruct struct {
 			SecretAccessKey string `yaml:"secretAccessKey"`
 			SessionToken    string `yaml:"sessionToken"`
 			SignEndpoint    string `yaml:"signEndpoint"`
+			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"minio"`
 		Cos struct {
 			BucketURL    string `yaml:"bucketURL"`
 			SecretID     string `yaml:"secretID"`
 			SecretKey    string `yaml:"secretKey"`
 			SessionToken string `yaml:"sessionToken"`
+			PublicRead   bool   `yaml:"publicRead"`
 		} `yaml:"cos"`
 		Oss struct {
 			Endpoint        string `yaml:"endpoint"`
@@ -142,6 +144,7 @@ type configStruct struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			AccessKeySecret string `yaml:"accessKeySecret"`
 			SessionToken    string `yaml:"sessionToken"`
+			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"oss"`
 	} `yaml:"object"`
 

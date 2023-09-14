@@ -375,7 +375,15 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)
+	var (
+		rawURL *url.URL
+		err    error
+	)
+	if config.Config.Object.Minio.PublicRead {
+		rawURL, err = makeTargetURL(m.sign, m.bucket, name, m.location, false, query)
+	} else {
+		rawURL, err = m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)
+	}
 	if err != nil {
 		return "", err
 	}

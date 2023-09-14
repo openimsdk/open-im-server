@@ -311,5 +311,13 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
+	if !config.Config.Object.Oss.PublicRead {
+		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
+	}
+	//params, err := oss.GetRawParams(opts)
+	//if err != nil {
+	//	return "", err
+	//}
+
 	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 }
