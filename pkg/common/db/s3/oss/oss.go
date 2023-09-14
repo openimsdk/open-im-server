@@ -18,13 +18,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
@@ -69,6 +69,7 @@ func NewOSS() (s3.Interface, error) {
 		bucketURL:   conf.BucketURL,
 		bucket:      bucket,
 		credentials: client.Config.GetCredentials(),
+		um:          *(*urlMaker)(reflect.ValueOf(bucket.Client.Conn).Elem().FieldByName("url").UnsafePointer()),
 	}, nil
 }
 
@@ -76,6 +77,7 @@ type OSS struct {
 	bucketURL   string
 	bucket      *oss.Bucket
 	credentials oss.Credentials
+	um          urlMaker
 }
 
 func (o *OSS) Engine() string {
@@ -314,10 +316,9 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	if !config.Config.Object.Oss.PublicRead {
 		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 	}
-	//params, err := oss.GetRawParams(opts)
-	//if err != nil {
-	//	return "", err
-	//}
-
-	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
+	params, err := oss.GetRawParams(opts)
+	if err != nil {
+		return "", err
+	}
+	return getURL(o.um, o.bucket.BucketName, name, getURLParams(o.bucket.Client.Conn, params)).String(), nil
 }

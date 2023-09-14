@@ -25,5 +25,15 @@ import (
 //go:linkname ossSignHeader github.com/aliyun/aliyun-oss-go-sdk/oss.Conn.signHeader
 func ossSignHeader(c *oss.Conn, req *http.Request, canonicalizedResource string)
 
+//go:linkname getURLParams github.com/aliyun/aliyun-oss-go-sdk/oss.Conn.getURLParams
+func getURLParams(c *oss.Conn, params map[string]interface{}) string
+
 //go:linkname getURL github.com/aliyun/aliyun-oss-go-sdk/oss.urlMaker.getURL
-func getURL(ptr any, bucket, object, params string) *url.URL
+func getURL(um urlMaker, bucket, object, params string) *url.URL
+
+type urlMaker struct {
+	Scheme  string
+	NetLoc  string
+	Type    int
+	IsProxy bool
+}
