@@ -2,10 +2,11 @@ package cos
 
 import (
 	"context"
-	"github.com/tencentyun/cos-go-sdk-v5"
 	"net/http"
 	"net/url"
 	_ "unsafe"
+
+	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
 //go:linkname newRequest github.com/tencentyun/cos-go-sdk-v5.(*Client).newRequest
