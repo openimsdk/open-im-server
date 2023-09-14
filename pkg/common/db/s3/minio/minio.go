@@ -140,7 +140,10 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		}
 	}
 	if conf.PublicRead {
-		policy := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, conf.Bucket)
+		policy := fmt.Sprintf(
+			`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`,
+			conf.Bucket,
+		)
 		if err := m.core.Client.SetBucketPolicy(ctx, conf.Bucket, policy); err != nil {
 			return err
 		}
