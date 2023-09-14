@@ -140,11 +140,13 @@ object:
     secretAccessKey: "openIM123"
     sessionToken: ''
     signEndpoint: "http://127.0.0.1:10005"
+    publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
     secretID: ''
     secretKey: ''
     sessionToken: ''
+    publicRead: false
   oss:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
@@ -152,6 +154,7 @@ object:
     accessKeyID: ''
     accessKeySecret: ''
     sessionToken: ''
+    publicRead: false
 
 
 ###################### RPC Port Configuration ######################
