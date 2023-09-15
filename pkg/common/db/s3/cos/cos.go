@@ -306,7 +306,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, &option)
+	rawURL, err := c.getPresignedURL(ctx, name, expire, &option)
 	if err != nil {
 		return "", err
 	}
