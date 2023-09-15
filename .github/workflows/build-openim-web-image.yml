@@ -32,16 +32,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
 # docker.io/openim/openim-server:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: openim/openim-server
           # generate Docker tags based on the following events/attributes
@@ -55,13 +55,13 @@ jobs:
             type=sha
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           # linux/ppc64le,linux/s390x
@@ -74,27 +74,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 # registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta2
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web
 
       - name: Log in to AliYun Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           # linux/ppc64le,linux/s390x
@@ -107,27 +107,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 # ghcr.io/openimsdk/openim-server:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta3
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-web
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           # linux/ppc64le,linux/s390x
@@ -140,16 +140,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
 # docker.io/openim/openim-server:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: openim/openim-server
           # generate Docker tags based on the following events/attributes
@@ -163,13 +163,13 @@ jobs:
             type=sha
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-tools/openim-web/Dockerfile
@@ -182,27 +182,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 # registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:latest
       - name: Extract metadata (tags, labels) for Docker
         id: meta2
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server
 
       - name: Log in to AliYun Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: registry.cn-hangzhou.aliyuncs.com
           username: ${{ secrets.ALIREGISTRY_USERNAME }}
           password: ${{ secrets.ALIREGISTRY_TOKEN }}
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-tools/openim-web/Dockerfile
@@ -215,11 +215,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           install: true
       - name: Cache Docker layers
@@ -231,7 +231,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -239,12 +239,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-web
         id: meta1
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-web
 
       - name: Build and push Docker image for openim-web
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-tools/openim-web/Dockerfile
@@ -257,12 +257,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-web
         id: meta2
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/component
 
       - name: Build and push Docker image for component
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-tools/component/Dockerfile
