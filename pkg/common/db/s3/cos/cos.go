@@ -18,13 +18,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tencentyun/cos-go-sdk-v5"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/tencentyun/cos-go-sdk-v5"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
