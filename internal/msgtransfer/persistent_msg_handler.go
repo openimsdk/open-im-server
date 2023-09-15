@@ -60,7 +60,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(
 		log.ZError(ctx, "msg_transfer Unmarshal msg err", err)
 		return
 	}
-	return
+
 	log.ZDebug(ctx, "handleChatWs2Mysql", "msg", msgFromMQ.MsgData)
 	// Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
