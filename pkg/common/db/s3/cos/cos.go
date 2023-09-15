@@ -324,17 +324,5 @@ func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Dura
 	if !config.Config.Object.Cos.PublicRead {
 		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
 	}
-	u := c.client.Object.GetObjectURL(name)
-	//if opt.Query != nil && len(*opt.Query) > 0 {
-	//	query := u.Query()
-	//	if len(query) == 0 {
-	//		query = *opt.Query
-	//	} else {
-	//		for key := range *opt.Query {
-	//			query[key] = (*opt.Query)[key]
-	//		}
-	//	}
-	//	u.RawQuery = query.Encode()
-	//}
-	return u, nil
+	return c.client.Object.GetObjectURL(name), nil
 }

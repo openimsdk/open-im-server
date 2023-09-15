@@ -166,7 +166,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, now)
 		request.Header.Set(oss.HttpHeaderOssDate, now)
-		ossSignHeader(o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
+		signHeader(*o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
 		delete(request.Header, oss.HTTPHeaderDate)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
@@ -317,9 +317,12 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	if !config.Config.Object.Oss.PublicRead {
 		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
 	}
-	params, err := oss.GetRawParams(opts)
+	rawParams, err := oss.GetRawParams(opts)
 	if err != nil {
 		return "", err
 	}
-	return getURL(o.um, o.bucket.BucketName, name, getURLParams(o.bucket.Client.Conn, params)).String(), nil
+	l := len(rawParams)
+	_ = l
+	params := getURLParams(*o.bucket.Client.Conn, rawParams)
+	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
 }
