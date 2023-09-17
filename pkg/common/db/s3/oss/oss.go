@@ -188,7 +188,7 @@ func (o *OSS) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	if res.ETag = strings.ToLower(strings.ReplaceAll(header.Get("ETag"), `"`, ``)); res.ETag == "" {
 		return nil, errors.New("StatObject etag not found")
 	}
-	if contentLengthStr := header.Get("Content-Length"); contentLengthStr == "" {
+	if contentLengthStr := header.Get(http.CanonicalHeaderKey("Content-Length")); contentLengthStr == "" {
 		return nil, errors.New("StatObject content-length not found")
 	} else {
 		res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
