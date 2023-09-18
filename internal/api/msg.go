@@ -224,6 +224,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
 		status = constant.MsgSendFailed
+		log.ZError(c, "send message err", err)
 		apiresp.GinError(c, err)
 		return
 	}
