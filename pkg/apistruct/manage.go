@@ -24,7 +24,7 @@ type SendMsg struct {
 	SenderNickname   string                 `json:"senderNickname"`
 	SenderFaceURL    string                 `json:"senderFaceURL"`
 	SenderPlatformID int32                  `json:"senderPlatformID"`
-	Content          map[string]interface{} `json:"content"          binding:"required"          swaggerignore:"true"`
+	Content          map[string]interface{} `json:"content"          binding:"required"                                            swaggerignore:"true"`
 	ContentType      int32                  `json:"contentType"      binding:"required"`
 	SessionType      int32                  `json:"sessionType"      binding:"required"`
 	IsOnlineOnly     bool                   `json:"isOnlineOnly"`
