@@ -11,4 +11,5 @@ use (
 	./tools/versionchecker
 	./tools/yamlfmt
 	./tools/component
+	./tools/url2im
 )
