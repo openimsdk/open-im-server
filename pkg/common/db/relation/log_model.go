@@ -6,8 +6,9 @@ import (
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/ormutil"
-	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"gorm.io/gorm"
+
+	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
 
 type LogGorm struct {

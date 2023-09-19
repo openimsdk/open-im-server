@@ -11,6 +11,7 @@ import (
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
 	utils2 "github.com/OpenIMSDK/tools/utils"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
