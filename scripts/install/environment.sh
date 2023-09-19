@@ -186,17 +186,21 @@ def "MINIO_ACCESS_KEY" "${USER}"                                                
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                              # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                         # MinIO的会话令牌
 readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址
+def "MINIO_PUBLIC_READ" "false"                                                   # 公有读
+
 # 腾讯云COS的存储桶URL
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
 def "COS_SECRET_ID"                                                     # 腾讯云COS的密钥ID
 def "COS_SECRET_KEY"                                                    # 腾讯云COS的密钥
 def "COS_SESSION_TOKEN"                                                 # 腾讯云COS的会话令牌
+def "COS_PUBLIC_READ" "false"                                           # 公有读
 def "OSS_ENDPOINT" "https://oss-cn-chengdu.aliyuncs.com"                # 阿里云OSS的端点URL
 def "OSS_BUCKET" "demo-9999999"                                         # 阿里云OSS的存储桶名称
 def "OSS_BUCKET_URL" "https://demo-9999999.oss-cn-chengdu.aliyuncs.com" # 阿里云OSS的存储桶URL
 def "OSS_ACCESS_KEY_ID"                                                 # 阿里云OSS的访问密钥ID
 def "OSS_ACCESS_KEY_SECRET"                                             # 阿里云OSS的密钥
 def "OSS_SESSION_TOKEN"                                                 # 阿里云OSS的会话令牌
+def "OSS_PUBLIC_READ" "false"                                           # 公有读
 
 ###################### Redis 配置信息 ######################
 def "REDIS_PORT" "16379"                                    # Redis的端口
