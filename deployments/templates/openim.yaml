@@ -140,11 +140,13 @@ object:
     secretAccessKey: "${MINIO_SECRET_KEY}"
     sessionToken: ${MINIO_SESSION_TOKEN}
     signEndpoint: "${MINIO_SIGN_ENDPOINT}"
+    publicRead: ${MINIO_PUBLIC_READ}
   cos:
     bucketURL: ${COS_BUCKET_URL}
     secretID: ${COS_SECRET_ID}
     secretKey: ${COS_SECRET_KEY}
     sessionToken: ${COS_SESSION_TOKEN}
+    publicRead: ${COS_PUBLIC_READ}
   oss:
     endpoint: "${OSS_ENDPOINT}"
     bucket: "${OSS_BUCKET}"
@@ -152,7 +154,7 @@ object:
     accessKeyID: ${OSS_ACCESS_KEY_ID}
     accessKeySecret: ${OSS_ACCESS_KEY_SECRET}
     sessionToken: ${OSS_SESSION_TOKEN}
-
+    publicRead: ${OSS_PUBLIC_READ}
 
 ###################### RPC Port Configuration ######################
 # RPC service ports

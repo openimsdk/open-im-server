@@ -58,7 +58,7 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
 	case constant.Text:
-		newContent = params.Content["text"].(string)
+		fallthrough
 	case constant.Picture:
 		fallthrough
 	case constant.Custom:

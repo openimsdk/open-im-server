@@ -288,7 +288,7 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 				style = append(style, "format/"+opt.Image.Format)
 			}
 			if len(style) > 0 {
-				imageMogr = "&imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
+				imageMogr = "imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
 			}
 		}
 		if opt.ContentType != "" {
@@ -306,13 +306,23 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, &option)
+	rawURL, err := c.getPresignedURL(ctx, name, expire, &option)
 	if err != nil {
 		return "", err
 	}
-	urlStr := rawURL.String()
 	if imageMogr != "" {
-		urlStr += imageMogr
+		if rawURL.RawQuery == "" {
+			rawURL.RawQuery = imageMogr
+		} else {
+			rawURL.RawQuery = rawURL.RawQuery + "&" + imageMogr
+		}
 	}
-	return urlStr, nil
+	return rawURL.String(), nil
+}
+
+func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Duration, opt *cos.PresignedURLOptions) (*url.URL, error) {
+	if !config.Config.Object.Cos.PublicRead {
+		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
+	}
+	return c.client.Object.GetObjectURL(name), nil
 }
