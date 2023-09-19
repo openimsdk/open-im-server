@@ -19,7 +19,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
@@ -221,6 +220,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 	sendMsgReq.MsgData.RecvID = req.RecvID
 	var status int
+	log.ZDebug(c, "send message start", "req", sendMsgReq)
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
 		status = constant.MsgSendFailed
@@ -228,6 +228,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
+	log.ZDebug(c, "message send success", "resp", respPb)
 	status = constant.MsgSendSuccessed
 	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
 		Status: int32(status),
