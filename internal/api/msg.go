@@ -100,6 +100,7 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 			ContentType:      params.ContentType,
 			Content:          []byte(newContent),
 			CreateTime:       utils.GetCurrentTimestampByMill(),
+			SendTime:         params.SendTime,
 			Options:          options,
 			OfflinePushInfo:  params.OfflinePushInfo,
 		},
