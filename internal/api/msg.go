@@ -207,7 +207,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	log.ZInfo(c, "SendMessage", "req", req)
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -221,7 +220,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	}
 	sendMsgReq.MsgData.RecvID = req.RecvID
 	var status int
-	log.ZDebug(c, "send message start", "req", sendMsgReq)
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
 		status = constant.MsgSendFailed
@@ -229,7 +227,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-	log.ZDebug(c, "message send success", "resp", respPb)
 	status = constant.MsgSendSuccessed
 	_, err = m.Client.SetSendMsgStatus(c, &msg.SetSendMsgStatusReq{
 		Status: int32(status),
