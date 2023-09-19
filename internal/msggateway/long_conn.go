@@ -41,7 +41,8 @@ type LongConn interface {
 	SetConnNil()
 	// SetReadLimit sets the maximum size for a message read from the peer.bytes
 	SetReadLimit(limit int64)
-	SetPongHandler(handler PongHandler)
+	SetPongHandler(handler PingPongHandler)
+	SetPingHandler(handler PingPongHandler)
 	// GenerateLongConn Check the connection of the current and when it was sent are the same
 	GenerateLongConn(w http.ResponseWriter, r *http.Request) error
 }
@@ -116,8 +117,11 @@ func (d *GWebSocket) SetReadLimit(limit int64) {
 	d.conn.SetReadLimit(limit)
 }
 
-func (d *GWebSocket) SetPongHandler(handler PongHandler) {
+func (d *GWebSocket) SetPongHandler(handler PingPongHandler) {
 	d.conn.SetPongHandler(handler)
+}
+func (d *GWebSocket) SetPingHandler(handler PingPongHandler) {
+	d.conn.SetPingHandler(handler)
 }
 
 //func (d *GWebSocket) CheckSendConnDiffNow() bool {
