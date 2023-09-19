@@ -18,10 +18,11 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	dbimpl "github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
-	"gorm.io/gorm"
 )
 
 type ThirdDatabase interface {
