@@ -33,7 +33,7 @@ func CallbackBeforeUpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserInf
 		return nil
 	}
 	cbReq := &cbapi.CallbackBeforeUpdateUserInfoReq{
-		CallbackCommand: constant.CallbackBeforeAddFriendCommand,
+		CallbackCommand: constant.CallbackBeforeUpdateUserInfoCommand,
 		OperationID:     mcontext.GetOperationID(ctx),
 		UserID:         req.UserInfo.UserID,
         FaceURL:        &req.UserInfo.FaceURL,
