@@ -100,6 +100,7 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 			ContentType:      params.ContentType,
 			Content:          []byte(newContent),
 			CreateTime:       utils.GetCurrentTimestampByMill(),
+			SendTime:         params.SendTime,
 			Options:          options,
 			OfflinePushInfo:  params.OfflinePushInfo,
 		},
@@ -207,7 +208,6 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
 		return
 	}
-	log.ZInfo(c, "SendMessage", "req", req)
 	if !authverify.IsAppManagerUid(c) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
@@ -224,6 +224,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 	respPb, err := m.Client.SendMsg(c, sendMsgReq)
 	if err != nil {
 		status = constant.MsgSendFailed
+		log.ZError(c, "send message err", err)
 		apiresp.GinError(c, err)
 		return
 	}
