@@ -115,6 +115,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbuser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
+	if err := CallbackBeforeUpdateUserInfo(ctx, req); err != nil {
+		return nil, err
+	}
 	user := convert.UserPb2DB(req.UserInfo)
 	if err != nil {
 		return nil, err
