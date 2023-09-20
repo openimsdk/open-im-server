@@ -14,9 +14,6 @@
 
 package callbackstruct
 
-
-
-
 type CallbackBeforeUpdateUserInfoReq struct {
 	CallbackCommand `json:"callbackCommand"`
 	OperationID     string  `json:"operationID"`
@@ -27,7 +24,7 @@ type CallbackBeforeUpdateUserInfoReq struct {
 }
 type CallbackBeforeUpdateUserInfoResp struct {
 	CommonCallbackResp
-	Nickname        *string `json:"nickName"`
-	FaceURL         *string `json:"faceURL"`
-	Ex              *string `json:"ex"`
+	Nickname *string `json:"nickName"`
+	FaceURL  *string `json:"faceURL"`
+	Ex       *string `json:"ex"`
 }
