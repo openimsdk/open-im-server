@@ -204,10 +204,8 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 		if err := c.conversationDatabase.SyncPeerUserPrivateConversationTx(ctx, conversations); err != nil {
 			return nil, err
 		}
-		if unequal > 0 {
-			for _, userID := range req.UserIDs {
-				c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
-			}
+		for _, userID := range req.UserIDs {
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
