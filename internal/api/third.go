@@ -105,3 +105,16 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 	}
 	c.Redirect(http.StatusFound, resp.Url)
 }
+
+// #################### logs ####################
+func (o *ThirdApi) UploadLogs(c *gin.Context) {
+	a2r.Call(third.ThirdClient.UploadLogs, o.Client, c)
+}
+
+func (o *ThirdApi) DeleteLogs(c *gin.Context) {
+	a2r.Call(third.ThirdClient.DeleteLogs, o.Client, c)
+}
+
+func (o *ThirdApi) SearchLogs(c *gin.Context) {
+	a2r.Call(third.ThirdClient.SearchLogs, o.Client, c)
+}
