@@ -250,6 +250,7 @@ type configStruct struct {
 		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
 		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
 		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
 		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`
