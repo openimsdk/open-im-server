@@ -26,6 +26,10 @@
 # Zookeeper address
 # Zookeeper username
 # Zookeeper password
+envs:
+  discovery: zookeeper #k8s
+  serverTag: develop
+
 zookeeper:
   schema: openim
   address: [ 172.28.0.1:12181 ]
@@ -173,15 +177,15 @@ rpcPort:
 ###################### RPC Register Name Configuration ######################
 # RPC service names for registration, it's not recommended to modify these
 rpcRegisterName:
-  openImUserName: User
-  openImFriendName: Friend
-  openImMsgName: Msg
-  openImPushName: Push
-  openImMessageGatewayName: MessageGateway
-  openImGroupName: Group
-  openImAuthName: Auth
-  openImConversationName: Conversation
-  openImThirdName: Third
+  openImUserName: Rpc-User
+  openImFriendName: Rpc-Friend
+  openImMsgName: Rpc-Msg
+  openImPushName: Rpc-Push
+  openImMessageGatewayName: Rpc-MessageGateway
+  openImGroupName: Rpc-Group
+  openImAuthName: Rpc-Auth
+  openImConversationName: Rpc-Conversation
+  openImThirdName: Rpc-Third
 
 ###################### Log Configuration ######################
 # Log configuration
@@ -211,6 +215,7 @@ log:
 # Websocket connection handshake timeout
 longConnSvr:
   openImWsPort: [ 10001 ]
+  openImMessageGatewayPort: [ 10140 ]
   websocketMaxConnNum: 100000
   websocketMaxMsgLen: 4096
   websocketTimeout: 10
