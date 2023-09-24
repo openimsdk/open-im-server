@@ -1,0 +1,97 @@
+images:
+  jobInitContainer: ""
+  imgaeName: ""
+
+otherConfigs:
+  url: ""
+  ansible_arch: ""
+
+
+replicaCount: 1
+
+image:
+  repository: harbor.apulis.cn:8443/huawei630/apulistech/openim-api
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.1.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+
+config:
+  port: 80
+  grpc: 81
+  debug: true
+  apiV1Prefix: /api/v1
+  db:
+    serverType: postgres
+    username:   postgres
+    password:   root
+    host:       172.17.0.1
+    port:       5432
+
+storage:
+  persistentVolumeType: hostPath
+  nfsServer: 192.168.3.9
+  persistentVolumes:
+    - name:     aiplatform-app-data-pvc
+      capacity: 20Gi
+      claimCapacity: 5Gi
+      path:     /dev-d/app/ai-app-data
+  mounts: #first pvc mounted as main storage
+    - name:       aiplatform-app-data-pvc
+      subPath:    openim-api
+      mountPath:  /app/openim-api-data
+  configs:
+    - name:       openim-api-cm
+      subPath:    config.yaml
+      mountPath:  /app/configs/config.yaml
+
+nodeSelector: {
+  archType: amd64
+}
+tolerations: []
+
+affinity: {}
+
+ingress:
+  kind: "istio"
+  enabled: true
+  className: ""
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host:
+      paths:
+        - path: /openim-api
+          pathType: Prefix
+  tls:
+    secretName: https-tls
+  #    hosts:
+  #      - chart-example.local
+
+# Custom labels to apply to Deployment, Pod, Configmap, Service, ServiceMonitor. Including autoscaler if enabled.
+extraLabels: {}

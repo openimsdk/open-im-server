@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-cm
+data:
+  config.yaml: |+
+    {{- with .Values.config }}
+        # 服务端口
+        port:  {{ .port }}
+        grpc:  {{ .grpc }}
+
+    {{- end }}
