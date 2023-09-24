@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-{{ .Chart.Name }}
+  namespace: default
+spec:
+  ingressClassName: nginx     # 指定ingress类名称,这里是Nginx
+  rules:
+    - host: 120.25.167.46  # 客户端访问的域名
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Chart.Name }}  # 转发到SVC名称
+                port:
+                  number: {{ .Values.service.port }}  # 转发到SVC端口
+            path: /{{ .Chart.Name }}/                           # 转发到/
+            pathType: Prefix

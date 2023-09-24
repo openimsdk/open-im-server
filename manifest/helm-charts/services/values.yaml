@@ -40,6 +40,8 @@ service:
 
 resources: {}
 
+notification:
+  port: 88
 config:
   port: 80
   grpc: 81
