@@ -71,6 +71,14 @@ storage:
       subPath:    config.yaml
       mountPath:  /app/configs/config.yaml
 
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+
 nodeSelector: {
   archType: amd64
 }
