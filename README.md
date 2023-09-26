@@ -24,7 +24,7 @@
 <p align="center">
     <a href="./README.md"><b> English </b></a> •
     <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-    <a href="https://www.openim.online/en"><b> Docs </b></a>
+<a href="https://www.openim.online/en"><b> Docs </b></a>
 </p>
 
 
