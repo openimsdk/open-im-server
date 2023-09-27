@@ -27,8 +27,16 @@
 # Zookeeper username
 # Zookeeper password
 image:
-  pullPolicy: Always
-  tag: "v0.1.0"
+  pullPolicy: IfNotPresent
+  tag: "latest"
+openim-msggateway:
+  image:
+    tag: "latest"
+    pullPolicy: IfNotPresent
+openim-msgtransfer:
+  image:
+    tag: "latest"
+    pullPolicy: IfNotPresent
 envs:
   discovery: zookeeper #k8s
 

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "openim-api.fullname" . }}
+  name: {{ include "openim-rpc-conversation.fullname" . }}
   labels:
-    {{- include "openim-api.labels" . | nindent 4 }}
+    {{- include "openim-rpc-conversation.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "openim-api.selectorLabels" . | nindent 6 }}
+      {{- include "openim-rpc-conversation.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "openim-api.selectorLabels" . | nindent 8 }}
+        {{- include "openim-rpc-conversation.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "openim-api.serviceAccountName" . }}
+      serviceAccountName: {{ include "openim-rpc-conversation.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -47,17 +47,6 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /openim/openim-server/config/config.yaml
-              name: config
-              subPath: config.yaml
-            - mountPath: /openim/openim-server/config/notification.yaml
-              name: config
-              subPath: notification.yaml
-      volumes:
-      - name: config
-        configMap:
-          name: openim-cm
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

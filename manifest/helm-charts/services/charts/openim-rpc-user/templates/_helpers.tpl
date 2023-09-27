@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "openim-api.name" -}}
+{{- define "openim-rpc-user.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "openim-api.fullname" -}}
+{{- define "openim-rpc-user.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "openim-api.chart" -}}
+{{- define "openim-rpc-user.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "openim-api.labels" -}}
-helm.sh/chart: {{ include "openim-api.chart" . }}
-{{ include "openim-api.selectorLabels" . }}
+{{- define "openim-rpc-user.labels" -}}
+helm.sh/chart: {{ include "openim-rpc-user.chart" . }}
+{{ include "openim-rpc-user.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "openim-api.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "openim-api.name" . }}
+{{- define "openim-rpc-user.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "openim-rpc-user.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "openim-api.serviceAccountName" -}}
+{{- define "openim-rpc-user.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "openim-api.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "openim-rpc-user.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
