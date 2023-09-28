@@ -54,13 +54,13 @@ function openim::push::start()
     openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
     openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
 
-    openim::util::stop_services_with_name ${SERVER_NAME}
-
     openim::log::status "prepare start push process, path: ${OPENIM_PUSH_BINARY}"
     openim::log::status "prepare start push process, port: ${OPENIM_PUSH_PORT}, prometheus port: ${PUSH_PROM_PORT}"
 
     OPENIM_PUSH_PORTS_ARRAY=$(openim::util::list-to-string ${OPENIM_PUSH_PORT} )
     PUSH_PROM_PORTS_ARRAY=$(openim::util::list-to-string ${PUSH_PROM_PORT} )
+
+    openim::util::stop_services_with_name ${SERVER_NAME}
 
     openim::log::status "push port list: ${OPENIM_PUSH_PORTS_ARRAY[@]}"
     openim::log::status "prometheus port list: ${PUSH_PROM_PORTS_ARRAY[@]}"
@@ -94,7 +94,7 @@ function openim::push::install()
 
   # 1. Build openim-push
   make build BINS=${SERVER_NAME}
-  openim::common::sudo "cp ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/bin"
+  openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/bin"
 
   openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
 

@@ -35,4 +35,40 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.16.0"
+appVersion: "default"
+
+icon: https://raw.githubusercontent.com/openimsdk/open-im-server/main/assets/openim-logo-gradient.svg
+
+maintainers:
+  - name: "OpenIM"
+    url: "https://github.com/openimsdk"
+
+keywords:
+  - openim
+  - im
+  - chat
+
+sources:
+  - "https://github.com/openimsdk/open-im-server"
+  - "https://github.com/openimsdk/openim-sdk-core"
+  - "https://github.com/openimsdk/openim-docker"
+
+dependencies:
+  - name: mysql
+    version: 8.0.25
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    version: 14.6.1
+    repository: https://charts.bitnami.com/bitnami
+  - name: mongodb
+    version: 10.1.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: kafka
+    version: 14.1.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: minio
+    version: 8.1.2
+    repository: https://charts.bitnami.com/bitnami
+  - name: zookeeper
+    version: 5.17.0
+    repository: https://charts.bitnami.com/bitnami

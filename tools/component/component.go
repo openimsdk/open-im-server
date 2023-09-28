@@ -22,6 +22,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -116,24 +117,16 @@ func main() {
 	os.Exit(1)
 }
 
-func checkMinioIP() error {
-	for _, i := range []string{config.Config.Object.ApiURL, config.Config.Object.Minio.SignEndpoint} {
-		u, err := url.Parse(i)
-		if err != nil {
-			return utils.Wrap(err, "api format error,please check config file apiURL or Minio SignEndpoint")
-		}
-		if u.Scheme == "https" {
-			continue
-		}
-		host, _, err := net.SplitHostPort(u.Host)
-		if err != nil {
-			host = u.Host
-		}
-		if host == "127.0.0.1" {
-			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1,please modify it")
-		}
+func exactIP(urll string) string {
+	u, _ := url.Parse(urll)
+	host, _, err := net.SplitHostPort(u.Host)
+	if err != nil {
+		host = u.Host
 	}
-	return nil
+	if strings.HasSuffix(host, ":") {
+		host = host[0 : len(host)-1]
+	}
+	return host
 }
 
 func checkMysql() error {
@@ -212,8 +205,8 @@ func checkMinio() error {
 				return ErrComponentStart.Wrap("Minio server is offline")
 			}
 		}
-		if checkMinioIP() != nil {
-			return checkMinioIP()
+		if exactIP(config.Config.Object.ApiURL) == "127.0.0.1" || exactIP(config.Config.Object.Minio.SignEndpoint) == "127.0.0.1" {
+			return ErrConfig.Wrap("apiURL or Minio SignEndpoint endpoint contain 127.0.0.1")
 		}
 	}
 	return nil
