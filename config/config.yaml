@@ -26,9 +26,6 @@
 # Zookeeper address
 # Zookeeper username
 # Zookeeper password
-image:
-  pullPolicy: Always
-  tag: "v0.1.0"
 envs:
   discovery: zookeeper #k8s
 
