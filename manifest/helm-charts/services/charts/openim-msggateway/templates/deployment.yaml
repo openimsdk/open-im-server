@@ -47,6 +47,17 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /app/config/config.yaml
+              name: config
+              subPath: config.yaml
+            - mountPath: /app/config/notification.yaml
+              name: config
+              subPath: notification.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: openim-cm
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
