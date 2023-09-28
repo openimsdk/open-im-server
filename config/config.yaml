@@ -353,10 +353,6 @@ callback:
     enable: false
     timeout: 5
     failedContinue: true
-  beforeUpdateUserInfo:
-    enable: false
-    timeout: 5
-    failedContinue: true
   beforeCreateGroup:
     enable: false
     timeout: 5

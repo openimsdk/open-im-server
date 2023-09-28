@@ -199,9 +199,6 @@ It's crucial to verify the configurations by checking the connectivity between y
     ```
 
 
-
-
-
 ## Config options
 
 ...
