@@ -12,7 +12,7 @@ ADD go.mod .
 ADD go.sum .
 RUN go mod download
 ADD . .
-RUN go build -o cmd/openim-api/openim-api cmd/openim-api/main.go
+RUN go build -o cmd/openim-rpc/openim-rpc-group/openim-rpc-group cmd/openim-rpc/openim-rpc-group/main.go
 
 # archive container
 FROM alpine:3.18
@@ -23,5 +23,5 @@ RUN apk add tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && apk del tzdata
 
 WORKDIR /app/bin
-COPY --from=builder /app/cmd/openim-api/openim-api /app/bin/
-ENTRYPOINT ["/app/bin/openim-api"]
+COPY --from=builder /app/cmd/openim-rpc/openim-rpc-group/openim-rpc-group /app/bin/
+ENTRYPOINT ["/app/bin/openim-rpc-group"]
