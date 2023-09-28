@@ -1,46 +1,64 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the License);
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-# -----------------------------------------------------------------
-# TODO: This config file is the template file
-# --| source: deployments/templates/openim.yaml
-# --| env: scripts/install/environment
-# --| target: config/config.yaml
-# -----------------------------------------------------------------
-
-###################### Zookeeper ######################
-# Zookeeper configuration
-# It's not recommended to modify the schema
-# 
-# Zookeeper address
-# Zookeeper username
-# Zookeeper password
 image:
+  repository: nginx
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "dev"
 openim-msggateway:
   image:
-    tag: "latest"
+    repository: nginx
+    tag: "dev"
     pullPolicy: IfNotPresent
 openim-msgtransfer:
   image:
-    tag: "latest"
+    repository: nginx
+    tag: "dev"
     pullPolicy: IfNotPresent
-envs:
-  discovery: zookeeper #k8s
+openim-push:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-auth:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-conversation:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-friend:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-group:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-msg:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-third:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+openim-rpc-user:
+  image:
+    repository: nginx
+    tag: "dev"
+    pullPolicy: IfNotPresent
+
+
 
 config:
+  envs:
+    discovery: k8s
   zookeeper:
     schema: openim
     address: [ 172.28.0.1:12181 ]
