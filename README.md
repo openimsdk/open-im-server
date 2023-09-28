@@ -24,7 +24,7 @@
 <p align="center">
     <a href="./README.md"><b> English </b></a> •
     <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-    <a href="https://www.openim.online/en"><b> Docs </b></a>
+<a href="https://www.openim.online/en"><b> Docs </b></a>
 </p>
 
 
@@ -166,7 +166,7 @@ Deploy basic components at the click of a command:
 ```bash
 # install openim dependency
 $ git clone https://github.com/openimsdk/open-im-server openim/openim-server && export openim=$(pwd)/openim/openim-server && cd $openim/openim-server && git checkout $OPENIM_VERSION
-$ make init && docker compose -f basic-openim-server-dependency.yml up -d && make start && make check
+$ make init && docker compose up -d && make start && make check
 ```
 
 > `make help` to help you see the instructions supported by OpenIM.
@@ -211,17 +211,17 @@ Read: https://github.com/openimsdk/open-im-server/blob/main/deployments/README.m
 </details>
 
 
-## :link: Relationship Between APP and OpenIM
+## :link: OpenIM and your application
 
-OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, Open-IM-Server, and Open-IM-SDK interact.
+OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
 
-![App-OpenIM Relationship](https://github.com/openimsdk/open-im-server/blob/main/docs/images/open-im-server.png)
+![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
-## :building_construction: Overall Architecture
+<!-- ## :building_construction: Overall Architecture
 
 Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
 
-![Overall Architecture](https://github.com/openimsdk/open-im-server/blob/main/docs/images/Architecture.jpg)
+![Overall Architecture](./docs/images/Architecture.jpg) -->
 
 ## :hammer_and_wrench: To start developing OpenIM
 

@@ -156,7 +156,6 @@ object:
     sessionToken: ''
     publicRead: false
 
-
 ###################### RPC Port Configuration ######################
 # RPC service ports
 # These ports are passed into the program by the script and are not recommended to modify
@@ -197,7 +196,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: /root/workspaces/openim/openim-server/logs/
+  storageLocation: ../../logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -229,18 +228,18 @@ push:
   enable: getui
   geTui:
     pushUrl: "https://restapi.getui.com/v2/$appId"
-    masterSecret: ""
-    appKey: ""
-    intent: ""
-    channelID: ""
-    channelName: ""
+    masterSecret: ''
+    appKey: ''
+    intent: ''
+    channelID: ''
+    channelName: ''
   fcm:
     serviceAccount: "x.json"
   jpns:
-    appKey:
-    masterSecret:
-    pushUrl:
-    pushIntent:
+    appKey: ''
+    masterSecret: ''
+    pushUrl: ''
+    pushIntent: ''
 
 # App manager configuration
 #

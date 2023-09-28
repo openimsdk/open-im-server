@@ -1,4 +1,4 @@
-module github.com/openimsdk/open-im-server/v3/tools/imctl
+module 	github.com/openimsdk/open-im-server/v3/tools/imctl
 
 go 1.18
 
@@ -14,6 +14,5 @@ require (
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	k8s.io/kubernetes v1.28.2
+	golang.org/x/sys v0.1.0 // indirect
 )

@@ -21,7 +21,7 @@
 #
 
 DOCKER := docker
-DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41
+DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41|1.42
 
 # read: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
 REGISTRY_PREFIX ?= ghcr.io/openimsdk
