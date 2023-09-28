@@ -176,15 +176,15 @@ rpcPort:
 ###################### RPC Register Name Configuration ######################
 # RPC service names for registration, it's not recommended to modify these
 rpcRegisterName:
-  openImUserName: Rpc-User
-  openImFriendName: Rpc-Friend
-  openImMsgName: Rpc-Msg
-  openImPushName: Rpc-Push
-  openImMessageGatewayName: Rpc-MessageGateway
-  openImGroupName: Rpc-Group
-  openImAuthName: Rpc-Auth
-  openImConversationName: Rpc-Conversation
-  openImThirdName: Rpc-Third
+  openImUserName: User
+  openImFriendName: Friend
+  openImMsgName: Msg
+  openImPushName: Push
+  openImMessageGatewayName: MessageGateway
+  openImGroupName: Group
+  openImAuthName: Auth
+  openImConversationName: Conversation
+  openImThirdName: Third
 
 ###################### Log Configuration ######################
 # Log configuration
