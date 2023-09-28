@@ -1278,6 +1278,9 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	if len(req.Members) == 0 {
 		return nil, errs.ErrArgs.Wrap("members empty")
 	}
+	for i := range req.Members {
+		req.Members[i].FaceURL = nil
+	}
 	duplicateMap := make(map[[2]string]struct{})
 	userIDMap := make(map[string]struct{})
 	groupIDMap := make(map[string]struct{})
