@@ -56,6 +56,9 @@ openim-rpc-user:
 
 
 
+
+
+
 config:
   envs:
     discovery: k8s
@@ -193,28 +196,28 @@ config:
   # For launching multiple programs, just fill in multiple ports separated by commas
   # For example, [10110, 10111]
   rpcPort:
-    openImUserPort: [ 10110 ]
-    openImFriendPort: [ 10120 ]
-    openImMessagePort: [ 10130 ]
-    openImMessageGatewayPort: [ 10140 ]
-    openImGroupPort: [ 10150 ]
-    openImAuthPort: [ 10160 ]
-    openImPushPort: [ 10170 ]
-    openImConversationPort: [ 10180 ]
-    openImThirdPort: [ 10190 ]
+    openImUserPort: [ 80 ]
+    openImFriendPort: [ 80 ]
+    openImMessagePort: [ 80 ]
+    openImMessageGatewayPort: [ 88 ]
+    openImGroupPort: [ 80 ]
+    openImAuthPort: [ 80 ]
+    openImPushPort: [ 80 ]
+    openImConversationPort: [ 80 ]
+    openImThirdPort: [ 80 ]
 
   ###################### RPC Register Name Configuration ######################
   # RPC service names for registration, it's not recommended to modify these
   rpcRegisterName:
-    openImUserName: Rpc-User
-    openImFriendName: Rpc-Friend
-    openImMsgName: Rpc-Msg
-    openImPushName: Rpc-Push
-    openImMessageGatewayName: Rpc-MessageGateway
-    openImGroupName: Rpc-Group
-    openImAuthName: Rpc-Auth
-    openImConversationName: Rpc-Conversation
-    openImThirdName: Rpc-Third
+    openImUserName: openimserver-openim-rpc-user
+    openImFriendName: openimserver-openim-rpc-friend
+    openImMsgName: openimserver-openim-rpc-msg
+    openImPushName: openimserver-openim-push
+    openImMessageGatewayName: openimserver-openim-msggateway:88
+    openImGroupName: openimserver-openim-rpc-group
+    openImAuthName: openimserver-openim-rpc-auth
+    openImConversationName: openimserver-openim-rpc-conversation
+    openImThirdName: openimserver-openim-rpc-third
 
   ###################### Log Configuration ######################
   # Log configuration
@@ -243,8 +246,8 @@ config:
   # Maximum length of websocket request package
   # Websocket connection handshake timeout
   longConnSvr:
-    openImWsPort: [ 10001 ]
-    openImMessageGatewayPort: [ 10140 ]
+    openImWsPort: [ 80 ]
+    openImMessageGatewayPort: [ 88 ]
     websocketMaxConnNum: 100000
     websocketMaxMsgLen: 4096
     websocketTimeout: 10

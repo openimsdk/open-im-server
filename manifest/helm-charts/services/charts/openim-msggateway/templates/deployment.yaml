@@ -37,6 +37,9 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+            - name: rpc
+              containerPort: 88
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /

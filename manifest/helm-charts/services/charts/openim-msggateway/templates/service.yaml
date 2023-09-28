@@ -11,5 +11,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: 88
+      targetPort: rpc
+      protocol: TCP
+      name: rpc
   selector:
     {{- include "openim-msggateway.selectorLabels" . | nindent 4 }}
