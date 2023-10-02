@@ -1,0 +1,5 @@
+nfs:
+  server: 127.0.0.1
+podSecurityPolicy:
+  enabled: true
+buildMode: true

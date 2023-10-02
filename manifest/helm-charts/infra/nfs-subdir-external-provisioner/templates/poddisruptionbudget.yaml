@@ -1,0 +1,13 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: {{ template "podDisruptionBudget.apiVersion" . }}
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    {{- include "nfs-subdir-external-provisioner.labels" . | nindent 4 }}
+  name: {{ template "nfs-subdir-external-provisioner.fullname" . }}
+spec:
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "nfs-subdir-external-provisioner.selectorLabels" . | nindent 6 }}
+{{- end }}

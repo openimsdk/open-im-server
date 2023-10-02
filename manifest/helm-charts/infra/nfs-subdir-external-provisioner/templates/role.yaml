@@ -1,0 +1,18 @@
+{{- if .Values.rbac.create }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    {{- include "nfs-subdir-external-provisioner.labels" . | nindent 4 }}
+  name: leader-locking-{{ template "nfs-subdir-external-provisioner.fullname" . }}
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+{{- if .Values.podSecurityPolicy.enabled }}
+  - apiGroups:      ['extensions']
+    resources:      ['podsecuritypolicies']
+    verbs:          ['use']
+    resourceNames:  [{{ template "nfs-subdir-external-provisioner.fullname" . }}]
+{{- end }}
+{{- end }}

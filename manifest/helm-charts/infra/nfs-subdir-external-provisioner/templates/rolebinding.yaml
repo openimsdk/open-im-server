@@ -1,0 +1,16 @@
+{{- if .Values.rbac.create }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    {{- include "nfs-subdir-external-provisioner.labels" . | nindent 4 }}
+  name: leader-locking-{{ template "nfs-subdir-external-provisioner.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "nfs-subdir-external-provisioner.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: leader-locking-{{ template "nfs-subdir-external-provisioner.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
