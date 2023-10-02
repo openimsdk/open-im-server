@@ -18,7 +18,7 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
-  storageClass: ""
+  storageClass: "nfs-client"
 
 ## @section Common parameters
 ##
@@ -112,7 +112,7 @@ auth:
   ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
   ##
-  rootPassword: ""
+  rootPassword: "openIM123"
   ## @param auth.createDatabase Whether to create the .Values.auth.database or not
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
   ##
@@ -120,7 +120,7 @@ auth:
   ## @param auth.database Name for a custom database to create
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
   ##
-  database: "my_database"
+  database: "openIM_v3"
   ## @param auth.username Name for a custom user to create
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-user-on-first-run
   ##
@@ -134,7 +134,7 @@ auth:
   replicationUser: replicator
   ## @param auth.replicationPassword MySQL replication user password. Ignored if existing secret is provided
   ##
-  replicationPassword: ""
+  replicationPassword: "openIM123"
   ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
   ## NOTE: When it's set the auth.rootPassword, auth.password, auth.replicationPassword are ignored.
   ##
@@ -454,7 +454,7 @@ primary:
       - ReadWriteOnce
     ## @param primary.persistence.size MySQL primary persistent volume size
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param primary.persistence.selector Selector to match an existing Persistent Volume
     ## selector:
     ##   matchLabels:
@@ -833,7 +833,7 @@ secondary:
       - ReadWriteOnce
     ## @param secondary.persistence.size MySQL secondary persistent volume size
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param secondary.persistence.selector Selector to match an existing Persistent Volume
     ## selector:
     ##   matchLabels:

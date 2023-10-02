@@ -1,0 +1,15 @@
+global:
+  storageClass: "nfs-client"
+
+auth:
+  rootPassword: "openIM123"
+  createDatabase: true
+  database: "openIM_v3"
+  replicationUser: replicator
+  replicationPassword: "openIM123"
+primary:
+  persistence:
+    size: 1Gi
+secondary:
+  persistence:
+    size: 1Gi
