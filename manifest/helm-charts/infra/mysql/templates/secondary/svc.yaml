@@ -1,0 +1,54 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if eq .Values.architecture "replication" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mysql.secondary.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: secondary
+  {{- if or .Values.secondary.service.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.secondary.service.annotations .Values.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.secondary.service.type }}
+  {{- if and .Values.secondary.service.clusterIP (eq .Values.secondary.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.secondary.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.secondary.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.secondary.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.secondary.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.secondary.service.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if or (eq .Values.secondary.service.type "LoadBalancer") (eq .Values.secondary.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.secondary.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.secondary.service.type "LoadBalancer") (not (empty .Values.secondary.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{- toYaml .Values.secondary.service.loadBalancerSourceRanges | nindent 4}}
+  {{- end }}
+  {{- if and (eq .Values.secondary.service.type "LoadBalancer") (not (empty .Values.secondary.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.secondary.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: mysql
+      port: {{ .Values.secondary.service.ports.mysql }}
+      protocol: TCP
+      targetPort: mysql
+      {{- if (and (or (eq .Values.secondary.service.type "NodePort") (eq .Values.secondary.service.type "LoadBalancer")) .Values.secondary.service.nodePorts.mysql) }}
+      nodePort: {{ .Values.secondary.service.nodePorts.mysql }}
+      {{- else if eq .Values.secondary.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- if .Values.secondary.service.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.secondary.service.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.secondary.podLabels .Values.commonLabels ) "context" . ) }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: secondary
+{{- end }}

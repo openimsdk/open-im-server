@@ -1,0 +1,11 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "exampleValue": {
+            "type": "string",
+            "description": "",
+            "default": "common-chart"
+        }
+    }
+}

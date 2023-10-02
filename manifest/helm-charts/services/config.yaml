@@ -2,56 +2,56 @@
 image:
   repository: nginx
   pullPolicy: IfNotPresent
-  tag: "dev"
+  tag: ""
 openim-msggateway:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-msgtransfer:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-push:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-auth:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-conversation:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-friend:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-group:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-msg:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-third:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 openim-rpc-user:
   image:
     repository: nginx
-    tag: "dev"
+    tag: ""
     pullPolicy: IfNotPresent
 
 
