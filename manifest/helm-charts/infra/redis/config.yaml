@@ -1,0 +1,11 @@
+global:
+  storageClass: "nfs-client"
+  redis:
+    password: "openIM123"
+
+master:
+  persistence:
+    size: 1Gi
+replica:
+  persistence:
+    size: 1Gi
