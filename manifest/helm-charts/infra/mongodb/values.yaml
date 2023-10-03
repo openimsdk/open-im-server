@@ -19,7 +19,7 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
-  storageClass: ""
+  storageClass: "nfs-client"
   namespaceOverride: ""
 
 ## @section Common parameters
@@ -161,7 +161,7 @@ auth:
   ## @param auth.rootPassword MongoDB(&reg;) root password
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#setting-the-root-user-and-password-on-first-run
   ##
-  rootPassword: ""
+  rootPassword: "openIM123"
   ## MongoDB(&reg;) custom users and databases
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#creating-a-user-and-database-on-first-run
   ## @param auth.usernames List of custom users to be created during the initialization
@@ -177,7 +177,7 @@ auth:
   ##
   username: ""
   password: ""
-  database: ""
+  database: "openIM_v3"
   ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
   ##
   replicaSetKey: ""
@@ -434,7 +434,7 @@ labels: {}
 ## @param replicaCount Number of MongoDB(&reg;) nodes (only when `architecture=replicaset`)
 ## Ignored when mongodb.architecture=standalone
 ##
-replicaCount: 2
+replicaCount: 1
 ## @param updateStrategy.type Strategy to use to replace existing MongoDB(&reg;) pods. When architecture=standalone and useStatefulSet=false,
 ## this parameter will be applied on a deployment object. In other case it will be applied on a statefulset object
 ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
@@ -1035,7 +1035,7 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for MongoDB(&reg;) data volume
   ##
-  size: 8Gi
+  size: 1Gi
   ## @param persistence.annotations PVC annotations
   ##
   annotations: {}
@@ -1151,7 +1151,7 @@ backup:
        - ReadWriteOnce
       ## @param backup.cronjob.storage.size PVC Storage Request for the backup data volume
       ##
-      size: 8Gi
+      size: 1Gi
       ## @param backup.cronjob.storage.annotations PVC annotations
       ##
       annotations: {}
@@ -2004,7 +2004,7 @@ hidden:
       - ReadWriteOnce
     ## @param hidden.persistence.size PVC Storage Request for hidden node data volume
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param hidden.persistence.annotations PVC annotations
     ##
     annotations: {}
