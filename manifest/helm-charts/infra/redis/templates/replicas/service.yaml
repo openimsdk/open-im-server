@@ -1,0 +1,56 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and (eq .Values.architecture "replication") (not .Values.sentinel.enabled) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-replicas" (include "common.names.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: replica
+  {{- if or .Values.replica.service.annotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.replica.service.annotations .Values.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.replica.service.type }}
+  {{- if or (eq .Values.replica.service.type "LoadBalancer") (eq .Values.replica.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.replica.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if (semverCompare ">=1.22-0" (include "common.capabilities.kubeVersion" .)) }}
+  internalTrafficPolicy: {{ .Values.replica.service.internalTrafficPolicy }}
+  {{- end }}
+  {{- if and (eq .Values.replica.service.type "LoadBalancer") (not (empty .Values.replica.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.replica.service.loadBalancerIP }}
+  {{- end }}
+  {{- if and (eq .Values.replica.service.type "LoadBalancer") (not (empty .Values.replica.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ toYaml .Values.replica.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.replica.service.clusterIP (eq .Values.replica.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.replica.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.replica.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.replica.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.replica.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.replica.service.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: tcp-redis
+      port: {{ .Values.replica.service.ports.redis }}
+      targetPort: redis
+      {{- if and (or (eq .Values.replica.service.type "NodePort") (eq .Values.replica.service.type "LoadBalancer")) .Values.replica.service.nodePorts.redis}}
+      nodePort: {{ .Values.replica.service.nodePorts.redis}}
+      {{- else if eq .Values.replica.service.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- if .Values.replica.service.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.replica.service.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.replica.podLabels .Values.commonLabels ) "context" . ) }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: replica
+{{- end }}

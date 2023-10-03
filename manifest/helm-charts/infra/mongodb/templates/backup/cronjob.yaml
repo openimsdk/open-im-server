@@ -1,0 +1,135 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "mongodb.fullname" . }}-mongodump
+  namespace: {{ include "mongodb.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: mongodump
+    {{- if .Values.backup.cronjob.labels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.backup.cronjob.labels "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.backup.cronjob.annotations .Values.commonAnnotations }}
+  annotations:
+    {{- if .Values.backup.cronjob.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.backup.cronjob.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  schedule: {{ quote .Values.backup.cronjob.schedule }}
+  concurrencyPolicy: {{ .Values.backup.cronjob.concurrencyPolicy }}
+  failedJobsHistoryLimit: {{ .Values.backup.cronjob.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.backup.cronjob.successfulJobsHistoryLimit }}
+  {{- if .Values.backup.cronjob.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ .Values.backup.cronjob.startingDeadlineSeconds }}
+  {{- end }}
+  jobTemplate:
+    spec:
+      {{- if .Values.backup.cronjob.ttlSecondsAfterFinished }}
+      ttlSecondsAfterFinished: {{ .Values.backup.cronjob.ttlSecondsAfterFinished }}
+      {{- end }}
+      template:
+        metadata:
+          labels: {{- include "common.labels.standard" . | nindent 12 }}
+            app.kubernetes.io/component: mongodump
+            {{- if .Values.backup.cronjob.labels }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.backup.cronjob.labels "context" $) | nindent 12 }}
+            {{- end }}
+            {{- if .Values.commonLabels }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.annotations .Values.commonAnnotations }}
+          annotations:
+            {{- if .Values.backup.cronjob.annotations }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.backup.cronjob.annotations "context" $) | nindent 12 }}
+            {{- end }}
+            {{- if .Values.commonAnnotations }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 12 }}
+            {{- end }}
+          {{- end }}
+        spec:
+          containers:
+          - name: {{ include "mongodb.fullname" . }}-mongodump
+            image: {{ include "mongodb.image" . }}
+            env:
+            {{- if .Values.auth.enabled }}
+              - name: MONGODB_ROOT_USER
+                value: {{ .Values.auth.rootUser | quote }}
+              - name: MONGODB_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ include "mongodb.secretName" . }}
+                    key: mongodb-root-password
+            {{- end }}
+              - name: MONGODB_SERVICE_NAME
+                value: {{ include "mongodb.service.nameOverride" . }}
+              - name: MONGODB_PORT_NUMBER
+                value: {{ .Values.containerPorts.mongodb | quote }}
+              - name: MONGODUMP_DIR
+                value: {{ .Values.backup.cronjob.storage.mountPath }}
+              {{- if .Values.tls.enabled }}
+              - name: MONGODB_CLIENT_EXTRA_FLAGS
+                value: --tls --tlsCertificateKeyFile=/certs/mongodb.pem --tlsCAFile=/certs/mongodb-ca-cert
+              {{- end }}
+            {{- if .Values.backup.cronjob.command }}
+            command: {{- include "common.tplvalues.render" (dict "value" .Values.backup.cronjob.command "context" $) | nindent 14 }}
+            {{- else }}
+            command:
+              - /bin/sh
+              - -c
+              - "mongodump {{- if .Values.auth.enabled }} --username=${MONGODB_ROOT_USER} --password=${MONGODB_ROOT_PASSWORD} {{- end }} --host=${MONGODB_SERVICE_NAME} --port=${MONGODB_PORT_NUMBER} ${MONGODB_CLIENT_EXTRA_FLAGS} --oplog --gzip --archive=${MONGODUMP_DIR}/mongodump-$(date '+%Y-%m-%d-%H-%M').gz"
+            {{- end }}
+            volumeMounts:
+              {{- if .Values.tls.enabled }}
+              - name: certs
+                mountPath: /certs
+              {{- end }}
+              - name: datadir
+                mountPath: {{ .Values.backup.cronjob.storage.mountPath }}
+                subPath: {{ .Values.backup.cronjob.storage.subPath }}
+            securityContext:
+              {{- include "common.tplvalues.render" ( dict "value" .Values.backup.cronjob.containerSecurityContext "context" $) | nindent 14 }}
+          restartPolicy: {{ .Values.backup.cronjob.restartPolicy }}
+          volumes:
+            {{- if .Values.tls.enabled }}
+            - name: certs
+              emptyDir: {}
+            {{- if (include "mongodb.autoGenerateCerts" .) }}
+            - name: certs-volume
+              secret:
+                secretName: {{ template "mongodb.tlsSecretName" . }}
+                items:
+                - key: mongodb-ca-cert
+                  path: mongodb-ca-cert
+                  mode: 0600
+                - key: mongodb-ca-key
+                  path: mongodb-ca-key
+                  mode: 0600
+            {{- else }}
+            - name: mongodb-certs-0
+              secret:
+                secretName: {{ include "common.tplvalues.render" ( dict "value" .Values.tls.standalone.existingSecret "context" $) }}
+                defaultMode: 256
+            {{- end }}
+            {{- end }}
+            {{- if .Values.backup.cronjob.storage.existingClaim }}
+            - name: datadir
+              persistentVolumeClaim:
+                claimName: {{ printf "%s" (tpl .Values.backup.cronjob.storage.existingClaim .) }}
+            {{- else }}
+            - name: datadir
+              persistentVolumeClaim:
+                claimName: {{ include "mongodb.fullname" . }}-mongodump
+            {{- end }}
+{{- end }}

@@ -1,0 +1,102 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and (eq .Values.architecture "replication") .Values.sentinel.enabled (eq .Values.sentinel.service.type "NodePort") (not .Values.sentinel.service.nodePorts.redis ) }}
+{{- /* create a list to keep track of ports we choose to use */}}
+{{ $chosenports := (list ) }}
+
+{{- /* Get list of all used nodeports */}}
+{{ $usedports := (list ) }}
+{{- range $index, $service := (lookup "v1" "Service" "" "").items }}
+  {{- range.spec.ports }}
+    {{- if .nodePort }}
+      {{- $usedports = (append $usedports .nodePort) }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- /*
+comments that start with # are rendered in the output when you debug, so you can less and search for them
+Vars in the comment will be rendered out, so you can check their value this way.
+https://helm.sh/docs/chart_best_practices/templates/#comments-yaml-comments-vs-template-comments
+
+remove the template comments and leave the yaml comments to help debug
+*/}}
+
+{{- /* Sort the list */}}
+{{ $usedports = $usedports | sortAlpha }}
+#usedports {{ $usedports }}
+
+{{- /* How many nodeports per service do we want to create, except for the main service which is always two */}}
+{{ $numberofPortsPerNodeService := 2 }}
+
+{{- /* for every nodeport we want, loop though the used ports to get an unused port */}}
+{{- range $j := until (int (add (mul (int .Values.replica.replicaCount) $numberofPortsPerNodeService) 2)) }}
+  {{- /* #j={{ $j }} */}}
+  {{- $nodeport := (add $j 30000) }}
+  {{- $nodeportfound := false }}
+  {{- range $i := $usedports }}
+    {{- /* #i={{ $i }}
+    #nodeport={{ $nodeport }}
+    #usedports={{ $usedports }} */}}
+    {{- if and (has (toString $nodeport) $usedports) (eq $nodeportfound false) }}
+      {{- /* nodeport conflicts with in use */}}
+      {{- $nodeport = (add $nodeport 1) }}
+    {{- else if and ( has $nodeport $chosenports) (eq $nodeportfound false) }}
+      {{- /* nodeport already chosen, try another */}}
+      {{- $nodeport = (add $nodeport 1) }}
+    {{- else if (eq $nodeportfound false) }}
+      {{- /* nodeport free to use: not already claimed and not in use */}}
+      {{- /* select nodeport, and place into usedports */}}
+      {{- $chosenports = (append $chosenports $nodeport) }}
+      {{- $nodeportfound = true }}
+    {{- else }}
+      {{- /* nodeport has already been chosen and locked in, just work through the rest of the list to get to the next nodeport selection */}}
+    {{- end }}
+  {{- end }}
+  {{- if (eq $nodeportfound false) }}
+    {{- $chosenports = (append $chosenports $nodeport) }}
+  {{- end }}
+
+{{- end }}
+
+{{- /* print the usedports and chosenports for debugging */}}
+#usedports {{ $usedports }}
+#chosenports {{ $chosenports }}}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-ports-configmap
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+{{ $portsmap := (lookup "v1" "ConfigMap" $.Release.Namespace (printf "%s-%s" ( include "common.names.fullname" . ) "ports-configmap")).data }}
+{{- if $portsmap }}
+{{- /* configmap already exists, do not install again */ -}}
+  {{- range $name, $value := $portsmap }}
+  "{{ $name }}": "{{ $value }}"
+  {{- end }}
+{{- else }}
+{{- /* configmap being set for first time */ -}}
+  {{- range $index, $port := $chosenports }}
+  {{- $nodenumber := (floor (div $index 2)) }}
+  {{- if (eq $index 0) }}
+  "{{ template "common.names.fullname" $ }}-sentinel": "{{ $port }}"
+  {{- else if (eq $index 1) }}
+  "{{ template "common.names.fullname" $ }}-redis": "{{ $port }}"
+  {{- else if (eq (mod $index 2) 0) }}
+  "{{ template "common.names.fullname" $ }}-node-{{ (sub $nodenumber 1) }}-sentinel": "{{ $port }}"
+  {{- else if (eq (mod $index 2) 1) }}
+  "{{ template "common.names.fullname" $ }}-node-{{ (sub $nodenumber 1) }}-redis": "{{ $port }}"
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

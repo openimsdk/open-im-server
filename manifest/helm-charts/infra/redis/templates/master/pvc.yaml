@@ -1,0 +1,33 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and (eq .Values.architecture "standalone") (eq .Values.master.kind "Deployment") (.Values.master.persistence.enabled) (not .Values.master.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ printf "redis-data-%s-master" (include "common.names.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.master.persistence.labels .Values.commonLabels ) "context" . ) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: master
+  {{- if .Values.master.persistence.annotations }}
+  annotations: {{- toYaml .Values.master.persistence.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.master.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.master.persistence.size | quote }}
+  {{- if .Values.master.persistence.selector }}
+  selector: {{- include "common.tplvalues.render" (dict "value" .Values.master.persistence.selector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.master.persistence.dataSource }}
+  dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.master.persistence.dataSource "context" $) | nindent 4 }}
+  {{- end }}
+  {{- include "common.storage.class" (dict "persistence" .Values.master.persistence "global" .Values.global) | nindent 2 }}
+{{- end }}

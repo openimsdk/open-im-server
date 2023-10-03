@@ -1,0 +1,194 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-health" (include "common.names.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  ping_readiness_local.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 15 $1 \
+      redis-cli \
+        -h localhost \
+{{- if .Values.tls.enabled }}
+        -p $REDIS_TLS_PORT \
+        --tls \
+        --cacert {{ template "redis.tlsCACert" . }} \
+        {{- if .Values.tls.authClients }}
+          --cert {{ template "redis.tlsCert" . }} \
+          --key {{ template "redis.tlsCertKey" . }} \
+        {{- end }}
+{{- else }}
+        -p $REDIS_PORT \
+{{- end }}
+        ping
+    )
+    if [ "$?" -eq "124" ]; then
+      echo "Timed out"
+      exit 1
+    fi
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_local.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 15 $1 \
+      redis-cli \
+        -h localhost \
+{{- if .Values.tls.enabled }}
+        -p $REDIS_TLS_PORT \
+        --tls \
+        --cacert {{ template "redis.tlsCACert" . }} \
+        {{- if .Values.tls.authClients }}
+          --cert {{ template "redis.tlsCert" . }} \
+          --key {{ template "redis.tlsCertKey" . }} \
+        {{- end }}
+{{- else }}
+        -p $REDIS_PORT \
+{{- end }}
+        ping
+    )
+    if [ "$?" -eq "124" ]; then
+      echo "Timed out"
+      exit 1
+    fi
+    responseFirstWord=$(echo $response | head -n1 | awk '{print $1;}')
+    if [ "$response" != "PONG" ] && [ "$responseFirstWord" != "LOADING" ] && [ "$responseFirstWord" != "MASTERDOWN" ]; then
+      echo "$response"
+      exit 1
+    fi
+{{- if .Values.sentinel.enabled }}
+  ping_sentinel.sh: |-
+    #!/bin/bash
+
+{{- if .Values.auth.sentinel }}
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
+{{- end }}
+    response=$(
+      timeout -s 15 $1 \
+      redis-cli \
+        -h localhost \
+{{- if .Values.tls.enabled }}
+        -p $REDIS_SENTINEL_TLS_PORT_NUMBER \
+        --tls \
+        --cacert "$REDIS_SENTINEL_TLS_CA_FILE" \
+        {{- if .Values.tls.authClients }}
+          --cert "$REDIS_SENTINEL_TLS_CERT_FILE" \
+          --key "$REDIS_SENTINEL_TLS_KEY_FILE" \
+        {{- end }}
+{{- else }}
+        -p $REDIS_SENTINEL_PORT \
+{{- end }}
+        ping
+    )
+    if [ "$?" -eq "124" ]; then
+      echo "Timed out"
+      exit 1
+    fi
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  parse_sentinels.awk: |-
+    /ip/ {FOUND_IP=1}
+    /port/ {FOUND_PORT=1}
+    /runid/ {FOUND_RUNID=1}
+    !/ip|port|runid/ {
+      if (FOUND_IP==1) {
+        IP=$1; FOUND_IP=0;
+      }
+      else if (FOUND_PORT==1) {
+        PORT=$1;
+        FOUND_PORT=0;
+      } else if (FOUND_RUNID==1) {
+        printf "\nsentinel known-sentinel {{ .Values.sentinel.masterSet }} %s %s %s", IP, PORT, $0; FOUND_RUNID=0;
+      }
+    }
+{{- end }}
+  ping_readiness_master.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    [[ -n "$REDIS_MASTER_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 15 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+{{- if .Values.tls.enabled }}
+        --tls \
+        --cacert {{ template "redis.tlsCACert" . }} \
+        {{- if .Values.tls.authClients }}
+          --cert {{ template "redis.tlsCert" . }} \
+          --key {{ template "redis.tlsCertKey" . }} \
+        {{- end }}
+{{- end }}
+        ping
+    )
+    if [ "$?" -eq "124" ]; then
+      echo "Timed out"
+      exit 1
+    fi
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_master.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    [[ -n "$REDIS_MASTER_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 15 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+{{- if .Values.tls.enabled }}
+        --tls \
+        --cacert {{ template "redis.tlsCACert" . }} \
+        {{- if .Values.tls.authClients }}
+          --cert {{ template "redis.tlsCert" . }} \
+          --key {{ template "redis.tlsCertKey" . }} \
+        {{- end }}
+{{- end }}
+        ping
+    )
+    if [ "$?" -eq "124" ]; then
+      echo "Timed out"
+      exit 1
+    fi
+    responseFirstWord=$(echo $response | head -n1 | awk '{print $1;}')
+    if [ "$response" != "PONG" ] && [ "$responseFirstWord" != "LOADING" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_readiness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_readiness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_readiness_master.sh" $1 || exit_status=$?
+    exit $exit_status
+  ping_liveness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_liveness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_liveness_master.sh" $1 || exit_status=$?
+    exit $exit_status

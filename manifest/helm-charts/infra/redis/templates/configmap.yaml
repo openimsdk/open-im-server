@@ -1,0 +1,61 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if (include "redis.createConfigmap" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-configuration" (include "common.names.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  redis.conf: |-
+    # User-supplied common configuration:
+    {{- if .Values.commonConfiguration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonConfiguration "context" $ ) | nindent 4 }}
+    {{- end }}
+    # End of common configuration
+  master.conf: |-
+    dir {{ .Values.master.persistence.path }}
+    # User-supplied master configuration:
+    {{- if .Values.master.configuration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.master.configuration "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.master.disableCommands }}
+    {{- range .Values.master.disableCommands }}
+    rename-command {{ . }} ""
+    {{- end }}
+    {{- end }}
+    # End of master configuration
+  replica.conf: |-
+    dir {{ .Values.replica.persistence.path }}
+    # User-supplied replica configuration:
+    {{- if .Values.replica.configuration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.replica.configuration "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.replica.disableCommands }}
+    {{- range .Values.replica.disableCommands }}
+    rename-command {{ . }} ""
+    {{- end }}
+    {{- end }}
+    # End of replica configuration
+  {{- if .Values.sentinel.enabled }}
+  sentinel.conf: |-
+    dir "/tmp"
+    port {{ .Values.sentinel.containerPorts.sentinel }}
+    sentinel monitor {{ .Values.sentinel.masterSet }} {{ template "common.names.fullname" . }}-node-0.{{ template "common.names.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }} {{ .Values.sentinel.service.ports.redis }} {{ .Values.sentinel.quorum }}
+    sentinel down-after-milliseconds {{ .Values.sentinel.masterSet }} {{ .Values.sentinel.downAfterMilliseconds }}
+    sentinel failover-timeout {{ .Values.sentinel.masterSet }} {{ .Values.sentinel.failoverTimeout }}
+    sentinel parallel-syncs {{ .Values.sentinel.masterSet }} {{ .Values.sentinel.parallelSyncs }}
+    # User-supplied sentinel configuration:
+    {{- if .Values.sentinel.configuration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.sentinel.configuration "context" $ ) | nindent 4 }}
+    {{- end }}
+    # End of sentinel configuration
+  {{- end }}
+{{- end }}

@@ -1,0 +1,67 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and (eq .Values.architecture "replication") .Values.sentinel.enabled (eq .Values.sentinel.service.type "NodePort") (or .Release.IsUpgrade .Values.sentinel.service.nodePorts.redis ) }}
+
+{{- range $i := until (int .Values.replica.replicaCount) }}
+
+{{ $portsmap := (lookup "v1" "ConfigMap" $.Release.Namespace (printf "%s-%s" ( include "common.names.fullname" $ ) "ports-configmap")).data }}
+
+{{ $sentinelport := 0}}
+{{ $redisport := 0}}
+{{- if $portsmap }}
+{{ $sentinelport = index $portsmap (printf "%s-node-%s-%s" (include "common.names.fullname" $) (toString $i) "sentinel") }}
+{{ $redisport = index $portsmap (printf "%s-node-%s-%s" (include "common.names.fullname" $) (toString $i) "redis") }}
+{{- else }}
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "common.names.fullname" $ }}-node-{{ $i }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: node
+  {{- if or $.Values.commonAnnotations $.Values.sentinel.service.annotations }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list $.Values.sentinel.service.annotations $.Values.commonAnnotations ) "context" $ ) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: NodePort
+  ports:
+  - name: sentinel
+    {{- if $.Values.sentinel.service.nodePorts.sentinel  }}
+    nodePort: {{ (add $.Values.sentinel.service.nodePorts.sentinel $i 1) }}
+    port: {{ (add $.Values.sentinel.service.nodePorts.sentinel $i 1) }}
+    {{- else }}
+    nodePort: {{ $sentinelport }}
+    port: {{ $sentinelport }}
+    {{- end }}
+    protocol: TCP
+    targetPort: {{ $.Values.sentinel.containerPorts.sentinel }}
+  - name: redis
+    {{- if $.Values.sentinel.service.nodePorts.redis }}
+    nodePort: {{ (add $.Values.sentinel.service.nodePorts.redis $i 1) }}
+    port: {{ (add $.Values.sentinel.service.nodePorts.redis $i 1) }}
+    {{- else }}
+    nodePort: {{ $redisport }}
+    port: {{ $redisport }}
+    {{- end }}
+    protocol: TCP
+    targetPort: {{ $.Values.replica.containerPorts.redis }}
+  - name: sentinel-internal
+    nodePort: null
+    port: {{ $.Values.sentinel.containerPorts.sentinel }}
+    protocol: TCP
+    targetPort: {{ $.Values.sentinel.containerPorts.sentinel }}
+  - name: redis-internal
+    nodePort: null
+    port: {{ $.Values.replica.containerPorts.redis }}
+    protocol: TCP
+    targetPort: {{ $.Values.replica.containerPorts.redis }}
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ template "common.names.fullname" $ }}-node-{{ $i }}
+---
+{{- end }}
+{{- end }}

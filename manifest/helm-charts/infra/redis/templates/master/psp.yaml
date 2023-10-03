@@ -1,0 +1,48 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- $pspAvailable := (semverCompare "<1.25-0" (include "common.capabilities.kubeVersion" .)) -}}
+{{- if and $pspAvailable .Values.podSecurityPolicy.create }}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ printf "%s-master" (include "common.names.fullname" .) }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  allowPrivilegeEscalation: false
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: {{ .Values.master.podSecurityContext.fsGroup }}
+        max: {{ .Values.master.podSecurityContext.fsGroup }}
+  hostIPC: false
+  hostNetwork: false
+  hostPID: false
+  privileged: false
+  readOnlyRootFilesystem: false
+  requiredDropCapabilities:
+    - ALL
+  runAsUser:
+    rule: 'MustRunAs'
+    ranges:
+      - min: {{ .Values.master.containerSecurityContext.runAsUser }}
+        max: {{ .Values.master.containerSecurityContext.runAsUser }}
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: {{ .Values.master.containerSecurityContext.runAsUser }}
+        max: {{ .Values.master.containerSecurityContext.runAsUser }}
+  volumes:
+    - 'configMap'
+    - 'secret'
+    - 'emptyDir'
+    - 'persistentVolumeClaim'
+{{- end }}

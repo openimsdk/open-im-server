@@ -1,0 +1,105 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.networkPolicy.enabled }}
+kind: NetworkPolicy
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 6 }}
+  policyTypes:
+    - Ingress
+  {{- if or (eq .Values.architecture "replication") .Values.networkPolicy.extraEgress }}
+    - Egress
+  egress:
+    {{- if eq .Values.architecture "replication" }}
+    # Allow dns resolution
+    - ports:
+        - port: 53
+          protocol: UDP
+    # Allow outbound connections to other cluster pods
+    - ports:
+        - port: {{ .Values.master.containerPorts.redis }}
+        {{- if .Values.sentinel.enabled }}
+        - port: {{ .Values.sentinel.containerPorts.sentinel }}
+        {{- end }}
+      to:
+        - podSelector:
+            matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.networkPolicy.extraEgress }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.networkPolicy.extraEgress "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+  ingress:
+    # Allow inbound connections
+    - ports:
+        - port: {{ .Values.master.containerPorts.redis }}
+        {{- if .Values.sentinel.enabled }}
+        - port: {{ .Values.sentinel.containerPorts.sentinel }}
+        {{- end }}
+      {{- if not .Values.networkPolicy.allowExternal }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{ template "common.names.fullname" . }}-client: "true"
+        - podSelector:
+            matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 14 }}
+        {{- if or .Values.networkPolicy.ingressNSMatchLabels .Values.networkPolicy.ingressNSPodMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- if .Values.networkPolicy.ingressNSMatchLabels }}
+                {{- range $key, $value := .Values.networkPolicy.ingressNSMatchLabels }}
+                {{ $key | quote }}: {{ $value | quote }}
+                {{- end }}
+              {{ else }}
+                {}
+              {{- end }}
+          {{- if .Values.networkPolicy.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- range $key, $value := .Values.networkPolicy.ingressNSPodMatchLabels }}
+              {{ $key | quote }}: {{ $value | quote }}
+              {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.metrics.enabled }}
+    # Allow prometheus scrapes for metrics
+    - ports:
+        - port: 9121
+      {{- if not .Values.networkPolicy.metrics.allowExternal }}
+      from:
+        {{- if or .Values.networkPolicy.metrics.ingressNSMatchLabels .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- if .Values.networkPolicy.metrics.ingressNSMatchLabels }}
+                {{- range $key, $value := .Values.networkPolicy.metrics.ingressNSMatchLabels }}
+                {{ $key | quote }}: {{ $value | quote }}
+                {{- end }}
+              {{ else }}
+                {}
+              {{- end }}
+          {{- if .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- range $key, $value := .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+              {{ $key | quote }}: {{ $value | quote }}
+              {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.networkPolicy.extraIngress }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.networkPolicy.extraIngress "context" $ ) | nindent 4 }}
+    {{- end }}
+{{- end }}

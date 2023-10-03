@@ -1,0 +1,30 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.rbac.create }}
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+kind: Role
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+rules:
+  {{- $pspAvailable := (semverCompare "<1.25-0" (include "common.capabilities.kubeVersion" .)) -}}
+  {{- if and $pspAvailable .Values.podSecurityPolicy.enabled }}
+  - apiGroups:
+      - '{{ template "podSecurityPolicy.apiGroup" . }}'
+    resources:
+      - 'podsecuritypolicies'
+    verbs:
+      - 'use'
+    resourceNames: [{{ printf "%s-master" (include "common.names.fullname" .) }}]
+  {{- end }}
+  {{- if .Values.rbac.rules }}
+  {{- include "common.tplvalues.render" ( dict "value" .Values.rbac.rules "context" $ ) | nindent 2 }}
+  {{- end }}
+{{- end }}
