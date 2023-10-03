@@ -1,0 +1,9 @@
+global:
+  storageClass: "nfs-client"
+mode: standalone
+auth:
+  rootUser: root
+  rootPassword: "openIM123"
+defaultBuckets: "openim"
+persistence:
+  size: 1Gi
