@@ -1,0 +1,324 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.provisioning.enabled }}
+{{- $fullname := printf "%s-provisioning" (include "common.names.fullname" .) }}
+{{- $minioAlias := "provisioning" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace | quote  }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: minio-provisioning
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.provisioning.cleanupAfterFinished.enabled }} 
+  ttlSecondsAfterFinished: {{ .Values.provisioning.cleanupAfterFinished.seconds }} 
+  {{- end }} 
+  parallelism: 1
+  template:
+    metadata:
+      labels: {{- include "minio.labels.provisioning" . | nindent 8 }}
+        app.kubernetes.io/component: minio-provisioning
+      {{- if .Values.provisioning.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.provisioning.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "minio.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.provisioning.schedulerName }}
+      schedulerName: {{ .Values.provisioning.schedulerName }}
+      {{- end }}
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 0
+      {{- if .Values.provisioning.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.provisioning.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "minio.serviceAccountName" . }}
+      initContainers:
+        - name: wait-for-available-minio
+          image: {{ include "minio.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.provisioning.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.provisioning.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/bash
+            - -c
+            - |-
+              set -e;
+              echo "Waiting for Minio";
+              wait-for-port \
+                --host={{ include "common.names.fullname" . }} \
+                --state=inuse \
+                --timeout=120 \
+                {{ .Values.service.ports.api | int64 }};
+              echo "Minio is available";
+          {{- if .Values.provisioning.resources }}
+          resources: {{- toYaml .Values.provisioning.resources | nindent 12 }}
+          {{- end }}
+      containers:
+        - name: minio
+          image: {{ include "minio.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.provisioning.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.provisioning.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.provisioning.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.command "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - /bin/bash
+            - -c
+            - >-
+              set -e;
+              echo "Start Minio provisioning";
+
+              function attachPolicy() {
+                local tmp=$(mc admin $1 info {{ $minioAlias }} $2 | sed -n -e 's/^Policy.*: \(.*\)$/\1/p');
+                IFS=',' read -r -a CURRENT_POLICIES <<< "$tmp";
+                if [[ ! "${CURRENT_POLICIES[*]}" =~ "$3" ]]; then
+                  mc admin policy attach {{ $minioAlias }} $3 --$1=$2;
+                fi;
+              };
+
+              function detachDanglingPolicies() {
+                local tmp=$(mc admin $1 info {{ $minioAlias }} $2 | sed -n -e 's/^Policy.*: \(.*\)$/\1/p');
+                IFS=',' read -r -a CURRENT_POLICIES <<< "$tmp";
+                IFS=',' read -r -a DESIRED_POLICIES <<< "$3";
+                for current in "${CURRENT_POLICIES[@]}"; do
+                  if [[ ! "${DESIRED_POLICIES[*]}" =~ "${current}" ]]; then
+                    mc admin policy detach {{ $minioAlias }} $current --$1=$2;
+                  fi;
+                done;
+              }
+
+              function addUsersFromFile() {
+                local username=$(grep -oP '^username=\K.+' $1);
+                local password=$(grep -oP '^password=\K.+' $1);
+                local disabled=$(grep -oP '^disabled=\K.+' $1);
+                local policies_list=$(grep -oP '^policies=\K.+' $1);
+                local set_policies=$(grep -oP '^setPolicies=\K.+' $1);
+
+                mc admin user add {{ $minioAlias }} "${username}" "${password}";
+
+                IFS=',' read -r -a POLICIES <<< "${policies_list}";
+                for policy in "${POLICIES[@]}"; do
+                  attachPolicy user "${username}" "${policy}";
+                done;
+                if [ "${set_policies}" == "true" ]; then
+                  detachDanglingPolicies user "${username}" "${policies_list}";
+                fi;
+
+                local user_status="enable";
+                if [[ "${disabled}" != "" && "${disabled,,}" == "true" ]]; then
+                  user_status="disable";
+                fi;
+
+                mc admin user "${user_status}" {{ $minioAlias }} "${username}";
+              };
+
+              {{- $minioUrl := printf "$MINIO_SCHEME://%s:%d" (include "common.names.fullname" .) (.Values.service.ports.api | int) }}
+              {{- $minioRootUser := ternary ("$(<$MINIO_ROOT_USER_FILE)") ("$MINIO_ROOT_USER") (.Values.auth.useCredentialsFiles) }}
+              {{- $minioRootPassword := ternary ("$(<$MINIO_ROOT_PASSWORD_FILE)") ("$MINIO_ROOT_PASSWORD") (.Values.auth.useCredentialsFiles) }}
+              mc alias set {{ $minioAlias }} {{ $minioUrl }} {{ $minioRootUser }} {{ $minioRootPassword }};
+
+              {{- range $config := .Values.provisioning.config }}
+              {{- $options := list }}
+              {{- range $name, $value := $config.options }}
+              {{- $options = (printf "%s=%s" $name $value) | append $options }}
+              {{- end }}
+              {{- $options := join " " $options }}
+              mc admin config set {{ $minioAlias }} {{ $config.name }} {{ $options }};
+              {{- end }}
+
+              mc admin service restart {{ $minioAlias }};
+
+              {{- range $policy := .Values.provisioning.policies }}
+              mc admin policy create {{ $minioAlias }} {{ $policy.name }} /etc/ilm/policy-{{ $policy.name }}.json;
+              {{- end }}
+
+              {{- range $user := .Values.provisioning.users }}
+              mc admin user add {{ $minioAlias }} {{ $user.username }} {{ $user.password }};
+              {{- range $policy := $user.policies }}
+              attachPolicy user {{ $user.username }} {{ $policy }};
+              {{- end }}
+              {{- if $user.setPolicies }}
+              detachDanglingPolicies user {{ $user.username }} "{{ join "," $user.policies }}";
+              {{- end }}
+              {{- $userStatus := ternary ("disable") ("enable") (and (not (empty $user.disabled)) $user.disabled) }}
+              mc admin user {{ $userStatus }} {{ $minioAlias }} {{ $user.username }};
+              {{- end }}
+              {{- if gt (len .Values.provisioning.usersExistingSecrets) 0 }}
+              while read -d '' configFile; do
+                addUsersFromFile "${configFile}";
+              done < <(find "/opt/bitnami/minio/users/" -type l -not -name '..data' -print0);
+              {{- end }}
+
+              {{- range $group := .Values.provisioning.groups }}
+              mc admin group add {{ $minioAlias }} {{ $group.name }} {{ join " " $group.members }};
+              {{- range $policy := $group.policies }}
+              attachPolicy group {{ $group.name }} {{ $policy }};
+              {{- end }}
+              {{- if $group.setPolicies }}
+              detachDanglingPolicies group {{ $group.name }} "{{ join "," $group.policies }}";
+              {{- end }}
+              {{- $groupStatus := ternary ("disable") ("enable") (and (not (empty $group.disabled)) $group.disabled) }}
+              mc admin group {{ $groupStatus }} {{ $minioAlias }} {{ $group.name }};
+              {{- end }}
+
+              {{- $isDistributedMode := (eq .Values.mode "distributed") }}
+              {{- range $bucket := .Values.provisioning.buckets }}
+              {{- $target := printf "%s/%s" $minioAlias $bucket.name }}
+              {{- $region := ternary (printf "--region=%s" $bucket.region) ("") (not (empty $bucket.region)) }}
+              {{- $withLock := ternary ("--with-lock") ("") (and (not (empty $bucket.withLock)) $bucket.withLock) }}
+              mc mb {{ $target }} --ignore-existing {{ $region }} {{ $withLock }};
+
+              {{- if $bucket.lifecycle }}
+              mc ilm import {{ $minioAlias }}/{{ $bucket.name }} < /etc/ilm/bucket-{{ $bucket.name }}.json;
+              {{- end }}
+
+              {{- with $bucket.quota }}
+              {{- if eq .type "hard" }}
+              mc quota set {{ $minioAlias }}/{{ $bucket.name }} {{ if .size }}--size {{ .size }}{{ end }};
+              {{- else }}
+              mc quota {{ .type }} {{ $minioAlias }}/{{ $bucket.name }} {{ if .size }}--size {{ .size }}{{ end }};
+              {{- end }}
+              {{- end }}
+
+              {{- if $isDistributedMode }}
+              {{- if (or ((empty $bucket.withLock)) (not $bucket.withLock)) }}
+              {{- $versioning := ternary ("enable") ("suspend") (and (not (empty $bucket.versioning)) $bucket.versioning) }}
+              mc version {{ $versioning }} {{ $minioAlias }}/{{ $bucket.name }};
+              {{- end }}
+              {{- end }}
+
+              {{- if $bucket.tags }}
+              {{- $target := printf "%s/%s" $minioAlias $bucket.name }}
+              {{- $tags := list }}
+              {{- range $name, $value := $bucket.tags }}
+              {{- $tags = (printf "%s=%s" $name $value) | append $tags }}
+              {{- end }}
+              {{- $tags := join "&" $tags | quote }}
+              mc tag set {{ $target }} {{ $tags }};
+              {{- end }}
+              {{- end }}
+
+              {{- if .Values.provisioning.extraCommands }}
+              {{ join ";" .Values.provisioning.extraCommands | nindent 14 }};
+              {{- end }}
+
+              echo "End Minio provisioning";
+          {{- end }}
+          {{- if .Values.provisioning.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: MINIO_SCHEME
+              value: {{ ternary "https" "http" .Values.tls.enabled | quote }}
+            {{- if .Values.auth.useCredentialsFiles }}
+            - name: MINIO_ROOT_USER_FILE
+              value: "/opt/bitnami/minio/secrets/root-user"
+            {{- else }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" . }}
+                  key: root-user
+            {{- end }}
+            {{- if .Values.auth.useCredentialsFiles }}
+            - name: MINIO_ROOT_PASSWORD_FILE
+              value: "/opt/bitnami/minio/secrets/root-password"
+            {{- else }}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "minio.secretName" . }}
+                  key: root-password
+            {{- end }}
+            {{- if .Values.tls.mountPath }}
+            - name: MINIO_CERTS_DIR
+              value: {{ .Values.tls.mountPath | quote }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.provisioning.resources }}
+          resources: {{- toYaml .Values.provisioning.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.provisioning.enabled }}
+            - name: minio-provisioning
+              mountPath: /etc/ilm
+            {{- end }}
+            {{- if .Values.auth.useCredentialsFiles }}
+            - name: minio-credentials
+              mountPath: /opt/bitnami/minio/secrets/
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: minio-certs
+              mountPath: {{ default "/certs" .Values.tls.mountPath }}
+            - name: minio-client-certs
+              mountPath: /.mc/certs
+            {{- end }}
+            {{- range $idx, $_ := .Values.provisioning.usersExistingSecrets }}
+            - name: {{ printf "users-secret-%d" $idx }}
+              mountPath: /opt/bitnami/minio/users/{{ $idx }}/
+            {{- end }}
+            {{- if .Values.provisioning.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.provisioning.enabled }}
+        - name: minio-provisioning
+          configMap:
+            name: {{ $fullname }}
+        {{- end }}
+        {{- if .Values.auth.useCredentialsFiles }}
+        - name: minio-credentials
+          secret:
+            secretName: {{ include "minio.secretName" . }}
+        {{- end }}
+        {{- range $idx, $userSecret := .Values.provisioning.usersExistingSecrets }}
+        - name: {{ printf "users-secret-%d" $idx }}
+          secret:
+            secretName: {{ $userSecret }}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: minio-certs
+          secret:
+            secretName: {{ include "minio.tlsSecretName" . }}
+            items:
+            - key: tls.crt
+              path: public.crt
+            - key: tls.key
+              path: private.key
+            - key: ca.crt
+              path: CAs/public.crt
+        - name: minio-client-certs
+          secret:
+            secretName: {{ include "minio.tlsSecretName" . }}
+            items:
+              - key: ca.crt
+                path: CAs/public.crt
+        {{- end }}
+        {{- if .Values.provisioning.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+{{- end }}

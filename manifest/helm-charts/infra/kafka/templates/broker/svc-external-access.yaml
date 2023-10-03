@@ -1,0 +1,63 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.externalAccess.enabled }}
+{{- $fullname := include "common.names.fullname" . }}
+{{- $replicaCount := .Values.broker.replicaCount | int }}
+{{- range $i := until $replicaCount }}
+{{- $targetPod := printf "%s-broker-%d" (printf "%s" $fullname) $i }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-%d-external" (include "common.names.fullname" $) $i | trunc 63 | trimSuffix "-" }}
+  namespace: {{ include "common.names.namespace" $ | quote }}
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list $.Values.externalAccess.broker.service.labels $.Values.commonLabels ) "context" $ ) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: kafka
+    pod: {{ $targetPod }}
+  {{- if or $.Values.externalAccess.broker.service.annotations $.Values.commonAnnotations $.Values.externalAccess.broker.service.loadBalancerAnnotations }}
+  annotations:
+    {{- if and (not (empty $.Values.externalAccess.broker.service.loadBalancerAnnotations)) (eq (len $.Values.externalAccess.broker.service.loadBalancerAnnotations) $replicaCount) }}
+    {{ include "common.tplvalues.render" ( dict "value" (index $.Values.externalAccess.broker.service.loadBalancerAnnotations $i) "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if or $.Values.externalAccess.broker.service.annotations $.Values.commonAnnotations }}
+    {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list $.Values.externalAccess.broker.service.annotations $.Values.commonAnnotations ) "context" $ ) }}
+    {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ $.Values.externalAccess.broker.service.type }}
+  {{- if eq $.Values.externalAccess.broker.service.type "LoadBalancer" }}
+  {{- if and (not (empty $.Values.externalAccess.broker.service.loadBalancerIPs)) (eq (len $.Values.externalAccess.broker.service.loadBalancerIPs) $replicaCount) }}
+  loadBalancerIP: {{ index $.Values.externalAccess.broker.service.loadBalancerIPs $i }}
+  {{- end }}
+  {{- if $.Values.externalAccess.broker.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges: {{- toYaml $.Values.externalAccess.broker.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  publishNotReadyAddresses: {{ $.Values.externalAccess.broker.service.publishNotReadyAddresses }}
+  ports:
+    - name: tcp-kafka
+      port: {{ $.Values.externalAccess.broker.service.ports.external }}
+      {{- if le (add $i 1) (len $.Values.externalAccess.broker.service.nodePorts) }}
+      nodePort: {{ index $.Values.externalAccess.broker.service.nodePorts $i }}
+      {{- else }}
+      nodePort: null
+      {{- end }}
+      targetPort: external
+    {{- if $.Values.externalAccess.broker.service.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" $.Values.externalAccess.broker.service.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if and (eq $.Values.externalAccess.broker.service.type "NodePort") (le (add $i 1) (len $.Values.externalAccess.broker.service.externalIPs)) }}
+  externalIPs: [{{ index $.Values.externalAccess.broker.service.externalIPs $i | quote }}]
+  {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list $.Values.broker.podLabels $.Values.commonLabels ) "context" $ ) }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/part-of: kafka
+    app.kubernetes.io/component: broker
+    statefulset.kubernetes.io/pod-name: {{ $targetPod }}
+---
+{{- end }}
+{{- end }}

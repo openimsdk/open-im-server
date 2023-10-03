@@ -1,0 +1,76 @@
+CHART NAME: {{ .Chart.Name }}
+CHART VERSION: {{ .Chart.Version }}
+APP VERSION: {{ .Chart.AppVersion }}
+
+{{- if and (not .Values.auth.client.enabled) (eq .Values.service.type "LoadBalancer") }}
+-------------------------------------------------------------------------------
+ WARNING
+
+    By specifying "serviceType=LoadBalancer" and not specifying "auth.enabled=true"
+    you have most likely exposed the ZooKeeper service externally without any
+    authentication mechanism.
+
+    For security reasons, we strongly suggest that you switch to "ClusterIP" or
+    "NodePort". As alternative, you can also specify a valid password on the
+    "auth.clientPassword" parameter.
+
+-------------------------------------------------------------------------------
+{{- end }}
+
+** Please be patient while the chart is being deployed **
+
+{{- if .Values.diagnosticMode.enabled }}
+The chart has been deployed in diagnostic mode. All probes have been disabled and the command has been overwritten with:
+
+  command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 4 }}
+  args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 4 }}
+
+Get the list of pods by executing:
+
+  kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Access the pod you want to debug by executing
+
+  kubectl exec --namespace {{ .Release.Namespace }} -ti <NAME OF THE POD> -- bash
+
+In order to replicate the container startup scripts execute this command:
+
+    /opt/bitnami/scripts/zookeeper/entrypoint.sh /opt/bitnami/scripts/zookeeper/run.sh
+
+{{- else }}
+
+ZooKeeper can be accessed via port {{ .Values.service.ports.client }} on the following DNS name from within your cluster:
+
+    {{ template "common.names.fullname" . }}.{{ template "zookeeper.namespace" . }}.svc.{{ .Values.clusterDomain }}
+
+To connect to your ZooKeeper server run the following commands:
+
+    export POD_NAME=$(kubectl get pods --namespace {{ template "zookeeper.namespace" . }} -l "app.kubernetes.io/name={{ template "common.names.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=zookeeper" -o jsonpath="{.items[0].metadata.name}")
+    kubectl exec -it $POD_NAME -- zkCli.sh
+
+To connect to your ZooKeeper server from outside the cluster execute the following commands:
+
+{{- if eq .Values.service.type "NodePort" }}
+
+    export NODE_IP=$(kubectl get nodes --namespace {{ template "zookeeper.namespace" . }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    export NODE_PORT=$(kubectl get --namespace {{ template "zookeeper.namespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "common.names.fullname" . }})
+    zkCli.sh $NODE_IP:$NODE_PORT
+
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        Watch the status with: 'kubectl get svc --namespace {{ template "zookeeper.namespace" . }} -w {{ template "common.names.fullname" . }}'
+
+    export SERVICE_IP=$(kubectl get svc --namespace {{ template "zookeeper.namespace" . }} {{ template "common.names.fullname" . }} --template "{{ "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}" }}")
+    zkCli.sh $SERVICE_IP:{{ .Values.service.ports.client }}
+
+{{- else if eq .Values.service.type "ClusterIP" }}
+
+    kubectl port-forward --namespace {{ template "zookeeper.namespace" . }} svc/{{ template "common.names.fullname" . }} {{ .Values.service.ports.client }}:{{ .Values.containerPorts.client }} &
+    zkCli.sh 127.0.0.1:{{ .Values.service.ports.client }}
+
+{{- end }}
+{{- end }}
+
+{{- include "zookeeper.validateValues" . }}
+{{- include "zookeeper.checkRollingTags" . }}

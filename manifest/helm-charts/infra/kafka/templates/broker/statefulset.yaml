@@ -1,0 +1,455 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- $replicaCount := int .Values.broker.replicaCount }}
+{{- if gt $replicaCount 0 }}
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ printf "%s-broker" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: broker
+    app.kubernetes.io/part-of: kafka
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  podManagementPolicy: {{ .Values.broker.podManagementPolicy }}
+  replicas: {{ .Values.broker.replicaCount }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.broker.podLabels .Values.commonLabels ) "context" . ) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: broker
+      app.kubernetes.io/part-of: kafka
+  serviceName: {{ printf "%s-broker-headless" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
+  updateStrategy: {{- include "common.tplvalues.render" (dict "value" .Values.broker.updateStrategy "context" $ ) | nindent 4 }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: broker
+        app.kubernetes.io/part-of: kafka
+      annotations:
+        {{- if (include "kafka.broker.createConfigmap" .) }}
+        checksum/configuration: {{ include (print $.Template.BasePath "/broker/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if (include "kafka.createSaslSecret" .) }}
+        checksum/passwords-secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- end }}
+         {{- if (include "kafka.createTlsSecret" .) }}
+        checksum/tls-secret: {{ include (print $.Template.BasePath "/tls-secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if (include "kafka.metrics.jmx.createConfigmap" .) }}
+        checksum/jmx-configuration: {{ include (print $.Template.BasePath "/metrics/jmx-configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.broker.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.broker.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "kafka.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.broker.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.broker.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      hostNetwork: {{ .Values.broker.hostNetwork }}
+      hostIPC: {{ .Values.broker.hostIPC }}
+      {{- if .Values.broker.schedulerName }}
+      schedulerName: {{ .Values.broker.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.broker.affinity }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.broker.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.broker.podAffinityPreset "component" "broker" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.broker.podAntiAffinityPreset "component" "broker" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.broker.nodeAffinityPreset.type "key" .Values.broker.nodeAffinityPreset.key "values" .Values.broker.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.broker.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.broker.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.broker.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.broker.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.broker.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- if .Values.broker.priorityClassName }}
+      priorityClassName: {{ .Values.broker.priorityClassName }}
+      {{- end }}
+      {{- if .Values.controller.runtimeClassName }}
+      runtimeClassName: {{ .Values.controller.runtimeClassName }}
+      {{- end }}
+      {{- if .Values.broker.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.broker.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kafka.serviceAccountName" . }}
+      enableServiceLinks: {{ .Values.broker.enableServiceLinks }}
+      initContainers:
+        {{- if and .Values.volumePermissions.enabled .Values.broker.persistence.enabled }}
+        - name: volume-permissions
+          image: {{ include "kafka.volumePermissions.image" . }}
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - |
+              mkdir -p "{{ .Values.broker.persistence.mountPath }}" "{{ .Values.broker.logPersistence.mountPath }}"
+              chown -R {{ .Values.broker.containerSecurityContext.runAsUser }}:{{ .Values.broker.podSecurityContext.fsGroup }} "{{ .Values.broker.persistence.mountPath }}" "{{ .Values.broker.logPersistence.mountPath }}"
+              find "{{ .Values.broker.persistence.mountPath }}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R {{ .Values.broker.containerSecurityContext.runAsUser }}:{{ .Values.broker.podSecurityContext.fsGroup }}
+              find "{{ .Values.broker.logPersistence.mountPath }}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R {{ .Values.broker.containerSecurityContext.runAsUser }}:{{ .Values.broker.podSecurityContext.fsGroup }}
+          {{- if eq ( toString ( .Values.volumePermissions.containerSecurityContext.runAsUser )) "auto" }}
+          securityContext: {{- omit .Values.volumePermissions.containerSecurityContext "runAsUser" | toYaml | nindent 12 }}
+          {{- else }}
+          securityContext: {{- .Values.volumePermissions.containerSecurityContext | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.volumePermissions.resources }}
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.broker.persistence.mountPath }}
+            - name: logs
+              mountPath: {{ .Values.broker.logPersistence.mountPath }}
+        {{- end }}
+        {{- if and .Values.externalAccess.enabled .Values.externalAccess.autoDiscovery.enabled }}
+        {{- include "kafka.autoDiscoveryInitContainer" ( dict "role" "broker" "context" $) | nindent 8 }}
+        {{- end }}
+        {{- include "kafka.prepareKafkaInitContainer" ( dict "role" "broker" "context" $) | nindent 8 }}
+        {{- if .Values.broker.initContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.broker.initContainers "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.initContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.initContainers "context" $ ) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: kafka
+          image: {{ include "kafka.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.broker.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.broker.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.broker.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.broker.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.broker.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.broker.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
+            - name: KAFKA_HEAP_OPTS
+              value: {{ coalesce .Values.broker.heapOpts .Values.heapOpts | quote }}
+            {{- if .Values.kraft.enabled }}
+            - name: KAFKA_KRAFT_CLUSTER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-kraft-cluster-id" (include "common.names.fullname" .) }}
+                  key: kraft-cluster-id
+            {{- if .Values.broker.zookeeperMigrationMode }}
+            - name: KAFKA_SKIP_KRAFT_STORAGE_INIT
+              value: "true"
+            {{- end }}
+            {{- end }}
+            {{- if and (include "kafka.saslEnabled" .) (or (regexFind "SCRAM" (upper .Values.sasl.enabledMechanisms)) (regexFind "SCRAM" (upper .Values.sasl.controllerMechanism)) (regexFind "SCRAM" (upper .Values.sasl.interBrokerMechanism))) }}
+            {{- if or .Values.zookeeper.enabled .Values.externalZookeeper.servers }}
+            - name: KAFKA_ZOOKEEPER_BOOTSTRAP_SCRAM_USERS
+              value: "true"
+            {{- else }}
+            - name: KAFKA_KRAFT_BOOTSTRAP_SCRAM_USERS
+              value: "true"
+            {{- end }}
+            {{- if and (include "kafka.client.saslEnabled" . ) .Values.sasl.client.users }}
+            - name: KAFKA_CLIENT_USERS
+              value: {{ join "," .Values.sasl.client.users | quote }}
+            - name: KAFKA_CLIENT_PASSWORDS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.saslSecretName" . }}
+                  key: client-passwords
+            {{- end }}
+            {{- if regexFind "SASL" (upper .Values.listeners.interbroker.protocol) }}
+            - name: KAFKA_INTER_BROKER_USER
+              value: {{ .Values.sasl.interbroker.user | quote }}
+            - name: KAFKA_INTER_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.saslSecretName" . }}
+                  key: inter-broker-password
+            {{- end }}
+            {{- if and .Values.kraft.enabled (regexFind "SASL" (upper .Values.listeners.controller.protocol)) }}
+            - name: KAFKA_CONTROLLER_USER
+              value: {{ .Values.sasl.controller.user | quote }}
+            - name: KAFKA_CONTROLLER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.saslSecretName" . }}
+                  key: controller-password
+            {{- end }}
+            {{- end }}
+            {{- if .Values.metrics.jmx.enabled }}
+            - name: JMX_PORT
+              value: {{ .Values.metrics.jmx.kafkaJmxPort | quote }}
+            {{- end }}
+            {{- if .Values.broker.extraEnvVars }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.broker.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+            {{- if .Values.extraEnvVars }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.broker.extraEnvVarsCM .Values.extraEnvVarsCM .Values.broker.extraEnvVarsSecret .Values.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.broker.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.broker.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.broker.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.broker.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.listeners.client.containerPort }}
+            - name: interbroker
+              containerPort: {{ .Values.listeners.interbroker.containerPort }}
+            {{- if .Values.externalAccess.enabled }}
+            - name: external
+              containerPort: {{ .Values.listeners.external.containerPort }}
+            {{- end }}
+            {{- if .Values.listeners.extraListeners }}
+            {{- include "kafka.extraListeners.containerPorts" . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.broker.extraContainerPorts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.broker.extraContainerPorts "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if not .Values.diagnosticMode.enabled }}
+          {{- if .Values.broker.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.broker.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.broker.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.broker.livenessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: "client"
+          {{- end }}
+          {{- if .Values.broker.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.broker.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.broker.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.broker.readinessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: "client"
+          {{- end }}
+          {{- if .Values.broker.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.broker.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.broker.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.broker.startupProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: "client"
+          {{- end }}
+          {{- end }}
+          {{- if .Values.broker.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.broker.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.broker.resources }}
+          resources: {{- toYaml .Values.broker.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.broker.persistence.mountPath }}
+            - name: logs
+              mountPath: {{ .Values.broker.logPersistence.mountPath }}
+            - name: kafka-config
+              mountPath: /opt/bitnami/kafka/config/server.properties
+              subPath: server.properties
+            - name: tmp
+              mountPath: /tmp
+            {{- if or .Values.log4j .Values.existingLog4jConfigMap }}
+            - name: log4j-config
+              mountPath: /opt/bitnami/kafka/config/log4j.properties
+              subPath: log4j.properties
+            {{- end }}
+            {{- if or .Values.tls.zookeeper.enabled (include "kafka.sslEnabled" .) }}
+            - name: kafka-shared-certs
+              mountPath: /opt/bitnami/kafka/config/certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+            {{- if .Values.broker.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.broker.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+        {{- if .Values.metrics.jmx.enabled }}
+        - name: jmx-exporter
+          image: {{ include "kafka.metrics.jmx.image" . }}
+          imagePullPolicy: {{ .Values.metrics.jmx.image.pullPolicy | quote }}
+          {{- if .Values.metrics.jmx.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.metrics.jmx.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - java
+          args:
+            - -XX:MaxRAMPercentage=100
+            - -XshowSettings:vm
+            - -jar
+            - jmx_prometheus_httpserver.jar
+            - "5556"
+            - /etc/jmx-kafka/jmx-kafka-prometheus.yml
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.metrics.jmx.containerPorts.metrics }}
+          {{- if .Values.metrics.jmx.resources }}
+          resources: {{- toYaml .Values.metrics.jmx.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: jmx-config
+              mountPath: /etc/jmx-kafka
+        {{- end }}
+        {{- if .Values.broker.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.broker.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: kafka-configmaps
+          configMap:
+            name: {{ include "kafka.broker.configmapName" . }}
+        - name: kafka-secret-config
+        {{- if (include "kafka.broker.secretConfigExists" .) }}
+          secret:
+            secretName: {{ include "kafka.broker.secretConfigName" . }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: kafka-config
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: {{ include "common.names.fullname" . }}-scripts
+            defaultMode: 0755
+        {{- if and .Values.externalAccess.enabled .Values.externalAccess.autoDiscovery.enabled }}
+        - name: kafka-autodiscovery-shared
+          emptyDir: {}
+        {{- end }}
+        {{- if or .Values.log4j .Values.existingLog4jConfigMap }}
+        - name: log4j-config
+          configMap:
+            name: {{ include "kafka.log4j.configMapName" . }}
+        {{- end }}
+        {{- if .Values.metrics.jmx.enabled }}
+        - name: jmx-config
+          configMap:
+            name: {{ include "kafka.metrics.jmx.configmapName" . }}
+        {{- end }}
+        {{- if or .Values.tls.zookeeper.enabled (include "kafka.sslEnabled" .) }}
+        - name: kafka-shared-certs
+          emptyDir: {}
+        {{- if and (include "kafka.sslEnabled" .) (or .Values.tls.existingSecret .Values.tls.autoGenerated) }}
+        - name: kafka-certs
+          projected:
+            defaultMode: 256
+            sources:
+              - secret:
+                  name: {{ include "kafka.tlsSecretName" . }}
+              {{- if .Values.tls.jksTruststoreSecret }}
+              - secret:
+                  name: {{ .Values.tls.jksTruststoreSecret }}
+              {{- end }}
+        {{- end }}
+        {{- if and .Values.tls.zookeeper.enabled .Values.tls.zookeeper.existingSecret }}
+        - name: kafka-zookeeper-cert
+          secret:
+            secretName: {{ .Values.tls.zookeeper.existingSecret }}
+            defaultMode: 256
+        {{- end }}
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.broker.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.broker.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if not .Values.broker.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.broker.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ printf "%s" (tpl .Values.broker.persistence.existingClaim .) }}
+        {{- end }}
+        {{- if not .Values.broker.logPersistence.enabled }}
+        - name: logs
+          emptyDir: {}
+        {{- else if .Values.broker.logPersistence.existingClaim }}
+        - name: logs
+          persistentVolumeClaim:
+            claimName: {{ printf "%s" (tpl .Values.broker.logPersistence.existingClaim .) }}
+        {{- end }}
+  {{- if or (and .Values.broker.persistence.enabled (not .Values.broker.persistence.existingClaim)) (and .Values.broker.logPersistence.enabled (not .Values.broker.logPersistence.existingClaim)) }}
+  volumeClaimTemplates:
+    {{- if and .Values.broker.persistence.enabled (not .Values.broker.persistence.existingClaim) }}
+    - metadata:
+        name: data
+        {{- if .Values.broker.persistence.annotations }}
+        annotations: {{- include "common.tplvalues.render" (dict "value" .Values.broker.persistence.annotations "context" $) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.broker.persistence.labels }}
+        labels: {{- include "common.tplvalues.render" (dict "value" .Values.broker.persistence.labels "context" $) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.broker.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.broker.persistence.size | quote }}
+        {{- include "common.storage.class" (dict "persistence" .Values.broker.persistence "global" .Values.global) | nindent 8 }}
+        {{- if .Values.broker.persistence.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.broker.persistence.selector "context" $) | nindent 10 }}
+        {{- end -}}
+    {{- end }}
+    {{- if and .Values.broker.logPersistence.enabled (not .Values.broker.logPersistence.existingClaim) }}
+    - metadata:
+        name: logs
+        {{- if .Values.broker.logPersistence.annotations }}
+        annotations: {{- include "common.tplvalues.render" (dict "value" .Values.broker.logPersistence.annotations "context" $) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.broker.logPersistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.broker.logPersistence.size | quote }}
+        {{- include "common.storage.class" (dict "persistence" .Values.broker.persistence "global" .Values.global) | nindent 8 }}
+        {{- if .Values.broker.logPersistence.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.broker.logPersistence.selector "context" $) | nindent 10 }}
+        {{- end -}}
+    {{- end }}
+  {{- end }}
+{{- end }}

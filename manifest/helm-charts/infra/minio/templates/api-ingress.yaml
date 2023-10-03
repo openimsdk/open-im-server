@@ -1,0 +1,60 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.apiIngress.enabled -}}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ include "common.names.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list (include "minio.apiIngress.annotations" . | fromYaml) .Values.commonAnnotations ) "context" . ) }}
+  {{- if $annotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.apiIngress.ingressClassName (include "common.ingress.supportsIngressClassname" .) }}
+  ingressClassName: {{ .Values.apiIngress.ingressClassName | quote }}
+  {{- end }}
+  rules:
+    {{- if (include "minio.apiIngress.hostname" .) }}
+    - host: {{ include "minio.apiIngress.hostname" . }}
+      http:
+        paths:
+          {{- if .Values.apiIngress.extraPaths }}
+          {{- toYaml .Values.apiIngress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.apiIngress.path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ .Values.apiIngress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" .) "servicePort" "minio-api" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.apiIngress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" "minio-api" "context" $) | nindent 14 }}
+    {{- end }}
+    {{- if .Values.apiIngress.extraRules }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.apiIngress.extraRules "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $annotationsMap := include "common.tplvalues.render" (dict "value" $annotations "context" $) | fromYaml }}
+  {{- if or (and .Values.apiIngress.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" $annotationsMap )) .Values.apiIngress.selfSigned)) .Values.apiIngress.extraTls }}
+  tls:
+    {{- if and .Values.apiIngress.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" $annotationsMap )) .Values.apiIngress.selfSigned) }}
+    - hosts:
+        - {{ include "minio.apiIngress.hostname" . }}
+      secretName: {{ printf "%s-tls" (include "minio.apiIngress.hostname" .) }}
+    {{- end }}
+    {{- if .Values.apiIngress.extraTls }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.apiIngress.extraTls "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

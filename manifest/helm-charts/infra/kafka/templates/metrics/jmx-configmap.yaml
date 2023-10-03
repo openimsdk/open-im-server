@@ -1,0 +1,70 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if (include "kafka.metrics.jmx.createConfigmap" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-jmx-configuration" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: metrics
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  jmx-kafka-prometheus.yml: |-
+    {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.jmx.config "context" $ ) | nindent 4 }}
+    rules:
+      - pattern: kafka.controller<type=(ControllerChannelManager), name=(QueueSize), broker-id=(\d+)><>(Value)
+        name: kafka_controller_$1_$2_$4
+        labels:
+          broker_id: "$3"
+      - pattern: kafka.controller<type=(ControllerChannelManager), name=(TotalQueueSize)><>(Value)
+        name: kafka_controller_$1_$2_$3
+      - pattern: kafka.controller<type=(KafkaController), name=(.+)><>(Value)
+        name: kafka_controller_$1_$2_$3
+      - pattern: kafka.controller<type=(ControllerStats), name=(.+)><>(Count)
+        name: kafka_controller_$1_$2_$3
+      - pattern : kafka.network<type=(Processor), name=(IdlePercent), networkProcessor=(.+)><>(Value)
+        name: kafka_network_$1_$2_$4
+        labels:
+          network_processor: $3
+      - pattern : kafka.network<type=(RequestMetrics), name=(.+), request=(.+)><>(Count|Value)
+        name: kafka_network_$1_$2_$4
+        labels:
+          request: $3
+      - pattern : kafka.network<type=(SocketServer), name=(.+)><>(Count|Value)
+        name: kafka_network_$1_$2_$3
+      - pattern : kafka.network<type=(RequestChannel), name=(.+)><>(Count|Value)
+        name: kafka_network_$1_$2_$3
+      - pattern: kafka.server<type=(.+), name=(.+), topic=(.+)><>(Count|OneMinuteRate)
+        name: kafka_server_$1_$2_$4
+        labels:
+          topic: $3
+      - pattern: kafka.server<type=(ReplicaFetcherManager), name=(.+), clientId=(.+)><>(Value)
+        name: kafka_server_$1_$2_$4
+        labels:
+          client_id: "$3"
+      - pattern: kafka.server<type=(DelayedOperationPurgatory), name=(.+), delayedOperation=(.+)><>(Value)
+        name: kafka_server_$1_$2_$3_$4
+      - pattern: kafka.server<type=(.+), name=(.+)><>(Count|Value|OneMinuteRate)
+        name: kafka_server_$1_total_$2_$3
+      - pattern: kafka.server<type=(.+)><>(queue-size)
+        name: kafka_server_$1_$2
+      - pattern: java.lang<type=(.+), name=(.+)><(.+)>(\w+)
+        name: java_lang_$1_$4_$3_$2
+      - pattern: java.lang<type=(.+), name=(.+)><>(\w+)
+        name: java_lang_$1_$3_$2
+      - pattern : java.lang<type=(.*)>
+      - pattern: kafka.log<type=(.+), name=(.+), topic=(.+), partition=(.+)><>Value
+        name: kafka_log_$1_$2
+        labels:
+          topic: $3
+          partition: $4
+      {{- if .Values.metrics.jmx.extraRules }}
+      {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.jmx.extraRules "context" $ ) | nindent 6 }}
+      {{- end }}
+{{- end -}}

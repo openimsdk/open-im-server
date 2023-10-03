@@ -1,0 +1,47 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- $replicaCount := int .Values.broker.replicaCount }}
+{{- if and (include "kafka.broker.createConfigmap" .) (gt $replicaCount 0) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-broker-configuration" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: broker
+    app.kubernetes.io/part-of: kafka
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  {{- if or .Values.config .Values.broker.config }}
+  server.properties: {{- include "common.tplvalues.render" ( dict "value" (coalesce .Values.broker.config .Values.config) "context" $ ) | nindent 4 }}
+  {{- else }}
+  server.properties: |-
+    # Listeners configuration
+    listeners={{ include "kafka.listeners" ( dict "isController" false "context" $ ) }}
+    listener.security.protocol.map={{ include "kafka.securityProtocolMap" . }}
+    advertised.listeners={{ include "kafka.advertisedListeners" . }}
+    {{- if .Values.kraft.enabled }}
+    {{- if not .Values.broker.zookeeperMigrationMode }}
+    # KRaft node role
+    process.roles=broker
+    {{- end -}}
+    {{- include "kafka.kraftConfig" . | nindent 4 }}
+    {{- end }}
+    {{- if or .Values.zookeeper.enabled .Values.externalZookeeper.servers }}
+    # Zookeeper configuration
+    {{- include "kafka.zookeeperConfig" . | nindent 4 }}
+    {{- if .Values.broker.zookeeperMigrationMode }}
+    zookeeper.metadata.migration.enable=true
+    inter.broker.protocol.version={{ default (regexFind "^[0-9].[0-9]+" .Chart.AppVersion) .Values.interBrokerProtocolVersion }}
+    {{- end }}
+    {{- end }}
+    {{- include "kafka.commonConfig" . | nindent 4 }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.extraConfig "context" $ ) | nindent 4 }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.broker.extraConfig "context" $ ) | nindent 4 }}
+  {{- end }}
+{{- end }}

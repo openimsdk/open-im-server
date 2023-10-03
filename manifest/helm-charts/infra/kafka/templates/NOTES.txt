@@ -1,0 +1,317 @@
+CHART NAME: {{ .Chart.Name }}
+CHART VERSION: {{ .Chart.Version }}
+APP VERSION: {{ .Chart.AppVersion }}
+
+{{- if .Values.diagnosticMode.enabled }}
+The chart has been deployed in diagnostic mode. All probes have been disabled and the command has been overwritten with:
+
+  command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 4 }}
+  args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 4 }}
+
+Get the list of pods by executing:
+
+  kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Access the pod you want to debug by executing
+
+  kubectl exec --namespace {{ .Release.Namespace }} -ti <NAME OF THE POD> -- bash
+
+In order to replicate the container startup scripts execute this command:
+
+    /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh
+
+{{- else }}
+
+{{- $releaseNamespace := .Release.Namespace }}
+{{- $clusterDomain := .Values.clusterDomain }}
+{{- $fullname := include "common.names.fullname" . }}
+{{- $clientPort := int .Values.listeners.client.containerPort }}
+
+{{- if and (or (eq .Values.service.type "LoadBalancer") .Values.externalAccess.enabled) (eq (upper .Values.listeners.external.protocol) "PLAINTEXT") }}
+---------------------------------------------------------------------------------------------
+ WARNING
+
+    By specifying "serviceType=LoadBalancer" and not configuring the authentication
+    you have most likely exposed the Kafka service externally without any
+    authentication mechanism.
+
+    For security reasons, we strongly suggest that you switch to "ClusterIP" or
+    "NodePort". As alternative, you can also configure the Kafka authentication.
+
+---------------------------------------------------------------------------------------------
+{{- end }}
+
+** Please be patient while the chart is being deployed **
+
+Kafka can be accessed by consumers via port {{ $clientPort }} on the following DNS name from within your cluster:
+
+    {{ $fullname }}.{{ $releaseNamespace }}.svc.{{ $clusterDomain }}
+
+Each Kafka broker can be accessed by producers via port {{ $clientPort }} on the following DNS name(s) from within your cluster:
+
+{{- $brokerList := list }}
+{{- range $i := until (int .Values.controller.replicaCount) }}
+{{- $brokerList = append $brokerList (printf "%s-controller-%d.%s-controller-headless.%s.svc.%s:%d" $fullname $i $fullname $releaseNamespace $clusterDomain $clientPort) }}
+{{- end }}
+{{- range $i := until (int .Values.broker.replicaCount) }}
+{{- $brokerList = append $brokerList (printf "%s-broker-%d.%s-broker-headless.%s.svc.%s:%d" $fullname $i $fullname $releaseNamespace $clusterDomain $clientPort) }}
+{{- end }}
+{{ join "\n" $brokerList | nindent 4 }}
+{{- $clientSaslEnabled := regexFind "SASL" (upper .Values.listeners.client.protocol) }}
+{{- $clientSslEnabled := regexFind "SSL" (upper .Values.listeners.client.protocol) }}
+{{- $clientMTlsEnabled := or (and .Values.listeners.client.sslClientAuth (not (eq .Values.listeners.client.sslClientAuth "none"))) (and (empty .Values.listeners.client.sslClientAuth) (not (eq .Values.tls.sslClientAuth "none"))) }}
+{{- if or $clientSaslEnabled $clientSslEnabled }}
+
+The {{ upper .Values.listeners.client.name }} listener for Kafka client connections from within your cluster have been configured with the following security settings:
+    {{- if $clientSaslEnabled }}
+    - SASL authentication
+    {{- end }}
+    {{- if $clientSslEnabled }}
+    - TLS encryption
+    {{- end }}
+    {{- if and $clientSslEnabled $clientMTlsEnabled }}
+    - mTLS authentication
+    {{- end }}
+
+To connect a client to your Kafka, you need to create the 'client.properties' configuration files with the content below:
+
+security.protocol={{ .Values.listeners.client.protocol }}
+{{- if $clientSaslEnabled }}
+{{- if regexFind "SCRAM-SHA-256" (upper .Values.sasl.enabledMechanisms) }}
+sasl.mechanism=SCRAM-SHA-256
+{{- else if regexFind "SCRAM-SHA-512" (upper .Values.sasl.enabledMechanisms) }}
+sasl.mechanism=SCRAM-SHA-512
+{{- else if regexFind "PLAIN" (upper .Values.sasl.enabledMechanisms) }}
+sasl.mechanism=PLAIN
+{{- end }}
+{{- $securityModule := ternary "org.apache.kafka.common.security.scram.ScramLoginModule required" "org.apache.kafka.common.security.plain.PlainLoginModule required" (regexMatch "SCRAM" (upper .Values.sasl.enabledMechanisms)) }}
+sasl.jaas.config={{ $securityModule }} \
+    username="{{ index .Values.sasl.client.users 0 }}" \
+    password="$(kubectl get secret {{ $fullname }}-user-passwords --namespace {{ $releaseNamespace }} -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d , -f 1)";
+{{- end }}
+{{- if $clientSslEnabled }}
+{{- $clientTlsType := upper .Values.tls.type }}
+ssl.truststore.type={{ $clientTlsType }}
+{{- if eq $clientTlsType "JKS" }}
+ssl.truststore.location=/tmp/kafka.truststore.jks
+# Uncomment this line if your client truststore is password protected
+#ssl.truststore.password=
+{{- else if eq $clientTlsType "PEM" }}
+ssl.truststore.certificates=-----BEGIN CERTIFICATE----- \
+... \
+-----END CERTIFICATE-----
+{{- end }}
+{{- if and $clientMTlsEnabled }}
+ssl.keystore.type={{ $clientTlsType }}
+{{- if eq $clientTlsType "JKS" }}
+ssl.keystore.location=/tmp/client.keystore.jks
+# Uncomment this line if your client truststore is password protected
+#ssl.keystore.password=
+{{- else if eq $clientTlsType "PEM" }}
+ssl.keystore.certificate.chain=-----BEGIN CERTIFICATE----- \
+... \
+-----END CERTIFICATE-----
+ssl.keystore.key=-----BEGIN ENCRYPTED PRIVATE KEY----- \
+... \
+-----END ENCRYPTED PRIVATE KEY-----
+{{- end }}
+{{- end }}
+{{- if eq .Values.tls.endpointIdentificationAlgorithm "" }}
+ssl.endpoint.identification.algorithm=
+{{- end }}
+{{- end }}
+{{- end }}
+
+To create a pod that you can use as a Kafka client run the following commands:
+
+    kubectl run {{ $fullname }}-client --restart='Never' --image {{ template "kafka.image" . }} --namespace {{ $releaseNamespace }} --command -- sleep infinity
+    {{- if or $clientSaslEnabled $clientSslEnabled }}
+    kubectl cp --namespace {{ $releaseNamespace }} /path/to/client.properties {{ $fullname }}-client:/tmp/client.properties
+    {{- end }}
+    {{- if and $clientSslEnabled (eq (upper .Values.tls.type) "JKS") }}
+    kubectl cp --namespace {{ $releaseNamespace }} ./kafka.truststore.jks {{ $fullname }}-client:/tmp/kafka.truststore.jks
+    {{- if $clientMTlsEnabled }}
+    kubectl cp --namespace {{ $releaseNamespace }} ./client.keystore.jks {{ $fullname }}-client:/tmp/client.keystore.jks
+    {{- end }}
+    {{- end }}
+    kubectl exec --tty -i {{ $fullname }}-client --namespace {{ $releaseNamespace }} -- bash
+
+    PRODUCER:
+        kafka-console-producer.sh \
+            {{- if or $clientSaslEnabled $clientSslEnabled }}
+            --producer.config /tmp/client.properties \
+            {{- end }}
+            --broker-list {{ join "," $brokerList }} \
+            --topic test
+
+    CONSUMER:
+        kafka-console-consumer.sh \
+            {{- if or $clientSaslEnabled $clientSslEnabled }}
+            --consumer.config /tmp/client.properties \
+            {{- end }}
+            --bootstrap-server {{ $fullname }}.{{ $releaseNamespace }}.svc.{{ $clusterDomain }}:{{ .Values.service.ports.client }} \
+            --topic test \
+            --from-beginning
+
+{{- if .Values.externalAccess.enabled }}
+{{- if or (not .Values.kraft.enabled) (not .Values.controller.controllerOnly) .Values.externalAccess.controller.forceExpose }}
+
+{{- if not .Values.kraft.enabled }}
+To connect to your Kafka nodes from outside the cluster, follow these instructions:
+{{- else if and .Values.controller.controllerOnly .Values.externalAccess.controller.forceExpose }}
+To connect to your Kafka controller-only nodes from outside the cluster, follow these instructions:
+{{- else }}
+To connect to your Kafka controller+broker nodes from outside the cluster, follow these instructions:
+{{- end }}
+
+{{- if eq "NodePort" .Values.externalAccess.controller.service.type }}
+    {{- if .Values.externalAccess.controller.service.domain }}
+    Kafka brokers domain: Use your provided hostname to reach Kafka brokers, {{ .Values.externalAccess.controller.service.domain }}
+
+    {{- else }}
+    Kafka brokers domain: You can get the external node IP from the Kafka configuration file with the following commands (Check the EXTERNAL listener)
+
+        1. Obtain the pod name:
+
+        kubectl get pods --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka"
+
+        2. Obtain pod configuration:
+
+        kubectl exec -it KAFKA_POD -- cat /opt/bitnami/kafka/config/server.properties | grep advertised.listeners
+
+    {{- end }}
+    Kafka brokers port: You will have a different node port for each Kafka broker. You can get the list of configured node ports using the command below:
+
+        echo "$(kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -o jsonpath='{.items[*].spec.ports[0].nodePort}' | tr ' ' '\n')"
+
+{{- else if eq "LoadBalancer" .Values.externalAccess.controller.service.type }}
+    NOTE: It may take a few minutes for the LoadBalancer IPs to be available.
+
+        Watch the status with: 'kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -w'
+
+    Kafka Brokers domain: You will have a different external IP for each Kafka broker. You can get the list of external IPs using the command below:
+
+        echo "$(kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -o jsonpath='{.items[*].status.loadBalancer.ingress[0].ip}' | tr ' ' '\n')"
+
+    Kafka Brokers port: {{ .Values.externalAccess.controller.service.ports.external }}
+
+{{- else if eq "ClusterIP" .Values.externalAccess.controller.service.type }}
+    Kafka brokers domain: Use your provided hostname to reach Kafka brokers, {{ .Values.externalAccess.controller.service.domain }}
+
+    Kafka brokers port: You will have a different port for each Kafka broker starting at {{ .Values.externalAccess.controller.service.ports.external }}
+
+{{- end }}
+{{- end }}
+
+{{- $brokerReplicaCount := int .Values.broker.replicaCount -}}
+{{- if gt $brokerReplicaCount 0 }}
+To connect to your Kafka broker nodes from outside the cluster, follow these instructions:
+
+{{- if eq "NodePort" .Values.externalAccess.broker.service.type }}
+    {{- if .Values.externalAccess.broker.service.domain }}
+    Kafka brokers domain: Use your provided hostname to reach Kafka brokers, {{ .Values.externalAccess.broker.service.domain }}
+
+    {{- else }}
+    Kafka brokers domain: You can get the external node IP from the Kafka configuration file with the following commands (Check the EXTERNAL listener)
+
+        1. Obtain the pod name:
+
+        kubectl get pods --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka"
+
+        2. Obtain pod configuration:
+
+        kubectl exec -it KAFKA_POD -- cat /opt/bitnami/kafka/config/server.properties | grep advertised.listeners
+
+    {{- end }}
+    Kafka brokers port: You will have a different node port for each Kafka broker. You can get the list of configured node ports using the command below:
+
+        echo "$(kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -o jsonpath='{.items[*].spec.ports[0].nodePort}' | tr ' ' '\n')"
+
+{{- else if eq "LoadBalancer" .Values.externalAccess.broker.service.type }}
+    NOTE: It may take a few minutes for the LoadBalancer IPs to be available.
+
+        Watch the status with: 'kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -w'
+
+    Kafka Brokers domain: You will have a different external IP for each Kafka broker. You can get the list of external IPs using the command below:
+
+        echo "$(kubectl get svc --namespace {{ include "common.names.namespace" . }} -l "app.kubernetes.io/name={{ template "kafka.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka,pod" -o jsonpath='{.items[*].status.loadBalancer.ingress[0].ip}' | tr ' ' '\n')"
+
+    Kafka Brokers port: {{ .Values.externalAccess.broker.service.ports.external }}
+
+{{- else if eq "ClusterIP" .Values.externalAccess.broker.service.type }}
+    Kafka brokers domain: Use your provided hostname to reach Kafka brokers, {{ .Values.externalAccess.broker.service.domain }}
+
+    Kafka brokers port: You will have a different port for each Kafka broker starting at {{ .Values.externalAccess.broker.service.ports.external }}
+
+{{- end }}
+{{- end }}
+{{- if or $clientSaslEnabled $clientSslEnabled }}
+{{- $externalSaslEnabled := regexFind "SASL" (upper .Values.listeners.external.protocol) }}
+{{- $externalSslEnabled := regexFind "SSL" (upper .Values.listeners.external.protocol) }}
+{{- $externalMTlsEnabled := or (and .Values.listeners.external.sslClientAuth (not (eq .Values.listeners.external.sslClientAuth "none"))) (and (empty .Values.listeners.external.sslClientAuth) (not (eq .Values.tls.sslClientAuth "none"))) }}
+
+The {{ upper .Values.listeners.external.name }} listener for Kafka client connections from within your cluster have been configured with the following settings:
+    {{- if $externalSaslEnabled }}
+    - SASL authentication
+    {{- end }}
+    {{- if $externalSslEnabled }}
+    - TLS encryption
+    {{- end }}
+    {{- if and $externalSslEnabled $externalMTlsEnabled }}
+    - mTLS authentication
+    {{- end }}
+
+To connect a client to your Kafka, you need to create the 'client.properties' configuration files with the content below:
+
+security.protocol={{ .Values.listeners.external.protocol }}
+{{- if $externalSaslEnabled }}
+{{- if regexFind "SCRAM-SHA-256" (upper .Values.sasl.enabledMechanisms) }}
+sasl.mechanism=SCRAM-SHA-256
+{{- else if regexFind "SCRAM-SHA-512" (upper .Values.sasl.enabledMechanisms) }}
+sasl.mechanism=SCRAM-SHA-512
+{{- else }}
+sasl.mechanism=PLAIN
+{{- end }}
+{{- $securityModule := ternary "org.apache.kafka.common.security.scram.ScramLoginModule required" "org.apache.kafka.common.security.plain.PlainLoginModule required" (regexMatch "SCRAM" (upper .Values.sasl.enabledMechanisms)) }}
+sasl.jaas.config={{ $securityModule }} \
+    username="{{ index .Values.sasl.client.users 0 }}" \
+    password="$(kubectl get secret {{ $fullname }}-user-passwords --namespace {{ $releaseNamespace }} -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d , -f 1)";
+{{- end }}
+{{- if $externalSslEnabled }}
+{{- $clientTlsType := upper .Values.tls.type }}
+ssl.truststore.type={{ $clientTlsType }}
+{{- if eq $clientTlsType "JKS" }}
+ssl.truststore.location=/tmp/kafka.truststore.jks
+# Uncomment this line if your client truststore is password protected
+#ssl.truststore.password=
+{{- else if eq $clientTlsType "PEM" }}
+ssl.truststore.certificates=-----BEGIN CERTIFICATE----- \
+... \
+-----END CERTIFICATE-----
+{{- end }}
+{{- if and $externalMTlsEnabled }}
+ssl.keystore.type={{ $clientTlsType }}
+{{- if eq $clientTlsType "JKS" }}
+ssl.keystore.location=/tmp/client.keystore.jks
+# Uncomment this line if your client truststore is password protected
+#ssl.keystore.password=
+{{- else if eq $clientTlsType "PEM" }}
+ssl.keystore.certificate.chain=-----BEGIN CERTIFICATE----- \
+... \
+-----END CERTIFICATE-----
+ssl.keystore.key=-----BEGIN ENCRYPTED PRIVATE KEY----- \
+... \
+-----END ENCRYPTED PRIVATE KEY-----
+{{- end }}
+{{- end }}
+{{- if eq .Values.tls.endpointIdentificationAlgorithm "" }}
+ssl.endpoint.identification.algorithm=
+{{- end }}
+{{- end }}
+
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- include "kafka.checkRollingTags" . }}
+{{- include "kafka.validateValues" . }}

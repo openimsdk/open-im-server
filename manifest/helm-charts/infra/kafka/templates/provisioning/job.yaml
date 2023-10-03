@@ -1,0 +1,267 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.provisioning.enabled }}
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ printf "%s-provisioning" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: kafka-provisioning
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  template:
+    metadata:
+      {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.provisioning.podLabels .Values.commonLabels ) "context" . ) }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: kafka-provisioning
+      {{- if .Values.provisioning.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ template "kafka.provisioning.serviceAccountName" . }}
+      enableServiceLinks: {{ .Values.provisioning.enableServiceLinks }}
+      {{- include "kafka.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.provisioning.schedulerName }}
+      schedulerName: {{ .Values.provisioning.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.provisioning.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.provisioning.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 0
+      {{- if .Values.provisioning.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.provisioning.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.provisioning.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.provisioning.initContainers .Values.provisioning.waitForKafka }}
+      initContainers:
+        {{- if .Values.provisioning.waitForKafka }}
+        - name: wait-for-available-kafka
+          image: {{ include "kafka.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.provisioning.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.provisioning.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - |
+              wait-for-port \
+                --host={{ include "common.names.fullname" . }} \
+                --state=inuse \
+                --timeout=120 \
+                {{ .Values.service.ports.client | int64 }};
+              echo "Kafka is available";
+          {{- if .Values.provisioning.resources }}
+          resources: {{- toYaml .Values.provisioning.resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.provisioning.initContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.provisioning.initContainers "context" $ ) | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: kafka-provisioning
+          image: {{ include "kafka.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.provisioning.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.provisioning.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.provisioning.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.command "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - /bin/bash
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.provisioning.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.args "context" $) | nindent 12 }}
+          {{- else }}
+          args:
+            - -ec
+            - |
+              echo "Configuring environment"
+              . /opt/bitnami/scripts/libkafka.sh
+              export CLIENT_CONF="${CLIENT_CONF:-/tmp/client.properties}"
+              if [ ! -f "$CLIENT_CONF" ]; then
+                touch $CLIENT_CONF
+
+                kafka_common_conf_set "$CLIENT_CONF" security.protocol {{ .Values.listeners.client.protocol | quote }}
+                {{- if (regexFind "SSL" (upper .Values.listeners.client.protocol)) }}
+                kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.type {{ upper .Values.provisioning.auth.tls.type | quote }}
+                kafka_common_conf_set "$CLIENT_CONF" ssl.truststore.type {{ upper .Values.provisioning.auth.tls.type | quote }}
+                ! is_empty_value "$KAFKA_CLIENT_KEY_PASSWORD" && kafka_common_conf_set "$CLIENT_CONF" ssl.key.password "$KAFKA_CLIENT_KEY_PASSWORD"
+                {{- if eq (upper .Values.provisioning.auth.tls.type) "PEM" }}
+                {{- if .Values.provisioning.auth.tls.caCert }}
+                file_to_multiline_property() {
+                    awk 'NR > 1{print line" \\"}{line=$0;}END{print $0" "}' <"${1:?missing file}"
+                }
+                kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.key "$(file_to_multiline_property "/certs/{{ .Values.provisioning.auth.tls.key }}")"
+                kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.certificate.chain "$(file_to_multiline_property "/certs/{{ .Values.provisioning.auth.tls.cert }}")"
+                kafka_common_conf_set "$CLIENT_CONF" ssl.truststore.certificates "$(file_to_multiline_property "/certs/{{ .Values.provisioning.auth.tls.caCert }}")"
+                {{- else }}
+                kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.location "/certs/{{ .Values.provisioning.auth.tls.keystore }}"
+                kafka_common_conf_set "$CLIENT_CONF" ssl.truststore.location "/certs/{{ .Values.provisioning.auth.tls.truststore }}"
+                {{- end }}
+                {{- else if eq (upper .Values.provisioning.auth.tls.type) "JKS" }}
+                kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.location "/certs/{{ .Values.provisioning.auth.tls.keystore }}"
+                kafka_common_conf_set "$CLIENT_CONF" ssl.truststore.location "/certs/{{ .Values.provisioning.auth.tls.truststore }}"
+                ! is_empty_value "$KAFKA_CLIENT_KEYSTORE_PASSWORD" && kafka_common_conf_set "$CLIENT_CONF" ssl.keystore.password "$KAFKA_CLIENT_KEYSTORE_PASSWORD"
+                ! is_empty_value "$KAFKA_CLIENT_TRUSTSTORE_PASSWORD" && kafka_common_conf_set "$CLIENT_CONF" ssl.truststore.password "$KAFKA_CLIENT_TRUSTSTORE_PASSWORD"
+                {{- end }}
+                {{- end }}
+                {{- if regexFind "SASL" (upper .Values.listeners.client.protocol) }}
+                {{- if regexFind "PLAIN" ( upper .Values.sasl.enabledMechanisms) }}
+                kafka_common_conf_set "$CLIENT_CONF" sasl.mechanism PLAIN
+                kafka_common_conf_set "$CLIENT_CONF" sasl.jaas.config "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$SASL_USERNAME\" password=\"$SASL_USER_PASSWORD\";"
+                {{- else if regexFind "SCRAM-SHA-256" ( upper .Values.sasl.enabledMechanisms) }}
+                kafka_common_conf_set "$CLIENT_CONF" sasl.mechanism SCRAM-SHA-256
+                kafka_common_conf_set "$CLIENT_CONF" sasl.jaas.config "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"$SASL_USERNAME\" password=\"$SASL_USER_PASSWORD\";"
+                {{- else if regexFind "SCRAM-SHA-512" ( upper .Values.sasl.enabledMechanisms) }}
+                kafka_common_conf_set "$CLIENT_CONF" sasl.mechanism SCRAM-SHA-512
+                kafka_common_conf_set "$CLIENT_CONF" sasl.jaas.config "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"$SASL_USERNAME\" password=\"$SASL_USER_PASSWORD\";"
+                {{- end }}
+                {{- end }}
+              fi
+
+              echo "Running pre-provisioning script if any given"
+              {{ .Values.provisioning.preScript | nindent 14 }}
+
+              kafka_provisioning_commands=(
+              {{- range $topic := .Values.provisioning.topics }}
+                "/opt/bitnami/kafka/bin/kafka-topics.sh \
+                    --create \
+                    --if-not-exists \
+                    --bootstrap-server ${KAFKA_SERVICE} \
+                    --replication-factor {{ $topic.replicationFactor | default $.Values.provisioning.replicationFactor }} \
+                    --partitions {{ $topic.partitions | default $.Values.provisioning.numPartitions }} \
+                    {{- range $name, $value := $topic.config }}
+                    --config {{ $name }}={{ $value }} \
+                    {{- end }}
+                    --command-config ${CLIENT_CONF} \
+                    --topic {{ $topic.name }}"
+              {{- end }}
+              {{- range $command := .Values.provisioning.extraProvisioningCommands }}
+                {{- $command | quote | nindent 16 }}
+              {{- end }}
+              )
+
+              echo "Starting provisioning"
+              for ((index=0; index < ${#kafka_provisioning_commands[@]}; index+={{ .Values.provisioning.parallel }}))
+              do
+                for j in $(seq ${index} $((${index}+{{ .Values.provisioning.parallel }}-1)))
+                do
+                    ${kafka_provisioning_commands[j]} & # Async command
+                done
+                wait  # Wait the end of the jobs
+              done
+
+              echo "Running post-provisioning script if any given"
+              {{ .Values.provisioning.postScript | nindent 14 }}
+
+              echo "Provisioning succeeded"
+          {{- end }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
+            {{- if (regexFind "SSL" (upper .Values.listeners.client.protocol)) }}
+            - name: KAFKA_CLIENT_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "kafka.client.passwordsSecretName" . }}
+                  key: {{ .Values.provisioning.auth.tls.keyPasswordSecretKey }}
+            - name: KAFKA_CLIENT_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "kafka.client.passwordsSecretName" . }}
+                  key: {{ .Values.provisioning.auth.tls.keystorePasswordSecretKey }}
+            - name: KAFKA_CLIENT_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "kafka.client.passwordsSecretName" . }}
+                  key: {{ .Values.provisioning.auth.tls.truststorePasswordSecretKey }}
+            {{- end }}
+            - name: KAFKA_SERVICE
+              value: {{ printf "%s:%d" (include "common.names.fullname" .) (.Values.service.ports.client | int64) }}
+            {{- if regexFind "SASL" (upper .Values.listeners.client.protocol) }}
+            - name: SASL_USERNAME
+              value: {{ index .Values.sasl.client.users 0 | quote }}
+            - name: SASL_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kafka.saslSecretName" . }}
+                  key: system-user-password
+            {{- end }}
+            {{- if .Values.provisioning.extraEnvVars }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.provisioning.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.provisioning.extraEnvVarsCM .Values.provisioning.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.provisioning.extraEnvVarsCM }}
+            - configMapRef:
+              name: {{ include "common.tplvalues.render" (dict "value" .Values.provisioning.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.provisioning.extraEnvVarsSecret }}
+            - secretRef:
+              name: {{ include "common.tplvalues.render" (dict "value" .Values.provisioning.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.provisioning.resources }}
+          resources: {{- toYaml .Values.provisioning.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if or .Values.log4j .Values.existingLog4jConfigMap }}
+            - name: log4j-config
+              mountPath: /opt/bitnami/kafka/config/log4j.properties
+              subPath: log4j.properties
+            {{- end }}
+            {{- if (regexFind "SSL" (upper .Values.listeners.client.protocol)) }}
+            {{- if not (empty .Values.provisioning.auth.tls.certificatesSecret) }}
+            - name: kafka-client-certs
+              mountPath: /certs
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.provisioning.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+        {{- if .Values.provisioning.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- if or .Values.log4j .Values.existingLog4jConfigMap }}
+        - name: log4j-config
+          configMap:
+            name: {{ include "kafka.log4j.configMapName" . }}
+        {{- end }}
+        {{- if (regexFind "SSL" (upper .Values.listeners.client.protocol)) }}
+        {{- if not (empty .Values.provisioning.auth.tls.certificatesSecret) }}
+        - name: kafka-client-certs
+          secret:
+            secretName: {{ .Values.provisioning.auth.tls.certificatesSecret }}
+            defaultMode: 256
+        {{- end }}
+        {{- end }}
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.provisioning.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.provisioning.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+{{- end }}

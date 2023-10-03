@@ -1,0 +1,53 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.networkPolicy.enabled }}
+kind: NetworkPolicy
+apiVersion: {{ include "common.capabilities.networkPolicy.apiVersion" . }}
+metadata:
+  name: {{ printf "%s-ingress" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow client connections
+    - ports:
+        - port: {{ .Values.listeners.client.containerPort }}
+      {{- if not .Values.networkPolicy.allowExternal }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{ template "common.names.fullname" . }}-client: "true"
+          {{- if .Values.networkPolicy.explicitNamespacesSelector }}
+          namespaceSelector: {{- toYaml .Values.networkPolicy.explicitNamespacesSelector | nindent 12 }}
+          {{- end }}
+      {{- end }}
+    # Allow communication inter-broker
+    - ports:
+        - port: {{ .Values.listeners.interbroker.containerPort }}
+      from:
+        - podSelector:
+            matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 14 }}
+    # Allow External connection
+    {{- if .Values.externalAccess.enabled }}
+    - ports:
+        - port: {{ .Values.listeners.external.containerPort }}
+    {{- if .Values.networkPolicy.externalAccess.from }}
+      from: {{- include "common.tplvalues.render" ( dict "value" .Values.networkPolicy.externalAccess.from "context" $ ) | nindent 8 }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.metrics.kafka.enabled }}
+    # Allow prometheus scrapes
+    - ports:
+        - port: {{ .Values.metrics.kafka.containerPorts.metrics }}
+    {{- end }}
+{{- end }}

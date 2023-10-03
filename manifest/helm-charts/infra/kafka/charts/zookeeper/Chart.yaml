@@ -1,0 +1,29 @@
+annotations:
+  category: Infrastructure
+  images: |
+    - name: os-shell
+      image: docker.io/bitnami/os-shell:11-debian-11-r51
+    - name: zookeeper
+      image: docker.io/bitnami/zookeeper:3.9.0-debian-11-r11
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 3.9.0
+dependencies:
+- name: common
+  repository: oci://registry-1.docker.io/bitnamicharts
+  tags:
+  - bitnami-common
+  version: 2.x.x
+description: Apache ZooKeeper provides a reliable, centralized register of configuration
+  data and services for distributed applications.
+home: https://bitnami.com
+icon: https://bitnami.com/assets/stacks/zookeeper/img/zookeeper-stack-220x234.png
+keywords:
+- zookeeper
+maintainers:
+- name: VMware, Inc.
+  url: https://github.com/bitnami/charts
+name: zookeeper
+sources:
+- https://github.com/bitnami/charts/tree/main/bitnami/zookeeper
+version: 12.1.3

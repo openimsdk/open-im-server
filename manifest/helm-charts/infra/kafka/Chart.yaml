@@ -1,0 +1,44 @@
+annotations:
+  category: Infrastructure
+  images: |
+    - name: jmx-exporter
+      image: docker.io/bitnami/jmx-exporter:0.19.0-debian-11-r66
+    - name: kafka-exporter
+      image: docker.io/bitnami/kafka-exporter:1.7.0-debian-11-r102
+    - name: kafka
+      image: docker.io/bitnami/kafka:3.5.1-debian-11-r44
+    - name: kubectl
+      image: docker.io/bitnami/kubectl:1.25.13-debian-11-r11
+    - name: os-shell
+      image: docker.io/bitnami/os-shell:11-debian-11-r60
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 3.5.1
+dependencies:
+- condition: zookeeper.enabled
+  name: zookeeper
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 12.x.x
+- name: common
+  repository: oci://registry-1.docker.io/bitnamicharts
+  tags:
+  - bitnami-common
+  version: 2.x.x
+description: Apache Kafka is a distributed streaming platform designed to build real-time
+  pipelines and can be used as a message broker or as a replacement for a log aggregation
+  solution for big data applications.
+home: https://bitnami.com
+icon: https://bitnami.com/assets/stacks/kafka/img/kafka-stack-220x234.png
+keywords:
+- kafka
+- zookeeper
+- streaming
+- producer
+- consumer
+maintainers:
+- name: VMware, Inc.
+  url: https://github.com/bitnami/charts
+name: kafka
+sources:
+- https://github.com/bitnami/charts/tree/main/bitnami/kafka
+version: 25.1.11

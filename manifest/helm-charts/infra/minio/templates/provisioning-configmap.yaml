@@ -1,0 +1,75 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.provisioning.enabled }}
+{{- $fullname := printf "%s-provisioning" (include "common.names.fullname" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: minio-provisioning
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $bucket := .Values.provisioning.buckets }}
+  {{- if $bucket.lifecycle }}
+  bucket-{{ $bucket.name }}.json: |
+    {
+      "Rules": [
+        {{- range $idx, $lifecycle := $bucket.lifecycle }}
+        {{- if not (eq $idx 0) }}
+        ,
+        {{- end }}
+        {
+          "ID": "{{ $lifecycle.id }}",
+          "Status": "{{ ternary "Disabled" "Enabled" (and (not (empty $lifecycle.disabled)) $lifecycle.disabled) }}",
+          {{- if $lifecycle.expiry }}
+          "Expiration": {
+            {{- with $lifecycle.expiry.date }}
+            "Date": "{{ . }}"
+            {{- end }}
+            {{- with $lifecycle.expiry.days }}
+            "Days": {{ . }}
+            {{- end }}
+          }
+          {{- with $lifecycle.expiry.nonconcurrentDays }}
+          ,
+          "NoncurrentVersionExpiration": {
+            "NoncurrentDays": {{ . }}
+          }
+          {{- end }}
+          {{- with $lifecycle.prefix }}
+          ,
+          "Filter": {
+            "Prefix": "{{ . }}"
+          }
+          {{- end }}
+        }
+        {{- end }}
+        {{- end }}
+      ]
+    }
+  {{- end }}
+  {{- end }}
+  {{- range $policy := .Values.provisioning.policies }}
+  policy-{{ $policy.name }}.json: |
+      {{- $statementsLength := sub (len $policy.statements) 1 }}
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {{- range $i, $statement := $policy.statements }}
+          {
+            "Effect": "{{ default "Deny" $statement.effect }}"{{ if $statement.actions }},
+            "Action": {{ toJson $statement.actions }}{{end}}{{ if $statement.resources }},
+            "Resource": {{ toJson $statement.resources }}{{end}}
+          }{{ if lt $i $statementsLength }},{{end }}
+          {{- end }}
+        ]
+      }
+  {{- end }}
+{{- end }}
