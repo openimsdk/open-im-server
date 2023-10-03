@@ -7,5 +7,6 @@ master:
   persistence:
     size: 1Gi
 replica:
+  replicaCount: 1
   persistence:
     size: 1Gi
