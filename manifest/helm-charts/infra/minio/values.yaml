@@ -17,7 +17,7 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
-  storageClass: ""
+  storageClass: "nfs-client"
 
 ## @section Common parameters
 
@@ -97,10 +97,10 @@ mode: standalone
 auth:
   ## @param auth.rootUser MinIO&reg; root username
   ##
-  rootUser: admin
+  rootUser: root
   ## @param auth.rootPassword Password for MinIO&reg; root user
   ##
-  rootPassword: ""
+  rootPassword: "openIM123"
   ## @param auth.existingSecret Use existing secret for credentials details (`auth.rootUser` and `auth.rootPassword` will be ignored and picked up from this secret). The secret has to contain the keys `root-user` and `root-password`)
   ##
   existingSecret: ""
@@ -117,7 +117,7 @@ auth:
 ## e.g:
 ## defaultBuckets: "my-bucket, my-second-bucket"
 ##
-defaultBuckets: ""
+defaultBuckets: "openim"
 ## @param disableWebUI Disable MinIO&reg; Web UI
 ## ref: https://github.com/minio/minio/tree/master/docs/config/#browser
 ##
@@ -918,7 +918,7 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for MinIO&reg; data volume
   ##
-  size: 8Gi
+  size: 1Gi
   ## @param persistence.annotations Annotations for the PVC
   ##
   annotations: {}
