@@ -18,7 +18,7 @@ global:
   ##   - myRegistryKeySecretName
   ##
   imagePullSecrets: []
-  storageClass: ""
+  storageClass: "nfs-client"
 
 ## @section Common parameters
 ##
@@ -742,7 +742,7 @@ controller:
       - ReadWriteOnce
     ## @param controller.persistence.size PVC Storage Request for Kafka data volume
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param controller.persistence.annotations Annotations for the PVC
     ##
     annotations: {}
@@ -1121,7 +1121,7 @@ broker:
       - ReadWriteOnce
     ## @param broker.persistence.size PVC Storage Request for Kafka data volume
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param broker.persistence.annotations Annotations for the PVC
     ##
     annotations: {}
@@ -1161,7 +1161,7 @@ broker:
       - ReadWriteOnce
     ## @param broker.logPersistence.size PVC Storage Request for Kafka logs volume
     ##
-    size: 8Gi
+    size: 1Gi
     ## @param broker.logPersistence.annotations Annotations for the PVC
     ##
     annotations: {}
@@ -2342,7 +2342,7 @@ zookeeper:
     storageClass: ""
     accessModes:
       - ReadWriteOnce
-    size: 8Gi
+    size: 1Gi
 
 ## External Zookeeper Configuration
 ##
