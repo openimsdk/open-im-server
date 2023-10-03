@@ -168,16 +168,16 @@ auth:
   ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
   ## @param auth.databases List of custom databases to be created during the initialization
   ##
-  usernames: []
-  passwords: []
-  databases: []
+  usernames: [openim]
+  passwords: [openIM123]
+  databases: [openIM_v3]
   ## @param auth.username DEPRECATED: use `auth.usernames` instead
   ## @param auth.password DEPRECATED: use `auth.passwords` instead
   ## @param auth.database DEPRECATED: use `auth.databases` instead
   ##
   username: ""
   password: ""
-  database: "openIM_v3"
+  database: ""
   ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
   ##
   replicaSetKey: ""
