@@ -1,0 +1,21 @@
+global:
+  storageClass: "nfs-client"
+
+architecture: standalone
+replicaCount: 1
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "openIM123"
+  usernames: [openim]
+  passwords: [openIM123]
+  databases: [openIM_v3]
+
+persistence:
+  size: 1Gi
+
+backup:
+  enabled: false
+  cronjob:
+    storage:
+      size: 1Gi
