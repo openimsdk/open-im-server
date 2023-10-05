@@ -77,7 +77,7 @@ func (a *RpcCmd) GetPortFromConfig(portType string) int {
 		}
 	case RpcMsgServer:
 		if portType == constant.FlagPort {
-			return config2.Config.RpcPort.OpenImMessageGatewayPort[0]
+			return config2.Config.RpcPort.OpenImMessagePort[0]
 		}
 	case RpcThirdServer:
 		if portType == constant.FlagPort {
