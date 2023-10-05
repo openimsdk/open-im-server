@@ -1,58 +1,58 @@
 
 image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  tag: ""
+  repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-api
+  pullPolicy: Always
+  tag: "dev"
 openim-msggateway:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-msggateway
+    tag: "dev"
+    pullPolicy: Always
 openim-msgtransfer:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-msgtransfer
+    tag: "dev"
+    pullPolicy: Always
 openim-push:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-push
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-auth:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-auth
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-conversation:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-conversation
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-friend:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-friend
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-group:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-group
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-msg:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-msg
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-third:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-third
+    tag: "dev"
+    pullPolicy: Always
 openim-rpc-user:
   image:
-    repository: nginx
-    tag: ""
-    pullPolicy: IfNotPresent
+    repository: registry.cn-shenzhen.aliyuncs.com/huanglin_hub/openim-rpc-user
+    tag: "dev"
+    pullPolicy: Always
 
 
 
@@ -120,8 +120,8 @@ config:
   # It's not recommended to modify this topic name
   # Consumer group ID, it's not recommended to modify
   kafka:
-    username: ''
-    password: ''
+    username: 'root'
+    password: 'proot'
     addr: [ im-kafka:9092 ]
     latestMsgToRedis:
       topic: "latestMsgToRedis"

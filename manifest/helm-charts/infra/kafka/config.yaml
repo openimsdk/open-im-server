@@ -1,2 +1,43 @@
 global:
   storageClass: "nfs-client"
+controller:
+  replicaCount: 1
+  zookeeperMigrationMode: true
+broker:
+  zookeeperMigrationMode: true
+sasl:
+  interbroker:
+    user: inter_broker_user
+    password: ""
+  controller:
+    user: controller_user
+    password: ""
+  client:
+    users:
+      - root
+    passwords: "proot"
+
+
+provisioning:
+  enabled: true
+  numPartitions: 1
+  replicationFactor: 1
+  topics:
+    - name: latestMsgToRedis
+      partitions: 1
+      replicationFactor: 1
+      config:
+        max.message.bytes: 64000
+        flush.messages: 1
+    - name: msgToPush
+      partitions: 1
+      replicationFactor: 1
+      config:
+        max.message.bytes: 64000
+        flush.messages: 1
+    - name: offlineMsgToMongoMysql
+      partitions: 1
+      replicationFactor: 1
+      config:
+        max.message.bytes: 64000
+        flush.messages: 1
