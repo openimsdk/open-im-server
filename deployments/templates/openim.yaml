@@ -228,18 +228,18 @@ push:
   enable: ${PUSH_ENABLE}
   geTui:
     pushUrl: "${GETUI_PUSH_URL}"
-    masterSecret: ""
-    appKey: ""
-    intent: ""
-    channelID: ""
-    channelName: ""
+    masterSecret: ${GETUI_MASTER_SECRET}
+    appKey: ${GETUI_APP_KEY}
+    intent: ${GETUI_INTENT}
+    channelID: ${GETUI_CHANNEL_ID}
+    channelName: ${GETUI_CHANNEL_NAME}
   fcm:
     serviceAccount: "${FCM_SERVICE_ACCOUNT}"
   jpns:
-    appKey:
-    masterSecret:
-    pushUrl:
-    pushIntent:
+    appKey: ${JPNS_APP_KEY}
+    masterSecret: ${JPNS_MASTER_SECRET}
+    pushUrl: ${JPNS_PUSH_URL}
+    pushIntent: ${JPNS_PUSH_INTENT}
 
 # App manager configuration
 #
@@ -350,6 +350,10 @@ callback:
     timeout: 5
     failedContinue: true
   beforeAddFriend:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeUpdateUserInfo:
     enable: false
     timeout: 5
     failedContinue: true

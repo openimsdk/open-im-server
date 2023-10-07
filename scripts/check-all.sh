@@ -62,6 +62,7 @@ echo "+++ The port being checked: ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}"
 
 set +e
 
+# Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
     openim::color::echo ${COLOR_BLUE} "Environment in the interior of the container"
 else

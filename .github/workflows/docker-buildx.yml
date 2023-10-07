@@ -29,13 +29,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           install: true
 
@@ -48,7 +48,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -87,12 +87,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-api
         id: meta1
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-api
 
       - name: Build and push Docker image for openim-api
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-api/Dockerfile
@@ -105,12 +105,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-cmdutils
         id: meta2
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-cmdutils
 
       - name: Build and push Docker image for openim-cmdutils
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-cmdutils/Dockerfile
@@ -123,12 +123,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-crontask
         id: meta3
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-crontask
 
       - name: Build and push Docker image for openim-crontask
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-crontask/Dockerfile
@@ -141,12 +141,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-msggateway
         id: meta4
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-msggateway
 
       - name: Build and push Docker image for openim-msggateway
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-msggateway/Dockerfile
@@ -159,12 +159,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-msgtransfer
         id: meta5
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-msgtransfer
 
       - name: Build and push Docker image for openim-msgtransfer
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-msgtransfer/Dockerfile
@@ -177,12 +177,12 @@ jobs:
           
       - name: Extract metadata (tags, labels) for Docker openim-push
         id: meta6
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-push
 
       - name: Build and push Docker image for openim-push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-push/Dockerfile
@@ -195,12 +195,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-auth
         id: meta7
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-auth
 
       - name: Build and push Docker image for openim-rpc-auth
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-auth/Dockerfile
@@ -213,12 +213,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-conversation
         id: meta8
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-conversation
 
       - name: Build and push Docker image for openim-rpc-conversation
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-conversation/Dockerfile
@@ -231,12 +231,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-friend
         id: meta9
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-friend
 
       - name: Build and push Docker image for openim-rpc-friend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-friend/Dockerfile
@@ -249,12 +249,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-group
         id: meta10
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-group
 
       - name: Build and push Docker image for openim-rpc-group
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-group/Dockerfile
@@ -267,12 +267,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-msg
         id: meta11
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-msg
 
       - name: Build and push Docker image for openim-rpc-msg
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-msg/Dockerfile
@@ -285,12 +285,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-third
         id: meta12
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-third
 
       - name: Build and push Docker image for openim-rpc-third
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-third/Dockerfile
@@ -303,12 +303,12 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker openim-rpc-user
         id: meta13
-        uses: docker/metadata-action@v4.6.0
+        uses: docker/metadata-action@v5.0.0
         with:
           images: ghcr.io/openimsdk/openim-rpc-user
 
       - name: Build and push Docker image for openim-rpc-user
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/images/openim-rpc-user/Dockerfile
