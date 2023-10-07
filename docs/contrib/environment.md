@@ -1,20 +1,19 @@
-# OpenIM enviroment
+# OpenIM ENVIRONMENT CONFIGURATION
 
 <!-- vscode-markdown-toc -->
-
 * 1. [OpenIM Deployment Guide](#OpenIMDeploymentGuide)
 	* 1.1. [Deployment Strategies](#DeploymentStrategies)
 	* 1.2. [Source Code Deployment](#SourceCodeDeployment)
 	* 1.3. [Docker Compose Deployment](#DockerComposeDeployment)
 	* 1.4. [Environment Variable Configuration](#EnvironmentVariableConfiguration)
-		* 1.4.1. [[1. Recommended using environment variables:](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#1-recommended-using-environment-variables)](#1.Recommendedusingenvironmentvariables:https:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.md1-recommended-using-environment-variables)
-		* 1.4.2. [[Additional Configuration](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#additional-configuration)](#AdditionalConfigurationhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdadditional-configuration)
-		* 1.4.3. [[Security Considerations](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#security-considerations)](#SecurityConsiderationshttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdsecurity-considerations)
-		* 1.4.4. [[Data Management](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#data-management)](#DataManagementhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mddata-management)
-		* 1.4.5. [[Monitoring and Logging](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#monitoring-and-logging)](#MonitoringandLogginghttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdmonitoring-and-logging)
-		* 1.4.6. [[Troubleshooting](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#troubleshooting)](#Troubleshootinghttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdtroubleshooting)
-		* 1.4.7. [[Conclusion](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#conclusion)](#Conclusionhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdconclusion)
-		* 1.4.8. [[Additional Resources](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#additional-resources)](#AdditionalResourceshttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdadditional-resources)
+		* 1.4.1. [Recommended using environment variables](#Recommendedusingenvironmentvariables)
+		* 1.4.2. [Additional Configuration](#AdditionalConfiguration)
+		* 1.4.3. [Security Considerations](#SecurityConsiderations)
+		* 1.4.4. [Data Management](#DataManagement)
+		* 1.4.5. [Monitoring and Logging](#MonitoringandLogging)
+		* 1.4.6. [Troubleshooting](#Troubleshooting)
+		* 1.4.7. [Conclusion](#Conclusion)
+		* 1.4.8. [Additional Resources](#AdditionalResources)
 * 2. [Further Configuration](#FurtherConfiguration)
 	* 2.1. [Image Registry Configuration](#ImageRegistryConfiguration)
 	* 2.2. [OpenIM Docker Network Configuration](#OpenIMDockerNetworkConfiguration)
@@ -39,11 +38,6 @@
 		* 2.20.1. [General Configuration](#GeneralConfiguration)
 		* 2.20.2. [Service-Specific Prometheus Ports](#Service-SpecificPrometheusPorts)
 
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
 
 
 ##  1. <a name='OpenIMDeploymentGuide'></a>OpenIM Deployment Guide
@@ -96,7 +90,7 @@ Setting a variable, e.g., `export CHAT_BRANCH="release-v1.3"`, will prioritize `
 
 For convenience, configuration through modifying environment variables is recommended:
 
-####  1.4.1. <a name='1.Recommendedusingenvironmentvariables:https:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.md1-recommended-using-environment-variables'></a>[1. Recommended using environment variables:](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#1-recommended-using-environment-variables)
+####  1.4.1. <a name='Recommendedusingenvironmentvariables'></a>Recommended using environment variables
 
 + PASSWORD
 
@@ -137,9 +131,9 @@ For convenience, configuration through modifying environment variables is recomm
   export DATA_DIR="/data/openim"
   ```
 
-####  1.4.2. <a name='AdditionalConfigurationhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdadditional-configuration'></a>[Additional Configuration](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#additional-configuration)
+####  1.4.2. <a name='AdditionalConfiguration'></a>Additional Configuration
 
-##### [MinIO Access and Secret Key](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#minio-access-and-secret-key)
+##### MinIO Access and Secret Key
 
 To secure your MinIO server, you should set up an access key and secret key. These credentials are used to authenticate requests to your MinIO server.
 
@@ -148,7 +142,7 @@ export MINIO_ACCESS_KEY="YourAccessKey"
 export MINIO_SECRET_KEY="YourSecretKey"
 ```
 
-##### [MinIO Browser](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#minio-browser)
+##### MinIO Browser
 
 MinIO comes with an embedded web-based object browser. You can control the availability of the MinIO browser by setting the `MINIO_BROWSER` environment variable.
 
@@ -156,9 +150,9 @@ MinIO comes with an embedded web-based object browser. You can control the avail
 export MINIO_BROWSER="on"
 ```
 
-####  1.4.3. <a name='SecurityConsiderationshttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdsecurity-considerations'></a>[Security Considerations](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#security-considerations)
+####  1.4.3. <a name='SecurityConsiderations'></a>Security Considerations
 
-##### [TLS/SSL Configuration](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#tls-ssl-configuration)
+##### TLS/SSL Configuration
 
 For secure communication, it's recommended to enable TLS/SSL for your MinIO server. You can do this by providing the path to the SSL certificate and key files.
 
@@ -166,9 +160,9 @@ For secure communication, it's recommended to enable TLS/SSL for your MinIO serv
 export MINIO_CERTS_DIR="/path/to/certs/directory"
 ```
 
-####  1.4.4. <a name='DataManagementhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mddata-management'></a>[Data Management](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#data-management)
+####  1.4.4. <a name='DataManagement'></a>Data Management
 
-##### [Data Retention Policy](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#data-retention-policy)
+##### Data Retention Policy
 
 You may want to set up a data retention policy to automatically delete objects after a specified period.
 
@@ -176,7 +170,7 @@ You may want to set up a data retention policy to automatically delete objects a
 export MINIO_RETENTION_DAYS="30"
 ```
 
-####  1.4.5. <a name='MonitoringandLogginghttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdmonitoring-and-logging'></a>[Monitoring and Logging](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#monitoring-and-logging)
+####  1.4.5. <a name='MonitoringandLogging'></a>Monitoring and Logging
 
 ##### [Audit Logging](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#audit-logging)
 
@@ -186,9 +180,9 @@ Enable audit logging to keep track of access and changes to your data.
 export MINIO_AUDIT="on"
 ```
 
-####  1.4.6. <a name='Troubleshootinghttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdtroubleshooting'></a>[Troubleshooting](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#troubleshooting)
+####  1.4.6. <a name='Troubleshooting'></a>Troubleshooting
 
-##### [Debug Mode](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#debug-mode)
+##### Debug Mode
 
 In case of issues, you may enable debug mode to get more detailed logs to assist in troubleshooting.
 
@@ -196,11 +190,11 @@ In case of issues, you may enable debug mode to get more detailed logs to assist
 export MINIO_DEBUG="on"
 ```
 
-####  1.4.7. <a name='Conclusionhttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdconclusion'></a>[Conclusion](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#conclusion)
+####  1.4.7. <a name='Conclusion'></a>Conclusion
 
 With the environment variables configured as per your requirements, your MinIO server should be ready to securely store and manage your object data. Ensure to verify the setup and monitor the logs for any unusual activities or errors. Regularly update the MinIO server and review your configuration to adapt to any changes or improvements in the MinIO system.
 
-####  1.4.8. <a name='AdditionalResourceshttps:github.comopenimsdkopen-im-serverblobmaindocscontribenvironment.mdadditional-resources'></a>[Additional Resources](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md#additional-resources)
+####  1.4.8. <a name='AdditionalResources'></a>Additional Resources
 
 + [MinIO Client Quickstart Guide](https://docs.min.io/docs/minio-client-quickstart-guide)
 + [MinIO Admin Complete Guide](https://docs.min.io/docs/minio-admin-complete-guide)
