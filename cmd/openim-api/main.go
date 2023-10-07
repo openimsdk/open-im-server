@@ -61,11 +61,11 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
-	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
+	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov")
-	if err := client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
+	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		return err
 	}
 	fmt.Println("api register public config to discov success")
@@ -82,7 +82,9 @@ func run(port int) error {
 	err = router.Run(address)
 	if err != nil {
 		log.ZError(context.Background(), "api run failed ", err, "address", address)
+
 		return err
 	}
+
 	return nil
 }
