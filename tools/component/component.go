@@ -120,23 +120,19 @@ func main() {
 	os.Exit(1)
 }
 
-func extractHost(urlStr string) (string, error) {
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return "", fmt.Errorf("unable to parse URL: %w", err)
-	}
-
+func exactIP(urll string) string {
+	u, _ := url.Parse(urll)
 	host, _, err := net.SplitHostPort(u.Host)
 	if err != nil {
 		host = u.Host
 	}
-
 	if strings.HasSuffix(host, ":") {
-		host = host[:len(host)-1]
+		host = host[0 : len(host)-1]
 	}
-
-	return host, nil
+	
+	return host
 }
+
 
 func checkMysql() error {
 	var sqlDB *sql.DB
