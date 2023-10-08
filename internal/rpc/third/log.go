@@ -69,7 +69,6 @@ func (t *thirdServer) UploadLogs(ctx context.Context, req *third.UploadLogsReq) 
 }
 
 func (t *thirdServer) DeleteLogs(ctx context.Context, req *third.DeleteLogsReq) (*third.DeleteLogsResp, error) {
-
 	if err := authverify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}

@@ -414,7 +414,8 @@ func (c *ConversationRedisCache) GetUserAllHasReadSeqs(
 }
 
 func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string,
-	conversationIDs ...string) ConversationCache {
+	conversationIDs ...string,
+) ConversationCache {
 	cache := c.NewCache()
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationHasReadSeqKey(ownerUserID, conversationID))

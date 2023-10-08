@@ -41,6 +41,7 @@ func (l *LogGorm) Get(ctx context.Context, logIDs []string, userID string) ([]*r
 	}
 	return logs, errs.Wrap(l.db.WithContext(ctx).Where("log_id in ? and user_id=?", logIDs, userID).Find(&logs).Error)
 }
+
 func NewLogGorm(db *gorm.DB) relationtb.LogInterface {
 	db.AutoMigrate(&relationtb.Log{})
 	return &LogGorm{db: db}
