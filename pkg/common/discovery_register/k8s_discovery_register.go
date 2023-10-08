@@ -34,6 +34,7 @@ func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistr
 }
 
 type K8sDR struct {
+	options         []grpc.DialOption
 	rpcRegisterAddr string
 }
 
@@ -65,19 +66,19 @@ func (cli *K8sDR) GetConfFromRegistry(key string) ([]byte, error) {
 }
 func (cli *K8sDR) GetConns(ctx context.Context, serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error) {
 
-	conn, err := grpc.DialContext(ctx, serviceName, grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, serviceName, append(cli.options, opts...)...)
 	return []*grpc.ClientConn{conn}, err
 }
 func (cli *K8sDR) GetConn(ctx context.Context, serviceName string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 
-	return grpc.DialContext(ctx, serviceName, grpc.WithInsecure())
+	return grpc.DialContext(ctx, serviceName, append(cli.options, opts...)...)
 }
 func (cli *K8sDR) GetSelfConnTarget() string {
 
 	return cli.rpcRegisterAddr
 }
 func (cli *K8sDR) AddOption(opts ...grpc.DialOption) {
-
+	cli.options = append(cli.options, opts...)
 }
 func (cli *K8sDR) CloseConn(conn *grpc.ClientConn) {
 	conn.Close()

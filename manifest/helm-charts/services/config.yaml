@@ -209,15 +209,15 @@ config:
   ###################### RPC Register Name Configuration ######################
   # RPC service names for registration, it's not recommended to modify these
   rpcRegisterName:
-    openImUserName: openimserver-openim-rpc-user
-    openImFriendName: openimserver-openim-rpc-friend
-    openImMsgName: openimserver-openim-rpc-msg
-    openImPushName: openimserver-openim-push
+    openImUserName: openimserver-openim-rpc-user:80
+    openImFriendName: openimserver-openim-rpc-friend:80
+    openImMsgName: openimserver-openim-rpc-msg:80
+    openImPushName: openimserver-openim-push:80
     openImMessageGatewayName: openimserver-openim-msggateway:88
-    openImGroupName: openimserver-openim-rpc-group
-    openImAuthName: openimserver-openim-rpc-auth
-    openImConversationName: openimserver-openim-rpc-conversation
-    openImThirdName: openimserver-openim-rpc-third
+    openImGroupName: openimserver-openim-rpc-group:80
+    openImAuthName: openimserver-openim-rpc-auth:80
+    openImConversationName: openimserver-openim-rpc-conversation:80
+    openImThirdName: openimserver-openim-rpc-third:80
 
   ###################### Log Configuration ######################
   # Log configuration
