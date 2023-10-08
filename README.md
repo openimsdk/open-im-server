@@ -29,7 +29,11 @@
 
 </p>
 
+## Ⓜ️ About OpenIM
 
+OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
+
+![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
 ## 🚀 About OpenIMSDK
 
@@ -42,7 +46,7 @@
 
 It's crafted in Golang and supports cross-platform deployment, ensuring a coherent messaging experience across all platforms.
 
-👉 **[Explore SDK](https://github.com/openimsdk/open-im-sdk-core)**
+👉 **[Explore GO SDK](https://github.com/openimsdk/open-im-sdk-core)**
 
 ## 🌐 About OpenIMServer
 
