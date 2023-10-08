@@ -106,7 +106,7 @@ func (o *ThirdApi) ObjectRedirect(c *gin.Context) {
 	c.Redirect(http.StatusFound, resp.Url)
 }
 
-// #################### logs ####################
+// #################### logs ####################.
 func (o *ThirdApi) UploadLogs(c *gin.Context) {
 	a2r.Call(third.ThirdClient.UploadLogs, o.Client, c)
 }

@@ -28,7 +28,7 @@ import (
 type ThirdDatabase interface {
 	FcmUpdateToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) error
 	SetAppBadge(ctx context.Context, userID string, value int) error
-	//about log for debug
+	// about log for debug
 	UploadLogs(ctx context.Context, logs []*relation.Log) error
 	DeleteLogs(ctx context.Context, logID []string, userID string) error
 	SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pageNumber int32, showNumber int32) (uint32, []*relation.Log, error)
@@ -60,7 +60,6 @@ func (t *thirdDatabase) GetLogs(ctx context.Context, LogIDs []string, userID str
 // SearchLogs implements ThirdDatabase.
 func (t *thirdDatabase) SearchLogs(ctx context.Context, keyword string, start time.Time, end time.Time, pageNumber int32, showNumber int32) (uint32, []*relation.Log, error) {
 	return t.logdb.Search(ctx, keyword, start, end, pageNumber, showNumber)
-
 }
 
 // UploadLogs implements ThirdDatabase.

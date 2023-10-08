@@ -120,6 +120,7 @@ func (d *GWebSocket) SetReadLimit(limit int64) {
 func (d *GWebSocket) SetPongHandler(handler PingPongHandler) {
 	d.conn.SetPongHandler(handler)
 }
+
 func (d *GWebSocket) SetPingHandler(handler PingPongHandler) {
 	d.conn.SetPingHandler(handler)
 }
