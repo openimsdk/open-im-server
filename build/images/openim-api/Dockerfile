@@ -39,7 +39,7 @@ FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
+COPY --from=builder $OPENIM_SERVER_BINDIR/platforms /openim/openim-server/_output/bin/platforms
 COPY --from=builder /openim/openim-server/config /openim/openim-server/config
 
 ENV PORT 10002
