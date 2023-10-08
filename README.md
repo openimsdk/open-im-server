@@ -27,18 +27,43 @@
 <a href="https://www.openim.online/en"><b> Docs </b></a>
 </p>
 
-
 </p>
 
-## ✨ About OpenIM
+## Ⓜ️ About OpenIM
 
-Open-IM-Server, meticulously developed in pure Golang, is a powerful instant messaging server. Its distinct communication method, employing pb+websocket, views every interaction as a message, streamlining customization without altering server code. Built on a microservice architecture, it offers deployment through clusters for outstanding performance and scalability.
+OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
 
-Open-IM-Server is more than an instant messaging server; it's a powerful tool for incorporating real-time networking into your applications, positioning itself as your premier choice for integration! 🚀
+![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
-Please be aware that Open-IM-Server does not function as a standalone product and does not offer built-in account registration or login services. To ease your implementation process, we've open-sourced the [chat repository](https://github.com/OpenIMSDK/chat), which comprises these features. Deploying this chat business server in conjunction with Open-IM-Server expedites the setup of a comprehensive chat product. 👥
+## 🚀 About OpenIMSDK
 
-Further enhancing your experience, we also provide an SDK client, wherein most complex logics are implemented. The [SDK repository](https://github.com/OpenIMSDK/openim-sdk-core) can be found at [this link](https://github.com/OpenIMSDK/openim-sdk-core). The [chat repository](https://github.com/OpenIMSDK/chat) is our business server while the 'core' represents the high-level encapsulation of the SDK, synergistically working together to deliver superior results. ✨
+**OpenIMSDK** seamlessly integrates into your application, delivering a rich, real-time messaging experience without requiring intricate UI integration. It provides:
+
++ **Local Storage**: For quick data retrieval and message synchronization.
++ **Listener Callbacks**: Ensuring real-time message interactivity.
++ **API Encapsulation**: Streamlining development processes.
++ **Connection Management**: Guaranteeing reliable message delivery.
+
+It's crafted in Golang and supports cross-platform deployment, ensuring a coherent messaging experience across all platforms.
+
+👉 **[Explore GO SDK](https://github.com/openimsdk/openim-sdk-core)**
+
+## 🌐 About OpenIMServer
+
+**OpenIMServer**, meticulously developed in Golang, ensures a stellar instant messaging server capability with a multifold approach:
+
++ **Modular Composition**: It's comprised of several modules, such as the gateway and multiple RPC services, offering a versatile messaging environment.
++ **Microservices Architecture**: Supporting cluster modes, it assures outstanding performance and scalability to manage communication effectively across various instances.
++ **Diverse Deployment Options**: Adapts to your operational preferences, offering deployment via source code, Kubernetes, or Docker.
+
+### Enhanced Business Functionalities:
+
++ **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
++ **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
+
+👉 **[Learn More](https://doc.rentsoft.cn/guides/introduction/product)**
+
+<!--
 
 ## :star2: Why OpenIM
 
@@ -54,61 +79,24 @@ Further enhancing your experience, we also provide an SDK client, wherein most c
 
 </div>
 
-1. **Comprehensive Message Type Support :speech_balloon:**
+**OpenIM** offers a powerful and reliable instant messaging platform, ensuring versatile communication across multiple platforms with the following key features:
 
-   ✅ Supports almost all types of messages, including text, images, emojis, voice, video, geographical location, files, quotes, business cards, system notifications, custom messages and more
+✅ **Versatile Messaging:** Support for text, images, emojis, voice, video, and more, alongside one-on-one and multi-person audio/video calls.
 
-   ✅ Supports one-on-one and multi-person audio and video calls
+✅ **Robust Chat Capabilities:** Including roles (application administrator, group owner, etc.) and features like muting, group announcements, and dynamic message loading.
 
-   ✅ Provides terminal support for multiple platforms such as iOS, Android, Flutter, uni-app, ReactNative, Electron, Web, H5 
+✅ **Unique Interaction Features:** Offering read-and-burn private chats and a message editing function to broaden social scenarios.
 
-2. **Efficient Meetings Anytime, Anywhere :earth_americas:**
+✅ **Open Source:** The code of OpenIM is open source and aims to build a leading global IM open source community. [GitHub Repository](https://github.com/OpenIMSDK)
 
-   ✅ Based on IM (Instant Messaging) with 100% reliable forced signaling capabilities, it paves the way for IM systems, deeply integrated with chat applications 
+✅ **Extensibility:** Implemented in Golang, OpenIM introduces an "everything is a message" communication model, simplifying custom messages and feature extension.
 
-   ✅ Supports hundreds of people in a single meeting, with subscription numbers reaching thousands, and server-side audio and video recording 
+✅ **High Performance:** Supports a hierarchical governance architecture tested and abstracts the storage model of various message types.
 
-3. **One-on-one and Group Chats for Various Social Scenarios :busts_in_silhouette:**
+✅ **Full Platform Support:** Native support for iOS, Android, Flutter, uni-app, ReactNative, Electron, and Web.
 
-   ✅ OpenIM has four roles: application administrator, group owner, group administrator, and regular member 
+-->
 
-   ✅ Powerful group features such as muting, group announcements, group validation, unlimited group members, and loading group messages as needed 
-
-4. **Unique Features :star2:**
-
-   ✅ Supports read-and-burn private chats, customizable duration
-
-   ✅ Message editing function broadens social scenarios, making instant communication more diverse and interesting
-
-5. **Open Source :open_hands:**
-
-   ✅ The code of OpenIM is open source, self-controlled data, aimed at building a globally leading [IM open source community](https://github.com/OpenIMSDK), including [client SDK](https://github.com/openimsdk/openim-sdk-core) and server 
-
-   ✅ Based on open source Server, many excellent open source projects have been developed, such as [OpenKF](https://github.com/OpenIMSDK/OpenKF) (Open source AI customer service system) 
-
-6. **Easy to Expand :wrench:**
-
-   ✅ The OpenIM server is implemented in Golang, introducing an innovative "everything is a message" communication model, simplifying the implementation of custom messages and extended features 
-
-7. **High Performance :racing_car:**
-
-   ✅ OpenIM supports a hierarchical governance architecture in the cluster, tested by a large number of users, and abstracts the storage model of online messages, offline messages, and historical messages 
-
-8. **Full Platform Support :tv:**
-
-   ✅ Supports native iOS, Android; cross-platform Flutter, uni-app, ReactNative; major web front-end frameworks such as React, Vue; applets; and PC platforms supported by Electron
-
-9. **The ultimate deployment experience 🤖** 
-
-   ✅  Supports [cluster deployment](https://github.com/openimsdk/open-im-server/edit/main/deployments/README.md)
-
-   ✅  Supports multi-architecture mirroring, our Docker images are hosted not only on GitHub but also on Alibaba Cloud and Docker Hub supporting multiple architectures. Visit [our GitHub packages](https://github.com/orgs/OpenIMSDK/packages?repo_name=Open-IM-Server) and read our [version management document](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md) for more information.
-
-11. **A large ecosystem of open source communities 🤲**
-
-    ✅  We have tens of thousands of users and many solutions to problems.
-
-    ✅  We have a large open source community called [OpenIMSDK](https://github.com/OpenIMSDK) that runs the core modules, we have an open source community called [openim-sigs](https://github.com/openim-sigs) to explore more IM-based infrastructure products.
 
 ## :rocket: Quick Start
 
@@ -120,6 +108,7 @@ $ make demo
 
 🤲 In order to facilitate the user experience, we have provided a variety of deployment solutions, you can choose your own deployment method according to the list below:
 
+<!--
 <details> <summary>Deploying with Docker Compose</summary>
 
 It is recommended to use Docker Compose for deployment, which can easily and quickly deploy the entire OpenIM service on a single node
@@ -185,39 +174,23 @@ Read: Configuration center document：https://github.com/openimsdk/open-im-serve
 
 <details>  <summary>Deployed with kubernetes</summary>
 
-
-Read: https://github.com/openimsdk/open-im-server/blob/main/deployments/README.md
++ https://github.com/openimsdk/open-im-server/blob/main/deployments/README.md
 
 </details> 
+-->
 
-<details>  <summary>Open IM and Chat Ports</summary>
++ **[Source Code Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Docker Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/dockerCompose)**
++ **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
 
-+ oepnim-server warehouse: https://github.com/openimsdk/open-im-server 
-
-| TCP Port  | Description                                                  | Operation                                             |
-| --------- | ------------------------------------------------------------ | ----------------------------------------------------- |
-| TCP:10001 | ws protocol, message port such as message sending, pushing etc, used for client SDK | Port release or nginx reverse proxy, and firewall off |
-| TCP:10002 | api port, such as user, friend, group, message interfaces.   | Port release or nginx reverse proxy, and firewall off |
-| TCP:10005 | Required when choosing minio storage (openIM uses minio storage by default) | Port release or nginx reverse proxy, and firewall off |
-
-
-+ chat warehouse: https://github.com/OpenIMSDK/chat 
-
-| TCP Port  | Description                                         | Operation                                             |
-| --------- | --------------------------------------------------- | ----------------------------------------------------- |
-| TCP:10008 | Business system, such as registration, login etc    | Port release or nginx reverse proxy, and firewall off |
-| TCP:10009 | Management backend, such as statistics, banning etc | Port release or nginx reverse proxy, and firewall off |
-
-</details>
-
-
+<!-- 
 ## :link: OpenIM and your application
 
 OpenIM isn't just an open-source instant messaging component, it's an integral part of your application ecosystem. Check out this diagram to understand how AppServer, AppClient, OpenIMServer, and OpenIMSDK interact.
 
 ![App-OpenIM Relationship](./docs/images/oepnim-design.png)
 
-<!-- ## :building_construction: Overall Architecture
+## :building_construction: Overall Architecture
 
 Delve into the heart of Open-IM-Server's functionality with our architecture diagram.
 
