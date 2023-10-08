@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/chat/conversion"
+	"log"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
+
+	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/chat/conversion"
 )
 
 func main() {
