@@ -46,7 +46,7 @@ OpenIM isn't just an open-source instant messaging component, it's an integral p
 
 It's crafted in Golang and supports cross-platform deployment, ensuring a coherent messaging experience across all platforms.
 
-👉 **[Explore GO SDK](https://github.com/openimsdk/open-im-sdk-core)**
+👉 **[Explore GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
 ## 🌐 About OpenIMServer
 
