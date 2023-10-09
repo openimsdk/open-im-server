@@ -133,11 +133,11 @@ func (m *msgServer) MarkConversationAsRead(
 ) (resp *msg.MarkConversationAsReadResp, err error) {
 	conversation, err := m.Conversation.GetConversation(ctx, req.UserID, req.ConversationID)
 	if err != nil {
-		return
+		return nil, err
 	}
 	hasReadSeq, err := m.MsgDatabase.GetHasReadSeq(ctx, req.UserID, req.ConversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
-		return
+		return nil, err
 	}
 	var seqs []int64
 
@@ -151,32 +151,32 @@ func (m *msgServer) MarkConversationAsRead(
 		if len(seqs) > 0 {
 			log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
 			if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
-				return
+				return nil, err
 			}
 		}
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
-				return
+				return nil, err
 			}
 			hasReadSeq = req.HasReadSeq
 		}
 		if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, conversation.ConversationType, req.UserID,
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
-			return
+			return nil, err
 		}
 
 	} else if conversation.ConversationType == constant.GroupChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
-				return
+				return nil, err
 			}
 			hasReadSeq = req.HasReadSeq
 		}
 		if err = m.sendMarkAsReadNotification(ctx, req.ConversationID, constant.SingleChatType, req.UserID,
 			req.UserID, seqs, hasReadSeq); err != nil {
-			return
+			return nil, err
 		}
 
 	}
