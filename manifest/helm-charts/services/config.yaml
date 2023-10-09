@@ -234,7 +234,7 @@ config:
     rotationTime: 24
     remainRotationCount: 2
     remainLogLevel: 6
-    isStdout: false
+    isStdout: true
     isJson: false
     withStack: false
 
