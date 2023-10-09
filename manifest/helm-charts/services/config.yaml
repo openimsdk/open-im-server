@@ -168,14 +168,14 @@ config:
   # minio.signEndpoint is minio public network address
   object:
     enable: "minio"
-    apiURL: "http://http://im-minio:9001"
+    apiURL: "https://openim1.nsddd.top/api"
     minio:
       bucket: "openim"
       endpoint: "http://im-minio:9000"
       accessKeyID: "root"
       secretAccessKey: "openIM123"
       sessionToken: ''
-      signEndpoint: "http://im-minio:9000"
+      signEndpoint: "https://openim1.nsddd.top/minio-api"
     cos:
       bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
       secretID: ''
