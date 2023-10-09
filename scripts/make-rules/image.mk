@@ -118,7 +118,7 @@ image.build.%: go.build.%
 	@echo $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE)
 	@echo $(TMP_DIR)/$(IMAGE)
 	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
-	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) -f $(TMP_DIR)/$(IMAGE))
+	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) -f $(TMP_DIR)/$(IMAGE)/Dockerfile)
 	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
 		echo "==> running if " ; \
 		$(MAKE) image.daemon.verify ;\
