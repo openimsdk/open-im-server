@@ -114,13 +114,23 @@ image.build.%: go.build.%
 | sed -e "s#BASE_IMAGE#$(BASE_IMAGE)#g" \
       -e 's/--from=builder //g' \
       -e 's#COPY /openim/openim-server/#COPY ./#g' > $(TMP_DIR)/$(IMAGE)/Dockerfile
+	@cat $(TMP_DIR)/$(IMAGE)/Dockerfile
+	@echo $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE)
+	@echo $(TMP_DIR)/$(IMAGE)
 	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
-	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
+	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) -f $(TMP_DIR)/$(IMAGE))
 	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
+		echo "==> running if " ; \
 		$(MAKE) image.daemon.verify ;\
 		$(DOCKER) build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX) ; \
 	else \
-		$(DOCKER) build $(BUILD_SUFFIX) ; \
+		echo "==> running else " ; \
+		echo "==> build_suffix $(BUILD_SUFFIX)" ; \
+		echo "==> root_dir $(ROOT_DIR)" ; \
+		echo "==> base_image $(BASE_IMAGE)" ; \
+		echo "==> image $(IMAGE)" ; \
+		echo "==> tmp_dir $(TMP_DIR)" ; \
+		$(DOCKER) build . $(BUILD_SUFFIX) ; \
 	fi
 	@rm -rf $(TMP_DIR)/$(IMAGE)
 
