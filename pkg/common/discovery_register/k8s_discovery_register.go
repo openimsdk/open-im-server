@@ -9,8 +9,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
-	"net"
-	"strconv"
 	"time"
 )
 
@@ -43,8 +41,7 @@ func NewK8sDiscoveryRegister() (discoveryregistry.SvcDiscoveryRegistry, error) {
 }
 
 func (cli *K8sDR) Register(serviceName, host string, port int, opts ...grpc.DialOption) error {
-
-	cli.rpcRegisterAddr = net.JoinHostPort(host, strconv.Itoa(port))
+	cli.rpcRegisterAddr = serviceName
 	return nil
 }
 func (cli *K8sDR) UnRegister() error {
