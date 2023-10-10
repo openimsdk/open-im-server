@@ -289,7 +289,8 @@ func (s *userServer) SubscribeOrCancelUsersStatus(ctx context.Context, req *pbus
 }
 
 // GetUserStatus Get the online status of the user.
-func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp, err error) {
+func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatusReq) (resp *pbuser.GetUserStatusResp,
+	err error) {
 	onlineStatusList, err := s.UserDatabase.GetUserStatus(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
@@ -298,7 +299,8 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 }
 
 // SetUserStatus Synchronize user's online status.
-func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp, err error) {
+func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
+	err error) {
 	err = s.UserDatabase.SetUserStatus(ctx, req.StatusList)
 	if err != nil {
 		return nil, err

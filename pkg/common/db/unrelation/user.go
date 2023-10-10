@@ -176,7 +176,11 @@ func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) 
 		bson.M{"user_id": SubscribedPrefix + userID})
 	err = cursor.Decode(&user)
 	if err != nil {
-		return nil, errs.Wrap(err)
+		if err == mongo.ErrNoDocuments {
+			return []string{}, nil
+		} else {
+			return nil, errs.Wrap(err)
+		}
 	}
 	return user.UserIDList, nil
 }
