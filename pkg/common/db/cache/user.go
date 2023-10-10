@@ -211,7 +211,8 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 	UserIDNum := crc32.ChecksumIEEE([]byte(userID))
 	modKey := strconv.Itoa(int(UserIDNum % statusMod))
 	key := olineStatusKey + modKey
-
+	log.ZDebug(ctx, "SetUserStatus args", "userID", userID, "status", status,
+		"platformID", platformID, "modKey", modKey, "key", key)
 	isNewKey, err := u.rdb.Exists(ctx, key).Result()
 	if err != nil {
 		return errs.Wrap(err)
