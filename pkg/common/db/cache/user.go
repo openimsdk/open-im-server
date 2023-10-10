@@ -246,16 +246,17 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 			return errs.Wrap(err)
 		}
 	}
-	var onlineStatus user.OnlineStatus
-	err = json.Unmarshal([]byte(result), &onlineStatus)
-	if err != nil {
-		return errs.Wrap(err)
-	}
+
 	if status == constant.Offline {
 		if isNil {
 			log.ZWarn(ctx, "this user not online,maybe trigger order not right",
 				err, "userStatus", status)
 			return nil
+		}
+		var onlineStatus user.OnlineStatus
+		err = json.Unmarshal([]byte(result), &onlineStatus)
+		if err != nil {
+			return errs.Wrap(err)
 		}
 		var newPlatformIDs []int32
 		for _, val := range onlineStatus.PlatformIDs {
@@ -280,6 +281,13 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 			}
 		}
 	} else {
+		var onlineStatus user.OnlineStatus
+		if !isNil {
+			err = json.Unmarshal([]byte(result), &onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
 		onlineStatus.Status = constant.Online
 		onlineStatus.UserID = userID
 		onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
