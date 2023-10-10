@@ -17,10 +17,11 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/tools/log"
 	"hash/crc32"
 	"strconv"
 	"time"
+
+	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/OpenIMSDK/protocol/constant"
 
