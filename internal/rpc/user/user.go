@@ -301,30 +301,30 @@ func (s *userServer) GetUserStatus(ctx context.Context, req *pbuser.GetUserStatu
 // SetUserStatus Synchronize user's online status.
 func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatusReq) (resp *pbuser.SetUserStatusResp,
 	err error) {
-	err = s.UserDatabase.SetUserStatus(ctx, req.StatusList)
+	err = s.UserDatabase.SetUserStatus(ctx, req.UserID, req.Status, req.PlatformID)
 	if err != nil {
 		return nil, err
 	}
-	for _, value := range req.StatusList {
-		list, err := s.UserDatabase.GetSubscribedList(ctx, value.UserID)
-		if err != nil {
-			return nil, err
-		}
-		for _, userID := range list {
-			tips := &sdkws.UserStatusChangeTips{
-				FromUserID: value.UserID,
-				ToUserID:   userID,
-				Status:     value.Status,
-				PlatformID: value.PlatformIDs[0],
-			}
-			s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
-		}
+	list, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	if err != nil {
+		return nil, err
 	}
+	for _, userID := range list {
+		tips := &sdkws.UserStatusChangeTips{
+			FromUserID: req.UserID,
+			ToUserID:   userID,
+			Status:     req.Status,
+			PlatformID: req.PlatformID,
+		}
+		s.userNotificationSender.UserStatusChangeNotification(ctx, tips)
+	}
+
 	return &pbuser.SetUserStatusResp{}, nil
 }
 
 // GetSubscribeUsersStatus Get the online status of subscribers.
-func (s *userServer) GetSubscribeUsersStatus(ctx context.Context, req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
+func (s *userServer) GetSubscribeUsersStatus(ctx context.Context,
+	req *pbuser.GetSubscribeUsersStatusReq) (*pbuser.GetSubscribeUsersStatusResp, error) {
 	userList, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
 	if err != nil {
 		return nil, err

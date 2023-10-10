@@ -53,7 +53,7 @@ type UserCache interface {
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
-	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
+	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 }
 
 type UserCacheRedis struct {
@@ -200,107 +200,98 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 			return nil, errs.Wrap(err)
 		}
 		onlineStatus.UserID = userID
+		onlineStatus.Status = constant.Online
 		res = append(res, &onlineStatus)
 	}
 	return res, nil
 }
 
 // SetUserStatus Set the user status and save it in redis.
-func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
-	for _, userStatus := range list {
-		var isNewKey int64
-		UserIDNum := crc32.ChecksumIEEE([]byte(userStatus.UserID))
-		modKey := strconv.Itoa(int(UserIDNum % statusMod))
-		key := olineStatusKey + modKey
-		jsonData, err := json.Marshal(userStatus)
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		isNewKey, err = u.rdb.Exists(ctx, key).Result()
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		if isNewKey == 0 {
-			if userStatus.Status == constant.Online {
-				_, err = u.rdb.HSet(ctx, key, userStatus.UserID, string(jsonData)).Result()
-				if err != nil {
-					return errs.Wrap(err)
-				}
-				u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
-			}
+func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
+	UserIDNum := crc32.ChecksumIEEE([]byte(userID))
+	modKey := strconv.Itoa(int(UserIDNum % statusMod))
+	key := olineStatusKey + modKey
 
-		} else {
-			result, err := u.rdb.HGet(ctx, key, userStatus.UserID).Result()
-			if err != nil {
-				//redis do not have this user key
-				if err == redis.Nil {
-					if userStatus.Status == constant.Offline {
-						log.ZWarn(ctx, "this user not online,maybe trigger order not right",
-							err, "userStatus", userStatus)
-						continue
-					}
-				} else {
-					return errs.Wrap(err)
-				}
+	isNewKey, err := u.rdb.Exists(ctx, key).Result()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	if isNewKey == 0 {
+		if status == constant.Online {
+			onlineStatus := user.OnlineStatus{
+				UserID:      userID,
+				Status:      constant.Online,
+				PlatformIDs: []int32{platformID},
 			}
-			var onlineStatus user.OnlineStatus
-			err = json.Unmarshal([]byte(result), &onlineStatus)
+			jsonData, err := json.Marshal(onlineStatus)
 			if err != nil {
 				return errs.Wrap(err)
 			}
-
-			onlineStatus.UserID = userStatus.UserID
-			if userStatus.Status == constant.Offline {
-				var newPlatformIDs []int32
-				for _, val := range onlineStatus.PlatformIDs {
-					if val != userStatus.PlatformIDs[0] {
-						newPlatformIDs = append(newPlatformIDs, val)
-					}
-				}
-				if newPlatformIDs == nil {
-					_, err = u.rdb.HDel(ctx, key, userStatus.UserID).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				} else {
-					onlineStatus.PlatformIDs = newPlatformIDs
-					newjsonData, err := json.Marshal(&onlineStatus)
-					if err != nil {
-						return errs.Wrap(err)
-					}
-					_, err = u.rdb.HSet(ctx, key, userStatus.UserID, string(newjsonData)).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				}
-			} else {
-				//user all terminal offline directly set online
-				if onlineStatus.UserID == "" {
-					onlineStatus.Status = constant.Online
-					onlineStatus.UserID = userStatus.UserID
-					onlineStatus.PlatformIDs = userStatus.PlatformIDs
-					newjsonData, err := json.Marshal(&onlineStatus)
-					if err != nil {
-						return errs.Wrap(err)
-					}
-					_, err = u.rdb.HSet(ctx, key, userStatus.UserID, string(newjsonData)).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				} else {
-					onlineStatus.Status = constant.Online
-					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, userStatus.PlatformIDs[0])
-					newjsonData, err := json.Marshal(&onlineStatus)
-					if err != nil {
-						return errs.Wrap(err)
-					}
-					_, err = u.rdb.HSet(ctx, key, userStatus.UserID, string(newjsonData)).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				}
+			_, err = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
 			}
+			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
+			return nil
 		}
 	}
+
+	isNil := false
+	result, err := u.rdb.HGet(ctx, key, userID).Result()
+	if err != nil {
+		if err == redis.Nil {
+			isNil = true
+		} else {
+			return errs.Wrap(err)
+		}
+	}
+	var onlineStatus user.OnlineStatus
+	err = json.Unmarshal([]byte(result), &onlineStatus)
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	if status == constant.Offline {
+		if isNil {
+			log.ZWarn(ctx, "this user not online,maybe trigger order not right",
+				err, "userStatus", status)
+			return nil
+		}
+		var newPlatformIDs []int32
+		for _, val := range onlineStatus.PlatformIDs {
+			if val != platformID {
+				newPlatformIDs = append(newPlatformIDs, val)
+			}
+		}
+		if newPlatformIDs == nil {
+			_, err = u.rdb.HDel(ctx, key, userID).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		} else {
+			onlineStatus.PlatformIDs = newPlatformIDs
+			newjsonData, err := json.Marshal(&onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
+	} else {
+		onlineStatus.Status = constant.Online
+		onlineStatus.UserID = userID
+		onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
+		newjsonData, err := json.Marshal(&onlineStatus)
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+
+	}
+
 	return nil
 }
