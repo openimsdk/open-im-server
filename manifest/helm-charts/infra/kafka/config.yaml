@@ -1,17 +1,8 @@
 global:
   storageClass: "nfs-client"
 controller:
-  replicaCount: 1
-  zookeeperMigrationMode: true
-broker:
-  zookeeperMigrationMode: true
+  replicaCount: 3
 sasl:
-  interbroker:
-    user: inter_broker_user
-    password: ""
-  controller:
-    user: controller_user
-    password: ""
   client:
     users:
       - root

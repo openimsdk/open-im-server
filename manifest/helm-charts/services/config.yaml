@@ -175,7 +175,7 @@ config:
       accessKeyID: "root"
       secretAccessKey: "openIM123"
       sessionToken: ''
-      signEndpoint: "https://openim2.nsddd.top/im-minio-api"
+      signEndpoint: "https://openim3.nsddd.top"
     cos:
       bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
       secretID: ''
