@@ -75,9 +75,10 @@ type configStruct struct {
 	} `yaml:"mongo"`
 
 	Redis struct {
-		Address  []string `yaml:"address"`
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
+		ClusterMode bool     `yaml:"clusterMode"`
+		Address     []string `yaml:"address"`
+		Username    string   `yaml:"username"`
+		Password    string   `yaml:"password"`
 	} `yaml:"redis"`
 
 	Kafka struct {
