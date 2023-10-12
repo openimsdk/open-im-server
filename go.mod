@@ -24,12 +24,12 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/image v0.12.0
-	google.golang.org/api v0.143.0
-	google.golang.org/grpc v1.58.2
+	golang.org/x/image v0.13.0
+	google.golang.org/api v0.146.0
+	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/driver/mysql v1.5.1
+	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5
 )
 
@@ -37,7 +37,7 @@ require github.com/google/uuid v1.3.1
 
 require (
 	github.com/IBM/sarama v1.41.2
-	github.com/OpenIMSDK/protocol v0.0.24
+	github.com/OpenIMSDK/protocol v0.0.25
 	github.com/OpenIMSDK/tools v0.0.14
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
