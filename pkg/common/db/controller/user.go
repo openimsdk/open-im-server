@@ -59,6 +59,8 @@ type UserDatabase interface {
 	UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error
 	// GetAllSubscribeList Get a list of all subscriptions
 	GetAllSubscribeList(ctx context.Context, userID string) ([]string, error)
+	// GetSubscribedList Get all subscribed lists
+	GetSubscribedList(ctx context.Context, userID string) ([]string, error)
 	// GetUserStatus Get the online status of the user
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
 	// SetUserStatus Set the user status and store the user status in redis
@@ -193,6 +195,15 @@ func (u *userDatabase) UnsubscribeUsersStatus(ctx context.Context, userID string
 // GetAllSubscribeList Get a list of all subscriptions.
 func (u *userDatabase) GetAllSubscribeList(ctx context.Context, userID string) ([]string, error) {
 	list, err := u.mongoDB.GetAllSubscribeList(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+// GetSubscribedList Get all subscribed lists.
+func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]string, error) {
+	list, err := u.mongoDB.GetSubscribedList(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

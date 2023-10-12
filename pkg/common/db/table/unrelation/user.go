@@ -41,4 +41,6 @@ type UserModelInterface interface {
 	RemoveSubscribedListFromUser(ctx context.Context, userID string, userIDList []string) error
 	// GetAllSubscribeList Get all users subscribed by this user
 	GetAllSubscribeList(ctx context.Context, id string) (userIDList []string, err error)
+	// GetSubscribedList Get the user subscribed by those users
+	GetSubscribedList(ctx context.Context, id string) (userIDList []string, err error)
 }

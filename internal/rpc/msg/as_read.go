@@ -166,7 +166,7 @@ func (m *msgServer) MarkConversationAsRead(
 			return nil, err
 		}
 
-	} else if conversation.ConversationType == constant.GroupChatType {
+	} else if conversation.ConversationType == constant.SuperGroupChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {

@@ -305,7 +305,7 @@ func (s *userServer) SetUserStatus(ctx context.Context, req *pbuser.SetUserStatu
 	if err != nil {
 		return nil, err
 	}
-	list, err := s.UserDatabase.GetAllSubscribeList(ctx, req.UserID)
+	list, err := s.UserDatabase.GetSubscribedList(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
