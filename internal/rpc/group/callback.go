@@ -51,7 +51,7 @@ func CallbackBeforeCreateGroup(ctx context.Context, req *group.CreateGroupReq) (
 			RoleLevel: constant.GroupAdmin,
 		})
 	}
-	for _, userID := range req.AdminUserIDs {
+	for _, userID := range req.MemberUserIDs {
 		cbReq.InitMemberList = append(cbReq.InitMemberList, &apistruct.GroupAddMemberInfo{
 			UserID:    userID,
 			RoleLevel: constant.GroupOrdinaryUsers,
