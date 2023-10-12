@@ -224,6 +224,7 @@ config/config.yaml 文件为存储组件提供了详细的配置说明。
 
     ```
     redis:
+      clusterMode: false                      #是否为 redis cluster 模式
       address: [ 127.0.0.1:16379 ]            #地址
       username:                               #用户名
       password: openIM123                     #密码
