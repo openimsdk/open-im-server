@@ -137,6 +137,7 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 	if err := s.GroupDatabase.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
 		log.ZError(ctx, "NotificationUserInfoUpdate DeleteGroupMemberHash", err, "groupID", groupIDs)
 	}
+
 	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
 }
 
