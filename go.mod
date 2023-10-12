@@ -30,7 +30,7 @@ require (
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.1
-	gorm.io/gorm v1.25.4
+	gorm.io/gorm v1.25.5
 )
 
 require github.com/google/uuid v1.3.1
@@ -43,7 +43,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/redis/go-redis/v9 v9.2.1
-	github.com/tencentyun/cos-go-sdk-v5 v0.7.43
+	github.com/tencentyun/cos-go-sdk-v5 v0.7.44
 )
 
 require (
@@ -119,10 +119,10 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
@@ -140,6 +140,6 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
