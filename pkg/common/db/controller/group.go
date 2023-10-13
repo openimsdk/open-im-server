@@ -566,5 +566,6 @@ func (g *groupDatabase) DeleteGroupMemberHash(ctx context.Context, groupIDs []st
 	for _, groupID := range groupIDs {
 		c = c.DelGroupMembersHash(groupID)
 	}
+
 	return c.ExecDel(ctx)
 }
