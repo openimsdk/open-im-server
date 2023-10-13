@@ -16,12 +16,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/conversion"
-	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/utils"
+	"log"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
+
+	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/conversion"
+	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/utils"
 )
 
 func main() {
