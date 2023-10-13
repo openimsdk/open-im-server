@@ -16,7 +16,7 @@ package common
 
 // ===================================  V2 =====================================
 // MySQL
-// V2
+// V2.
 const (
 	UsernameV2 = "root"
 	PasswordV2 = "openIM"
@@ -24,7 +24,7 @@ const (
 	DatabaseV2 = "openIM_v2"
 )
 
-// V2 chat
+// V2 chat.
 const (
 	ChatUsernameV2 = "root"
 	ChatPasswordV2 = "openIM"
@@ -32,14 +32,14 @@ const (
 	ChatDatabaseV2 = "admin_chat"
 )
 
-// Kafka
+// Kafka.
 const (
 	Topic     = "ws2ms_chat"
 	KafkaAddr = "121.5.182.23:9092"
 )
 
 // ===================================  V3 =====================================
-// V3
+// V3.
 const (
 	UsernameV3 = "root"
 	PasswordV3 = "openIM123"
@@ -47,7 +47,7 @@ const (
 	DatabaseV3 = "openIM_v3"
 )
 
-// V3 chat
+// V3 chat.
 const (
 	ChatUsernameV3 = "root"
 	ChatPasswordV3 = "openIM123"
@@ -55,7 +55,7 @@ const (
 	ChatDatabaseV3 = "openim_enterprise"
 )
 
-// Zookeeper
+// Zookeeper.
 const (
 	ZkAddr     = "43.134.63.160:12181"
 	ZKSchema   = "openim"

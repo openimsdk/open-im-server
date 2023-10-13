@@ -129,10 +129,9 @@ func exactIP(urll string) string {
 	if strings.HasSuffix(host, ":") {
 		host = host[0 : len(host)-1]
 	}
-	
+
 	return host
 }
-
 
 func checkMysql() error {
 	var sqlDB *sql.DB

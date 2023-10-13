@@ -2,11 +2,12 @@ package utils
 
 import (
 	"fmt"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 	"log"
 	"sync"
 	"sync/atomic"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func FindAndInsert[V2 any, V3 schema.Tabler](v2db *gorm.DB, v3db *gorm.DB, fn func(V2) (V3, bool)) (string, error) {
