@@ -64,7 +64,7 @@ type UserDatabase interface {
 	// GetUserStatus Get the online status of the user
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
 	// SetUserStatus Set the user status and store the user status in redis
-	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
+	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 }
 
 type userDatabase struct {
@@ -217,6 +217,6 @@ func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*
 }
 
 // SetUserStatus Set the user status and save it in redis.
-func (u *userDatabase) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
-	return u.cache.SetUserStatus(ctx, list)
+func (u *userDatabase) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
+	return u.cache.SetUserStatus(ctx, userID, status, platformID)
 }
