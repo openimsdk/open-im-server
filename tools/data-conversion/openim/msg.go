@@ -3,20 +3,22 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/IBM/sarama"
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msg"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/golang/protobuf/proto"
-	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
-	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"sync"
-	"sync/atomic"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/apistruct"
+	pbmsg "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/proto/msg"
 )
 
 func main() {

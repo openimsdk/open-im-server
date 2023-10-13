@@ -21,6 +21,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/OpenIMSDK/tools/log"
+
 	"github.com/OpenIMSDK/protocol/constant"
 
 	"github.com/OpenIMSDK/protocol/user"
@@ -51,7 +53,7 @@ type UserCache interface {
 	GetUserGlobalRecvMsgOpt(ctx context.Context, userID string) (opt int, err error)
 	DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache
 	GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error)
-	SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error
+	SetUserStatus(ctx context.Context, userID string, status, platformID int32) error
 }
 
 type UserCacheRedis struct {
@@ -198,95 +200,107 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 			return nil, errs.Wrap(err)
 		}
 		onlineStatus.UserID = userID
+		onlineStatus.Status = constant.Online
 		res = append(res, &onlineStatus)
 	}
 	return res, nil
 }
 
 // SetUserStatus Set the user status and save it in redis.
-func (u *UserCacheRedis) SetUserStatus(ctx context.Context, list []*user.OnlineStatus) error {
-	for _, status := range list {
-		var isNewKey int64
-		UserIDNum := crc32.ChecksumIEEE([]byte(status.UserID))
-		modKey := strconv.Itoa(int(UserIDNum % statusMod))
-		key := olineStatusKey + modKey
-		jsonData, err := json.Marshal(status)
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		isNewKey, err = u.rdb.Exists(ctx, key).Result()
-		if err != nil {
-			return errs.Wrap(err)
-		}
-		if isNewKey == 0 {
-			_, err = u.rdb.HSet(ctx, key, status.UserID, string(jsonData)).Result()
+func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, status, platformID int32) error {
+	UserIDNum := crc32.ChecksumIEEE([]byte(userID))
+	modKey := strconv.Itoa(int(UserIDNum % statusMod))
+	key := olineStatusKey + modKey
+	log.ZDebug(ctx, "SetUserStatus args", "userID", userID, "status", status,
+		"platformID", platformID, "modKey", modKey, "key", key)
+	isNewKey, err := u.rdb.Exists(ctx, key).Result()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+	if isNewKey == 0 {
+		if status == constant.Online {
+			onlineStatus := user.OnlineStatus{
+				UserID:      userID,
+				Status:      constant.Online,
+				PlatformIDs: []int32{platformID},
+			}
+			jsonData, err := json.Marshal(onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			_, err = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
 			if err != nil {
 				return errs.Wrap(err)
 			}
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
+			return nil
+		}
+	}
+
+	isNil := false
+	result, err := u.rdb.HGet(ctx, key, userID).Result()
+	if err != nil {
+		if err == redis.Nil {
+			isNil = true
 		} else {
-			result, err := u.rdb.HGet(ctx, key, status.UserID).Result()
+			return errs.Wrap(err)
+		}
+	}
+
+	if status == constant.Offline {
+		if isNil {
+			log.ZWarn(ctx, "this user not online,maybe trigger order not right",
+				err, "userStatus", status)
+			return nil
+		}
+		var onlineStatus user.OnlineStatus
+		err = json.Unmarshal([]byte(result), &onlineStatus)
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		var newPlatformIDs []int32
+		for _, val := range onlineStatus.PlatformIDs {
+			if val != platformID {
+				newPlatformIDs = append(newPlatformIDs, val)
+			}
+		}
+		if newPlatformIDs == nil {
+			_, err = u.rdb.HDel(ctx, key, userID).Result()
 			if err != nil {
 				return errs.Wrap(err)
 			}
-			var onlineStatus user.OnlineStatus
+		} else {
+			onlineStatus.PlatformIDs = newPlatformIDs
+			newjsonData, err := json.Marshal(&onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
+	} else {
+		var onlineStatus user.OnlineStatus
+		if !isNil {
 			err = json.Unmarshal([]byte(result), &onlineStatus)
 			if err != nil {
 				return errs.Wrap(err)
 			}
-			onlineStatus.UserID = status.UserID
-			if status.Status == constant.Offline {
-				var newPlatformIDs []int32
-				for _, val := range onlineStatus.PlatformIDs {
-					if val != status.PlatformIDs[0] {
-						newPlatformIDs = append(newPlatformIDs, val)
-					}
-				}
-				if newPlatformIDs == nil {
-					onlineStatus.Status = constant.Offline
-					onlineStatus.PlatformIDs = []int32{}
-					newjsonData, err := json.Marshal(&onlineStatus)
-					if err != nil {
-						return errs.Wrap(err)
-					}
-					_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				} else {
-					onlineStatus.PlatformIDs = newPlatformIDs
-					newjsonData, err := json.Marshal(&onlineStatus)
-					if err != nil {
-						return errs.Wrap(err)
-					}
-					_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
-					if err != nil {
-						return errs.Wrap(err)
-					}
-				}
-			} else {
-				onlineStatus.Status = constant.Online
-				// Judging whether to be kicked out.
-				flag := false
-				for _, val := range onlineStatus.PlatformIDs {
-					if val == status.PlatformIDs[0] {
-						flag = true
-						break
-					}
-				}
-				if !flag {
-					onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, status.PlatformIDs[0])
-				}
-				newjsonData, err := json.Marshal(&onlineStatus)
-				if err != nil {
-					return errs.Wrap(err)
-				}
-				_, err = u.rdb.HSet(ctx, key, status.UserID, string(newjsonData)).Result()
-				if err != nil {
-					return errs.Wrap(err)
-				}
-			}
 		}
+		onlineStatus.Status = constant.Online
+		onlineStatus.UserID = userID
+		onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
+		newjsonData, err := json.Marshal(&onlineStatus)
+		if err != nil {
+			return errs.Wrap(err)
+		}
+		_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
+		if err != nil {
+			return errs.Wrap(err)
+		}
+
 	}
+
 	return nil
 }

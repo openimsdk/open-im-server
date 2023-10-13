@@ -2,6 +2,7 @@ package conversion
 
 import (
 	"github.com/OpenIMSDK/protocol/constant"
+
 	v3 "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	v2 "github.com/openimsdk/open-im-server/v3/tools/data-conversion/openim/mysql/v2"
 	"github.com/openimsdk/open-im-server/v3/tools/data-conversion/utils"

@@ -173,6 +173,9 @@ func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumbe
 
 // SetUserStatus sets the status for a user based on the provided user ID, status, and platform ID.
 func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status int32, platformID int) error {
-	_, err := u.Client.SetUserStatus(ctx, &user.SetUserStatusReq{StatusList: []*user.OnlineStatus{{UserID: userID, Status: status, PlatformIDs: []int32{int32(platformID)}}}})
+	_, err := u.Client.SetUserStatus(ctx, &user.SetUserStatusReq{
+		UserID: userID,
+		Status: status, PlatformID: int32(platformID),
+	})
 	return err
 }
