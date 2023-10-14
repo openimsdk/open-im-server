@@ -17,7 +17,7 @@ package rpcclient
 import (
 	"context"
 
-	"google.golang.org/grpc"
+	"github.com/apache/dubbo-go"
 
 	"github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -35,7 +35,7 @@ func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 }
 
 type Auth struct {
-	conn   grpc.ClientConnInterface
+	conn   dubbo-go.ClientConnInterface
 	Client auth.AuthClient
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
