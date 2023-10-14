@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/grpc"
+	"github.com/apache/dubbo-go"
 
 	pbconversation "github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -29,7 +29,7 @@ import (
 
 type Conversation struct {
 	Client pbconversation.ConversationClient
-	conn   grpc.ClientConnInterface
+	conn   dubbo-go.ClientConnInterface
 	discov discoveryregistry.SvcDiscoveryRegistry
 }
 
