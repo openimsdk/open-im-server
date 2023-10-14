@@ -30,8 +30,8 @@ func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 	if err != nil {
 		panic(err)
 	}
-	client := auth.NewAuthClient(conn)
-	return &Auth{discov: discov, conn: conn, Client: client}
+	client := auth.NewAuthClient(conn.(dubbo-go.ClientConnInterface))
+	return &Auth{discov: discov, conn: conn.(dubbo-go.ClientConnInterface), Client: client}
 }
 
 type Auth struct {
