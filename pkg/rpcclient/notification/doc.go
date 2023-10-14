@@ -12,4 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package notification provides client-side implementations for the notification services in the OpenIM project.
+// It uses Dubbo-go for RPC communication.
 package notification // import "github.com/openimsdk/open-im-server/v3/pkg/rpcclient/notification"
