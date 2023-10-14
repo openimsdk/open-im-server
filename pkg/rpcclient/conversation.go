@@ -38,8 +38,8 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversatio
 	if err != nil {
 		panic(err)
 	}
-	client := pbconversation.NewConversationClient(conn)
-	return &Conversation{discov: discov, conn: conn, Client: client}
+	client := pbconversation.NewConversationClient(conn.(dubbo-go.ClientConnInterface))
+	return &Conversation{discov: discov, conn: conn.(dubbo-go.ClientConnInterface), Client: client}
 }
 
 type ConversationRpcClient Conversation
