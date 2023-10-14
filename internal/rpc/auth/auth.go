@@ -19,7 +19,7 @@ import (
 
 	"github.com/openimsdk/open-im-server/v3/pkg/authverify"
 
-	"google.golang.org/grpc"
+	"github.com/apache/dubbo-go"
 
 	pbauth "github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/protocol/constant"
@@ -43,13 +43,13 @@ type authServer struct {
 	RegisterCenter discoveryregistry.SvcDiscoveryRegistry
 }
 
-func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error {
+func Start(client discoveryregistry.SvcDiscoveryRegistry) error {
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		return err
 	}
 	userRpcClient := rpcclient.NewUserRpcClient(client)
-	pbauth.RegisterAuthServer(server, &authServer{
+	dubbo.RegisterProviderService(&authServer{
 		userRpcClient:  &userRpcClient,
 		RegisterCenter: client,
 		authDatabase: controller.NewAuthDatabase(
