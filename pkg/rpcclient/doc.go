@@ -12,4 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package rpcclient provides client-side implementations for the various services in the OpenIM project.
+// It uses Dubbo-go for RPC communication.
 package rpcclient // import "github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
