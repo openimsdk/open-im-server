@@ -54,27 +54,27 @@ func (MessageApi) SetOptions(options map[string]bool, value bool) {
 }
 
 func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg) *msg.SendMsgReq {
-	var newContent string
+	var newContent interface{}
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
 	case constant.Text:
-		fallthrough
+		newContent = params.Content.(string)
 	case constant.Picture:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.Custom:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.Voice:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.Video:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.File:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.CustomNotTriggerConversation:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	case constant.CustomOnlineOnly:
-		fallthrough
+		newContent = params.Content.(map[string]interface{})
 	default:
-		newContent = utils.StructToJsonString(params.Content)
+		newContent = params.Content
 	}
 	if params.IsOnlineOnly {
 		m.SetOptions(options, false)
@@ -98,14 +98,15 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 			SessionType:      params.SessionType,
 			MsgFrom:          constant.SysMsgType,
 			ContentType:      params.ContentType,
-			Content:          []byte(newContent),
+			Content:          []byte(utils.StructToJsonString(newContent)),
 			CreateTime:       utils.GetCurrentTimestampByMill(),
 			SendTime:         params.SendTime,
 			Options:          options,
 			OfflinePushInfo:  params.OfflinePushInfo,
 		},
 	}
-	//if params.ContentType == constant.OANotification {
+	return &pbData
+}
 	//	var tips sdkws.TipsComm
 	//	tips.JsonDetail = utils.StructToJsonString(params.Content)
 	//	pbData.MsgData.Content, err = proto.Marshal(&tips)
