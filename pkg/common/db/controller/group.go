@@ -81,6 +81,7 @@ type GroupDatabase interface {
 	CountTotal(ctx context.Context, before *time.Time) (count int64, err error)
 	// 获取范围内群增量
 	CountRangeEverydayTotal(ctx context.Context, start time.Time, end time.Time) (map[string]int64, error)
+	DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error
 }
 
 func NewGroupDatabase(
@@ -555,4 +556,16 @@ func (g *groupDatabase) FindGroupRequests(ctx context.Context, groupID string, u
 
 func (g *groupDatabase) FindNotDismissedGroup(ctx context.Context, groupIDs []string) (groups []*relationtb.GroupModel, err error) {
 	return g.groupDB.FindNotDismissedGroup(ctx, groupIDs)
+}
+
+func (g *groupDatabase) DeleteGroupMemberHash(ctx context.Context, groupIDs []string) error {
+	if len(groupIDs) == 0 {
+		return nil
+	}
+	c := g.cache.NewCache()
+	for _, groupID := range groupIDs {
+		c = c.DelGroupMembersHash(groupID)
+	}
+
+	return c.ExecDel(ctx)
 }

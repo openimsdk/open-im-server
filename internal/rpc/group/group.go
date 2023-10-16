@@ -121,14 +121,23 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 	if err != nil {
 		return nil, err
 	}
+	groupIDs := make([]string, 0, len(members))
 	for _, member := range members {
 		if member.Nickname != "" && member.FaceURL != "" {
 			continue
 		}
-		if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
-			log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+		groupIDs = append(groupIDs, member.GroupID)
+	}
+	log.ZInfo(ctx, "NotificationUserInfoUpdate", "joinGroupNum", len(members), "updateNum", len(groupIDs), "updateGroupIDs", groupIDs)
+	for _, groupID := range groupIDs {
+		if err := s.Notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID); err != nil {
+			log.ZError(ctx, "NotificationUserInfoUpdate setGroupMemberInfo notification failed", err, "groupID", groupID)
 		}
 	}
+	if err := s.GroupDatabase.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
+		log.ZError(ctx, "NotificationUserInfoUpdate DeleteGroupMemberHash", err, "groupID", groupIDs)
+	}
+
 	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
 }
 
