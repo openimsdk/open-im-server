@@ -150,6 +150,8 @@ def "OPENIM_CHAT_NAME" "chat"                      # openim-chat chat用户名
 # TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
 # TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
 # TODO 使用 readonly 来定义合适，负责无法正常解析, 并且 yaml 模板需要加 "" 来包裹
+###################### Env 配置信息 ######################
+def "ENVS_DISCOVERY" "zookeeper"
 
 ###################### Zookeeper 配置信息 ######################
 def "ZOOKEEPER_SCHEMA" "openim"                    # Zookeeper的模式
