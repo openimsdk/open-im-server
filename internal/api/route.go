@@ -156,6 +156,11 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
 
+		logs := thirdGroup.Group("/logs")
+		logs.POST("/upload", t.UploadLogs)
+		logs.POST("/delete", t.DeleteLogs)
+		logs.POST("/search", t.SearchLogs)
+
 		objectGroup := r.Group("/object", ParseToken)
 
 		objectGroup.POST("/part_limit", t.PartLimit)

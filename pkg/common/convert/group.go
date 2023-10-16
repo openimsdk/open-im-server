@@ -138,11 +138,11 @@ func Pb2DBGroupInfo(m *sdkws.GroupInfo) *relation.GroupModel {
 	}
 }
 
-func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
-	return &relation.GroupMemberModel{
-		UserID:   m.UserID,
-		Nickname: m.Nickname,
-		FaceURL:  m.FaceURL,
-		Ex:       m.Ex,
-	}
-}
+//func Pb2DbGroupMember(m *sdkws.UserInfo) *relation.GroupMemberModel {
+//	return &relation.GroupMemberModel{
+//		UserID:   m.UserID,
+//		Nickname: m.Nickname,
+//		FaceURL:  m.FaceURL,
+//		Ex:       m.Ex,
+//	}
+//}

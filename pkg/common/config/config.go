@@ -78,9 +78,10 @@ type configStruct struct {
 	} `yaml:"mongo"`
 
 	Redis struct {
-		Address  []string `yaml:"address"`
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
+		ClusterMode bool     `yaml:"clusterMode"`
+		Address     []string `yaml:"address"`
+		Username    string   `yaml:"username"`
+		Password    string   `yaml:"password"`
 	} `yaml:"redis"`
 
 	Kafka struct {
@@ -131,12 +132,14 @@ type configStruct struct {
 			SecretAccessKey string `yaml:"secretAccessKey"`
 			SessionToken    string `yaml:"sessionToken"`
 			SignEndpoint    string `yaml:"signEndpoint"`
+			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"minio"`
 		Cos struct {
 			BucketURL    string `yaml:"bucketURL"`
 			SecretID     string `yaml:"secretID"`
 			SecretKey    string `yaml:"secretKey"`
 			SessionToken string `yaml:"sessionToken"`
+			PublicRead   bool   `yaml:"publicRead"`
 		} `yaml:"cos"`
 		Oss struct {
 			Endpoint        string `yaml:"endpoint"`
@@ -145,6 +148,7 @@ type configStruct struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			AccessKeySecret string `yaml:"accessKeySecret"`
 			SessionToken    string `yaml:"sessionToken"`
+			PublicRead      bool   `yaml:"publicRead"`
 		} `yaml:"oss"`
 	} `yaml:"object"`
 
@@ -251,6 +255,7 @@ type configStruct struct {
 		CallbackOnlinePush                 CallBackConfig `yaml:"onlinePush"`
 		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"superGroupOnlinePush"`
 		CallbackBeforeAddFriend            CallBackConfig `yaml:"beforeAddFriend"`
+		CallbackBeforeUpdateUserInfo       CallBackConfig `yaml:"beforeUpdateUserInfo"`
 		CallbackBeforeCreateGroup          CallBackConfig `yaml:"beforeCreateGroup"`
 		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"beforeMemberJoinGroup"`
 		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"beforeSetGroupMemberInfo"`

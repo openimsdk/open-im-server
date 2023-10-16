@@ -17,7 +17,7 @@
 #
 
 GO := go
-GO_SUPPORTED_VERSIONS ?= 1.18|1.19|1.20|1.21
+GO_SUPPORTED_VERSIONS ?= 1.18|1.19|1.20|1.21|1.22
 
 GO_LDFLAGS += -X $(VERSION_PACKAGE).gitVersion=$(GIT_TAG) \
 	-X $(VERSION_PACKAGE).gitCommit=$(GIT_COMMIT) \
@@ -124,6 +124,10 @@ go.check:
 go.check-component:
 	@echo "===========> Checking openim component"
 	@$(ROOT_DIR)/scripts/install/openim-tools.sh openim::tools::pre-start
+
+## go.versionchecker: Design, detect some environment variables and versions
+go.versionchecker:
+	@$(ROOT_DIR)/scripts/install/openim-tools.sh openim::tools::post-start
 
 ## go.build.verify: Verify that a suitable version of Go exists
 .PHONY: go.build.verify

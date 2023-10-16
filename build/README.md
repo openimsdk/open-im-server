@@ -49,17 +49,17 @@ While it is possible to build OpenIM using a local golang installation, we have 
 
 ## Basic Flow
 
-The scripts directly under [`build/`](.) are used to build and test.  They will ensure that the `kube-build` Docker image is built (based on [`build/build-image/Dockerfile`](build-image/Dockerfile) and after base image's `KUBE_BUILD_IMAGE_CROSS_TAG` from Dockerfile is replaced with one of those actual tags of the base image, like `v1.13.9-2`) and then execute the appropriate command in that container.  These scripts will both ensure that the right data is cached from run to run for incremental builds and will copy the results back out of the container. You can specify a different registry/name and version for `kube-cross` by setting `KUBE_CROSS_IMAGE` and `KUBE_CROSS_VERSION`, see [`common.sh`](common.sh) for more details.
+The scripts directly under [`build/`](.) are used to build and test.  They will ensure that the `openim-build` Docker image is built (based on [`build/build-image/Dockerfile`](../Dockerfile) and after base image's `OPENIM_BUILD_IMAGE_CROSS_TAG` from Dockerfile is replaced with one of those actual tags of the base image, like `v1.13.9-2`) and then execute the appropriate command in that container.  These scripts will both ensure that the right data is cached from run to run for incremental builds and will copy the results back out of the container. You can specify a different registry/name and version for `openim-cross` by setting `OPENIM_CROSS_IMAGE` and `OPENIM_CROSS_VERSION`, see [`common.sh`](common.sh) for more details.
 
-The `kube-build` container image is built by first creating a "context" directory in `_output/images/build-image`.  It is done there instead of at the root of the OpenIM repo to minimize the amount of data we need to package up when building the image.
+The `openim-build` container image is built by first creating a "context" directory in `_output/images/build-image`.  It is done there instead of at the root of the OpenIM repo to minimize the amount of data we need to package up when building the image.
 
 There are 3 different containers instances that are run from this image.  The first is a "data" container to store all data that needs to persist across to support incremental builds. Next there is an "rsync" container that is used to transfer data in and out to the data container.  Lastly there is a "build" container that is used for actually doing build actions.  The data container persists across runs while the rsync and build containers are deleted after each use.
 
-`rsync` is used transparently behind the scenes to efficiently move data in and out of the container.  This will use an ephemeral port picked by Docker.  You can modify this by setting the `KUBE_RSYNC_PORT` env variable.
+`rsync` is used transparently behind the scenes to efficiently move data in and out of the container.  This will use an ephemeral port picked by Docker.  You can modify this by setting the `OPENIM_RSYNC_PORT` env variable.
 
 All Docker names are suffixed with a hash derived from the file path (to allow concurrent usage on things like CI machines) and a version number.  When the version number changes all state is cleared and clean build is started.  This allows the build infrastructure to be changed and signal to CI systems that old artifacts need to be deleted.
 
 ## Build artifacts
 The build system output all its products to a top level directory in the source repository named `_output`.
-These include the binary compiled packages (e.g. kubectl, kube-scheduler etc.) and archived Docker images.
+These include the binary compiled packages (e.g. imctl, openim-api etc.) and archived Docker images.
 If you intend to run a component with a docker image you will need to import it from this directory with

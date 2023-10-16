@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -69,6 +70,7 @@ func NewOSS() (s3.Interface, error) {
 		bucketURL:   conf.BucketURL,
 		bucket:      bucket,
 		credentials: client.Config.GetCredentials(),
+		um:          *(*urlMaker)(reflect.ValueOf(bucket.Client.Conn).Elem().FieldByName("url").UnsafePointer()),
 	}, nil
 }
 
@@ -76,6 +78,7 @@ type OSS struct {
 	bucketURL   string
 	bucket      *oss.Bucket
 	credentials oss.Credentials
+	um          urlMaker
 }
 
 func (o *OSS) Engine() string {
@@ -163,7 +166,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 		request.Header.Set(oss.HTTPHeaderHost, request.Host)
 		request.Header.Set(oss.HTTPHeaderDate, now)
 		request.Header.Set(oss.HttpHeaderOssDate, now)
-		ossSignHeader(o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
+		signHeader(*o.bucket.Client.Conn, request, fmt.Sprintf(`/%s/%s?partNumber=%d&uploadId=%s`, o.bucket.BucketName, name, partNumber, uploadID))
 		delete(request.Header, oss.HTTPHeaderDate)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
@@ -272,6 +275,7 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 }
 
 func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+	publicRead := config.Config.Object.Oss.PublicRead
 	var opts []oss.Option
 	if opt != nil {
 		if opt.Image != nil {
@@ -299,11 +303,13 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			process += ",format," + format
 			opts = append(opts, oss.Process(process))
 		}
-		if opt.ContentType != "" {
-			opts = append(opts, oss.ResponseContentType(opt.ContentType))
-		}
-		if opt.Filename != "" {
-			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename=`+strconv.Quote(opt.Filename)))
+		if !publicRead {
+			if opt.ContentType != "" {
+				opts = append(opts, oss.ResponseContentType(opt.ContentType))
+			}
+			if opt.Filename != "" {
+				opts = append(opts, oss.ResponseContentDisposition(`attachment; filename=`+strconv.Quote(opt.Filename)))
+			}
 		}
 	}
 	if expire <= 0 {
@@ -311,5 +317,13 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
+	if !publicRead {
+		return o.bucket.SignURL(name, http.MethodGet, int64(expire/time.Second), opts...)
+	}
+	rawParams, err := oss.GetRawParams(opts)
+	if err != nil {
+		return "", err
+	}
+	params := getURLParams(*o.bucket.Client.Conn, rawParams)
+	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
 }

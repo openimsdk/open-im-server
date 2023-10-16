@@ -1250,6 +1250,38 @@ function openim::util::gencpu() {
     echo $cpu_count
 }
 
+function openim::util::set_max_fd() {
+    local desired_fd=$1
+    local max_fd_limit
+
+    # Check if we're not on cygwin or darwin.
+    if [ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "cygwin" ] && [ "$(uname -s | tr '[:upper:]' '[:lower:]')" != "darwin" ]; then
+        # Try to get the hard limit.
+        max_fd_limit=$(ulimit -H -n)
+        if [ $? -eq 0 ]; then
+            # If desired_fd is 'maximum' or 'max', set it to the hard limit.
+            if [ "$desired_fd" = "maximum" ] || [ "$desired_fd" = "max" ]; then
+                desired_fd="$max_fd_limit"
+            fi
+            
+            # Check if desired_fd is less than or equal to max_fd_limit.
+            if [ "$desired_fd" -le "$max_fd_limit" ]; then
+                ulimit -n "$desired_fd"
+                if [ $? -ne 0 ]; then
+                    echo "Warning: Could not set maximum file descriptor limit to $desired_fd"
+                fi
+            else
+                echo "Warning: Desired file descriptor limit ($desired_fd) is greater than the hard limit ($max_fd_limit)"
+            fi
+        else
+            echo "Warning: Could not query the maximum file descriptor hard limit."
+        fi
+    else
+        echo "Warning: Not attempting to modify file descriptor limit on Cygwin or Darwin."
+    fi
+}
+
+
 function openim::util::gen_os_arch() {
     # Get the current operating system and architecture
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')

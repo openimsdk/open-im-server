@@ -29,7 +29,7 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
@@ -38,7 +38,7 @@ jobs:
           go-version: stable
       # More assembly might be required: Docker logins, GPG, etc. It all depends
       # on your needs.
-      - uses: goreleaser/goreleaser-action@v4
+      - uses: goreleaser/goreleaser-action@v5
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro':
           distribution: goreleaser
@@ -63,14 +63,14 @@ jobs:
       matrix:
         format: [ deb, rpm, apk ]
     steps:
-      - uses: actions/checkout@v3 # v3
+      - uses: actions/checkout@v4 # v3
         with:
           fetch-depth: 0
       - uses: arduino/setup-task@e26d8975574116b0097a1161e0fe16ba75d84c1c # v1
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2
+      - uses: docker/setup-qemu-action@326560df218a7ea9cf6ab49bbc88b8b306bb437e # v2
       - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3
         with:
           path: |

@@ -73,7 +73,7 @@ $ SEALOS_VERSION=`curl -s https://api.github.com/repos/labring/sealos/releases/l
 ```bash
 $ export CLUSTER_USERNAME=ubuntu
 $ export CLUSTER_PASSWORD=123456
-$ sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:v3.24.1 \
+$ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:v3.24.1 \
     --masters 10.0.0.9 \
     --nodes 10.0.0.4,10.0.0.10 \
     -u "$CLUSTER_USERNAME" \

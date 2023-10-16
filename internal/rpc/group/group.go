@@ -121,14 +121,23 @@ func (s *groupServer) NotificationUserInfoUpdate(ctx context.Context, req *pbgro
 	if err != nil {
 		return nil, err
 	}
+	groupIDs := make([]string, 0, len(members))
 	for _, member := range members {
 		if member.Nickname != "" && member.FaceURL != "" {
 			continue
 		}
-		if err := s.Notification.GroupMemberInfoSetNotification(ctx, member.GroupID, member.UserID); err != nil {
-			log.ZError(ctx, "setGroupMemberInfo notification failed", err, "member", member.UserID, "groupID", member.GroupID)
+		groupIDs = append(groupIDs, member.GroupID)
+	}
+	log.ZInfo(ctx, "NotificationUserInfoUpdate", "joinGroupNum", len(members), "updateNum", len(groupIDs), "updateGroupIDs", groupIDs)
+	for _, groupID := range groupIDs {
+		if err := s.Notification.GroupMemberInfoSetNotification(ctx, groupID, req.UserID); err != nil {
+			log.ZError(ctx, "NotificationUserInfoUpdate setGroupMemberInfo notification failed", err, "groupID", groupID)
 		}
 	}
+	if err := s.GroupDatabase.DeleteGroupMemberHash(ctx, groupIDs); err != nil {
+		log.ZError(ctx, "NotificationUserInfoUpdate DeleteGroupMemberHash", err, "groupID", groupIDs)
+	}
+
 	return &pbgroup.NotificationUserInfoUpdateResp{}, nil
 }
 
@@ -225,15 +234,16 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbgroup.CreateGroupR
 		return nil, err
 	}
 	joinGroup := func(userID string, roleLevel int32) error {
-		groupMember := convert.Pb2DbGroupMember(userMap[userID])
-		groupMember.Nickname = ""
-		groupMember.GroupID = group.GroupID
-		groupMember.RoleLevel = roleLevel
-		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
-		groupMember.JoinSource = constant.JoinByInvitation
-		groupMember.InviterUserID = mcontext.GetOpUserID(ctx)
-		groupMember.JoinTime = time.Now()
-		groupMember.MuteEndTime = time.Unix(0, 0)
+		groupMember := &relationtb.GroupMemberModel{
+			GroupID:        group.GroupID,
+			UserID:         userID,
+			RoleLevel:      roleLevel,
+			OperatorUserID: opUserID,
+			JoinSource:     constant.JoinByInvitation,
+			InviterUserID:  opUserID,
+			JoinTime:       time.Now(),
+			MuteEndTime:    time.UnixMilli(0),
+		}
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return err
 		}
@@ -359,6 +369,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 	if err != nil {
 		return nil, err
 	}
+	if len(userMap) != len(req.InvitedUserIDs) {
+		return nil, errs.ErrRecordNotFound.Wrap("user not found")
+	}
 	var groupMember *relationtb.GroupMemberModel
 	var opUserID string
 	if !authverify.IsAppManagerUid(ctx) {
@@ -416,15 +429,16 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbgroup.Invite
 		opUserID := mcontext.GetOpUserID(ctx)
 		var groupMembers []*relationtb.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
-			member := convert.Pb2DbGroupMember(userMap[userID])
-			member.Nickname = ""
-			member.GroupID = req.GroupID
-			member.RoleLevel = constant.GroupOrdinaryUsers
-			member.OperatorUserID = opUserID
-			member.InviterUserID = opUserID
-			member.JoinSource = constant.JoinByInvitation
-			member.JoinTime = time.Now()
-			member.MuteEndTime = time.Unix(0, 0)
+			member := &relationtb.GroupMemberModel{
+				GroupID:        req.GroupID,
+				UserID:         userID,
+				RoleLevel:      constant.GroupOrdinaryUsers,
+				OperatorUserID: opUserID,
+				InviterUserID:  opUserID,
+				JoinSource:     constant.JoinByInvitation,
+				JoinTime:       time.Now(),
+				MuteEndTime:    time.UnixMilli(0),
+			}
 			if err := CallbackBeforeMemberJoinGroup(ctx, member, group.Ex); err != nil {
 				return nil, err
 			}
@@ -800,14 +814,15 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 		if group.GroupType == constant.SuperGroup {
 			return nil, errs.ErrGroupTypeNotSupport.Wrap()
 		}
-		groupMember := convert.Pb2DbGroupMember(user)
-		groupMember.GroupID = group.GroupID
-		groupMember.RoleLevel = constant.GroupOrdinaryUsers
-		groupMember.OperatorUserID = mcontext.GetOpUserID(ctx)
-		groupMember.JoinSource = constant.JoinByInvitation
-		groupMember.InviterUserID = req.InviterUserID
-		groupMember.JoinTime = time.Now()
-		groupMember.MuteEndTime = time.Unix(0, 0)
+		groupMember := &relationtb.GroupMemberModel{
+			GroupID:        group.GroupID,
+			UserID:         user.UserID,
+			RoleLevel:      constant.GroupOrdinaryUsers,
+			OperatorUserID: mcontext.GetOpUserID(ctx),
+			InviterUserID:  req.InviterUserID,
+			JoinTime:       time.Now(),
+			MuteEndTime:    time.UnixMilli(0),
+		}
 		if err := CallbackBeforeMemberJoinGroup(ctx, groupMember, group.Ex); err != nil {
 			return nil, err
 		}
@@ -1271,6 +1286,9 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbgroup.SetGr
 	resp := &pbgroup.SetGroupMemberInfoResp{}
 	if len(req.Members) == 0 {
 		return nil, errs.ErrArgs.Wrap("members empty")
+	}
+	for i := range req.Members {
+		req.Members[i].FaceURL = nil
 	}
 	duplicateMap := make(map[[2]string]struct{})
 	userIDMap := make(map[string]struct{})

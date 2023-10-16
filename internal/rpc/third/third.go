@@ -35,6 +35,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -79,7 +80,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
-		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb)),
+		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), db),
 		userRpcClient: rpcclient.NewUserRpcClient(client),
 		s3dataBase:    controller.NewS3Database(o, relation.NewObjectInfo(db)),
 		defaultExpire: time.Hour * 24 * 7,

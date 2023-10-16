@@ -135,7 +135,7 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://http://127.0.0.1:10002"
+  apiURL: "http://127.0.0.1:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
@@ -143,11 +143,13 @@ object:
     secretAccessKey: "openIM123"
     sessionToken: ''
     signEndpoint: "http://127.0.0.1:10005"
+    publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
     secretID: ''
     secretKey: ''
     sessionToken: ''
+    publicRead: false
   oss:
     endpoint: "https://oss-cn-chengdu.aliyuncs.com"
     bucket: "demo-9999999"
@@ -155,7 +157,7 @@ object:
     accessKeyID: ''
     accessKeySecret: ''
     sessionToken: ''
-
+    publicRead: false
 
 ###################### RPC Port Configuration ######################
 # RPC service ports
@@ -197,7 +199,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: /root/workspaces/openim/openim-server/logs/
+  storageLocation: ../../logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -230,18 +232,18 @@ push:
   enable: getui
   geTui:
     pushUrl: "https://restapi.getui.com/v2/$appId"
-    masterSecret: ""
-    appKey: ""
-    intent: ""
-    channelID: ""
-    channelName: ""
+    masterSecret: ''
+    appKey: ''
+    intent: ''
+    channelID: ''
+    channelName: ''
   fcm:
     serviceAccount: "x.json"
   jpns:
-    appKey:
-    masterSecret:
-    pushUrl:
-    pushIntent:
+    appKey: ''
+    masterSecret: ''
+    pushUrl: ''
+    pushIntent: ''
 
 # App manager configuration
 #
@@ -352,6 +354,10 @@ callback:
     timeout: 5
     failedContinue: true
   beforeAddFriend:
+    enable: false
+    timeout: 5
+    failedContinue: true
+  beforeUpdateUserInfo:
     enable: false
     timeout: 5
     failedContinue: true

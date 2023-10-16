@@ -36,6 +36,13 @@ API_URL=${API_URL}
 # Default: DATA_DIR=./
 DATA_DIR=${DATA_DIR}
 
+# Choose the appropriate image address, the default is GITHUB image, 
+# you can choose docker hub, for Chinese users can choose Ali Cloud
+# export IMAGE_REGISTRY="ghcr.io/openimsdk"
+# export IMAGE_REGISTRY="openim"
+# export IMAGE_REGISTRY="registry.cn-hangzhou.aliyuncs.com/openimsdk"
+IMAGE_REGISTRY=${IMAGE_REGISTRY}
+
 # ======================================
 # ========= Network Configuration ======
 # ======================================
@@ -226,7 +233,6 @@ OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
 # Address or hostname for the OpenIM web service.
 # Default: OPENIM_WEB_ADDRESS=172.28.0.1
 OPENIM_WEB_ADDRESS=${OPENIM_WEB_NETWORK_ADDRESS}
-
 
 # ======================================
 # ========= OpenIM Server ==============

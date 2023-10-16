@@ -139,6 +139,15 @@ func (m *Minio) initMinio(ctx context.Context) error {
 			return fmt.Errorf("make bucket error: %w", err)
 		}
 	}
+	if conf.PublicRead {
+		policy := fmt.Sprintf(
+			`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`,
+			conf.Bucket,
+		)
+		if err := m.core.Client.SetBucketPolicy(ctx, conf.Bucket, policy); err != nil {
+			return err
+		}
+	}
 	m.location, err = m.core.Client.GetBucketLocation(ctx, conf.Bucket)
 	if err != nil {
 		return err
@@ -375,7 +384,15 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	} else if expire < time.Second {
 		expire = time.Second
 	}
-	rawURL, err := m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)
+	var (
+		rawURL *url.URL
+		err    error
+	)
+	if config.Config.Object.Minio.PublicRead {
+		rawURL, err = makeTargetURL(m.sign, m.bucket, name, m.location, false, query)
+	} else {
+		rawURL, err = m.sign.PresignedGetObject(ctx, m.bucket, name, expire, query)
+	}
 	if err != nil {
 		return "", err
 	}

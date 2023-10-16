@@ -361,13 +361,17 @@ linters-settings:
         - gorm.io/gorm
         - gorm.io/driver/mysql
         - k8s.io/klog
+        - github.com/allowed/module
+        - go.mongodb.org/mongo-driver/mongo
         # - gopkg.in/yaml.v2
       domains:                                                        # List of allowed module domains
         - google.golang.org
         - gopkg.in
         - golang.org
         - github.com
+        - go.mongodb.org
         - go.uber.org
+        - openim.io
         - go.etcd.io
     blocked:
       versions:

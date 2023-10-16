@@ -29,6 +29,7 @@ type SendMsg struct {
 	SessionType      int32                  `json:"sessionType"      binding:"required"`
 	IsOnlineOnly     bool                   `json:"isOnlineOnly"`
 	NotOfflinePush   bool                   `json:"notOfflinePush"`
+	SendTime         int64                  `json:"sendTime"`
 	OfflinePushInfo  *sdkws.OfflinePushInfo `json:"offlinePushInfo"`
 }
 

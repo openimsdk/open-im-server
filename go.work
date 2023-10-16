@@ -4,7 +4,7 @@ use (
 	.
 	./test/typecheck
 	./tools/changelog
-	./tools/imctl
+	//./tools/imctl
 	./tools/infra
 	./tools/ncpu
 	./tools/openim-web
@@ -12,4 +12,5 @@ use (
 	./tools/yamlfmt
 	./tools/component
 	./tools/url2im
+	./tools/data-conversion
 )

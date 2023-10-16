@@ -69,6 +69,15 @@ def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
 def "CHAT_BRANCH" "main"
 def "SERVER_BRANCH" "main"
 
+# Choose the appropriate image address, the default is GITHUB image, 
+# you can choose docker hub, for Chinese users can choose Ali Cloud
+# export IMAGE_REGISTRY="ghcr.io/openimsdk"
+# export IMAGE_REGISTRY="openim"
+# export IMAGE_REGISTRY="registry.cn-hangzhou.aliyuncs.com/openimsdk"
+def "IMAGE_REGISTRY" "ghcr.io/openimsdk"
+# def "IMAGE_REGISTRY" "openim"
+# def "IMAGE_REGISTRY" "registry.cn-hangzhou.aliyuncs.com/openimsdk"
+
 ###################### OpenIM Docker Network ######################
 # 设置 Docker 网络的网段
 readonly DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET:-'172.28.0.0/16'}
@@ -186,17 +195,21 @@ def "MINIO_ACCESS_KEY" "${USER}"                                                
 def "MINIO_SECRET_KEY" "${PASSWORD}"                                              # MinIO的密钥
 def "MINIO_SESSION_TOKEN"                                                         # MinIO的会话令牌
 readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址
+def "MINIO_PUBLIC_READ" "false"                                                   # 公有读
+
 # 腾讯云COS的存储桶URL
 def "COS_BUCKET_URL" "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
 def "COS_SECRET_ID"                                                     # 腾讯云COS的密钥ID
 def "COS_SECRET_KEY"                                                    # 腾讯云COS的密钥
 def "COS_SESSION_TOKEN"                                                 # 腾讯云COS的会话令牌
+def "COS_PUBLIC_READ" "false"                                           # 公有读
 def "OSS_ENDPOINT" "https://oss-cn-chengdu.aliyuncs.com"                # 阿里云OSS的端点URL
 def "OSS_BUCKET" "demo-9999999"                                         # 阿里云OSS的存储桶名称
 def "OSS_BUCKET_URL" "https://demo-9999999.oss-cn-chengdu.aliyuncs.com" # 阿里云OSS的存储桶URL
 def "OSS_ACCESS_KEY_ID"                                                 # 阿里云OSS的访问密钥ID
 def "OSS_ACCESS_KEY_SECRET"                                             # 阿里云OSS的密钥
 def "OSS_SESSION_TOKEN"                                                 # 阿里云OSS的会话令牌
+def "OSS_PUBLIC_READ" "false"                                           # 公有读
 
 ###################### Redis 配置信息 ######################
 def "REDIS_PORT" "16379"                                    # Redis的端口
@@ -285,11 +298,16 @@ def "WEBSOCKET_TIMEOUT" "10"          # Websocket超时
 def "PUSH_ENABLE" "getui"             # 推送是否启用
 # GeTui推送URL
 readonly GETUI_PUSH_URL=${GETUI_PUSH_URL:-'https://restapi.getui.com/v2/$appId'}
+def "GETUI_MASTER_SECRET" ""          # GeTui主密钥
+def "GETUI_APP_KEY" ""                # GeTui应用密钥
+def "GETUI_INTENT" ""                 # GeTui推送意图
+def "GETUI_CHANNEL_ID" ""             # GeTui渠道ID
+def "GETUI_CHANNEL_NAME" ""           # GeTui渠道名称
 def "FCM_SERVICE_ACCOUNT" "x.json"    # FCM服务账户
-def "JPNS_APP_KEY"                    # JPNS应用密钥
-def "JPNS_MASTER_SECRET"              # JPNS主密钥
-def "JPNS_PUSH_URL"                   # JPNS推送URL
-def "JPNS_PUSH_INTENT"                # JPNS推送意图
+def "JPNS_APP_KEY"  ""                  # JPNS应用密钥
+def "JPNS_MASTER_SECRET" ""             # JPNS主密钥
+def "JPNS_PUSH_URL"  ""                 # JPNS推送URL
+def "JPNS_PUSH_INTENT" ""               # JPNS推送意图
 def "MANAGER_USERID_1" "openIM123456" # 管理员ID 1
 def "MANAGER_USERID_2" "openIM654321" # 管理员ID 2
 def "MANAGER_USERID_3" "openIMAdmin"  # 管理员ID 3

@@ -160,7 +160,6 @@ flycheck_*.el
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-tools/imctl
 
 # Go workspace file
 # go.work
