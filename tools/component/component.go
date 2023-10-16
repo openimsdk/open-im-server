@@ -163,12 +163,25 @@ func checkMongo() error {
 			client.Disconnect(context.TODO())
 		}
 	}()
-	mongodbHosts := ""
-	for i, v := range config.Config.Mongo.Address {
-		if i == len(config.Config.Mongo.Address)-1 {
-			mongodbHosts += v
+	if config.Config.Mongo.Uri != "" {
+		uri = config.Config.Mongo.Uri
+	} else {
+		mongodbHosts := ""
+		for i, v := range config.Config.Mongo.Address {
+			if i == len(config.Config.Mongo.Address)-1 {
+				mongodbHosts += v
+			} else {
+				mongodbHosts += v + ","
+			}
+		}
+		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
+				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
 		} else {
-			mongodbHosts += v + ","
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+				mongodbHosts, config.Config.Mongo.Database,
+				config.Config.Mongo.MaxPoolSize)
 		}
 	}
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(
@@ -177,7 +190,7 @@ func checkMongo() error {
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
-		err = client.Ping(context.TODO(), &readpref.ReadPref{})
+		err = client.Ping(context.TODO(), nil)
 		if err != nil {
 			return errs.Wrap(err)
 		}
