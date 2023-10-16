@@ -158,6 +158,8 @@ func checkMysql() error {
 
 func checkMongo() error {
 	var client *mongo.Client
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	
 	defer func() {
 		if client != nil {
 			client.Disconnect(context.TODO())
@@ -184,9 +186,7 @@ func checkMongo() error {
 				config.Config.Mongo.MaxPoolSize)
 		}
 	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(
-		fmt.Sprintf("mongodb://%v:%v@%v/?authSource=admin",
-			config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts)))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri)
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
