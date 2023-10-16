@@ -1,6 +1,0 @@
-image:
-  repository: m.daocloud.io/registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
-
-nfs:
-  server: 172.29.166.17
-  path: /nfs_share
