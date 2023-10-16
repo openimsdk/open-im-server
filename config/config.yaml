@@ -27,7 +27,7 @@
 # Zookeeper username
 # Zookeeper password
 envs:
-  discovery: zookeeper #k8s
+  discovery: zookeeper
 
 zookeeper:
   schema: openim
