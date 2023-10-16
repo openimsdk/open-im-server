@@ -46,6 +46,9 @@ type POfflinePush struct {
 }
 
 type configStruct struct {
+	Envs struct {
+		Discovery string `yaml:"discovery"`
+	}
 	Zookeeper struct {
 		Schema   string   `yaml:"schema"`
 		ZkAddr   []string `yaml:"address"`
@@ -185,10 +188,11 @@ type configStruct struct {
 	} `yaml:"log"`
 
 	LongConnSvr struct {
-		OpenImWsPort        []int `yaml:"openImWsPort"`
-		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
-		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
-		WebsocketTimeout    int   `yaml:"websocketTimeout"`
+		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+		OpenImWsPort             []int `yaml:"openImWsPort"`
+		WebsocketMaxConnNum      int   `yaml:"websocketMaxConnNum"`
+		WebsocketMaxMsgLen       int   `yaml:"websocketMaxMsgLen"`
+		WebsocketTimeout         int   `yaml:"websocketTimeout"`
 	} `yaml:"longConnSvr"`
 
 	Push struct {

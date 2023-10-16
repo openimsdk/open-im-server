@@ -16,7 +16,8 @@ package cmd
 
 import (
 	"errors"
-
+	"github.com/OpenIMSDK/protocol/constant"
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
@@ -30,8 +31,9 @@ type RpcCmd struct {
 }
 
 func NewRpcCmd(name string) *RpcCmd {
-	authCmd := &RpcCmd{NewRootCmd(name)}
-	return authCmd
+	ret := &RpcCmd{NewRootCmd(name)}
+	ret.SetRootCmdPt(ret)
+	return ret
 }
 
 func (a *RpcCmd) Exec() error {
@@ -50,4 +52,41 @@ func (a *RpcCmd) StartSvr(
 		return errors.New("port is required")
 	}
 	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
+}
+func (a *RpcCmd) GetPortFromConfig(portType string) int {
+	switch a.Name {
+	case RpcPushServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImPushPort[0]
+		}
+	case RpcAuthServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImAuthPort[0]
+		}
+	case RpcConversationServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImConversationPort[0]
+		}
+	case RpcFriendServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImFriendPort[0]
+		}
+	case RpcGroupServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImGroupPort[0]
+		}
+	case RpcMsgServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImMessagePort[0]
+		}
+	case RpcThirdServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImThirdPort[0]
+		}
+	case RpcUserServer:
+		if portType == constant.FlagPort {
+			return config2.Config.RpcPort.OpenImUserPort[0]
+		}
+	}
+	return 0
 }

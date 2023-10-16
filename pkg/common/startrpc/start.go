@@ -16,19 +16,16 @@ package startrpc
 
 import (
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"net"
 	"strconv"
-	"time"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	"github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
-	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
 	"github.com/OpenIMSDK/tools/prome"
@@ -60,15 +57,17 @@ func Start(
 		return err
 	}
 	defer listener.Close()
-	zkClient, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-		zookeeper.WithFreq(time.Hour), zookeeper.WithUserNameAndPassword(
-			config.Config.Zookeeper.Username,
-			config.Config.Zookeeper.Password,
-		), zookeeper.WithRoundRobin(), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))
+	zkClient, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	/*
+		zkClient, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+			zookeeper.WithFreq(time.Hour), zookeeper.WithUserNameAndPassword(
+				config.Config.Zookeeper.Username,
+				config.Config.Zookeeper.Password,
+			), zookeeper.WithRoundRobin(), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	defer zkClient.CloseZK()
+	//defer zkClient.CloseZK()
 	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
