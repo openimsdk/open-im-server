@@ -186,7 +186,7 @@ func checkMongo() error {
 				config.Config.Mongo.MaxPoolSize)
 		}
 	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri)
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
