@@ -48,7 +48,7 @@ jobs:
         fi
 
     - name: Push Changes
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "Auto Commit CHANGELOG"
         branch: release-v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}
@@ -68,7 +68,7 @@ jobs:
         fi
 
     - name: Push Changes
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "Auto Commit CHANGELOG"
         branch: main
