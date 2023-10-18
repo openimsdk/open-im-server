@@ -63,13 +63,12 @@ const (
 )
 
 func NewMinio() (s3.Interface, error) {
-	conf := config.Config.Object.Minio
-	u, err := url.Parse(conf.Endpoint)
+	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+		Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 		Secure: u.Scheme == "https",
 	}
 	client, err := minio.New(u.Host, opts)
@@ -77,31 +76,35 @@ func NewMinio() (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket: conf.Bucket,
+		bucket: config.Config.Object.Minio.Bucket,
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
 	}
-	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
-		m.bucketURL = conf.Endpoint + "/" + conf.Bucket + "/"
 		m.prefix = u.Path
+		u.Path = ""
+		config.Config.Object.Minio.Endpoint = u.String()
+		m.bucketURL = config.Config.Object.Minio.Endpoint + "/" + config.Config.Object.Minio.Bucket + "/"
 	} else {
-		su, err := url.Parse(conf.SignEndpoint)
+		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		m.opts = &minio.Options{
-			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+			Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 			Secure: su.Scheme == "https",
 		}
 		m.sign, err = minio.New(su.Host, m.opts)
 		if err != nil {
 			return nil, err
 		}
-		m.bucketURL = conf.SignEndpoint + "/" + conf.Bucket + "/"
 		m.prefix = su.Path
+		su.Path = ""
+		config.Config.Object.Minio.SignEndpoint = su.String()
+		m.bucketURL = config.Config.Object.Minio.SignEndpoint + "/" + config.Config.Object.Minio.Bucket + "/"
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -258,9 +261,13 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		return nil, err
 	}
 	result := s3.AuthSignResult{
-		URL:   m.bucketURL + name,
 		Query: url.Values{"uploadId": {uploadID}},
 		Parts: make([]s3.SignPart, len(partNumbers)),
+	}
+	if m.prefix == "" {
+		result.URL = m.bucketURL + name
+	} else {
+		result.URL = m.bucketURL + path.Join(m.prefix[1:], name)
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := result.URL + "?partNumber=" + strconv.Itoa(partNumber) + "&uploadId=" + uploadID
