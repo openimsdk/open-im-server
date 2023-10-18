@@ -86,6 +86,7 @@ func NewMinio() (s3.Interface, error) {
 		m.opts = opts
 		m.sign = m.core.Client
 		m.bucketURL = conf.Endpoint + "/" + conf.Bucket + "/"
+		m.prefix = u.Path
 	} else {
 		su, err := url.Parse(conf.SignEndpoint)
 		if err != nil {
@@ -100,6 +101,7 @@ func NewMinio() (s3.Interface, error) {
 			return nil, err
 		}
 		m.bucketURL = conf.SignEndpoint + "/" + conf.Bucket + "/"
+		m.prefix = su.Path
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -118,6 +120,7 @@ type Minio struct {
 	sign      *minio.Client
 	lock      sync.Locker
 	init      bool
+	prefix    string
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -285,6 +288,9 @@ func (m *Minio) PresignedPutObject(ctx context.Context, name string, expire time
 	if err != nil {
 		return "", err
 	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
+	}
 	return rawURL.String(), nil
 }
 
@@ -395,6 +401,9 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	}
 	if err != nil {
 		return "", err
+	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
 	}
 	return rawURL.String(), nil
 }
