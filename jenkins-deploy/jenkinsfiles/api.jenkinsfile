@@ -101,10 +101,10 @@ pipeline {
                     sh """  
                       echo `Build image ...`
                       docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/jenkins-deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
-                      docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                      docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}-${JOB_NAME}:${CommitHash}-${BUILD_NUM}
                       
                       echo `Push image ...`
-                      docker push ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                      docker push ${HARBOR_URL}/${JOB_ENV}-${JOB_NAME}:${CommitHash}-${BUILD_NUM}
 
                       echo `Start removing image ...1.`
                       docker rmi ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
