@@ -287,10 +287,12 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 			if err != nil {
 				return errs.Wrap(err)
 			}
+			onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
+		} else {
+			onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
 		}
 		onlineStatus.Status = constant.Online
 		onlineStatus.UserID = userID
-		onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
 		newjsonData, err := json.Marshal(&onlineStatus)
 		if err != nil {
 			return errs.Wrap(err)
@@ -303,4 +305,21 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 	}
 
 	return nil
+}
+
+type Comparable interface {
+	~int | ~string | ~float64 | ~int32
+}
+
+func RemoveRepeatedElementsInList[T Comparable](slc []T) []T {
+	var result []T
+	tempMap := map[T]struct{}{}
+	for _, e := range slc {
+		if _, found := tempMap[e]; !found {
+			tempMap[e] = struct{}{}
+			result = append(result, e)
+		}
+	}
+
+	return result
 }
