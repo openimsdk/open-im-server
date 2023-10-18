@@ -44,6 +44,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.43
+	github.com/openimsdk/open-im-server/v3 v3.3.2
 )
 
 require (
