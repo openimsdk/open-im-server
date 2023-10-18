@@ -171,9 +171,13 @@ func checkMongo() error {
 			mongodbHosts += v + ","
 		}
 	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(
-		fmt.Sprintf("mongodb://%v:%v@%v/?authSource=admin",
-			config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts)))
+	var mongoURI string
+	if config.Config.Mongo.Uri == "" {
+		mongoURI = fmt.Sprintf("mongodb://%v:%v@%v/?authSource=admin", config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts)
+	} else {
+		mongoURI = config.Config.Mongo.Uri
+	}
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
