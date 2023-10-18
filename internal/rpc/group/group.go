@@ -867,7 +867,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, []string{req.UserID}); err != nil {
 			return nil, err
 		}
-		s.Notification.SuperGroupNotification(ctx, req.UserID, req.UserID)
+		_ = s.Notification.SuperGroupNotification(ctx, req.UserID, req.UserID)
 	} else {
 		info, err := s.TakeGroupMember(ctx, req.GroupID, req.UserID)
 		if err != nil {
@@ -880,7 +880,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) 
 		if err != nil {
 			return nil, err
 		}
-		s.Notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(info, 0))
+		_ = s.Notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(info, 0))
 	}
 	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{req.UserID}); err != nil {
 		return nil, err
