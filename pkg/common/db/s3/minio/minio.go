@@ -87,7 +87,7 @@ func NewMinio() (s3.Interface, error) {
 		m.prefix = u.Path
 		u.Path = ""
 		config.Config.Object.Minio.Endpoint = u.String()
-		m.bucketURL = config.Config.Object.Minio.Endpoint + "/" + config.Config.Object.Minio.Bucket + "/"
+		m.signEndpoint = config.Config.Object.Minio.Endpoint
 	} else {
 		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
 		if err != nil {
@@ -104,7 +104,7 @@ func NewMinio() (s3.Interface, error) {
 		m.prefix = su.Path
 		su.Path = ""
 		config.Config.Object.Minio.SignEndpoint = su.String()
-		m.bucketURL = config.Config.Object.Minio.SignEndpoint + "/" + config.Config.Object.Minio.Bucket + "/"
+		m.signEndpoint = config.Config.Object.Minio.SignEndpoint
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -115,15 +115,15 @@ func NewMinio() (s3.Interface, error) {
 }
 
 type Minio struct {
-	bucket    string
-	bucketURL string
-	location  string
-	opts      *minio.Options
-	core      *minio.Core
-	sign      *minio.Client
-	lock      sync.Locker
-	init      bool
-	prefix    string
+	bucket       string
+	signEndpoint string
+	location     string
+	opts         *minio.Options
+	core         *minio.Core
+	sign         *minio.Client
+	lock         sync.Locker
+	init         bool
+	prefix       string
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -265,9 +265,9 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		Parts: make([]s3.SignPart, len(partNumbers)),
 	}
 	if m.prefix == "" {
-		result.URL = m.bucketURL + name
+		result.URL = m.signEndpoint + "/" + m.bucket + "/" + name
 	} else {
-		result.URL = m.bucketURL + path.Join(m.prefix[1:], name)
+		result.URL = m.signEndpoint + m.prefix + "/" + m.bucket + "/" + name
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := result.URL + "?partNumber=" + strconv.Itoa(partNumber) + "&uploadId=" + uploadID
@@ -279,9 +279,9 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
-			URL:        request.URL.String(),
-			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
-			Header:     request.Header,
+			//URL:        request.URL.String(),
+			Query:  url.Values{"partNumber": {strconv.Itoa(partNumber)}},
+			Header: request.Header,
 		}
 	}
 	return &result, nil
