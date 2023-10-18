@@ -1,0 +1,52 @@
+# redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+  namespace: social
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      name: redis
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+      #          env:
+      #            - name: REDIS_PASSWORD
+      #              value: "openIM123"
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: social
+  labels:
+    name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 30029
+      targetPort: 6379
+      nodePort: 30029
+  type: NodePort
+  sessionAffinity: None
+
+      

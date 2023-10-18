@@ -1,0 +1,66 @@
+# msg-gateway.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msg-gateway
+  namespace: ${JOB_ENV}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: msg-gateway
+  template:
+    metadata:
+      labels:
+        name: msg-gateway
+    spec:
+      containers:
+        - name: msg-gateway
+          image: ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "200m"
+            requests:
+              memory: "500Mi"
+              cpu: "50m"
+          ports:
+            - containerPort: 10001
+              name: ws
+              protocol: TCP
+            - containerPort: 10140
+              name: rpc
+              protocol: TCP
+          volumeMounts:
+            - name: localtime
+              mountPath: /etc/localtime
+            - name: config
+              mountPath: ${CONF_PATH}
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/UTC
+        - name: config
+          configMap:
+            name: ${CONFIGMAP_NAME}
+      restartPolicy: Always
+---
+# 外部访问的服务
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    name: msg-gateway
+  name: msg-gateway
+  namespace: ${JOB_ENV}
+spec:
+  type: NodePort
+  ports:
+    - name: msg-gateway-ws
+      port: 10001
+      targetPort: 10001
+      nodePort: 30031
+  selector:
+    name: msg-gateway

@@ -244,3 +244,73 @@ help: Makefile
 .PHONY: help-all
 help-all: go.help copyright.help tools.help image.help dependencies.help gen.help release.help swagger.help help
 	$(call makeallhelp)
+
+#####
+#####
+#####
+
+.PHONY:api
+api:
+	@echo "${NOW} Starting to build api..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-api cmd/openim-api/main.go
+
+.PHONY:gateway
+gateway:
+	@echo "${NOW} Starting to build gateway..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-msg-gateway cmd/openim-msggateway/main.go
+
+.PHONY:transfer
+transfer:
+	@echo "${NOW} Starting to build transfer..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-msgtransfer cmd/openim-msgtransfer/main.go
+
+.PHONY:push
+push:
+	@echo "${NOW} Starting to build push..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-push cmd/openim-push/main.go
+
+.PHONY:group
+group:
+	@echo "${NOW} Starting to build rpc_group..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-group cmd/openim-rpc/openim-rpc-group/main.go
+
+.PHONY:msg
+msg:
+	@echo "${NOW} Starting to build rpc_msg..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-msg cmd/openim-rpc/openim-rpc-msg/main.go
+
+.PHONY:user
+user:
+	@echo "${NOW} Starting to build rpc_user..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-user cmd/openim-rpc/openim-rpc-user/main.go
+
+.PHONY:conversation
+conversation:
+	@echo "${NOW} Starting to build rpc_conversation..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-conversation cmd/openim-rpc/openim-rpc-conversation/main.go
+
+.PHONY:friend
+friend:
+	@echo "${NOW} Starting to build rpc_conversation..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-friend cmd/openim-rpc/openim-rpc-friend/main.go
+
+.PHONY:third
+third:
+	@echo "${NOW} Starting to build rpc_conversation..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-third cmd/openim-rpc/openim-rpc-third/main.go
+
+.PHONY:auth
+auth:
+	@echo "${NOW} Starting to build rpc_conversation..."
+	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH};go build -ldflags="-w -s" -o ./bin/openim-rpc-auth cmd/openim-rpc/openim-rpc-auth/main.go
+
+.PHONY:build
+build: api gateway transfer push group msg user conversation friend third auth
+	@echo "${NOW} Build done, files in ./bin as follow:"
+	@ls -l bin | grep openim-
+
+.PHONY:clean
+clean:
+	@echo "${NOW} Starting to clean ..."
+	rm -rf bin/openim-* && rm -rf logs
+	@echo "${NOW} Clean done!"

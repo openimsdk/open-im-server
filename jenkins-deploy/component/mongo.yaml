@@ -1,0 +1,58 @@
+# mongo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: social
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      name: mongo
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6.0.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+              protocol: TCP
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: root
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: openIM123
+            - name: MONGO_INITDB_DATABASE
+              value: openIM_v3
+            - name: MONGO_USERNAME
+              value: root
+            - name: MONGO_PASSWORD
+              value: openIM123
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: social
+  labels:
+    name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: 30007
+      targetPort: 27017
+      nodePort: 30007
+  type: NodePort
+  sessionAffinity: None

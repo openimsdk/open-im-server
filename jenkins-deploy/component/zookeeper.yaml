@@ -1,0 +1,48 @@
+#zk
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  labels:
+    app: zookeeper
+  namespace: social
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      name: zookeeper
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper:latest
+          image: wurstmeister/zookeeper
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2181
+              protocol: TCP
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  namespace: social
+  labels:
+    name: zookeeper
+spec:
+  selector:
+    app: zookeeper
+  ports:
+    - protocol: TCP
+      port: 30001
+      targetPort: 2181
+      nodePort: 30001
+  type: NodePort
+  sessionAffinity: None
+      

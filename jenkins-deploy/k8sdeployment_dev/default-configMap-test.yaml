@@ -1,0 +1,592 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${CONFIGMAP_NAME}
+  namespace: ${JOB_ENV}
+  labels:
+    app: ${CONFIGMAP_NAME}
+data:
+  config.yaml: |
+    ################################################
+    # 测试环境
+    ################################################
+    zookeeper:
+      schema: openim                          #不建议修改
+      address: [ 127.0.0.1:30001 ]             #
+      username:                               #用户名
+      password:                               #密码
+    
+    mysql:
+      address: [ 127.0.0.1:30006 ]            #目前仅支持单机
+      username: root                          #用户名
+      password: openIM123                     #密码
+      database: openIM_v3                     #不建议修改
+      maxOpenConn: 1000                       #最大连接数
+      maxIdleConn: 100                        #最大空闲连接数
+      maxLifeTime: 60                         #连接可以重复使用的最长时间（秒）
+      logLevel: 4                             #日志级别 1=slient 2=error 3=warn 4=info
+      slowThreshold: 500                      #慢语句阈值 （毫秒）
+    
+    mongo:
+      uri:                                    #不为空则直接使用该值
+      address: [ 127.0.0.1:30007 ]            #单机时为mongo地址，使用分片集群时，为mongos地址
+      database: openIM_v3                      #mongo db 默认即可
+      username: root                          #用户名
+      password: openIM123                     #密码
+      maxPoolSize: 100
+    
+    redis:
+      address: [ 127.0.0.1:30029 ]            #
+      username:                               #only redis version 6.0+ need username
+      password:                               #密码
+    
+    kafka:
+      username:                               #用户名
+      password:                               #密码
+      addr: [ 127.0.0.1:30032 ]                #
+      latestMsgToRedis:
+        topic: "latestMsgToRedis"             #不建议修改
+      offlineMsgToMongo:
+        topic: "offlineMsgToMongoMysql"       #不建议修改
+      msgToPush:
+        topic: "msgToPush"                    #不建议修改
+      consumerGroupID: #消费者组，不建议修改
+        msgToRedis: redis                     #
+        msgToMongo: mongo                     #
+        msgToMySql: mysql                     #
+        msgToPush: push                       #
+    
+    
+    rpc:
+      registerIP:                             #作为rpc启动时，注册到zookeeper的IP，api/gateway能访问到此ip和对应的rpcPort中的端口
+      listenIP:                               #默认为0.0.0.0
+    
+    
+    api:
+      openImApiPort: [ 10002 ]                #api服务端口
+      listenIP:                               #默认为0.0.0.0
+    
+    object:
+      enable: "minio"                           #使用minio
+      apiURL: "http://127.0.0.1:10002/object/"
+      minio:
+        bucket: "openim"                      #不建议修改
+        endpoint: "http://127.0.0.1:10005"      #minio对外服务的ip和端口，app要能访问此ip和端口
+        accessKeyID: "root"                     #ID
+        secretAccessKey: "openIM123"            #秘钥
+        sessionToken: ""                        #token
+      cos: #tencent cos
+        bucketURL: "https://temp-1252357374.cos.ap-chengdu.myqcloud.com"
+        secretID: ""
+        secretKey: ""
+        sessionToken: ""
+      oss: #ali oss
+        endpoint: "https://oss-cn-chengdu.aliyuncs.com"
+        bucket: "demo-9999999"
+        bucketURL: "https://demo-9999999.oss-cn-chengdu.aliyuncs.com"
+        accessKeyID: ""
+        accessKeySecret: ""
+        sessionToken: ""
+    
+    rpcPort: #rpc服务端口，不建议修改，端口由脚本读取后传入程序，如启动多个程序，只需要填入多个端口，用逗号隔开，如  [10110, 10111]
+      openImUserPort: [ 10110 ]
+      openImFriendPort: [ 10120 ]
+      openImMessagePort: [ 10130 ]
+      openImMessageGatewayPort: [ 10140 ]
+      openImGroupPort: [ 10150 ]
+      openImAuthPort: [ 10160 ]
+      openImPushPort: [ 10170 ]
+      openImConversationPort: [ 10180 ]
+      openImThirdPort: [ 10190 ]
+    
+    rpcRegisterName: #rpc注册服务名，不建议修改
+      openImUserName: User
+      openImFriendName: Friend
+      openImMsgName: Msg
+      openImPushName: Push
+      openImMessageGatewayName: MessageGateway
+      openImGroupName: Group
+      openImAuthName: Auth
+      openImConversationName: Conversation
+      openImThirdName: Third
+    
+    log:
+      storageLocation: ../../../../../logs/   #存放目录
+      rotationTime: 24                        #日志旋转时间
+      remainRotationCount: 2                  #日志数量
+      remainLogLevel: 6                       #日志级别 6表示全都打印，
+      isStdout: false
+      isJson: false
+      withStack: false
+    
+    longConnSvr:
+      openImWsPort: [ 10001 ]             #msg_gateway的websocket端口
+      websocketMaxConnNum: 100000         #websocket最大连接数
+      websocketMaxMsgLen: 4096            #websocket请求包最大长度
+      websocketTimeout: 10                #websocket连接握手超时时间
+    
+    push:
+      enable: getui
+      geTui: #个推离线推送
+        pushUrl: "https://restapi.getui.com/v2/$appId"
+        masterSecret: ""
+        appKey: ""
+        intent: ""
+        channelID: ""
+        channelName: ""
+      fcm: #fcm离线推送
+        serviceAccount: "x.json"          #帐号文件，并放在 config目录下
+      jpns: #极光推送 在极光后台申请后，修改以下四项
+        appKey:
+        masterSecret:
+        pushUrl:
+        pushIntent:
+    
+    manager:
+      userID: [ "openIM123456","openIM654321","openIMAdmin" ]   #内置的app管理员userID
+      nickname: [ "system1","system2", "system3" ]              #内置的app管理员nickname
+    
+    
+    
+    
+    multiLoginPolicy: 1                                     #多平台登录：Android、iOS、Windows、Mac、web 每种平台只能有一个在线
+    
+    
+    chatPersistenceMysql: true                              #消息是否存入mysql，mysql中的消息仅用于管理后台使用
+    msgCacheTimeout: 86400                                  #信消息缓存时间秒，不建议修改
+    groupMessageHasReadReceiptEnable: true                  #群聊已读是否开启
+    singleMessageHasReadReceiptEnable: true                 #单聊已读是否开启
+    
+    retainChatRecords: 365                                  #mongo保存离线消息时间（天）
+    chatRecordsClearTime: "0 2 * * 3"                       #每周三凌晨2点清理mongo中的过期（超过retainChatRecords时间）消息，这个删除是为了清理满足上个配置retainChatRecords的过期消息，不会发送通知，仅仅作为清理磁盘使用
+    msgDestructTime: "0 2 * * *"                            #消息自动删除时间，每天凌晨2点删除过期消息，这个删除是为了删除保留时间超过超过会话字段msg_destruct_time（秒）的消息。
+    
+    secret: tuoyun #秘钥，获取token时校验
+    
+    tokenPolicy:
+      expire: 90                                     #过期时间（天）
+    
+    messageVerify:
+      friendVerify: false                                  #发送消息时是否验证好友关系
+    
+    #ios系统推送声音以及标记计数
+    iosPush:
+      pushSound: "xxx"
+      badgeCount: true
+      production: false
+    
+    callback:
+      # 回调callback
+      url:
+      beforeSendSingleMsg:
+        enable: false                                     #是否启用此回调事件
+        timeout: 5                                        #超时时间（秒）
+        failedContinue: true                              #如回调失败是否继续往后执行
+      afterSendSingleMsg:
+        enable: false
+        timeout: 5
+      beforeSendGroupMsg:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      afterSendGroupMsg:
+        enable: false
+        timeout: 5
+      msgModify:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      userOnline:
+        enable: false
+        timeout: 5
+      userOffline:
+        enable: false
+        timeout: 5
+      userKickOff:
+        enable: false
+        timeout: 5
+      offlinePush:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      onlinePush:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      superGroupOnlinePush:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      beforeAddFriend:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      beforeCreateGroup:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      beforeMemberJoinGroup:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      beforeSetGroupMemberInfo:
+        enable: false
+        timeout: 5
+        failedContinue: true
+      setMessageReactionExtensions:
+        enable: false
+        timeout: 5
+        failedContinue: true
+    
+    
+    prometheus: #prometheus每个服务的端口数量需要和rpcPort保持对应
+      enable: false
+      userPrometheusPort: [ 20110 ]
+      friendPrometheusPort: [ 20120 ]
+      messagePrometheusPort: [ 20130 ]
+      messageGatewayPrometheusPort: [ 20140 ]
+      groupPrometheusPort: [ 20150 ]
+      authPrometheusPort: [ 20160 ]
+      pushPrometheusPort: [ 20170 ]
+      conversationPrometheusPort: [ 20230 ]
+      rtcPrometheusPort: [ 21300 ]
+      thirdPrometheusPort: [ 21301 ]
+      messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] #端口数量需要和script/path_info.sh中的msg_transfer_service_num保持一致
+  notification.yaml: |
+    # Copyright © 2023 OpenIM. All rights reserved.
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    groupCreated:
+      isSendMsg: true #是否发送消息，false不发消息为无声的触发同步。true发消息需要触发会话，rpc notification直接发两次，一次消息一次通知, options字段isNotification是否为通知
+      reliabilityLevel: 1 # 1为online才发送 2为必达
+      unreadCount: false # 只在isSendMsg为true的情况下有作用
+      offlinePush:
+        enable: false # 开启该开关
+        title: "create group title" # xx create the group
+        desc: "create group desc"
+        ext: "create group ext"
+
+    # 不加消息contentType，content统一json 结构体使用pb的
+
+
+    groupInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupInfoSet title"
+        desc: "groupInfoSet desc"
+        ext: "groupInfoSet ext"
+
+
+    joinGroupApplication:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "joinGroupApplication title"
+        desc: "joinGroupApplication desc"
+        ext: "joinGroupApplication ext"
+
+    memberQuit:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "memberQuit title"
+        desc: "memberQuit desc"
+        ext: "memberQuit ext"
+
+    groupApplicationAccepted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupApplicationAccepted title"
+        desc: "groupApplicationAccepted desc"
+        ext: "groupApplicationAccepted ext"
+
+    groupApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: " title"
+        desc: " desc"
+        ext: " ext"
+
+
+    groupOwnerTransferred:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupOwnerTransferred title"
+        desc: "groupOwnerTransferred desc"
+        ext: "groupOwnerTransferred ext"
+
+    memberKicked:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "memberKicked title"
+        desc: "memberKicked desc"
+        ext: "memberKicked ext"
+
+    memberInvited:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "memberInvited title"
+        desc: "memberInvited desc"
+        ext: "memberInvited ext"
+
+    memberEnter:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "memberEnter title"
+        desc: "memberEnter desc"
+        ext: "memberEnter ext"
+
+    groupDismissed:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupDismissed title"
+        desc: "groupDismissed desc"
+        ext: "groupDismissed ext"
+
+    groupMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupMuted title"
+        desc: "groupMuted desc"
+        ext: "groupMuted ext"
+
+    groupCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupCancelMuted title"
+        desc: "groupCancelMuted desc"
+        ext: "groupCancelMuted ext"
+      defaultTips:
+        tips: "group Cancel Muted"
+
+
+    groupMemberMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupMemberMuted title"
+        desc: "groupMemberMuted desc"
+        ext: "groupMemberMuted ext"
+
+    groupMemberCancelMuted:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupMemberCancelMuted title"
+        desc: "groupMemberCancelMuted desc"
+        ext: "groupMemberCancelMuted ext"
+
+    groupMemberInfoSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupMemberInfoSet title"
+        desc: "groupMemberInfoSet desc"
+        ext: "groupMemberInfoSet ext"
+
+    groupInfoSetAnnouncement:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupInfoSetAnnouncement title"
+        desc: "groupInfoSetAnnouncement desc"
+        ext: "groupInfoSetAnnouncement ext"
+
+
+    groupInfoSetName:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "groupInfoSetName title"
+        desc: "groupInfoSetName desc"
+        ext: "groupInfoSetName ext"
+
+
+    #############################friend#################################
+    friendApplicationAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "Somebody applies to add you as a friend"
+        desc: "Somebody applies to add you as a friend"
+        ext: "Somebody applies to add you as a friend"
+
+    friendApplicationApproved:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "Someone applies to add your friend application"
+        desc: "Someone applies to add your friend application"
+        ext: "Someone applies to add your friend application"
+
+    friendApplicationRejected:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "Someone rejected your friend application"
+        desc: "Someone rejected your friend application"
+        ext: "Someone rejected your friend application"
+
+    friendAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "We have become friends"
+        desc: "We have become friends"
+        ext: "We have become friends"
+
+    friendDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "deleted a friend"
+        desc: "deleted a friend"
+        ext: "deleted a friend"
+
+    friendRemarkSet:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "Your friend's profile has been changed"
+        desc: "Your friend's profile has been changed"
+        ext: "Your friend's profile has been changed"
+
+    blackAdded:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "blocked a user"
+        desc: "blocked a user"
+        ext: "blocked a user"
+
+    blackDeleted:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "Remove a blocked user"
+        desc: "Remove a blocked user"
+        ext: "Remove a blocked user"
+
+    friendInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "friend info updated"
+        desc: "friend info updated"
+        ext: "friend info updated"
+
+    #####################user#########################
+    userInfoUpdated:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "Remove a blocked user"
+        desc: "Remove a blocked user"
+        ext: "Remove a blocked user"
+
+    #####################conversation#########################
+    conversationChanged:
+      isSendMsg: false
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "conversation changed"
+        desc: "conversation changed"
+        ext: "conversation changed"
+
+    conversationSetPrivate:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: true
+        title: "burn after reading"
+        desc: "burn after reading"
+        ext: "burn after reading"
+
+    #####################msg#########################
+    msgQuoteMember:
+      isSendMsg: true
+      reliabilityLevel: 1
+      unreadCount: false
+      offlinePush:
+        enable: false
+        title: "your msg has been quote"
+        desc: "your msg has been quote"
+        ext: "your msg has been quote"

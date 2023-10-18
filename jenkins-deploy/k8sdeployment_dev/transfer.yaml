@@ -1,0 +1,41 @@
+# transfer don't need port, please handle it separately
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${DEPLOYMENT_NAME}
+  namespace: ${JOB_ENV}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ${DEPLOYMENT_NAME}
+  template:
+    metadata:
+      labels:
+        name: ${DEPLOYMENT_NAME}
+    spec:
+      containers:
+        - name: ${DEPLOYMENT_NAME}
+          image: ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: ${DOCKER_MEM}
+              cpu: ${DOCKER_CPU}
+            requests:
+              memory: 100Mi
+              cpu: 80m
+          volumeMounts:
+            - name: localtime
+              mountPath: /etc/localtime
+            - name: config
+              mountPath: ${CONF_PATH}
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/UTC
+        - name: config
+          configMap:
+            name: ${CONFIGMAP_NAME}
+      restartPolicy: Always

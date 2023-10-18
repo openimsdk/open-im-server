@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: social
+  name: minio
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      name: minio
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MINIO_ROOT_USER
+              value: "root"
+            - name: MINIO_ROOT_PASSWORD
+              value: "openIM123"
+          args:
+            - server
+            - --console-address
+            - :9001
+            - /data
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social
+  namespace: social
+  labels:
+    name: social
+spec:
+  selector:
+    app: social
+  ports:
+    - name: minio-dashboard
+      port: 30046
+      targetPort: 9001
+      nodePort: 30046
+    - name: rpc
+      port: 30047
+      targetPort: 9000
+      nodePort: 30047
+  type: NodePort

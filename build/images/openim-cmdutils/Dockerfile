@@ -39,8 +39,11 @@ FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder $OPENIM_SERVER_BINDIR/platforms /openim/openim-server/_output/bin/platforms
-COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
+# COPY --from=builder $OPENIM_SERVER_BINDIR/platforms /openim/openim-server/_output/bin/platforms
+COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
+# COPY --from=builder ${SERVER_WORKDIR}/config /openim/openim-server/config
+COPY --from=builder /openim/openim-server/config /openim/openim-server/config
+
 
 RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-cmdutils /usr/bin/openim-cmdutils
 

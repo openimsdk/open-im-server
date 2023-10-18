@@ -1,0 +1,129 @@
+pipeline {
+    agent any
+	// agent {
+        // node {
+        //     label 'jnlp-slave'
+        // }
+    // }
+	environment {
+	    JOB_ENV = "social" // namespace
+	    DEPLOYMENT_NAME = "api"  // k8s deploy name
+        CONFIGMAP_NAME = "${DEPLOYMENT_NAME}-conf" // runtime conf
+        JOB_NAME = "${JOB_NAME}" // jenkins job name
+		GIT_URL = "https://github.com/truongpx396/k8s-jenkins" // gitlab or github codebase
+		CREDENTIALS_ID = "GitHub" // need configure it in jenkins, will use it's username and password to pull codebase
+		HARBOR_URL = "truongpx396" // docker harbor url
+		HARBOR_ID = "" // docker harbor id, will use it to login
+		DOCKER_CPU = "100m"
+        DOCKER_MEM = "200Mi"
+        BASEDIR = "."
+        BUILD_NUM = "${BUILD_NUMBER}"
+        CONF_PATH = "/openim/config/"
+	}
+	parameters {
+      	gitParameter(
+    		branch: '',
+    		branchFilter: 'origin/(.*)',
+    		defaultValue: 'main',
+    		description: '',
+    		name: 'RELEASE_BRANCH',
+    		quickFilterEnabled: false,
+    		selectedValue: 'NONE',
+    		sortMode: 'NONE',
+    		tagFilter: '*',
+    		type: 'PT_BRANCH'
+        )
+        extendedChoice(
+            name: "RELEASE_PROJECTS",
+            type: "PT_RADIO",
+            multiSelectDelimiter: " ",
+            value: """api,msg_gateway,msg_transfer,push,rpc_conversation,rpc_group,rpc_msg,rpc_user""",
+            defaultValue: "",
+            description: "please choice projects to deploy"
+        )
+    }
+	stages {
+        stage('Git') {
+          steps {
+            checkout([$class: 'GitSCM',
+                branches: [[name: "${params.RELEASE_BRANCH}"]],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [],
+                gitTool: 'Default',
+                submoduleCfg: [],
+                userRemoteConfigs: [[url: "${GIT_URL}", credentialsId: "${CREDENTIALS_ID}"]]
+            ])
+          }
+        }
+        stage('CommitHash') {
+            steps {
+                script {
+                    env.CommitHash = sh (script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                }
+            }
+        }
+         stage('Check Param') {
+            steps {
+                script {
+                    def releaseParams = "${params.RELEASE_PROJECTS}"
+                    def tag = "${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}"
+                    def selectEnv = "${params.SERVICE_ENV}"
+                    if(releaseParams) {
+                        echo "============================================="
+                        echo "projects:  $releaseParams"
+                        echo "tag:       $tag"
+                        echo "selectEnv: $selectEnv"
+                        echo "============================================="
+                    } else {
+                        echo "============================================="
+                        echo "invalid release projects!!! stop now!!!"
+                    }
+                }
+            }
+        }
+        stage('Docker Build') {
+             steps {
+                // container ('docker') {
+                //   withCredentials([usernamePassword(credentialsId: "${HARBOR_ID}", passwordVariable: 'password', usernameVariable: 'username')]) {
+                //     sh """
+                //       docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
+                //       docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+
+                //       docker login -u ${username} -p ${password} ${HARBOR_URL}
+
+                //       docker push ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                //       docker rmi ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                //       docker rmi ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                //     """
+                //   }
+                // }
+                withDockerRegistry([ credentialsId: "DockerHub", url: "" ]){
+                    sh """  
+                      echo `Build image ...`
+                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
+                      docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                      
+                      echo `Push image ...`
+                      docker push ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+
+                      echo `Start removing image ...1.`
+                      docker rmi ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                      docker rmi ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+                      echo `Done removing image!`
+                    """
+                }
+             }
+        }
+        // stage('Deploy') {
+        //     steps {
+        //         container ('helm-kubectl') {
+        //            sh """
+        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/default-configMap-test.yaml | kubectl apply -f -
+        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/default-namespace-test.yaml | kubectl apply -f -
+        //            envsubst < ${BASEDIR}/deploy/k8sdeployment_dev/api.yaml | kubectl apply -f - && kubectl rollout status -f -
+        //            """
+        //         }
+        //     }
+        // }
+    }
+}

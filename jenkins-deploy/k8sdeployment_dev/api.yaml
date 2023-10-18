@@ -1,0 +1,64 @@
+# api.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: ${JOB_ENV}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: api
+  template:
+    metadata:
+      labels:
+        name: api
+    spec:
+      containers:
+        - name: api
+          image: ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "500Mi"
+              cpu: "80m"
+            requests:
+              memory: "200Mi"
+              cpu: "50m"
+          ports:
+            - containerPort: 10002
+              name: api
+              protocol: TCP
+          volumeMounts:
+            - name: localtime
+              mountPath: /etc/localtime
+            - name: config
+              mountPath: ${CONF_PATH}
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/UTC
+        - name: config
+          configMap:
+            name: ${CONFIGMAP_NAME}
+      restartPolicy: Always
+
+---
+# 外部访问的服务
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    name: api
+  name: api
+  namespace: ${JOB_ENV}
+spec:
+  type: NodePort
+  ports:
+    - name: api
+      port: 10002
+      targetPort: 10002
+      nodePort: 30020
+  selector:
+    name: api

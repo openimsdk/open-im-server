@@ -1,0 +1,67 @@
+# kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: social
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      name: kafka
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: wurstmeister/kafka
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9092
+              protocol: TCP
+          env:
+            - name: KAFKA_BROKER_ID
+              value: "1"  # Kafka Broker ID，从 0 开始递增
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper:30001"  # 连接到 ZooKeeper 服务的地址
+            - name: KAFKA_ADVERTISED_HOST_NAME
+              value: "kafka"
+            - name: KAFKA_ADVERTISED_PORT
+              value: "30032"
+            - name: KAFKA_CREATE_TOPICS
+              value: "latestMsgToRedis:8:1,msgToPush:8:1,offlineMsgToMongoMysql:8:1"
+#            - name: KAFKA_LISTENERS
+#              value: "INSIDE://:9092,OUTSIDE://:9093"
+#            - name: KAFKA_ADVERTISED_LISTENERS
+#              value: "INSIDE://:9092,OUTSIDE://:9093"
+#            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+#              value: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
+#            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+#              value: "INSIDE"
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: social
+  labels:
+    name: kafka
+spec:
+  selector:
+    app: kafka
+  ports:
+    - protocol: TCP
+      port: 30032
+      targetPort: 9092
+      nodePort: 30032
+  type: NodePort
+  sessionAffinity: None
+      
