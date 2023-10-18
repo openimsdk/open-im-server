@@ -10,7 +10,7 @@ pipeline {
 	    DEPLOYMENT_NAME = "api"  // k8s deploy name
         CONFIGMAP_NAME = "${DEPLOYMENT_NAME}-conf" // runtime conf
         JOB_NAME = "${JOB_NAME}" // jenkins job name
-		GIT_URL = "https://github.com/truongpx396/k8s-jenkins" // gitlab or github codebase
+		GIT_URL = "https://github.com/truongpx396/Open-IM-Server" // gitlab or github codebase
 		CREDENTIALS_ID = "GitHub" // need configure it in jenkins, will use it's username and password to pull codebase
 		HARBOR_URL = "truongpx396" // docker harbor url
 		HARBOR_ID = "" // docker harbor id, will use it to login
@@ -100,7 +100,7 @@ pipeline {
                 withDockerRegistry([ credentialsId: "DockerHub", url: "" ]){
                     sh """  
                       echo `Build image ...`
-                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
+                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/jenkins-deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
                       docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
                       
                       echo `Push image ...`
