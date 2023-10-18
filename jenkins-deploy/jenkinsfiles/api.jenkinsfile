@@ -100,7 +100,7 @@ pipeline {
                 withDockerRegistry([ credentialsId: "DockerHub", url: "" ]){
                     sh """  
                       echo `Build image ...`
-                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
+                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/jenkins-deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
                       docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM}
                       
                       echo `Push image ...`
