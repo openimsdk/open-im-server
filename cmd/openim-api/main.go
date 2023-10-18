@@ -17,15 +17,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"net"
-	"strconv"
-	"time"
-
 	_ "net/http/pprof"
+	"strconv"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
-	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/log"
 
 	"github.com/openimsdk/open-im-server/v3/internal/api"
@@ -44,6 +42,7 @@ func main() {
 }
 
 func run(port int) error {
+	fmt.Println("*****openimapi port:", port)
 	if port == 0 {
 		return fmt.Errorf("port is empty")
 	}
@@ -53,11 +52,13 @@ func run(port int) error {
 	}
 	fmt.Println("api start init discov client")
 	var client discoveryregistry.SvcDiscoveryRegistry
-	client, err = openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-		openkeeper.WithFreq(time.Hour), openkeeper.WithUserNameAndPassword(
-			config.Config.Zookeeper.Username,
-			config.Config.Zookeeper.Password,
-		), openkeeper.WithRoundRobin(), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))
+	client, err = discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	/*
+		client, err = openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
+			openkeeper.WithFreq(time.Hour), openkeeper.WithUserNameAndPassword(
+				config.Config.Zookeeper.Username,
+				config.Config.Zookeeper.Password,
+			), openkeeper.WithRoundRobin(), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
 		return err
 	}
