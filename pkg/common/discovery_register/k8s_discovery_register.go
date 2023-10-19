@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	openkeeper "github.com/OpenIMSDK/tools/discoveryregistry/zookeeper"
 	"github.com/OpenIMSDK/tools/log"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"google.golang.org/grpc"
-	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func NewDiscoveryRegister(envType string) (discoveryregistry.SvcDiscoveryRegistry, error) {

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 )
 

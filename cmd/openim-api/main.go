@@ -17,10 +17,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
