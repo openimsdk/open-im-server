@@ -147,7 +147,6 @@ func (m *msgServer) MarkConversationAsRead(
 		for i := hasReadSeq + 1; i <= req.HasReadSeq; i++ {
 			seqs = append(seqs, i)
 		}
-
 		if len(seqs) > 0 {
 			log.ZDebug(ctx, "MarkConversationAsRead", "seqs", seqs, "conversationID", req.ConversationID)
 			if err = m.MsgDatabase.MarkSingleChatMsgsAsRead(ctx, req.UserID, req.ConversationID, seqs); err != nil {
@@ -166,7 +165,8 @@ func (m *msgServer) MarkConversationAsRead(
 			return nil, err
 		}
 
-	} else if conversation.ConversationType == constant.SuperGroupChatType {
+	} else if conversation.ConversationType == constant.SuperGroupChatType ||
+		conversation.ConversationType == constant.NotificationChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
 			if err != nil {
