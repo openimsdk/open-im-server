@@ -60,6 +60,8 @@ func run(port int) error {
 	logger.Info(context.Background(), "api start init discov client")
 
 	var client discoveryregistry.SvcDiscoveryRegistry
+
+	// Determine whether zk is passed according to whether it is a clustered deployment
 	client, err = discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		logger.Error(context.Background(), "Failed to initialize discovery register", err)

@@ -21,21 +21,13 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"gopkg.in/yaml.v3"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed version
 var Version string
-
-var (
-	_, b, _, _ = runtime.Caller(0)
-	// Root folder of this project.
-	Root = filepath.Join(filepath.Dir(b), "../../..")
-)
 
 const (
 	FileName             = "config.yaml"
@@ -43,8 +35,19 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
+// getProjectRoot returns the absolute path of the project root directory
+func getProjectRoot() string {
+	// Program counter (PC): This represents the address of the function.
+	// File path: The full path to the source file from which the function was called.
+	// Line number: The line number in the source file from which the function was called.
+	// Success flag: it will be true if the information was successfully fetched, false otherwise.
+	_, b, _, _ := runtime.Caller(0) // pkg/common/config/parse.go
+	return filepath.Join(filepath.Dir(b), "../../..")
+}
+
 func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	opts := msgprocessor.NewOptions()
+
 	if cfg.UnreadCount {
 		opts = msgprocessor.WithOptions(opts, msgprocessor.WithUnreadCount(true))
 	}
@@ -61,40 +64,31 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 }
 
 func initConfig(config interface{}, configName, configFolderPath string) error {
-	if configFolderPath == "" {
-		configFolderPath = DefaultFolderPath
-	}
-	configPath := filepath.Join(configFolderPath, configName)
-	defer func() {
-		fmt.Println("use config", configPath)
-	}()
-	_, err := os.Stat(configPath)
+	configFolderPath = filepath.Join(configFolderPath, configName)
+	_, err := os.Stat(configFolderPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return err
+			return fmt.Errorf("stat config path error: %w", err)
 		}
-		configPath = filepath.Join(Root, "config", configName)
-	} else {
-		Root = filepath.Dir(configPath)
+		configFolderPath = filepath.Join(getProjectRoot(), "config", configName)
 	}
-	data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(configFolderPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("read file error: %w", err)
 	}
 	if err = yaml.Unmarshal(data, config); err != nil {
-		return err
+		return fmt.Errorf("unmarshal yaml error: %w", err)
 	}
+	fmt.Println("use config", configFolderPath)
 	return nil
 }
 
 func InitConfig(configFolderPath string) error {
-	err := initConfig(&Config, FileName, configFolderPath)
-	if err != nil {
+	if configFolderPath == "" {
+		configFolderPath = DefaultFolderPath
+	}
+	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
 		return err
 	}
-	err = initConfig(&Config.Notification, NotificationFileName, configFolderPath)
-	if err != nil {
-		return err
-	}
-	return nil
+	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
 }
