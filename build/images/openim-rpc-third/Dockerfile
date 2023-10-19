@@ -31,23 +31,15 @@ RUN go mod download
 
 COPY . .
 
-RUN make clean
-
 RUN make build BINS=openim-rpc-third
 
+RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-third /usr/bin/openim-rpc-third
 
+# FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms/
-COPY --from=builder /openim/openim-server/config /openim/openim-server/config
+COPY --from=builder /usr/bin/openim-rpc-third ./bin/openim-rpc-third
 
-ENV PORT 10190 \
-    PROMETHEUS_PORT 21301
-
-EXPOSE 10190
-
-RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-rpc-third /usr/bin/openim-rpc-third
-
-ENTRYPOINT ["bash", "-c", "if [[ -n $PROMETHEUS_PORT ]]; then "openim-rpc-third --port $PORT -c $OPENIM_SERVER_CONFIG_NAME" --prometheus_port $PROMETHEUS_PORT; else "openim-rpc-third --port $PORT -c $OPENIM_SERVER_CONFIG_NAME"; fi"]
+ENTRYPOINT ["./bin/openim-rpc-third"]
