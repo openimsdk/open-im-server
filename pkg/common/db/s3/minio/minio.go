@@ -276,7 +276,8 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 			return nil, err
 		}
 		request.Header.Set("X-Amz-Content-Sha256", unsignedPayload)
-		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
+		//request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
+		request = signer.PreSignV4(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, int64(expire/time.Second))
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
 			//URL:        request.URL.String(),
