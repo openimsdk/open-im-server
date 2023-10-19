@@ -80,6 +80,12 @@ $ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:
     -p "$CLUSTER_PASSWORD"
 ```
 
+> **Node**
+> 卸载的方式：使用 `kubeadm` 卸载并不会清除 `etcd` 和 `cni` 相关，所以需要手动清除，或者使用 `sealos` 卸载。
+> ```bash
+> sealos reset
+> ```
+
 ### 安装 helm
 
 helm通过打包的方式，支持发布的版本管理和控制，很大程度上简化了Kubernetes应用的部署和管理。
@@ -101,7 +107,3 @@ $ helm repo add brigade https://openimsdk.github.io/openim-charts
 ### 容器化安装
 
 具体安装步骤如下：
-
-
-
-### Helm安装

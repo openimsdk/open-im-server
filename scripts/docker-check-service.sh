@@ -19,11 +19,7 @@ source "${OPENIM_ROOT}/scripts/install/common.sh"
 
 cd "$OPENIM_ROOT"
 
-if command -v docker-compose &> /dev/null; then
-    docker-compose ps
-else
-    docker compose ps
-fi
+openim::util::check_docker_and_compose_versions
 
 progress() {
     local _main_pid="$1"

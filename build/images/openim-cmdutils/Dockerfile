@@ -32,7 +32,7 @@ RUN go mod download
 COPY . .
 
 RUN make build BINS=openim-cmdutils
-RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-cmdutils /usr/bin/openim-api
+RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-cmdutils /usr/bin/openim-cmdutils
 
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 

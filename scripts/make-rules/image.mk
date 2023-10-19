@@ -21,7 +21,6 @@
 #
 
 DOCKER := docker
-DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41|1.42
 
 # read: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
 REGISTRY_PREFIX ?= ghcr.io/openimsdk
@@ -75,22 +74,13 @@ image.docker-buildx:
 ## image.verify: Verify docker version
 .PHONY: image.verify
 image.verify:
-	$(eval API_VERSION := $(shell $(DOCKER) version | grep -E 'API version: {1,6}[0-9]' | head -n1 | awk '{print $$3} END { if (NR==0) print 0}' ))
-	$(eval PASS := $(shell echo "$(API_VERSION) > $(DOCKER_SUPPORTED_API_VERSION)" | bc))
-	@if [ $(PASS) -ne 1 ]; then \
-		$(DOCKER) -v ;\
-		echo "Unsupported docker version. Docker API version should be greater than $(DOCKER_SUPPORTED_API_VERSION)"; \
-		exit 1; \
-	fi
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::check_docker_and_compose_versions
 
 ## image.daemon.verify: Verify docker daemon experimental features
 .PHONY: image.daemon.verify
 image.daemon.verify:
-	$(eval PASS := $(shell $(DOCKER) version | grep -q -E 'Experimental: {1,5}true' && echo 1 || echo 0))
-	@if [ $(PASS) -ne 1 ]; then \
-		echo "Experimental features of Docker daemon is not enabled. Please add \"experimental\": true in '/etc/docker/daemon.json' and then restart Docker daemon."; \
-		exit 1; \
-	fi
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::ensure_docker_daemon_connectivity
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::ensure-docker-buildx
 
 # If you wish built the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64 ). However, you must enable docker buildKit for it.
@@ -123,7 +113,6 @@ image.build.%: go.build.%
 		$(DOCKER) build $(BUILD_SUFFIX) ; \
 	fi
 	@rm -rf $(TMP_DIR)/$(IMAGE)
-
 
 # https://docs.docker.com/build/building/multi-platform/
 # busybox image supports amd64, arm32v5, arm32v6, arm32v7, arm64v8, i386, ppc64le, and s390x

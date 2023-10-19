@@ -17,73 +17,77 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/log"
-
 	"github.com/openimsdk/open-im-server/v3/internal/api"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 )
 
+var logger log.Logger // Assuming Logger is globally accessible and properly initialized
+
 func main() {
 	apiCmd := cmd.NewApiCmd()
 	apiCmd.AddPortFlag()
 	apiCmd.AddApi(run)
 	if err := apiCmd.Execute(); err != nil {
+		logger.Error(context.Background(), "API command execution failed", err)
 		panic(err.Error())
 	}
 }
 
 func run(port int) error {
-	fmt.Println("*****openimapi port:", port)
+	logger.Info(context.Background(), "Openim api port:", "port", port)
+
 	if port == 0 {
-		return fmt.Errorf("port is empty")
+		err := "port is empty"
+		logger.Error(context.Background(), err, nil)
+		return fmt.Errorf(err)
 	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
+		logger.Error(context.Background(), "Failed to initialize Redis", err)
 		return err
 	}
-	fmt.Println("api start init discov client")
+	logger.Info(context.Background(), "api start init discov client")
+
 	var client discoveryregistry.SvcDiscoveryRegistry
 	client, err = discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
-	/*
-		client, err = openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-			openkeeper.WithFreq(time.Hour), openkeeper.WithUserNameAndPassword(
-				config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password,
-			), openkeeper.WithRoundRobin(), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/
 	if err != nil {
+		logger.Error(context.Background(), "Failed to initialize discovery register", err)
 		return err
 	}
 	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
+		logger.Error(context.Background(), "Failed to create RPC root nodes", err)
 		return err
 	}
-	fmt.Println("api register public config to discov")
+	logger.Info(context.Background(), "api register public config to discov")
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
+		logger.Error(context.Background(), "Failed to register public config to discov", err)
 		return err
 	}
-	fmt.Println("api register public config to discov success")
+	logger.Info(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
-	fmt.Println("api init router success")
+	logger.Info(context.Background(), "api init router success")
 	var address string
 	if config.Config.Api.ListenIP != "" {
 		address = net.JoinHostPort(config.Config.Api.ListenIP, strconv.Itoa(port))
 	} else {
 		address = net.JoinHostPort("0.0.0.0", strconv.Itoa(port))
 	}
-	fmt.Println("start api server, address: ", address, ", OpenIM version: ", config.Version)
-	log.ZInfo(context.Background(), "start server success", "address", address, "version", config.Version)
+	logger.Info(context.Background(), "start api server", "address", address, "OpenIM version", config.Version)
+
 	err = router.Run(address)
 	if err != nil {
-		log.ZError(context.Background(), "api run failed ", err, "address", address)
-
+		logger.Error(context.Background(), "api run failed", err, "address", address)
 		return err
 	}
 
