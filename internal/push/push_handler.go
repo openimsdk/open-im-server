@@ -56,7 +56,6 @@ func (c *ConsumerHandler) handleMs2PsChat(ctx context.Context, msg []byte) {
 		MsgData:        msgFromMQ.MsgData,
 		ConversationID: msgFromMQ.ConversationID,
 	}
-	log.ZDebug(ctx, "push msg", "msg", pbData.String())
 	sec := msgFromMQ.MsgData.SendTime / 1000
 	nowSec := utils.GetCurrentTimestampBySecond()
 	log.ZDebug(ctx, "push msg", "msg", pbData.String(), "sec", sec, "nowSec", nowSec)

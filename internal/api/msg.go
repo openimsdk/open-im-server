@@ -173,7 +173,8 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
 		if !authverify.IsManagerUserID(req.SendID) {
-			return nil, errs.ErrNoPermission.Wrap("only app manager can send message")
+			return nil, errs.ErrNoPermission.
+				Wrap("only app manager can as sender send OANotificationElem")
 		}
 	case constant.CustomNotTriggerConversation:
 		data = apistruct.CustomElem{}
