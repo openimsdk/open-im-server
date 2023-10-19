@@ -35,7 +35,6 @@ import (
 	"github.com/go-zookeeper/zk"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -158,26 +157,38 @@ func checkMysql() error {
 
 func checkMongo() error {
 	var client *mongo.Client
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	defer func() {
 		if client != nil {
 			client.Disconnect(context.TODO())
 		}
 	}()
-	mongodbHosts := ""
-	for i, v := range config.Config.Mongo.Address {
-		if i == len(config.Config.Mongo.Address)-1 {
-			mongodbHosts += v
+	if config.Config.Mongo.Uri != "" {
+		uri = config.Config.Mongo.Uri
+	} else {
+		mongodbHosts := ""
+		for i, v := range config.Config.Mongo.Address {
+			if i == len(config.Config.Mongo.Address)-1 {
+				mongodbHosts += v
+			} else {
+				mongodbHosts += v + ","
+			}
+		}
+		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
+				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
 		} else {
-			mongodbHosts += v + ","
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+				mongodbHosts, config.Config.Mongo.Database,
+				config.Config.Mongo.MaxPoolSize)
 		}
 	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(
-		fmt.Sprintf("mongodb://%v:%v@%v/?authSource=admin",
-			config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts)))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
-		err = client.Ping(context.TODO(), &readpref.ReadPref{})
+		err = client.Ping(context.TODO(), nil)
 		if err != nil {
 			return errs.Wrap(err)
 		}
