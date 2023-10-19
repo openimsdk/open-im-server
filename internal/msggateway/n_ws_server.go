@@ -143,9 +143,6 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	for _, o := range opts {
 		o(&config)
 	}
-	if config.port < 1024 {
-		return nil, errors.New("port not allow to listen")
-	}
 	v := validator.New()
 	return &WsServer{
 		port:             config.port,

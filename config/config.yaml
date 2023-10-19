@@ -26,6 +26,9 @@
 # Zookeeper address
 # Zookeeper username
 # Zookeeper password
+envs:
+  discovery: zookeeper
+
 zookeeper:
   schema: openim
   address: [ 172.28.0.1:12181 ]
@@ -213,6 +216,7 @@ log:
 # Websocket connection handshake timeout
 longConnSvr:
   openImWsPort: [ 10001 ]
+  openImMessageGatewayPort: [ 10140 ]
   websocketMaxConnNum: 100000
   websocketMaxMsgLen: 4096
   websocketTimeout: 10
