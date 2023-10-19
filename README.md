@@ -126,7 +126,7 @@ It is recommended to use Docker Compose for deployment, which can easily and qui
 <details>  <summary>Compile from Source</summary>
 
 
-Ur need `Go 1.18` or higher version, and `make`.
+Ur need `Go 1.20` or higher version, and `make`.
 
 
 ```bash

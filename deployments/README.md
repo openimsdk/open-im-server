@@ -103,6 +103,16 @@ $ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bas
 $ helm repo add brigade https://openimsdk.github.io/openim-charts
 ```
 
+### OpenIM 的镜像策略
+
+自动化提供的 aliyun, ghcr, docker hub: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
+
+**本地化测试构建方法：**
+
+```bash
+$ make image
+```
+
 
 ### 容器化安装
 
