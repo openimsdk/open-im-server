@@ -35,7 +35,6 @@ import (
 	"github.com/go-zookeeper/zk"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -158,13 +157,12 @@ func checkMysql() error {
 
 func checkMongo() error {
 	var client *mongo.Client
-	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	
 	defer func() {
 		if client != nil {
 			client.Disconnect(context.TODO())
 		}
 	}()
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.Uri != "" {
 		uri = config.Config.Mongo.Uri
 	} else {
@@ -190,6 +188,7 @@ func checkMongo() error {
 	if err != nil {
 		return errs.Wrap(err)
 	} else {
+		//err = client.Ping(context.TODO(), &readpref.ReadPref{})
 		err = client.Ping(context.TODO(), nil)
 		if err != nil {
 			return errs.Wrap(err)
