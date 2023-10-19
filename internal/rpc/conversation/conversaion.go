@@ -17,8 +17,6 @@ package conversation
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -235,24 +233,40 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 }
 
 // create conversation without notification for msg redis transfer.
-func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbconversation.CreateSingleChatConversationsReq) (*pbconversation.CreateSingleChatConversationsResp, error) {
-	var conversation tablerelation.ConversationModel
-	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
-	conversation.ConversationType = constant.SingleChatType
-	conversation.OwnerUserID = req.SendID
-	conversation.UserID = req.RecvID
-	err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
-	if err != nil {
-		log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
+	req *pbconversation.CreateSingleChatConversationsReq,
+) (*pbconversation.CreateSingleChatConversationsResp, error) {
+	switch req.ConversationType {
+	case constant.SingleChatType:
+		var conversation tablerelation.ConversationModel
+		conversation.ConversationID = req.ConversationID
+		conversation.ConversationType = req.ConversationType
+		conversation.OwnerUserID = req.SendID
+		conversation.UserID = req.RecvID
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
+		}
+
+		conversation2 := conversation
+		conversation2.OwnerUserID = req.RecvID
+		conversation2.UserID = req.SendID
+		err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
+		}
+	case constant.NotificationChatType:
+		var conversation tablerelation.ConversationModel
+		conversation.ConversationID = req.ConversationID
+		conversation.ConversationType = req.ConversationType
+		conversation.OwnerUserID = req.RecvID
+		conversation.UserID = req.SendID
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
+		}
 	}
 
-	conversation2 := conversation
-	conversation2.OwnerUserID = req.RecvID
-	conversation2.UserID = req.SendID
-	err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
-	if err != nil {
-		log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
-	}
 	return &pbconversation.CreateSingleChatConversationsResp{}, nil
 }
 

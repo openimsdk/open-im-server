@@ -252,7 +252,8 @@ func (s *friendServer) GetDesignatedFriends(
 	return resp, nil
 }
 
-func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context, req *pbfriend.GetDesignatedFriendsApplyReq) (resp *pbfriend.GetDesignatedFriendsApplyResp, err error) {
+func (s *friendServer) GetDesignatedFriendsApply(ctx context.Context,
+	req *pbfriend.GetDesignatedFriendsApplyReq) (resp *pbfriend.GetDesignatedFriendsApplyResp, err error) {
 	friendRequests, err := s.friendDatabase.FindBothFriendRequests(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
