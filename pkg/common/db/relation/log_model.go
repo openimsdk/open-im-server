@@ -24,6 +24,7 @@ func (l *LogGorm) Search(ctx context.Context, keyword string, start time.Time, e
 	if end.UnixMilli() != 0 {
 		db = l.db.WithContext(ctx).Where("create_time <= ?", end)
 	}
+	db = db.Order("create_time desc")
 	return ormutil.GormSearch[relationtb.Log](db, []string{"user_id"}, keyword, pageNumber, showNumber)
 }
 
