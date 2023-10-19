@@ -261,13 +261,9 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		return nil, err
 	}
 	result := s3.AuthSignResult{
+		URL:   m.signEndpoint + "/" + m.bucket + "/" + name,
 		Query: url.Values{"uploadId": {uploadID}},
 		Parts: make([]s3.SignPart, len(partNumbers)),
-	}
-	if m.prefix == "" {
-		result.URL = m.signEndpoint + "/" + m.bucket + "/" + name
-	} else {
-		result.URL = m.signEndpoint + m.prefix + "/" + m.bucket + "/" + name
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := result.URL + "?partNumber=" + strconv.Itoa(partNumber) + "&uploadId=" + uploadID
@@ -276,14 +272,15 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 			return nil, err
 		}
 		request.Header.Set("X-Amz-Content-Sha256", unsignedPayload)
-		//request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
-		request = signer.PreSignV4(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, int64(expire/time.Second))
+		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
-			//URL:        request.URL.String(),
-			Query:  url.Values{"partNumber": {strconv.Itoa(partNumber)}},
-			Header: request.Header,
+			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
+			Header:     request.Header,
 		}
+	}
+	if m.prefix != "" {
+		result.URL = m.signEndpoint + m.prefix + "/" + m.bucket + "/" + name
 	}
 	return &result, nil
 }
