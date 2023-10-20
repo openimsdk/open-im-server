@@ -106,13 +106,7 @@ func GetDefaultOpt() rockscache.Options {
 	return opts
 }
 
-func getCache[T any](
-	ctx context.Context,
-	rcClient *rockscache.Client,
-	key string,
-	expire time.Duration,
-	fn func(ctx context.Context) (T, error),
-) (T, error) {
+func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key string, expire time.Duration, fn func(ctx context.Context) (T, error)) (T, error) {
 	var t T
 	var write bool
 	v, err := rcClient.Fetch2(ctx, key, expire, func() (s string, err error) {
@@ -144,14 +138,7 @@ func getCache[T any](
 	return t, nil
 }
 
-func batchGetCache[T any](
-	ctx context.Context,
-	rcClient *rockscache.Client,
-	keys []string,
-	expire time.Duration,
-	keyIndexFn func(t T, keys []string) (int, error),
-	fn func(ctx context.Context) ([]T, error),
-) ([]T, error) {
+func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) ([]T, error)) ([]T, error) {
 	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 		values := make(map[int]string)
 		tArrays, err := fn(ctx)
