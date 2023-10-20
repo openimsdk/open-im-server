@@ -69,20 +69,43 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
 }
 
 func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
-	if err := rc.getConfFromCmdAndInit(cmd); err != nil {
+	if err := rc.initializeConfiguration(cmd); err != nil {
 		return fmt.Errorf("failed to get configuration from command: %w", err)
 	}
 
-	cmdOpts := defaultCmdOpts()
-	for _, opt := range opts {
-		opt(cmdOpts)
-	}
+	cmdOpts := rc.applyOptions(opts...)
 
-	if err := log.InitFromConfig(cmdOpts.loggerPrefixName, rc.Name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount, config.Config.Log.RotationTime); err != nil {
+	if err := rc.initializeLogger(cmdOpts); err != nil {
 		return fmt.Errorf("failed to initialize from config: %w", err)
 	}
 
 	return nil
+}
+
+func (rc *RootCmd) initializeConfiguration(cmd *cobra.Command) error {
+	return rc.getConfFromCmdAndInit(cmd)
+}
+
+func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
+	cmdOpts := defaultCmdOpts()
+	for _, opt := range opts {
+		opt(cmdOpts)
+	}
+	return cmdOpts
+}
+
+func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
+	logConfig := config.Config.Log
+	return log.InitFromConfig(
+		cmdOpts.loggerPrefixName,
+		rc.Name,
+		logConfig.RemainLogLevel,
+		logConfig.IsStdout,
+		logConfig.IsJson,
+		logConfig.StorageLocation,
+		logConfig.RemainRotationCount,
+		logConfig.RotationTime,
+	)
 }
 
 func defaultCmdOpts() *CmdOpts {

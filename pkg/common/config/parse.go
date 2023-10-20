@@ -36,12 +36,13 @@ const (
 )
 
 // getProjectRoot returns the absolute path of the project root directory
-func getProjectRoot() string {
+func GetProjectRoot() string {
 	// Program counter (PC): This represents the address of the function.
-	// File path: The full path to the source file from which the function was called.
+	// File path: The full path to the source file from which the function was called. (pkg/common/config/parse.go)
 	// Line number: The line number in the source file from which the function was called.
 	// Success flag: it will be true if the information was successfully fetched, false otherwise.
-	_, b, _, _ := runtime.Caller(0) // pkg/common/config/parse.go
+	_, b, _, _ := runtime.Caller(0)
+
 	return filepath.Join(filepath.Dir(b), "../../..")
 }
 
@@ -70,7 +71,7 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 		if !os.IsNotExist(err) {
 			return fmt.Errorf("stat config path error: %w", err)
 		}
-		configFolderPath = filepath.Join(getProjectRoot(), "config", configName)
+		configFolderPath = filepath.Join(GetProjectRoot(), "config", configName)
 	}
 	data, err := os.ReadFile(configFolderPath)
 	if err != nil {

@@ -64,9 +64,9 @@ set +e
 
 # Later, after discarding Docker, the Docker keyword is unreliable, and Kubepods is used
 if grep -qE 'docker|kubepods' /proc/1/cgroup || [ -f /.dockerenv ]; then
-    openim::color::echo ${COLOR_BLUE} "Environment in the interior of the container"
+    openim::color::echo ${COLOR_CYAN} "Environment in the interior of the container"
 else
-    openim::color::echo ${COLOR_BLUE} "The environment is outside the container"
+    openim::color::echo ${COLOR_CYAN} "The environment is outside the container"
     openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]} || return 0
 fi
 
