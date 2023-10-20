@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
@@ -37,11 +36,7 @@ const (
 
 // getProjectRoot returns the absolute path of the project root directory
 func GetProjectRoot() string {
-	// Program counter (PC): This represents the address of the function.
-	// File path: The full path to the source file from which the function was called. (pkg/common/config/parse.go)
-	// Line number: The line number in the source file from which the function was called.
-	// Success flag: it will be true if the information was successfully fetched, false otherwise.
-	_, b, _, _ := runtime.Caller(0)
+	b, _ := filepath.Abs(os.Args[0])
 
 	return filepath.Join(filepath.Dir(b), "../../..")
 }
@@ -64,7 +59,6 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
-
 func initConfig(config interface{}, configName, configFolderPath string) error {
 	configFolderPath = filepath.Join(configFolderPath, configName)
 	_, err := os.Stat(configFolderPath)
@@ -86,17 +80,18 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 }
 
 func InitConfig(configFolderPath string) error {
-    if configFolderPath == "" {
-        envConfigPath := os.Getenv("OPENIMCONFIG")
-        if envConfigPath != "" {
-            configFolderPath = envConfigPath
-        } else {
-            configFolderPath = DefaultFolderPath
-        }
-    }
+	if configFolderPath == "" {
+		envConfigPath := os.Getenv("OPENIMCONFIG")
+		if envConfigPath != "" {
+			configFolderPath = envConfigPath
+		} else {
+			configFolderPath = DefaultFolderPath
+		}
+	}
 
 	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
 		return err
 	}
+	
 	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
 }

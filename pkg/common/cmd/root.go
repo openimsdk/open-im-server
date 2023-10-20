@@ -91,12 +91,14 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 	for _, opt := range opts {
 		opt(cmdOpts)
 	}
+
 	return cmdOpts
 }
 
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	logConfig := config.Config.Log
 	return log.InitFromConfig(
+		
 		cmdOpts.loggerPrefixName,
 		rc.Name,
 		logConfig.RemainLogLevel,
