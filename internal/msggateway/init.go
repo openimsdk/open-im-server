@@ -18,9 +18,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/OpenIMSDK/tools/utils"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
+// RunWsAndServer run ws server
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	fmt.Println(
 		"start rpc/msg_gateway server, port: ",
@@ -42,7 +45,7 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	go func() {
 		err := hubServer.Start()
 		if err != nil {
-			panic(err.Error())
+			panic(utils.Wrap1(err))
 		}
 	}()
 	return hubServer.LongConnServer.Run()
