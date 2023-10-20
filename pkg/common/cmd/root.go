@@ -97,6 +97,7 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	logConfig := config.Config.Log
+	
 	return log.InitFromConfig(
 		
 		cmdOpts.loggerPrefixName,

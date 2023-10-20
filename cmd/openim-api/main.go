@@ -49,11 +49,13 @@ func run(port int) error {
 	if port == 0 {
 		err := "port is empty"
 		log.ZError(context.Background(), err, nil)
+
 		return fmt.Errorf(err)
 	}
 	rdb, err := cache.NewRedis()
 	if err != nil {
 		log.ZError(context.Background(), "Failed to initialize Redis", err)
+
 		return err
 	}
 	log.ZInfo(context.Background(), "api start init discov client")
@@ -64,15 +66,18 @@ func run(port int) error {
 	client, err = discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	if err != nil {
 		log.ZError(context.Background(), "Failed to initialize discovery register", err)
+
 		return err
 	}
 	if err = client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		log.ZError(context.Background(), "Failed to create RPC root nodes", err)
+
 		return err
 	}
 	log.ZInfo(context.Background(), "api register public config to discov")
 	if err = client.RegisterConf2Registry(constant.OpenIMCommonConfigKey, config.Config.EncodeConfig()); err != nil {
 		log.ZError(context.Background(), "Failed to register public config to discov", err)
+
 		return err
 	}
 	log.ZInfo(context.Background(), "api register public config to discov success")
@@ -89,6 +94,7 @@ func run(port int) error {
 	err = router.Run(address)
 	if err != nil {
 		log.ZError(context.Background(), "api run failed", err, "address", address)
+
 		return err
 	}
 
