@@ -124,14 +124,8 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			return nil, err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed {
-			return nil, err
+			return nil, errs.ErrDismissedAlready.Wrap("group dismissed")
 		}
-		// for _, userID := range req.UserIDs {
-		// 	if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
-		// 		log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
-		// 		return nil, err
-		// 	}
-		// }
 	}
 	var unequal int
 	var conv tablerelation.ConversationModel
@@ -205,8 +199,13 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
+			err := c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
 				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			if err != nil {
+				log.ZWarn(ctx, "send conversation set private notification failed", err,
+					"userID", userID, "conversationID", req.Conversation.ConversationID)
+				continue
+			}
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
