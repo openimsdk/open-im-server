@@ -167,8 +167,6 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.FileElem{}
 	case constant.Custom:
 		data = apistruct.CustomElem{}
-	case constant.Revoke:
-		data = apistruct.RevokeElem{}
 	case constant.OANotification:
 		data = apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
@@ -176,10 +174,6 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 			return nil, errs.ErrNoPermission.
 				Wrap("only app manager can as sender send OANotificationElem")
 		}
-	case constant.CustomNotTriggerConversation:
-		data = apistruct.CustomElem{}
-	case constant.CustomOnlineOnly:
-		data = apistruct.CustomElem{}
 	default:
 		return nil, errs.ErrArgs.WithDetail("not support err contentType")
 	}
