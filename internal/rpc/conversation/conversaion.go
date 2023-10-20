@@ -112,7 +112,9 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
+func (c *conversationServer) SetConversations(ctx context.Context,
+	req *pbconversation.SetConversationsReq,
+) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
@@ -203,7 +205,8 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
+				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
