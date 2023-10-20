@@ -63,13 +63,12 @@ const (
 )
 
 func NewMinio() (s3.Interface, error) {
-	conf := config.Config.Object.Minio
-	u, err := url.Parse(conf.Endpoint)
+	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+		Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 		Secure: u.Scheme == "https",
 	}
 	client, err := minio.New(u.Host, opts)
@@ -77,29 +76,35 @@ func NewMinio() (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket: conf.Bucket,
+		bucket: config.Config.Object.Minio.Bucket,
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
 	}
-	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
-		m.bucketURL = conf.Endpoint + "/" + conf.Bucket + "/"
+		m.prefix = u.Path
+		u.Path = ""
+		config.Config.Object.Minio.Endpoint = u.String()
+		m.signEndpoint = config.Config.Object.Minio.Endpoint
 	} else {
-		su, err := url.Parse(conf.SignEndpoint)
+		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		m.opts = &minio.Options{
-			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+			Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 			Secure: su.Scheme == "https",
 		}
 		m.sign, err = minio.New(su.Host, m.opts)
 		if err != nil {
 			return nil, err
 		}
-		m.bucketURL = conf.SignEndpoint + "/" + conf.Bucket + "/"
+		m.prefix = su.Path
+		su.Path = ""
+		config.Config.Object.Minio.SignEndpoint = su.String()
+		m.signEndpoint = config.Config.Object.Minio.SignEndpoint
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -110,14 +115,15 @@ func NewMinio() (s3.Interface, error) {
 }
 
 type Minio struct {
-	bucket    string
-	bucketURL string
-	location  string
-	opts      *minio.Options
-	core      *minio.Core
-	sign      *minio.Client
-	lock      sync.Locker
-	init      bool
+	bucket       string
+	signEndpoint string
+	location     string
+	opts         *minio.Options
+	core         *minio.Core
+	sign         *minio.Client
+	lock         sync.Locker
+	init         bool
+	prefix       string
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -255,7 +261,7 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		return nil, err
 	}
 	result := s3.AuthSignResult{
-		URL:   m.bucketURL + name,
+		URL:   m.signEndpoint + "/" + m.bucket + "/" + name,
 		Query: url.Values{"uploadId": {uploadID}},
 		Parts: make([]s3.SignPart, len(partNumbers)),
 	}
@@ -269,10 +275,12 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
-			URL:        request.URL.String(),
 			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
 			Header:     request.Header,
 		}
+	}
+	if m.prefix != "" {
+		result.URL = m.signEndpoint + m.prefix + "/" + m.bucket + "/" + name
 	}
 	return &result, nil
 }
@@ -284,6 +292,9 @@ func (m *Minio) PresignedPutObject(ctx context.Context, name string, expire time
 	rawURL, err := m.sign.PresignedPutObject(ctx, m.bucket, name, expire)
 	if err != nil {
 		return "", err
+	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
 	}
 	return rawURL.String(), nil
 }
@@ -395,6 +406,9 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	}
 	if err != nil {
 		return "", err
+	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
 	}
 	return rawURL.String(), nil
 }

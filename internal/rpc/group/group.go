@@ -852,32 +852,40 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbgroup.JoinGroupReq) 
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbgroup.QuitGroupReq) (*pbgroup.QuitGroupResp, error) {
 	resp := &pbgroup.QuitGroupResp{}
+	if req.UserID == "" {
+		req.UserID = mcontext.GetOpUserID(ctx)
+	} else {
+		if err := authverify.CheckAccessV3(ctx, req.UserID); err != nil {
+			return nil, err
+		}
+	}
 	group, err := s.GroupDatabase.TakeGroup(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if group.GroupType == constant.SuperGroup {
-		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
+		if err := s.GroupDatabase.DeleteSuperGroupMember(ctx, req.GroupID, []string{req.UserID}); err != nil {
 			return nil, err
 		}
-		s.Notification.SuperGroupNotification(ctx, mcontext.GetOpUserID(ctx), mcontext.GetOpUserID(ctx))
+		_ = s.Notification.SuperGroupNotification(ctx, req.UserID, req.UserID)
 	} else {
-		info, err := s.TakeGroupMember(ctx, req.GroupID, mcontext.GetOpUserID(ctx))
+		info, err := s.TakeGroupMember(ctx, req.GroupID, req.UserID)
 		if err != nil {
 			return nil, err
 		}
 		if info.RoleLevel == constant.GroupOwner {
 			return nil, errs.ErrNoPermission.Wrap("group owner can't quit")
 		}
-		err = s.GroupDatabase.DeleteGroupMember(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)})
+		err = s.GroupDatabase.DeleteGroupMember(ctx, req.GroupID, []string{req.UserID})
 		if err != nil {
 			return nil, err
 		}
-		s.Notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(info, 0))
+		_ = s.Notification.MemberQuitNotification(ctx, s.groupMemberDB2PB(info, 0))
 	}
-	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{mcontext.GetOpUserID(ctx)}); err != nil {
+	if err := s.deleteMemberAndSetConversationSeq(ctx, req.GroupID, []string{req.UserID}); err != nil {
 		return nil, err
 	}
+
 	return resp, nil
 }
 
