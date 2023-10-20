@@ -64,6 +64,7 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 	return opts
 }
 
+
 func initConfig(config interface{}, configName, configFolderPath string) error {
 	configFolderPath = filepath.Join(configFolderPath, configName)
 	_, err := os.Stat(configFolderPath)
@@ -85,9 +86,15 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 }
 
 func InitConfig(configFolderPath string) error {
-	if configFolderPath == "" {
-		configFolderPath = DefaultFolderPath
-	}
+    if configFolderPath == "" {
+        envConfigPath := os.Getenv("OPENIMCONFIG")
+        if envConfigPath != "" {
+            configFolderPath = envConfigPath
+        } else {
+            configFolderPath = DefaultFolderPath
+        }
+    }
+
 	if err := initConfig(&Config, FileName, configFolderPath); err != nil {
 		return err
 	}

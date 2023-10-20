@@ -212,6 +212,8 @@ Before you start, please make sure your changes are in demand. The best for that
 - [Interface Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/api.md)
 - [Log Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/logging.md)
 - [Error Code Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/error_code.md)
+- [OpenIM configuration and environment variable Settings](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md)
+
 
 ## :busts_in_silhouette: Community
 

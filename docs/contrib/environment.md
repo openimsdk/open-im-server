@@ -38,6 +38,38 @@
 		* 2.20.1. [General Configuration](#GeneralConfiguration)
 		* 2.20.2. [Service-Specific Prometheus Ports](#Service-SpecificPrometheusPorts)
 
+## 0. <a name='TableofContents'></a>OpenIM Config File
+
+Ensuring that OpenIM operates smoothly requires clear direction on the configuration file's location. Here's a detailed step-by-step guide on how to provide this essential path to OpenIM:
+
+1. **Using the Command-line Argument**:
+
+   + **For Configuration Path**: When initializing OpenIM, you can specify the path to the configuration file directly using the `-c` or `--config_folder_path` option.
+
+     ```bash
+     ❯ _output/bin/platforms/linux/amd64/openim-api --config_folder_path="/your/config/folder/path"
+     ```
+
+   + **For Port Specification**: Similarly, if you wish to designate a particular port, utilize the `-p` option followed by the desired port number.
+
+     ```bash
+     ❯ _output/bin/platforms/linux/amd64/openim-api -p 1234
+     ```
+
+     Note: If the port is not specified here, OpenIM will fetch it from the configuration file. Setting the port via environment variables isn't supported. We recommend consolidating settings in the configuration file for a more consistent and streamlined setup.
+
+2. **Leveraging the Environment Variable**:
+
+   You have the flexibility to determine OpenIM's configuration path by setting an `OPENIMCONFIG` environment variable. This method provides a seamless way to instruct OpenIM without command-line parameters every time.
+
+   ```bash
+   export OPENIMCONFIG="/path/to/your/config"
+   ```
+
+3. **Relying on the Default Path**:
+
+   In scenarios where neither command-line arguments nor environment variables are provided, OpenIM will intuitively revert to the `config/` directory to locate its configuration.
+
 
 
 ##  1. <a name='OpenIMDeploymentGuide'></a>OpenIM Deployment Guide

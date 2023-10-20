@@ -32,6 +32,14 @@ DOCKER_COMPOSE_COMMAND=
 # Check if docker-compose command is available
 openim::util::check_docker_and_compose_versions
 
+if command -v docker compose &> /dev/null
+then
+    openim::log::info "docker compose command is available"
+    DOCKER_COMPOSE_COMMAND="docker compose"
+else
+    DOCKER_COMPOSE_COMMAND="docker-compose"
+fi
+
 pushd "${OPENIM_ROOT}"
 ${DOCKER_COMPOSE_COMMAND} stop
 curl https://gitee.com/openimsdk/openim-docker/raw/main/example/full-openim-server-and-chat.yml -o docker-compose.yml &&  make init && docker compose up -d

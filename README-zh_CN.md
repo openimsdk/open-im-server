@@ -98,6 +98,11 @@ OpenIM 我们的目标是建立一个顶级的开源社区。我们有一套标�
 
 + [接口标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/interface.md)
 
++ [OpenIM配置和环境变量设置](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md)
+
+> **Note**
+> 针对中国的用户，阅读我们的 [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md) 以便使用国内 aliyun 的镜像地址。OpenIM 也有针对中国的 gitee 同步仓库，你可以在 [gitee.com](https://gitee.com/openimsdk) 上找到它。
+
 ## :link: 链接
 
   + **[完整文档](https://doc.rentsoft.cn/)**
