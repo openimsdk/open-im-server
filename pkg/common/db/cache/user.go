@@ -113,23 +113,6 @@ func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userIn
 	)
 }
 
-func batchGetCache2[T any, K comparable](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, keys []K, keyFn func(key K) string, fns func(ctx context.Context, key K) (T, error)) ([]T, error) {
-	if len(keys) == 0 {
-		return nil, nil
-	}
-	res := make([]T, 0, len(keys))
-	for _, key := range keys {
-		val, err := getCache(ctx, rcClient, keyFn(key), expire, func(ctx context.Context) (T, error) {
-			return fns(ctx, key)
-		})
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, val)
-	}
-	return res, nil
-}
-
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {
 	//var keys []string
 	//for _, userID := range userIDs {
