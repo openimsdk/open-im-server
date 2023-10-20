@@ -6,7 +6,7 @@ pipeline {
         // }
     // }
 	environment {
-	    JOB_ENV = "social" // namespace
+	    JOB_ENV = "open-im" // namespace
 	    DEPLOYMENT_NAME = "api"  // k8s deploy name
         CONFIGMAP_NAME = "${DEPLOYMENT_NAME}-conf" // runtime conf
         JOB_NAME = "${JOB_NAME}" // jenkins job name
@@ -100,15 +100,14 @@ pipeline {
                 withDockerRegistry([ credentialsId: "DockerHub", url: "" ]){
                     sh """  
                       echo `Build image ...`
-                      docker build -t ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/jenkins-deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
-                      docker tag ${JOB_ENV}/${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}
+                      docker build -t ${JOB_ENV}-${JOB_NAME}:${CommitHash}-${BUILD_NUM} -f ${BASEDIR}/jenkins-deploy/dockerfile/${params.RELEASE_PROJECTS}.Dockerfile .
+                      docker tag ${JOB_ENV}-${JOB_NAME}:${CommitHash}-${BUILD_NUM} ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}
                       
                       echo `Push image ...`
                       docker push ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}
 
                       echo `Start removing image ...1.`
-                      docker rmi ${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}
-                      docker rmi ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}
+                      docker rmi ${JOB_ENV}-${JOB_NAME}:${CommitHash}-${BUILD_NUM}
                       echo `Done removing image!`
                     """
                 }
