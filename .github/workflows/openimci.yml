@@ -86,7 +86,7 @@ jobs:
       run: sudo make clean
 
     - name: Push Changes to Main
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "cicd: robot automated Change"
         branch: main
