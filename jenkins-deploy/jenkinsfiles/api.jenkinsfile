@@ -142,7 +142,7 @@ pipeline {
                    fileContentReplaceConfig(
                      configs: [
                        fileContentReplaceItemConfig(
-                         search: "(image: )truongpx396\\/([a-zA-Z-])+:([a-z])\\w+-[0-9]+",
+                         search: "(image: )truongpx396\\/([a-zA-Z-_])+:([0-9a-z])\\w+-[0-9]+",
                          replace: "image: ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}",
                          matchCount: 1,
                          verbose: false,
