@@ -121,7 +121,6 @@ pipeline {
         stage('Prepare to update infra') {
             steps {
                 cleanWs()
-                // git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}"
                 checkout([$class: 'GitSCM',
                 branches: [[name: "main"]],
                 doGenerateSubmoduleConfigurations: false,
@@ -150,11 +149,10 @@ pipeline {
                      ],
                      fileEncoding: 'UTF-8',
                      lineSeparator: 'Unix',
-                     filePath: 'open-im-server/api/deployment.yaml'
+                     filePath: "open-im-server/${params.RELEASE_PROJECTS}/deployment.yaml"
                    )
                  ]
             )
-
 
             script {
                   withCredentials([string(credentialsId: 'GitHub1', variable: 'GITHUB_TOKEN')]) {
