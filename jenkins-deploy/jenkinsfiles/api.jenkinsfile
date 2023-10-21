@@ -6,7 +6,7 @@ pipeline {
         // }
     // }
 	environment {
-	    JOB_ENV = "openim-dev" // namespace
+	    JOB_ENV = "dev" // namespace
 	    DEPLOYMENT_NAME = "api"  // k8s deploy name
         CONFIGMAP_NAME = "${DEPLOYMENT_NAME}-conf" // runtime conf
         JOB_NAME = "${JOB_NAME}" // jenkins job name
