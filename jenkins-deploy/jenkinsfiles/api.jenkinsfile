@@ -6,7 +6,7 @@ pipeline {
         // }
     // }
 	environment {
-	    JOB_ENV = "dev" // namespace
+	    JOB_ENV = "openim-dev" // namespace
 	    DEPLOYMENT_NAME = "api"  // k8s deploy name
         CONFIGMAP_NAME = "${DEPLOYMENT_NAME}-conf" // runtime conf
         JOB_NAME = "${JOB_NAME}" // jenkins job name
@@ -164,7 +164,7 @@ pipeline {
                           git config user.email "jenkins@example.com"
                           git config user.name "Jenkins"
                           git add open-im-server/api/deployment.yaml && git commit -m "Update app image tag to ${CommitHash}-${BUILD_NUM}"
-                          git push -f https://${GITHUB_TOKEN}@github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}.git 
+                          git push -f https://${GITHUB_TOKEN}@github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}.git HEAD:main
                       """
                   }
               }
