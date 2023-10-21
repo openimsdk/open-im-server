@@ -121,7 +121,15 @@ pipeline {
         stage('Prepare to update infra') {
             steps {
                 cleanWs()
-                git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}"
+                // git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}"
+                checkout([$class: 'GitSCM',
+                branches: [[name: "main"]],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [],
+                gitTool: 'Default',
+                submoduleCfg: [],
+                userRemoteConfigs: [[url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}", credentialsId: "${CREDENTIALS_ID}"]]
+            ])
             }
         }
 
