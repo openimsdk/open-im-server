@@ -53,38 +53,76 @@ func WithLogName(logName string) func(*CmdOpts) {
 	}
 }
 
-func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
-	rootCmd = &RootCmd{Name: name}
-	c := cobra.Command{
-		Use:   "start openIM application",
+func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
+	rootCmd := &RootCmd{Name: name}
+	cmd := cobra.Command{
+		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
-				panic(err)
-			}
-			cmdOpts := &CmdOpts{}
-			for _, opt := range opts {
-				opt(cmdOpts)
-			}
-			if cmdOpts.loggerPrefixName == "" {
-				cmdOpts.loggerPrefixName = "OpenIM.log.all"
-			}
-			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount, config.Config.Log.RotationTime); err != nil {
-				panic(err)
-			}
-			return nil
+			return rootCmd.persistentPreRun(cmd, opts...)
 		},
 	}
-	rootCmd.Command = c
+	rootCmd.Command = cmd
 	rootCmd.addConfFlag()
 	return rootCmd
 }
+
+func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
+	if err := rc.initializeConfiguration(cmd); err != nil {
+		return fmt.Errorf("failed to get configuration from command: %w", err)
+	}
+
+	cmdOpts := rc.applyOptions(opts...)
+
+	if err := rc.initializeLogger(cmdOpts); err != nil {
+		return fmt.Errorf("failed to initialize from config: %w", err)
+	}
+
+	return nil
+}
+
+func (rc *RootCmd) initializeConfiguration(cmd *cobra.Command) error {
+	return rc.getConfFromCmdAndInit(cmd)
+}
+
+func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
+	cmdOpts := defaultCmdOpts()
+	for _, opt := range opts {
+		opt(cmdOpts)
+	}
+
+	return cmdOpts
+}
+
+func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
+	logConfig := config.Config.Log
+	
+	return log.InitFromConfig(
+		
+		cmdOpts.loggerPrefixName,
+		rc.Name,
+		logConfig.RemainLogLevel,
+		logConfig.IsStdout,
+		logConfig.IsJson,
+		logConfig.StorageLocation,
+		logConfig.RemainRotationCount,
+		logConfig.RotationTime,
+	)
+}
+
+func defaultCmdOpts() *CmdOpts {
+	return &CmdOpts{
+		loggerPrefixName: "OpenIM.log.all",
+	}
+}
+
 func (r *RootCmd) SetRootCmdPt(cmdItf RootCmdPt) {
 	r.cmdItf = cmdItf
 }
+
 func (r *RootCmd) addConfFlag() {
-	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+	r.Command.Flags().StringP(constant.FlagConf, "c", "", "path to config file folder")
 }
 
 func (r *RootCmd) AddPortFlag() {

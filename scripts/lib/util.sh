@@ -250,6 +250,39 @@ openim::util::host_arch() {
   echo "${host_arch}"
 }
 
+# Define a bash function to check the versions of Docker and Docker Compose
+openim::util::check_docker_and_compose_versions() {
+    # Define the required versions of Docker and Docker Compose
+    required_docker_version="20.10.0"
+    required_compose_version="2.0"
+
+    # Get the currently installed Docker version
+    installed_docker_version=$(docker --version | awk '{print $3}' | sed 's/,//')
+
+    # Check if the installed Docker version matches the required version
+    if [[ "$installed_docker_version" < "$required_docker_version" ]]; then
+        echo "Docker version mismatch. Installed: $installed_docker_version, Required: $required_docker_version"
+        return 1
+    fi
+
+    # Check if the docker compose sub-command is available
+    if ! docker compose version &> /dev/null; then
+        echo "Docker does not support the docker compose sub-command"
+        return 1
+    fi
+
+    # Get the currently installed Docker Compose version
+    installed_compose_version=$(docker compose version --short)
+
+    # Check if the installed Docker Compose version matches the required version
+    if [[ "$installed_compose_version" < "$required_compose_version" ]]; then
+        echo "Docker Compose version mismatch. Installed: $installed_compose_version, Required: $required_compose_version"
+        return 1
+    fi
+
+}
+
+
 # The `openim::util::check_ports` function analyzes the state of processes based on given ports.
 # It accepts multiple ports as arguments and prints:
 # 1. The state of the process (whether it's running or not).
@@ -1321,3 +1354,7 @@ function openim::util::gen_os_arch() {
         exit 1
     fi
 }
+
+if [[ "$*" =~ openim::util:: ]];then
+  eval $*
+fi

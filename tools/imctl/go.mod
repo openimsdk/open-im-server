@@ -1,6 +1,6 @@
 module 	github.com/openimsdk/open-im-server/v3/tools/imctl
 
-go 1.18
+go 1.19
 
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1

@@ -1,6 +1,6 @@
 module github.com/openimsdk/open-im-server/v3/tools/data-conversion
 
-go 1.18
+go 1.19
 
 require (
 	github.com/IBM/sarama v1.41.2
