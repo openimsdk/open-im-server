@@ -142,7 +142,7 @@ pipeline {
                    fileContentReplaceConfig(
                      configs: [
                        fileContentReplaceItemConfig(
-                         search: "(image: )([*]:[*]-[0-9]+)",
+                         search: "(image: )([*]-[0-9]+)",
                          replace: "image: ${HARBOR_URL}/${JOB_ENV}-${params.RELEASE_PROJECTS}:${CommitHash}-${BUILD_NUM}",
                          matchCount: 1,
                          verbose: false,
@@ -161,6 +161,8 @@ pipeline {
                       sh """
                           echo "${GITHUB_TOKEN}"
                           export BUILD_ID=${CommitHash}-${BUILD_NUM}
+                          git config user.email "jenkins@example.com"
+                          git config user.name "Jenkins"
                           git add open-im-server/api/deployment.yaml && git commit -m "Update app image tag to ${CommitHash}-${BUILD_NUM}"
                           git push -f https://${GITHUB_TOKEN}@github.com/${ORGANIZATION_NAME}/${SERVICE_NAME_INFRA}.git 
                       """
