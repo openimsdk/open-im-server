@@ -89,6 +89,7 @@ func NewConversationRedis(
 	db relationtb.ConversationModelInterface,
 ) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
+
 	return &ConversationRedisCache{
 		rcClient:       rcClient,
 		metaCache:      NewMetaCacheRedis(rcClient),
@@ -110,6 +111,7 @@ func NewNewConversationRedis(
 	options rockscache.Options,
 ) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, options)
+
 	return &ConversationRedisCache{
 		rcClient:       rcClient,
 		metaCache:      NewMetaCacheRedis(rcClient),
@@ -168,12 +170,13 @@ func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, own
 }
 
 func (c *ConversationRedisCache) DelConversationIDs(userIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(userIDs))
 	for _, userID := range userIDs {
 		keys = append(keys, c.getConversationIDsKey(userID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -198,18 +201,20 @@ func (c *ConversationRedisCache) GetUserConversationIDsHash(
 			utils.Sort(conversationIDs, true)
 			bi := big.NewInt(0)
 			bi.SetString(utils.Md5(strings.Join(conversationIDs, ";"))[0:8], 16)
+
 			return bi.Uint64(), nil
 		},
 	)
 }
 
 func (c *ConversationRedisCache) DelUserConversationIDsHash(ownerUserIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(ownerUserIDs))
 	for _, ownerUserID := range ownerUserIDs {
 		keys = append(keys, c.getUserConversationIDsHashKey(ownerUserID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -229,12 +234,13 @@ func (c *ConversationRedisCache) GetConversation(
 }
 
 func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(conversationIDs))
 	for _, conversationID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -248,6 +254,7 @@ func (c *ConversationRedisCache) getConversationIndex(
 			return _i, nil
 		}
 	}
+
 	return 0, errors.New("not found key:" + key + " in keys")
 }
 
@@ -256,10 +263,11 @@ func (c *ConversationRedisCache) GetConversations(
 	ownerUserID string,
 	conversationIDs []string,
 ) ([]*relationtb.ConversationModel, error) {
-	var keys []string
+	keys := make([]string, 0, len(conversationIDs))
 	for _, conversarionID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	}
+
 	return batchGetCache(
 		ctx,
 		c.rcClient,
@@ -280,10 +288,11 @@ func (c *ConversationRedisCache) GetUserAllConversations(
 	if err != nil {
 		return nil, err
 	}
-	var keys []string
+	keys := make([]string, 0, len(conversationIDs))
 	for _, conversarionID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversarionID))
 	}
+
 	return batchGetCache(
 		ctx,
 		c.rcClient,
@@ -327,24 +336,27 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDs(
 }
 
 func (c *ConversationRedisCache) DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(ownerUserIDs))
 	for _, ownerUserID := range ownerUserIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
 func (c *ConversationRedisCache) DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getRecvMsgOptKey(ownerUserID, conversationID))
+
 	return cache
 }
 
 func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDs(groupID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsKey(groupID))
+
 	return cache
 }
 
@@ -365,6 +377,7 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(
 			utils.Sort(userIDs, true)
 			bi := big.NewInt(0)
 			bi.SetString(utils.Md5(strings.Join(userIDs, ";"))[0:8], 16)
+
 			return bi.Uint64(), nil
 		},
 	)
@@ -373,6 +386,7 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(
 func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsHashKey(groupID))
+
 	return cache
 }
 
@@ -385,6 +399,7 @@ func (c *ConversationRedisCache) getUserAllHasReadSeqsIndex(
 			return _i, nil
 		}
 	}
+
 	return 0, errors.New("not found key:" + conversationID + " in keys")
 }
 
@@ -396,10 +411,11 @@ func (c *ConversationRedisCache) GetUserAllHasReadSeqs(
 	if err != nil {
 		return nil, err
 	}
-	var keys []string
+	keys := make([]string, 0, len(conversationIDs))
 	for _, conversarionID := range conversationIDs {
 		keys = append(keys, c.getConversationHasReadSeqKey(ownerUserID, conversarionID))
 	}
+
 	return batchGetCacheMap(
 		ctx,
 		c.rcClient,
@@ -420,6 +436,7 @@ func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string,
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationHasReadSeqKey(ownerUserID, conversationID))
 	}
+
 	return cache
 }
 
@@ -451,5 +468,6 @@ func (c *ConversationRedisCache) DelConversationNotReceiveMessageUserIDs(convers
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationNotReceiveMessageUserIDsKey(conversationID))
 	}
+
 	return cache
 }
