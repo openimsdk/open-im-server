@@ -55,6 +55,7 @@ func MsgPb2DB(msg *sdkws.MsgData) *unrelation.MsgDataModel {
 	msgDataModel.AtUserIDList = msg.AtUserIDList
 	msgDataModel.AttachedInfo = msg.AttachedInfo
 	msgDataModel.Ex = msg.Ex
+
 	return &msgDataModel
 }
 
@@ -95,5 +96,6 @@ func MsgDB2Pb(msgModel *unrelation.MsgDataModel) *sdkws.MsgData {
 	msg.AtUserIDList = msgModel.AtUserIDList
 	msg.AttachedInfo = msgModel.AttachedInfo
 	msg.Ex = msgModel.Ex
+
 	return &msg
 }
