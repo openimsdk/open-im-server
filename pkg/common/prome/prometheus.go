@@ -30,13 +30,16 @@ func StartPrometheusSrv(prometheusPort int) error {
 	if config.Config.Prometheus.Enable {
 		http.Handle("/metrics", promhttp.Handler())
 		err := http.ListenAndServe(":"+strconv.Itoa(prometheusPort), nil)
+
 		return err
 	}
+
 	return nil
 }
 
 func PrometheusHandler() gin.HandlerFunc {
 	h := promhttp.Handler()
+
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
@@ -49,6 +52,7 @@ type responseBodyWriter struct {
 
 func (r responseBodyWriter) Write(b []byte) (int, error) {
 	r.body.Write(b)
+
 	return r.ResponseWriter.Write(b)
 }
 
