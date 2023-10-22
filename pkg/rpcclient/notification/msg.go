@@ -37,6 +37,7 @@ func (m *MsgNotificationSender) UserDeleteMsgsNotification(ctx context.Context, 
 		ConversationID: conversationID,
 		Seqs:           seqs,
 	}
+
 	return m.Notification(ctx, userID, userID, constant.DeleteMsgsNotification, &tips)
 }
 
@@ -47,5 +48,6 @@ func (m *MsgNotificationSender) MarkAsReadNotification(ctx context.Context, conv
 		Seqs:             seqs,
 		HasReadSeq:       hasReadSeq,
 	}
+
 	return m.NotificationWithSesstionType(ctx, sendID, recvID, constant.HasReadReceipt, sesstionType, tips)
 }
