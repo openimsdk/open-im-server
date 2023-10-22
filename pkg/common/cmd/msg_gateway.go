@@ -31,6 +31,7 @@ type MsgGatewayCmd struct {
 func NewMsgGatewayCmd() *MsgGatewayCmd {
 	ret := &MsgGatewayCmd{NewRootCmd("msgGateway")}
 	ret.SetRootCmdPt(ret)
+
 	return ret
 }
 
@@ -43,6 +44,7 @@ func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
 	if port == 0 {
 		port = m.PortFromConfig(constant.FlagWsPort)
 	}
+
 	return port
 }
 
@@ -54,8 +56,10 @@ func (m *MsgGatewayCmd) addRunE() {
 
 func (m *MsgGatewayCmd) Exec() error {
 	m.addRunE()
+
 	return m.Execute()
 }
+
 func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
 	if portType == constant.FlagWsPort {
 		return config2.Config.LongConnSvr.OpenImWsPort[0]
