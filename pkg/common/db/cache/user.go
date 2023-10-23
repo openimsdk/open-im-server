@@ -112,29 +112,32 @@ func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userIn
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {
-	keys := make([]string, 0, len(userIDs))
-	for _, userID := range userIDs {
-		keys = append(keys, u.getUserInfoKey(userID))
-	}
-
-	return batchGetCache(
-		ctx,
-		u.rcClient,
-		keys,
-		u.expireTime,
-		func(user *relationtb.UserModel, keys []string) (int, error) {
-			for i, key := range keys {
-				if key == u.getUserInfoKey(user.UserID) {
-					return i, nil
-				}
-			}
-
-			return 0, errIndex
-		},
-		func(ctx context.Context) ([]*relationtb.UserModel, error) {
-			return u.userDB.Find(ctx, userIDs)
-		},
-	)
+	//var keys []string
+	//for _, userID := range userIDs {
+	//	keys = append(keys, u.getUserInfoKey(userID))
+	//}
+	//return batchGetCache(
+	//	ctx,
+	//	u.rcClient,
+	//	keys,
+	//	u.expireTime,
+	//	func(user *relationtb.UserModel, keys []string) (int, error) {
+	//		for i, key := range keys {
+	//			if key == u.getUserInfoKey(user.UserID) {
+	//				return i, nil
+	//			}
+	//		}
+	//		return 0, errIndex
+	//	},
+	//	func(ctx context.Context) ([]*relationtb.UserModel, error) {
+	//		return u.userDB.Find(ctx, userIDs)
+	//	},
+	//)
+	return batchGetCache2(ctx, u.rcClient, u.expireTime, userIDs, func(userID string) string {
+		return u.getUserInfoKey(userID)
+	}, func(ctx context.Context, userID string) (*relationtb.UserModel, error) {
+		return u.userDB.Take(ctx, userID)
+	})
 }
 
 func (u *UserCacheRedis) DelUsersInfo(userIDs ...string) UserCache {

@@ -53,11 +53,7 @@ type FriendCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewFriendCacheRedis(
-	rdb redis.UniversalClient,
-	friendDB relationtb.FriendModelInterface,
-	options rockscache.Options,
-) FriendCache {
+func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface, options rockscache.Options) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
 
 	return &FriendCacheRedis{
@@ -90,15 +86,9 @@ func (f *FriendCacheRedis) getFriendKey(ownerUserID, friendUserID string) string
 }
 
 func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDs []string, err error) {
-	return getCache(
-		ctx,
-		f.rcClient,
-		f.getFriendIDsKey(ownerUserID),
-		f.expireTime,
-		func(ctx context.Context) ([]string, error) {
-			return f.friendDB.FindFriendUserIDs(ctx, ownerUserID)
-		},
-	)
+	return getCache(ctx, f.rcClient, f.getFriendIDsKey(ownerUserID), f.expireTime, func(ctx context.Context) ([]string, error) {
+		return f.friendDB.FindFriendUserIDs(ctx, ownerUserID)
+	})
 }
 
 func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) FriendCache {
@@ -113,10 +103,7 @@ func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) FriendCache {
 }
 
 // todo.
-func (f *FriendCacheRedis) GetTwoWayFriendIDs(
-	ctx context.Context,
-	ownerUserID string,
-) (twoWayFriendIDs []string, err error) {
+func (f *FriendCacheRedis) GetTwoWayFriendIDs(ctx context.Context, ownerUserID string) (twoWayFriendIDs []string, err error) {
 	friendIDs, err := f.GetFriendIDs(ctx, ownerUserID)
 	if err != nil {
 		return nil, err
@@ -141,19 +128,10 @@ func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID s
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) GetFriend(
-	ctx context.Context,
-	ownerUserID, friendUserID string,
-) (friend *relationtb.FriendModel, err error) {
-	return getCache(
-		ctx,
-		f.rcClient,
-		f.getFriendKey(ownerUserID, friendUserID),
-		f.expireTime,
-		func(ctx context.Context) (*relationtb.FriendModel, error) {
-			return f.friendDB.Take(ctx, ownerUserID, friendUserID)
-		},
-	)
+func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error) {
+	return getCache(ctx, f.rcClient, f.getFriendKey(ownerUserID, friendUserID), f.expireTime, func(ctx context.Context) (*relationtb.FriendModel, error) {
+		return f.friendDB.Take(ctx, ownerUserID, friendUserID)
+	})
 }
 
 func (f *FriendCacheRedis) DelFriend(ownerUserID, friendUserID string) FriendCache {

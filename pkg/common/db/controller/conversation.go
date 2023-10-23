@@ -50,7 +50,7 @@ type ConversationDatabase interface {
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
-	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
+	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
 	GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error)
@@ -306,9 +306,9 @@ func (c *conversationDatabase) GetAllConversationIDs(ctx context.Context) ([]str
 	return c.conversationDB.GetAllConversationIDs(ctx)
 }
 
-func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
-	return c.cache.GetUserAllHasReadSeqs(ctx, ownerUserID)
-}
+//func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
+//	return c.cache.GetUserAllHasReadSeqs(ctx, ownerUserID)
+//}
 
 func (c *conversationDatabase) GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error) {
 	return c.conversationDB.GetConversationsByConversationID(ctx, conversationIDs)
