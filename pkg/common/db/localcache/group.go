@@ -57,6 +57,7 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 	localHashInfo, ok := g.cache[groupID]
 	if ok && localHashInfo.memberListHash == resp.GroupAbstractInfos[0].GroupMemberListHash {
 		g.lock.Unlock()
+
 		return localHashInfo.userIDs, nil
 	}
 	g.lock.Unlock()
@@ -74,5 +75,6 @@ func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string)
 		memberListHash: resp.GroupAbstractInfos[0].GroupMemberListHash,
 		userIDs:        groupMembersResp.UserIDs,
 	}
+
 	return g.cache[groupID].userIDs, nil
 }

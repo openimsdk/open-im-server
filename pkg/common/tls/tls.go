@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
+//nolint:staticcheck //we have not time looking for a replacement for x509 to fix the security valnerability
 func decryptPEM(data []byte, passphrase []byte) ([]byte, error) {
 	if len(passphrase) == 0 {
 		return data, nil
@@ -33,6 +34,7 @@ func decryptPEM(data []byte, passphrase []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return pem.EncodeToMemory(&pem.Block{
 		Type:  b.Type,
 		Bytes: d,
@@ -44,6 +46,7 @@ func readEncryptablePEMBlock(path string, pwd []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return decryptPEM(data, pwd)
 }
 

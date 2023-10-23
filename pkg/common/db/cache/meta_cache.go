@@ -91,6 +91,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 			//}
 		}
 	}
+
 	return nil
 }
 
@@ -114,6 +115,7 @@ func GetDefaultOpt() rockscache.Options {
 	opts := rockscache.NewDefaultOptions()
 	opts.StrongConsistency = true
 	opts.RandomExpireAdjustment = 0.2
+
 	return opts
 }
 
@@ -130,6 +132,7 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 			return "", utils.Wrap(err, "")
 		}
 		write = true
+
 		return string(bs), nil
 	})
 	if err != nil {
@@ -144,8 +147,10 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
 		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
+
 		return t, utils.Wrap(err, "")
 	}
+
 	return t, nil
 }
 
@@ -200,6 +205,7 @@ func batchGetCache2[T any, K comparable](ctx context.Context, rcClient *rockscac
 		}
 		res = append(res, val)
 	}
+
 	return res, nil
 }
 

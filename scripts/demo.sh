@@ -37,6 +37,8 @@ readonly ipv6regex='(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:
 clear
 . $(dirname ${BASH_SOURCE})/lib/util.sh
 
+openim::util::ensure-bash-version
+
 trap 'openim::util::onCtrlC' INT
 
 function openim::util::onCtrlC() {

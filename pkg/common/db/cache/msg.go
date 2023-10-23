@@ -16,12 +16,11 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
-	"github.com/dtm-labs/rockscache"
 
 	"github.com/OpenIMSDK/tools/errs"
 
@@ -33,7 +32,6 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -169,6 +167,7 @@ func (c *msgCache) getSeqs(ctx context.Context, items []string, getkey func(s st
 			m[items[i]] = val
 		}
 	}
+
 	return m, nil
 
 	//pipe := c.rdb.Pipeline()
@@ -299,6 +298,7 @@ func (c *msgCache) GetHasReadSeq(ctx context.Context, userID string, conversatio
 
 func (c *msgCache) AddTokenFlag(ctx context.Context, userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+
 	return errs.Wrap(c.rdb.HSet(ctx, key, token, flag).Err())
 }
 
@@ -312,6 +312,7 @@ func (c *msgCache) GetTokensWithoutError(ctx context.Context, userID string, pla
 	for k, v := range m {
 		mm[k] = utils.StringToInt(v)
 	}
+
 	return mm, nil
 }
 
@@ -321,11 +322,13 @@ func (c *msgCache) SetTokenMapByUidPid(ctx context.Context, userID string, platf
 	for k, v := range m {
 		mm[k] = v
 	}
+
 	return errs.Wrap(c.rdb.HSet(ctx, key, mm).Err())
 }
 
 func (c *msgCache) DeleteTokenByUidPid(ctx context.Context, userID string, platform int, fields []string) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platform)
+
 	return errs.Wrap(c.rdb.HDel(ctx, key, fields...).Err())
 }
 
@@ -357,6 +360,7 @@ func (c *msgCache) GetMessagesBySeq(ctx context.Context, conversationID string, 
 		}
 		seqMsgs = append(seqMsgs, &msg)
 	}
+
 	return
 	//pipe := c.rdb.Pipeline()
 	//for _, v := range seqs {
@@ -445,6 +449,7 @@ func (c *msgCache) UserDeleteMsgs(ctx context.Context, conversationID string, se
 			return errs.Wrap(err)
 		}
 	}
+
 	return nil
 	//pipe := c.rdb.Pipeline()
 	//for _, seq := range seqs {
@@ -478,6 +483,7 @@ func (c *msgCache) GetUserDelList(ctx context.Context, userID, conversationID st
 	for i, v := range result {
 		seqs[i] = utils.StringToInt64(v)
 	}
+
 	return seqs, nil
 }
 
@@ -486,6 +492,7 @@ func (c *msgCache) DelUserDeleteMsgsList(ctx context.Context, conversationID str
 		delUsers, err := c.rdb.SMembers(ctx, c.getMessageDelUserListKey(conversationID, seq)).Result()
 		if err != nil {
 			log.ZWarn(ctx, "DelUserDeleteMsgsList failed", err, "conversationID", conversationID, "seq", seq)
+
 			continue
 		}
 		if len(delUsers) > 0 {
@@ -561,7 +568,7 @@ func (c *msgCache) DeleteMessages(ctx context.Context, conversationID string, se
 
 func (c *msgCache) CleanUpOneConversationAllMsg(ctx context.Context, conversationID string) error {
 	vals, err := c.rdb.Keys(ctx, c.allMessageCacheKey(conversationID)).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return nil
 	}
 	if err != nil {
@@ -588,13 +595,15 @@ func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []in
 		key := c.getMessageCacheKey(userID, seq)
 		result, err := c.rdb.Get(ctx, key).Result()
 		if err != nil {
-			if err == redis.Nil {
+			if errors.Is(err, redis.Nil) {
 				continue
 			}
+
 			return errs.Wrap(err)
 		}
 		var msg sdkws.MsgData
-		if err := jsonpb.UnmarshalString(result, &msg); err != nil {
+		err = jsonpb.UnmarshalString(result, &msg)
+		if err != nil {
 			return err
 		}
 		msg.Status = constant.MsgDeleted
@@ -606,6 +615,7 @@ func (c *msgCache) DelMsgFromCache(ctx context.Context, userID string, seqs []in
 			return errs.Wrap(err)
 		}
 	}
+
 	return nil
 }
 
@@ -631,6 +641,7 @@ func (c *msgCache) SetSendMsgStatus(ctx context.Context, id string, status int32
 
 func (c *msgCache) GetSendMsgStatus(ctx context.Context, id string) (int32, error) {
 	result, err := c.rdb.Get(ctx, sendMsgFailedFlag+id).Int()
+
 	return int32(result), errs.Wrap(err)
 }
 
@@ -648,6 +659,7 @@ func (c *msgCache) DelFcmToken(ctx context.Context, account string, platformID i
 
 func (c *msgCache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
 	seq, err := c.rdb.Incr(ctx, userBadgeUnreadCountSum+userID).Result()
+
 	return int(seq), errs.Wrap(err)
 }
 
@@ -661,11 +673,13 @@ func (c *msgCache) GetUserBadgeUnreadCountSum(ctx context.Context, userID string
 
 func (c *msgCache) LockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+
 	return errs.Wrap(c.rdb.SetNX(ctx, key, 1, time.Minute).Err())
 }
 
 func (c *msgCache) UnLockMessageTypeKey(ctx context.Context, clientMsgID string, TypeKey string) error {
 	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+
 	return errs.Wrap(c.rdb.Del(ctx, key).Err())
 }
 
@@ -680,6 +694,7 @@ func (c *msgCache) getMessageReactionExPrefix(clientMsgID string, sessionType in
 	case constant.NotificationChatType:
 		return "EX_NOTIFICATION" + clientMsgID
 	}
+
 	return ""
 }
 
@@ -688,6 +703,7 @@ func (c *msgCache) JudgeMessageReactionExist(ctx context.Context, clientMsgID st
 	if err != nil {
 		return false, utils.Wrap(err, "")
 	}
+
 	return n > 0, nil
 }
 

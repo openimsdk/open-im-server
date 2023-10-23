@@ -16,6 +16,7 @@ package unrelation
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -44,27 +45,12 @@ type Mongo struct {
 // NewMongo Initialize MongoDB connection.
 func NewMongo() (*Mongo, error) {
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
-	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	// uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	var uri string
 	if config.Config.Mongo.Uri != "" {
 		uri = config.Config.Mongo.Uri
 	} else {
-		mongodbHosts := ""
-		for i, v := range config.Config.Mongo.Address {
-			if i == len(config.Config.Mongo.Address)-1 {
-				mongodbHosts += v
-			} else {
-				mongodbHosts += v + ","
-			}
-		}
-		if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
-				config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
-				config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
-		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
-				mongodbHosts, config.Config.Mongo.Database,
-				config.Config.Mongo.MaxPoolSize)
-		}
+		uri = defaultMongoUriForNewMongo()
 	}
 	fmt.Println("mongo:", uri)
 	var mongoClient *mongo.Client
@@ -76,15 +62,39 @@ func NewMongo() (*Mongo, error) {
 		if err == nil {
 			return &Mongo{db: mongoClient}, nil
 		}
-		if cmdErr, ok := err.(mongo.CommandError); ok {
+		var cmdErr mongo.CommandError
+		if errors.As(err, &cmdErr) {
 			if cmdErr.Code == 13 || cmdErr.Code == 18 {
 				return nil, err
-			} else {
-				fmt.Printf("Failed to connect to MongoDB: %s\n", err)
 			}
+			fmt.Printf("Failed to connect to MongoDB: %s\n", err)
 		}
 	}
+
 	return nil, err
+}
+
+func defaultMongoUriForNewMongo() string {
+	var uri string
+	mongodbHosts := ""
+	for i, v := range config.Config.Mongo.Address {
+		if i == len(config.Config.Mongo.Address)-1 {
+			mongodbHosts += v
+		} else {
+			mongodbHosts += v + ","
+		}
+	}
+	if config.Config.Mongo.Password != "" && config.Config.Mongo.Username != "" {
+		uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+			config.Config.Mongo.Username, config.Config.Mongo.Password, mongodbHosts,
+			config.Config.Mongo.Database, config.Config.Mongo.MaxPoolSize)
+	} else {
+		uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
+			mongodbHosts, config.Config.Mongo.Database,
+			config.Config.Mongo.MaxPoolSize)
+	}
+
+	return uri
 }
 
 func (m *Mongo) GetClient() *mongo.Client {
@@ -106,6 +116,7 @@ func (m *Mongo) CreateSuperGroupIndex() error {
 	if err := m.createMongoIndex(unrelation.CUserToSuperGroup, true, "user_id"); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -139,5 +150,6 @@ func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...strin
 	if err != nil {
 		return utils.Wrap(err, result)
 	}
+
 	return nil
 }

@@ -167,6 +167,7 @@ define MAKEFILE_EXAMPLE
 # make install-deepcopy-gen                                      Install deepcopy-gen tools if the license is missing.
 # make build BINS=openim-api V=1 DEBUG=1                         Build debug binaries for only openim-api.
 # make multiarch -j PLATFORMS="linux_arm64 linux_amd64" V=1      Build binaries for both platforms.
+# make image
 endef
 export MAKEFILE_EXAMPLE
 

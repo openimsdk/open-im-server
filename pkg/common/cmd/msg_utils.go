@@ -22,7 +22,7 @@ import (
 
 type MsgUtilsCmd struct {
 	cobra.Command
-	msgTool *tools.MsgTool
+	// msgTool *tools.MsgTool
 }
 
 func (m *MsgUtilsCmd) AddUserIDFlag() {
@@ -31,6 +31,7 @@ func (m *MsgUtilsCmd) AddUserIDFlag() {
 
 func (m *MsgUtilsCmd) getUserIDFlag(cmdLines *cobra.Command) string {
 	userID, _ := cmdLines.Flags().GetString("userID")
+
 	return userID
 }
 
@@ -38,18 +39,8 @@ func (m *MsgUtilsCmd) AddFixAllFlag() {
 	m.Command.PersistentFlags().BoolP("fixAll", "f", false, "openIM fix all seqs")
 }
 
-func (m *MsgUtilsCmd) getFixAllFlag(cmdLines *cobra.Command) bool {
-	fixAll, _ := cmdLines.Flags().GetBool("fixAll")
-	return fixAll
-}
-
 func (m *MsgUtilsCmd) AddClearAllFlag() {
 	m.Command.PersistentFlags().BoolP("clearAll", "c", false, "openIM clear all seqs")
-}
-
-func (m *MsgUtilsCmd) getClearAllFlag(cmdLines *cobra.Command) bool {
-	clearAll, _ := cmdLines.Flags().GetBool("clearAll")
-	return clearAll
 }
 
 func (m *MsgUtilsCmd) AddSuperGroupIDFlag() {
@@ -58,6 +49,7 @@ func (m *MsgUtilsCmd) AddSuperGroupIDFlag() {
 
 func (m *MsgUtilsCmd) getSuperGroupIDFlag(cmdLines *cobra.Command) string {
 	superGroupID, _ := cmdLines.Flags().GetString("superGroupID")
+
 	return superGroupID
 }
 
@@ -65,18 +57,8 @@ func (m *MsgUtilsCmd) AddBeginSeqFlag() {
 	m.Command.PersistentFlags().Int64P("beginSeq", "b", 0, "openIM beginSeq")
 }
 
-func (m *MsgUtilsCmd) getBeginSeqFlag(cmdLines *cobra.Command) int64 {
-	beginSeq, _ := cmdLines.Flags().GetInt64("beginSeq")
-	return beginSeq
-}
-
 func (m *MsgUtilsCmd) AddLimitFlag() {
 	m.Command.PersistentFlags().Int64P("limit", "l", 0, "openIM limit")
-}
-
-func (m *MsgUtilsCmd) getLimitFlag(cmdLines *cobra.Command) int64 {
-	limit, _ := cmdLines.Flags().GetInt64("limit")
-	return limit
 }
 
 func (m *MsgUtilsCmd) Execute() error {
@@ -131,6 +113,7 @@ func NewSeqCmd() *SeqCmd {
 	seqCmd := &SeqCmd{
 		NewMsgUtilsCmd("seq", "seq", nil),
 	}
+
 	return seqCmd
 }
 
@@ -158,6 +141,7 @@ func (s *SeqCmd) GetSeqCmd() *cobra.Command {
 			// println(seq)
 		}
 	}
+
 	return &s.Command
 }
 
@@ -173,6 +157,7 @@ func NewMsgCmd() *MsgCmd {
 	msgCmd := &MsgCmd{
 		NewMsgUtilsCmd("msg", "msg", nil),
 	}
+
 	return msgCmd
 }
 

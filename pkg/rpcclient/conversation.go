@@ -39,6 +39,7 @@ func NewConversation(discov discoveryregistry.SvcDiscoveryRegistry) *Conversatio
 		panic(err)
 	}
 	client := pbconversation.NewConversationClient(conn)
+
 	return &Conversation{discov: discov, conn: conn, Client: client}
 }
 
@@ -56,26 +57,31 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 	if err != nil {
 		return 0, err
 	}
+
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 
 func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
 	_, err := c.Client.CreateSingleChatConversations(ctx, &pbconversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+
 	return err
 }
 
 func (c *ConversationRpcClient) GroupChatFirstCreateConversation(ctx context.Context, groupID string, userIDs []string) error {
 	_, err := c.Client.CreateGroupChatConversations(ctx, &pbconversation.CreateGroupChatConversationsReq{UserIDs: userIDs, GroupID: groupID})
+
 	return err
 }
 
 func (c *ConversationRpcClient) SetConversationMaxSeq(ctx context.Context, ownerUserIDs []string, conversationID string, maxSeq int64) error {
 	_, err := c.Client.SetConversationMaxSeq(ctx, &pbconversation.SetConversationMaxSeqReq{OwnerUserID: ownerUserIDs, ConversationID: conversationID, MaxSeq: maxSeq})
+
 	return err
 }
 
 func (c *ConversationRpcClient) SetConversations(ctx context.Context, userIDs []string, conversation *pbconversation.ConversationReq) error {
 	_, err := c.Client.SetConversations(ctx, &pbconversation.SetConversationsReq{UserIDs: userIDs, Conversation: conversation})
+
 	return err
 }
 
@@ -84,6 +90,7 @@ func (c *ConversationRpcClient) GetConversationIDs(ctx context.Context, ownerUse
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.ConversationIDs, nil
 }
 
@@ -92,6 +99,7 @@ func (c *ConversationRpcClient) GetConversation(ctx context.Context, ownerUserID
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Conversation, nil
 }
 
@@ -106,6 +114,7 @@ func (c *ConversationRpcClient) GetConversationsByConversationID(ctx context.Con
 	if len(resp.Conversations) == 0 {
 		return nil, errs.ErrRecordNotFound.Wrap(fmt.Sprintf("conversationIDs: %v not found", conversationIDs))
 	}
+
 	return resp.Conversations, nil
 }
 
@@ -124,5 +133,6 @@ func (c *ConversationRpcClient) GetConversations(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Conversations, nil
 }

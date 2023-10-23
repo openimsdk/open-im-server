@@ -50,6 +50,7 @@ func (g *ConversationLocalCache) GetRecvMsgNotNotifyUserIDs(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.UserIDs, nil
 }
 

@@ -85,6 +85,7 @@ type ConversationCache interface {
 
 func NewConversationRedis(rdb redis.UniversalClient, opts rockscache.Options, db relationtb.ConversationModelInterface) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, opts)
+
 	return &ConversationRedisCache{
 		rcClient:       rcClient,
 		metaCache:      NewMetaCacheRedis(rcClient),
@@ -106,6 +107,7 @@ func NewNewConversationRedis(
 	options rockscache.Options,
 ) ConversationCache {
 	rcClient := rockscache.NewClient(rdb, options)
+
 	return &ConversationRedisCache{
 		rcClient:       rcClient,
 		metaCache:      NewMetaCacheRedis(rcClient),
@@ -158,12 +160,13 @@ func (c *ConversationRedisCache) GetUserConversationIDs(ctx context.Context, own
 }
 
 func (c *ConversationRedisCache) DelConversationIDs(userIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(userIDs))
 	for _, userID := range userIDs {
 		keys = append(keys, c.getConversationIDsKey(userID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -191,12 +194,13 @@ func (c *ConversationRedisCache) GetUserConversationIDsHash(ctx context.Context,
 }
 
 func (c *ConversationRedisCache) DelUserConversationIDsHash(ownerUserIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(ownerUserIDs))
 	for _, ownerUserID := range ownerUserIDs {
 		keys = append(keys, c.getUserConversationIDsHashKey(ownerUserID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -207,12 +211,13 @@ func (c *ConversationRedisCache) GetConversation(ctx context.Context, ownerUserI
 }
 
 func (c *ConversationRedisCache) DelConversations(ownerUserID string, conversationIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(conversationIDs))
 	for _, conversationID := range conversationIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
@@ -223,6 +228,7 @@ func (c *ConversationRedisCache) getConversationIndex(convsation *relationtb.Con
 			return _i, nil
 		}
 	}
+
 	return 0, errors.New("not found key:" + key + " in keys")
 }
 
@@ -283,24 +289,27 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDs(ctx contex
 }
 
 func (c *ConversationRedisCache) DelUsersConversation(conversationID string, ownerUserIDs ...string) ConversationCache {
-	var keys []string
+	keys := make([]string, 0, len(ownerUserIDs))
 	for _, ownerUserID := range ownerUserIDs {
 		keys = append(keys, c.getConversationKey(ownerUserID, conversationID))
 	}
 	cache := c.NewCache()
 	cache.AddKeys(keys...)
+
 	return cache
 }
 
 func (c *ConversationRedisCache) DelUserRecvMsgOpt(ownerUserID, conversationID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getRecvMsgOptKey(ownerUserID, conversationID))
+
 	return cache
 }
 
 func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDs(groupID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsKey(groupID))
+
 	return cache
 }
 
@@ -321,6 +330,7 @@ func (c *ConversationRedisCache) GetSuperGroupRecvMsgNotNotifyUserIDsHash(ctx co
 func (c *ConversationRedisCache) DelSuperGroupRecvMsgNotNotifyUserIDsHash(groupID string) ConversationCache {
 	cache := c.NewCache()
 	cache.AddKeys(c.getSuperGroupRecvNotNotifyUserIDsHashKey(groupID))
+
 	return cache
 }
 
@@ -330,6 +340,7 @@ func (c *ConversationRedisCache) getUserAllHasReadSeqsIndex(conversationID strin
 			return _i, nil
 		}
 	}
+
 	return 0, errors.New("not found key:" + conversationID + " in keys")
 }
 
@@ -352,6 +363,7 @@ func (c *ConversationRedisCache) DelUserAllHasReadSeqs(ownerUserID string, conve
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationHasReadSeqKey(ownerUserID, conversationID))
 	}
+
 	return cache
 }
 
@@ -374,5 +386,6 @@ func (c *ConversationRedisCache) DelConversationNotReceiveMessageUserIDs(convers
 	for _, conversationID := range conversationIDs {
 		cache.AddKeys(c.getConversationNotReceiveMessageUserIDsKey(conversationID))
 	}
+
 	return cache
 }

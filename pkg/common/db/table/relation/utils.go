@@ -15,6 +15,8 @@
 package relation
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/tools/utils"
@@ -32,5 +34,5 @@ type GroupSimpleUserID struct {
 }
 
 func IsNotFound(err error) bool {
-	return utils.Unwrap(err) == gorm.ErrRecordNotFound
+	return errors.Is(utils.Unwrap(err), gorm.ErrRecordNotFound)
 }

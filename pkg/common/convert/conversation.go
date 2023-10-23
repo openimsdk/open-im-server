@@ -27,6 +27,7 @@ func ConversationDB2Pb(conversationDB *relation.ConversationModel) *conversation
 	if err := utils.CopyStructFields(conversationPB, conversationDB); err != nil {
 		return nil
 	}
+
 	return conversationPB
 }
 
@@ -39,6 +40,7 @@ func ConversationsDB2Pb(conversationsDB []*relation.ConversationModel) (conversa
 		conversationPB.LatestMsgDestructTime = conversationDB.LatestMsgDestructTime.Unix()
 		conversationsPB = append(conversationsPB, conversationPB)
 	}
+
 	return conversationsPB
 }
 
@@ -47,6 +49,7 @@ func ConversationPb2DB(conversationPB *conversation.Conversation) *relation.Conv
 	if err := utils.CopyStructFields(conversationDB, conversationPB); err != nil {
 		return nil
 	}
+
 	return conversationDB
 }
 
@@ -58,5 +61,6 @@ func ConversationsPb2DB(conversationsPB []*conversation.Conversation) (conversat
 		}
 		conversationsDB = append(conversationsDB, conversationDB)
 	}
+
 	return conversationsDB
 }

@@ -55,6 +55,7 @@ func (b *blackDatabase) Create(ctx context.Context, blacks []*relation.BlackMode
 	if err := b.black.Create(ctx, blacks); err != nil {
 		return err
 	}
+
 	return b.deleteBlackIDsCache(ctx, blacks)
 }
 
@@ -63,6 +64,7 @@ func (b *blackDatabase) Delete(ctx context.Context, blacks []*relation.BlackMode
 	if err := b.black.Delete(ctx, blacks); err != nil {
 		return err
 	}
+
 	return b.deleteBlackIDsCache(ctx, blacks)
 }
 
@@ -71,6 +73,7 @@ func (b *blackDatabase) deleteBlackIDsCache(ctx context.Context, blacks []*relat
 	for _, black := range blacks {
 		cache = cache.DelBlackIDs(ctx, black.OwnerUserID)
 	}
+
 	return cache.ExecDel(ctx)
 }
 
@@ -97,6 +100,7 @@ func (b *blackDatabase) CheckIn(
 		return
 	}
 	log.ZDebug(ctx, "blackIDs", "user1BlackIDs", userID1BlackIDs, "user2BlackIDs", userID2BlackIDs)
+
 	return utils.IsContain(userID2, userID1BlackIDs), utils.IsContain(userID1, userID2BlackIDs), nil
 }
 

@@ -31,22 +31,15 @@ RUN go mod download
 
 COPY . .
 
-RUN make clean
 RUN make build BINS=openim-msggateway
 
+RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-msggateway /usr/bin/openim-msggateway
+
+# FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
 WORKDIR /openim/openim-server
 
-COPY --from=builder /openim/openim-server/_output/bin/platforms /openim/openim-server/_output/bin/platforms
-COPY --from=builder /openim/openim-server/config /openim/openim-server/config
+COPY --from=builder /usr/bin/openim-msggateway ./bin/openim-msggateway
 
-ENV PORT 10140 \
-    WS_PORT 10001
-
-EXPOSE 10140
-EXPOSE 10001
-
-RUN mv ${OPENIM_SERVER_BINDIR}/platforms/$(get_os)/$(get_arch)/openim-msggateway /usr/bin/openim-msggateway
-
-CMD ["bash", "-c", "openim-msggateway -c $OPENIM_SERVER_CONFIG_NAME --port $PORT --ws_port $WS_PORT"]
+ENTRYPOINT ["./bin/openim-msggateway"]
