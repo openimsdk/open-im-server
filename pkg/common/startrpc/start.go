@@ -16,10 +16,11 @@ package startrpc
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"net"
 	"strconv"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
@@ -32,6 +33,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 )
 
+// Start rpc server.
 func Start(
 	rpcPort int,
 	rpcRegisterName string,
@@ -39,16 +41,8 @@ func Start(
 	rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
-	fmt.Println(
-		"start",
-		rpcRegisterName,
-		"server, port: ",
-		rpcPort,
-		"prometheusPort:",
-		prometheusPort,
-		", OpenIM version: ",
-		config.Version,
-	)
+	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s",
+		rpcRegisterName, rpcPort, prometheusPort, config.Version)
 	listener, err := net.Listen(
 		"tcp",
 		net.JoinHostPort(network.GetListenIP(config.Config.Rpc.ListenIP), strconv.Itoa(rpcPort)),
@@ -63,11 +57,10 @@ func Start(
 			zookeeper.WithFreq(time.Hour), zookeeper.WithUserNameAndPassword(
 				config.Config.Zookeeper.Username,
 				config.Config.Zookeeper.Password,
-			), zookeeper.WithRoundRobin(), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/
-	if err != nil {
+			), zookeeper.WithRoundRobin(), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/if err != nil {
 		return utils.Wrap1(err)
 	}
-	//defer zkClient.CloseZK()
+	// defer zkClient.CloseZK()
 	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
@@ -108,5 +101,6 @@ func Start(
 			}
 		}
 	}()
+
 	return utils.Wrap1(srv.Serve(listener))
 }
