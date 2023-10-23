@@ -23,7 +23,7 @@
 DOCKER := docker
 
 # read: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
-REGISTRY_PREFIX ?= ghcr.io/openimsdk
+REGISTRY_PREFIX ?= registry.cn-hangzhou.aliyuncs.com/openimsdk #ghcr.io/openimsdk
 
 BASE_IMAGE ?= ghcr.io/openim-sigs/openim-bash-image
 
@@ -43,7 +43,7 @@ endif
 # Determine image files by looking into build/images/*/Dockerfile
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/images/*)
 # Determine images names by stripping out the dir names, and filter out the undesired directories
-IMAGES ?= $(filter-out Dockerfile openim-tools openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
+IMAGES ?= $(filter-out Dockerfile,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)

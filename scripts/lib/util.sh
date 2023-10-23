@@ -268,6 +268,7 @@ openim::util::check_docker_and_compose_versions() {
     # Check if the docker compose sub-command is available
     if ! docker compose version &> /dev/null; then
         echo "Docker does not support the docker compose sub-command"
+        echo "You need to upgrade Docker to the right version"
         return 1
     fi
 

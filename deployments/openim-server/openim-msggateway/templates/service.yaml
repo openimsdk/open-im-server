@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "openim-msggateway.fullname" . }}
+  labels:
+    {{- include "openim-msggateway.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 88
+      targetPort: rpc
+      protocol: TCP
+      name: rpc
+  selector:
+    {{- include "openim-msggateway.selectorLabels" . | nindent 4 }}

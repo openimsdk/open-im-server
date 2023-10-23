@@ -97,6 +97,13 @@ helm通过打包的方式，支持发布的版本管理和控制，很大程度�
 $ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 ```
 
+**Helm Version:**
+
+```bash
+$ helm version 
+version.BuildInfo{Version:"v3.13.1", GitCommit:"3547a4b5bf5edb5478ce352e18858d8a552a4110", GitTreeState:"clean", GoVersion:"go1.20.8"}
+``
+
 **添加仓库：**
 
 ```bash
@@ -117,3 +124,6 @@ $ make image
 ### 容器化安装
 
 具体安装步骤如下：
+
+> **Note**
+> 针对中国的用户，阅读我们的 [Docker 镜像标准](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md) 以便使用国内 aliyun 的镜像地址。OpenIM 也有针对中国的 gitee 同步仓库，你可以在 [gitee.com](https://gitee.com/openimsdk) 上找到它。

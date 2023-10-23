@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGEHUB="registry.cn-shenzhen.aliyuncs.com/huanglin_hub"
+IMAGEHUB="ghcr.io/openimsdk"
 PROJECT=$1
 ALLPRO="all"
 servers=(openim-api openim-crontask openim-msggateway openim-msgtransfer openim-push openim-rpc-auth openim-rpc-conversation openim-rpc-friend openim-rpc-group openim-rpc-msg openim-rpc-third openim-rpc-user)

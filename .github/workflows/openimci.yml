@@ -170,3 +170,24 @@ jobs:
     - name: Print OpenIM Logs
       run: sudo cat ./_output/logs/* 2>/dev/null
       continue-on-error: true
+
+  openim-build-image:
+    name: Build OpenIM Docker Image
+    runs-on: ubuntu-latest
+    environment:
+      name: openim
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up Go ${{ matrix.go_version }}
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go_version }}
+      id: go
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 2.x
+    - name: Test Docker Build
+      run: |
+        sudo make image
