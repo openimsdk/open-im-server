@@ -21,7 +21,6 @@
 #
 
 DOCKER := docker
-DOCKER_SUPPORTED_API_VERSION ?= 1.32|1.40|1.41|1.42
 
 # read: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
 REGISTRY_PREFIX ?= ghcr.io/openimsdk
@@ -43,8 +42,8 @@ endif
 
 # Determine image files by looking into build/images/*/Dockerfile
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/images/*)
-# Determine images names by stripping out the dir names
-IMAGES ?= $(filter-out tools,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
+# Determine images names by stripping out the dir names, and filter out the undesired directories
+IMAGES ?= $(filter-out Dockerfile openim-tools openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 
 ifeq (${IMAGES},)
   $(error Could not determine IMAGES, set ROOT_DIR or run in source dir)
@@ -75,22 +74,13 @@ image.docker-buildx:
 ## image.verify: Verify docker version
 .PHONY: image.verify
 image.verify:
-	$(eval API_VERSION := $(shell $(DOCKER) version | grep -E 'API version: {1,6}[0-9]' | head -n1 | awk '{print $$3} END { if (NR==0) print 0}' ))
-	$(eval PASS := $(shell echo "$(API_VERSION) > $(DOCKER_SUPPORTED_API_VERSION)" | bc))
-	@if [ $(PASS) -ne 1 ]; then \
-		$(DOCKER) -v ;\
-		echo "Unsupported docker version. Docker API version should be greater than $(DOCKER_SUPPORTED_API_VERSION)"; \
-		exit 1; \
-	fi
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::check_docker_and_compose_versions
 
 ## image.daemon.verify: Verify docker daemon experimental features
 .PHONY: image.daemon.verify
 image.daemon.verify:
-	$(eval PASS := $(shell $(DOCKER) version | grep -q -E 'Experimental: {1,5}true' && echo 1 || echo 0))
-	@if [ $(PASS) -ne 1 ]; then \
-		echo "Experimental features of Docker daemon is not enabled. Please add \"experimental\": true in '/etc/docker/daemon.json' and then restart Docker daemon."; \
-		exit 1; \
-	fi
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::ensure_docker_daemon_connectivity
+	@$(ROOT_DIR)/scripts/lib/util.sh openim::util::ensure-docker-buildx
 
 # If you wish built the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64 ). However, you must enable docker buildKit for it.
@@ -110,10 +100,9 @@ image.build.%: go.build.%
 	$(eval ARCH := $(word 2,$(subst _, ,$(PLATFORM))))
 	@echo "===========> Building docker image $(IMAGE) $(VERSION) for $(IMAGE_PLAT)"
 	@mkdir -p $(TMP_DIR)/$(IMAGE)/$(PLATFORM)
-	@awk '/FROM/ {c++; if (c==2) {print; next}} c>=2' $(ROOT_DIR)/build/images/$(IMAGE)/Dockerfile \
-| sed -e "s#BASE_IMAGE#$(BASE_IMAGE)#g" \
-      -e 's/--from=builder //g' \
-      -e 's#COPY /openim/openim-server/#COPY ./#g' > $(TMP_DIR)/$(IMAGE)/Dockerfile
+	@cat $(ROOT_DIR)/build/images/Dockerfile\
+		| sed "s#BASE_IMAGE#$(BASE_IMAGE)#g" \
+		| sed "s#BINARY_NAME#$(IMAGE)#g" >$(TMP_DIR)/$(IMAGE)/Dockerfile
 	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
 	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
 	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
@@ -123,7 +112,6 @@ image.build.%: go.build.%
 		$(DOCKER) build $(BUILD_SUFFIX) ; \
 	fi
 	@rm -rf $(TMP_DIR)/$(IMAGE)
-
 
 # https://docs.docker.com/build/building/multi-platform/
 # busybox image supports amd64, arm32v5, arm32v6, arm32v7, arm64v8, i386, ppc64le, and s390x

@@ -16,6 +16,7 @@ package unrelation
 
 import (
 	"context"
+	"errors"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/utils"
@@ -50,6 +51,7 @@ type UserMongoDriver struct {
 // AddSubscriptionList Subscriber's handling of thresholds.
 func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string, userIDList []string) error {
 	// Check the number of lists in the key.
+	//nolint:govet  //this has already been the standard format for mongo.Pipeline
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"user_id", SubscriptionPrefix + userID}}}},
 		{{"$project", bson.D{{"count", bson.D{{"$size", "$user_id_list"}}}}}},
@@ -65,7 +67,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 	}
 	// iterate over aggregated results
 	for cursor.Next(ctx) {
-		err := cursor.Decode(&cnt)
+		err = cursor.Decode(&cnt)
 		if err != nil {
 			return errs.Wrap(err)
 		}
@@ -122,6 +124,7 @@ func (u *UserMongoDriver) AddSubscriptionList(ctx context.Context, userID string
 			return utils.Wrap(err, "transaction failed")
 		}
 	}
+
 	return nil
 }
 
@@ -139,6 +142,7 @@ func (u *UserMongoDriver) UnsubscriptionList(ctx context.Context, userID string,
 	if err != nil {
 		return errs.Wrap(err)
 	}
+
 	return nil
 }
 
@@ -152,6 +156,7 @@ func (u *UserMongoDriver) RemoveSubscribedListFromUser(ctx context.Context, user
 			bson.M{"$pull": bson.M{"user_id_list": userID}},
 		)
 	}
+
 	return errs.Wrap(err)
 }
 
@@ -163,12 +168,13 @@ func (u *UserMongoDriver) GetAllSubscribeList(ctx context.Context, userID string
 		bson.M{"user_id": SubscriptionPrefix + userID})
 	err = cursor.Decode(&user)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return []string{}, nil
-		} else {
-			return nil, errs.Wrap(err)
 		}
+
+		return nil, errs.Wrap(err)
 	}
+
 	return user.UserIDList, nil
 }
 
@@ -180,11 +186,12 @@ func (u *UserMongoDriver) GetSubscribedList(ctx context.Context, userID string) 
 		bson.M{"user_id": SubscribedPrefix + userID})
 	err = cursor.Decode(&user)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return []string{}, nil
-		} else {
-			return nil, errs.Wrap(err)
 		}
+
+		return nil, errs.Wrap(err)
 	}
+
 	return user.UserIDList, nil
 }

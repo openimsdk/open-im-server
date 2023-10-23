@@ -44,10 +44,12 @@ func (o *ObjectInfoGorm) SetObject(ctx context.Context, obj *relation.ObjectMode
 	if err := o.DB.WithContext(ctx).Where("name = ?", obj.Name).FirstOrCreate(obj).Error; err != nil {
 		return errs.Wrap(err)
 	}
+
 	return nil
 }
 
 func (o *ObjectInfoGorm) Take(ctx context.Context, name string) (info *relation.ObjectModel, err error) {
 	info = &relation.ObjectModel{}
+
 	return info, errs.Wrap(o.DB.WithContext(ctx).Where("name = ?", name).Take(info).Error)
 }

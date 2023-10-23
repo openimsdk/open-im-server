@@ -28,6 +28,7 @@ func GetNotificationConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.SingleChatType:
 		l := []string{msg.SendID, msg.RecvID}
 		sort.Strings(l)
+
 		return "n_" + strings.Join(l, "_")
 	case constant.GroupChatType:
 		return "n_" + msg.GroupID
@@ -36,6 +37,7 @@ func GetNotificationConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.NotificationChatType:
 		return "n_" + msg.SendID + "_" + msg.RecvID
 	}
+
 	return ""
 }
 
@@ -44,6 +46,7 @@ func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.SingleChatType:
 		l := []string{msg.SendID, msg.RecvID}
 		sort.Strings(l)
+
 		return "si_" + strings.Join(l, "_")
 	case constant.GroupChatType:
 		return "g_" + msg.GroupID
@@ -52,6 +55,7 @@ func GetChatConversationIDByMsg(msg *sdkws.MsgData) string {
 	case constant.NotificationChatType:
 		return "sn_" + msg.SendID + "_" + msg.RecvID
 	}
+
 	return ""
 }
 
@@ -60,10 +64,12 @@ func GenConversationUniqueKey(msg *sdkws.MsgData) string {
 	case constant.SingleChatType, constant.NotificationChatType:
 		l := []string{msg.SendID, msg.RecvID}
 		sort.Strings(l)
+
 		return strings.Join(l, "_")
 	case constant.SuperGroupChatType:
 		return msg.GroupID
 	}
+
 	return ""
 }
 
@@ -76,23 +82,28 @@ func GetConversationIDByMsg(msg *sdkws.MsgData) string {
 		if !options.IsNotNotification() {
 			return "n_" + strings.Join(l, "_")
 		}
+
 		return "si_" + strings.Join(l, "_") // single chat
 	case constant.GroupChatType:
 		if !options.IsNotNotification() {
 			return "n_" + msg.GroupID // group chat
 		}
+
 		return "g_" + msg.GroupID // group chat
 	case constant.SuperGroupChatType:
 		if !options.IsNotNotification() {
 			return "n_" + msg.GroupID // super group chat
 		}
+
 		return "sg_" + msg.GroupID // super group chat
 	case constant.NotificationChatType:
 		if !options.IsNotNotification() {
 			return "n_" + msg.SendID + "_" + msg.RecvID // super group chat
 		}
+
 		return "sn_" + msg.SendID + "_" + msg.RecvID // server notification chat
 	}
+
 	return ""
 }
 
@@ -111,6 +122,7 @@ func GetConversationIDBySessionType(sessionType int, ids ...string) string {
 	case constant.NotificationChatType:
 		return "sn_" + ids[0] // server notification chat
 	}
+
 	return ""
 }
 
@@ -118,10 +130,11 @@ func GetNotificationConversationIDByConversationID(conversationID string) string
 	l := strings.Split(conversationID, "_")
 	if len(l) > 1 {
 		l[0] = "n"
+
 		return strings.Join(l, "_")
-	} else {
-		return ""
 	}
+
+	return ""
 }
 
 func GetNotificationConversationID(sessionType int, ids ...string) string {
@@ -135,6 +148,7 @@ func GetNotificationConversationID(sessionType int, ids ...string) string {
 	case constant.SuperGroupChatType:
 		return "n_" + ids[0] // super group chat
 	}
+
 	return ""
 }
 
@@ -155,18 +169,22 @@ func ParseConversationID(msg *sdkws.MsgData) (isNotification bool, conversationI
 		if !options.IsNotNotification() {
 			return true, "n_" + strings.Join(l, "_")
 		}
+
 		return false, "si_" + strings.Join(l, "_") // single chat
 	case constant.SuperGroupChatType:
 		if !options.IsNotNotification() {
 			return true, "n_" + msg.GroupID // super group chat
 		}
+
 		return false, "sg_" + msg.GroupID // super group chat
 	case constant.NotificationChatType:
 		if !options.IsNotNotification() {
 			return true, "n_" + msg.SendID + "_" + msg.RecvID // super group chat
 		}
+
 		return false, "sn_" + msg.SendID + "_" + msg.RecvID // server notification chat
 	}
+
 	return false, ""
 }
 
@@ -189,6 +207,7 @@ func Pb2String(pb proto.Message) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(s), nil
 }
 

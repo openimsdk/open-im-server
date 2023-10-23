@@ -38,12 +38,14 @@ func NewOptions(opts ...OptionsOpt) Options {
 	for _, opt := range opts {
 		opt(options)
 	}
+
 	return options
 }
 
 func NewMsgOptions() Options {
 	options := make(map[string]bool, 11)
 	options[constant.IsOfflinePush] = false
+
 	return make(map[string]bool)
 }
 
@@ -51,6 +53,7 @@ func WithOptions(options Options, opts ...OptionsOpt) Options {
 	for _, opt := range opts {
 		opt(options)
 	}
+
 	return options
 }
 
@@ -131,6 +134,7 @@ func (o Options) Is(notification string) bool {
 	if !ok || v {
 		return true
 	}
+
 	return false
 }
 

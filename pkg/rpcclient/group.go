@@ -42,6 +42,7 @@ func NewGroup(discov discoveryregistry.SvcDiscoveryRegistry) *Group {
 		panic(err)
 	}
 	client := group.NewGroupClient(conn)
+
 	return &Group{discov: discov, conn: conn, Client: client}
 }
 
@@ -69,6 +70,7 @@ func (g *GroupRpcClient) GetGroupInfos(
 			return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
 		}
 	}
+
 	return resp.GroupInfos, nil
 }
 
@@ -77,6 +79,7 @@ func (g *GroupRpcClient) GetGroupInfo(ctx context.Context, groupID string) (*sdk
 	if err != nil {
 		return nil, err
 	}
+
 	return groups[0], nil
 }
 
@@ -89,6 +92,7 @@ func (g *GroupRpcClient) GetGroupInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(groups, func(e *sdkws.GroupInfo) string {
 		return e.GroupID
 	}), nil
@@ -114,6 +118,7 @@ func (g *GroupRpcClient) GetGroupMemberInfos(
 			return nil, errs.ErrNotInGroupYet.Wrap(strings.Join(ids, ","))
 		}
 	}
+
 	return resp.Members, nil
 }
 
@@ -126,6 +131,7 @@ func (g *GroupRpcClient) GetGroupMemberInfo(
 	if err != nil {
 		return nil, err
 	}
+
 	return members[0], nil
 }
 
@@ -139,6 +145,7 @@ func (g *GroupRpcClient) GetGroupMemberInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(members, func(e *sdkws.GroupMemberFullInfo) string {
 		return e.UserID
 	}), nil
@@ -155,6 +162,7 @@ func (g *GroupRpcClient) GetOwnerAndAdminInfos(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Members, nil
 }
 
@@ -163,6 +171,7 @@ func (g *GroupRpcClient) GetOwnerInfo(ctx context.Context, groupID string) (*sdk
 		GroupID:    groupID,
 		RoleLevels: []int32{constant.GroupOwner},
 	})
+
 	return resp.Members[0], err
 }
 
@@ -173,6 +182,7 @@ func (g *GroupRpcClient) GetGroupMemberIDs(ctx context.Context, groupID string) 
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.UserIDs, nil
 }
 
@@ -183,6 +193,7 @@ func (g *GroupRpcClient) GetGroupInfoCache(ctx context.Context, groupID string) 
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.GroupInfo, nil
 }
 
@@ -198,6 +209,7 @@ func (g *GroupRpcClient) GetGroupMemberCache(
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Member, nil
 }
 
@@ -206,6 +218,7 @@ func (g *GroupRpcClient) DismissGroup(ctx context.Context, groupID string) error
 		GroupID:      groupID,
 		DeleteMember: true,
 	})
+
 	return err
 }
 
@@ -213,5 +226,6 @@ func (g *GroupRpcClient) NotificationUserInfoUpdate(ctx context.Context, userID 
 	_, err := g.Client.NotificationUserInfoUpdate(ctx, &group.NotificationUserInfoUpdateReq{
 		UserID: userID,
 	})
+
 	return err
 }

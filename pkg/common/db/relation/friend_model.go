@@ -50,6 +50,7 @@ func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserI
 			Error,
 		"",
 	)
+
 	return err
 }
 
@@ -84,6 +85,7 @@ func (f *FriendGorm) UpdateRemark(ctx context.Context, ownerUserID, friendUserID
 	}
 	m := make(map[string]interface{}, 1)
 	m["remark"] = ""
+
 	return utils.Wrap(f.db(ctx).Where("owner_user_id = ?", ownerUserID).Updates(m).Error, "")
 }
 
@@ -93,6 +95,7 @@ func (f *FriendGorm) Take(
 	ownerUserID, friendUserID string,
 ) (friend *relation.FriendModel, err error) {
 	friend = &relation.FriendModel{}
+
 	return friend, utils.Wrap(
 		f.db(ctx).Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error,
 		"",
@@ -156,6 +159,7 @@ func (f *FriendGorm) FindOwnerFriends(
 			Error,
 		"",
 	)
+
 	return
 }
 
@@ -178,6 +182,7 @@ func (f *FriendGorm) FindInWhoseFriends(
 			Error,
 		"",
 	)
+
 	return
 }
 

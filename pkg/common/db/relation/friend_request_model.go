@@ -74,6 +74,7 @@ func (f *FriendRequestGorm) Update(ctx context.Context, friendRequest *relation.
 	fr2 := *friendRequest
 	fr2.FromUserID = ""
 	fr2.ToUserID = ""
+
 	return utils.Wrap(
 		f.db(ctx).
 			Where("from_user_id = ? AND to_user_id =?", friendRequest.FromUserID, friendRequest.ToUserID).
@@ -93,6 +94,7 @@ func (f *FriendRequestGorm) Find(
 		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Find(friendRequest).Error,
 		"",
 	)
+
 	return friendRequest, err
 }
 
@@ -105,6 +107,7 @@ func (f *FriendRequestGorm) Take(
 		f.db(ctx).Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Take(friendRequest).Error,
 		"",
 	)
+
 	return friendRequest, err
 }
 
@@ -127,6 +130,7 @@ func (f *FriendRequestGorm) FindToUserID(
 			Error,
 		"",
 	)
+
 	return
 }
 
@@ -149,6 +153,7 @@ func (f *FriendRequestGorm) FindFromUserID(
 			Error,
 		"",
 	)
+
 	return
 }
 
@@ -160,5 +165,6 @@ func (f *FriendRequestGorm) FindBothFriendRequests(ctx context.Context, fromUser
 			Error,
 		"",
 	)
+
 	return
 }

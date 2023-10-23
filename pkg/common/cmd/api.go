@@ -30,6 +30,7 @@ type ApiCmd struct {
 func NewApiCmd() *ApiCmd {
 	ret := &ApiCmd{NewRootCmd("api")}
 	ret.SetRootCmdPt(ret)
+
 	return ret
 }
 
@@ -38,11 +39,12 @@ func (a *ApiCmd) AddApi(f func(port int) error) {
 		return f(a.getPortFlag(cmd))
 	}
 }
+
 func (a *ApiCmd) GetPortFromConfig(portType string) int {
 	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return config2.Config.Api.OpenImApiPort[0]
-	} else {
-		return 0
 	}
+
+	return 0
 }

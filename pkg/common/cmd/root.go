@@ -17,12 +17,11 @@ package cmd
 import (
 	"fmt"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/tools/log"
+
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
@@ -53,10 +52,10 @@ func WithLogName(logName string) func(*CmdOpts) {
 	}
 }
 
-func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
-	rootCmd = &RootCmd{Name: name}
-	c := cobra.Command{
-		Use:   "start openIM application",
+func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
+	rootCmd := &RootCmd{Name: name}
+	cmd := cobra.Command{
+		Use:   "Start openIM application",
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -70,21 +69,78 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 			if cmdOpts.loggerPrefixName == "" {
 				cmdOpts.loggerPrefixName = "OpenIM.log.all"
 			}
-			if err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel, config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation, config.Config.Log.RemainRotationCount, config.Config.Log.RotationTime); err != nil {
+			err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel,
+				config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation,
+				config.Config.Log.RemainRotationCount, config.Config.Log.RotationTime)
+			if err != nil {
 				panic(err)
 			}
+
 			return nil
 		},
 	}
-	rootCmd.Command = c
+	rootCmd.Command = cmd
 	rootCmd.addConfFlag()
+
 	return rootCmd
 }
+
+// func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
+// 	if err := rc.initializeConfiguration(cmd); err != nil {
+// 		return fmt.Errorf("failed to get configuration from command: %w", err)
+// 	}
+
+// 	cmdOpts := rc.applyOptions(opts...)
+
+// 	if err := rc.initializeLogger(cmdOpts); err != nil {
+// 		return fmt.Errorf("failed to initialize from config: %w", err)
+// 	}
+
+// 	return nil
+// }
+
+//nolint:unused		//unused work wrongly
+func (rc *RootCmd) initializeConfiguration(cmd *cobra.Command) error {
+	return rc.getConfFromCmdAndInit(cmd)
+}
+
+// func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
+// 	cmdOpts := defaultCmdOpts()
+// 	for _, opt := range opts {
+// 		opt(cmdOpts)
+// 	}
+
+// 	return cmdOpts
+// }
+
+// func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
+// 	logConfig := config.Config.Log
+
+// 	return log.InitFromConfig(
+
+// 		cmdOpts.loggerPrefixName,
+// 		rc.Name,
+// 		logConfig.RemainLogLevel,
+// 		logConfig.IsStdout,
+// 		logConfig.IsJson,
+// 		logConfig.StorageLocation,
+// 		logConfig.RemainRotationCount,
+// 		logConfig.RotationTime,
+// 	)
+// }
+
+// func defaultCmdOpts() *CmdOpts {
+// 	return &CmdOpts{
+// 		loggerPrefixName: "OpenIM.log.all",
+// 	}
+// }
+
 func (r *RootCmd) SetRootCmdPt(cmdItf RootCmdPt) {
 	r.cmdItf = cmdItf
 }
+
 func (r *RootCmd) addConfFlag() {
-	r.Command.Flags().StringP(constant.FlagConf, "c", "", "Path to config file folder")
+	r.Command.Flags().StringP(constant.FlagConf, "c", "", "path to config file folder")
 }
 
 func (r *RootCmd) AddPortFlag() {
@@ -96,6 +152,7 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPort)
 	}
+
 	return port
 }
 
@@ -112,6 +169,7 @@ func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPrometheusPort)
 	}
+
 	return port
 }
 
@@ -122,7 +180,8 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	fmt.Println("configFolderPath:", configFolderPath)
-	return config2.InitConfig(configFolderPath)
+
+	return config.InitConfig(configFolderPath)
 }
 
 func (r *RootCmd) Execute() error {
@@ -135,9 +194,12 @@ func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
 
 func (r *RootCmd) GetPortFromConfig(portType string) int {
 	fmt.Println("RootCmd.GetPortFromConfig:", portType)
+
 	return 0
 }
+
 func (r *RootCmd) PortFromConfig(portType string) int {
 	fmt.Println("PortFromConfig:", portType)
+
 	return r.cmdItf.GetPortFromConfig(portType)
 }

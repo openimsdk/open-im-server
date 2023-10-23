@@ -35,6 +35,7 @@ type RpcCmd struct {
 func NewRpcCmd(name string) *RpcCmd {
 	ret := &RpcCmd{NewRootCmd(name)}
 	ret.SetRootCmdPt(ret)
+
 	return ret
 }
 
@@ -43,6 +44,7 @@ func (a *RpcCmd) Exec() error {
 		a.port = a.getPortFlag(cmd)
 		a.prometheusPort = a.getPrometheusPortFlag(cmd)
 	}
+
 	return a.Execute()
 }
 
@@ -53,8 +55,10 @@ func (a *RpcCmd) StartSvr(
 	if a.GetPortFlag() == 0 {
 		return errors.New("port is required")
 	}
+
 	return startrpc.Start(a.GetPortFlag(), name, a.GetPrometheusPortFlag(), rpcFn)
 }
+
 func (a *RpcCmd) GetPortFromConfig(portType string) int {
 	switch a.Name {
 	case RpcPushServer:
@@ -90,5 +94,6 @@ func (a *RpcCmd) GetPortFromConfig(portType string) int {
 			return config2.Config.RpcPort.OpenImUserPort[0]
 		}
 	}
+
 	return 0
 }

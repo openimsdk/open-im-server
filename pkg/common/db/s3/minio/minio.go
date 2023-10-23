@@ -63,13 +63,12 @@ const (
 )
 
 func NewMinio() (s3.Interface, error) {
-	conf := config.Config.Object.Minio
-	u, err := url.Parse(conf.Endpoint)
+	u, err := url.Parse(config.Config.Object.Minio.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+		Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 		Secure: u.Scheme == "https",
 	}
 	client, err := minio.New(u.Host, opts)
@@ -77,47 +76,55 @@ func NewMinio() (s3.Interface, error) {
 		return nil, err
 	}
 	m := &Minio{
-		bucket: conf.Bucket,
+		bucket: config.Config.Object.Minio.Bucket,
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
 	}
-	if conf.SignEndpoint == "" || conf.SignEndpoint == conf.Endpoint {
+	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
 		m.opts = opts
 		m.sign = m.core.Client
-		m.bucketURL = conf.Endpoint + "/" + conf.Bucket + "/"
+		m.prefix = u.Path
+		u.Path = ""
+		config.Config.Object.Minio.Endpoint = u.String()
+		m.signEndpoint = config.Config.Object.Minio.Endpoint
 	} else {
-		su, err := url.Parse(conf.SignEndpoint)
+		su, err := url.Parse(config.Config.Object.Minio.SignEndpoint)
 		if err != nil {
 			return nil, err
 		}
 		m.opts = &minio.Options{
-			Creds:  credentials.NewStaticV4(conf.AccessKeyID, conf.SecretAccessKey, conf.SessionToken),
+			Creds:  credentials.NewStaticV4(config.Config.Object.Minio.AccessKeyID, config.Config.Object.Minio.SecretAccessKey, config.Config.Object.Minio.SessionToken),
 			Secure: su.Scheme == "https",
 		}
 		m.sign, err = minio.New(su.Host, m.opts)
 		if err != nil {
 			return nil, err
 		}
-		m.bucketURL = conf.SignEndpoint + "/" + conf.Bucket + "/"
+		m.prefix = su.Path
+		su.Path = ""
+		config.Config.Object.Minio.SignEndpoint = su.String()
+		m.signEndpoint = config.Config.Object.Minio.SignEndpoint
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := m.initMinio(ctx); err != nil {
 		fmt.Println("init minio error:", err)
 	}
+
 	return m, nil
 }
 
 type Minio struct {
-	bucket    string
-	bucketURL string
-	location  string
-	opts      *minio.Options
-	core      *minio.Core
-	sign      *minio.Client
-	lock      sync.Locker
-	init      bool
+	bucket       string
+	signEndpoint string
+	location     string
+	opts         *minio.Options
+	core         *minio.Core
+	sign         *minio.Client
+	lock         sync.Locker
+	init         bool
+	prefix       string
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -135,8 +142,9 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		return fmt.Errorf("check bucket exists error: %w", err)
 	}
 	if !exists {
-		if err := m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{}); err != nil {
-			return fmt.Errorf("make bucket error: %w", err)
+		err2 := m.core.Client.MakeBucket(ctx, conf.Bucket, minio.MakeBucketOptions{})
+		if err2 != nil {
+			return fmt.Errorf("make bucket error: %w", err2)
 		}
 	}
 	if conf.PublicRead {
@@ -144,8 +152,9 @@ func (m *Minio) initMinio(ctx context.Context) error {
 			`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`,
 			conf.Bucket,
 		)
-		if err := m.core.Client.SetBucketPolicy(ctx, conf.Bucket, policy); err != nil {
-			return err
+		err2 := m.core.Client.SetBucketPolicy(ctx, conf.Bucket, policy)
+		if err2 != nil {
+			return err2
 		}
 	}
 	m.location, err = m.core.Client.GetBucketLocation(ctx, conf.Bucket)
@@ -176,6 +185,7 @@ func (m *Minio) initMinio(ctx context.Context) error {
 		vblc.Elem().Elem().Interface().(interface{ Set(string, string) }).Set(conf.Bucket, m.location)
 	}()
 	m.init = true
+
 	return nil
 }
 
@@ -199,6 +209,7 @@ func (m *Minio) InitiateMultipartUpload(ctx context.Context, name string) (*s3.I
 	if err != nil {
 		return nil, err
 	}
+
 	return &s3.InitiateMultipartUploadResult{
 		Bucket:   m.bucket,
 		Key:      name,
@@ -221,6 +232,7 @@ func (m *Minio) CompleteMultipartUpload(ctx context.Context, uploadID string, na
 	if err != nil {
 		return nil, err
 	}
+
 	return &s3.CompleteMultipartUploadResult{
 		Location: upload.Location,
 		Bucket:   upload.Bucket,
@@ -243,6 +255,7 @@ func (m *Minio) PartSize(ctx context.Context, size int64) (int64, error) {
 	if size%maxNumSize != 0 {
 		partSize++
 	}
+
 	return partSize, nil
 }
 
@@ -255,7 +268,7 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		return nil, err
 	}
 	result := s3.AuthSignResult{
-		URL:   m.bucketURL + name,
+		URL:   m.signEndpoint + "/" + m.bucket + "/" + name,
 		Query: url.Values{"uploadId": {uploadID}},
 		Parts: make([]s3.SignPart, len(partNumbers)),
 	}
@@ -269,11 +282,14 @@ func (m *Minio) AuthSign(ctx context.Context, uploadID string, name string, expi
 		request = signer.SignV4Trailer(*request, creds.AccessKeyID, creds.SecretAccessKey, creds.SessionToken, m.location, nil)
 		result.Parts[i] = s3.SignPart{
 			PartNumber: partNumber,
-			URL:        request.URL.String(),
 			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
 			Header:     request.Header,
 		}
 	}
+	if m.prefix != "" {
+		result.URL = m.signEndpoint + m.prefix + "/" + m.bucket + "/" + name
+	}
+
 	return &result, nil
 }
 
@@ -285,6 +301,10 @@ func (m *Minio) PresignedPutObject(ctx context.Context, name string, expire time
 	if err != nil {
 		return "", err
 	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
+	}
+
 	return rawURL.String(), nil
 }
 
@@ -292,6 +312,7 @@ func (m *Minio) DeleteObject(ctx context.Context, name string) error {
 	if err := m.initMinio(ctx); err != nil {
 		return err
 	}
+
 	return m.core.Client.RemoveObject(ctx, m.bucket, name, minio.RemoveObjectOptions{})
 }
 
@@ -303,6 +324,7 @@ func (m *Minio) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, er
 	if err != nil {
 		return nil, err
 	}
+
 	return &s3.ObjectInfo{
 		ETag:         strings.ToLower(info.ETag),
 		Key:          info.Key,
@@ -325,6 +347,7 @@ func (m *Minio) CopyObject(ctx context.Context, src string, dst string) (*s3.Cop
 	if err != nil {
 		return nil, err
 	}
+
 	return &s3.CopyObjectInfo{
 		Key:  dst,
 		ETag: strings.ToLower(result.ETag),
@@ -335,20 +358,23 @@ func (m *Minio) IsNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	switch e := err.(type) {
-	case minio.ErrorResponse:
-		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
-	case *minio.ErrorResponse:
-		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
-	default:
-		return false
+	var minioErr minio.ErrorResponse
+	if errors.As(err, &minio.ErrorResponse{}) {
+		return minioErr.StatusCode == http.StatusNotFound || minioErr.Code == "NoSuchKey"
 	}
+	var minioErr2 *minio.ErrorResponse
+	if errors.As(err, &minioErr2) {
+		return minioErr2.StatusCode == http.StatusNotFound || minioErr2.Code == "NoSuchKey"
+	}
+
+	return false
 }
 
 func (m *Minio) AbortMultipartUpload(ctx context.Context, uploadID string, name string) error {
 	if err := m.initMinio(ctx); err != nil {
 		return err
 	}
+
 	return m.core.AbortMultipartUpload(ctx, m.bucket, name, uploadID)
 }
 
@@ -375,6 +401,7 @@ func (m *Minio) ListUploadedParts(ctx context.Context, uploadID string, name str
 			Size:         part.Size,
 		}
 	}
+
 	return res, nil
 }
 
@@ -396,14 +423,14 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	if err != nil {
 		return "", err
 	}
+	if m.prefix != "" {
+		rawURL.Path = path.Join(m.prefix, rawURL.Path)
+	}
+
 	return rawURL.String(), nil
 }
 
-func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
-	if err := m.initMinio(ctx); err != nil {
-		return "", err
-	}
-	reqParams := make(url.Values)
+func (m *Minio) getImageInfoForAccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption, reqParams url.Values) (fileInfo *s3.ObjectInfo, objectInfoPath, msg string, err error) {
 	if opt != nil {
 		if opt.ContentType != "" {
 			reqParams.Set("response-content-type", opt.ContentType)
@@ -413,35 +440,47 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 		}
 	}
 	if opt.Image == nil || (opt.Image.Width < 0 && opt.Image.Height < 0 && opt.Image.Format == "") || (opt.Image.Width > maxImageWidth || opt.Image.Height > maxImageHeight) {
-		return m.presignedGetObject(ctx, name, expire, reqParams)
+		msg, err = m.presignedGetObject(ctx, name, expire, reqParams)
+
+		return nil, "", msg, err
 	}
-	fileInfo, err := m.StatObject(ctx, name)
+	fileInfo, err = m.StatObject(ctx, name)
+	objectInfoPath = path.Join(pathInfo, fileInfo.ETag, "image.json")
 	if err != nil {
-		return "", err
+		return nil, "", msg, err
 	}
 	if fileInfo.Size > maxImageSize {
-		return "", errors.New("file size too large")
+		return nil, "", "", errors.New("file size too large")
 	}
-	objectInfoPath := path.Join(pathInfo, fileInfo.ETag, "image.json")
-	var (
-		img  image.Image
-		info minioImageInfo
-	)
-	data, err := m.getObjectData(ctx, objectInfoPath, 1024)
+
+	return fileInfo, objectInfoPath, "", nil
+}
+
+func (m *Minio) loadImgDataForAccessURL(objectInfoPath string, ctx context.Context, name string, info *minioImageInfo) (img image.Image, msg string, err error) {
+	var data []byte
+	data, err = m.getObjectData(ctx, objectInfoPath, 1024)
+
+	//nolint:nestif 	//easy enough to understand
 	if err == nil {
-		if err := json.Unmarshal(data, &info); err != nil {
-			return "", fmt.Errorf("unmarshal minio image info.json error: %w", err)
+		err = json.Unmarshal(data, &info)
+		if err != nil {
+			return nil, "", fmt.Errorf("unmarshal minio image info.json error: %w", err)
 		}
 		if info.NotImage {
-			return "", errors.New("not image")
+			return nil, "", errors.New("not image")
 		}
 	} else if m.IsNotFound(err) {
-		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+		var reader *minio.Object
+		reader, err = m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
 		if err != nil {
-			return "", err
+			return img, msg, err
 		}
 		defer reader.Close()
-		imageInfo, format, err := ImageStat(reader)
+		var (
+			imageInfo image.Image
+			format    string
+		)
+		imageInfo, format, err = ImageStat(reader)
 		if err == nil {
 			info.NotImage = false
 			info.Format = format
@@ -450,16 +489,22 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 		} else {
 			info.NotImage = true
 		}
-		data, err := json.Marshal(&info)
+
+		data, err = json.Marshal(&info)
 		if err != nil {
-			return "", err
+			return img, msg, err
 		}
-		if _, err := m.core.Client.PutObject(ctx, m.bucket, objectInfoPath, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{}); err != nil {
-			return "", err
+
+		_, err = m.core.Client.PutObject(ctx, m.bucket, objectInfoPath, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{})
+		if err != nil {
+			return img, msg, err
 		}
-	} else {
-		return "", err
 	}
+
+	return img, msg, err
+}
+
+func (m *Minio) formatImgInfoForAccessURL(opt *s3.AccessURLOption, info *minioImageInfo, reqParams url.Values) {
 	if opt.Image.Width > info.Width || opt.Image.Width <= 0 {
 		opt.Image.Width = info.Width
 	}
@@ -482,24 +527,24 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 		}
 	}
 	reqParams.Set("response-content-type", "image/"+opt.Image.Format)
-	if opt.Image.Width == info.Width && opt.Image.Height == info.Height && opt.Image.Format == info.Format {
-		return m.presignedGetObject(ctx, name, expire, reqParams)
-	}
-	cacheKey := filepath.Join(pathInfo, fileInfo.ETag, fmt.Sprintf("image_w%d_h%d.%s", opt.Image.Width, opt.Image.Height, opt.Image.Format))
-	if _, err := m.core.Client.StatObject(ctx, m.bucket, cacheKey, minio.StatObjectOptions{}); err == nil {
+}
+
+func (m *Minio) cacheImgInfoForAccessURL(ctx context.Context, name, cacheKey string, img image.Image, expire time.Duration, opt *s3.AccessURLOption, reqParams url.Values) (string, error) {
+	_, err := m.core.Client.StatObject(ctx, m.bucket, cacheKey, minio.StatObjectOptions{})
+	if err == nil {
 		return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
 	} else if !m.IsNotFound(err) {
 		return "", err
 	}
 	if img == nil {
-		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
-		if err != nil {
-			return "", err
+		reader, err2 := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+		if err2 != nil {
+			return "", err2
 		}
 		defer reader.Close()
-		img, _, err = ImageStat(reader)
-		if err != nil {
-			return "", err
+		img, _, err2 = ImageStat(reader)
+		if err2 != nil {
+			return "", err2
 		}
 	}
 	thumbnail := resizeImage(img, opt.Image.Width, opt.Image.Height)
@@ -512,9 +557,48 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	case formatGif:
 		err = gif.Encode(buf, thumbnail, nil)
 	}
+	if err != nil {
+		return "", err
+	}
 	if _, err := m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
 		return "", err
 	}
+
+	return "", nil
+}
+
+func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
+	errInit := m.initMinio(ctx)
+	if errInit != nil {
+		return "", errInit
+	}
+	reqParams := make(url.Values)
+	fileInfo, objectInfoPath, msg, err := m.getImageInfoForAccessURL(ctx, name, expire, opt, reqParams)
+	if err != nil {
+		return msg, err
+	}
+	// load-cache img data
+	var (
+		img  image.Image
+		info minioImageInfo
+	)
+	img, msg, err = m.loadImgDataForAccessURL(objectInfoPath, ctx, name, &info)
+	if err != nil {
+		return msg, err
+	}
+	// format img info
+	m.formatImgInfoForAccessURL(opt, &info, reqParams)
+	// no need resize
+	if opt.Image.Width == info.Width && opt.Image.Height == info.Height && opt.Image.Format == info.Format {
+		return m.presignedGetObject(ctx, name, expire, reqParams)
+	}
+	// cache img
+	cacheKey := filepath.Join(pathInfo, fileInfo.ETag, fmt.Sprintf("image_w%d_h%d.%s", opt.Image.Width, opt.Image.Height, opt.Image.Format))
+	msg, err = m.cacheImgInfoForAccessURL(ctx, name, cacheKey, img, expire, opt, reqParams)
+	if err != nil {
+		return msg, err
+	}
+	// return cache img
 	return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
 }
 
@@ -527,5 +611,6 @@ func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]
 	if limit < 0 {
 		return io.ReadAll(object)
 	}
+
 	return io.ReadAll(io.LimitReader(object, 1024))
 }

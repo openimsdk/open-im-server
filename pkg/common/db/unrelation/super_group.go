@@ -59,6 +59,7 @@ func (s *SuperGroupMongoDriver) CreateSuperGroup(ctx context.Context, groupID st
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -69,6 +70,7 @@ func (s *SuperGroupMongoDriver) TakeSuperGroup(
 	if err := s.superGroupCollection.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&group); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
+
 	return group, nil
 }
 
@@ -86,6 +88,7 @@ func (s *SuperGroupMongoDriver) FindSuperGroup(
 	if err := cursor.All(ctx, &groups); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
+
 	return groups, nil
 }
 
@@ -113,6 +116,7 @@ func (s *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID
 			return utils.Wrap(err, "transaction failed")
 		}
 	}
+
 	return nil
 }
 
@@ -129,6 +133,7 @@ func (s *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, g
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -138,6 +143,7 @@ func (s *SuperGroupMongoDriver) GetSuperGroupByUserID(
 ) (*unrelation.UserToSuperGroupModel, error) {
 	var user unrelation.UserToSuperGroupModel
 	err := s.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+
 	return &user, utils.Wrap(err, "")
 }
 
@@ -149,6 +155,7 @@ func (s *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID st
 	if _, err := s.superGroupCollection.DeleteOne(ctx, bson.M{"group_id": groupID}); err != nil {
 		return utils.Wrap(err, "")
 	}
+
 	return s.RemoveGroupFromUser(ctx, groupID, group.MemberIDs)
 }
 
@@ -158,5 +165,6 @@ func (s *SuperGroupMongoDriver) RemoveGroupFromUser(ctx context.Context, groupID
 		bson.M{"user_id": bson.M{"$in": userIDs}},
 		bson.M{"$pull": bson.M{"group_id_list": groupID}},
 	)
+
 	return utils.Wrap(err, "")
 }

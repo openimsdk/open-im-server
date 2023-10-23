@@ -178,7 +178,6 @@ func (m *msgServer) MarkConversationAsRead(
 			req.UserID, seqs, hasReadSeq); err != nil {
 			return nil, err
 		}
-
 	}
 
 	return &msg.MarkConversationAsReadResp{}, nil

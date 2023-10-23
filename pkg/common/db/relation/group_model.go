@@ -61,12 +61,14 @@ func (g *GroupGorm) Find(ctx context.Context, groupIDs []string) (groups []*rela
 
 func (g *GroupGorm) Take(ctx context.Context, groupID string) (group *relation.GroupModel, err error) {
 	group = &relation.GroupModel{}
+
 	return group, utils.Wrap(g.DB.Where("group_id = ?", groupID).Take(group).Error, "")
 }
 
 func (g *GroupGorm) Search(ctx context.Context, keyword string, pageNumber, showNumber int32) (total uint32, groups []*relation.GroupModel, err error) {
 	db := g.DB
 	db = db.WithContext(ctx).Where("status!=?", constant.GroupStatusDismissed)
+
 	return ormutil.GormSearch[relation.GroupModel](db, []string{"name"}, keyword, pageNumber, showNumber)
 }
 
@@ -82,6 +84,7 @@ func (g *GroupGorm) CountTotal(ctx context.Context, before *time.Time) (count in
 	if err := db.Count(&count).Error; err != nil {
 		return 0, err
 	}
+
 	return count, nil
 }
 
@@ -98,6 +101,7 @@ func (g *GroupGorm) CountRangeEverydayTotal(ctx context.Context, start time.Time
 	for _, r := range res {
 		v[r.Date.Format("2006-01-02")] = r.Count
 	}
+
 	return v, nil
 }
 
