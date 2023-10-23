@@ -17,6 +17,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"hash/crc32"
 	"strconv"
 	"time"

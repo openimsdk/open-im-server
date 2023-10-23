@@ -17,6 +17,8 @@ package cache
 import (
 	"context"
 	"errors"
+	"github.com/dtm-labs/rockscache"
+	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"strconv"
 	"time"
 
