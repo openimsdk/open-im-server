@@ -36,9 +36,8 @@ func (s *Statistics) output() {
 	var timeIntervalNum uint64
 	for {
 		sum = *s.AllCount
-		select {
-		case <-t.C:
-		}
+		<-t.C
+
 		if *s.AllCount-sum <= 0 {
 			intervalCount = 0
 		} else {
@@ -66,5 +65,6 @@ func (s *Statistics) output() {
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
 	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()
+
 	return p
 }

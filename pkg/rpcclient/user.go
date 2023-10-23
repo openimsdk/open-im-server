@@ -45,6 +45,7 @@ func NewUser(discov discoveryregistry.SvcDiscoveryRegistry) *User {
 		panic(err)
 	}
 	client := user.NewUserClient(conn)
+
 	return &User{Discov: discov, Client: client, conn: conn}
 }
 
@@ -54,6 +55,7 @@ type UserRpcClient User
 // NewUserRpcClientByUser initializes a UserRpcClient based on the provided User instance.
 func NewUserRpcClientByUser(user *User) *UserRpcClient {
 	rpc := UserRpcClient(*user)
+
 	return &rpc
 }
 
@@ -75,6 +77,7 @@ func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*
 	})); len(ids) > 0 {
 		return nil, errs.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
+
 	return resp.UsersInfo, nil
 }
 
@@ -84,6 +87,7 @@ func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*sdkws.
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
@@ -93,6 +97,7 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.UserInfo) string {
 		return e.UserID
 	}), nil
@@ -108,6 +113,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.Slice(users, func(e *sdkws.UserInfo) *sdkws.PublicUserInfo {
 		return &sdkws.PublicUserInfo{
 			UserID:   e.UserID,
@@ -124,6 +130,7 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 	if err != nil {
 		return nil, err
 	}
+
 	return users[0], nil
 }
 
@@ -137,6 +144,7 @@ func (u *UserRpcClient) GetPublicUserInfoMap(
 	if err != nil {
 		return nil, err
 	}
+
 	return utils.SliceToMap(users, func(e *sdkws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
@@ -150,6 +158,7 @@ func (u *UserRpcClient) GetUserGlobalMsgRecvOpt(ctx context.Context, userID stri
 	if err != nil {
 		return 0, err
 	}
+
 	return resp.GlobalRecvMsgOpt, nil
 }
 
@@ -159,6 +168,7 @@ func (u *UserRpcClient) Access(ctx context.Context, ownerUserID string) error {
 	if err != nil {
 		return err
 	}
+
 	return authverify.CheckAccessV3(ctx, ownerUserID)
 }
 
@@ -168,6 +178,7 @@ func (u *UserRpcClient) GetAllUserIDs(ctx context.Context, pageNumber, showNumbe
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.UserIDs, nil
 }
 
@@ -177,5 +188,6 @@ func (u *UserRpcClient) SetUserStatus(ctx context.Context, userID string, status
 		UserID: userID,
 		Status: status, PlatformID: int32(platformID),
 	})
+
 	return err
 }

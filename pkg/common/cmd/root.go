@@ -17,8 +17,6 @@ package cmd
 import (
 	"fmt"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -61,62 +59,81 @@ func NewRootCmd(name string, opts ...func(*CmdOpts)) *RootCmd {
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return rootCmd.persistentPreRun(cmd, opts...)
+			if err := rootCmd.getConfFromCmdAndInit(cmd); err != nil {
+				panic(err)
+			}
+			cmdOpts := &CmdOpts{}
+			for _, opt := range opts {
+				opt(cmdOpts)
+			}
+			if cmdOpts.loggerPrefixName == "" {
+				cmdOpts.loggerPrefixName = "OpenIM.log.all"
+			}
+			err := log.InitFromConfig(cmdOpts.loggerPrefixName, name, config.Config.Log.RemainLogLevel,
+				config.Config.Log.IsStdout, config.Config.Log.IsJson, config.Config.Log.StorageLocation,
+				config.Config.Log.RemainRotationCount, config.Config.Log.RotationTime)
+			if err != nil {
+				panic(err)
+			}
+
+			return nil
 		},
 	}
 	rootCmd.Command = cmd
 	rootCmd.addConfFlag()
+
 	return rootCmd
 }
 
-func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
-	if err := rc.initializeConfiguration(cmd); err != nil {
-		return fmt.Errorf("failed to get configuration from command: %w", err)
-	}
+// func (rc *RootCmd) persistentPreRun(cmd *cobra.Command, opts ...func(*CmdOpts)) error {
+// 	if err := rc.initializeConfiguration(cmd); err != nil {
+// 		return fmt.Errorf("failed to get configuration from command: %w", err)
+// 	}
 
-	cmdOpts := rc.applyOptions(opts...)
+// 	cmdOpts := rc.applyOptions(opts...)
 
-	if err := rc.initializeLogger(cmdOpts); err != nil {
-		return fmt.Errorf("failed to initialize from config: %w", err)
-	}
+// 	if err := rc.initializeLogger(cmdOpts); err != nil {
+// 		return fmt.Errorf("failed to initialize from config: %w", err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
+//nolint:unused		//unused work wrongly
 func (rc *RootCmd) initializeConfiguration(cmd *cobra.Command) error {
 	return rc.getConfFromCmdAndInit(cmd)
 }
 
-func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
-	cmdOpts := defaultCmdOpts()
-	for _, opt := range opts {
-		opt(cmdOpts)
-	}
+// func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
+// 	cmdOpts := defaultCmdOpts()
+// 	for _, opt := range opts {
+// 		opt(cmdOpts)
+// 	}
 
-	return cmdOpts
-}
+// 	return cmdOpts
+// }
 
-func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
-	logConfig := config.Config.Log
-	
-	return log.InitFromConfig(
-		
-		cmdOpts.loggerPrefixName,
-		rc.Name,
-		logConfig.RemainLogLevel,
-		logConfig.IsStdout,
-		logConfig.IsJson,
-		logConfig.StorageLocation,
-		logConfig.RemainRotationCount,
-		logConfig.RotationTime,
-	)
-}
+// func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
+// 	logConfig := config.Config.Log
 
-func defaultCmdOpts() *CmdOpts {
-	return &CmdOpts{
-		loggerPrefixName: "OpenIM.log.all",
-	}
-}
+// 	return log.InitFromConfig(
+
+// 		cmdOpts.loggerPrefixName,
+// 		rc.Name,
+// 		logConfig.RemainLogLevel,
+// 		logConfig.IsStdout,
+// 		logConfig.IsJson,
+// 		logConfig.StorageLocation,
+// 		logConfig.RemainRotationCount,
+// 		logConfig.RotationTime,
+// 	)
+// }
+
+// func defaultCmdOpts() *CmdOpts {
+// 	return &CmdOpts{
+// 		loggerPrefixName: "OpenIM.log.all",
+// 	}
+// }
 
 func (r *RootCmd) SetRootCmdPt(cmdItf RootCmdPt) {
 	r.cmdItf = cmdItf
@@ -135,6 +152,7 @@ func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPort)
 	}
+
 	return port
 }
 
@@ -151,6 +169,7 @@ func (r *RootCmd) getPrometheusPortFlag(cmd *cobra.Command) int {
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPrometheusPort)
 	}
+
 	return port
 }
 
@@ -161,7 +180,8 @@ func (r *RootCmd) GetPrometheusPortFlag() int {
 func (r *RootCmd) getConfFromCmdAndInit(cmdLines *cobra.Command) error {
 	configFolderPath, _ := cmdLines.Flags().GetString(constant.FlagConf)
 	fmt.Println("configFolderPath:", configFolderPath)
-	return config2.InitConfig(configFolderPath)
+
+	return config.InitConfig(configFolderPath)
 }
 
 func (r *RootCmd) Execute() error {
@@ -174,9 +194,12 @@ func (r *RootCmd) AddCommand(cmds ...*cobra.Command) {
 
 func (r *RootCmd) GetPortFromConfig(portType string) int {
 	fmt.Println("RootCmd.GetPortFromConfig:", portType)
+
 	return 0
 }
+
 func (r *RootCmd) PortFromConfig(portType string) int {
 	fmt.Println("PortFromConfig:", portType)
+
 	return r.cmdItf.GetPortFromConfig(portType)
 }

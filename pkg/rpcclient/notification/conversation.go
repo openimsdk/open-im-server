@@ -41,6 +41,7 @@ func (c *ConversationNotificationSender) ConversationSetPrivateNotification(ctx 
 		IsPrivate:      isPrivateChat,
 		ConversationID: conversationID,
 	}
+
 	return c.Notification(ctx, sendID, recvID, constant.ConversationPrivateChatNotification, tips)
 }
 
@@ -50,6 +51,7 @@ func (c *ConversationNotificationSender) ConversationChangeNotification(ctx cont
 		UserID:             userID,
 		ConversationIDList: conversationIDs,
 	}
+
 	return c.Notification(ctx, userID, userID, constant.ConversationChangeNotification, tips)
 }
 
@@ -65,5 +67,6 @@ func (c *ConversationNotificationSender) ConversationUnreadChangeNotification(
 		HasReadSeq:      hasReadSeq,
 		UnreadCountTime: unreadCountTime,
 	}
+
 	return c.Notification(ctx, userID, userID, constant.ConversationUnreadNotification, tips)
 }

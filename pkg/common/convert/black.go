@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
-	sdk "github.com/OpenIMSDK/protocol/sdkws"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 )
@@ -27,11 +26,11 @@ func BlackDB2Pb(
 	ctx context.Context,
 	blackDBs []*relation.BlackModel,
 	f func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
-) (blackPbs []*sdk.BlackInfo, err error) {
+) (blackPbs []*sdkws.BlackInfo, err error) {
 	if len(blackDBs) == 0 {
 		return nil, nil
 	}
-	var userIDs []string
+	userIDs := make([]string, 0, len(blackDBs))
 	for _, blackDB := range blackDBs {
 		userIDs = append(userIDs, blackDB.BlockUserID)
 	}
@@ -40,7 +39,7 @@ func BlackDB2Pb(
 		return nil, err
 	}
 	for _, blackDB := range blackDBs {
-		blackPb := &sdk.BlackInfo{
+		blackPb := &sdkws.BlackInfo{
 			OwnerUserID:    blackDB.OwnerUserID,
 			CreateTime:     blackDB.CreateTime.Unix(),
 			AddSource:      blackDB.AddSource,
@@ -55,5 +54,6 @@ func BlackDB2Pb(
 		}
 		blackPbs = append(blackPbs, blackPb)
 	}
+
 	return blackPbs, nil
 }
