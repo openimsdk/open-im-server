@@ -41,7 +41,7 @@ type SendMsgReq struct {
 type BatchSendMsgReq struct {
 	SendMsg
 	IsSendAll bool     `json:"isSendAll"`
-	RecvIDs   []string `json:"recvIDs"`
+	RecvIDs   []string `json:"recvIDs" binding:"required"`
 }
 
 type BatchSendMsgResp struct {

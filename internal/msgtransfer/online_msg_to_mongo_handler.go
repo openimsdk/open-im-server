@@ -62,7 +62,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 		log.ZError(ctx, "msgFromMQ.MsgData is empty", nil, "cMsg", cMsg)
 		return
 	}
-	log.ZInfo(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.MsgData)
+	log.ZInfo(ctx, "mongo consumer recv msg", "msgs", msgFromMQ.String())
 	err = mc.msgDatabase.BatchInsertChat2DB(ctx, msgFromMQ.ConversationID, msgFromMQ.MsgData, msgFromMQ.LastSeq)
 	if err != nil {
 		log.ZError(
