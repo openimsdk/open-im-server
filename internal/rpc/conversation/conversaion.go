@@ -112,6 +112,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
+//gocognit:ignore
 func (c *conversationServer) SetConversations(ctx context.Context,
 	req *pbconversation.SetConversationsReq,
 ) (*pbconversation.SetConversationsResp, error) {
@@ -204,6 +205,7 @@ func (c *conversationServer) SetConversations(ctx context.Context,
 			if err != nil {
 				log.ZWarn(ctx, "send conversation set private notification failed", err,
 					"userID", userID, "conversationID", req.Conversation.ConversationID)
+
 				continue
 			}
 		}

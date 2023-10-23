@@ -130,6 +130,7 @@ func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t interface{}) error {
 	if err := json.Unmarshal(bytes, &notification); err != nil {
 		return err
 	}
+
 	return json.Unmarshal([]byte(notification.Detail), t)
 }
 

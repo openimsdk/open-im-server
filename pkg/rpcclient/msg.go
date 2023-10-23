@@ -236,8 +236,9 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
+	var userInfo *sdkws.UserInfo
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
-		userInfo, err := s.getUserInfo(ctx, sendID)
+		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
 		} else {
