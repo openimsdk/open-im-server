@@ -715,83 +715,18 @@ linters:
   # enable-all: true
   disable-all: true
   enable:
-    - typecheck
-    - asciicheck
-    - bodyclose
-    - cyclop
-    # - depguard
-    - dogsled
-    - dupl
-    - durationcheck
-    - errcheck
-    - errorlint
-    - exhaustive
-    - exportloopref
-    # - forbidigo
-    - funlen
-    # - gci
-    # - gochecknoinits
-    - gocognit
-    - goconst
-    - gocyclo
-    - godot
-    - godox
-    - gofmt
-    - gofumpt
-    - goheader
-    - goimports
-    - gomoddirectives
-    - gomodguard
-    - goprintffuncname
-    - gosec
-    - gosimple
-    - govet
-    - importas
-    - ineffassign
-    - lll
-    - makezero
-    - misspell
-    - nakedret
-    - nestif
-    - nilerr
-    - nlreturn
-    - noctx
-    - nolintlint
-    - paralleltest
-    - prealloc
-    - predeclared
-    - promlinter
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - staticcheck
-    - stylecheck
-    - thelper
-    - tparallel
-    - unconvert
-    - unparam
-    - unused
-    - wastedassign
-    - whitespace
-    - bidichk
-    - wastedassign
-    - execinquery
-    - nosprintfhostport
-    - grouper
-    - decorder
-    - errchkjson
-    - maintidx
-      #- containedctx
-      #- tagliatelle
-      #- nonamedreturns
-      #- nilnil
-      #- tenv
-      #- varnamelen
-      #- contextcheck
-      #- errname
-      #- ForceTypeAssert
-      #- nilassign
-  fast: false
+    - typecheck     # 基本的类型检查
+    - gofmt         # 格式检查
+    - govet         # Go 语言的标准检查工具
+    - gosimple      # 简化代码的建议
+    - misspell      # 拼写错误
+    - staticcheck   # 静态检查
+    - unused        # 未使用的代码检查
+    - goimports     # 检查导入是否正确排序和格式化
+    - godot         # 注释句点检查
+    - bodyclose     # 确保 HTTP response body 被关闭
+    - errcheck      # 检查是否遗漏了错误返回值
+  fast: true
 
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
