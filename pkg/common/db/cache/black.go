@@ -52,6 +52,7 @@ func NewBlackCacheRedis(
 	options rockscache.Options,
 ) BlackCache {
 	rcClient := rockscache.NewClient(rdb, options)
+
 	return &BlackCacheRedis{
 		expireTime: blackExpireTime,
 		rcClient:   rcClient,
@@ -61,8 +62,12 @@ func NewBlackCacheRedis(
 }
 
 func (b *BlackCacheRedis) NewCache() BlackCache {
-	return &BlackCacheRedis{expireTime: b.expireTime, rcClient: b.rcClient, blackDB: b.blackDB,
-		metaCache: NewMetaCacheRedis(b.rcClient, b.metaCache.GetPreDelKeys()...)}
+	return &BlackCacheRedis{
+		expireTime: b.expireTime,
+		rcClient:   b.rcClient,
+		blackDB:    b.blackDB,
+		metaCache:  NewMetaCacheRedis(b.rcClient, b.metaCache.GetPreDelKeys()...),
+	}
 }
 
 func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
@@ -70,13 +75,20 @@ func (b *BlackCacheRedis) getBlackIDsKey(ownerUserID string) string {
 }
 
 func (b *BlackCacheRedis) GetBlackIDs(ctx context.Context, userID string) (blackIDs []string, err error) {
-	return getCache(ctx, b.rcClient, b.getBlackIDsKey(userID), b.expireTime, func(ctx context.Context) ([]string, error) {
-		return b.blackDB.FindBlackUserIDs(ctx, userID)
-	})
+	return getCache(
+		ctx,
+		b.rcClient,
+		b.getBlackIDsKey(userID),
+		b.expireTime,
+		func(ctx context.Context) ([]string, error) {
+			return b.blackDB.FindBlackUserIDs(ctx, userID)
+		},
+	)
 }
 
 func (b *BlackCacheRedis) DelBlackIDs(ctx context.Context, userID string) BlackCache {
 	cache := b.NewCache()
 	cache.AddKeys(b.getBlackIDsKey(userID))
+
 	return cache
 }
