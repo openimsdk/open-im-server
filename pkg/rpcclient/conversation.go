@@ -60,8 +60,7 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 }
 
 func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID,
-	conversationID string, conversationType int32,
-) error {
+	conversationID string, conversationType int32) error {
 	_, err := c.Client.CreateSingleChatConversations(ctx,
 		&pbconversation.CreateSingleChatConversationsReq{
 			RecvID: recvID, SendID: sendID, ConversationID: conversationID,

@@ -228,8 +228,9 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
+	var userInfo *sdkws.UserInfo
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
-		userInfo, err := s.getUserInfo(ctx, sendID)
+		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
 		} else {
@@ -251,7 +252,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	optionsConfig := s.contentTypeConf[contentType]
-	if sesstionType == constant.SuperGroupChatType && contentType == constant.HasReadReceipt {
+	if sendID == recvID && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
 	options := config.GetOptionsByNotification(optionsConfig)
