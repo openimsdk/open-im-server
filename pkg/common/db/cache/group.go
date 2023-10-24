@@ -412,7 +412,12 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(ctx context.Context, groupID strin
 	})
 }
 
-func (g *GroupCacheRedis) GetGroupMembersPage(ctx context.Context, groupID string, userIDs []string, showNumber, pageNumber int32) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error) {
+func (g *GroupCacheRedis) GetGroupMembersPage(
+	ctx context.Context,
+	groupID string,
+	userIDs []string,
+	showNumber, pageNumber int32,
+) (total uint32, groupMembers []*relationtb.GroupMemberModel, err error) {
 	groupMemberIDs, err := g.GetGroupMemberIDs(ctx, groupID)
 	if err != nil {
 		return 0, nil, err
