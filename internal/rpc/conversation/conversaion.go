@@ -17,8 +17,6 @@ package conversation
 import (
 	"context"
 
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
 	"google.golang.org/grpc"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -114,7 +112,10 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-func (c *conversationServer) SetConversations(ctx context.Context, req *pbconversation.SetConversationsReq) (*pbconversation.SetConversationsResp, error) {
+//nolint
+func (c *conversationServer) SetConversations(ctx context.Context,
+	req *pbconversation.SetConversationsReq,
+) (*pbconversation.SetConversationsResp, error) {
 	if req.Conversation == nil {
 		return nil, errs.ErrArgs.Wrap("conversation must not be nil")
 	}
@@ -124,14 +125,8 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed {
-			return nil, err
+			return nil, errs.ErrDismissedAlready.Wrap("group dismissed")
 		}
-		// for _, userID := range req.UserIDs {
-		// 	if _, err := c.groupRpcClient.GetGroupMemberCache(ctx, req.Conversation.GroupID, userID); err != nil {
-		// 		log.ZError(ctx, "user not in group", err, "userID", userID, "groupID", req.Conversation.GroupID)
-		// 		return nil, err
-		// 	}
-		// }
 	}
 	var unequal int
 	var conv tablerelation.ConversationModel
@@ -205,7 +200,14 @@ func (c *conversationServer) SetConversations(ctx context.Context, req *pbconver
 			return nil, err
 		}
 		for _, userID := range req.UserIDs {
-			c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID, req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			err := c.conversationNotificationSender.ConversationSetPrivateNotification(ctx, userID, req.Conversation.UserID,
+				req.Conversation.IsPrivateChat.Value, req.Conversation.ConversationID)
+			if err != nil {
+				log.ZWarn(ctx, "send conversation set private notification failed", err,
+					"userID", userID, "conversationID", req.Conversation.ConversationID)
+
+				continue
+			}
 		}
 	}
 	if req.Conversation.BurnDuration != nil {
@@ -235,24 +237,40 @@ func (c *conversationServer) GetRecvMsgNotNotifyUserIDs(ctx context.Context, req
 }
 
 // create conversation without notification for msg redis transfer.
-func (c *conversationServer) CreateSingleChatConversations(ctx context.Context, req *pbconversation.CreateSingleChatConversationsReq) (*pbconversation.CreateSingleChatConversationsResp, error) {
-	var conversation tablerelation.ConversationModel
-	conversation.ConversationID = msgprocessor.GetConversationIDBySessionType(constant.SingleChatType, req.RecvID, req.SendID)
-	conversation.ConversationType = constant.SingleChatType
-	conversation.OwnerUserID = req.SendID
-	conversation.UserID = req.RecvID
-	err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
-	if err != nil {
-		log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
+func (c *conversationServer) CreateSingleChatConversations(ctx context.Context,
+	req *pbconversation.CreateSingleChatConversationsReq,
+) (*pbconversation.CreateSingleChatConversationsResp, error) {
+	switch req.ConversationType {
+	case constant.SingleChatType:
+		var conversation tablerelation.ConversationModel
+		conversation.ConversationID = req.ConversationID
+		conversation.ConversationType = req.ConversationType
+		conversation.OwnerUserID = req.SendID
+		conversation.UserID = req.RecvID
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation", conversation)
+		}
+
+		conversation2 := conversation
+		conversation2.OwnerUserID = req.RecvID
+		conversation2.UserID = req.SendID
+		err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
+		}
+	case constant.NotificationChatType:
+		var conversation tablerelation.ConversationModel
+		conversation.ConversationID = req.ConversationID
+		conversation.ConversationType = req.ConversationType
+		conversation.OwnerUserID = req.RecvID
+		conversation.UserID = req.SendID
+		err := c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation})
+		if err != nil {
+			log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
+		}
 	}
 
-	conversation2 := conversation
-	conversation2.OwnerUserID = req.RecvID
-	conversation2.UserID = req.SendID
-	err = c.conversationDatabase.CreateConversation(ctx, []*tablerelation.ConversationModel{&conversation2})
-	if err != nil {
-		log.ZWarn(ctx, "create conversation failed", err, "conversation2", conversation)
-	}
 	return &pbconversation.CreateSingleChatConversationsResp{}, nil
 }
 

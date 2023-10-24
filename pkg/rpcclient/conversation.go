@@ -59,8 +59,14 @@ func (c *ConversationRpcClient) GetSingleConversationRecvMsgOpt(ctx context.Cont
 	return conversation.GetConversation().RecvMsgOpt, err
 }
 
-func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID string) error {
-	_, err := c.Client.CreateSingleChatConversations(ctx, &pbconversation.CreateSingleChatConversationsReq{RecvID: recvID, SendID: sendID})
+func (c *ConversationRpcClient) SingleChatFirstCreateConversation(ctx context.Context, recvID, sendID,
+	conversationID string, conversationType int32,
+) error {
+	_, err := c.Client.CreateSingleChatConversations(ctx,
+		&pbconversation.CreateSingleChatConversationsReq{
+			RecvID: recvID, SendID: sendID, ConversationID: conversationID,
+			ConversationType: conversationType,
+		})
 	return err
 }
 
