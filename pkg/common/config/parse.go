@@ -21,9 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"gopkg.in/yaml.v3"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed version
@@ -35,7 +34,7 @@ const (
 	DefaultFolderPath    = "../config/"
 )
 
-// getProjectRoot returns the absolute path of the project root directory.
+// getProjectRoot returns the absolute path of the project root directory
 func GetProjectRoot() string {
 	b, _ := filepath.Abs(os.Args[0])
 
@@ -57,7 +56,6 @@ func GetOptionsByNotification(cfg NotificationConf) msgprocessor.Options {
 		opts = msgprocessor.WithOptions(opts, msgprocessor.WithHistory(true), msgprocessor.WithPersistent())
 	}
 	opts = msgprocessor.WithOptions(opts, msgprocessor.WithSendMsg(cfg.IsSendMsg))
-
 	return opts
 }
 
@@ -78,7 +76,6 @@ func initConfig(config interface{}, configName, configFolderPath string) error {
 		return fmt.Errorf("unmarshal yaml error: %w", err)
 	}
 	fmt.Println("use config", configFolderPath)
-
 	return nil
 }
 
@@ -96,5 +93,5 @@ func InitConfig(configFolderPath string) error {
 		return err
 	}
 
-	return nil
+	return initConfig(&Config.Notification, NotificationFileName, configFolderPath)
 }

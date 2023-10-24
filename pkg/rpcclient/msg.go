@@ -136,7 +136,6 @@ func NewMessage(discov discoveryregistry.SvcDiscoveryRegistry) *Message {
 		panic(err)
 	}
 	client := msg.NewMsgClient(conn)
-
 	return &Message{discov: discov, conn: conn, Client: client}
 }
 
@@ -148,19 +147,16 @@ func NewMessageRpcClient(discov discoveryregistry.SvcDiscoveryRegistry) MessageR
 
 func (m *MessageRpcClient) SendMsg(ctx context.Context, req *msg.SendMsgReq) (*msg.SendMsgResp, error) {
 	resp, err := m.Client.SendMsg(ctx, req)
-
 	return resp, err
 }
 
 func (m *MessageRpcClient) GetMaxSeq(ctx context.Context, req *sdkws.GetMaxSeqReq) (*sdkws.GetMaxSeqResp, error) {
 	resp, err := m.Client.GetMaxSeq(ctx, req)
-
 	return resp, err
 }
 
 func (m *MessageRpcClient) PullMessageBySeqList(ctx context.Context, req *sdkws.PullMessageBySeqsReq) (*sdkws.PullMessageBySeqsResp, error) {
 	resp, err := m.Client.PullMessageBySeqs(ctx, req)
-
 	return resp, err
 }
 
@@ -169,7 +165,6 @@ func (m *MessageRpcClient) GetConversationMaxSeq(ctx context.Context, conversati
 	if err != nil {
 		return 0, err
 	}
-
 	return resp.MaxSeq, nil
 }
 
@@ -205,7 +200,6 @@ func NewNotificationSender(opts ...NotificationSenderOptions) *NotificationSende
 	for _, opt := range opts {
 		opt(notificationSender)
 	}
-
 	return notificationSender
 }
 
@@ -221,13 +215,11 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string,
-	contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID",
-			sendID, "recvID", recvID, "contentType", contentType, "msg", m)
+		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
 		return err
 	}
 	notificationOpt := &notificationOpt{}
@@ -236,9 +228,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
-	var userInfo *sdkws.UserInfo
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
-		userInfo, err = s.getUserInfo(ctx, sendID)
+		userInfo, err := s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
 		} else {
@@ -260,7 +251,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	optionsConfig := s.contentTypeConf[contentType]
-	if sendID == recvID && contentType == constant.HasReadReceipt {
+	if sesstionType == constant.SuperGroupChatType && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
 	options := config.GetOptionsByNotification(optionsConfig)
@@ -276,7 +267,6 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	} else {
 		log.ZError(ctx, "MsgClient Notification SendMsg failed", err, "req", &req)
 	}
-
 	return err
 }
 

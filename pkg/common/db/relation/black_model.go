@@ -63,11 +63,10 @@ func (b *BlackGorm) Find(
 	ctx context.Context,
 	blacks []*relation.BlackModel,
 ) (blackList []*relation.BlackModel, err error) {
-	where := make([][]interface{}, 0, len(blacks))
+	var where [][]interface{}
 	for _, black := range blacks {
 		where = append(where, []interface{}{black.OwnerUserID, black.BlockUserID})
 	}
-
 	return blackList, utils.Wrap(
 		b.db(ctx).Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error,
 		"",
@@ -76,7 +75,6 @@ func (b *BlackGorm) Find(
 
 func (b *BlackGorm) Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.BlackModel, err error) {
 	black = &relation.BlackModel{}
-
 	return black, utils.Wrap(
 		b.db(ctx).Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error,
 		"",
@@ -98,7 +96,6 @@ func (b *BlackGorm) FindOwnerBlacks(
 		showNumber,
 	)
 	total = int64(totalUint32)
-
 	return
 }
 

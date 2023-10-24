@@ -109,7 +109,6 @@ func NewGroupCacheRedis(
 	opts rockscache.Options,
 ) GroupCache {
 	rcClient := rockscache.NewClient(rdb, opts)
-
 	return &GroupCacheRedis{
 		rcClient: rcClient, expireTime: groupExpireTime,
 		groupDB: groupDB, groupMemberDB: groupMemberDB, groupRequestDB: groupRequestDB,
@@ -170,7 +169,6 @@ func (g *GroupCacheRedis) GetGroupIndex(group *relationtb.GroupModel, keys []str
 			return i, nil
 		}
 	}
-
 	return 0, errIndex
 }
 
@@ -181,7 +179,6 @@ func (g *GroupCacheRedis) GetGroupMemberIndex(groupMember *relationtb.GroupMembe
 			return i, nil
 		}
 	}
-
 	return 0, errIndex
 }
 
@@ -190,11 +187,10 @@ func (g *GroupCacheRedis) GetGroupsInfo(
 	ctx context.Context,
 	groupIDs []string,
 ) (groups []*relationtb.GroupModel, err error) {
-	keys := make([]string, 0, len(groupIDs))
+	var keys []string
 	for _, group := range groupIDs {
 		keys = append(keys, g.getGroupInfoKey(group))
 	}
-
 	return batchGetCache(
 		ctx,
 		g.rcClient,
@@ -220,14 +216,13 @@ func (g *GroupCacheRedis) GetGroupInfo(ctx context.Context, groupID string) (gro
 }
 
 func (g *GroupCacheRedis) DelGroupsInfo(groupIDs ...string) GroupCache {
-	newGroupCache := g.NewCache()
-	keys := make([]string, 0, len(groupIDs))
+	new := g.NewCache()
+	var keys []string
 	for _, groupID := range groupIDs {
 		keys = append(keys, g.getGroupInfoKey(groupID))
 	}
-	newGroupCache.AddKeys(keys...)
-
-	return newGroupCache
+	new.AddKeys(keys...)
+	return new
 }
 
 func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(
@@ -244,7 +239,6 @@ func (g *GroupCacheRedis) GetJoinedSuperGroupIDs(
 			if err != nil {
 				return nil, err
 			}
-
 			return userGroup.GroupIDs, nil
 		},
 	)
@@ -254,11 +248,10 @@ func (g *GroupCacheRedis) GetSuperGroupMemberIDs(
 	ctx context.Context,
 	groupIDs ...string,
 ) (models []*unrelationtb.SuperGroupModel, err error) {
-	keys := make([]string, 0, len(groupIDs))
+	var keys []string
 	for _, group := range groupIDs {
 		keys = append(keys, g.getSuperGroupMemberIDsKey(group))
 	}
-
 	return batchGetCache(
 		ctx,
 		g.rcClient,
@@ -270,7 +263,6 @@ func (g *GroupCacheRedis) GetSuperGroupMemberIDs(
 					return i, nil
 				}
 			}
-
 			return 0, errIndex
 		},
 		func(ctx context.Context) ([]*unrelationtb.SuperGroupModel, error) {
@@ -281,25 +273,23 @@ func (g *GroupCacheRedis) GetSuperGroupMemberIDs(
 
 // userJoinSuperGroup.
 func (g *GroupCacheRedis) DelJoinedSuperGroupIDs(userIDs ...string) GroupCache {
-	newGroupCache := g.NewCache()
-	keys := make([]string, 0, len(userIDs))
+	new := g.NewCache()
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, g.getJoinedSuperGroupsIDKey(userID))
 	}
-	newGroupCache.AddKeys(keys...)
-
-	return newGroupCache
+	new.AddKeys(keys...)
+	return new
 }
 
 func (g *GroupCacheRedis) DelSuperGroupMemberIDs(groupIDs ...string) GroupCache {
-	newGroupCache := g.NewCache()
-	keys := make([]string, 0, len(groupIDs))
+	new := g.NewCache()
+	var keys []string
 	for _, groupID := range groupIDs {
 		keys = append(keys, g.getSuperGroupMemberIDsKey(groupID))
 	}
-	newGroupCache.AddKeys(keys...)
-
-	return newGroupCache
+	new.AddKeys(keys...)
+	return new
 }
 
 // groupMembersHash.
@@ -378,14 +368,12 @@ func (g *GroupCacheRedis) GetGroupMemberHashMap(
 		}
 		res[groupID] = &relationtb.GroupSimpleUserID{Hash: hash, MemberNum: uint32(num)}
 	}
-
 	return res, nil
 }
 
 func (g *GroupCacheRedis) DelGroupMembersHash(groupID string) GroupCache {
 	cache := g.NewCache()
 	cache.AddKeys(g.getGroupMembersHashKey(groupID))
-
 	return cache
 }
 
@@ -411,14 +399,12 @@ func (g *GroupCacheRedis) GetGroupsMemberIDs(ctx context.Context, groupIDs []str
 		}
 		m[groupID] = userIDs
 	}
-
 	return m, nil
 }
 
 func (g *GroupCacheRedis) DelGroupMemberIDs(groupID string) GroupCache {
 	cache := g.NewCache()
 	cache.AddKeys(g.getGroupMemberIDsKey(groupID))
-
 	return cache
 }
 
@@ -435,13 +421,12 @@ func (g *GroupCacheRedis) GetJoinedGroupIDs(ctx context.Context, userID string) 
 }
 
 func (g *GroupCacheRedis) DelJoinedGroupID(userIDs ...string) GroupCache {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, g.getJoinedGroupsKey(userID))
 	}
 	cache := g.NewCache()
 	cache.AddKeys(keys...)
-
 	return cache
 }
 
@@ -465,11 +450,10 @@ func (g *GroupCacheRedis) GetGroupMembersInfo(
 	groupID string,
 	userIDs []string,
 ) ([]*relationtb.GroupMemberModel, error) {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, g.getGroupMemberInfoKey(groupID, userID))
 	}
-
 	return batchGetCache(
 		ctx,
 		g.rcClient,
@@ -498,7 +482,6 @@ func (g *GroupCacheRedis) GetGroupMembersPage(
 		userIDs = groupMemberIDs
 	}
 	groupMembers, err = g.GetGroupMembersInfo(ctx, groupID, utils.Paginate(userIDs, int(showNumber), int(showNumber)))
-
 	return uint32(len(userIDs)), groupMembers, err
 }
 
@@ -510,7 +493,6 @@ func (g *GroupCacheRedis) GetAllGroupMembersInfo(
 	if err != nil {
 		return nil, err
 	}
-
 	return g.GetGroupMembersInfo(ctx, groupID, groupMemberIDs)
 }
 
@@ -522,11 +504,10 @@ func (g *GroupCacheRedis) GetAllGroupMemberInfo(
 	if err != nil {
 		return nil, err
 	}
-	keys := make([]string, 0, len(groupMemberIDs))
+	var keys []string
 	for _, groupMemberID := range groupMemberIDs {
 		keys = append(keys, g.getGroupMemberInfoKey(groupID, groupMemberID))
 	}
-
 	return batchGetCache(
 		ctx,
 		g.rcClient,
@@ -540,13 +521,12 @@ func (g *GroupCacheRedis) GetAllGroupMemberInfo(
 }
 
 func (g *GroupCacheRedis) DelGroupMembersInfo(groupID string, userIDs ...string) GroupCache {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, g.getGroupMemberInfoKey(groupID, userID))
 	}
 	cache := g.NewCache()
 	cache.AddKeys(keys...)
-
 	return cache
 }
 
@@ -563,12 +543,11 @@ func (g *GroupCacheRedis) GetGroupMemberNum(ctx context.Context, groupID string)
 }
 
 func (g *GroupCacheRedis) DelGroupsMemberNum(groupID ...string) GroupCache {
-	keys := make([]string, 0, len(groupID))
+	var keys []string
 	for _, groupID := range groupID {
 		keys = append(keys, g.getGroupMemberNumKey(groupID))
 	}
 	cache := g.NewCache()
 	cache.AddKeys(keys...)
-
 	return cache
 }

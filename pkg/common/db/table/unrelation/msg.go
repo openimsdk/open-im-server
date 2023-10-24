@@ -150,7 +150,6 @@ func (m *MsgDocModel) IsFull() bool {
 
 func (m MsgDocModel) GetDocID(conversationID string, seq int64) string {
 	seqSuffix := (seq - 1) / singleGocMsgNum
-
 	return m.indexGen(conversationID, seqSuffix)
 }
 
@@ -165,7 +164,6 @@ func (m MsgDocModel) GetDocIDSeqsMap(conversationID string, seqs []int64) map[st
 			t[docID] = append(value, seqs[i])
 		}
 	}
-
 	return t
 }
 
@@ -183,6 +181,5 @@ func (MsgDocModel) GenExceptionMessageBySeqs(seqs []int64) (exceptionMsg []*sdkw
 		msgModel.Seq = v
 		exceptionMsg = append(exceptionMsg, msgModel)
 	}
-
 	return exceptionMsg
 }

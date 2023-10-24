@@ -102,7 +102,6 @@ func NewGroupDatabase(
 		cache:          cache,
 		mongoDB:        superGroup,
 	}
-
 	return database
 }
 
@@ -110,7 +109,6 @@ func InitGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, database *mongo.D
 	rcOptions := rockscache.NewDefaultOptions()
 	rcOptions.StrongConsistency = true
 	rcOptions.RandomExpireAdjustment = 0.2
-
 	return NewGroupDatabase(
 		relation.NewGroupDB(db),
 		relation.NewGroupMemberDB(db),
@@ -153,7 +151,6 @@ func (g *groupDatabase) FindGroupMemberNum(ctx context.Context, groupID string) 
 	if err != nil {
 		return 0, err
 	}
-
 	return uint32(num), nil
 }
 
@@ -187,12 +184,10 @@ func (g *groupDatabase) CreateGroup(
 			cache = cache.DelJoinedGroupID(groupMember.UserID).DelGroupMembersInfo(groupMember.GroupID, groupMember.UserID)
 		}
 		cache = cache.DelGroupsInfo(createGroupIDs...)
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -216,7 +211,6 @@ func (g *groupDatabase) UpdateGroup(ctx context.Context, groupID string, data ma
 	if err := g.groupDB.UpdateMap(ctx, groupID, data); err != nil {
 		return err
 	}
-
 	return g.cache.DelGroupsInfo(groupID).ExecDel(ctx)
 }
 
@@ -237,12 +231,10 @@ func (g *groupDatabase) DismissGroup(ctx context.Context, groupID string, delete
 			cache = cache.DelJoinedGroupID(userIDs...).DelGroupMemberIDs(groupID).DelGroupsMemberNum(groupID).DelGroupMembersHash(groupID)
 		}
 		cache = cache.DelGroupsInfo(groupID)
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -284,7 +276,6 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 			}
 			res = append(res, v)
 		}
-
 		return res, nil
 	}
 	if len(roleLevels) == 0 {
@@ -295,10 +286,8 @@ func (g *groupDatabase) FindGroupMember(ctx context.Context, groupIDs []string, 
 			}
 			totalGroupMembers = append(totalGroupMembers, groupMembers...)
 		}
-
 		return totalGroupMembers, nil
 	}
-
 	return g.groupMemberDB.Find(ctx, groupIDs, userIDs, roleLevels)
 }
 
@@ -318,7 +307,6 @@ func (g *groupDatabase) PageGetJoinGroup(
 		}
 		totalGroupMembers = append(totalGroupMembers, groupMembers...)
 	}
-
 	return uint32(len(groupIDs)), totalGroupMembers, nil
 }
 
@@ -339,7 +327,6 @@ func (g *groupDatabase) PageGetGroupMember(
 	if err != nil {
 		return 0, nil, err
 	}
-
 	return uint32(len(groupMemberIDs)), members, nil
 }
 
@@ -391,7 +378,6 @@ func (g *groupDatabase) HandlerGroupRequest(
 				return err
 			}
 		}
-
 		return nil
 	})
 }
@@ -400,7 +386,6 @@ func (g *groupDatabase) DeleteGroupMember(ctx context.Context, groupID string, u
 	if err := g.groupMemberDB.Delete(ctx, groupID, userIDs); err != nil {
 		return err
 	}
-
 	return g.cache.DelGroupMembersHash(groupID).
 		DelGroupMemberIDs(groupID).
 		DelGroupsMemberNum(groupID).
@@ -425,7 +410,6 @@ func (g *groupDatabase) MapGroupMemberNum(ctx context.Context, groupIDs []string
 		}
 		m[groupID] = uint32(num)
 	}
-
 	return m, nil
 }
 
@@ -445,7 +429,6 @@ func (g *groupDatabase) TransferGroupOwner(ctx context.Context, groupID string, 
 		if rowsAffected != 1 {
 			return utils.Wrap(fmt.Errorf("newOwnerUserID %s rowsAffected = %d", newOwnerUserID, rowsAffected), "")
 		}
-
 		return g.cache.DelGroupMembersInfo(groupID, oldOwnerUserID, newOwnerUserID).DelGroupMembersHash(groupID).ExecDel(ctx)
 	})
 }
@@ -459,7 +442,6 @@ func (g *groupDatabase) UpdateGroupMember(
 	if err := g.groupMemberDB.Update(ctx, groupID, userID, data); err != nil {
 		return err
 	}
-
 	return g.cache.DelGroupMembersInfo(groupID, userID).ExecDel(ctx)
 }
 
@@ -472,12 +454,10 @@ func (g *groupDatabase) UpdateGroupMembers(ctx context.Context, data []*relation
 			}
 			cache = cache.DelGroupMembersInfo(item.GroupID, item.UserID)
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -489,7 +469,6 @@ func (g *groupDatabase) CreateGroupRequest(ctx context.Context, requests []*rela
 				return err
 			}
 		}
-
 		return db.Create(ctx, requests)
 	})
 }
@@ -525,7 +504,6 @@ func (g *groupDatabase) CreateSuperGroup(ctx context.Context, groupID string, in
 	if err := g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDs); err != nil {
 		return err
 	}
-
 	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(initMemberIDs...).ExecDel(ctx)
 }
 
@@ -543,12 +521,10 @@ func (g *groupDatabase) DeleteSuperGroup(ctx context.Context, groupID string) er
 		if len(models) > 0 {
 			cache = cache.DelJoinedSuperGroupIDs(models[0].MemberIDs...)
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -556,7 +532,6 @@ func (g *groupDatabase) DeleteSuperGroupMember(ctx context.Context, groupID stri
 	if err := g.mongoDB.RemoverUserFromSuperGroup(ctx, groupID, userIDs); err != nil {
 		return err
 	}
-
 	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 }
 
@@ -564,7 +539,6 @@ func (g *groupDatabase) CreateSuperGroupMember(ctx context.Context, groupID stri
 	if err := g.mongoDB.AddUserToSuperGroup(ctx, groupID, userIDs); err != nil {
 		return err
 	}
-
 	return g.cache.DelSuperGroupMemberIDs(groupID).DelJoinedSuperGroupIDs(userIDs...).ExecDel(ctx)
 }
 

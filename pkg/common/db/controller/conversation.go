@@ -99,8 +99,8 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 		now := time.Now()
 		for _, v := range NotUserIDs {
 			temp := new(relationtb.ConversationModel)
-			if err2 := utils.CopyStructFields(temp, conversation); err2 != nil {
-				return err2
+			if err := utils.CopyStructFields(temp, conversation); err != nil {
+				return err
 			}
 			temp.OwnerUserID = v
 			temp.CreateTime = now
@@ -113,12 +113,10 @@ func (c *conversationDatabase) SetUsersConversationFiledTx(ctx context.Context, 
 			}
 			cache = cache.DelConversationIDs(NotUserIDs...).DelUserConversationIDsHash(NotUserIDs...).DelConversations(conversation.ConversationID, NotUserIDs...)
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -132,7 +130,6 @@ func (c *conversationDatabase) UpdateUsersConversationFiled(ctx context.Context,
 	if _, ok := args["recv_msg_opt"]; ok {
 		cache = cache.DelConversationNotReceiveMessageUserIDs(conversationID)
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -140,14 +137,13 @@ func (c *conversationDatabase) CreateConversation(ctx context.Context, conversat
 	if err := c.conversationDB.Create(ctx, conversations); err != nil {
 		return err
 	}
-	userIDs := make([]string, 0, len(conversations))
+	var userIDs []string
 	cache := c.cache.NewCache()
 	for _, conversation := range conversations {
 		cache = cache.DelConversations(conversation.OwnerUserID, conversation.ConversationID)
 		cache = cache.DelConversationNotReceiveMessageUserIDs(conversation.ConversationID)
 		userIDs = append(userIDs, conversation.OwnerUserID)
 	}
-
 	return cache.DelConversationIDs(userIDs...).DelUserConversationIDsHash(userIDs...).ExecDel(ctx)
 }
 
@@ -182,12 +178,10 @@ func (c *conversationDatabase) SyncPeerUserPrivateConversationTx(ctx context.Con
 				}
 			}
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -240,15 +234,12 @@ func (c *conversationDatabase) SetUserConversations(ctx context.Context, ownerUs
 			if err != nil {
 				return err
 			}
-			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID)
-			cache = cache.DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
+			cache = cache.DelConversationIDs(ownerUserID).DelUserConversationIDsHash(ownerUserID).DelConversationNotReceiveMessageUserIDs(utils.Slice(notExistConversations, func(e *relationtb.ConversationModel) string { return e.ConversationID })...)
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -285,12 +276,10 @@ func (c *conversationDatabase) CreateGroupChatConversation(ctx context.Context, 
 		for _, v := range existConversationUserIDs {
 			cache = cache.DelConversations(v, conversationID)
 		}
-
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	return cache.ExecDel(ctx)
 }
 

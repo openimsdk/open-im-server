@@ -15,7 +15,6 @@
 package relation
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -83,7 +82,6 @@ func newMysqlGormDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.MaxLifeTime))
 	sqlDB.SetMaxOpenConns(config.Config.Mysql.MaxOpenConn)
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.MaxIdleConn)
-
 	return db, nil
 }
 
@@ -96,13 +94,11 @@ func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 		if err == nil {
 			return db, nil
 		}
-		var mysqlErr *mysqldriver.MySQLError
-		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1045 {
+		if mysqlErr, ok := err.(*mysqldriver.MySQLError); ok && mysqlErr.Number == 1045 {
 			return nil, err
 		}
 		time.Sleep(time.Duration(1) * time.Second)
 	}
-
 	return nil, err
 }
 
@@ -110,7 +106,6 @@ func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 func NewGormDB() (*gorm.DB, error) {
 	specialerror.AddReplace(gorm.ErrRecordNotFound, errs.ErrRecordNotFound)
 	specialerror.AddErrHandler(replaceDuplicateKey)
-
 	return newMysqlGormDB()
 }
 
@@ -118,15 +113,12 @@ func replaceDuplicateKey(err error) errs.CodeError {
 	if IsMysqlDuplicateKey(err) {
 		return errs.ErrDuplicateKey
 	}
-
 	return nil
 }
 
 func IsMysqlDuplicateKey(err error) bool {
-	var mysqlErr *mysqldriver.MySQLError
-	if errors.As(err, &mysqlErr) {
+	if mysqlErr, ok := err.(*mysqldriver.MySQLError); ok {
 		return mysqlErr.Number == 1062
 	}
-
 	return false
 }

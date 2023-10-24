@@ -67,7 +67,6 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 		producer, err = sarama.NewSyncProducer(p.addr, p.config) // Initialize the client
 		if err == nil {
 			p.producer = producer
-
 			return &p
 		}
 		//TODO If the password is wrong, exit directly
@@ -84,7 +83,6 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 		panic(err.Error())
 	}
 	p.producer = producer
-
 	return &p
 }
 
@@ -93,7 +91,6 @@ func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) 
 	if err != nil {
 		return nil, err
 	}
-
 	return []sarama.RecordHeader{
 		{Key: []byte(constant.OperationID), Value: []byte(operationID)},
 		{Key: []byte(constant.OpUserID), Value: []byte(opUserID)},
@@ -103,11 +100,10 @@ func GetMQHeaderWithContext(ctx context.Context) ([]sarama.RecordHeader, error) 
 }
 
 func GetContextWithMQHeader(header []*sarama.RecordHeader) context.Context {
-	values := make([]string, 0, len(header))
+	var values []string
 	for _, recordHeader := range header {
 		values = append(values, string(recordHeader.Value))
 	}
-
 	return mcontext.WithMustInfoCtx(values) // TODO
 }
 
@@ -138,6 +134,5 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	if err == nil {
 		prome.Inc(prome.SendMsgCounter)
 	}
-
 	return partition, offset, utils.Wrap(err, "")
 }

@@ -59,7 +59,6 @@ func NewFriendCacheRedis(
 	options rockscache.Options,
 ) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
 	return &FriendCacheRedis{
 		metaCache:  NewMetaCacheRedis(rcClient),
 		friendDB:   friendDB,
@@ -101,15 +100,14 @@ func (f *FriendCacheRedis) GetFriendIDs(ctx context.Context, ownerUserID string)
 	)
 }
 
-func (f *FriendCacheRedis) DelFriendIDs(ownerUserIDs ...string) FriendCache {
-	newGroupCache := f.NewCache()
-	keys := make([]string, 0, len(ownerUserIDs))
-	for _, userID := range ownerUserIDs {
+func (f *FriendCacheRedis) DelFriendIDs(ownerUserID ...string) FriendCache {
+	new := f.NewCache()
+	var keys []string
+	for _, userID := range ownerUserID {
 		keys = append(keys, f.getFriendIDsKey(userID))
 	}
-	newGroupCache.AddKeys(keys...)
-
-	return newGroupCache
+	new.AddKeys(keys...)
+	return new
 }
 
 // todo.
@@ -130,15 +128,13 @@ func (f *FriendCacheRedis) GetTwoWayFriendIDs(
 			twoWayFriendIDs = append(twoWayFriendIDs, ownerUserID)
 		}
 	}
-
 	return twoWayFriendIDs, nil
 }
 
 func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID string) FriendCache {
-	newFriendCache := f.NewCache()
-	newFriendCache.AddKeys(f.getTwoWayFriendsIDsKey(ownerUserID))
-
-	return newFriendCache
+	new := f.NewCache()
+	new.AddKeys(f.getTwoWayFriendsIDsKey(ownerUserID))
+	return new
 }
 
 func (f *FriendCacheRedis) GetFriend(
@@ -157,8 +153,7 @@ func (f *FriendCacheRedis) GetFriend(
 }
 
 func (f *FriendCacheRedis) DelFriend(ownerUserID, friendUserID string) FriendCache {
-	newFriendCache := f.NewCache()
-	newFriendCache.AddKeys(f.getFriendKey(ownerUserID, friendUserID))
-
-	return newFriendCache
+	new := f.NewCache()
+	new.AddKeys(f.getFriendKey(ownerUserID, friendUserID))
+	return new
 }

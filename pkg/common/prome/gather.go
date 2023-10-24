@@ -79,7 +79,6 @@ var (
 	ConversationCreateFailedCounter  prometheus.Counter
 )
 
-//nolint:promlinter    //no idea to fix it
 func NewUserLoginCounter() {
 	if UserLoginCounter != nil {
 		return
@@ -90,7 +89,6 @@ func NewUserLoginCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewUserRegisterCounter() {
 	if UserRegisterCounter != nil {
 		return
@@ -101,7 +99,6 @@ func NewUserRegisterCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSeqGetSuccessCounter() {
 	if SeqGetSuccessCounter != nil {
 		return
@@ -112,7 +109,6 @@ func NewSeqGetSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSeqGetFailedCounter() {
 	if SeqGetFailedCounter != nil {
 		return
@@ -123,7 +119,6 @@ func NewSeqGetFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSeqSetSuccessCounter() {
 	if SeqSetSuccessCounter != nil {
 		return
@@ -134,7 +129,6 @@ func NewSeqSetSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSeqSetFailedCounter() {
 	if SeqSetFailedCounter != nil {
 		return
@@ -145,7 +139,6 @@ func NewSeqSetFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewApiRequestCounter() {
 	if ApiRequestCounter != nil {
 		return
@@ -156,7 +149,6 @@ func NewApiRequestCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewApiRequestSuccessCounter() {
 	if ApiRequestSuccessCounter != nil {
 		return
@@ -167,7 +159,6 @@ func NewApiRequestSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewApiRequestFailedCounter() {
 	if ApiRequestFailedCounter != nil {
 		return
@@ -178,7 +169,6 @@ func NewApiRequestFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGrpcRequestCounter() {
 	if GrpcRequestCounter != nil {
 		return
@@ -189,7 +179,6 @@ func NewGrpcRequestCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGrpcRequestSuccessCounter() {
 	if GrpcRequestSuccessCounter != nil {
 		return
@@ -200,7 +189,6 @@ func NewGrpcRequestSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGrpcRequestFailedCounter() {
 	if GrpcRequestFailedCounter != nil {
 		return
@@ -211,7 +199,6 @@ func NewGrpcRequestFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSendMsgCount() {
 	if SendMsgCounter != nil {
 		return
@@ -222,7 +209,6 @@ func NewSendMsgCount() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgInsertRedisSuccessCounter() {
 	if MsgInsertRedisSuccessCounter != nil {
 		return
@@ -233,7 +219,6 @@ func NewMsgInsertRedisSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix its
 func NewMsgInsertRedisFailedCounter() {
 	if MsgInsertRedisFailedCounter != nil {
 		return
@@ -244,7 +229,6 @@ func NewMsgInsertRedisFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgInsertMongoSuccessCounter() {
 	if MsgInsertMongoSuccessCounter != nil {
 		return
@@ -255,7 +239,6 @@ func NewMsgInsertMongoSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgInsertMongoFailedCounter() {
 	if MsgInsertMongoFailedCounter != nil {
 		return
@@ -266,7 +249,6 @@ func NewMsgInsertMongoFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgPullFromRedisSuccessCounter() {
 	if MsgPullFromRedisSuccessCounter != nil {
 		return
@@ -277,7 +259,6 @@ func NewMsgPullFromRedisSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgPullFromRedisFailedCounter() {
 	if MsgPullFromRedisFailedCounter != nil {
 		return
@@ -288,7 +269,6 @@ func NewMsgPullFromRedisFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgPullFromMongoSuccessCounter() {
 	if MsgPullFromMongoSuccessCounter != nil {
 		return
@@ -299,7 +279,6 @@ func NewMsgPullFromMongoSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgPullFromMongoFailedCounter() {
 	if MsgPullFromMongoFailedCounter != nil {
 		return
@@ -340,7 +319,6 @@ func NewPullMsgBySeqListTotalCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSingleChatMsgRecvSuccessCounter() {
 	if SingleChatMsgRecvSuccessCounter != nil {
 		return
@@ -351,7 +329,6 @@ func NewSingleChatMsgRecvSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGroupChatMsgRecvSuccessCounter() {
 	if GroupChatMsgRecvSuccessCounter != nil {
 		return
@@ -362,7 +339,6 @@ func NewGroupChatMsgRecvSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewWorkSuperGroupChatMsgRecvSuccessCounter() {
 	if WorkSuperGroupChatMsgRecvSuccessCounter != nil {
 		return
@@ -383,7 +359,6 @@ func NewOnlineUserGauges() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSingleChatMsgProcessSuccessCounter() {
 	if SingleChatMsgProcessSuccessCounter != nil {
 		return
@@ -394,7 +369,6 @@ func NewSingleChatMsgProcessSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewSingleChatMsgProcessFailedCounter() {
 	if SingleChatMsgProcessFailedCounter != nil {
 		return
@@ -405,7 +379,6 @@ func NewSingleChatMsgProcessFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGroupChatMsgProcessSuccessCounter() {
 	if GroupChatMsgProcessSuccessCounter != nil {
 		return
@@ -416,7 +389,6 @@ func NewGroupChatMsgProcessSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewGroupChatMsgProcessFailedCounter() {
 	if GroupChatMsgProcessFailedCounter != nil {
 		return
@@ -427,7 +399,6 @@ func NewGroupChatMsgProcessFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
 	if WorkSuperGroupChatMsgProcessSuccessCounter != nil {
 		return
@@ -438,7 +409,6 @@ func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewWorkSuperGroupChatMsgProcessFailedCounter() {
 	if WorkSuperGroupChatMsgProcessFailedCounter != nil {
 		return
@@ -449,7 +419,6 @@ func NewWorkSuperGroupChatMsgProcessFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgOnlinePushSuccessCounter() {
 	if MsgOnlinePushSuccessCounter != nil {
 		return
@@ -460,7 +429,6 @@ func NewMsgOnlinePushSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgOfflinePushSuccessCounter() {
 	if MsgOfflinePushSuccessCounter != nil {
 		return
@@ -471,7 +439,6 @@ func NewMsgOfflinePushSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewMsgOfflinePushFailedCounter() {
 	if MsgOfflinePushFailedCounter != nil {
 		return
@@ -482,7 +449,6 @@ func NewMsgOfflinePushFailedCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewConversationCreateSuccessCounter() {
 	if ConversationCreateSuccessCounter != nil {
 		return
@@ -493,7 +459,6 @@ func NewConversationCreateSuccessCounter() {
 	})
 }
 
-//nolint:promlinter    //no idea to fix it
 func NewConversationCreateFailedCounter() {
 	if ConversationCreateFailedCounter != nil {
 		return

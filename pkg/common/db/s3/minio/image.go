@@ -39,7 +39,6 @@ func ImageStat(reader io.Reader) (image.Image, string, error) {
 
 func ImageWidthHeight(img image.Image) (int, int) {
 	bounds := img.Bounds().Max
-
 	return bounds.X, bounds.Y
 }
 
@@ -48,27 +47,27 @@ func resizeImage(img image.Image, maxWidth, maxHeight int) image.Image {
 	imgWidth := bounds.Max.X
 	imgHeight := bounds.Max.Y
 
-	// Calculate scaling ratio
+	// 计算缩放比例
 	scaleWidth := float64(maxWidth) / float64(imgWidth)
 	scaleHeight := float64(maxHeight) / float64(imgHeight)
 
-	// If both maxWidth and maxHeight are 0, return the original image
+	// 如果都为0，则不缩放，返回原始图片
 	if maxWidth == 0 && maxHeight == 0 {
 		return img
 	}
 
-	// If both maxWidth and maxHeight are greater than 0, choose the smaller scaling ratio to maintain aspect ratio
+	// 如果宽度和高度都大于0，则选择较小的缩放比例，以保持宽高比
 	if maxWidth > 0 && maxHeight > 0 {
 		scale := scaleWidth
 		if scaleHeight < scaleWidth {
 			scale = scaleHeight
 		}
 
-		// Calculate thumbnail size
+		// 计算缩略图尺寸
 		thumbnailWidth := int(float64(imgWidth) * scale)
 		thumbnailHeight := int(float64(imgHeight) * scale)
 
-		// Generate thumbnail using the Resample method of the "image" library
+		// 使用"image"库的Resample方法生成缩略图
 		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
 		for y := 0; y < thumbnailHeight; y++ {
 			for x := 0; x < thumbnailWidth; x++ {
@@ -81,12 +80,12 @@ func resizeImage(img image.Image, maxWidth, maxHeight int) image.Image {
 		return thumbnail
 	}
 
-	// If only maxWidth or maxHeight is specified, generate thumbnail according to the "max not exceed" rule
+	// 如果只指定了宽度或高度，则根据最大不超过的规则生成缩略图
 	if maxWidth > 0 {
 		thumbnailWidth := maxWidth
 		thumbnailHeight := int(float64(imgHeight) * scaleWidth)
 
-		// Generate thumbnail using the Resample method of the "image" library
+		// 使用"image"库的Resample方法生成缩略图
 		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
 		for y := 0; y < thumbnailHeight; y++ {
 			for x := 0; x < thumbnailWidth; x++ {
@@ -103,7 +102,7 @@ func resizeImage(img image.Image, maxWidth, maxHeight int) image.Image {
 		thumbnailWidth := int(float64(imgWidth) * scaleHeight)
 		thumbnailHeight := maxHeight
 
-		// Generate thumbnail using the Resample method of the "image" library
+		// 使用"image"库的Resample方法生成缩略图
 		thumbnail := image.NewRGBA(image.Rect(0, 0, thumbnailWidth, thumbnailHeight))
 		for y := 0; y < thumbnailHeight; y++ {
 			for x := 0; x < thumbnailWidth; x++ {
@@ -116,6 +115,6 @@ func resizeImage(img image.Image, maxWidth, maxHeight int) image.Image {
 		return thumbnail
 	}
 
-	// By default, return the original image
+	// 默认情况下，返回原始图片
 	return img
 }

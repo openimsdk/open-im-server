@@ -57,10 +57,6 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 	var newContent string
 	options := make(map[string]bool, 5)
 	switch params.ContentType {
-	case constant.OANotification:
-		notification := sdkws.NotificationElem{}
-		notification.Detail = utils.StructToJsonString(params.Content)
-		newContent = utils.StructToJsonString(&notification)
 	case constant.Text:
 		fallthrough
 	case constant.Picture:
@@ -73,6 +69,10 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 		fallthrough
 	case constant.File:
 		fallthrough
+	case constant.CustomNotTriggerConversation:
+		fallthrough
+	case constant.CustomOnlineOnly:
+		fallthrough
 	default:
 		newContent = utils.StructToJsonString(params.Content)
 	}
@@ -81,6 +81,11 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 	}
 	if params.NotOfflinePush {
 		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
+	}
+	if params.ContentType == constant.CustomOnlineOnly {
+		m.SetOptions(options, false)
+	} else if params.ContentType == constant.CustomNotTriggerConversation {
+		utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
 	}
 	pbData := msg.SendMsgReq{
 		MsgData: &sdkws.MsgData{
@@ -100,6 +105,14 @@ func (m MessageApi) newUserSendMsgReq(c *gin.Context, params *apistruct.SendMsg)
 			OfflinePushInfo:  params.OfflinePushInfo,
 		},
 	}
+	//if params.ContentType == constant.OANotification {
+	//	var tips sdkws.TipsComm
+	//	tips.JsonDetail = utils.StructToJsonString(params.Content)
+	//	pbData.MsgData.Content, err = proto.Marshal(&tips)
+	//	if err != nil {
+	//		log.ZError(c, "Marshal failed ", err, "tips", tips.String())
+	//	}
+	//}
 	return &pbData
 }
 
@@ -167,13 +180,15 @@ func (m *MessageApi) getSendMsgReq(c *gin.Context, req apistruct.SendMsg) (sendM
 		data = apistruct.FileElem{}
 	case constant.Custom:
 		data = apistruct.CustomElem{}
+	case constant.Revoke:
+		data = apistruct.RevokeElem{}
 	case constant.OANotification:
 		data = apistruct.OANotificationElem{}
 		req.SessionType = constant.NotificationChatType
-		if !authverify.IsManagerUserID(req.SendID) {
-			return nil, errs.ErrNoPermission.
-				Wrap("only app manager can as sender send OANotificationElem")
-		}
+	case constant.CustomNotTriggerConversation:
+		data = apistruct.CustomElem{}
+	case constant.CustomOnlineOnly:
+		data = apistruct.CustomElem{}
 	default:
 		return nil, errs.ErrArgs.WithDetail("not support err contentType")
 	}
@@ -197,6 +212,7 @@ func (m *MessageApi) SendMessage(c *gin.Context) {
 		apiresp.GinError(c, errs.ErrNoPermission.Wrap("only app manager can send message"))
 		return
 	}
+
 	sendMsgReq, err := m.getSendMsgReq(c, req.SendMsg)
 	if err != nil {
 		log.ZError(c, "decodeData failed", err)

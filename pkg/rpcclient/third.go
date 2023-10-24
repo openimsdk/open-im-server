@@ -42,13 +42,14 @@ func NewThird(discov discoveryregistry.SvcDiscoveryRegistry) *Third {
 		panic(err)
 	}
 	client := third.NewThirdClient(conn)
-	minioClient, _ := minioInit()
-
+	minioClient, err := minioInit()
 	return &Third{discov: discov, Client: client, conn: conn, MinioClient: minioClient}
 }
 
 func minioInit() (*minio.Client, error) {
-	initUrl := config.Config.Object.Minio.Endpoint
+	minioClient := &minio.Client{}
+	var initUrl string
+	initUrl = config.Config.Object.Minio.Endpoint
 	minioUrl, err := url.Parse(initUrl)
 	if err != nil {
 		return nil, err
@@ -62,11 +63,9 @@ func minioInit() (*minio.Client, error) {
 	} else if minioUrl.Scheme == "https" {
 		opts.Secure = true
 	}
-	var minioClient *minio.Client
 	minioClient, err = minio.New(minioUrl.Host, opts)
 	if err != nil {
 		return nil, err
 	}
-
 	return minioClient, nil
 }

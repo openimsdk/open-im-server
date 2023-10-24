@@ -51,7 +51,6 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	if err != nil {
 		panic(err.Error())
 	}
-
 	return &MConsumerGroup{
 		consumerGroup,
 		groupID,

@@ -42,13 +42,11 @@ func (l *LockerMessage) LockMessageTypeKey(ctx context.Context, clientMsgID, typ
 		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, typeKey)
 		if err != nil {
 			time.Sleep(time.Millisecond * 100)
-
 			continue
 		} else {
 			break
 		}
 	}
-
 	return err
 }
 
@@ -57,13 +55,11 @@ func (l *LockerMessage) LockGlobalMessage(ctx context.Context, clientMsgID strin
 		err = l.cache.LockMessageTypeKey(ctx, clientMsgID, GlOBALLOCK)
 		if err != nil {
 			time.Sleep(time.Millisecond * 100)
-
 			continue
 		} else {
 			break
 		}
 	}
-
 	return err
 }
 

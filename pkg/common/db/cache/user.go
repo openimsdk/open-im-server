@@ -17,7 +17,6 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"hash/crc32"
 	"strconv"
 	"time"
@@ -71,7 +70,6 @@ func NewUserCacheRedis(
 	options rockscache.Options,
 ) UserCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
 	return &UserCacheRedis{
 		rdb:        rdb,
 		metaCache:  NewMetaCacheRedis(rcClient),
@@ -99,6 +97,10 @@ func (u *UserCacheRedis) getUserGlobalRecvMsgOptKey(userID string) string {
 	return userGlobalRecvMsgOptKey + userID
 }
 
+func (u *UserCacheRedis) getUserStatusHashKey(userID string, Id int32) string {
+	return userID + "_" + string(Id) + platformID
+}
+
 func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userInfo *relationtb.UserModel, err error) {
 	return getCache(
 		ctx,
@@ -112,11 +114,10 @@ func (u *UserCacheRedis) GetUserInfo(ctx context.Context, userID string) (userIn
 }
 
 func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]*relationtb.UserModel, error) {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, u.getUserInfoKey(userID))
 	}
-
 	return batchGetCache(
 		ctx,
 		u.rcClient,
@@ -128,7 +129,6 @@ func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]
 					return i, nil
 				}
 			}
-
 			return 0, errIndex
 		},
 		func(ctx context.Context) ([]*relationtb.UserModel, error) {
@@ -138,13 +138,12 @@ func (u *UserCacheRedis) GetUsersInfo(ctx context.Context, userIDs []string) ([]
 }
 
 func (u *UserCacheRedis) DelUsersInfo(userIDs ...string) UserCache {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, u.getUserInfoKey(userID))
 	}
 	cache := u.NewCache()
 	cache.AddKeys(keys...)
-
 	return cache
 }
 
@@ -161,19 +160,22 @@ func (u *UserCacheRedis) GetUserGlobalRecvMsgOpt(ctx context.Context, userID str
 }
 
 func (u *UserCacheRedis) DelUsersGlobalRecvMsgOpt(userIDs ...string) UserCache {
-	keys := make([]string, 0, len(userIDs))
+	var keys []string
 	for _, userID := range userIDs {
 		keys = append(keys, u.getUserGlobalRecvMsgOptKey(userID))
 	}
 	cache := u.NewCache()
 	cache.AddKeys(keys...)
-
 	return cache
+}
+
+func (u *UserCacheRedis) getOnlineStatusKey(userID string) string {
+	return olineStatusKey + userID
 }
 
 // GetUserStatus get user status.
 func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
-	userStatus := make([]*user.OnlineStatus, 0, len(userIDs))
+	var res []*user.OnlineStatus
 	for _, userID := range userIDs {
 		UserIDNum := crc32.ChecksumIEEE([]byte(userID))
 		modKey := strconv.Itoa(int(UserIDNum % statusMod))
@@ -181,14 +183,13 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 		key := olineStatusKey + modKey
 		result, err := u.rdb.HGet(ctx, key, userID).Result()
 		if err != nil {
-			if errors.Is(err, redis.Nil) {
+			if err == redis.Nil {
 				// key or field does not exist
-				userStatus = append(userStatus, &user.OnlineStatus{
+				res = append(res, &user.OnlineStatus{
 					UserID:      userID,
 					Status:      constant.Offline,
 					PlatformIDs: nil,
 				})
-
 				continue
 			} else {
 				return nil, errs.Wrap(err)
@@ -200,10 +201,9 @@ func (u *UserCacheRedis) GetUserStatus(ctx context.Context, userIDs []string) ([
 		}
 		onlineStatus.UserID = userID
 		onlineStatus.Status = constant.Online
-		userStatus = append(userStatus, &onlineStatus)
+		res = append(res, &onlineStatus)
 	}
-
-	return userStatus, nil
+	return res, nil
 }
 
 // SetUserStatus Set the user status and save it in redis.
@@ -224,16 +224,15 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 				Status:      constant.Online,
 				PlatformIDs: []int32{platformID},
 			}
-			jsonData, err2 := json.Marshal(&onlineStatus)
-			if err2 != nil {
-				return errs.Wrap(err2)
+			jsonData, err := json.Marshal(onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
 			}
-			_, err2 = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
-			if err2 != nil {
-				return errs.Wrap(err2)
+			_, err = u.rdb.HSet(ctx, key, userID, string(jsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
 			}
 			u.rdb.Expire(ctx, key, userOlineStatusExpireTime)
-
 			return nil
 		}
 	}
@@ -241,7 +240,7 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 	isNil := false
 	result, err := u.rdb.HGet(ctx, key, userID).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
+		if err == redis.Nil {
 			isNil = true
 		} else {
 			return errs.Wrap(err)
@@ -249,45 +248,51 @@ func (u *UserCacheRedis) SetUserStatus(ctx context.Context, userID string, statu
 	}
 
 	if status == constant.Offline {
-		err = u.refreshStatusOffline(ctx, userID, status, platformID, isNil, err, result, key)
-		if err != nil {
-			return err
+		if isNil {
+			log.ZWarn(ctx, "this user not online,maybe trigger order not right",
+				err, "userStatus", status)
+			return nil
 		}
-	} else {
-		err = u.refreshStatusOnline(ctx, userID, platformID, isNil, err, result, key)
-		if err != nil {
-			return errs.Wrap(err)
-		}
-	}
-
-	return nil
-}
-
-func (u *UserCacheRedis) refreshStatusOffline(ctx context.Context, userID string, status, platformID int32, isNil bool, err error, result, key string) error {
-	if isNil {
-		log.ZWarn(ctx, "this user not online,maybe trigger order not right",
-			err, "userStatus", status)
-
-		return nil
-	}
-	var onlineStatus user.OnlineStatus
-	err = json.Unmarshal([]byte(result), &onlineStatus)
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	var newPlatformIDs []int32
-	for _, val := range onlineStatus.PlatformIDs {
-		if val != platformID {
-			newPlatformIDs = append(newPlatformIDs, val)
-		}
-	}
-	if newPlatformIDs == nil {
-		_, err = u.rdb.HDel(ctx, key, userID).Result()
+		var onlineStatus user.OnlineStatus
+		err = json.Unmarshal([]byte(result), &onlineStatus)
 		if err != nil {
 			return errs.Wrap(err)
 		}
+		var newPlatformIDs []int32
+		for _, val := range onlineStatus.PlatformIDs {
+			if val != platformID {
+				newPlatformIDs = append(newPlatformIDs, val)
+			}
+		}
+		if newPlatformIDs == nil {
+			_, err = u.rdb.HDel(ctx, key, userID).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		} else {
+			onlineStatus.PlatformIDs = newPlatformIDs
+			newjsonData, err := json.Marshal(&onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
+			if err != nil {
+				return errs.Wrap(err)
+			}
+		}
 	} else {
-		onlineStatus.PlatformIDs = newPlatformIDs
+		var onlineStatus user.OnlineStatus
+		if !isNil {
+			err = json.Unmarshal([]byte(result), &onlineStatus)
+			if err != nil {
+				return errs.Wrap(err)
+			}
+			onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
+		} else {
+			onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
+		}
+		onlineStatus.Status = constant.Online
+		onlineStatus.UserID = userID
 		newjsonData, err := json.Marshal(&onlineStatus)
 		if err != nil {
 			return errs.Wrap(err)
@@ -296,31 +301,7 @@ func (u *UserCacheRedis) refreshStatusOffline(ctx context.Context, userID string
 		if err != nil {
 			return errs.Wrap(err)
 		}
-	}
 
-	return nil
-}
-
-func (u *UserCacheRedis) refreshStatusOnline(ctx context.Context, userID string, platformID int32, isNil bool, err error, result, key string) error {
-	var onlineStatus user.OnlineStatus
-	if !isNil {
-		err2 := json.Unmarshal([]byte(result), &onlineStatus)
-		if err != nil {
-			return errs.Wrap(err2)
-		}
-		onlineStatus.PlatformIDs = RemoveRepeatedElementsInList(append(onlineStatus.PlatformIDs, platformID))
-	} else {
-		onlineStatus.PlatformIDs = append(onlineStatus.PlatformIDs, platformID)
-	}
-	onlineStatus.Status = constant.Online
-	onlineStatus.UserID = userID
-	newjsonData, err := json.Marshal(&onlineStatus)
-	if err != nil {
-		return errs.Wrap(err)
-	}
-	_, err = u.rdb.HSet(ctx, key, userID, string(newjsonData)).Result()
-	if err != nil {
-		return errs.Wrap(err)
 	}
 
 	return nil

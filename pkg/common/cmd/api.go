@@ -16,11 +16,9 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/spf13/cobra"
-
 	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"github.com/spf13/cobra"
 )
 
 type ApiCmd struct {
@@ -44,7 +42,8 @@ func (a *ApiCmd) GetPortFromConfig(portType string) int {
 	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return config2.Config.Api.OpenImApiPort[0]
-	}
+	} else {
 
-	return 0
+		return 0
+	}
 }

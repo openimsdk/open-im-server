@@ -34,21 +34,16 @@ import (
 var client http.Client
 
 func Get(url string) (response []byte, err error) {
-	clientGet := http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	client := http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	resp, err2 := clientGet.Do(req)
-	if err2 != nil {
-		return nil, err
-	}
 	defer resp.Body.Close()
-	body, err3 := io.ReadAll(resp.Body)
-	if err3 != nil {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
-
 	return body, nil
 }
 
@@ -88,7 +83,6 @@ func Post(
 	if err != nil {
 		return nil, err
 	}
-
 	return result, nil
 }
 
@@ -104,7 +98,6 @@ func PostReturn(
 		return err
 	}
 	err = json.Unmarshal(b, output)
-
 	return err
 }
 
@@ -123,22 +116,17 @@ func callBackPostReturn(
 	if err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-
 			return errs.ErrCallbackContinue
 		}
-
 		return errs.ErrNetwork.Wrap(err.Error())
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if callbackConfig.CallbackFailedContinue != nil && *callbackConfig.CallbackFailedContinue {
 			log.ZWarn(ctx, "callback failed but continue", err, "url", url)
-
 			return errs.ErrCallbackContinue
 		}
-
 		return errs.ErrData.Wrap(err.Error())
 	}
-
 	return output.Parse()
 }
 

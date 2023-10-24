@@ -16,7 +16,6 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -110,7 +109,6 @@ func (f *friendDatabase) CheckIn(
 	if err != nil {
 		return
 	}
-
 	return utils.IsContain(userID2, userID1FriendIDs), utils.IsContain(userID1, userID2FriendIDs), nil
 }
 
@@ -123,8 +121,8 @@ func (f *friendDatabase) AddFriendRequest(
 ) (err error) {
 	return f.tx.Transaction(func(tx any) error {
 		_, err := f.friendRequest.NewTx(tx).Take(ctx, fromUserID, toUserID)
-		// if there is a db error
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		// 有db错误
+		if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
 		// 无错误 则更新
@@ -138,14 +136,12 @@ func (f *friendDatabase) AddFriendRequest(
 			if err := f.friendRequest.NewTx(tx).UpdateByMap(ctx, fromUserID, toUserID, m); err != nil {
 				return err
 			}
-
 			return nil
 		}
 		// gorm.ErrRecordNotFound 错误，则新增
 		if err := f.friendRequest.NewTx(tx).Create(ctx, []*relation.FriendRequestModel{{FromUserID: fromUserID, ToUserID: toUserID, ReqMsg: reqMsg, Ex: ex, CreateTime: time.Now(), HandleTime: time.Unix(0, 0)}}); err != nil {
 			return err
 		}
-
 		return nil
 	})
 }
@@ -158,11 +154,11 @@ func (f *friendDatabase) BecomeFriends(
 	addSource int32,
 ) (err error) {
 	cache := f.cache.NewCache()
-	fn := func(tx any) error {
-		// first,find and drop delete ones
-		fs1, err2 := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
-		if err2 != nil {
-			return err2
+	if err := f.tx.Transaction(func(tx any) error {
+		// 先find 找出重复的 去掉重复的
+		fs1, err := f.friend.NewTx(tx).FindFriends(ctx, ownerUserID, friendUserIDs)
+		if err != nil {
+			return err
 		}
 		opUserID := mcontext.GetOperationID(ctx)
 		for _, v := range friendUserIDs {
@@ -172,13 +168,13 @@ func (f *friendDatabase) BecomeFriends(
 			return e.FriendUserID
 		})
 
-		err2 = f.friend.NewTx(tx).Create(ctx, fs11)
-		if err2 != nil {
-			return err2
+		err = f.friend.NewTx(tx).Create(ctx, fs11)
+		if err != nil {
+			return err
 		}
-		fs2, err2 := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
-		if err2 != nil {
-			return err2
+		fs2, err := f.friend.NewTx(tx).FindReversalFriends(ctx, ownerUserID, friendUserIDs)
+		if err != nil {
+			return err
 		}
 		var newFriendIDs []string
 		for _, v := range friendUserIDs {
@@ -188,20 +184,16 @@ func (f *friendDatabase) BecomeFriends(
 		fs22 := utils.DistinctAny(fs2, func(e *relation.FriendModel) string {
 			return e.OwnerUserID
 		})
-		err2 = f.friend.NewTx(tx).Create(ctx, fs22)
-		if err2 != nil {
-			return err2
+		err = f.friend.NewTx(tx).Create(ctx, fs22)
+		if err != nil {
+			return err
 		}
 		newFriendIDs = append(newFriendIDs, ownerUserID)
 		cache = cache.DelFriendIDs(newFriendIDs...)
-
+		return nil
+	}); err != nil {
 		return nil
 	}
-	err = f.tx.Transaction(fn)
-	if err != nil {
-		return err
-	}
-
 	return cache.ExecDel(ctx)
 }
 
@@ -224,7 +216,6 @@ func (f *friendDatabase) RefuseFriendRequest(
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -260,7 +251,7 @@ func (f *friendDatabase) AgreeFriendRequest(
 			if err != nil {
 				return err
 			}
-		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		} else if err != nil && errs.Unwrap(err) != gorm.ErrRecordNotFound {
 			return err
 		}
 
@@ -299,7 +290,6 @@ func (f *friendDatabase) AgreeFriendRequest(
 				return err
 			}
 		}
-
 		return f.cache.DelFriendIDs(friendRequest.ToUserID, friendRequest.FromUserID).ExecDel(ctx)
 	})
 }
@@ -309,7 +299,6 @@ func (f *friendDatabase) Delete(ctx context.Context, ownerUserID string, friendU
 	if err := f.friend.Delete(ctx, ownerUserID, friendUserIDs); err != nil {
 		return err
 	}
-
 	return f.cache.DelFriendIDs(append(friendUserIDs, ownerUserID)...).ExecDel(ctx)
 }
 
@@ -318,7 +307,6 @@ func (f *friendDatabase) UpdateRemark(ctx context.Context, ownerUserID, friendUs
 	if err := f.friend.UpdateRemark(ctx, ownerUserID, friendUserID, remark); err != nil {
 		return err
 	}
-
 	return f.cache.DelFriend(ownerUserID, friendUserID).ExecDel(ctx)
 }
 
@@ -371,7 +359,6 @@ func (f *friendDatabase) FindFriendsWithError(
 	if len(friends) != len(friendUserIDs) {
 		err = errs.ErrRecordNotFound.Wrap()
 	}
-
 	return
 }
 

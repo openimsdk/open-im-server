@@ -34,6 +34,5 @@ func NewMetaDB(db *gorm.DB, table any) *MetaDB {
 
 func (g *MetaDB) db(ctx context.Context) *gorm.DB {
 	db := g.DB.WithContext(ctx).Model(g.table)
-
 	return db
 }

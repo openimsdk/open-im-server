@@ -171,7 +171,7 @@ linters-settings:
   #   exclude_godoc_examples: false
   funlen:
     lines: 150
-    statements: 80
+    statements: 50
   gci:
     # put imports beginning with prefix after 3rd-party packages;
     # only support one prefix
@@ -510,7 +510,7 @@ linters-settings:
 
   nestif:
     # minimal complexity of if statements to report, 5 by default
-    min-complexity: 6
+    min-complexity: 4
 
   nilnil:
     # By default, nilnil checks all returned types below.

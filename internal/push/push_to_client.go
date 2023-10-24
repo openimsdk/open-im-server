@@ -126,12 +126,13 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 }
 
 func (p *Pusher) UnmarshalNotificationElem(bytes []byte, t interface{}) error {
-	var notification sdkws.NotificationElem
-	if err := json.Unmarshal(bytes, &notification); err != nil {
+	var notificationElem struct {
+		Detail string `json:"detail,omitempty"`
+	}
+	if err := json.Unmarshal(bytes, &notificationElem); err != nil {
 		return err
 	}
-
-	return json.Unmarshal([]byte(notification.Detail), t)
+	return json.Unmarshal([]byte(notificationElem.Detail), t)
 }
 
 func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws.MsgData) (err error) {

@@ -16,12 +16,10 @@ package msgtransfer
 
 import (
 	"fmt"
-	"sync"
-
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"sync"
 
 	"github.com/OpenIMSDK/tools/mw"
 
@@ -65,7 +63,8 @@ func StartTransfer(prometheusPort int) error {
 	/*
 		client, err := openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 			openkeeper.WithFreq(time.Hour), openkeeper.WithRoundRobin(), openkeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/if err != nil {
+				config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/
+	if err != nil {
 		return err
 	}
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {

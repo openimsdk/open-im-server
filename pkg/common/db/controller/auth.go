@@ -69,9 +69,9 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 		}
 	}
 	if len(deleteTokenKey) != 0 {
-		err2 := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
-		if err2 != nil {
-			return "", err2
+		err := a.cache.DeleteTokenByUidPid(ctx, userID, platformID, deleteTokenKey)
+		if err != nil {
+			return "", err
 		}
 	}
 	claims := tokenverify.BuildClaims(userID, platformID, a.accessExpire)
@@ -80,6 +80,5 @@ func (a *authDatabase) CreateToken(ctx context.Context, userID string, platformI
 	if err != nil {
 		return "", utils.Wrap(err, "")
 	}
-
 	return tokenString, a.cache.AddTokenFlag(ctx, userID, platformID, tokenString, constant.NormalToken)
 }
