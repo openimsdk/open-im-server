@@ -44,6 +44,11 @@ const (
 	imageWebp = "webp"
 )
 
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
+)
+
 func NewCos() (s3.Interface, error) {
 	conf := config.Config.Object.Cos
 	u, err := url.Parse(conf.BucketURL)
@@ -57,7 +62,6 @@ func NewCos() (s3.Interface, error) {
 			SessionToken: conf.SessionToken,
 		},
 	})
-
 	return &Cos{
 		copyURL:    u.Host + "/",
 		client:     client,
@@ -88,7 +92,6 @@ func (c *Cos) InitiateMultipartUpload(ctx context.Context, name string) (*s3.Ini
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.InitiateMultipartUploadResult{
 		UploadID: result.UploadID,
 		Bucket:   result.Bucket,
@@ -110,7 +113,6 @@ func (c *Cos) CompleteMultipartUpload(ctx context.Context, uploadID string, name
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.CompleteMultipartUploadResult{
 		Location: result.Location,
 		Bucket:   result.Bucket,
@@ -133,7 +135,6 @@ func (c *Cos) PartSize(ctx context.Context, size int64) (int64, error) {
 	if size%maxNumSize != 0 {
 		partSize++
 	}
-
 	return partSize, nil
 }
 
@@ -156,7 +157,6 @@ func (c *Cos) AuthSign(ctx context.Context, uploadID string, name string, expire
 			Query:      url.Values{"partNumber": {strconv.Itoa(partNumber)}},
 		}
 	}
-
 	return &result, nil
 }
 
@@ -165,13 +165,11 @@ func (c *Cos) PresignedPutObject(ctx context.Context, name string, expire time.D
 	if err != nil {
 		return "", err
 	}
-
 	return rawURL.String(), nil
 }
 
 func (c *Cos) DeleteObject(ctx context.Context, name string) error {
 	_, err := c.client.Object.Delete(ctx, name)
-
 	return err
 }
 
@@ -187,26 +185,25 @@ func (c *Cos) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	if res.ETag = strings.ToLower(strings.ReplaceAll(info.Header.Get("ETag"), `"`, "")); res.ETag == "" {
 		return nil, errors.New("StatObject etag not found")
 	}
-	contentLengthStr := info.Header.Get("Content-Length")
-	if contentLengthStr == "" {
+	if contentLengthStr := info.Header.Get("Content-Length"); contentLengthStr == "" {
 		return nil, errors.New("StatObject content-length not found")
+	} else {
+		res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("StatObject content-length parse error: %w", err)
+		}
+		if res.Size < 0 {
+			return nil, errors.New("StatObject content-length must be greater than 0")
+		}
 	}
-	res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("StatObject content-length parse error: %w", err)
-	}
-	if res.Size < 0 {
-		return nil, errors.New("StatObject content-length must be greater than 0")
-	}
-	lastModified := info.Header.Get("Last-Modified")
-	if lastModified == "" {
+	if lastModified := info.Header.Get("Last-Modified"); lastModified == "" {
 		return nil, errors.New("StatObject last-modified not found")
+	} else {
+		res.LastModified, err = time.Parse(http.TimeFormat, lastModified)
+		if err != nil {
+			return nil, fmt.Errorf("StatObject last-modified parse error: %w", err)
+		}
 	}
-	res.LastModified, err = time.Parse(http.TimeFormat, lastModified)
-	if err != nil {
-		return nil, fmt.Errorf("StatObject last-modified parse error: %w", err)
-	}
-
 	return res, nil
 }
 
@@ -216,7 +213,6 @@ func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.CopyObjectInfo{
 		Key:  dst,
 		ETag: strings.ReplaceAll(result.ETag, `"`, ``),
@@ -224,17 +220,16 @@ func (c *Cos) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (c *Cos) IsNotFound(err error) bool {
-	var cosErr *cos.ErrorResponse
-	if errors.As(err, &cosErr) {
-		return cosErr.Response.StatusCode == http.StatusNotFound || cosErr.Code == "NoSuchKey"
+	switch e := err.(type) {
+	case *cos.ErrorResponse:
+		return e.Response.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
+	default:
+		return false
 	}
-
-	return false
 }
 
 func (c *Cos) AbortMultipartUpload(ctx context.Context, uploadID string, name string) error {
 	_, err := c.client.Object.AbortMultipartUpload(ctx, name, uploadID)
-
 	return err
 }
 
@@ -262,59 +257,46 @@ func (c *Cos) ListUploadedParts(ctx context.Context, uploadID string, name strin
 			Size:         part.Size,
 		}
 	}
-
 	return res, nil
 }
 
 func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption) (string, error) {
 	var imageMogr string
 	var option cos.PresignedURLOptions
-	getImageMogr := func(opt *s3.AccessURLOption) (imageMogr string) {
-		if opt.Image == nil {
-			return imageMogr
+	if opt != nil {
+		query := make(url.Values)
+		if opt.Image != nil {
+			// https://cloud.tencent.com/document/product/436/44880
+			style := make([]string, 0, 2)
+			wh := make([]string, 2)
+			if opt.Image.Width > 0 {
+				wh[0] = strconv.Itoa(opt.Image.Width)
+			}
+			if opt.Image.Height > 0 {
+				wh[1] = strconv.Itoa(opt.Image.Height)
+			}
+			if opt.Image.Width > 0 || opt.Image.Height > 0 {
+				style = append(style, strings.Join(wh, "x"))
+			}
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				style = append(style, "format/"+opt.Image.Format)
+			}
+			if len(style) > 0 {
+				imageMogr = "imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
+			}
 		}
-		// https://cloud.tencent.com/document/product/436/44880
-		style := make([]string, 0, 2)
-		wh := make([]string, 2)
-		if opt.Image.Width > 0 {
-			wh[0] = strconv.Itoa(opt.Image.Width)
-		}
-		if opt.Image.Height > 0 {
-			wh[1] = strconv.Itoa(opt.Image.Height)
-		}
-		if opt.Image.Width > 0 || opt.Image.Height > 0 {
-			style = append(style, strings.Join(wh, "x"))
-		}
-		switch opt.Image.Format {
-		case
-			imagePng,
-			imageJpg,
-			imageJpeg,
-			imageGif,
-			imageWebp:
-			style = append(style, "format/"+opt.Image.Format)
-		}
-		if len(style) > 0 {
-			imageMogr = "imageMogr2/thumbnail/" + strings.Join(style, "/") + "/ignore-error/1"
-		}
-
-		return imageMogr
-	}
-	getQuery := func(opt *s3.AccessURLOption) (query url.Values) {
-		query = make(url.Values)
 		if opt.ContentType != "" {
 			query.Set("response-content-type", opt.ContentType)
 		}
 		if opt.Filename != "" {
 			query.Set("response-content-disposition", `attachment; filename=`+strconv.Quote(opt.Filename))
 		}
-
-		return query
-	}
-
-	if opt != nil {
-		imageMogr = getImageMogr(opt)
-		query := getQuery(opt)
 		if len(query) > 0 {
 			option.Query = &query
 		}
@@ -335,7 +317,6 @@ func (c *Cos) AccessURL(ctx context.Context, name string, expire time.Duration, 
 			rawURL.RawQuery = rawURL.RawQuery + "&" + imageMogr
 		}
 	}
-
 	return rawURL.String(), nil
 }
 
@@ -343,6 +324,5 @@ func (c *Cos) getPresignedURL(ctx context.Context, name string, expire time.Dura
 	if !config.Config.Object.Cos.PublicRead {
 		return c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, c.credential.SecretID, c.credential.SecretKey, expire, opt)
 	}
-
 	return c.client.Object.GetObjectURL(name), nil
 }

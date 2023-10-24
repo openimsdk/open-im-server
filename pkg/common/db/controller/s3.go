@@ -89,6 +89,5 @@ func (s *s3Database) AccessURL(ctx context.Context, name string, expire time.Dur
 	if err != nil {
 		return time.Time{}, "", err
 	}
-
 	return expireTime, rawURL, nil
 }

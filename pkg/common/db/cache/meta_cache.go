@@ -154,7 +154,8 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 	return t, nil
 }
 
-//func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) ([]T, error)) ([]T, error) {
+// func batchGetCache[T any](ctx context.Context, rcClient *rockscache.Client, keys []string, expire time.Duration, keyIndexFn func(t T, keys []string) (int, error), fn func(ctx context.Context) ([]T,
+// error)) ([]T, error) {
 //	batchMap, err := rcClient.FetchBatch2(ctx, keys, expire, func(idxs []int) (m map[int]string, err error) {
 //		values := make(map[int]string)
 //		tArrays, err := fn(ctx)
@@ -191,7 +192,14 @@ func getCache[T any](ctx context.Context, rcClient *rockscache.Client, key strin
 //	return tArrays, nil
 //}
 
-func batchGetCache2[T any, K comparable](ctx context.Context, rcClient *rockscache.Client, expire time.Duration, keys []K, keyFn func(key K) string, fns func(ctx context.Context, key K) (T, error)) ([]T, error) {
+func batchGetCache2[T any, K comparable](
+	ctx context.Context,
+	rcClient *rockscache.Client,
+	expire time.Duration,
+	keys []K,
+	keyFn func(key K) string,
+	fns func(ctx context.Context, key K) (T, error),
+) ([]T, error) {
 	if len(keys) == 0 {
 		return nil, nil
 	}

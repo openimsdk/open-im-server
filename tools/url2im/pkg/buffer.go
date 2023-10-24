@@ -15,7 +15,7 @@ func NewReader(r io.Reader, max int64, path string) (ReadSeekSizeCloser, error) 
 	buf := make([]byte, max+1)
 	n, err := io.ReadFull(r, buf)
 	if err == nil {
-		f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0666)
+		f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o666)
 		if err != nil {
 			return nil, err
 		}

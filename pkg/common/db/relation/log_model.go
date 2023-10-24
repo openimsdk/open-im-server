@@ -25,7 +25,6 @@ func (l *LogGorm) Search(ctx context.Context, keyword string, start time.Time, e
 		db = l.db.WithContext(ctx).Where("create_time <= ?", end)
 	}
 	db = db.Order("create_time desc")
-
 	return ormutil.GormSearch[relationtb.Log](db, []string{"user_id"}, keyword, pageNumber, showNumber)
 }
 
@@ -33,7 +32,6 @@ func (l *LogGorm) Delete(ctx context.Context, logIDs []string, userID string) er
 	if userID == "" {
 		return errs.Wrap(l.db.WithContext(ctx).Where("log_id in ?", logIDs).Delete(&relationtb.Log{}).Error)
 	}
-
 	return errs.Wrap(l.db.WithContext(ctx).Where("log_id in ? and user_id=?", logIDs, userID).Delete(&relationtb.Log{}).Error)
 }
 
@@ -42,15 +40,10 @@ func (l *LogGorm) Get(ctx context.Context, logIDs []string, userID string) ([]*r
 	if userID == "" {
 		return logs, errs.Wrap(l.db.WithContext(ctx).Where("log_id in ?", logIDs).Find(&logs).Error)
 	}
-
 	return logs, errs.Wrap(l.db.WithContext(ctx).Where("log_id in ? and user_id=?", logIDs, userID).Find(&logs).Error)
 }
 
 func NewLogGorm(db *gorm.DB) relationtb.LogInterface {
-	err := db.AutoMigrate(&relationtb.Log{})
-	if err != nil {
-		panic(err)
-	}
-
+	db.AutoMigrate(&relationtb.Log{})
 	return &LogGorm{db: db}
 }

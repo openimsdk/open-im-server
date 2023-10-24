@@ -17,10 +17,12 @@ package cache
 import (
 	"context"
 	"errors"
-	"github.com/dtm-labs/rockscache"
-	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"strconv"
 	"time"
+
+	"github.com/dtm-labs/rockscache"
+
+	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
@@ -718,21 +720,11 @@ func (c *msgCache) SetMessageTypeKeyValue(
 	return errs.Wrap(c.rdb.HSet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey, value).Err())
 }
 
-func (c *msgCache) SetMessageReactionExpire(
-	ctx context.Context,
-	clientMsgID string,
-	sessionType int32,
-	expiration time.Duration,
-) (bool, error) {
+func (c *msgCache) SetMessageReactionExpire(ctx context.Context, clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
 	return utils.Wrap2(c.rdb.Expire(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), expiration).Result())
 }
 
-func (c *msgCache) GetMessageTypeKeyValue(
-	ctx context.Context,
-	clientMsgID string,
-	sessionType int32,
-	typeKey string,
-) (string, error) {
+func (c *msgCache) GetMessageTypeKeyValue(ctx context.Context, clientMsgID string, sessionType int32, typeKey string) (string, error) {
 	return utils.Wrap2(c.rdb.HGet(ctx, c.getMessageReactionExPrefix(clientMsgID, sessionType), typeKey).Result())
 }
 

@@ -57,7 +57,6 @@ func WithDBFunc(
 			for _, user := range users {
 				result = append(result, user)
 			}
-
 			return result, nil
 		}
 		s.getUsersInfo = f
@@ -76,7 +75,6 @@ func WithRpcFunc(
 			for _, user := range users {
 				result = append(result, user)
 			}
-
 			return result, err
 		}
 		s.getUsersInfo = f
@@ -93,7 +91,6 @@ func NewFriendNotificationSender(
 	for _, opt := range opts {
 		opt(f)
 	}
-
 	return f
 }
 
@@ -109,13 +106,22 @@ func (f *FriendNotificationSender) getUsersInfoMap(
 	for _, user := range users {
 		result[user.GetUserID()] = user.(*sdkws.UserInfo)
 	}
-
 	return result, nil
+}
+
+func (f *FriendNotificationSender) getFromToUserNickname(
+	ctx context.Context,
+	fromUserID, toUserID string,
+) (string, string, error) {
+	users, err := f.getUsersInfoMap(ctx, []string{fromUserID, toUserID})
+	if err != nil {
+		return "", "", nil
+	}
+	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
 }
 
 func (f *FriendNotificationSender) UserInfoUpdatedNotification(ctx context.Context, changedUserID string) error {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-
 	return f.Notification(ctx, mcontext.GetOpUserID(ctx), changedUserID, constant.UserInfoUpdatedNotification, &tips)
 }
 
@@ -127,7 +133,6 @@ func (f *FriendNotificationSender) FriendApplicationAddNotification(
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}}
-
 	return f.Notification(ctx, req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &tips)
 }
 
@@ -139,7 +144,6 @@ func (f *FriendNotificationSender) FriendApplicationAgreedNotification(
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}, HandleMsg: req.HandleMsg}
-
 	return f.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &tips)
 }
 
@@ -151,7 +155,6 @@ func (f *FriendNotificationSender) FriendApplicationRefusedNotification(
 		FromUserID: req.FromUserID,
 		ToUserID:   req.ToUserID,
 	}, HandleMsg: req.HandleMsg}
-
 	return f.Notification(ctx, req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &tips)
 }
 
@@ -176,7 +179,6 @@ func (f *FriendNotificationSender) FriendAddedNotification(
 	if err != nil {
 		return err
 	}
-
 	return f.Notification(ctx, fromUserID, toUserID, constant.FriendAddedNotification, &tips)
 }
 
@@ -185,7 +187,6 @@ func (f *FriendNotificationSender) FriendDeletedNotification(ctx context.Context
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.FriendUserID,
 	}}
-
 	return f.Notification(ctx, req.OwnerUserID, req.FriendUserID, constant.FriendDeletedNotification, &tips)
 }
 
@@ -193,7 +194,6 @@ func (f *FriendNotificationSender) FriendRemarkSetNotification(ctx context.Conte
 	tips := sdkws.FriendInfoChangedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = fromUserID
 	tips.FromToUserID.ToUserID = toUserID
-
 	return f.Notification(ctx, fromUserID, toUserID, constant.FriendRemarkSetNotification, &tips)
 }
 
@@ -201,7 +201,6 @@ func (f *FriendNotificationSender) BlackAddedNotification(ctx context.Context, r
 	tips := sdkws.BlackAddedTips{FromToUserID: &sdkws.FromToUserID{}}
 	tips.FromToUserID.FromUserID = req.OwnerUserID
 	tips.FromToUserID.ToUserID = req.BlackUserID
-
 	return f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackAddedNotification, &tips)
 }
 
@@ -210,10 +209,7 @@ func (f *FriendNotificationSender) BlackDeletedNotification(ctx context.Context,
 		FromUserID: req.OwnerUserID,
 		ToUserID:   req.BlackUserID,
 	}}
-	err := f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
-	if err != nil {
-		panic(err)
-	}
+	f.Notification(ctx, req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
 func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
@@ -222,8 +218,5 @@ func (f *FriendNotificationSender) FriendInfoUpdatedNotification(
 	needNotifiedUserID string,
 ) {
 	tips := sdkws.UserInfoUpdatedTips{UserID: changedUserID}
-	err := f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
-	if err != nil {
-		panic(err)
-	}
+	f.Notification(ctx, mcontext.GetOpUserID(ctx), needNotifiedUserID, constant.FriendInfoUpdatedNotification, &tips)
 }

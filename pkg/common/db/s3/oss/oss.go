@@ -45,6 +45,11 @@ const (
 	imageWebp = "webp"
 )
 
+const (
+	videoSnapshotImagePng = "png"
+	videoSnapshotImageJpg = "jpg"
+)
+
 func NewOSS() (s3.Interface, error) {
 	conf := config.Config.Object.Oss
 	if conf.BucketURL == "" {
@@ -61,7 +66,6 @@ func NewOSS() (s3.Interface, error) {
 	if conf.BucketURL[len(conf.BucketURL)-1] != '/' {
 		conf.BucketURL += "/"
 	}
-
 	return &OSS{
 		bucketURL:   conf.BucketURL,
 		bucket:      bucket,
@@ -94,7 +98,6 @@ func (o *OSS) InitiateMultipartUpload(ctx context.Context, name string) (*s3.Ini
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.InitiateMultipartUploadResult{
 		UploadID: result.UploadID,
 		Bucket:   result.Bucket,
@@ -118,7 +121,6 @@ func (o *OSS) CompleteMultipartUpload(ctx context.Context, uploadID string, name
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.CompleteMultipartUploadResult{
 		Location: result.Location,
 		Bucket:   result.Bucket,
@@ -141,7 +143,6 @@ func (o *OSS) PartSize(ctx context.Context, size int64) (int64, error) {
 	if size%maxNumSize != 0 {
 		partSize++
 	}
-
 	return partSize, nil
 }
 
@@ -154,7 +155,7 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 	}
 	for i, partNumber := range partNumbers {
 		rawURL := fmt.Sprintf(`%s%s?partNumber=%d&uploadId=%s`, o.bucketURL, name, partNumber, uploadID)
-		request, err := http.NewRequestWithContext(context.Background(), http.MethodPut, rawURL, nil)
+		request, err := http.NewRequest(http.MethodPut, rawURL, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -174,7 +175,6 @@ func (o *OSS) AuthSign(ctx context.Context, uploadID string, name string, expire
 			Header:     request.Header,
 		}
 	}
-
 	return &result, nil
 }
 
@@ -191,26 +191,25 @@ func (o *OSS) StatObject(ctx context.Context, name string) (*s3.ObjectInfo, erro
 	if res.ETag = strings.ToLower(strings.ReplaceAll(header.Get("ETag"), `"`, ``)); res.ETag == "" {
 		return nil, errors.New("StatObject etag not found")
 	}
-	contentLengthStr := header.Get("Content-Length")
-	if contentLengthStr == "" {
+	if contentLengthStr := header.Get("Content-Length"); contentLengthStr == "" {
 		return nil, errors.New("StatObject content-length not found")
+	} else {
+		res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("StatObject content-length parse error: %w", err)
+		}
+		if res.Size < 0 {
+			return nil, errors.New("StatObject content-length must be greater than 0")
+		}
 	}
-	res.Size, err = strconv.ParseInt(contentLengthStr, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("StatObject content-length parse error: %w", err)
-	}
-	if res.Size < 0 {
-		return nil, errors.New("StatObject content-length must be greater than 0")
-	}
-	lastModified := header.Get("Last-Modified")
-	if lastModified == "" {
+	if lastModified := header.Get("Last-Modified"); lastModified == "" {
 		return nil, errors.New("StatObject last-modified not found")
+	} else {
+		res.LastModified, err = time.Parse(http.TimeFormat, lastModified)
+		if err != nil {
+			return nil, fmt.Errorf("StatObject last-modified parse error: %w", err)
+		}
 	}
-	res.LastModified, err = time.Parse(http.TimeFormat, lastModified)
-	if err != nil {
-		return nil, fmt.Errorf("StatObject last-modified parse error: %w", err)
-	}
-
 	return res, nil
 }
 
@@ -223,7 +222,6 @@ func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 	if err != nil {
 		return nil, err
 	}
-
 	return &s3.CopyObjectInfo{
 		Key:  dst,
 		ETag: strings.ToLower(strings.ReplaceAll(result.ETag, `"`, ``)),
@@ -231,7 +229,6 @@ func (o *OSS) CopyObject(ctx context.Context, src string, dst string) (*s3.CopyO
 }
 
 func (o *OSS) IsNotFound(err error) bool {
-	//nolint:errorlint  //this is exactly what we want,there is no risk for no wrapped errors
 	switch e := err.(type) {
 	case oss.ServiceError:
 		return e.StatusCode == http.StatusNotFound || e.Code == "NoSuchKey"
@@ -274,7 +271,6 @@ func (o *OSS) ListUploadedParts(ctx context.Context, uploadID string, name strin
 			Size:         int64(part.Size),
 		}
 	}
-
 	return res, nil
 }
 
@@ -282,7 +278,39 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 	publicRead := config.Config.Object.Oss.PublicRead
 	var opts []oss.Option
 	if opt != nil {
-		opts = optsForAccessURL(opt, opts, publicRead)
+		if opt.Image != nil {
+			// 文档地址: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
+			var format string
+			switch opt.Image.Format {
+			case
+				imagePng,
+				imageJpg,
+				imageJpeg,
+				imageGif,
+				imageWebp:
+				format = opt.Image.Format
+			default:
+				opt.Image.Format = imageJpg
+			}
+			// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
+			process := "image/resize,m_lfit"
+			if opt.Image.Width > 0 {
+				process += ",w_" + strconv.Itoa(opt.Image.Width)
+			}
+			if opt.Image.Height > 0 {
+				process += ",h_" + strconv.Itoa(opt.Image.Height)
+			}
+			process += ",format," + format
+			opts = append(opts, oss.Process(process))
+		}
+		if !publicRead {
+			if opt.ContentType != "" {
+				opts = append(opts, oss.ResponseContentType(opt.ContentType))
+			}
+			if opt.Filename != "" {
+				opts = append(opts, oss.ResponseContentDisposition(`attachment; filename=`+strconv.Quote(opt.Filename)))
+			}
+		}
 	}
 	if expire <= 0 {
 		expire = time.Hour * 24 * 365 * 99 // 99 years
@@ -297,44 +325,5 @@ func (o *OSS) AccessURL(ctx context.Context, name string, expire time.Duration, 
 		return "", err
 	}
 	params := getURLParams(*o.bucket.Client.Conn, rawParams)
-
 	return getURL(o.um, o.bucket.BucketName, name, params).String(), nil
-}
-
-func optsForAccessURL(opt *s3.AccessURLOption, opts []oss.Option, publicRead bool) []oss.Option {
-	if opt.Image != nil {
-		// 文档地址: https://help.aliyun.com/zh/oss/user-guide/resize-images-4?spm=a2c4g.11186623.0.0.4b3b1e4fWW6yji
-		var format string
-		switch opt.Image.Format {
-		case
-			imagePng,
-			imageJpg,
-			imageJpeg,
-			imageGif,
-			imageWebp:
-			format = opt.Image.Format
-		default:
-			opt.Image.Format = imageJpg
-		}
-		// https://oss-console-img-demo-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/example.jpg?x-oss-process=image/resize,h_100,m_lfit
-		process := "image/resize,m_lfit"
-		if opt.Image.Width > 0 {
-			process += ",w_" + strconv.Itoa(opt.Image.Width)
-		}
-		if opt.Image.Height > 0 {
-			process += ",h_" + strconv.Itoa(opt.Image.Height)
-		}
-		process += ",format," + format
-		opts = append(opts, oss.Process(process))
-	}
-	if !publicRead {
-		if opt.ContentType != "" {
-			opts = append(opts, oss.ResponseContentType(opt.ContentType))
-		}
-		if opt.Filename != "" {
-			opts = append(opts, oss.ResponseContentDisposition(`attachment; filename=`+strconv.Quote(opt.Filename)))
-		}
-	}
-
-	return opts
 }

@@ -33,7 +33,6 @@ func newMultipartUploadID(id multipartUploadID) string {
 	if err != nil {
 		panic(err)
 	}
-
 	return base64.StdEncoding.EncodeToString(data)
 }
 
@@ -46,6 +45,5 @@ func parseMultipartUploadID(id string) (*multipartUploadID, error) {
 	if err := json.Unmarshal(data, &upload); err != nil {
 		return nil, fmt.Errorf("invalid multipart upload id: %w", err)
 	}
-
 	return &upload, nil
 }

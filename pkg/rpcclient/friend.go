@@ -38,7 +38,6 @@ func NewFriend(discov discoveryregistry.SvcDiscoveryRegistry) *Friend {
 		panic(err)
 	}
 	client := friend.NewFriendClient(conn)
-
 	return &Friend{discov: discov, conn: conn, Client: client}
 }
 
@@ -60,7 +59,6 @@ func (f *FriendRpcClient) GetFriendsInfo(
 		return nil, err
 	}
 	resp = r.FriendsInfo[0]
-
 	return
 }
 
@@ -70,7 +68,6 @@ func (f *FriendRpcClient) IsFriend(ctx context.Context, possibleFriendUserID, us
 	if err != nil {
 		return false, err
 	}
-
 	return resp.InUser1Friends, nil
 }
 
@@ -80,7 +77,6 @@ func (f *FriendRpcClient) GetFriendIDs(ctx context.Context, ownerUserID string) 
 	if err != nil {
 		return nil, err
 	}
-
 	return resp.FriendIDs, nil
 }
 
@@ -89,6 +85,5 @@ func (b *FriendRpcClient) IsBlocked(ctx context.Context, possibleBlackUserID, us
 	if err != nil {
 		return false, err
 	}
-
 	return r.InUser2Blacks, nil
 }

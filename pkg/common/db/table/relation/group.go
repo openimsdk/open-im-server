@@ -30,7 +30,7 @@ type GroupModel struct {
 	Introduction           string    `gorm:"column:introduction;size:255"                        json:"introduction"`
 	FaceURL                string    `gorm:"column:face_url;size:255"                            json:"faceURL"`
 	CreateTime             time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
-	Ex                     string    `gorm:"column:ex;size:1024"                                 json:"ex"`
+	Ex                     string    `gorm:"column:ex"                                           json:"ex;size:1024"`
 	Status                 int32     `gorm:"column:status"`
 	CreatorUserID          string    `gorm:"column:creator_user_id;size:64"`
 	GroupType              int32     `gorm:"column:group_type"`

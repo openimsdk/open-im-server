@@ -54,7 +54,6 @@ func (c *ConversationGorm) UpdateByMap(
 	args map[string]interface{},
 ) (rows int64, err error) {
 	result := c.db(ctx).Where("owner_user_id IN (?) and  conversation_id=?", userIDList, conversationID).Updates(args)
-
 	return result.RowsAffected, utils.Wrap(result.Error, "")
 }
 
@@ -80,7 +79,6 @@ func (c *ConversationGorm) Find(
 			Error,
 		"",
 	)
-
 	return conversations, err
 }
 
@@ -89,7 +87,6 @@ func (c *ConversationGorm) Take(
 	userID, conversationID string,
 ) (conversation *relation.ConversationModel, err error) {
 	cc := &relation.ConversationModel{}
-
 	return cc, utils.Wrap(
 		c.db(ctx).Where("conversation_id = ? And owner_user_id = ?", conversationID, userID).Take(cc).Error,
 		"",
@@ -172,7 +169,6 @@ func (c *ConversationGorm) GetUserRecvMsgOpt(
 	ownerUserID, conversationID string,
 ) (opt int, err error) {
 	var conversation relation.ConversationModel
-
 	return int(
 			conversation.RecvMsgOpt,
 		), utils.Wrap(
@@ -223,7 +219,6 @@ func (c *ConversationGorm) GetConversationIDsNeedDestruct(
 
 func (c *ConversationGorm) GetConversationRecvMsgOpt(ctx context.Context, userID string, conversationID string) (int32, error) {
 	var recvMsgOpt int32
-
 	return recvMsgOpt, errs.Wrap(
 		c.db(ctx).
 			Model(&relation.ConversationModel{}).
@@ -235,7 +230,6 @@ func (c *ConversationGorm) GetConversationRecvMsgOpt(ctx context.Context, userID
 
 func (c *ConversationGorm) GetConversationNotReceiveMessageUserIDs(ctx context.Context, conversationID string) ([]string, error) {
 	var userIDs []string
-
 	return userIDs, errs.Wrap(
 		c.db(ctx).
 			Model(&relation.ConversationModel{}).

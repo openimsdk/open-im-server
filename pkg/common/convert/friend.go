@@ -16,7 +16,6 @@ package convert
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/utils"
@@ -26,13 +25,9 @@ import (
 
 func FriendPb2DB(friend *sdkws.FriendInfo) *relation.FriendModel {
 	dbFriend := &relation.FriendModel{}
-	err := utils.CopyStructFields(dbFriend, friend)
-	if err != nil {
-		panic(err)
-	}
+	utils.CopyStructFields(dbFriend, friend)
 	dbFriend.FriendUserID = friend.FriendUser.UserID
 	dbFriend.CreateTime = utils.UnixSecondToTime(friend.CreateTime)
-
 	return dbFriend
 }
 
@@ -42,10 +37,7 @@ func FriendDB2Pb(
 	getUsers func(ctx context.Context, userIDs []string) (map[string]*sdkws.UserInfo, error),
 ) (*sdkws.FriendInfo, error) {
 	pbfriend := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-	err := utils.CopyStructFields(pbfriend, friendDB)
-	if err != nil {
-		panic(err)
-	}
+	utils.CopyStructFields(pbfriend, friendDB)
 	users, err := getUsers(ctx, []string{friendDB.FriendUserID})
 	if err != nil {
 		return nil, err
@@ -55,7 +47,6 @@ func FriendDB2Pb(
 	pbfriend.FriendUser.FaceURL = users[friendDB.FriendUserID].FaceURL
 	pbfriend.FriendUser.Ex = users[friendDB.FriendUserID].Ex
 	pbfriend.CreateTime = friendDB.CreateTime.Unix()
-
 	return pbfriend, nil
 }
 
@@ -67,7 +58,7 @@ func FriendsDB2Pb(
 	if len(friendsDB) == 0 {
 		return nil, nil
 	}
-	userID := make([]string, 0, len(friendsDB))
+	var userID []string
 	for _, friendDB := range friendsDB {
 		userID = append(userID, friendDB.FriendUserID)
 	}
@@ -77,8 +68,7 @@ func FriendsDB2Pb(
 	}
 	for _, friend := range friendsDB {
 		friendPb := &sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-		err2 := utils.CopyStructFields(friendPb, friend)
-		err = fmt.Errorf("%w, %w", err, err2)
+		utils.CopyStructFields(friendPb, friend)
 		friendPb.FriendUser.UserID = users[friend.FriendUserID].UserID
 		friendPb.FriendUser.Nickname = users[friend.FriendUserID].Nickname
 		friendPb.FriendUser.FaceURL = users[friend.FriendUserID].FaceURL
@@ -86,8 +76,7 @@ func FriendsDB2Pb(
 		friendPb.CreateTime = friend.CreateTime.Unix()
 		friendsPb = append(friendsPb, friendPb)
 	}
-
-	return friendsPb, err
+	return friendsPb, nil
 }
 
 func FriendRequestDB2Pb(
@@ -127,6 +116,5 @@ func FriendRequestDB2Pb(
 			Ex:            friendRequest.Ex,
 		})
 	}
-
 	return res, nil
 }

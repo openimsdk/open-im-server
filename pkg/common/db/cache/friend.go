@@ -53,9 +53,9 @@ type FriendCacheRedis struct {
 	rcClient   *rockscache.Client
 }
 
-func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface, options rockscache.Options) FriendCache {
+func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendModelInterface,
+	options rockscache.Options) FriendCache {
 	rcClient := rockscache.NewClient(rdb, options)
-
 	return &FriendCacheRedis{
 		metaCache:  NewMetaCacheRedis(rcClient),
 		friendDB:   friendDB,
@@ -64,12 +64,12 @@ func NewFriendCacheRedis(rdb redis.UniversalClient, friendDB relationtb.FriendMo
 	}
 }
 
-func (c *FriendCacheRedis) NewCache() FriendCache {
+func (f *FriendCacheRedis) NewCache() FriendCache {
 	return &FriendCacheRedis{
-		rcClient:   c.rcClient,
-		metaCache:  NewMetaCacheRedis(c.rcClient, c.metaCache.GetPreDelKeys()...),
-		friendDB:   c.friendDB,
-		expireTime: c.expireTime,
+		rcClient:   f.rcClient,
+		metaCache:  NewMetaCacheRedis(f.rcClient, f.metaCache.GetPreDelKeys()...),
+		friendDB:   f.friendDB,
+		expireTime: f.expireTime,
 	}
 }
 
@@ -128,8 +128,10 @@ func (f *FriendCacheRedis) DelTwoWayFriendIDs(ctx context.Context, ownerUserID s
 	return newFriendCache
 }
 
-func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID, friendUserID string) (friend *relationtb.FriendModel, err error) {
-	return getCache(ctx, f.rcClient, f.getFriendKey(ownerUserID, friendUserID), f.expireTime, func(ctx context.Context) (*relationtb.FriendModel, error) {
+func (f *FriendCacheRedis) GetFriend(ctx context.Context, ownerUserID,
+	friendUserID string) (friend *relationtb.FriendModel, err error) {
+	return getCache(ctx, f.rcClient, f.getFriendKey(ownerUserID,
+		friendUserID), f.expireTime, func(ctx context.Context) (*relationtb.FriendModel, error) {
 		return f.friendDB.Take(ctx, ownerUserID, friendUserID)
 	})
 }

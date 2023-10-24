@@ -336,7 +336,6 @@ func (c *configStruct) RegisterConf2Registry(registry discoveryregistry.SvcDisco
 	if err != nil {
 		return err
 	}
-
 	return registry.RegisterConf2Registry(ConfKey, data)
 }
 
@@ -349,6 +348,5 @@ func (c *configStruct) EncodeConfig() []byte {
 	if err := yaml.NewEncoder(buf).Encode(c); err != nil {
 		panic(err)
 	}
-
 	return buf.Bytes()
 }

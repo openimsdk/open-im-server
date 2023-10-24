@@ -36,7 +36,6 @@ func NewPush(discov discoveryregistry.SvcDiscoveryRegistry) *Push {
 	if err != nil {
 		panic(err)
 	}
-
 	return &Push{
 		discov: discov,
 		conn:   conn,

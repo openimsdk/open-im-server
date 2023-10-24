@@ -90,7 +90,6 @@ func (u *userDatabase) InitOnce(ctx context.Context, users []*relation.UserModel
 	if len(miss) > 0 {
 		_ = u.userDB.Create(ctx, miss)
 	}
-
 	return nil
 }
 
@@ -103,35 +102,30 @@ func (u *userDatabase) FindWithError(ctx context.Context, userIDs []string) (use
 	if len(users) != len(userIDs) {
 		err = errs.ErrRecordNotFound.Wrap("userID not found")
 	}
-
 	return
 }
 
 // Find Get the information of the specified user. If the userID is not found, no error will be returned.
 func (u *userDatabase) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
 	users, err = u.cache.GetUsersInfo(ctx, userIDs)
-
 	return
 }
 
 // Create Insert multiple external guarantees that the userID is not repeated and does not exist in the db.
 func (u *userDatabase) Create(ctx context.Context, users []*relation.UserModel) (err error) {
-	err = u.tx.Transaction(func(tx any) error {
+	if err := u.tx.Transaction(func(tx any) error {
 		err = u.userDB.Create(ctx, users)
 		if err != nil {
 			return err
 		}
-
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
-	userIDs := make([]string, 0, len(users))
+	var userIDs []string
 	for _, user := range users {
 		userIDs = append(userIDs, user.UserID)
 	}
-
 	return u.cache.DelUsersInfo(userIDs...).ExecDel(ctx)
 }
 
@@ -140,7 +134,6 @@ func (u *userDatabase) Update(ctx context.Context, user *relation.UserModel) (er
 	if err := u.userDB.Update(ctx, user); err != nil {
 		return err
 	}
-
 	return u.cache.DelUsersInfo(user.UserID).ExecDel(ctx)
 }
 
@@ -149,7 +142,6 @@ func (u *userDatabase) UpdateByMap(ctx context.Context, userID string, args map[
 	if err := u.userDB.UpdateByMap(ctx, userID, args); err != nil {
 		return err
 	}
-
 	return u.cache.DelUsersInfo(userID).ExecDel(ctx)
 }
 
@@ -170,7 +162,6 @@ func (u *userDatabase) IsExist(ctx context.Context, userIDs []string) (exist boo
 	if len(users) > 0 {
 		return true, nil
 	}
-
 	return false, nil
 }
 
@@ -192,14 +183,12 @@ func (u *userDatabase) CountRangeEverydayTotal(ctx context.Context, start time.T
 // SubscribeUsersStatus Subscribe or unsubscribe a user's presence status.
 func (u *userDatabase) SubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
 	err := u.mongoDB.AddSubscriptionList(ctx, userID, userIDs)
-
 	return err
 }
 
 // UnsubscribeUsersStatus unsubscribe a user's presence status.
 func (u *userDatabase) UnsubscribeUsersStatus(ctx context.Context, userID string, userIDs []string) error {
 	err := u.mongoDB.UnsubscriptionList(ctx, userID, userIDs)
-
 	return err
 }
 
@@ -209,7 +198,6 @@ func (u *userDatabase) GetAllSubscribeList(ctx context.Context, userID string) (
 	if err != nil {
 		return nil, err
 	}
-
 	return list, nil
 }
 
@@ -219,14 +207,12 @@ func (u *userDatabase) GetSubscribedList(ctx context.Context, userID string) ([]
 	if err != nil {
 		return nil, err
 	}
-
 	return list, nil
 }
 
 // GetUserStatus get user status.
 func (u *userDatabase) GetUserStatus(ctx context.Context, userIDs []string) ([]*user.OnlineStatus, error) {
 	onlineStatusList, err := u.cache.GetUserStatus(ctx, userIDs)
-
 	return onlineStatusList, err
 }
 
