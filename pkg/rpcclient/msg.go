@@ -221,12 +221,13 @@ func WithRpcGetUserName() NotificationOptions {
 	}
 }
 
-func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string, contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
+func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, sendID, recvID string,
+	contentType, sesstionType int32, m proto.Message, opts ...NotificationOptions) (err error) {
 	n := sdkws.NotificationElem{Detail: utils.StructToJsonString(m)}
 	content, err := json.Marshal(&n)
 	if err != nil {
-		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID", sendID, "recvID", recvID, "contentType", contentType, "msg", m)
-
+		log.ZError(ctx, "MsgClient Notification json.Marshal failed", err, "sendID",
+			sendID, "recvID", recvID, "contentType", contentType, "msg", m)
 		return err
 	}
 	notificationOpt := &notificationOpt{}
@@ -235,8 +236,8 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	}
 	var req msg.SendMsgReq
 	var msg sdkws.MsgData
+	var userInfo *sdkws.UserInfo
 	if notificationOpt.WithRpcGetUsername && s.getUserInfo != nil {
-		var userInfo *sdkws.UserInfo
 		userInfo, err = s.getUserInfo(ctx, sendID)
 		if err != nil {
 			log.ZWarn(ctx, "getUserInfo failed", err, "sendID", sendID)
@@ -259,7 +260,7 @@ func (s *NotificationSender) NotificationWithSesstionType(ctx context.Context, s
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(sendID)
 	optionsConfig := s.contentTypeConf[contentType]
-	if sesstionType == constant.SuperGroupChatType && contentType == constant.HasReadReceipt {
+	if sendID == recvID && contentType == constant.HasReadReceipt {
 		optionsConfig.ReliabilityLevel = constant.UnreliableNotification
 	}
 	options := config.GetOptionsByNotification(optionsConfig)

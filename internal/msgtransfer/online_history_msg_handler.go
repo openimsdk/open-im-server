@@ -283,20 +283,30 @@ func (och *OnlineHistoryRedisConsumerHandler) handleMsg(
 			return
 		}
 		if isNewConversation {
-			if storageList[0].SessionType == constant.SuperGroupChatType {
-				log.ZInfo(ctx, "group chat first create conversation", "conversationID", conversationID)
+			switch storageList[0].SessionType {
+			case constant.SuperGroupChatType:
+				log.ZInfo(ctx, "group chat first create conversation", "conversationID",
+					conversationID)
 				userIDs, err := och.groupRpcClient.GetGroupMemberIDs(ctx, storageList[0].GroupID)
 				if err != nil {
-					log.ZWarn(ctx, "get group member ids error", err, "conversationID", conversationID)
+					log.ZWarn(ctx, "get group member ids error", err, "conversationID",
+						conversationID)
 				} else {
-					if err := och.conversationRpcClient.GroupChatFirstCreateConversation(ctx, storageList[0].GroupID, userIDs); err != nil {
-						log.ZWarn(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
+					if err := och.conversationRpcClient.GroupChatFirstCreateConversation(ctx,
+						storageList[0].GroupID, userIDs); err != nil {
+						log.ZWarn(ctx, "single chat first create conversation error", err,
+							"conversationID", conversationID)
 					}
 				}
-			} else {
-				if err := och.conversationRpcClient.SingleChatFirstCreateConversation(ctx, storageList[0].RecvID, storageList[0].SendID); err != nil {
-					log.ZWarn(ctx, "single chat first create conversation error", err, "conversationID", conversationID)
+			case constant.SingleChatType, constant.NotificationChatType:
+				if err := och.conversationRpcClient.SingleChatFirstCreateConversation(ctx, storageList[0].RecvID,
+					storageList[0].SendID, conversationID, storageList[0].SessionType); err != nil {
+					log.ZWarn(ctx, "single chat or notification first create conversation error", err,
+						"conversationID", conversationID, "sessionType", storageList[0].SessionType)
 				}
+			default:
+				log.ZWarn(ctx, "unknown session type", nil, "sessionType",
+					storageList[0].SessionType)
 			}
 		}
 

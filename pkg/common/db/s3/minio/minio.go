@@ -430,7 +430,13 @@ func (m *Minio) presignedGetObject(ctx context.Context, name string, expire time
 	return rawURL.String(), nil
 }
 
-func (m *Minio) getImageInfoForAccessURL(ctx context.Context, name string, expire time.Duration, opt *s3.AccessURLOption, reqParams url.Values) (fileInfo *s3.ObjectInfo, objectInfoPath, msg string, err error) {
+func (m *Minio) getImageInfoForAccessURL(
+	ctx context.Context,
+	name string,
+	expire time.Duration,
+	opt *s3.AccessURLOption,
+	reqParams url.Values,
+) (fileInfo *s3.ObjectInfo, objectInfoPath, msg string, err error) {
 	if opt != nil {
 		if opt.ContentType != "" {
 			reqParams.Set("response-content-type", opt.ContentType)

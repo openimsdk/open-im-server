@@ -16,11 +16,12 @@ package msgtransfer
 
 import (
 	"fmt"
-
 	"sync"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 
 	"github.com/OpenIMSDK/tools/mw"
 
@@ -30,7 +31,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )

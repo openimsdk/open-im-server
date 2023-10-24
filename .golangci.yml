@@ -171,7 +171,7 @@ linters-settings:
   #   exclude_godoc_examples: false
   funlen:
     lines: 150
-    statements: 50
+    statements: 80
   gci:
     # put imports beginning with prefix after 3rd-party packages;
     # only support one prefix

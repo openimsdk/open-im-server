@@ -701,7 +701,14 @@ func (db *commonMsgDatabase) DeleteConversationMsgsAndSetMinSeq(ctx context.Cont
 	return db.cache.SetMinSeq(ctx, conversationID, minSeq)
 }
 
-func processMsgDocModel(ctx context.Context, msgDocModel *unrelationtb.MsgDocModel, userID, conversationID string, index int64, destructTime int64, lastMsgDestructTime time.Time) (seqs []int64, over bool) {
+func processMsgDocModel(
+	ctx context.Context,
+	msgDocModel *unrelationtb.MsgDocModel,
+	userID, conversationID string,
+	index int64,
+	destructTime int64,
+	lastMsgDestructTime time.Time,
+) (seqs []int64, over bool) {
 	if len(msgDocModel.Msg) > 0 {
 		i := 0
 		for _, msg := range msgDocModel.Msg {
@@ -823,7 +830,14 @@ func handleFullAndExpiredForDeleteMsgRecursion(ctx context.Context, msgDocModel 
 	delStruct.minSeq = msgDocModel.Msg[len(msgDocModel.Msg)-1].Msg.Seq
 }
 
-func handleNotFullAndExpiredForDeleteMsgRecursion(ctx context.Context, msgDocModel *unrelationtb.MsgDocModel, remainTime, index int64, conversationID string, delStruct *delMsgRecursionStruct, db *commonMsgDatabase) {
+func handleNotFullAndExpiredForDeleteMsgRecursion(
+	ctx context.Context,
+	msgDocModel *unrelationtb.MsgDocModel,
+	remainTime, index int64,
+	conversationID string,
+	delStruct *delMsgRecursionStruct,
+	db *commonMsgDatabase,
+) {
 	var delMsgIndexs []int
 	for i, MsgInfoModel := range msgDocModel.Msg {
 		if MsgInfoModel != nil && MsgInfoModel.Msg != nil {
