@@ -72,6 +72,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 						),
 					)
 					log.ZWarn(ctx, "delete cache failed, please handle keys", err, "keys", m.keys)
+
 					return err
 				}
 				retryTimes++
@@ -80,6 +81,7 @@ func (m *metaCacheRedis) ExecDel(ctx context.Context) error {
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -103,6 +105,7 @@ func GetDefaultOpt() rockscache.Options {
 	opts := rockscache.NewDefaultOptions()
 	opts.StrongConsistency = true
 	opts.RandomExpireAdjustment = 0.2
+
 	return opts
 }
 
@@ -125,6 +128,7 @@ func getCache[T any](
 			return "", utils.Wrap(err, "")
 		}
 		write = true
+
 		return string(bs), nil
 	})
 	if err != nil {
@@ -139,8 +143,10 @@ func getCache[T any](
 	err = json.Unmarshal([]byte(v), &t)
 	if err != nil {
 		log.ZError(ctx, "cache json.Unmarshal failed", err, "key", key, "value", v, "expire", expire)
+
 		return t, utils.Wrap(err, "")
 	}
+
 	return t, nil
 }
 
@@ -169,6 +175,7 @@ func batchGetCache[T any](
 			}
 			values[index] = string(bs)
 		}
+
 		return values, nil
 	})
 	if err != nil {
@@ -185,6 +192,7 @@ func batchGetCache[T any](
 			tArrays = append(tArrays, t)
 		}
 	}
+
 	return tArrays, nil
 }
 
@@ -213,6 +221,7 @@ func batchGetCacheMap[T any](
 			}
 			values[index] = string(bs)
 		}
+
 		return values, nil
 	})
 	if err != nil {
@@ -229,5 +238,6 @@ func batchGetCacheMap[T any](
 			tMap[originKeys[i]] = t
 		}
 	}
+
 	return tMap, nil
 }

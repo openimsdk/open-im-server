@@ -80,6 +80,7 @@ func (g *GroupRequestGorm) Take(
 	userID string,
 ) (groupRequest *relation.GroupRequestModel, err error) {
 	groupRequest = &relation.GroupRequestModel{}
+
 	return groupRequest, utils.Wrap(
 		g.DB.WithContext(ctx).Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error,
 		utils.GetSelfFuncName(),
@@ -114,5 +115,6 @@ func (g *GroupRequestGorm) PageGroup(
 
 func (g *GroupRequestGorm) FindGroupRequests(ctx context.Context, groupID string, userIDs []string) (total int64, groupRequests []*relation.GroupRequestModel, err error) {
 	err = g.DB.WithContext(ctx).Where("group_id = ? and user_id in ?", groupID, userIDs).Find(&groupRequests).Error
+
 	return int64(len(groupRequests)), groupRequests, utils.Wrap(err, utils.GetSelfFuncName())
 }

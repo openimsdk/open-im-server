@@ -162,6 +162,7 @@ func GetDB() *commonMsgDatabase {
 	if err != nil {
 		panic(err)
 	}
+
 	return &commonMsgDatabase{
 		msgDocDatabase: unrelation.NewMsgMongoDriver(mongo.GetDatabase()),
 	}

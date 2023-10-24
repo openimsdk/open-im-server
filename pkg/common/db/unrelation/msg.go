@@ -49,6 +49,7 @@ type MsgMongoDriver struct {
 
 func NewMsgMongoDriver(database *mongo.Database) table.MsgDocModelInterface {
 	collection := database.Collection(table.MsgDocModel{}.TableName())
+
 	return &MsgMongoDriver{MsgCollection: collection}
 }
 
@@ -59,6 +60,7 @@ func (m *MsgMongoDriver) PushMsgsToDoc(ctx context.Context, docID string, msgsTo
 
 func (m *MsgMongoDriver) Create(ctx context.Context, model *table.MsgDocModel) error {
 	_, err := m.MsgCollection.InsertOne(ctx, model)
+
 	return err
 }
 
@@ -81,6 +83,7 @@ func (m *MsgMongoDriver) UpdateMsg(
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
+
 	return res, nil
 }
 
@@ -108,6 +111,7 @@ func (m *MsgMongoDriver) PushUnique(
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
+
 	return res, nil
 }
 
@@ -120,6 +124,7 @@ func (m *MsgMongoDriver) UpdateMsgContent(ctx context.Context, docID string, ind
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
+
 	return nil
 }
 
@@ -143,12 +148,14 @@ func (m *MsgMongoDriver) UpdateMsgStatusByIndexInOneDoc(
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
+
 	return nil
 }
 
 func (m *MsgMongoDriver) FindOneByDocID(ctx context.Context, docID string) (*table.MsgDocModel, error) {
 	doc := &table.MsgDocModel{}
 	err := m.MsgCollection.FindOne(ctx, bson.M{"doc_id": docID}).Decode(doc)
+
 	return doc, err
 }
 
@@ -177,6 +184,7 @@ func (m *MsgMongoDriver) GetMsgDocModelByIndex(
 	if len(msgs) > 0 {
 		return &msgs[0], nil
 	}
+
 	return nil, ErrMsgListNotExist
 }
 
@@ -225,6 +233,7 @@ func (m *MsgMongoDriver) DeleteMsgsInOneDocByIndex(ctx context.Context, docID st
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
+
 	return nil
 }
 
@@ -233,6 +242,7 @@ func (m *MsgMongoDriver) DeleteDocs(ctx context.Context, docIDs []string) error 
 		return nil
 	}
 	_, err := m.MsgCollection.DeleteMany(ctx, bson.M{"doc_id": bson.M{"$in": docIDs}})
+
 	return err
 }
 
@@ -246,6 +256,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 	for _, seq := range seqs {
 		indexs = append(indexs, m.model.GetMsgIndex(seq))
 	}
+	//nolint:govet  //This is already the officially recommended standard practice.
 	pipeline := mongo.Pipeline{
 		{
 			{"$match", bson.D{
@@ -336,6 +347,7 @@ func (m *MsgMongoDriver) GetMsgBySeqIndexIn1Doc(
 		}
 		msgs = append(msgs, msg)
 	}
+
 	return msgs, nil
 }
 
@@ -344,6 +356,7 @@ func (m *MsgMongoDriver) IsExistDocID(ctx context.Context, docID string) (bool, 
 	if err != nil {
 		return false, errs.Wrap(err)
 	}
+
 	return count > 0, nil
 }
 
@@ -372,6 +385,7 @@ func (m *MsgMongoDriver) MarkSingleChatMsgsAsRead(
 		updates = append(updates, updateModel)
 	}
 	_, err := m.MsgCollection.BulkWrite(ctx, updates)
+
 	return err
 }
 
@@ -611,7 +625,39 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 			},
 		)
 	}
-	pipeline := bson.A{
+	pipeline := buildPiplineForRangeUserSendCount(or, start, end, sort, pageNumber, showNumber)
+	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
+	if err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	defer cur.Close(ctx)
+	var result []Result
+	if err = cur.All(ctx, &result); err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	if len(result) == 0 {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	users = make([]*table.UserCount, len(result[0].Users))
+	for i, r := range result[0].Users {
+		users[i] = &table.UserCount{
+			UserID: r.UserID,
+			Count:  r.Count,
+		}
+	}
+	dateCount = make(map[string]int64)
+	for _, r := range result[0].Dates {
+		dateCount[r.Date] = r.Count
+	}
+
+	return result[0].MsgCount, result[0].UserCount, users, dateCount, nil
+}
+
+//nolint:funlen	// it need to be such long
+func buildPiplineForRangeUserSendCount(or bson.A, start time.Time,
+	end time.Time, sort int, pageNumber, showNumber int32,
+) bson.A {
+	return bson.A{
 		bson.M{
 			"$match": bson.M{
 				"$and": bson.A{
@@ -795,30 +841,6 @@ func (m *MsgMongoDriver) RangeUserSendCount(
 			},
 		},
 	}
-	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
-	if err != nil {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	defer cur.Close(ctx)
-	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	if len(result) == 0 {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	users = make([]*table.UserCount, len(result[0].Users))
-	for i, r := range result[0].Users {
-		users[i] = &table.UserCount{
-			UserID: r.UserID,
-			Count:  r.Count,
-		}
-	}
-	dateCount = make(map[string]int64)
-	for _, r := range result[0].Dates {
-		dateCount[r.Date] = r.Count
-	}
-	return result[0].MsgCount, result[0].UserCount, users, dateCount, nil
 }
 
 func (m *MsgMongoDriver) RangeGroupSendCount(
@@ -847,7 +869,39 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 			Count int64  `bson:"count"`
 		} `bson:"dates"`
 	}
-	pipeline := bson.A{
+	pipeline := buildPiplineForRangeGroupSendCount(start, end, sort, pageNumber, showNumber)
+	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
+	if err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	defer cur.Close(ctx)
+	var result []Result
+	if err = cur.All(ctx, &result); err != nil {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	if len(result) == 0 {
+		return 0, 0, nil, nil, errs.Wrap(err)
+	}
+	groups = make([]*table.GroupCount, len(result[0].Groups))
+	for i, r := range result[0].Groups {
+		groups[i] = &table.GroupCount{
+			GroupID: r.GroupID,
+			Count:   r.Count,
+		}
+	}
+	dateCount = make(map[string]int64)
+	for _, r := range result[0].Dates {
+		dateCount[r.Date] = r.Count
+	}
+
+	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
+}
+
+//nolint:funlen  //it need to has such length
+func buildPiplineForRangeGroupSendCount(start time.Time,
+	end time.Time, sort int, pageNumber, showNumber int32,
+) bson.A {
+	return bson.A{
 		bson.M{
 			"$match": bson.M{
 				"$and": bson.A{
@@ -1044,30 +1098,6 @@ func (m *MsgMongoDriver) RangeGroupSendCount(
 			},
 		},
 	}
-	cur, err := m.MsgCollection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
-	if err != nil {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	defer cur.Close(ctx)
-	var result []Result
-	if err := cur.All(ctx, &result); err != nil {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	if len(result) == 0 {
-		return 0, 0, nil, nil, errs.Wrap(err)
-	}
-	groups = make([]*table.GroupCount, len(result[0].Groups))
-	for i, r := range result[0].Groups {
-		groups[i] = &table.GroupCount{
-			GroupID: r.GroupID,
-			Count:   r.Count,
-		}
-	}
-	dateCount = make(map[string]int64)
-	for _, r := range result[0].Dates {
-		dateCount[r.Date] = r.Count
-	}
-	return result[0].MsgCount, result[0].UserCount, groups, dateCount, nil
 }
 
 func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessageReq) (int32, []*table.MsgInfoModel, error) {
@@ -1075,6 +1105,7 @@ func (m *MsgMongoDriver) SearchMessage(ctx context.Context, req *msg.SearchMessa
 	if err != nil {
 		return 0, nil, err
 	}
+
 	return total, msgs, nil
 }
 
@@ -1119,7 +1150,7 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 			},
 		},
 	)
-
+	//nolint:govet  //this is already standard
 	pipe = mongo.Pipeline{
 		{
 			{"$match", bson.D{
@@ -1214,5 +1245,6 @@ func (m *MsgMongoDriver) searchMessage(ctx context.Context, req *msg.SearchMessa
 	} else {
 		msgs = msgs[start:]
 	}
+
 	return n, msgs, nil
 }

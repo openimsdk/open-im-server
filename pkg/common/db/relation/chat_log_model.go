@@ -15,6 +15,8 @@
 package relation
 
 import (
+
+	//nolint:staticcheck  //tofix: SA1019: "github.com/golang/protobuf/jsonpb" is deprecated: Use the "google.golang.org/protobuf/encoding/protojson" package instead.
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/jinzhu/copier"
 	"google.golang.org/protobuf/proto"
@@ -38,7 +40,10 @@ func NewChatLogGorm(db *gorm.DB) relation.ChatLogModelInterface {
 
 func (c *ChatLogGorm) Create(msg *pbmsg.MsgDataToMQ) error {
 	chatLog := new(relation.ChatLogModel)
-	copier.Copy(chatLog, msg.MsgData)
+	err := copier.Copy(chatLog, msg.MsgData)
+	if err != nil {
+		return err
+	}
 	switch msg.MsgData.SessionType {
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		chatLog.RecvID = msg.MsgData.GroupID
@@ -59,5 +64,6 @@ func (c *ChatLogGorm) Create(msg *pbmsg.MsgDataToMQ) error {
 	}
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
+
 	return c.DB.Create(chatLog).Error
 }

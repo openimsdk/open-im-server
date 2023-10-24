@@ -16,10 +16,11 @@ package msgtransfer
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+
+	"sync"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"sync"
 
 	"github.com/OpenIMSDK/tools/mw"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
@@ -63,8 +65,7 @@ func StartTransfer(prometheusPort int) error {
 	/*
 		client, err := openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 			openkeeper.WithFreq(time.Hour), openkeeper.WithRoundRobin(), openkeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/
-	if err != nil {
+				config.Config.Zookeeper.Password), openkeeper.WithTimeout(10), openkeeper.WithLogger(log.NewZkLogger()))*/if err != nil {
 		return err
 	}
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {

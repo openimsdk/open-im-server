@@ -31,6 +31,7 @@ func NewAuth(discov discoveryregistry.SvcDiscoveryRegistry) *Auth {
 		panic(err)
 	}
 	client := auth.NewAuthClient(conn)
+
 	return &Auth{discov: discov, conn: conn, Client: client}
 }
 

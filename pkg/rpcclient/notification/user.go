@@ -52,6 +52,7 @@ func WithUserFunc(
 			for _, user := range users {
 				result = append(result, user)
 			}
+
 			return result, nil
 		}
 		u.getUsersInfo = f
@@ -68,34 +69,37 @@ func NewUserNotificationSender(
 	for _, opt := range opts {
 		opt(f)
 	}
+
 	return f
 }
 
-func (u *UserNotificationSender) getUsersInfoMap(
-	ctx context.Context,
-	userIDs []string,
-) (map[string]*sdkws.UserInfo, error) {
-	users, err := u.getUsersInfo(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
-	result := make(map[string]*sdkws.UserInfo)
-	for _, user := range users {
-		result[user.GetUserID()] = user.(*sdkws.UserInfo)
-	}
-	return result, nil
-}
+// func (u *UserNotificationSender) getUsersInfoMap(
+// 	ctx context.Context,
+// 	userIDs []string,
+// ) (map[string]*sdkws.UserInfo, error) {
+// 	users, err := u.getUsersInfo(ctx, userIDs)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	result := make(map[string]*sdkws.UserInfo)
+// 	for _, user := range users {
+// 		result[user.GetUserID()] = user.(*sdkws.UserInfo)
+// 	}
 
-func (u *UserNotificationSender) getFromToUserNickname(
-	ctx context.Context,
-	fromUserID, toUserID string,
-) (string, string, error) {
-	users, err := u.getUsersInfoMap(ctx, []string{fromUserID, toUserID})
-	if err != nil {
-		return "", "", nil
-	}
-	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
-}
+// 	return result, nil
+// }
+
+// func (u *UserNotificationSender) getFromToUserNickname(
+// 	ctx context.Context,
+// 	fromUserID, toUserID string,
+// ) (string, string, error) {
+// 	users, err := u.getUsersInfoMap(ctx, []string{fromUserID, toUserID})
+// 	if err != nil {
+// 		return "", "", err
+// 	}
+
+// 	return users[fromUserID].Nickname, users[toUserID].Nickname, nil
+// }
 
 func (u *UserNotificationSender) UserStatusChangeNotification(
 	ctx context.Context,

@@ -165,7 +165,6 @@ func (m *msgServer) MarkConversationAsRead(
 			m.conversationAndGetRecvID(conversation, req.UserID), seqs, hasReadSeq); err != nil {
 			return nil, err
 		}
-
 	} else if conversation.ConversationType == constant.SuperGroupChatType {
 		if req.HasReadSeq > hasReadSeq {
 			err = m.MsgDatabase.SetHasReadSeq(ctx, req.UserID, req.ConversationID, req.HasReadSeq)
@@ -178,7 +177,6 @@ func (m *msgServer) MarkConversationAsRead(
 			req.UserID, seqs, hasReadSeq); err != nil {
 			return nil, err
 		}
-
 	}
 
 	return &msg.MarkConversationAsReadResp{}, nil

@@ -46,6 +46,7 @@ func (c *Controller) HashPath(md5 string) string {
 
 func (c *Controller) NowPath() string {
 	now := time.Now()
+
 	return path.Join(
 		fmt.Sprintf("%04d", now.Year()),
 		fmt.Sprintf("%02d", now.Month()),
@@ -58,6 +59,7 @@ func (c *Controller) NowPath() string {
 
 func (c *Controller) UUID() string {
 	id := uuid.New()
+
 	return hex.EncodeToString(id[:])
 }
 
@@ -92,20 +94,24 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 		partNumber++
 	}
 	if maxParts > 0 && partNumber > 0 && partNumber < maxParts {
-		return nil, errors.New(fmt.Sprintf("too many parts: %d", partNumber))
+		return nil, fmt.Errorf("too few parts: %d", partNumber)
 	}
-	if info, err := c.impl.StatObject(ctx, c.HashPath(hash)); err == nil {
+	info, err := c.impl.StatObject(ctx, c.HashPath(hash))
+	if err == nil {
 		return nil, &HashAlreadyExistsError{Object: info}
-	} else if !c.impl.IsNotFound(err) {
+	}
+	if !c.impl.IsNotFound(err) {
 		return nil, err
 	}
+
 	if size <= partSize {
 		// 预签名上传
 		key := path.Join(tempPath, c.NowPath(), fmt.Sprintf("%s_%d_%s.presigned", hash, size, c.UUID()))
-		rawURL, err := c.impl.PresignedPutObject(ctx, key, expire)
-		if err != nil {
-			return nil, err
+		rawURL, err2 := c.impl.PresignedPutObject(ctx, key, expire)
+		if err2 != nil {
+			return nil, err2
 		}
+
 		return &InitiateUploadResult{
 			UploadID: newMultipartUploadID(multipartUploadID{
 				Type: UploadTypePresigned,
@@ -124,38 +130,39 @@ func (c *Controller) InitiateUpload(ctx context.Context, hash string, size int64
 				},
 			},
 		}, nil
-	} else {
-		// 分片上传
-		upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
+	}
+
+	// 分片上传
+	upload, err := c.impl.InitiateMultipartUpload(ctx, c.HashPath(hash))
+	if err != nil {
+		return nil, err
+	}
+	if maxParts < 0 {
+		maxParts = partNumber
+	}
+	var authSign *s3.AuthSignResult
+	if maxParts > 0 {
+		partNumbers := make([]int, partNumber)
+		for i := 0; i < maxParts; i++ {
+			partNumbers[i] = i + 1
+		}
+		authSign, err = c.impl.AuthSign(ctx, upload.UploadID, upload.Key, time.Hour*24, partNumbers)
 		if err != nil {
 			return nil, err
 		}
-		if maxParts < 0 {
-			maxParts = partNumber
-		}
-		var authSign *s3.AuthSignResult
-		if maxParts > 0 {
-			partNumbers := make([]int, partNumber)
-			for i := 0; i < maxParts; i++ {
-				partNumbers[i] = i + 1
-			}
-			authSign, err = c.impl.AuthSign(ctx, upload.UploadID, upload.Key, time.Hour*24, partNumbers)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return &InitiateUploadResult{
-			UploadID: newMultipartUploadID(multipartUploadID{
-				Type: UploadTypeMultipart,
-				ID:   upload.UploadID,
-				Key:  upload.Key,
-				Size: size,
-				Hash: hash,
-			}),
-			PartSize: partSize,
-			Sign:     authSign,
-		}, nil
 	}
+
+	return &InitiateUploadResult{
+		UploadID: newMultipartUploadID(multipartUploadID{
+			Type: UploadTypeMultipart,
+			ID:   upload.UploadID,
+			Key:  upload.Key,
+			Size: size,
+			Hash: hash,
+		}),
+		PartSize: partSize,
+		Sign:     authSign,
+	}, nil
 }
 
 func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHashs []string) (*UploadResult, error) {
@@ -164,8 +171,10 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 	if err != nil {
 		return nil, err
 	}
+	//nolint:gosec 	//tofix G401: Use of weak cryptographic primitive
 	if md5Sum := md5.Sum([]byte(strings.Join(partHashs, partSeparator))); hex.EncodeToString(md5Sum[:]) != upload.Hash {
 		fmt.Println("CompleteUpload sum:", hex.EncodeToString(md5Sum[:]), "upload hash:", upload.Hash)
+
 		return nil, errors.New("md5 mismatching")
 	}
 	if info, err := c.impl.StatObject(ctx, c.HashPath(upload.Hash)); err == nil {
@@ -193,7 +202,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 				ETag:       part,
 			}
 		}
-		// todo: 验证大小
+		// todo: verify size
 		result, err := c.impl.CompleteMultipartUpload(ctx, upload.ID, upload.Key, parts)
 		if err != nil {
 			return nil, err
@@ -208,11 +217,12 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 		if uploadInfo.Size != upload.Size {
 			return nil, errors.New("upload size mismatching")
 		}
+		//nolint:gosec 	//G401: Use of weak cryptographic primitive
 		md5Sum := md5.Sum([]byte(strings.Join([]string{uploadInfo.ETag}, partSeparator)))
 		if md5val := hex.EncodeToString(md5Sum[:]); md5val != upload.Hash {
 			return nil, errs.ErrArgs.Wrap(fmt.Sprintf("md5 mismatching %s != %s", md5val, upload.Hash))
 		}
-		// 防止在这个时候，并发操作，导致文件被覆盖
+		// Prevent concurrent operations at this time to avoid file overwrite
 		copyInfo, err := c.impl.CopyObject(ctx, uploadInfo.Key, upload.Key+"."+c.UUID())
 		if err != nil {
 			return nil, err
@@ -230,6 +240,7 @@ func (c *Controller) CompleteUpload(ctx context.Context, uploadID string, partHa
 	default:
 		return nil, errors.New("invalid upload id type")
 	}
+
 	return &UploadResult{
 		Key:  targetKey,
 		Size: upload.Size,
@@ -261,5 +272,6 @@ func (c *Controller) AccessURL(ctx context.Context, name string, expire time.Dur
 		opt.Filename = ""
 		opt.ContentType = ""
 	}
+
 	return c.impl.AccessURL(ctx, name, expire, opt)
 }
