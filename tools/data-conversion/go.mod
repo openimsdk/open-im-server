@@ -9,7 +9,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/openimsdk/open-im-server/v3 v3.3.2
 	golang.org/x/net v0.17.0
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.31.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.4
