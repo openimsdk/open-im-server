@@ -51,17 +51,12 @@ func Start(
 		return err
 	}
 	defer listener.Close()
-	zkClient, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
-	/*
-		zkClient, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
-			zookeeper.WithFreq(time.Hour), zookeeper.WithUserNameAndPassword(
-				config.Config.Zookeeper.Username,
-				config.Config.Zookeeper.Password,
-			), zookeeper.WithRoundRobin(), zookeeper.WithTimeout(10), zookeeper.WithLogger(log.NewZkLogger()))*/if err != nil {
+	client, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	if err != nil {
 		return utils.Wrap1(err)
 	}
-	// defer zkClient.CloseZK()
-	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	defer client.Close()
+	client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
 		return err
@@ -81,11 +76,11 @@ func Start(
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
-	err = rpcFn(zkClient, srv)
+	err = rpcFn(client, srv)
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	err = zkClient.Register(
+	err = client.Register(
 		rpcRegisterName,
 		registerIP,
 		rpcPort,

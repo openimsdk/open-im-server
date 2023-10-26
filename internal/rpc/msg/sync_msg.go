@@ -62,6 +62,10 @@ func (m *msgServer) PullMessageBySeqs(
 			case sdkws.PullOrder_PullOrderDesc:
 				isEnd = seq.Begin <= minSeq
 			}
+			if len(msgs) == 0 {
+				log.ZWarn(ctx, "not have msgs", nil, "conversationID", seq.ConversationID, "seq", seq)
+				continue
+			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs, IsEnd: isEnd}
 		} else {
 			var seqs []int64
@@ -79,6 +83,10 @@ func (m *msgServer) PullMessageBySeqs(
 				isEnd = maxSeq <= seq.End
 			case sdkws.PullOrder_PullOrderDesc:
 				isEnd = seq.Begin <= minSeq
+			}
+			if len(notificationMsgs) == 0 {
+				log.ZWarn(ctx, "not have notificationMsgs", nil, "conversationID", seq.ConversationID, "seq", seq)
+				continue
 			}
 			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, IsEnd: isEnd}
 		}

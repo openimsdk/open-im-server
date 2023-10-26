@@ -86,3 +86,6 @@ func (cli *K8sDR) GetClientLocalConns() map[string][]*grpc.ClientConn {
 	fmt.Println("should not call this function!!!!!!!!!!!!!!!!!!!!!!!!!")
 	return nil
 }
+func (cli *K8sDR) Close() {
+	return
+}
