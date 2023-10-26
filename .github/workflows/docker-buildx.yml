@@ -104,8 +104,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-api
-            docker.io/openimsdk/openim-api
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-api
+            openim/openim-api
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-api
 
       - name: Build and push Docker image for openim-api
         uses: docker/build-push-action@v5
@@ -125,8 +125,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-cmdutils
-            docker.io/openimsdk/openim-cmdutils
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-cmdutils
+            openim/openim-cmdutils
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-cmdutils
 
       - name: Build and push Docker image for openim-cmdutils
         uses: docker/build-push-action@v5
@@ -146,8 +146,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-crontask
-            docker.io/openimsdk/openim-crontask
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-crontask
+            openim/openim-crontask
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-crontask
 
       - name: Build and push Docker image for openim-crontask
         uses: docker/build-push-action@v5
@@ -167,8 +167,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-msggateway
-            docker.io/openimsdk/openim-msggateway
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-msggateway
+            openim/openim-msggateway
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msggateway
 
       - name: Build and push Docker image for openim-msggateway
         uses: docker/build-push-action@v5
@@ -188,8 +188,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-msgtransfer
-            docker.io/openimsdk/openim-msgtransfer
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-msgtransfer
+            openim/openim-msgtransfer
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msgtransfer
 
       - name: Build and push Docker image for openim-msgtransfer
         uses: docker/build-push-action@v5
@@ -209,8 +209,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-push
-            docker.io/openimsdk/openim-push
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-push
+            openim/openim-push
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-push
 
       - name: Build and push Docker image for openim-push
         uses: docker/build-push-action@v5
@@ -230,8 +230,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-auth
-            docker.io/openimsdk/openim-rpc-auth
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-auth
+            openim/openim-rpc-auth
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-auth
 
       - name: Build and push Docker image for openim-rpc-auth
         uses: docker/build-push-action@v5
@@ -251,8 +251,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-conversation
-            docker.io/openimsdk/openim-rpc-conversation
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-conversation
+            openim/openim-rpc-conversation
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-conversation
 
       - name: Build and push Docker image for openim-rpc-conversation
         uses: docker/build-push-action@v5
@@ -272,8 +272,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-friend
-            docker.io/openimsdk/openim-rpc-friend
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-friend
+            openim/openim-rpc-friend
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-friend
 
       - name: Build and push Docker image for openim-rpc-friend
         uses: docker/build-push-action@v5
@@ -293,8 +293,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-group
-            docker.io/openimsdk/openim-rpc-group
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-group
+            openim/openim-rpc-group
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-group
 
       - name: Build and push Docker image for openim-rpc-group
         uses: docker/build-push-action@v5
@@ -314,8 +314,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-msg
-            docker.io/openimsdk/openim-rpc-msg
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-msg
+            openim/openim-rpc-msg
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-msg
 
       - name: Build and push Docker image for openim-rpc-msg
         uses: docker/build-push-action@v5
@@ -335,8 +335,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-third
-            docker.io/openimsdk/openim-rpc-third
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-third
+            openim/openim-rpc-third
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-third
 
       - name: Build and push Docker image for openim-rpc-third
         uses: docker/build-push-action@v5
@@ -356,8 +356,8 @@ jobs:
         with:
           images: |
             ghcr.io/openimsdk/openim-rpc-user
-            docker.io/openimsdk/openim-rpc-user
-            registry.cn-shanghai.aliyuncs.com/openimsdk/openim-rpc-user
+            openim/openim-rpc-user
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-user
 
       - name: Build and push Docker image for openim-rpc-user
         uses: docker/build-push-action@v5
