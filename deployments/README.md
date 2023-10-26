@@ -112,4 +112,3 @@ $ make image
 ## Installation
 
 Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
-
