@@ -121,8 +121,20 @@ $ make image
 Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
 
 
+**Use Helmfile:**
+
+```bash
+GO111MODULE=on go get github.com/roboll/helmfile@latest
+```
+
+**Install OpenIM:**
+
 ```bash
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
 cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
+```
+
+```bash
+helmfile apply
 ```
