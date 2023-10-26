@@ -81,6 +81,13 @@ $ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:
 > $ sealos reset
 > ```
 
+If you are local, you can also use Kind and Minikube to test, for example, using Kind:
+
+```bash
+$ sGO111MODULE="on" go get sigs.k8s.io/kind@v0.11.1
+$ skind create cluster
+```
+
 ### Installing helm
 
 Helm simplifies the deployment and management of Kubernetes applications to a large extent by offering version control and release management through packaging.
@@ -112,3 +119,10 @@ $ make image
 ## Installation
 
 Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
+
+
+```bash
+../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
+cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
+../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
+```

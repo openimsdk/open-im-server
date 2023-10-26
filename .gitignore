@@ -29,6 +29,7 @@ tmp/
 bin/
 output/
 _output/
+deployments/charts/generated-configs/
 
 ### OpenIM Config ###
 config/config.yaml

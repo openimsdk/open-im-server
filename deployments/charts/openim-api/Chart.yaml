@@ -22,3 +22,18 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
+
+icon: https://raw.githubusercontent.com/openimsdk/open-im-server/main/assets/openim-logo-gradient.svg
+
+maintainers:
+  - name: "OpenIM"
+    url: "https://github.com/openimsdk"
+
+keywords:
+  - openim
+  - im
+  - chat
+
+sources:
+  - "https://github.com/openimsdk/open-im-server"
+  - "https://github.com/openimsdk/helm-charts"

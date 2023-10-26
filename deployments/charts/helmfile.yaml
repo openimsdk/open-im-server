@@ -1,0 +1,92 @@
+repositories:
+  - name: stable
+    url: https://charts.helm.sh/stable
+
+releases:
+  - name: openim-api
+    namespace: default
+    chart: ./openim-api
+    values:
+      - openim-api/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-msggateway
+    namespace: default
+    chart: ./openim-msggateway
+    values:
+      - openim-msggateway/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-msgtransfer
+    namespace: default
+    chart: ./openim-msgtransfer
+    values:
+      - openim-msgtransfer/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-push
+    namespace: default
+    chart: ./openim-push
+    values:
+      - openim-push/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+
+  - name: openim-rpc-auth
+    namespace: default
+    chart: ./openim-rpc-auth
+    values:
+      - openim-rpc-auth/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-conversation
+    namespace: default
+    chart: ./openim-rpc-conversation
+    values:
+      - openim-rpc-conversation/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-friend
+    namespace: default
+    chart: ./openim-rpc-friend
+    values:
+      - openim-rpc-friend/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-group
+    namespace: default
+    chart: ./openim-rpc-group
+    values:
+      - openim-rpc-group/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-msg
+    namespace: default
+    chart: ./openim-rpc-msg
+    values:
+      - openim-rpc-msg/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-third
+    namespace: default
+    chart: ./openim-rpc-third
+    values:
+      - openim-rpc-third/values.yaml
+      - generated-configs/helm-image.yaml
+      - generated-configs/config.yaml
+      - generated-configs/notification.yaml
+  - name: openim-rpc-user
+    namespace: default
+    chart: ./openim-rpc-user
+    values:
+      - openim-rpc-user/values.yaml
+      - generated-configs/helm-image.yaml

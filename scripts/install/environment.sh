@@ -78,6 +78,9 @@ def "IMAGE_REGISTRY" "ghcr.io/openimsdk"
 # def "IMAGE_REGISTRY" "openim"
 # def "IMAGE_REGISTRY" "registry.cn-hangzhou.aliyuncs.com/openimsdk"
 
+# Choose the appropriate image tag, the default is the latest version
+def "SERVER_IMAGE_TAG" "latest"
+
 ###################### OpenIM Docker Network ######################
 # 设置 Docker 网络的网段
 readonly DOCKER_BRIDGE_SUBNET=${DOCKER_BRIDGE_SUBNET:-'172.28.0.0/16'}
