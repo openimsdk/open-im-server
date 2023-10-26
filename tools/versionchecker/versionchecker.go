@@ -100,7 +100,7 @@ func getOpenIMClientVersion() (string, error) {
 }
 
 func main() {
-	red := color.New(color.FgRed).SprintFunc()
+	// red := color.New(color.FgRed).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
 	blue := color.New(color.FgBlue).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
