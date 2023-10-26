@@ -222,7 +222,8 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 				// log.ZError(ctx, "GetRecvMsgNotNotifyUserIDs failed", err, "groupID", groupID)
 				return err
 			}
-			needOfflinePushUserIDs = utils.DifferenceString(notNotificationUserIDs, needOfflinePushUserIDs)
+			// todo => utils.ExceptString(needOfflinePushUserIDs, notNotificationUserIDs)
+			needOfflinePushUserIDs = utils.IntersectString(utils.DifferenceString(notNotificationUserIDs, needOfflinePushUserIDs), needOfflinePushUserIDs)
 		}
 		// Use offline push messaging
 		if len(needOfflinePushUserIDs) > 0 {
