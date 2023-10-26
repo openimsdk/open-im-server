@@ -21,7 +21,7 @@ FROM golang:1.20 AS builder
 ARG GO111MODULE=on
 ARG GOPROXY=https://goproxy.cn,direct
 
-WORKDIR /openim/openim-server
+WORKDIR /openim/openim-server/bin
 
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
@@ -38,8 +38,8 @@ RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARC
 # FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest
 
-WORKDIR /openim/openim-server
+WORKDIR /openim/openim-server/bin
 
-COPY --from=builder /usr/bin/openim-rpc-conversation ./bin/openim-rpc-conversation
+COPY --from=builder /usr/bin/openim-rpc-conversation ./openim-rpc-conversation
 
-ENTRYPOINT ["./bin/openim-rpc-conversation"]
+ENTRYPOINT ["./openim-rpc-conversation"]

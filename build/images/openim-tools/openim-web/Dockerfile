@@ -21,7 +21,7 @@ FROM golang:1.20 AS builder
 ARG GO111MODULE=on
 ARG GOPROXY=https://goproxy.cn,direct
 
-WORKDIR /openim/openim-server
+WORKDIR /openim/openim-server/bin
 
 ENV GO111MODULE=$GO111MODULE
 ENV GOPROXY=$GOPROXY
@@ -42,7 +42,7 @@ RUN make build BINS=openim-web
 
 FROM ghcr.io/openim-sigs/openim-ubuntu-image:latest
 
-WORKDIR /openim/openim-server
+WORKDIR /openim/openim-server/bin
 
 COPY --from=builder /openim/openim-server/_output/bin/tools /openim/openim-server/_output/bin/tools/
 COPY --from=builder /openim/openim-server/dist /openim/openim-server/dist
