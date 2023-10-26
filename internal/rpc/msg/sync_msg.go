@@ -65,6 +65,7 @@ func (m *msgServer) PullMessageBySeqs(
 			if len(msgs) == 0 {
 				log.ZWarn(ctx, "not have msgs", nil, "conversationID", seq.ConversationID, "seq", seq)
 				continue
+
 			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs, IsEnd: isEnd}
 		} else {
