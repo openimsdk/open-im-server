@@ -97,9 +97,9 @@ func (rc *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 
 func (rc *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	logConfig := config.Config.Log
-	
+
 	return log.InitFromConfig(
-		
+
 		cmdOpts.loggerPrefixName,
 		rc.Name,
 		logConfig.RemainLogLevel,
@@ -130,7 +130,10 @@ func (r *RootCmd) AddPortFlag() {
 }
 
 func (r *RootCmd) getPortFlag(cmd *cobra.Command) int {
-	port, _ := cmd.Flags().GetInt(constant.FlagPort)
+	port, err := cmd.Flags().GetInt(constant.FlagPort)
+	if err != nil {
+		fmt.Println("Error getting ws port flag:", err)
+	}
 	if port == 0 {
 		port = r.PortFromConfig(constant.FlagPort)
 	}
