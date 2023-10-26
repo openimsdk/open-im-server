@@ -73,9 +73,9 @@ gen:
 demo:
 	@$(MAKE) go.demo
 
-## versionchecker: Check version of openim. ✨
-.PHONY: versionchecker
-versionchecker:
+## version: Check version of openim. ✨
+.PHONY: version
+version:
 	@$(MAKE) go.versionchecker
 
 ## build: Build binaries by default ✨

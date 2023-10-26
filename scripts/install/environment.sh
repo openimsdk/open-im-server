@@ -118,7 +118,7 @@ GRAFANA_NETWORK_ADDRESS=$(generate_ip)
 # read: https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
 def "OPENIM_INSTALL_DIR" "/opt/openim"
-def "OPENIM_CONFIG_DIR" "/etc/openim"
+def "OPENIM_CONFIG_DIR" "/etc/openim/config"
 def "OPENIM_LOG_DIR" "/var/log/openim"
 def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 

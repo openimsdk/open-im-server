@@ -19,6 +19,9 @@
 # --| target: config/config.yaml
 # -----------------------------------------------------------------
 
+envs:
+  discovery: zookeeper
+
 ###################### Zookeeper ######################
 # Zookeeper configuration
 # It's not recommended to modify the schema
@@ -26,9 +29,6 @@
 # Zookeeper address
 # Zookeeper username
 # Zookeeper password
-envs:
-  discovery: zookeeper
-
 zookeeper:
   schema: openim
   address: [ 172.28.0.1:12181 ]
@@ -135,14 +135,14 @@ api:
 # minio.signEndpoint is minio public network address
 object:
   enable: "minio"
-  apiURL: "http://127.0.0.1:10002"
+  apiURL: "http://14.155.86.214:10002"
   minio:
     bucket: "openim"
     endpoint: "http://172.28.0.1:10005"
     accessKeyID: "root"
     secretAccessKey: "openIM123"
     sessionToken: ''
-    signEndpoint: "http://127.0.0.1:10005"
+    signEndpoint: "http://14.155.86.214:10005"
     publicRead: false
   cos:
     bucketURL: https://temp-1252357374.cos.ap-chengdu.myqcloud.com
@@ -168,7 +168,6 @@ rpcPort:
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
   openImMessagePort: [ 10130 ]
-  openImMessageGatewayPort: [ 10140 ]
   openImGroupPort: [ 10150 ]
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
@@ -199,7 +198,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../../logs/
+  storageLocation: /root/workspaces/openim/Open-IM-Server/logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6
@@ -216,8 +215,8 @@ log:
 # Websocket connection handshake timeout
 longConnSvr:
   openImWsPort: [ 10001 ]
-  openImMessageGatewayPort: [ 10140 ]
   websocketMaxConnNum: 100000
+  openImMessageGatewayPort: [ 10140 ]
   websocketMaxMsgLen: 4096
   websocketTimeout: 10
 

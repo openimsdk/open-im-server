@@ -7,6 +7,7 @@
   - [Tag Management: The Cornerstone of Version Control](#tag-management-the-cornerstone-of-version-control)
   - [Release Management: A Guided Tour](#release-management-a-guided-tour)
   - [Milestones, Branching, and Addressing Major Bugs](#milestones-branching-and-addressing-major-bugs)
+  - [Version Skew Policy](#version-skew-policy)
   - [Applying Principles: A Git Workflow Example](#applying-principles-a-git-workflow-example)
   - [Docker Images Version Management](#docker-images-version-management)
 
@@ -76,6 +77,97 @@ We create a new branch, such as `release-v3.1`, for each significant milestone (
 When dealing with major bugs, we selectively merge the fix into the affected version (e.g., v3.1 or the `release-v3.1` branch), as well as the `main` branch. This dual pronged strategy ensures that users on older versions receive crucial bug fixes, while also keeping the `main` branch updated.
 
 We reinforce our approach to branch management and versioning with stringent testing protocols. Automated tests and code review sessions form vital components of maintaining a robust and reliable codebase.
+
+## Version Skew Policy
+
+This document describes the maximum version skew supported between various openim components. Specific cluster deployment tools may place additional restrictions on version skew.
+
+
+### Supported version skew
+
+In highly-available (HA) clusters, the newest and oldest `openim-api` instances must be within one minor version.
+
+### OpenIM Versioning, Branching, and Tag Strategy
+
+Similar to Kubernetes, OpenIM has a strict versioning, branching, and tag strategy to ensure compatibility among its various services and components. This document outlines the policies, especially focusing on the version skew supported between OpenIM's components. Given that the current version is v3.3, the policy references will be centered around this version.
+
+#### Supported Version Skew
+
+##### openim-api
+
+In highly-available (HA) clusters, the newest and oldest `openim-api` instances must be within one minor version.
+
+Example:
+
++ Newest `openim-api` is at v3.3
++ Other `openim-api` instances are supported at v3.3 and v3.2
+
+##### openim-rpc-* Components
+
+All `openim-rpc-*` components (e.g., `openim-rpc-auth`, `openim-rpc-conversation`, etc.) should adhere to the following rules:
+
+1. They must not be newer than `openim-api`.
+2. They may be up to one minor version older than `openim-api`.
+
+Example:
+
++ `openim-api` is at v3.3
++ All `openim-rpc-*` components are supported at v3.3 and v3.2
+
+Note: If version skew exists between `openim-api` instances in an HA cluster, this narrows the allowed `openim-rpc-*` components versions.
+
+##### Other OpenIM Services
+
+Other OpenIM services such as `openim-cmdutils`, `openim-crontask`, `openim-msggateway`, etc. should adhere to the following rules:
+
+1. These services must not be newer than `openim-api`.
+2. They are expected to match the `openim-api` minor version but may be up to one minor version older (to allow live upgrades).
+
+Example:
+
++ `openim-api` is at v3.3
++ `openim-msggateway`, `openim-cmdutils`, and other services are supported at v3.3 and v3.2
+
+#### Supported Component Upgrade Order
+
+The version skew policy has implications on the order in which components should be upgraded. Below is the recommended order to transition an existing cluster from version v3.2 to v3.3:
+
+##### openim-api
+
+Pre-requisites:
+
+1. In a single-instance cluster, the existing `openim-api` instance is v3.2.
+2. In an HA cluster, all `openim-api` instances are at v3.2 or v3.3.
+3. All `openim-rpc-*` and other OpenIM services communicating with this server are at version v3.2.
+
+Upgrade Procedure:
+
+1. Upgrade `openim-api` to v3.3.
+
+##### openim-rpc-* Components
+
+Pre-requisites:
+
+1. The `openim-api` instances these components communicate with are at v3.3.
+
+Upgrade Procedure:
+
+2. Upgrade all `openim-rpc-*` components to v3.3.
+
+##### Other OpenIM Services
+
+Pre-requisites:
+
+1. The `openim-api` instances these services communicate with are at v3.3.
+
+Upgrade Procedure:
+
+2. Upgrade other OpenIM services such as `openim-msggateway`, `openim-cmdutils`, etc., to v3.3.
+
+#### Conclusion
+
+Just like Kubernetes, it's essential for OpenIM to have a strict versioning and upgrade policy to ensure seamless operation and compatibility among its various services. Adhering to the policies outlined above will help in achieving this goal.
+
 
 ## Applying Principles: A Git Workflow Example
 
