@@ -89,6 +89,10 @@ function openim::install::install_openim()
     ${OPENIM_ROOT}/scripts/install/openim-rpc.sh openim::rpc::install || return 1
     ${OPENIM_ROOT}/scripts/install/openim-api.sh openim::api::install || return 1
 
+    openim::common::sudo "cp -r ${OPENIM_ROOT}/deployments/templates/openim.target /etc/systemd/system/openim.target"
+    openim::common::sudo "systemctl daemon-reload"
+    openim::common::sudo "systemctl restart openim.target"
+    openim::common::sudo "systemctl enable openim.target"
     openim::log::success "openim install success"
 }
 
@@ -103,6 +107,11 @@ function openim::uninstall::uninstall_openim()
     ${OPENIM_ROOT}/scripts/install/openim-rpc.sh openim::rpc::uninstall || return 1
     ${OPENIM_ROOT}/scripts/install/openim-api.sh openim::api::uninstall || return 1
 
+    set +o errexit
+    openim::common::sudo "systemctl stop openim.target"
+    openim::common::sudo "systemctl disable openim.target"
+    openim::common::sudo "rm -f /etc/systemd/system/openim.target"
+    set -o errexit
     openim::log::success "openim uninstall success"
 }
 

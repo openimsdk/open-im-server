@@ -1,6 +1,6 @@
 [Unit]
 Description=${SERVER_NAME} for OpenIM
-Documentation=https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
+Documentation=https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 
 [Service]
 WorkingDirectory=${OPENIM_DATA_DIR}

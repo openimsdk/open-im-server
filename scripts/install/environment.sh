@@ -115,7 +115,7 @@ LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
 
 ###################### openim 配置 ######################
-# read: https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
+# read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
 def "OPENIM_INSTALL_DIR" "/opt/openim"
 def "OPENIM_CONFIG_DIR" "/etc/openim/config"
