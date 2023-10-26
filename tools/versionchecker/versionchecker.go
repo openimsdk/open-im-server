@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/version"
+	//"github.com/openimsdk/open-im-server/v3/pkg/common/version"
 )
 
 func ExecuteCommand(cmdName string, args ...string) (string, error) {
@@ -84,20 +84,20 @@ func getGitVersion() string {
 	return version
 }
 
-// NOTE: You'll need to provide appropriate commands for OpenIM versions.
-func getOpenIMServerVersion() string {
-	// Placeholder
-	openimVersion := version.GetSingleVersion()
-	return "OpenIM Server: " + openimVersion + "\n"
-}
+// // NOTE: You'll need to provide appropriate commands for OpenIM versions.
+// func getOpenIMServerVersion() string {
+// 	// Placeholder
+// 	openimVersion := version.GetSingleVersion()
+// 	return "OpenIM Server: " + openimVersion + "\n"
+// }
 
-func getOpenIMClientVersion() (string, error) {
-	openIMClientVersion, err := version.GetClientVersion()
-	if err != nil {
-		return "", err
-	}
-	return "OpenIM Client: " + openIMClientVersion.ClientVersion + "\n", nil
-}
+// func getOpenIMClientVersion() (string, error) {
+// 	openIMClientVersion, err := version.GetClientVersion()
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return "OpenIM Client: " + openIMClientVersion.ClientVersion + "\n", nil
+// }
 
 func main() {
 	// red := color.New(color.FgRed).SprintFunc()
@@ -117,8 +117,8 @@ func main() {
 	fmt.Println(getDockerComposeVersion())
 	fmt.Println(blue("## Kubernetes Version"))
 	fmt.Println(getKubernetesVersion())
-	fmt.Println(blue("## OpenIM Versions"))
-	fmt.Println(getOpenIMServerVersion())
+	// fmt.Println(blue("## OpenIM Versions"))
+	// fmt.Println(getOpenIMServerVersion())
 	// clientVersion, err := getOpenIMClientVersion()
 	// if err != nil {
 	// 	fmt.Println(red("Error getting OpenIM Client Version: "), err)

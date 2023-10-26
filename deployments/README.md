@@ -130,6 +130,7 @@ GO111MODULE=on go get github.com/roboll/helmfile@latest
 **Install OpenIM:**
 
 ```bash
+mkdir ./charts/generated-configs
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
 cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
