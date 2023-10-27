@@ -61,6 +61,8 @@ func run(port int) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("api start CreateRpcRootNodes: ", config.Config.GetServiceNames())
 	if err := client.CreateRpcRootNodes(config.Config.GetServiceNames()); err != nil {
 		return err
 	}
