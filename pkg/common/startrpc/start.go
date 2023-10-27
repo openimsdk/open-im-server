@@ -68,7 +68,7 @@ func Start(
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	defer zkClient.CloseZK()
+	defer zkClient.Close()
 	zkClient.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	registerIP, err := network.GetRpcRegisterIP(config.Config.Rpc.RegisterIP)
 	if err != nil {
