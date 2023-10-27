@@ -33,7 +33,7 @@ require (
 	gorm.io/gorm v1.25.5
 )
 
-require github.com/google/uuid v1.3.1
+require github.com/google/uuid v1.4.0
 
 require (
 	github.com/IBM/sarama v1.41.3
