@@ -17,7 +17,7 @@
 #
 
 GO := go
-GO_SUPPORTED_VERSIONS ?= 1.18|1.19|1.20|1.21|1.22
+GO_SUPPORTED_VERSIONS ?= 1.19|1.20|1.21|1.22
 
 GO_LDFLAGS += -X $(VERSION_PACKAGE).gitVersion=$(GIT_TAG) \
 	-X $(VERSION_PACKAGE).gitCommit=$(GIT_COMMIT) \
@@ -45,7 +45,7 @@ ifeq ($(origin GOBIN), undefined)
 endif
 
 # COMMANDS is Specify all files under ${ROOT_DIR}/cmd/ and ${ROOT_DIR}/tools/ except those ending in.md
-COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/* ${ROOT_DIR}/cmd/openim-rpc/*))
+COMMANDS ?= $(filter-out %.md, $(wildcard ${ROOT_DIR}/cmd/* ${ROOT_DIR}/tools/* ${ROOT_DIR}/tools/data-conversion/chat/cmd/* ${ROOT_DIR}/tools/data-conversion/openim/cmd/* ${ROOT_DIR}/cmd/openim-rpc/*))
 ifeq (${COMMANDS},)
   $(error Could not determine COMMANDS, set ROOT_DIR or run in source dir)
 endif
@@ -136,6 +136,7 @@ ifneq ($(shell $(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b' && 
 	$(error unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)')
 endif
 
+## go.build.%: Build binaries for a specific platform
 .PHONY: go.build.%
 go.build.%:
 	$(eval COMMAND := $(word 2,$(subst ., ,$*)))
@@ -158,6 +159,14 @@ go.build.%:
 		elif [ -f $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go ]; then \
 			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
 			$(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/$(COMMAND)/$(COMMAND).go; \
+			chmod +x $(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT); \
+		elif [ -f $(ROOT_DIR)/tools/data-conversion/openim/cmd/$(COMMAND)/$(COMMAND).go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/data-conversion/openim/cmd/$(COMMAND)/$(COMMAND).go; \
+			chmod +x $(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT); \
+		elif [ -f $(ROOT_DIR)/tools/data-conversion/chat/cmd/$(COMMAND)/$(COMMAND).go ]; then \
+			CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) $(GO) build $(GO_BUILD_FLAGS) -o \
+			$(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT) $(ROOT_DIR)/tools/data-conversion/chat/cmd/$(COMMAND)/$(COMMAND).go; \
 			chmod +x $(BIN_TOOLS_DIR)/$(OS)/$(ARCH)/$(COMMAND)$(GO_OUT_EXT); \
 		fi \
 	fi

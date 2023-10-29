@@ -60,9 +60,11 @@ func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID 
 	if err != nil {
 		return nil, err
 	}
+
 	g.lock.Lock()
-	defer g.lock.Unlock()
 	hash, ok := g.conversationIDs[userID]
+	g.lock.Unlock()
+
 	if !ok || hash.hash != resp.Hash {
 		conversationIDsResp, err := g.client.Client.GetConversationIDs(ctx, &conversation.GetConversationIDsReq{
 			UserID: userID,
@@ -70,11 +72,16 @@ func (g *ConversationLocalCache) GetConversationIDs(ctx context.Context, userID 
 		if err != nil {
 			return nil, err
 		}
+
+		g.lock.Lock()
+		defer g.lock.Unlock()
 		g.conversationIDs[userID] = Hash{
 			hash: resp.Hash,
 			ids:  conversationIDsResp.ConversationIDs,
 		}
+
 		return conversationIDsResp.ConversationIDs, nil
 	}
+
 	return hash.ids, nil
 }

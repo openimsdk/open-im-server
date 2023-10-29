@@ -30,6 +30,8 @@ openim::util::ensure_docker_daemon_connectivity
 
 DOCKER_COMPOSE_COMMAND=
 # Check if docker-compose command is available
+openim::util::check_docker_and_compose_versions
+
 if command -v docker compose &> /dev/null
 then
     openim::log::info "docker compose command is available"

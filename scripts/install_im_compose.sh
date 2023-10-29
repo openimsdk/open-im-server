@@ -51,17 +51,7 @@ execute_scripts() {
     "${OPENIM_ROOT}"/scripts/env_check.sh
 }
 
-# Start docker compose
-start_docker_compose() {
-    openim::log::info "Checking if docker-compose command is available"
-    if command -v docker-compose &> /dev/null; then
-        docker-compose up -d
-    else
-        docker compose up -d
-    fi
-
-    "${OPENIM_ROOT}"/scripts/docker-check-service.sh
-}
+openim::util::check_docker_and_compose_versions
 
 main() {
     load_env

@@ -12,4 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package startrpc // import "github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
+// Package startrpc start rpc server.
+package startrpc

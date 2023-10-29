@@ -18,8 +18,6 @@ import (
 	"context"
 	"path/filepath"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/redis/go-redis/v9"
@@ -42,20 +40,17 @@ type Fcm struct {
 }
 
 func NewClient(cache cache.MsgModel) *Fcm {
-	opt := option.WithCredentialsFile(filepath.Join(config2.Root, "config", config.Config.Push.Fcm.ServiceAccount))
+	projectRoot := config.GetProjectRoot()
+	credentialsFilePath := filepath.Join(projectRoot, "config", config.Config.Push.Fcm.ServiceAccount)
+	opt := option.WithCredentialsFile(credentialsFilePath)
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil
 	}
-	// auth
-	// fcmClient, err := fcmApp.Auth(context.Background())
-	// if err != nil {
-	// 	return
-	// }
+
 	ctx := context.Background()
 	fcmMsgClient, err := fcmApp.Messaging(ctx)
 	if err != nil {
-		panic(err.Error())
 		return nil
 	}
 	return &Fcm{fcmMsgCli: fcmMsgClient, cache: cache}

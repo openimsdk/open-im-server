@@ -39,7 +39,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
 			continue
 		}
-		writer, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+		writer, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
 			continue

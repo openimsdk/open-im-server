@@ -40,7 +40,7 @@ REPO="Open-IM-Server"
 
 # Version of Go you want to use, make sure it is compatible with your OpenIM-Server requirements.
 # Default is 1.18, if you want to use a different version, replace accordingly.
-GO_VERSION="1.18"
+GO_VERSION="1.20"
 
 # Default HTTP_PORT is 80. If you want to use a different port, uncomment and replace the value.
 # HTTP_PORT=80
@@ -168,7 +168,7 @@ function install_go() {
     command -v go >/dev/null 2>&1
     # Determines if GO_VERSION is defined
     if [ -z "$GO_VERSION" ]; then
-        GO_VERSION="1.18"
+        GO_VERSION="1.20"
     fi
 
     if [[ $? -ne 0 ]]; then
@@ -309,7 +309,7 @@ function cmd_help() {
     color_echo ${BLUE_PREFIX} "-t,  --tag           ${CYAN_PREFIX}specify the tag (default option, set to latest if not specified)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-r,  --release       ${CYAN_PREFIX}specify the release branch (cannot be used with the tag option)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "-gt, --github-token  ${CYAN_PREFIX}set the GITHUB_TOKEN (default: not set)${COLOR_SUFFIX}"
-    color_echo ${BLUE_PREFIX} "-g,  --go-version    ${CYAN_PREFIX}set the Go language version (default: GO_VERSION=\"1.18\")${COLOR_SUFFIX}"
+    color_echo ${BLUE_PREFIX} "-g,  --go-version    ${CYAN_PREFIX}set the Go language version (default: GO_VERSION=\"1.20\")${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "--install-dir        ${CYAN_PREFIX}set the OpenIM installation directory (default: /tmp)${COLOR_SUFFIX}"
     color_echo ${BLUE_PREFIX} "--cpu                ${CYAN_PREFIX}set the number of concurrent processes${COLOR_SUFFIX}"
     echo
@@ -329,7 +329,7 @@ function parseinput() {
     # CHINA=false
     # TAG=latest
     # RELEASE=""
-    # GO_VERSION=1.18
+    # GO_VERSION=1.20
     # INSTALL_DIR=/tmp
     # GITHUB_TOKEN=""
     # CPU=$(nproc)
