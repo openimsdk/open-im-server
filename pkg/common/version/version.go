@@ -16,6 +16,7 @@ func Get() Info {
 		Major:      gitMajor,
 		Minor:      gitMinor,
 		GitVersion: gitVersion,
+		GitTreeState: gitTreeState,
 		GitCommit:  gitCommit,
 		BuildDate:  buildDate,
 		GoVersion:  runtime.Version(),

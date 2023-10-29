@@ -7,6 +7,7 @@ type Info struct {
 	Major      string `json:"major,omitempty"`
 	Minor      string `json:"minor,omitempty"`
 	GitVersion string `json:"gitVersion"`
+	GitTreeState string `json:"gitTreeState,omitempty"`
 	GitCommit  string `json:"gitCommit,omitempty"`
 	BuildDate  string `json:"buildDate"`
 	GoVersion  string `json:"goVersion"`

@@ -121,6 +121,8 @@ $ make image
 Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
 
 
+Using the helm charts repository, you can ignore the following configuration, but if you want to just use the server and scale on top of it, you can go ahead:
+
 **Use Helmfile:**
 
 ```bash
@@ -128,6 +130,18 @@ GO111MODULE=on go get github.com/roboll/helmfile@latest
 ```
 
 ```bash
+export MYSQL_ADDRESS=im-mysql
+export MYSQL_PORT=3306
+export MONGO_ADDRESS=im-mongo
+export MONGO_PORT=27017
+export REDIS_ADDRESS=im-redis-master
+export REDIS_PORT=6379
+export KAFKA_ADDRESS=im-kafka
+export KAFKA_PORT=9092
+export OBJECT_APIURL="https://openim.server.com/api"
+export MINIO_ENDPOINT="http://im-minio:9000"
+export MINIO_SIGN_ENDPOINT="https://openim.server.com/im-minio-api"
+
 mkdir ./charts/generated-configs
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
 cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
