@@ -48,10 +48,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /oepnim/openim-server/config/config.yaml
+            - mountPath: /config/config.yaml
               name: config
               subPath: config.yaml
-            - mountPath: /oepnim/openim-server/config/notification.yaml
+            - mountPath: /config/notification.yaml
               name: config
               subPath: notification.yaml
       volumes:
