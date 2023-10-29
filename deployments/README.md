@@ -127,8 +127,6 @@ Explore our Helm-Charts repository and read through: [Helm-Charts Repository](ht
 GO111MODULE=on go get github.com/roboll/helmfile@latest
 ```
 
-**Install OpenIM:**
-
 ```bash
 mkdir ./charts/generated-configs
 ../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
