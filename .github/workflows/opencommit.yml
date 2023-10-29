@@ -27,7 +27,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Setup Node.js Environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '16'
       - uses: actions/checkout@v4

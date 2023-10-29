@@ -42,7 +42,7 @@ jobs:
           git config user.name 'openimbot'
           git config user.email 'openimsdk@qq.com'
           git checkout -b cicd/patch-${{ github.event.number }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
       - name: Setup Go
         uses: actions/setup-go@v4
       - name: Run go modules tidy
