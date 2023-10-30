@@ -17,20 +17,18 @@ package tools
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
-	"github.com/redis/go-redis/v9"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"math"
-	"math/rand"
-	"time"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"math"
+	"math/rand"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -128,8 +126,7 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 		return
 	}
 	const batchNum = 50
-	seed := time.Now().UnixMilli()
-	log.ZDebug(ctx, "GetAllConversationIDsNumber", "num", num, "seed", seed)
+	log.ZDebug(ctx, "GetAllConversationIDsNumber", "num", num)
 	if num == 0 {
 		return
 	}
@@ -141,9 +138,8 @@ func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 	if num%batchNum != 0 {
 		maxPage++
 	}
-	r := rand.New(rand.NewSource(seed))
 	for i := 0; i < count; i++ {
-		pageNumber := r.Int63() % maxPage
+		pageNumber := rand.Int63() % maxPage
 		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, int32(pageNumber), batchNum)
 		if err != nil {
 			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
