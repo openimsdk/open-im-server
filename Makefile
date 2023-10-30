@@ -93,7 +93,7 @@ start:
 stop:
 	@$(MAKE) go.stop
 
-## restart: Restart openim ✨
+## restart: Restart openim (make init configuration file is initialized) ✨
 .PHONY: restart
 restart: clean stop build init start check
 
