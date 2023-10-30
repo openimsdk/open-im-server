@@ -1,4 +1,4 @@
-FROM golang:1.18.0 as build
+FROM golang:1.19.0 as build
 
 WORKDIR /openim
 COPY . .
@@ -15,5 +15,5 @@ VOLUME ["/openim/logs","/openim/bin"]
 COPY --from=build /openim/bin /openim/bin
 COPY --from=build /openim/config /openim/config
 
-EXPOSE 10002
+EXPOSE 10120
 CMD ["./bin/openim-api","--port", "10120"]
