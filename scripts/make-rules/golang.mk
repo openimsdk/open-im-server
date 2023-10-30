@@ -137,6 +137,7 @@ ifneq ($(shell $(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b' && 
 endif
 
 ## go.build.%: Build binaries for a specific platform
+# CGO_ENABLED=0 https://wiki.musl-libc.org/functional-differences-from-glibc.html
 .PHONY: go.build.%
 go.build.%:
 	$(eval COMMAND := $(word 2,$(subst ., ,$*)))

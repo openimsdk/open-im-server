@@ -92,21 +92,70 @@ function openim::api::start_service() {
 ###################################### Linux Systemd ######################################
 SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
 
-function openim::api::install() {
-    openim::log::info "Installing ${SERVER_NAME} ..."
+# Print the necessary information after installation
+function openim::api::info() {
+cat << EOF
+openim-api listen on: ${OPENIM_API_HOST}:${API_OPENIM_PORT}
+EOF
 }
 
+# install openim-api
+function openim::api::install() {
+    openim::log::info "Installing ${SERVER_NAME} ..."
+
+    pushd "${OPENIM_ROOT}"
+
+    # 1. Build openim-api
+    make build BINS=${SERVER_NAME}
+    openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
+    openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/${SERVER_NAME}/${SERVER_NAME}"
+
+    # 2. Generate and install the openim-api configuration file (config)
+    openim::log::status "${SERVER_NAME} config file: ${OPENIM_CONFIG_DIR}/config.yaml"
+
+    # 3. Create and install the ${SERVER_NAME} systemd unit file
+    echo ${LINUX_PASSWORD} | sudo -S bash -c \
+        "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
+    openim::log::status "${SERVER_NAME} systemd file: ${SYSTEM_FILE_PATH}"
+
+    # 4. Start the openim-api service
+    openim::common::sudo "systemctl daemon-reload"
+    openim::common::sudo "systemctl restart ${SERVER_NAME}"
+    openim::common::sudo "systemctl enable ${SERVER_NAME}"
+    openim::api::status || return 1
+    openim::api::info
+
+    openim::log::info "install ${SERVER_NAME} successfully"
+    popd
+}
+
+# Unload
 function openim::api::uninstall() {
     openim::log::info "Uninstalling ${SERVER_NAME} ..."
 
+    set +o errexit
+    openim::common::sudo "systemctl stop ${SERVER_NAME}"
+    openim::common::sudo "systemctl disable ${SERVER_NAME}"
+    openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
+    openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
+    openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
+    set -o errexit
+    openim::log::info "uninstall ${SERVER_NAME} successfully"
 }
 
+# Status Check
 function openim::api::status() {
     openim::log::info "Checking ${SERVER_NAME} status ..."
+
+    # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
+    systemctl status ${SERVER_NAME}|grep -q 'active' || {
+        openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
+        return 1
+    }
 
     openim::util::check_ports ${OPENIM_API_PORT_LISTARIES[@]}
 }
 
 if [[ "$*" =~ openim::api:: ]];then
-  eval $*
+    eval $*
 fi

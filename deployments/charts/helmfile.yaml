@@ -1,0 +1,20 @@
+{{- define "defaultValues" -}}
+- ./generated-configs/helm-image.yaml
+- ./generated-configs/config.yaml
+- ./generated-configs/notification.yaml
+{{- end -}}
+
+{{- define "defaultRelease" -}}
+namespace: openim
+chart: ./{{ .name }}
+values:
+  - ./{{ .name }}/values.yaml
+  {{- template "defaultValues" . }}
+{{- end -}}
+
+releases:
+{{- $apps := list "openim-api" "openim-msggateway" "openim-msgtransfer" "openim-push" "openim-rpc-auth" "openim-rpc-conversation" "openim-rpc-friend" "openim-rpc-group" "openim-rpc-msg" "openim-rpc-third" "openim-rpc-user" }}
+{{- range $app := $apps }}
+  - name: {{ $app }}
+    {{- template "defaultRelease" dict "name" $app }}
+{{- end }}
