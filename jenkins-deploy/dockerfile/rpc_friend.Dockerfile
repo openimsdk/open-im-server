@@ -16,4 +16,4 @@ COPY --from=build /openim/bin /openim/bin
 COPY --from=build /openim/config /openim/config
 
 EXPOSE 10120
-CMD ["./bin/openim-api","--port", "10120"]
+CMD ["./bin/openim-rpc-friend","--port", "10120"]
