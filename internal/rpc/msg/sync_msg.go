@@ -64,6 +64,7 @@ func (m *msgServer) PullMessageBySeqs(
 			}
 			if len(msgs) == 0 {
 				log.ZWarn(ctx, "not have msgs", nil, "conversationID", seq.ConversationID, "seq", seq)
+
 				continue
 			}
 			resp.Msgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: msgs, IsEnd: isEnd}
@@ -75,6 +76,7 @@ func (m *msgServer) PullMessageBySeqs(
 			minSeq, maxSeq, notificationMsgs, err := m.MsgDatabase.GetMsgBySeqs(ctx, req.UserID, seq.ConversationID, seqs)
 			if err != nil {
 				log.ZWarn(ctx, "GetMsgBySeqs error", err, "conversationID", seq.ConversationID, "seq", seq)
+
 				continue
 			}
 			var isEnd bool
@@ -86,6 +88,7 @@ func (m *msgServer) PullMessageBySeqs(
 			}
 			if len(notificationMsgs) == 0 {
 				log.ZWarn(ctx, "not have notificationMsgs", nil, "conversationID", seq.ConversationID, "seq", seq)
+
 				continue
 			}
 			resp.NotificationMsgs[seq.ConversationID] = &sdkws.PullMsgs{Msgs: notificationMsgs, IsEnd: isEnd}

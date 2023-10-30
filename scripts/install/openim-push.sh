@@ -83,7 +83,7 @@ SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
 # Print the necessary information after installation
 function openim::push::info() {
 cat << EOF
-openim-push listen on: ${OPENIM_PUSH_HOST}
+openim-push listen on: ${OPENIM_PUSH_HOST}:${OPENIM_PUSH_PORT}
 EOF
 }
 
@@ -94,18 +94,15 @@ function openim::push::install()
 
   # 1. Build openim-push
   make build BINS=${SERVER_NAME}
-  openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/bin"
+  openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
+  openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/${SERVER_NAME}/${SERVER_NAME}"
 
-  openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
-
-  # 2. Generate and install the openim-push configuration file (openim-push.yaml)
-  echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "./scripts/genconfig.sh ${ENV_FILE} deployments/templates/${SERVER_NAME}.yaml > ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
-  openim::log::status "${SERVER_NAME} config file: ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
+  # 2. Generate and install the openim-push configuration file (config)
+  openim::log::status "${SERVER_NAME} config file: ${OPENIM_CONFIG_DIR}/config.yaml"
 
   # 3. Create and install the ${SERVER_NAME} systemd unit file
   echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "./scripts/genconfig.sh ${ENV_FILE} deployments/templates/init/${SERVER_NAME}.service > ${SYSTEM_FILE_PATH}"
+    "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
   openim::log::status "${SERVER_NAME} systemd file: ${SYSTEM_FILE_PATH}"
 
   # 4. Start the openim-push service
@@ -125,7 +122,7 @@ function openim::push::uninstall()
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
-  openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
+  openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
   set -o errexit
@@ -142,7 +139,7 @@ function openim::push::status()
   }
 
   # The listening port is hardcode in the configuration file
-  if echo | telnet 127.0.0.1 7071 2>&1|grep refused &>/dev/null;then  # Assuming a different port for push
+  if echo | telnet ${OPENIM_MSGGATEWAY_HOST} ${OPENIM_PUSH_PORT} 2>&1|grep refused &>/dev/null;then  # Assuming a different port for push
     openim::log::error "cannot access health check port, ${SERVER_NAME} maybe not startup"
     return 1
   fi

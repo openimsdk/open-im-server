@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://www.openim.online">
+    <a href="https://openim.io">
         <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
@@ -23,7 +23,7 @@
 <p align="center">
     <a href="./README.md"><b> English </b></a> •
     <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-    <a href="https://www.openim.online/en"><b> Docs </b></a>
+    <a href="https://openim.io/en"><b> Docs </b></a>
 </p>
 
 

@@ -51,15 +51,9 @@
 OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 [[ -z ${COMMON_SOURCED} ]] && source "${OPENIM_ROOT}"/scripts/install/common.sh
 
-source "${OPENIM_ROOT}"/scripts/install/openim-msggateway.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-msgtransfer.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-push.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-rpc.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-crontask.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-api.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-man.sh
-source "${OPENIM_ROOT}"/scripts/install/openim-tools.sh
-source "${OPENIM_ROOT}"/scripts/install/test.sh
+${OPENIM_ROOT}/scripts/install/openim-man.sh
+${OPENIM_ROOT}/scripts/install/openim-tools.sh
+${OPENIM_ROOT}/scripts/install/test.sh
 
 # Detailed help function
 function openim::install::show_help() {
@@ -79,16 +73,26 @@ function openim::install::show_help() {
 
 function openim::install::install_openim()
 {
+    openim::common::sudo "mkdir -p ${OPENIM_DATA_DIR} ${OPENIM_INSTALL_DIR} ${OPENIM_CONFIG_DIR} ${OPENIM_LOG_DIR}"
     openim::log::info "check openim dependency"
+    openim::common::sudo "cp -r ${OPENIM_ROOT}/config/* ${OPENIM_CONFIG_DIR}/"
+
+    echo ${LINUX_PASSWORD} | sudo -S bash -c \
+        "${OPENIM_ROOT}/scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.yaml > ${OPENIM_CONFIG_DIR}/config.yaml"
+
     openim::util::check_ports ${OPENIM_DEPENDENCY_PORT_LISTARIES[@]}
 
-    openim::msggateway::install || return 1
-    openim::msgtransfer::install || return 1
-    openim::push::install || return 1
-    openim::rpc::install || return 1
-    openim::crontask::install || return 1
-    openim::api::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msggateway.sh openim::msggateway::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msgtransfer.sh openim::msgtransfer::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-push.sh openim::push::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-crontask.sh openim::crontask::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-rpc.sh openim::rpc::install || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-api.sh openim::api::install || return 1
 
+    openim::common::sudo "cp -r ${OPENIM_ROOT}/deployments/templates/openim.target /etc/systemd/system/openim.target"
+    openim::common::sudo "systemctl daemon-reload"
+    openim::common::sudo "systemctl restart openim.target"
+    openim::common::sudo "systemctl enable openim.target"
     openim::log::success "openim install success"
 }
 
@@ -96,13 +100,18 @@ function openim::uninstall::uninstall_openim()
 {
     openim::log::info "uninstall openim"
 
-    openim::msggateway::uninstall || return 1
-    openim::msgtransfer::uninstall || return 1
-    openim::push::uninstall || return 1
-    openim::rpc::uninstall || return 1
-    openim::crontask::uninstall || return 1
-    openim::api::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msggateway.sh openim::msggateway::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msgtransfer.sh openim::msgtransfer::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-push.sh openim::push::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-crontask.sh openim::crontask::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-rpc.sh openim::rpc::uninstall || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-api.sh openim::api::uninstall || return 1
 
+    set +o errexit
+    openim::common::sudo "systemctl stop openim.target"
+    openim::common::sudo "systemctl disable openim.target"
+    openim::common::sudo "rm -f /etc/systemd/system/openim.target"
+    set -o errexit
     openim::log::success "openim uninstall success"
 }
 
@@ -110,12 +119,12 @@ function openim::install::status()
 {
     openim::log::info "check openim status"
 
-    openim::msggateway::status || return 1
-    openim::msgtransfer::status || return 1
-    openim::push::status || return 1
-    openim::rpc::status || return 1
-    openim::crontask::status || return 1
-    openim::api::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msggateway.sh openim::msggateway::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-msgtransfer.sh openim::msgtransfer::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-push.sh openim::push::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-crontask.sh openim::crontask::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-rpc.sh openim::rpc::status || return 1
+    ${OPENIM_ROOT}/scripts/install/openim-api.sh openim::api::status || return 1
 
     openim::log::success "openim status success"
 }

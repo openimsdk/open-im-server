@@ -18,15 +18,12 @@ import (
 	"fmt"
 	"time"
 
-	mysqldriver "github.com/go-sql-driver/mysql"
-	"gorm.io/driver/mysql"
-
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
-
+	mysqldriver "github.com/go-sql-driver/mysql"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -35,54 +32,78 @@ const (
 	maxRetry = 100 // number of retries
 )
 
-// newMysqlGormDB Initialize the database connection.
-func newMysqlGormDB() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
-		config.Config.Mysql.Username, config.Config.Mysql.Password, config.Config.Mysql.Address[0], "mysql")
+type option struct {
+	Username      string
+	Password      string
+	Address       []string
+	Database      string
+	LogLevel      int
+	SlowThreshold int
+	MaxLifeTime   int
+	MaxOpenConn   int
+	MaxIdleConn   int
+	Connect       func(dsn string, maxRetry int) (*gorm.DB, error)
+}
 
-	db, err := connectToDatabase(dsn, maxRetry)
-	if err != nil {
-		panic(err.Error() + " Open failed " + dsn)
-	}
-	sqlDB, err := db.DB()
+// newMysqlGormDB Initialize the database connection.
+func newMysqlGormDB(o *option) (*gorm.DB, error) {
+	err := maybeCreateTable(o)
 	if err != nil {
 		return nil, err
 	}
-	defer sqlDB.Close()
-	sql := fmt.Sprintf(
-		"CREATE DATABASE IF NOT EXISTS %s default charset utf8mb4 COLLATE utf8mb4_unicode_ci;",
-		config.Config.Mysql.Database,
-	)
-	err = db.Exec(sql).Error
-	if err != nil {
-		return nil, fmt.Errorf("init db %w", err)
-	}
-	dsn = fmt.Sprintf(
-		"%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
-		config.Config.Mysql.Username,
-		config.Config.Mysql.Password,
-		config.Config.Mysql.Address[0],
-		config.Config.Mysql.Database,
-	)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+		o.Username, o.Password, o.Address[0], o.Database)
 	sqlLogger := log.NewSqlLogger(
-		logger.LogLevel(config.Config.Mysql.LogLevel),
+		logger.LogLevel(o.LogLevel),
 		true,
-		time.Duration(config.Config.Mysql.SlowThreshold)*time.Millisecond,
+		time.Duration(o.SlowThreshold)*time.Millisecond,
 	)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: sqlLogger,
 	})
 	if err != nil {
 		return nil, err
 	}
-	sqlDB, err = db.DB()
+	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, err
 	}
-	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.MaxLifeTime))
-	sqlDB.SetMaxOpenConns(config.Config.Mysql.MaxOpenConn)
-	sqlDB.SetMaxIdleConns(config.Config.Mysql.MaxIdleConn)
+	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(o.MaxLifeTime))
+	sqlDB.SetMaxOpenConns(o.MaxOpenConn)
+	sqlDB.SetMaxIdleConns(o.MaxIdleConn)
 	return db, nil
+}
+
+// maybeCreateTable creates a database if it does not exists.
+func maybeCreateTable(o *option) error {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+		o.Username, o.Password, o.Address[0], "mysql")
+
+	var db *gorm.DB
+	var err error
+	if f := o.Connect; f != nil {
+		db, err = f(dsn, maxRetry)
+	} else {
+		db, err = connectToDatabase(dsn, maxRetry)
+	}
+	if err != nil {
+		panic(err.Error() + " Open failed " + dsn)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return err
+	}
+	defer sqlDB.Close()
+	sql := fmt.Sprintf(
+		"CREATE DATABASE IF NOT EXISTS `%s` default charset utf8mb4 COLLATE utf8mb4_unicode_ci",
+		o.Database,
+	)
+	err = db.Exec(sql).Error
+	if err != nil {
+		return fmt.Errorf("init db %w", err)
+	}
+	return nil
 }
 
 // connectToDatabase Connection retry for mysql.
@@ -106,7 +127,18 @@ func connectToDatabase(dsn string, maxRetry int) (*gorm.DB, error) {
 func NewGormDB() (*gorm.DB, error) {
 	specialerror.AddReplace(gorm.ErrRecordNotFound, errs.ErrRecordNotFound)
 	specialerror.AddErrHandler(replaceDuplicateKey)
-	return newMysqlGormDB()
+
+	return newMysqlGormDB(&option{
+		Username:      config.Config.Mysql.Username,
+		Password:      config.Config.Mysql.Password,
+		Address:       config.Config.Mysql.Address,
+		Database:      config.Config.Mysql.Database,
+		LogLevel:      config.Config.Mysql.LogLevel,
+		SlowThreshold: config.Config.Mysql.SlowThreshold,
+		MaxLifeTime:   config.Config.Mysql.MaxLifeTime,
+		MaxOpenConn:   config.Config.Mysql.MaxOpenConn,
+		MaxIdleConn:   config.Config.Mysql.MaxIdleConn,
+	})
 }
 
 func replaceDuplicateKey(err error) errs.CodeError {

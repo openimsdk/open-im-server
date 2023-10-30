@@ -95,18 +95,18 @@ function openim::msgtransfer::install()
 
   # 1. Build openim-msgtransfer
   make build BINS=${SERVER_NAME}
-  openim::common::sudo "cp ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/bin"
+
+  openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME} ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
+  openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/${SERVER_NAME}/${SERVER_NAME}"
 
   openim::log::status "${SERVER_NAME} binary: ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
 
   # 2. Generate and install the openim-msgtransfer configuration file (openim-msgtransfer.yaml)
-  echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "./scripts/genconfig.sh ${ENV_FILE} deployments/templates/${SERVER_NAME}.yaml > ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
-  openim::log::status "${SERVER_NAME} config file: ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
+  # nono
 
   # 3. Create and install the ${SERVER_NAME} systemd unit file
   echo ${LINUX_PASSWORD} | sudo -S bash -c \
-    "./scripts/genconfig.sh ${ENV_FILE} deployments/templates/init/${SERVER_NAME}.service > ${SYSTEM_FILE_PATH}"
+    "SERVER_NAME=${SERVER_NAME} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATH}"
   openim::log::status "${SERVER_NAME} systemd file: ${SYSTEM_FILE_PATH}"
 
   # 4. Start the openim-msgtransfer service
@@ -127,7 +127,7 @@ function openim::msgtransfer::uninstall()
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
-  openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/bin/${SERVER_NAME}"
+  openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${SERVER_NAME}"
   openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${SERVER_NAME}.yaml"
   openim::common::sudo "rm -f /etc/systemd/system/${SERVER_NAME}.service"
   set -o errexit
@@ -138,14 +138,10 @@ function openim::msgtransfer::uninstall()
 function openim::msgtransfer::status()
 {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
-  systemctl status ${SERVER_NAME}|grep -q 'active' || {
+  if systemctl is-active --quiet "${SERVER_NAME}"; then
+    openim::log::info "${SERVER_NAME} is running successfully."
+  else
     openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
-    return 1
-  }
-
-  # The listening port is hardcode in the configuration file
-  if echo | telnet 127.0.0.1 7070 2>&1|grep refused &>/dev/null;then
-    openim::log::error "cannot access health check port, ${SERVER_NAME} maybe not startup"
     return 1
   fi
 }

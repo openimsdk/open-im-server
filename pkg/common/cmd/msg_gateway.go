@@ -15,10 +15,11 @@
 package cmd
 
 import (
-	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+	"log"
 
-	//"github.com/openimsdk/open-im-server/internal/msggateway".
+	"github.com/openimsdk/open-im-server/v3/internal/msggateway"
+	v3config "github.com/openimsdk/open-im-server/v3/pkg/common/config"
+
 	"github.com/spf13/cobra"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -39,7 +40,10 @@ func (m *MsgGatewayCmd) AddWsPortFlag() {
 }
 
 func (m *MsgGatewayCmd) getWsPortFlag(cmd *cobra.Command) int {
-	port, _ := cmd.Flags().GetInt(constant.FlagWsPort)
+	port, err := cmd.Flags().GetInt(constant.FlagWsPort)
+	if err != nil {
+		log.Println("Error getting ws port flag:", err)
+	}
 	if port == 0 {
 		port = m.PortFromConfig(constant.FlagWsPort)
 	}
@@ -58,9 +62,9 @@ func (m *MsgGatewayCmd) Exec() error {
 }
 func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
 	if portType == constant.FlagWsPort {
-		return config2.Config.LongConnSvr.OpenImWsPort[0]
+		return v3config.Config.LongConnSvr.OpenImWsPort[0]
 	} else if portType == constant.FlagPort {
-		return config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]
+		return v3config.Config.LongConnSvr.OpenImMessageGatewayPort[0]
 	} else if portType == constant.FlagPrometheusPort {
 		return 0
 	} else {

@@ -1,0 +1,89 @@
+#This configuration file is used to override the use of the value.yaml variable.
+#Currently, only the configuration with ingressName as nginx is provided.
+#If it is another gateway such as istio or treafik, please modify the corresponding gateway requirements
+image:
+  repository: ${IMAGE_REGISTRY}/openim-api
+  pullPolicy: Always
+  tag: "${SERVER_IMAGE_TAG}"
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  hosts:
+    - host: openim.server.com # your hostname
+      paths:
+        - path: /api(/|$)(.*)
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: webapitls  #your hostname tls
+      hosts:
+        - openim.server.com
+
+openim-msggateway:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-msggateway
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: openim.server.com # your hostname
+        paths:
+          - path: /msg_gateway(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: webapitls  #your hostname tls
+        hosts:
+          - openim.server.com
+
+openim-msgtransfer:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-msgtransfer
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-push:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-push
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-auth:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-auth
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-conversation:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-conversation
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-friend:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-friend
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-group:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-group
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-msg:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-msg
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-third:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-third
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always
+openim-rpc-user:
+  image:
+    repository: ${IMAGE_REGISTRY}/openim-rpc-user
+    tag: "${SERVER_IMAGE_TAG}"
+    pullPolicy: Always

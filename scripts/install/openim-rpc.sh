@@ -160,26 +160,86 @@ function openim::rpc::start_service() {
 }
 
 ###################################### Linux Systemd ######################################
-SYSTEM_FILE_PATH="/etc/systemd/system/${SERVER_NAME}.service"
+declare -A SYSTEM_FILE_PATHS
+for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+    SYSTEM_FILE_PATHS["$service"]="/etc/systemd/system/${service}.service"
+done
 
-function openim::rpc::install() {
-    openim::log::info "Installing ${SERVER_NAME} ..."
+# Print the necessary information after installation
+function openim::rpc::info() {
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        echo "${service} listen on: ${OPENIM_RPC_PORT_LISTARIES[@]}"
+    done
 }
 
-function openim::rpc::uninstall() {
-    openim::log::info "Uninstalling ${SERVER_NAME} ..."
+# install openim-rpc
+function openim::rpc::install()
+{
+    pushd "${OPENIM_ROOT}"
 
+    # 1. Build openim-rpc
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        make build BINS=${service}
+        openim::common::sudo "cp -r ${OPENIM_OUTPUT_HOSTBIN}/${service} ${OPENIM_INSTALL_DIR}/${service}"
+        openim::log::status "${service} binary: ${OPENIM_INSTALL_DIR}/${service}/${service}"
+    done
+
+    # 2. Generate and install the openim-rpc configuration file (config)
+    openim::log::status "openim-rpc config file: ${OPENIM_CONFIG_DIR}/config.yaml"
+
+    # 3. Create and install the systemd unit files
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        echo ${LINUX_PASSWORD} | sudo -S bash -c \
+            "SERVER_NAME=${service} ./scripts/genconfig.sh ${ENV_FILE} deployments/templates/openim.service > ${SYSTEM_FILE_PATHS[$service]}"
+        openim::log::status "${service} systemd file: ${SYSTEM_FILE_PATHS[$service]}"
+    done
+
+    # 4. Start the openim-rpc services
+    openim::common::sudo "systemctl daemon-reload"
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        openim::common::sudo "systemctl restart ${service}"
+        openim::common::sudo "systemctl enable ${service}"
+    done
+    openim::rpc::status || return 1
+    openim::rpc::info
+
+    openim::log::info "install openim-rpc successfully"
+    popd
 }
 
-function openim::rpc::status() {
-    openim::log::info "Checking ${SERVER_NAME} status ..."
+# Unload
+function openim::rpc::uninstall()
+{
+    set +o errexit
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        openim::common::sudo "systemctl stop ${service}"
+        openim::common::sudo "systemctl disable ${service}"
+        openim::common::sudo "rm -f ${OPENIM_INSTALL_DIR}/${service}"
+        openim::common::sudo "rm -f ${OPENIM_CONFIG_DIR}/${service}.yaml"
+        openim::common::sudo "rm -f ${SYSTEM_FILE_PATHS[$service]}"
+    done
+    set -o errexit
+    openim::log::info "uninstall openim-rpc successfully"
+}
 
-    openim::util::check_ports ${OPENIM_RPC_PORT_TARGETS[@]}
-    # openim::util::check_ports ${OPENIM_RPC_PROM_PORT_TARGETS[@]}
+# Status Check
+function openim::rpc::status()
+{
+    for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
+        # Check the running status of the ${service}. If active (running) is displayed, the ${service} is started successfully.
+        systemctl status ${service}|grep -q 'active' || {
+            openim::log::error "${service} failed to start, maybe not installed properly"
+            return 1
+        }
 
-    openim::util::check_process_names ${SERVER_NAME}
+        # The listening port is hardcoded in the configuration file
+        if echo | telnet ${OPENIM_MSGGATEWAY_HOST} ${OPENIM_RPC_PORT_LISTARIES[@]} 2>&1|grep refused &>/dev/null;then
+            openim::log::error "cannot access health check port, ${service} maybe not startup"
+            return 1
+        fi
+    done
 }
 
 if [[ "$*" =~ openim::rpc:: ]];then
-  eval $*
+    eval $*
 fi
