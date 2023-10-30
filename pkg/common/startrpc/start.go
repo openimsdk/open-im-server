@@ -16,7 +16,12 @@ package startrpc
 
 import (
 	"fmt"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
 	"net"
+	"net/http"
 	"strconv"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
@@ -29,7 +34,6 @@ import (
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
-	"github.com/OpenIMSDK/tools/prome"
 	"github.com/OpenIMSDK/tools/utils"
 )
 
@@ -61,16 +65,19 @@ func Start(
 	if err != nil {
 		return err
 	}
+	var reg *prometheus.Registry
+	var metric *grpcprometheus.ServerMetrics
 	// ctx 中间件
 	if config.Config.Prometheus.Enable {
-		prome.NewGrpcRequestCounter()
-		prome.NewGrpcRequestFailedCounter()
-		prome.NewGrpcRequestSuccessCounter()
-		unaryInterceptor := mw.InterceptChain(grpcprometheus.UnaryServerInterceptor, mw.RpcServerInterceptor)
-		options = append(options, []grpc.ServerOption{
-			grpc.StreamInterceptor(grpcprometheus.StreamServerInterceptor),
-			grpc.UnaryInterceptor(unaryInterceptor),
-		}...)
+		//////////////////////////
+		cusMetrics, err := prom_metrics.GetGrpcCusMetrics(rpcRegisterName)
+		if err != nil {
+			fmt.Println("prom_metrics.GetGrpcCusMetrics error")
+			return err
+		}
+		reg, metric, err = prom_metrics.NewGrpcPromObj(cusMetrics.MetricList())
+		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
+			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
 	} else {
 		options = append(options, mw.GrpcServer())
 	}
@@ -80,6 +87,7 @@ func Start(
 	if err != nil {
 		return utils.Wrap1(err)
 	}
+	metric.InitializeMetrics(srv)
 	err = client.Register(
 		rpcRegisterName,
 		registerIP,
@@ -91,8 +99,10 @@ func Start(
 	}
 	go func() {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
-			if err := prome.StartPrometheusSrv(prometheusPort); err != nil {
-				panic(err.Error())
+			// Create a HTTP server for prometheus.
+			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", 90)}
+			if err := httpServer.ListenAndServe(); err != nil {
+				log.Fatal("Unable to start a http server.")
 			}
 		}
 	}()

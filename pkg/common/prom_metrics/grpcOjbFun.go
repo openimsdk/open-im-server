@@ -26,3 +26,17 @@ func NewGrpcPromObj(cusMetrics []prometheus.Collector) (*prometheus.Registry, *g
 	reg.MustRegister(cusMetrics...)
 	return reg, grpcMetrics, nil
 }
+func GetGrpcCusMetrics(name string) (*GrpcCusMetricsMap, error) {
+	switch name {
+	case "MessageGateway":
+		return G_grpc_msggateway_metrics, nil
+	case "User":
+		return G_grpc_msggateway_metrics, nil
+	case "Msg":
+		return G_grpc_msggateway_metrics, nil
+	case "Conversation":
+		return G_grpc_msggateway_metrics, nil
+	default:
+		return G_grpc_msggateway_metrics, nil
+	}
+}

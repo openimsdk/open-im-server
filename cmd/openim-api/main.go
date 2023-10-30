@@ -17,6 +17,8 @@ package main
 import (
 	"context"
 	"fmt"
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
+	prom_metrics "github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
@@ -81,6 +83,11 @@ func run(port int) error {
 	}
 	log.ZInfo(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
+	//////////////////////////////
+	p := ginProm.NewPrometheus("app", prom_metrics.G_api_metrics.MetricList())
+	p.SetListenAddress(":90")
+	p.Use(router)
+	/////////////////////////////////
 	log.ZInfo(context.Background(), "api init router success")
 	var address string
 	if config.Config.Api.ListenIP != "" {
