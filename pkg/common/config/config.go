@@ -263,6 +263,7 @@ type configStruct struct {
 
 	Prometheus struct {
 		Enable                        bool  `yaml:"enable"`
+		ApiPrometheusPort             []int `yaml:"apiPrometheusPort"`
 		UserPrometheusPort            []int `yaml:"userPrometheusPort"`
 		FriendPrometheusPort          []int `yaml:"friendPrometheusPort"`
 		MessagePrometheusPort         []int `yaml:"messagePrometheusPort"`

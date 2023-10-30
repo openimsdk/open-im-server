@@ -62,7 +62,7 @@ func (m *MsgGatewayCmd) GetPortFromConfig(portType string) int {
 	} else if portType == constant.FlagPort {
 		return config2.Config.LongConnSvr.OpenImMessageGatewayPort[0]
 	} else if portType == constant.FlagPrometheusPort {
-		return 0
+		return config2.Config.Prometheus.MessageGatewayPrometheusPort[0]
 	} else {
 		return 0
 	}

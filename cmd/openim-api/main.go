@@ -44,11 +44,11 @@ func main() {
 	}
 }
 
-func run(port int) error {
+func run(port int, proPort int) error {
 	log.ZInfo(context.Background(), "Openim api port:", "port", port)
 
-	if port == 0 {
-		err := "port is empty"
+	if port == 0 || proPort == 0 {
+		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		log.ZError(context.Background(), err, nil)
 
 		return fmt.Errorf(err)
@@ -85,7 +85,8 @@ func run(port int) error {
 	router := api.NewGinRouter(client, rdb)
 	//////////////////////////////
 	p := ginProm.NewPrometheus("app", prom_metrics.G_api_metrics.MetricList())
-	p.SetListenAddress(":90")
+
+	p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 	p.Use(router)
 	/////////////////////////////////
 	log.ZInfo(context.Background(), "api init router success")

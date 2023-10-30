@@ -384,6 +384,7 @@ callback:
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
   enable: true
+  apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
   messagePrometheusPort: [ 20130 ]

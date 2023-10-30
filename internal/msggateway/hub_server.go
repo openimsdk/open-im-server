@@ -69,9 +69,10 @@ func (s *Server) SetLongConnServer(LongConnServer LongConnServer) {
 	s.LongConnServer = LongConnServer
 }
 
-func NewServer(rpcPort int, longConnServer LongConnServer) *Server {
+func NewServer(rpcPort int, proPort int, longConnServer LongConnServer) *Server {
 	return &Server{
 		rpcPort:        rpcPort,
+		prometheusPort: proPort,
 		LongConnServer: longConnServer,
 		pushTerminal:   []int{constant.IOSPlatformID, constant.AndroidPlatformID},
 	}
