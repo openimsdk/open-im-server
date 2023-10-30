@@ -22,6 +22,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"math"
+	"math/rand"
+	"time"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -102,18 +104,57 @@ func InitMsgTool() (*MsgTool, error) {
 	return msgTool, nil
 }
 
+//func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
+//	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
+//	log.ZInfo(ctx, "============================ start del cron task ============================")
+//	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
+//	if err != nil {
+//		log.ZError(ctx, "GetAllConversationIDs failed", err)
+//		return
+//	}
+//	for _, conversationID := range conversationIDs {
+//		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+//	}
+//	c.ClearConversationsMsg(ctx, conversationIDs)
+//	log.ZInfo(ctx, "============================ start del cron finished ============================")
+//}
+
 func (c *MsgTool) AllConversationClearMsgAndFixSeq() {
 	ctx := mcontext.NewCtx(utils.GetSelfFuncName())
 	log.ZInfo(ctx, "============================ start del cron task ============================")
-	conversationIDs, err := c.conversationDatabase.GetAllConversationIDs(ctx)
+	num, err := c.conversationDatabase.GetAllConversationIDsNumber(ctx)
 	if err != nil {
-		log.ZError(ctx, "GetAllConversationIDs failed", err)
+		log.ZError(ctx, "GetAllConversationIDsNumber failed", err)
 		return
 	}
-	for _, conversationID := range conversationIDs {
-		conversationIDs = append(conversationIDs, utils.GetNotificationConversationIDByConversationID(conversationID))
+	const batchNum = 50
+	seed := time.Now().UnixMilli()
+	log.ZDebug(ctx, "GetAllConversationIDsNumber", "num", num, "seed", seed)
+	if num == 0 {
+		return
 	}
-	c.ClearConversationsMsg(ctx, conversationIDs)
+	count := int(num/batchNum + num/batchNum/2)
+	if count < 1 {
+		count = 1
+	}
+	maxPage := 1 + num/batchNum
+	if num%batchNum != 0 {
+		maxPage++
+	}
+	r := rand.New(rand.NewSource(seed))
+	for i := 0; i < count; i++ {
+		pageNumber := r.Int63() % maxPage
+		conversationIDs, err := c.conversationDatabase.PageConversationIDs(ctx, int32(pageNumber), batchNum)
+		if err != nil {
+			log.ZError(ctx, "PageConversationIDs failed", err, "pageNumber", pageNumber)
+			continue
+		}
+		log.ZDebug(ctx, "PageConversationIDs failed", "pageNumber", pageNumber, "conversationIDsNum", len(conversationIDs), "conversationIDs", conversationIDs)
+		if len(conversationIDs) == 0 {
+			continue
+		}
+		c.ClearConversationsMsg(ctx, conversationIDs)
+	}
 	log.ZInfo(ctx, "============================ start del cron finished ============================")
 }
 

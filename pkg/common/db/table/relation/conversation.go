@@ -63,6 +63,8 @@ type ConversationModelInterface interface {
 	GetUserRecvMsgOpt(ctx context.Context, ownerUserID, conversationID string) (opt int, err error)
 	FindSuperGroupRecvMsgNotNotifyUserIDs(ctx context.Context, groupID string) ([]string, error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
+	GetAllConversationIDsNumber(ctx context.Context) (int64, error)
+	PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) (conversationIDs []string, err error)
 	GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (hashReadSeqs map[string]int64, err error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*ConversationModel, error)

@@ -50,6 +50,8 @@ type ConversationDatabase interface {
 	GetConversationIDs(ctx context.Context, userID string) ([]string, error)
 	GetUserConversationIDsHash(ctx context.Context, ownerUserID string) (hash uint64, err error)
 	GetAllConversationIDs(ctx context.Context) ([]string, error)
+	GetAllConversationIDsNumber(ctx context.Context) (int64, error)
+	PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) (conversationIDs []string, err error)
 	//GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error)
 	GetConversationsByConversationID(ctx context.Context, conversationIDs []string) ([]*relationtb.ConversationModel, error)
 	GetConversationIDsNeedDestruct(ctx context.Context) ([]*relationtb.ConversationModel, error)
@@ -293,6 +295,14 @@ func (c *conversationDatabase) GetUserConversationIDsHash(ctx context.Context, o
 
 func (c *conversationDatabase) GetAllConversationIDs(ctx context.Context) ([]string, error) {
 	return c.conversationDB.GetAllConversationIDs(ctx)
+}
+
+func (c *conversationDatabase) GetAllConversationIDsNumber(ctx context.Context) (int64, error) {
+	return c.conversationDB.GetAllConversationIDsNumber(ctx)
+}
+
+func (c *conversationDatabase) PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) ([]string, error) {
+	return c.conversationDB.PageConversationIDs(ctx, pageNumber, showNumber)
 }
 
 //func (c *conversationDatabase) GetUserAllHasReadSeqs(ctx context.Context, ownerUserID string) (map[string]int64, error) {
