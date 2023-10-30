@@ -30,17 +30,15 @@ type MessageInterceptorFunc func(ctx context.Context, req *msg.SendMsgReq) (*sdk
 func MessageHasReadEnabled(_ context.Context, req *msg.SendMsgReq) (*sdkws.MsgData, error) {
 	switch {
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SingleChatType:
-		if config.Config.SingleMessageHasReadReceiptEnable {
-			return req.MsgData, nil
-		} else {
+		if !config.Config.SingleMessageHasReadReceiptEnable {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
+		return req.MsgData, nil
 	case req.MsgData.ContentType == constant.HasReadReceipt && req.MsgData.SessionType == constant.SuperGroupChatType:
-		if config.Config.GroupMessageHasReadReceiptEnable {
-			return req.MsgData, nil
-		} else {
+		if !config.Config.GroupMessageHasReadReceiptEnable {
 			return nil, errs.ErrMessageHasReadDisable.Wrap()
 		}
+		return req.MsgData, nil
 	}
 	return req.MsgData, nil
 }
