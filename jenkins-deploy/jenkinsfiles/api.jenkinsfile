@@ -40,7 +40,7 @@ pipeline {
             name: "RELEASE_PROJECTS",
             type: "PT_RADIO",
             multiSelectDelimiter: " ",
-            value: """api,msg_gateway,msg_transfer,push,rpc_conversation,rpc_group,rpc_msg,rpc_user,rpc_third,rpc_friend""",
+            value: """api,msg_gateway,msg_transfer,push,rpc_conversation,rpc_group,rpc_msg,rpc_user,rpc_third,rpc_friend,rpc_auth""",
             defaultValue: "",
             description: "please choice projects to deploy"
         )
