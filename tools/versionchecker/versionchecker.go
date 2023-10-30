@@ -20,9 +20,12 @@ import (
 	"os/exec"
 	"runtime"
 	"time"
+
+	"github.com/fatih/color"
+	//"github.com/openimsdk/open-im-server/v3/pkg/common/version"
 )
 
-func executeCommand(cmdName string, args ...string) (string, error) {
+func ExecuteCommand(cmdName string, args ...string) (string, error) {
 	cmd := exec.Command(cmdName, args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -31,19 +34,15 @@ func executeCommand(cmdName string, args ...string) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("Error executing %s: %v", cmdName, err)
+		return "", fmt.Errorf("error executing %s: %v, stderr: %s", cmdName, err, stderr.String())
 	}
 	return out.String(), nil
 }
 
 func printTime() string {
 	currentTime := time.Now()
-
-	// 使用 Format 函数以优雅的方式格式化日期和时间
-	// 2006-01-02 15:04:05 是 Go 中的标准时间格式
 	formattedTime := currentTime.Format("2006-01-02 15:04:05")
-
-	return fmt.Sprintf("Current Date & Time:", formattedTime)
+	return fmt.Sprintf("Current Date & Time: %s", formattedTime)
 }
 
 func getGoVersion() string {
@@ -54,7 +53,7 @@ func getGoVersion() string {
 }
 
 func getDockerVersion() string {
-	version, err := executeCommand("docker", "--version")
+	version, err := ExecuteCommand("docker", "--version")
 	if err != nil {
 		return "Docker is not installed. Please install it to get the version."
 	}
@@ -62,7 +61,7 @@ func getDockerVersion() string {
 }
 
 func getDockerComposeVersion() string {
-	version, err := executeCommand("docker-compose", "--version")
+	version, err := ExecuteCommand("docker-compose", "--version")
 	if err != nil {
 		return "Docker Compose is not installed. Please install it to get the version."
 	}
@@ -70,7 +69,7 @@ func getDockerComposeVersion() string {
 }
 
 func getKubernetesVersion() string {
-	version, err := executeCommand("kubectl", "version", "--client", "--short")
+	version, err := ExecuteCommand("kubectl", "version", "--client", "--short")
 	if err != nil {
 		return "Kubernetes is not installed. Please install it to get the version."
 	}
@@ -78,38 +77,52 @@ func getKubernetesVersion() string {
 }
 
 func getGitVersion() string {
-	version, err := executeCommand("git", "branch", "--show-current")
+	version, err := ExecuteCommand("git", "branch", "--show-current")
 	if err != nil {
 		return "Git is not installed. Please install it to get the version."
 	}
 	return version
 }
 
-// NOTE: You'll need to provide appropriate commands for OpenIM versions.
-func getOpenIMServerVersion() string {
-	// Placeholder
-	return "OpenIM Server: v3.2"
-}
+// // NOTE: You'll need to provide appropriate commands for OpenIM versions.
+// func getOpenIMServerVersion() string {
+// 	// Placeholder
+// 	openimVersion := version.GetSingleVersion()
+// 	return "OpenIM Server: " + openimVersion + "\n"
+// }
 
-func getOpenIMClientVersion() string {
-	// Placeholder
-	return "OpenIM Client: v3.2"
-}
+// func getOpenIMClientVersion() (string, error) {
+// 	openIMClientVersion, err := version.GetClientVersion()
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return "OpenIM Client: " + openIMClientVersion.ClientVersion + "\n", nil
+// }
 
 func main() {
-	fmt.Println(printTime())
-	fmt.Println("# Diagnostic Tool Result\n")
-	fmt.Println("## Go Version")
+	// red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+
+	fmt.Println(green(printTime()))
+	fmt.Println(yellow("# Diagnostic Tool Result\n"))
+	fmt.Println(blue("## Go Version"))
 	fmt.Println(getGoVersion())
-	fmt.Println("## Branch Type")
+	fmt.Println(blue("## Branch Type"))
 	fmt.Println(getGitVersion())
-	fmt.Println("## Docker Version")
+	fmt.Println(blue("## Docker Version"))
 	fmt.Println(getDockerVersion())
-	fmt.Println("## Docker Compose Version")
+	fmt.Println(blue("## Docker Compose Version"))
 	fmt.Println(getDockerComposeVersion())
-	fmt.Println("## Kubernetes Version")
+	fmt.Println(blue("## Kubernetes Version"))
 	fmt.Println(getKubernetesVersion())
-	fmt.Println("## OpenIM Versions")
-	fmt.Println(getOpenIMServerVersion())
-	fmt.Println(getOpenIMClientVersion())
+	// fmt.Println(blue("## OpenIM Versions"))
+	// fmt.Println(getOpenIMServerVersion())
+	// clientVersion, err := getOpenIMClientVersion()
+	// if err != nil {
+	// 	fmt.Println(red("Error getting OpenIM Client Version: "), err)
+	// } else {
+	// 	fmt.Println(clientVersion)
+	// }
 }

@@ -1,52 +1,48 @@
-# OpenIM 应用容器化部署指南
+# OpenIM Application Containerization Deployment Guide
 
-OpenIM 支持很多种集群化部署方式，包括但不限于 helm, sealos, kubeam, kubesphere, kubeflow, kuboard, kubespray, k3s, k3d, k3c, k3sup, k3v, k3x
+OpenIM supports a variety of cluster deployment methods, including but not limited to `helm`, `sealos`, `kustomize`
 
-**目前还在开发这个模块，预计 v3.2.0 之前会有一个集群方案。**
+Various contributors, as well as previous official releases, have provided some referenceable solutions:
 
-目前各个贡献者，以及之前的官方有出过一些可以参考的方案：
++ [k8s-jenkins Repository](https://github.com/OpenIMSDK/k8s-jenkins)
++ [open-im-server-k8s-deploy Repository](https://github.com/openimsdk/open-im-server-k8s-deploy)
++ [openim-charts Repository](https://github.com/OpenIMSDK/openim-charts)
++ [deploy-openim Repository](https://github.com/showurl/deploy-openim)
 
-- https://github.com/OpenIMSDK/k8s-jenkins
-- https://github.com/openimsdk/open-im-server-k8s-deploy
-- https://github.com/OpenIMSDK/openim-charts
-- https://github.com/showurl/deploy-openim
-
-
-### 依赖检查
+### Dependency Check
 
 ```bash
 Kubernetes: >= 1.16.0-0
 Helm: >= 3.0
 ```
 
+### Minimum Configuration
 
-### 最低配置
+The recommended minimum configuration for a production environment is as follows:
 
-建议生产环境的最低配置如下：
-
-```bash
+```yaml
 CPU: 4
 Memory: 8G
 Disk: 100G
 ```
 
-## 生成配置文件
+## Configuration File Generation
 
-我们将自动文件全部自动化处理了，所以生成配置文件对于 openim 来说是可选的，但是如果你想要自定义配置，可以参考下面的步骤：
+We have automated all the files, making the generation of configuration files optional for OpenIM. However, if you desire custom configurations, you can follow the steps below:
 
 ```bash
 $ make init
-# 或者是使用脚本:
+# Alternatively, use script:
 # ./scripts/init-config.sh
 ```
-此时会帮你在 `deployments/openim/config` 目录下生成配置文件，你可以根据自己的需求进行修改。
 
+At this point, configuration files will be generated under `deployments/openim/config`, which you can modify as per your requirements.
 
-## 集群搭建
+## Cluster Setup
 
-如果你已经有了一个 `kubernetes` 集群，或者是你希望自己从头开始搭建一个 `kubernetes` 那么你可以直接跳过这一步。
+If you already have a `kubernetes` cluster, or if you wish to build a `kubernetes` cluster from scratch, you can skip this step.
 
-为了快速开始，我使用 [sealos](https://github.com/labring/sealos) 来快速搭建集群，sealos 底层也是对 kubeadm 的封装:
+For a quick start, I used [sealos](https://github.com/labring/sealos) to rapidly set up the cluster, with sealos also being a wrapper for kubeadm at its core:
 
 ```bash
 $ SEALOS_VERSION=`curl -s https://api.github.com/repos/labring/sealos/releases/latest | grep -oE '"tag_name": "[^"]+"' | head -n1 | cut -d'"' -f4` && \
@@ -54,21 +50,20 @@ $ SEALOS_VERSION=`curl -s https://api.github.com/repos/labring/sealos/releases/l
   sh -s ${SEALOS_VERSION} labring/sealos
 ```
 
-**支持的版本：**
+**Supported Versions:**
 
 + docker: `labring/kubernetes-docker`:(v1.24.0~v1.27.0)
 + containerd: `labring/kubernetes`:(v1.24.0~v1.27.0)
 
+#### Cluster Installation:
 
-#### 安装集群：
+Cluster details are as follows:
 
-集群的信息如下：
-
-| 机器名   | IP地址          | 系统信息                                                                                                    |
-|---------|-----------------|------------------------------------------------------------------------------------------------------------|
-| master01| 10.0.0.9   | Linux VM-0-9-ubuntu 5.15.0-76-generic #83-Ubuntu SMP Thu Jun 15 19:16:32 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux |
-| node01  | 10.0.0.4   | Linux VM-0-9-ubuntu 5.15.0-76-generic #83-Ubuntu SMP Thu Jun 15 19:16:32 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux |
-| node02  | 10.0.0.10  | Linux VM-0-9-ubuntu 5.15.0-76-generic #83-Ubuntu SMP Thu Jun 15 19:16:32 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux |
+| Hostname | IP Address | System Info                                                  |
+| -------- | ---------- | ------------------------------------------------------------ |
+| master01 | 10.0.0.9   | `Linux VM-0-9-ubuntu 5.15.0-76-generic #83-Ubuntu SMP Thu Jun 15 19:16:32 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux` |
+| node01   | 10.0.0.4   | Similar to master01                                          |
+| node02   | 10.0.0.10  | Similar to master01                                          |
 
 ```bash
 $ export CLUSTER_USERNAME=ubuntu
@@ -80,40 +75,79 @@ $ sudo sealos run labring/kubernetes:v1.25.0 labring/helm:v3.8.2 labring/calico:
     -p "$CLUSTER_PASSWORD"
 ```
 
-> **Node**
-> 卸载的方式：使用 `kubeadm` 卸载并不会清除 `etcd` 和 `cni` 相关，所以需要手动清除，或者使用 `sealos` 卸载。
+> **Node** Uninstallation method: using `kubeadm` for uninstallation does not remove `etcd` and `cni` related configurations. Manual clearance or using `sealos` for uninstallation is needed.
+>
 > ```bash
-> sealos reset
+> $ sealos reset
 > ```
 
-### 安装 helm
+If you are local, you can also use Kind and Minikube to test, for example, using Kind:
 
-helm通过打包的方式，支持发布的版本管理和控制，很大程度上简化了Kubernetes应用的部署和管理。
+```bash
+$ sGO111MODULE="on" go get sigs.k8s.io/kind@v0.11.1
+$ skind create cluster
+```
 
+### Installing helm
 
-**使用脚本：**
+Helm simplifies the deployment and management of Kubernetes applications to a large extent by offering version control and release management through packaging.
+
+**Using Script:**
 
 ```bash
 $ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 ```
 
-**添加仓库：**
+**Adding Repository:**
 
 ```bash
 $ helm repo add brigade https://openimsdk.github.io/openim-charts
 ```
 
-### OpenIM 的镜像策略
+### OpenIM Image Strategy
 
-自动化提供的 aliyun, ghcr, docker hub: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
+Automated offerings include aliyun, ghcr, docker hub: [Image Documentation](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
 
-**本地化测试构建方法：**
+**Local Test Build Method:**
 
 ```bash
 $ make image
 ```
 
+> This command assists in quickly building the required images locally. For a detailed build strategy, refer to the [Build Documentation](https://github.com/openimsdk/open-im-server/blob/main/build/README.md).
 
-### 容器化安装
+## Installation
 
-具体安装步骤如下：
+Explore our Helm-Charts repository and read through: [Helm-Charts Repository](https://github.com/openimsdk/helm-charts)
+
+
+Using the helm charts repository, you can ignore the following configuration, but if you want to just use the server and scale on top of it, you can go ahead:
+
+**Use Helmfile:**
+
+```bash
+GO111MODULE=on go get github.com/roboll/helmfile@latest
+```
+
+```bash
+export MYSQL_ADDRESS=im-mysql
+export MYSQL_PORT=3306
+export MONGO_ADDRESS=im-mongo
+export MONGO_PORT=27017
+export REDIS_ADDRESS=im-redis-master
+export REDIS_PORT=6379
+export KAFKA_ADDRESS=im-kafka
+export KAFKA_PORT=9092
+export OBJECT_APIURL="https://openim.server.com/api"
+export MINIO_ENDPOINT="http://im-minio:9000"
+export MINIO_SIGN_ENDPOINT="https://openim.server.com/im-minio-api"
+
+mkdir ./charts/generated-configs
+../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/openim.yaml > ./charts/generated-configs/config.yaml
+cp ../config/notification.yaml ./charts/generated-configs/notification.yaml
+../scripts/genconfig.sh ../scripts/install/environment.sh ./templates/helm-image.yaml > ./charts/generated-configs/helm-image.yaml
+```
+
+```bash
+helmfile apply
+```

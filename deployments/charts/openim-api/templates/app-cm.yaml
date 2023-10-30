@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openim-cm
+data:
+  config.yaml: |+
+    {{- with .Values.config }}
+        {{- toYaml . | nindent 4 }}
+    {{- end }}
+  notification.yaml: |+
+    {{- with .Values.notification }}
+        {{- toYaml . | nindent 4 }}
+    {{- end }}

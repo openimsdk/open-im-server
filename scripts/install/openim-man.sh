@@ -48,7 +48,7 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 function openim::man::info() {
 cat <<- EOF
 Usage:
-  man openim-server  # Display the man page for openim-server
+  man openim-server to see openim-server help # Display the man page for openim-server
 EOF
 }
 

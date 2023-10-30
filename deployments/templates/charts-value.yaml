@@ -1,0 +1,96 @@
+#This configuration file is used to override the use of the value.yaml variable.
+#Currently, only the configuration with ingressName as nginx is provided.
+#If it is another gateway such as istio or treafik, please modify the corresponding gateway requirements
+
+global:
+  commonRepository: ghcr.io/openimsdk
+  commonTag: "latest"
+  pullPolicy: Always
+
+openim-api:
+  image:
+    repository: ghcr.io/openimsdk/openim-api
+    pullPolicy: Always
+    tag: "latest"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: openim.server.com # your hostname
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: webapitls  #your hostname tls
+        hosts:
+          - openim.server.com
+
+openim-msggateway:
+  image:
+    repository: ghcr.io/openimsdk/openim-msggateway
+    tag: "latest"
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - host: openim.server.com # your hostname
+        paths:
+          - path: /msg_gateway(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: webapitls  #your hostname tls
+        hosts:
+          - openim.server.com
+
+openim-msgtransfer:
+  image:
+    repository: ghcr.io/openimsdk/openim-msgtransfer
+    tag: "latest"
+    pullPolicy: Always
+openim-push:
+  image:
+    repository: ghcr.io/openimsdk/openim-push
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-auth:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-auth
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-conversation:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-conversation
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-friend:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-friend
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-group:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-group
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-msg:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-msg
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-third:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-third
+    tag: "latest"
+    pullPolicy: Always
+openim-rpc-user:
+  image:
+    repository: ghcr.io/openimsdk/openim-rpc-user
+    tag: "latest"
+    pullPolicy: Always
