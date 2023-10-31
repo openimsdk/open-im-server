@@ -45,7 +45,7 @@ func main() {
 }
 
 func run(port int, proPort int) error {
-	log.ZInfo(context.Background(), "Openim api port:", "port", port)
+	log.ZInfo(context.Background(), "Openim api port:", "port", port, "proPort", proPort)
 
 	if port == 0 || proPort == 0 {
 		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)

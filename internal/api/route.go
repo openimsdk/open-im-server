@@ -39,7 +39,6 @@ import (
 	"github.com/OpenIMSDK/tools/mw"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -63,13 +62,14 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc)
-	if config.Config.Prometheus.Enable {
-		prome.NewApiRequestCounter()
-		prome.NewApiRequestFailedCounter()
-		prome.NewApiRequestSuccessCounter()
-		r.Use(prome.PrometheusMiddleware)
-		r.GET("/metrics", prome.PrometheusHandler())
-	}
+	/*
+		if config.Config.Prometheus.Enable {
+			prome.NewApiRequestCounter()
+			prome.NewApiRequestFailedCounter()
+			prome.NewApiRequestSuccessCounter()
+			r.Use(prome.PrometheusMiddleware)
+			r.GET("/metrics", prome.PrometheusHandler())
+		}*/
 	ParseToken := GinParseToken(rdb)
 	userRouterGroup := r.Group("/user")
 	{
