@@ -16,6 +16,7 @@ package msg
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
@@ -59,9 +60,8 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	ctx context.Context,
 	req *pbmsg.SendMsgReq,
 ) (resp *pbmsg.SendMsgResp, err error) {
-	promepkg.Inc(promepkg.WorkSuperGroupChatMsgRecvSuccessCounter)
 	if err = m.messageVerification(ctx, req); err != nil {
-		promepkg.Inc(promepkg.WorkSuperGroupChatMsgProcessFailedCounter)
+		prom_metrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
 	}
 	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
@@ -80,7 +80,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
 		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
-	promepkg.Inc(promepkg.WorkSuperGroupChatMsgProcessSuccessCounter)
+	prom_metrics.GroupChatMsgProcessSuccessCounter.Inc()
 	resp = &pbmsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
 	resp.ServerMsgID = req.MsgData.ServerMsgID
@@ -147,7 +147,6 @@ func (m *msgServer) sendMsgNotification(
 }
 
 func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, err error) {
-	promepkg.Inc(promepkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.messageVerification(ctx, req); err != nil {
 		return nil, err
 	}
@@ -166,7 +165,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		}
 	}
 	if !isSend {
-		promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
+		prom_metrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
@@ -176,7 +175,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			return nil, err
 		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-			promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
+			prom_metrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
 		err = callbackAfterSendSingleMsg(ctx, req)
@@ -188,7 +187,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			ClientMsgID: req.MsgData.ClientMsgID,
 			SendTime:    req.MsgData.SendTime,
 		}
-		promepkg.Inc(promepkg.SingleChatMsgProcessSuccessCounter)
+		prom_metrics.SingleChatMsgProcessSuccessCounter.Inc()
 		return resp, nil
 	}
 }

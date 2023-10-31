@@ -15,10 +15,17 @@
 package msgtransfer
 
 import (
+	"errors"
 	"fmt"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"net/http"
 	"sync"
 
 	"github.com/OpenIMSDK/tools/mw"
@@ -108,6 +115,9 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	fmt.Println("start msg transfer", "prometheusPort:", prometheusPort)
+	if prometheusPort <= 0 {
+		return errors.New("prometheusPort not correct")
+	}
 	if config.Config.ChatPersistenceMysql {
 		// go m.persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(m.persistentCH)
 	} else {
@@ -116,10 +126,19 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 	go m.historyCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyCH)
 	go m.historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(m.historyMongoCH)
 	// go m.modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(m.modifyCH)
-	err := prome.StartPrometheusSrv(prometheusPort)
+	/*err := prome.StartPrometheusSrv(prometheusPort)
 	if err != nil {
 		return err
-	}
+	}*/
+	////////////////////////////
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(
+		collectors.NewGoCollector(),
+	)
+	reg.MustRegister(prom_metrics.GetGrpcCusMetrics("Transfer")...)
+	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+	////////////////////////////////////////
 	wg.Wait()
 	return nil
 }

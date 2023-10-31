@@ -84,7 +84,7 @@ func run(port int, proPort int) error {
 	log.ZInfo(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
 	//////////////////////////////
-	p := ginProm.NewPrometheus("app", prom_metrics.G_api_metrics.MetricList())
+	p := ginProm.NewPrometheus("app", prom_metrics.GetGinCusMetrics("Api"))
 
 	p.SetListenAddress(fmt.Sprintf(":%d", proPort))
 	p.Use(router)

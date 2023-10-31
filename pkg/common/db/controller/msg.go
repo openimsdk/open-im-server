@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -355,10 +356,9 @@ func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversa
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
 	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
-		prome.Inc(prome.SeqGetFailedCounter)
+		log.ZError(ctx, "db.cache.GetMaxSeq", err)
 		return 0, false, err
 	}
-	prome.Inc(prome.SeqGetSuccessCounter)
 	lenList := len(msgs)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
 		return 0, false, errors.New("too large")
@@ -378,23 +378,20 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
-		prome.Add(prome.MsgInsertRedisFailedCounter, failedNum)
+		prom_metrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
-		prome.Inc(prome.MsgInsertRedisSuccessCounter)
+		prom_metrics.MsgInsertRedisSuccessCounter.Inc()
 	}
 	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
-		prome.Inc(prome.SeqSetFailedCounter)
-	} else {
-		prome.Inc(prome.SeqSetSuccessCounter)
+		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
+		prom_metrics.SeqSetFailedCounter.Inc()
 	}
 	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
-		prome.Inc(prome.SeqSetFailedCounter)
-	} else {
-		prome.Inc(prome.SeqSetSuccessCounter)
+		prom_metrics.SeqSetFailedCounter.Inc()
 	}
 	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }

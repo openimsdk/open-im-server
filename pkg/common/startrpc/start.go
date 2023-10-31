@@ -70,12 +70,8 @@ func Start(
 	// ctx 中间件
 	if config.Config.Prometheus.Enable {
 		//////////////////////////
-		cusMetrics, err := prom_metrics.GetGrpcCusMetrics(rpcRegisterName)
-		if err != nil {
-			fmt.Println("prom_metrics.GetGrpcCusMetrics error")
-			return err
-		}
-		reg, metric, err = prom_metrics.NewGrpcPromObj(cusMetrics.MetricList())
+		cusMetrics := prom_metrics.GetGrpcCusMetrics(rpcRegisterName)
+		reg, metric, err = prom_metrics.NewGrpcPromObj(cusMetrics)
 		options = append(options, mw.GrpcServer(), grpc.StreamInterceptor(metric.StreamServerInterceptor()),
 			grpc.UnaryInterceptor(metric.UnaryServerInterceptor()))
 	} else {

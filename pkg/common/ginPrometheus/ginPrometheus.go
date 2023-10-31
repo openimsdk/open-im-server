@@ -16,18 +16,6 @@ import (
 
 var defaultMetricPath = "/metrics"
 
-type CusMetrics struct {
-	MetricsMap map[string]*Metric
-}
-
-func (m *CusMetrics) MetricList() []*Metric {
-	var ret []*Metric
-	for _, v := range m.MetricsMap {
-		ret = append(ret, v)
-	}
-	return ret
-}
-
 // counter, counter_vec, gauge, gauge_vec,
 // histogram, histogram_vec, summary, summary_vec
 var reqCnt = &Metric{

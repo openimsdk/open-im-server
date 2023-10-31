@@ -17,6 +17,7 @@ package msggateway
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"net/http"
 	"strconv"
 	"sync"
@@ -222,6 +223,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		log.ZDebug(client.ctx, "user not exist", "userID", client.UserID, "platformID", client.PlatformID)
 		atomic.AddInt64(&ws.onlineUserNum, 1)
 		atomic.AddInt64(&ws.onlineUserConnNum, 1)
+		prom_metrics.OnlineUserGauge.Add(1)
 	} else {
 		i := &kickHandler{
 			clientOK:   clientOK,
@@ -350,6 +352,7 @@ func (ws *WsServer) unregisterClient(client *Client) {
 	defer ws.clientPool.Put(client)
 	isDeleteUser := ws.clients.delete(client.UserID, client.ctx.GetRemoteAddr())
 	if isDeleteUser {
+		prom_metrics.OnlineUserGauge.Dec()
 		atomic.AddInt64(&ws.onlineUserNum, -1)
 	}
 	atomic.AddInt64(&ws.onlineUserConnNum, -1)
