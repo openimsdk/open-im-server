@@ -85,10 +85,12 @@ type configStruct struct {
 	} `yaml:"redis"`
 
 	Kafka struct {
-		Username string   `yaml:"username"`
-		Password string   `yaml:"password"`
-		Addr     []string `yaml:"addr"`
-		TLS      *struct {
+		Username     string   `yaml:"username"`
+		Password     string   `yaml:"password"`
+		ProducerAck  string   `yaml:"producerAck"`
+		CompressType string   `yaml:"compressType"`
+		Addr         []string `yaml:"addr"`
+		TLS          *struct {
 			CACrt              string `yaml:"caCrt"`
 			ClientCrt          string `yaml:"clientCrt"`
 			ClientKey          string `yaml:"clientKey"`
