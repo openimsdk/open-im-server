@@ -29,8 +29,6 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/OpenIMSDK/tools/utils"
-
-	promepkg "github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 )
 
 func (m *msgServer) SendMsg(ctx context.Context, req *pbmsg.SendMsgReq) (resp *pbmsg.SendMsgResp, error error) {
@@ -133,9 +131,7 @@ func (m *msgServer) sendMsgNotification(
 	ctx context.Context,
 	req *pbmsg.SendMsgReq,
 ) (resp *pbmsg.SendMsgResp, err error) {
-	promepkg.Inc(promepkg.SingleChatMsgRecvSuccessCounter)
 	if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-		promepkg.Inc(promepkg.SingleChatMsgProcessFailedCounter)
 		return nil, err
 	}
 	resp = &pbmsg.SendMsgResp{

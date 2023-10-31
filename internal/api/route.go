@@ -62,14 +62,6 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 
 	u := NewUserApi(*userRpc)
 	m := NewMessageApi(messageRpc, userRpc)
-	/*
-		if config.Config.Prometheus.Enable {
-			prome.NewApiRequestCounter()
-			prome.NewApiRequestFailedCounter()
-			prome.NewApiRequestSuccessCounter()
-			r.Use(prome.PrometheusMiddleware)
-			r.GET("/metrics", prome.PrometheusHandler())
-		}*/
 	ParseToken := GinParseToken(rdb)
 	userRouterGroup := r.Group("/user")
 	{

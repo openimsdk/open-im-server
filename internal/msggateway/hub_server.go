@@ -33,7 +33,6 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/startrpc"
 )
 
@@ -159,7 +158,6 @@ func (s *Server) SuperGroupOnlineBatchPushOneMsg(
 					} else {
 						if utils.IsContainInt(client.PlatformID, s.pushTerminal) {
 							tempT.OnlinePush = true
-							prome.Inc(prome.MsgOnlinePushSuccessCounter)
 							resp = append(resp, temp)
 						}
 					}

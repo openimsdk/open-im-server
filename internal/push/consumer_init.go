@@ -14,10 +14,6 @@
 
 package push
 
-import (
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
-)
-
 type Consumer struct {
 	pushCh       ConsumerHandler
 	successCount uint64
@@ -27,11 +23,6 @@ func NewConsumer(pusher *Pusher) *Consumer {
 	return &Consumer{
 		pushCh: *NewConsumerHandler(pusher),
 	}
-}
-
-func (c *Consumer) initPrometheus() {
-	prome.NewMsgOfflinePushSuccessCounter()
-	prome.NewMsgOfflinePushFailedCounter()
 }
 
 func (c *Consumer) Start() {

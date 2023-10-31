@@ -36,7 +36,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -86,7 +85,6 @@ func StartTransfer(prometheusPort int) error {
 	conversationRpcClient := rpcclient.NewConversationRpcClient(client)
 	groupRpcClient := rpcclient.NewGroupRpcClient(client)
 	msgTransfer := NewMsgTransfer(chatLogDatabase, msgDatabase, &conversationRpcClient, &groupRpcClient)
-	msgTransfer.initPrometheus()
 	return msgTransfer.Start(prometheusPort)
 }
 
@@ -98,17 +96,6 @@ func NewMsgTransfer(chatLogDatabase controller.ChatLogDatabase,
 		persistentCH: NewPersistentConsumerHandler(chatLogDatabase), historyCH: NewOnlineHistoryRedisConsumerHandler(msgDatabase, conversationRpcClient, groupRpcClient),
 		historyMongoCH: NewOnlineHistoryMongoConsumerHandler(msgDatabase),
 	}
-}
-
-func (m *MsgTransfer) initPrometheus() {
-	prome.NewSeqGetSuccessCounter()
-	prome.NewSeqGetFailedCounter()
-	prome.NewSeqSetSuccessCounter()
-	prome.NewSeqSetFailedCounter()
-	prome.NewMsgInsertRedisSuccessCounter()
-	prome.NewMsgInsertRedisFailedCounter()
-	prome.NewMsgInsertMongoSuccessCounter()
-	prome.NewMsgInsertMongoFailedCounter()
 }
 
 func (m *MsgTransfer) Start(prometheusPort int) error {

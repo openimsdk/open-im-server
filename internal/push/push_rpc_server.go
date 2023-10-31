@@ -67,7 +67,6 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	go func() {
 		defer wg.Done()
 		consumer := NewConsumer(pusher)
-		consumer.initPrometheus()
 		consumer.Start()
 	}()
 	wg.Wait()
