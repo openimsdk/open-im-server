@@ -69,7 +69,7 @@ def "ENV_FILE" ""${OPENIM_ROOT}"/scripts/install/environment.sh"
 def "CHAT_BRANCH" "main"
 def "SERVER_BRANCH" "main"
 
-# Choose the appropriate image address, the default is GITHUB image, 
+# Choose the appropriate image address, the default is GITHUB image,
 # you can choose docker hub, for Chinese users can choose Ali Cloud
 # export IMAGE_REGISTRY="ghcr.io/openimsdk"
 # export IMAGE_REGISTRY="openim"
@@ -77,6 +77,9 @@ def "SERVER_BRANCH" "main"
 def "IMAGE_REGISTRY" "ghcr.io/openimsdk"
 # def "IMAGE_REGISTRY" "openim"
 # def "IMAGE_REGISTRY" "registry.cn-hangzhou.aliyuncs.com/openimsdk"
+
+# Choose the appropriate image tag, the default is the latest version
+def "SERVER_IMAGE_TAG" "latest"
 
 ###################### OpenIM Docker Network ######################
 # 设置 Docker 网络的网段
@@ -115,10 +118,10 @@ LAST_OCTET=$((LAST_OCTET + 1))
 GRAFANA_NETWORK_ADDRESS=$(generate_ip)
 
 ###################### openim 配置 ######################
-# read: https://github.com/openimsdk/open-im-server/blob/main/deployment/init/README.md
+# read: https://github.com/openimsdk/open-im-server/blob/main/deployment/README.md
 def "OPENIM_DATA_DIR" "/data/openim"
 def "OPENIM_INSTALL_DIR" "/opt/openim"
-def "OPENIM_CONFIG_DIR" "/etc/openim"
+def "OPENIM_CONFIG_DIR" "/etc/openim/config"
 def "OPENIM_LOG_DIR" "/var/log/openim"
 def "CA_FILE" "${OPENIM_CONFIG_DIR}/cert/ca.pem"
 
@@ -138,14 +141,14 @@ def "OPENIM_CHAT_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # OpenIM服务地址
 def "OPENIM_CHAT_API_PORT" "10008"                   # OpenIM API端口
 def "CHAT_API_LISTEN_IP" ""                          # OpenIM API的监听IP
 
-def "OPENIM_ADMIN_API_PORT" "10009"                # OpenIM Admin API端口
-def "ADMIN_API_LISTEN_IP" ""                       # OpenIM Admin API的监听IP
+def "OPENIM_ADMIN_API_PORT" "10009" # OpenIM Admin API端口
+def "ADMIN_API_LISTEN_IP" ""        # OpenIM Admin API的监听IP
 
-def "OPENIM_ADMIN_PORT" "30200"                    # OpenIM chat Admin端口
-def "OPENIM_CHAT_PORT" "30300"                     # OpenIM chat Admin的监听IP
+def "OPENIM_ADMIN_PORT" "30200" # OpenIM chat Admin端口
+def "OPENIM_CHAT_PORT" "30300"  # OpenIM chat Admin的监听IP
 
-def "OPENIM_ADMIN_NAME" "admin"                    # openim-chat Admin用户名
-def "OPENIM_CHAT_NAME" "chat"                      # openim-chat chat用户名
+def "OPENIM_ADMIN_NAME" "admin" # openim-chat Admin用户名
+def "OPENIM_CHAT_NAME" "chat"   # openim-chat chat用户名
 
 # TODO 注意： 一般的配置都可以使用 def 函数来定义，如果是包含特殊字符，比如说:
 # TODO readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
@@ -306,10 +309,10 @@ def "GETUI_INTENT" ""                 # GeTui推送意图
 def "GETUI_CHANNEL_ID" ""             # GeTui渠道ID
 def "GETUI_CHANNEL_NAME" ""           # GeTui渠道名称
 def "FCM_SERVICE_ACCOUNT" "x.json"    # FCM服务账户
-def "JPNS_APP_KEY"  ""                  # JPNS应用密钥
-def "JPNS_MASTER_SECRET" ""             # JPNS主密钥
-def "JPNS_PUSH_URL"  ""                 # JPNS推送URL
-def "JPNS_PUSH_INTENT" ""               # JPNS推送意图
+def "JPNS_APP_KEY" ""                 # JPNS应用密钥
+def "JPNS_MASTER_SECRET" ""           # JPNS主密钥
+def "JPNS_PUSH_URL" ""                # JPNS推送URL
+def "JPNS_PUSH_INTENT" ""             # JPNS推送意图
 def "MANAGER_USERID_1" "openIM123456" # 管理员ID 1
 def "MANAGER_USERID_2" "openIM654321" # 管理员ID 2
 def "MANAGER_USERID_3" "openIMAdmin"  # 管理员ID 3

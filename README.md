@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://www.openim.online">
+    <a href="https://openim.io">
         <img src="./assets/logo-gif/openim-logo.gif" width="60%" height="30%"/>
     </a>
 </p>
@@ -24,7 +24,7 @@
 <p align="center">
     <a href="./README.md"><b> English </b></a> •
     <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-<a href="https://www.openim.online/en"><b> Docs </b></a>
+<a href="https://openim.io/en"><b> Docs </b></a>
 </p>
 
 </p>
@@ -61,7 +61,7 @@ It's crafted in Golang and supports cross-platform deployment, ensuring a cohere
 + **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
 + **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
 
-👉 **[Learn More](https://doc.rentsoft.cn/guides/introduction/product)**
+👉 **[Learn More](https://docs.openim.io/guides/introduction/product)**
 
 <!--
 
@@ -179,8 +179,9 @@ Read: Configuration center document：https://github.com/openimsdk/open-im-serve
 </details> 
 -->
 
-+ **[Source Code Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/dockerCompose)**
++ **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Production deployment of Linux systems](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/install-openim-linux-system.md)**
++ **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
 + **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
 
 <!-- 

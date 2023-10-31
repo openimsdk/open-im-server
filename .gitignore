@@ -29,6 +29,7 @@ tmp/
 bin/
 output/
 _output/
+deployments/charts/generated-configs/
 
 ### OpenIM Config ###
 config/config.yaml
@@ -37,18 +38,7 @@ config/config.yaml
 ./.env
 
 ### OpenIM deploy ###
-deploy/openim_demo
-deploy/openim-api
-deploy/openim-rpc-msg_gateway
-deploy/openim-msgtransfer
-deploy/openim-push
-deploy/openim_timer_task
-deploy/openim-rpc-user
-deploy/openim-rpc-friend
-deploy/openim-rpc-group
-deploy/openim-rpc-msg
-deploy/openim-rpc-auth
-deploy/Open-IM-SDK-Core
+deployments/openim-server/charts
 
 # files used by the developer
 .idea.md

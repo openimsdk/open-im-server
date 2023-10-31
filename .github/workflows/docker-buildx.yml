@@ -54,6 +54,19 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Log in to AliYun Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-hangzhou.aliyuncs.com
+          username: ${{ secrets.ALIREGISTRY_USERNAME }}
+          password: ${{ secrets.ALIREGISTRY_TOKEN }}
+
 ################################################
 # build/
 # └── docker
@@ -89,7 +102,10 @@ jobs:
         id: meta1
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-api
+          images: |
+            ghcr.io/openimsdk/openim-api
+            openim/openim-api
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-api
 
       - name: Build and push Docker image for openim-api
         uses: docker/build-push-action@v5
@@ -107,7 +123,10 @@ jobs:
         id: meta2
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-cmdutils
+          images: |
+            ghcr.io/openimsdk/openim-cmdutils
+            openim/openim-cmdutils
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-cmdutils
 
       - name: Build and push Docker image for openim-cmdutils
         uses: docker/build-push-action@v5
@@ -125,7 +144,10 @@ jobs:
         id: meta3
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-crontask
+          images: |
+            ghcr.io/openimsdk/openim-crontask
+            openim/openim-crontask
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-crontask
 
       - name: Build and push Docker image for openim-crontask
         uses: docker/build-push-action@v5
@@ -143,7 +165,10 @@ jobs:
         id: meta4
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-msggateway
+          images: |
+            ghcr.io/openimsdk/openim-msggateway
+            openim/openim-msggateway
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msggateway
 
       - name: Build and push Docker image for openim-msggateway
         uses: docker/build-push-action@v5
@@ -161,7 +186,10 @@ jobs:
         id: meta5
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-msgtransfer
+          images: |
+            ghcr.io/openimsdk/openim-msgtransfer
+            openim/openim-msgtransfer
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-msgtransfer
 
       - name: Build and push Docker image for openim-msgtransfer
         uses: docker/build-push-action@v5
@@ -179,7 +207,10 @@ jobs:
         id: meta6
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-push
+          images: |
+            ghcr.io/openimsdk/openim-push
+            openim/openim-push
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-push
 
       - name: Build and push Docker image for openim-push
         uses: docker/build-push-action@v5
@@ -197,7 +228,10 @@ jobs:
         id: meta7
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-auth
+          images: |
+            ghcr.io/openimsdk/openim-rpc-auth
+            openim/openim-rpc-auth
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-auth
 
       - name: Build and push Docker image for openim-rpc-auth
         uses: docker/build-push-action@v5
@@ -215,7 +249,10 @@ jobs:
         id: meta8
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-conversation
+          images: |
+            ghcr.io/openimsdk/openim-rpc-conversation
+            openim/openim-rpc-conversation
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-conversation
 
       - name: Build and push Docker image for openim-rpc-conversation
         uses: docker/build-push-action@v5
@@ -233,7 +270,10 @@ jobs:
         id: meta9
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-friend
+          images: |
+            ghcr.io/openimsdk/openim-rpc-friend
+            openim/openim-rpc-friend
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-friend
 
       - name: Build and push Docker image for openim-rpc-friend
         uses: docker/build-push-action@v5
@@ -251,7 +291,10 @@ jobs:
         id: meta10
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-group
+          images: |
+            ghcr.io/openimsdk/openim-rpc-group
+            openim/openim-rpc-group
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-group
 
       - name: Build and push Docker image for openim-rpc-group
         uses: docker/build-push-action@v5
@@ -269,7 +312,10 @@ jobs:
         id: meta11
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-msg
+          images: |
+            ghcr.io/openimsdk/openim-rpc-msg
+            openim/openim-rpc-msg
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-msg
 
       - name: Build and push Docker image for openim-rpc-msg
         uses: docker/build-push-action@v5
@@ -287,7 +333,10 @@ jobs:
         id: meta12
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-third
+          images: |
+            ghcr.io/openimsdk/openim-rpc-third
+            openim/openim-rpc-third
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-third
 
       - name: Build and push Docker image for openim-rpc-third
         uses: docker/build-push-action@v5
@@ -305,7 +354,10 @@ jobs:
         id: meta13
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ghcr.io/openimsdk/openim-rpc-user
+          images: |
+            ghcr.io/openimsdk/openim-rpc-user
+            openim/openim-rpc-user
+            registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-rpc-user
 
       - name: Build and push Docker image for openim-rpc-user
         uses: docker/build-push-action@v5
@@ -318,4 +370,3 @@ jobs:
           labels: ${{ steps.meta13.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-

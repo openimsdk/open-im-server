@@ -168,7 +168,6 @@ rpcPort:
   openImUserPort: [ ${OPENIM_USER_PORT} ]
   openImFriendPort: [ ${OPENIM_FRIEND_PORT} ]
   openImMessagePort: [ ${OPENIM_MESSAGE_PORT} ]
-  openImMessageGatewayPort: [ ${OPENIM_MESSAGE_GATEWAY_PORT} ]
   openImGroupPort: [ ${OPENIM_GROUP_PORT} ]
   openImAuthPort: [ ${OPENIM_AUTH_PORT} ]
   openImPushPort: [ ${OPENIM_PUSH_PORT} ]
@@ -217,6 +216,7 @@ log:
 longConnSvr:
   openImWsPort: [ ${OPENIM_WS_PORT} ]
   websocketMaxConnNum: ${WEBSOCKET_MAX_CONN_NUM}
+  openImMessageGatewayPort: [ ${OPENIM_MESSAGE_GATEWAY_PORT} ]
   websocketMaxMsgLen: ${WEBSOCKET_MAX_MSG_LEN}
   websocketTimeout: ${WEBSOCKET_TIMEOUT}
 

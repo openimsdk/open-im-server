@@ -23,7 +23,8 @@
 DOCKER := docker
 
 # read: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md
-REGISTRY_PREFIX ?= ghcr.io/openimsdk
+REGISTRY_PREFIX ?= registry.cn-hangzhou.aliyuncs.com/openimsdk
+# REGISTRY_PREFIX ?= ghcr.io/openimsdk
 
 BASE_IMAGE ?= ghcr.io/openim-sigs/openim-bash-image
 
@@ -43,6 +44,7 @@ endif
 # Determine image files by looking into build/images/*/Dockerfile
 IMAGES_DIR ?= $(wildcard ${ROOT_DIR}/build/images/*)
 # Determine images names by stripping out the dir names, and filter out the undesired directories
+# IMAGES ?= $(filter-out Dockerfile,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 IMAGES ?= $(filter-out Dockerfile openim-tools openim-cmdutils,$(foreach image,${IMAGES_DIR},$(notdir ${image})))
 
 ifeq (${IMAGES},)
@@ -105,6 +107,7 @@ image.build.%: go.build.%
 		| sed "s#BINARY_NAME#$(IMAGE)#g" >$(TMP_DIR)/$(IMAGE)/Dockerfile
 	@cp $(BIN_DIR)/platforms/$(IMAGE_PLAT)/$(IMAGE) $(TMP_DIR)/$(IMAGE)
 	$(eval BUILD_SUFFIX := $(_DOCKER_BUILD_EXTRA_ARGS) --pull -t $(REGISTRY_PREFIX)/$(IMAGE)-$(ARCH):$(VERSION) $(TMP_DIR)/$(IMAGE))
+	@echo $(DOCKER) build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX)
 	@if [ $(shell $(GO) env GOARCH) != $(ARCH) ] ; then \
 		$(MAKE) image.daemon.verify ;\
 		$(DOCKER) build --platform $(IMAGE_PLAT) $(BUILD_SUFFIX) ; \

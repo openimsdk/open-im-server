@@ -73,9 +73,9 @@ gen:
 demo:
 	@$(MAKE) go.demo
 
-## versionchecker: Check version of openim. ✨
-.PHONY: versionchecker
-versionchecker:
+## version: Check version of openim. ✨
+.PHONY: version
+version:
 	@$(MAKE) go.versionchecker
 
 ## build: Build binaries by default ✨
@@ -93,9 +93,9 @@ start:
 stop:
 	@$(MAKE) go.stop
 
-## restart: Restart openim ✨
+## restart: Restart openim (make init configuration file is initialized) ✨
 .PHONY: restart
-restart: clean stop build init start
+restart: clean stop build init start check
 
 ## multiarch: Build binaries for multiple platforms. See option PLATFORMS. ✨
 .PHONY: multiarch
