@@ -82,7 +82,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), db),
 		userRpcClient: rpcclient.NewUserRpcClient(client),
-		s3dataBase:    controller.NewS3Database(o, relation.NewObjectInfo(db)),
+		s3dataBase:    controller.NewS3Database(rdb, o, relation.NewObjectInfo(db)),
 		defaultExpire: time.Hour * 24 * 7,
 	})
 	return nil

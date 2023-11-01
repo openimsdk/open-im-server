@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dtm-labs/rockscache"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -124,6 +125,7 @@ type Minio struct {
 	lock         sync.Locker
 	init         bool
 	prefix       string
+	rcClient     *rockscache.Client
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -542,4 +544,9 @@ func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]
 		return io.ReadAll(object)
 	}
 	return io.ReadAll(io.LimitReader(object, 1024))
+}
+
+func (m *Minio) GetThumbnailKey(ctx context.Context, name string) (string, error) {
+
+	return "", nil
 }
