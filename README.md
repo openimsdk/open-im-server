@@ -61,7 +61,7 @@ It's crafted in Golang and supports cross-platform deployment, ensuring a cohere
 + **REST API**: OpenIMServer provides REST API for business systems, aiming to empower your operations with additional functionalities like group creation and message push via backend interfaces.
 + **Callbacks**: To expand its utility across varied business forms, OpenIMServer offers callback capabilities. That is, it sends a request to the business server before or after an event occurs, such as sending a message, enriching the interaction and data exchange flow in the communication processes.
 
-👉 **[Learn More](https://doc.rentsoft.cn/guides/introduction/product)**
+👉 **[Learn More](https://docs.openim.io/guides/introduction/product)**
 
 <!--
 
@@ -179,8 +179,9 @@ Read: Configuration center document：https://github.com/openimsdk/open-im-serve
 </details> 
 -->
 
-+ **[Source Code Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker Deployment Guide](https://doc.rentsoft.cn/guides/gettingStarted/dockerCompose)**
++ **[Source Code Deployment Guide](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Production deployment of Linux systems](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/install-openim-linux-system.md)**
++ **[Docker Deployment Guide](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
 + **[Kubernetes Deployment Guide](https://github.com/openimsdk/open-im-server/tree/main/deployments)**
 
 <!-- 
