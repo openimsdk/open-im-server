@@ -17,6 +17,8 @@ package third
 import (
 	"context"
 	"fmt"
+	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"net/url"
 	"time"
 
@@ -78,6 +80,12 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	specialerror.AddErrHandler(func(err error) errs.CodeError {
+		if o.IsNotFound(err) {
+			return errs.ErrRecordNotFound
+		}
+		return nil
+	})
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), db),

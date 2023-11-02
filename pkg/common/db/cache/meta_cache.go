@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/OpenIMSDK/tools/mw/specialerror"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -209,7 +210,7 @@ func batchGetCache2[T any, K comparable](
 			return fns(ctx, key)
 		})
 		if err != nil {
-			if errs.ErrRecordNotFound.Is(err) {
+			if errs.ErrRecordNotFound.Is(specialerror.ErrCode(errs.Unwrap(err))) {
 				continue
 			}
 			return nil, err
