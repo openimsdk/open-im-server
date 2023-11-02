@@ -105,28 +105,3 @@ func Start(
 
 	return utils.Wrap1(srv.Serve(listener))
 }
-func getPromPort(name string) int {
-	switch name {
-	case "MessageGateway":
-		return config.Config.Prometheus.MessageGatewayPrometheusPort[0]
-	case "User":
-		return config.Config.Prometheus.UserPrometheusPort[0]
-	case "Msg":
-		return config.Config.Prometheus.MessagePrometheusPort[0]
-	case "Conversation":
-		return config.Config.Prometheus.ConversationPrometheusPort[0]
-	case "Friend":
-		return config.Config.Prometheus.FriendPrometheusPort[0]
-	case "Push":
-		return config.Config.Prometheus.PushPrometheusPort[0]
-	case "Group":
-		return config.Config.Prometheus.GroupPrometheusPort[0]
-	case "Auth":
-		return config.Config.Prometheus.AuthPrometheusPort[0]
-	case "Third":
-		return config.Config.Prometheus.ThirdPrometheusPort[0]
-	default:
-		fmt.Println("name not have correct prometheus port!!!")
-		return 90
-	}
-}
