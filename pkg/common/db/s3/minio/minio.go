@@ -74,6 +74,7 @@ func NewMinio(cache cache.MinioCache) (s3.Interface, error) {
 		core:   &minio.Core{Client: client},
 		lock:   &sync.Mutex{},
 		init:   false,
+		cache:  cache,
 	}
 	if config.Config.Object.Minio.SignEndpoint == "" || config.Config.Object.Minio.SignEndpoint == config.Config.Object.Minio.Endpoint {
 		m.opts = opts
