@@ -21,8 +21,9 @@ import (
 	"path/filepath"
 
 	"github.com/OpenIMSDK/protocol/constant"
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"gopkg.in/yaml.v3"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 )
 
 //go:embed version

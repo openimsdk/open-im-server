@@ -112,7 +112,7 @@ func (c *conversationServer) SetConversation(ctx context.Context, req *pbconvers
 	return resp, nil
 }
 
-//nolint
+// nolint
 func (c *conversationServer) SetConversations(ctx context.Context,
 	req *pbconversation.SetConversationsReq,
 ) (*pbconversation.SetConversationsResp, error) {

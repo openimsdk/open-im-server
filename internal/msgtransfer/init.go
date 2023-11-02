@@ -16,10 +16,12 @@ package msgtransfer
 
 import (
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"sync"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"sync"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
 
 	"github.com/OpenIMSDK/tools/mw"
 
