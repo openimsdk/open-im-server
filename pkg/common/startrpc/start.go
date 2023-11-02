@@ -45,7 +45,7 @@ func Start(
 	rpcFn func(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) error,
 	options ...grpc.ServerOption,
 ) error {
-	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s",
+	fmt.Printf("start %s server, port: %d, prometheusPort: %d, OpenIM version: %s\n",
 		rpcRegisterName, rpcPort, prometheusPort, config.Version)
 	listener, err := net.Listen(
 		"tcp",
