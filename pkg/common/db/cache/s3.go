@@ -2,12 +2,11 @@ package cache
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/s3"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/redis/go-redis/v9"
-	"image"
+	"strconv"
 	"time"
 )
 
@@ -117,24 +116,23 @@ func (g *s3CacheRedis) GetKey(ctx context.Context, engine string, name string) (
 
 type MinioCache interface {
 	metaCache
-	GetImageObjectKeyInfo(ctx context.Context, key string, fn func(ctx context.Context, key string) (*MinioImageInfo, image.Image, error)) (*MinioImageInfo, image.Image, error)
+	GetImageObjectKeyInfo(ctx context.Context, key string, fn func(ctx context.Context) (*MinioImageInfo, error)) (*MinioImageInfo, error)
 	GetThumbnailKey(ctx context.Context, key string, format string, width int, height int, minioCache func(ctx context.Context) (string, error)) (string, error)
-	//DelS3Key(engine string, keys ...string) S3Cache
+	DelObjectImageInfoKey(keys ...string) MinioCache
+	DelImageThumbnailKey(key string, format string, width int, height int) MinioCache
 }
 
-func NewMinioCache(rdb redis.UniversalClient, s3 s3.Interface) MinioCache {
+func NewMinioCache(rdb redis.UniversalClient) MinioCache {
 	rcClient := rockscache.NewClient(rdb, rockscache.NewDefaultOptions())
 	return &minioCacheRedis{
 		rcClient:   rcClient,
-		expireTime: time.Hour * 12,
-		s3:         s3,
+		expireTime: time.Hour * 24 * 7,
 		metaCache:  NewMetaCacheRedis(rcClient),
 	}
 }
 
 type minioCacheRedis struct {
 	metaCache
-	s3         s3.Interface
 	rcClient   *rockscache.Client
 	expireTime time.Duration
 }
@@ -143,52 +141,44 @@ func (g *minioCacheRedis) NewCache() MinioCache {
 	return &minioCacheRedis{
 		rcClient:   g.rcClient,
 		expireTime: g.expireTime,
-		s3:         g.s3,
 		metaCache:  NewMetaCacheRedis(g.rcClient, g.metaCache.GetPreDelKeys()...),
 	}
 }
 
-//func (g *minioCacheRedis) DelS3Key(engine string, keys ...string) MinioCache {
-//	s3cache := g.NewCache()
-//	ks := make([]string, 0, len(keys))
-//	for _, key := range keys {
-//		ks = append(ks, g.getS3Key(engine, key))
-//	}
-//	s3cache.AddKeys(ks...)
-//	return s3cache
-//}
-
-func (g *minioCacheRedis) getMinioImageInfoKey(name string) string {
-	return "MINIO:IMAGE:" + name
+func (g *minioCacheRedis) DelObjectImageInfoKey(keys ...string) MinioCache {
+	s3cache := g.NewCache()
+	ks := make([]string, 0, len(keys))
+	for _, key := range keys {
+		ks = append(ks, g.getObjectImageInfoKey(key))
+	}
+	s3cache.AddKeys(ks...)
+	return s3cache
 }
 
-func (g *minioCacheRedis) getMinioImageThumbnailKey(name string) string {
-	return "MINIO:THUMBNAIL:" + name
+func (g *minioCacheRedis) DelImageThumbnailKey(key string, format string, width int, height int) MinioCache {
+	s3cache := g.NewCache()
+	s3cache.AddKeys(g.getMinioImageThumbnailKey(key, format, width, height))
+	return s3cache
 }
 
-func (g *minioCacheRedis) GetImageObjectKeyInfo(ctx context.Context, key string, fn func(ctx context.Context, key string) (*MinioImageInfo, image.Image, error)) (*MinioImageInfo, image.Image, error) {
-	var img image.Image
-	info, err := getCache(ctx, g.rcClient, g.getMinioImageInfoKey(key), g.expireTime, func(ctx context.Context) (info *MinioImageInfo, err error) {
-		info, img, err = fn(ctx, key)
-		return
-	})
+func (g *minioCacheRedis) getObjectImageInfoKey(key string) string {
+	return "MINIO:IMAGE:" + key
+}
+
+func (g *minioCacheRedis) getMinioImageThumbnailKey(key string, format string, width int, height int) string {
+	return "MINIO:THUMBNAIL:" + format + ":w" + strconv.Itoa(width) + ":h" + strconv.Itoa(height) + ":" + key
+}
+
+func (g *minioCacheRedis) GetImageObjectKeyInfo(ctx context.Context, key string, fn func(ctx context.Context) (*MinioImageInfo, error)) (*MinioImageInfo, error) {
+	info, err := getCache(ctx, g.rcClient, g.getObjectImageInfoKey(key), g.expireTime, fn)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	if !info.IsImg {
-		return nil, nil, errs.ErrData.Wrap("object not image")
-	}
-	return info, img, nil
+	return info, nil
 }
 
-func (g *minioCacheRedis) GetThumbnailKey(ctx context.Context, key string, format string, width int, height int, minioCache func(ctx context.Context, key string, format string, width int, height int) (string, error)) (string, error) {
-	return getCache(ctx, g.rcClient, g.getMinioImageThumbnailKey(key), g.expireTime, func(ctx context.Context) (string, error) {
-		info, img, err := g.GetImageObjectKeyInfo(ctx, key, getInfo)
-		if err != nil {
-			return "", err
-		}
-		return minioCache(ctx, key, format, width, height, info, img)
-	})
+func (g *minioCacheRedis) GetThumbnailKey(ctx context.Context, key string, format string, width int, height int, minioCache func(ctx context.Context) (string, error)) (string, error) {
+	return getCache(ctx, g.rcClient, g.getMinioImageThumbnailKey(key, format, width, height), g.expireTime, minioCache)
 }
 
 type MinioImageInfo struct {

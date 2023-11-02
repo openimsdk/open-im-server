@@ -67,7 +67,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	var o s3.Interface
 	switch config.Config.Object.Enable {
 	case "minio":
-		o, err = minio.NewMinio()
+		o, err = minio.NewMinio(cache.NewMinioCache(rdb))
 	case "cos":
 		o, err = cos.NewCos()
 	case "oss":
