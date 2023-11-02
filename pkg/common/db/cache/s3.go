@@ -53,7 +53,7 @@ func (g *objectCacheRedis) DelObjectName(names ...string) ObjectCache {
 }
 
 func (g *objectCacheRedis) getObjectKey(name string) string {
-	return "OBJECT_INFO:" + name
+	return "OBJECT:" + name
 }
 
 func (g *objectCacheRedis) GetName(ctx context.Context, name string) (*relationtb.ObjectModel, error) {
