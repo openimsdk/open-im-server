@@ -164,7 +164,7 @@ func (c *Client) readMessage() {
 func (c *Client) handleMessage(message []byte) error {
 	if c.IsCompress {
 		var decompressErr error
-		message, decompressErr = c.longConnServer.DeCompress(message)
+		message, decompressErr = c.longConnServer.DecompressWithPool(message)
 		if decompressErr != nil {
 			return utils.Wrap(decompressErr, "")
 		}
@@ -294,7 +294,7 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 	_ = c.conn.SetWriteDeadline(writeWait)
 	if c.IsCompress {
 		var compressErr error
-		resultBuf, compressErr = c.longConnServer.Compress(encodedBuf)
+		resultBuf, compressErr = c.longConnServer.CompressWithPool(encodedBuf)
 		if compressErr != nil {
 			return utils.Wrap(compressErr, "")
 		}

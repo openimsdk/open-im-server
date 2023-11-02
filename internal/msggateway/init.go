@@ -23,7 +23,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
-// RunWsAndServer run ws server
+// RunWsAndServer run ws server.
 func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	fmt.Println(
 		"start rpc/msg_gateway server, port: ",
