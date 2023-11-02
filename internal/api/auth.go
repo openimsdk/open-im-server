@@ -17,7 +17,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/OpenIMSDK/protocol/auth"
+	auth "github.com/OpenIMSDK/protocol/auth"
 	"github.com/OpenIMSDK/tools/a2r"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
@@ -29,6 +29,18 @@ func NewAuthApi(client rpcclient.Auth) AuthApi {
 	return AuthApi(client)
 }
 
+// @Summary User login
+// @Description Get the user token
+// @Tags Authentication
+// @ID UserToken
+// @Accept json
+// @Param OperationId header string true "OperationId"
+// @Param req body auth.UserTokenReq true "Secret is the Openim key. For details, see the server Config.yaml Secret field <br> Platform is the platform ID"
+// @Produce json
+// @Success 0 {object} auth.UserTokenResp
+// @Failure 500 {object} error "ERRCODE is 500 generally an internal error of the server"
+// @Failure 400 {object} error "Errcode is 400, which is generally a parameter input error."
+// @Router /auth/user_token [post]
 func (o *AuthApi) UserToken(c *gin.Context) {
 	a2r.Call(auth.AuthClient.UserToken, o.Client, c)
 }

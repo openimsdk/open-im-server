@@ -19,7 +19,7 @@ import (
 
 	"github.com/OpenIMSDK/protocol/constant"
 	"github.com/OpenIMSDK/protocol/msggateway"
-	"github.com/OpenIMSDK/protocol/user"
+	user "github.com/OpenIMSDK/protocol/user"
 	"github.com/OpenIMSDK/tools/a2r"
 	"github.com/OpenIMSDK/tools/apiresp"
 	"github.com/OpenIMSDK/tools/errs"
@@ -35,10 +35,36 @@ func NewUserApi(client rpcclient.User) UserApi {
 	return UserApi(client)
 }
 
+// UserRegisterReq
+// @Summary User registration
+// @Description User registration
+// @Tags User
+// @ID UserRegister
+// @Accept json
+// @Param OperationId header string true "Operation Id"
+// @Param UserInfo body user.UserRegisterReq true "Secret is the Openim key. For details, see the server Config.yaml Secret field."
+// @Produce json
+// @Success 200 {object} user.UserRegisterResp
+// @Failure 500 {object} error "ERRCODE is 500 generally an internal error of the server"
+// @Failure 400 {object} error "Errcode is 400, which is generally a parameter input error.""
+// @Router /user/user_register [post]
 func (u *UserApi) UserRegister(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegister, u.Client, c)
 }
 
+// @Summary Modify user information
+// @Description Modify user information Userid Faceurl, etc.
+// @Tags User
+// @ID UpdateUserInfo
+// @Accept json
+// @Param OperationId header string true "Operation Id"
+// @Param req body user.UpdateUserInfoReq true "Request"
+// @Produce json
+// @Success 200 {object} user.UpdateUserInfoResp
+// @Failure 500 {object} error "ERRCODE is 500 generally an internal error of the server"
+// @Failure 400 {object} error "Errcode is 400, which is generally a parameter input error."
+// @Security	ApiKeyAuth
+// @Router /user/update_user_info [post]
 func (u *UserApi) UpdateUserInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.UpdateUserInfo, u.Client, c)
 }
@@ -47,6 +73,21 @@ func (u *UserApi) SetGlobalRecvMessageOpt(c *gin.Context) {
 	a2r.Call(user.UserClient.SetGlobalRecvMessageOpt, u.Client, c)
 }
 
+//// @Success 0 {object} user.GetDesignateUsersResp{usersInfo=[]sdkws.UserInfo}
+
+// @Summary Get user information
+// @Description Obtain user information in batches according to the user list
+// @Tags User
+// @ID GetUsersInfo
+// @Accept json
+// @Param OperationId header string true "Operation Id"
+// @Param req body user.GetDesignateUsersReq true "Request"
+// @Produce json
+// @Success 200 {object} user.GetDesignateUsersResp
+// @Failure 500 {object} error "Errcode is 500 一For the internal error of the server"
+// @Failure 400 {object} error "errcode is 400 一Input errors in the parameter, token is not brought up"
+// @Security	ApiKeyAuth
+// @Router /user/get_users_info [post]
 func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
 }

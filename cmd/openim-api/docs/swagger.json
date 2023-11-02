@@ -1,0 +1,342 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Open-IM-Server API server document, all requests in the document have an OperationId field for link tracking",
+        "title": "open-IM-Server API",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:10002",
+    "basePath": "/",
+    "paths": {
+        "/auth/user_token": {
+            "post": {
+                "description": "Get the user token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User login",
+                "operationId": "UserToken",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OperationId",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Secret is the Openim key. For details, see the server Config.yaml Secret field \u003cbr\u003e Platform is the platform ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.UserTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/auth.UserTokenResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Errcode is 400, which is generally a parameter input error.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "ERRCODE is 500 generally an internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/get_users_info": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Obtain user information in batches according to the user list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user information",
+                "operationId": "GetUsersInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operation Id",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.GetDesignateUsersReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.GetDesignateUsersResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errcode is 400 一Input errors in the parameter, token is not brought up",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Errcode is 500 一For the internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/update_user_info": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Modify user information Userid Faceurl, etc.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Modify user information",
+                "operationId": "UpdateUserInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operation Id",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateUserInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateUserInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Errcode is 400, which is generally a parameter input error.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "ERRCODE is 500 generally an internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/user/user_register": {
+            "post": {
+                "description": "User registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User registration",
+                "operationId": "UserRegister",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operation Id",
+                        "name": "OperationId",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Secret is the Openim key. For details, see the server Config.yaml Secret field.",
+                        "name": "UserInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserRegisterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UserRegisterResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Errcode is 400, which is generally a parameter input error.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "ERRCODE is 500 generally an internal error of the server",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth.UserTokenReq": {
+            "type": "object",
+            "properties": {
+                "platformID": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.UserTokenResp": {
+            "type": "object",
+            "properties": {
+                "expireTimeSeconds": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "sdkws.UserInfo": {
+            "type": "object",
+            "properties": {
+                "appMangerLevel": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "globalRecvMsgOpt": {
+                    "type": "integer"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.GetDesignateUsersReq": {
+            "type": "object",
+            "properties": {
+                "userIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "user.GetDesignateUsersResp": {
+            "type": "object",
+            "properties": {
+                "usersInfo": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sdkws.UserInfo"
+                    }
+                }
+            }
+        },
+        "user.UpdateUserInfoReq": {
+            "type": "object",
+            "properties": {
+                "userInfo": {
+                    "$ref": "#/definitions/sdkws.UserInfo"
+                }
+            }
+        },
+        "user.UpdateUserInfoResp": {
+            "type": "object"
+        },
+        "user.UserRegisterReq": {
+            "type": "object",
+            "properties": {
+                "secret": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sdkws.UserInfo"
+                    }
+                }
+            }
+        },
+        "user.UserRegisterResp": {
+            "type": "object"
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Description for what is this security definition being used",
+            "type": "apiKey",
+            "name": "token",
+            "in": "header"
+        }
+    }
+}

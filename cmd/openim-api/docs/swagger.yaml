@@ -1,0 +1,231 @@
+basePath: /
+definitions:
+  auth.UserTokenReq:
+    properties:
+      platformID:
+        type: integer
+      secret:
+        type: string
+      userID:
+        type: string
+    type: object
+  auth.UserTokenResp:
+    properties:
+      expireTimeSeconds:
+        type: integer
+      token:
+        type: string
+    type: object
+  sdkws.UserInfo:
+    properties:
+      appMangerLevel:
+        type: integer
+      createTime:
+        type: integer
+      ex:
+        type: string
+      faceURL:
+        type: string
+      globalRecvMsgOpt:
+        type: integer
+      nickname:
+        type: string
+      userID:
+        type: string
+    type: object
+  user.GetDesignateUsersReq:
+    properties:
+      userIDs:
+        items:
+          type: string
+        type: array
+    type: object
+  user.GetDesignateUsersResp:
+    properties:
+      usersInfo:
+        items:
+          $ref: '#/definitions/sdkws.UserInfo'
+        type: array
+    type: object
+  user.UpdateUserInfoReq:
+    properties:
+      userInfo:
+        $ref: '#/definitions/sdkws.UserInfo'
+    type: object
+  user.UpdateUserInfoResp:
+    type: object
+  user.UserRegisterReq:
+    properties:
+      secret:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/sdkws.UserInfo'
+        type: array
+    type: object
+  user.UserRegisterResp:
+    type: object
+host: localhost:10002
+info:
+  contact: {}
+  description: Open-IM-Server API server document, all requests in the document have
+    an OperationId field for link tracking
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: open-IM-Server API
+  version: "1.0"
+paths:
+  /auth/user_token:
+    post:
+      consumes:
+      - application/json
+      description: Get the user token
+      operationId: UserToken
+      parameters:
+      - description: OperationId
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: Secret is the Openim key. For details, see the server Config.yaml
+          Secret field <br> Platform is the platform ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/auth.UserTokenReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/auth.UserTokenResp'
+        "400":
+          description: Errcode is 400, which is generally a parameter input error.
+          schema: {}
+        "500":
+          description: ERRCODE is 500 generally an internal error of the server
+          schema: {}
+      summary: User login
+      tags:
+      - Authentication
+  /user/get_users_info:
+    post:
+      consumes:
+      - application/json
+      description: Obtain user information in batches according to the user list
+      operationId: GetUsersInfo
+      parameters:
+      - description: Operation Id
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/user.GetDesignateUsersReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.GetDesignateUsersResp'
+        "400":
+          description: errcode is 400 一Input errors in the parameter, token is not
+            brought up
+          schema: {}
+        "500":
+          description: Errcode is 500 一For the internal error of the server
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get user information
+      tags:
+      - User
+  /user/update_user_info:
+    post:
+      consumes:
+      - application/json
+      description: Modify user information Userid Faceurl, etc.
+      operationId: UpdateUserInfo
+      parameters:
+      - description: Operation Id
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UpdateUserInfoResp'
+        "400":
+          description: Errcode is 400, which is generally a parameter input error.
+          schema: {}
+        "500":
+          description: ERRCODE is 500 generally an internal error of the server
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Modify user information
+      tags:
+      - User
+  /user/user_register:
+    post:
+      consumes:
+      - application/json
+      description: User registration
+      operationId: UserRegister
+      parameters:
+      - description: Operation Id
+        in: header
+        name: OperationId
+        required: true
+        type: string
+      - description: Secret is the Openim key. For details, see the server Config.yaml
+          Secret field.
+        in: body
+        name: UserInfo
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserRegisterReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserRegisterResp'
+        "400":
+          description: Errcode is 400, which is generally a parameter input error.
+          schema: {}
+        "500":
+          description: ERRCODE is 500 generally an internal error of the server
+          schema: {}
+      summary: User registration
+      tags:
+      - User
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    description: Description for what is this security definition being used
+    in: header
+    name: token
+    type: apiKey
+swagger: "2.0"

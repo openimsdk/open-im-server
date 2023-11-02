@@ -41,7 +41,38 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
+
+	_ "github.com/openimsdk/open-im-server/v3/cmd/openim-api/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+//swag init --parseInternal --dir ../../internal/api/
+//swag init --parseInternal --dir cmd/openim-api,internal/api/ -g ../../internal/api/route.go
+//swag init --parseInternal --pd --dir cmd/openim-api,internal/api/ -g ../../internal/api/route.go --output cmd/openim-api/docs
+
+// @title open-IM-Server API
+// @version 1.0
+// @description  Open-IM-Server API server document, all requests in the document have an OperationId field for link tracking
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host		localhost:10002
+// @BasePath /
+
+//	@schemes http https
+
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						token
+//	@description				Description for what is this security definition being used
+
+//// @securityDefinitions.basic	OperationId
+//// @in							header
+//// @name						OperationId
+//// @description				OperationId for link tracking
 
 func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.UniversalClient) *gin.Engine {
 	discov.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials())) // 默认RPC中间件
@@ -52,6 +83,8 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	}
 	log.ZInfo(context.Background(), "load config", "config", config.Config)
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID())
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// init rpc client here
 	userRpc := rpcclient.NewUser(discov)
 	groupRpc := rpcclient.NewGroup(discov)

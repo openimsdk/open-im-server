@@ -12,31 +12,34 @@ networks:
 
 services:
   mysql:
-    image: mysql:5.7
+    image: bitnami/mysql:latest
     ports:
-      - "${MYSQL_PORT}:3306"
+      - '${MYSQL_PORT}:3306'
     container_name: mysql
     volumes:
-      - "${DATA_DIR}/components/mysql/data:/var/lib/mysql"
-      - "/etc/localtime:/etc/localtime"
+      - '${DATA_DIR}/components/mysql/data:/var/lib/mysql'
+      - '/etc/localtime:/etc/localtime'
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: '${MYSQL_PASSWORD}'
     restart: always
     networks:
       server:
         ipv4_address: ${MYSQL_NETWORK_ADDRESS}
 
   mongodb:
-    image: mongo:6.0.2
+    # image: arm64v8/mongo:7.0-rc-jammy
+    # image: bitnami/mongodb:latest
+    image: mongo:7.0-rc-jammy
     ports:
-      - "${MONGO_PORT}:27017"
+      - '${MONGO_PORT}:27017'
     container_name: mongo
     command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
-      - "${DATA_DIR}/components/mongodb/data/db:/data/db"
-      - "${DATA_DIR}/components/mongodb/data/logs:/data/logs"
-      - "${DATA_DIR}/components/mongodb/data/conf:/etc/mongo"
-      - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
+      - '${DATA_DIR}/components/mongodb/data/db:/data/db'
+      - '${DATA_DIR}/components/mongodb/data/logs:/data/logs'
+      - '${DATA_DIR}/components/mongodb/data/conf:/etc/mongo'
+      - ./scripts/mongo-init.sh:/bitnami/scripts/mongo-init.sh:ro
+      # - ./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
     environment:
       - TZ=Asia/Shanghai
       - wiredTigerCacheSizeGB=1
@@ -49,13 +52,14 @@ services:
         ipv4_address: ${MONGO_NETWORK_ADDRESS}
 
   redis:
-    image: redis:7.0.0
+    image: bitnami/redis:latest
+    user: root
     container_name: redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - '${REDIS_PORT}:6379'
     volumes:
-      - "${DATA_DIR}/components/redis/data:/data"
-      - "${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf"
+      - '${DATA_DIR}/components/redis/data:/data'
+      - '${DATA_DIR}/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf'
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -67,27 +71,29 @@ services:
         ipv4_address: ${REDIS_NETWORK_ADDRESS}
 
   zookeeper:
-   image: bitnami/zookeeper:3.8
-   container_name: zookeeper
-   ports:
-    - "${ZOOKEEPER_PORT}:2181"
-   volumes:
-     - "/etc/localtime:/etc/localtime"
-   environment:
-     - ALLOW_ANONYMOUS_LOGIN=yes
-     - TZ="Asia/Shanghai"
-   restart: always
-   networks:
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
+    ports:
+      - '${ZOOKEEPER_PORT}:2181'
+    volumes:
+      - '/etc/localtime:/etc/localtime'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - TZ="Asia/Shanghai"
+    restart: always
+    networks:
       server:
         ipv4_address: ${ZOOKEEPER_NETWORK_ADDRESS}
 
   kafka:
-    image: 'bitnami/kafka:3.5.1'
+    # image: 'bitnami/kafka:3.5.1'
+    image: 'bitnami/kafka:latest'
     container_name: kafka
     user: root
+    # user: nfsnobody
     restart: always
     ports:
-    - "${KAFKA_PORT}:9094"
+      - '${KAFKA_PORT}:9094'
     volumes:
       - ./scripts/create_topic.sh:/opt/bitnami/kafka/create_topic.sh
       - ${DATA_DIR}/components/kafka:/bitnami/kafka
@@ -96,52 +102,52 @@ services:
       /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
       "
     environment:
-       - TZ=Asia/Shanghai
-       - KAFKA_CFG_NODE_ID=0
-       - KAFKA_CFG_PROCESS_ROLES=controller,broker
-       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
-       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY}:${KAFKA_PORT}
-       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
-       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - TZ=Asia/Shanghai
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://${DOCKER_BRIDGE_GATEWAY}:${KAFKA_PORT}
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       server:
         ipv4_address: ${KAFKA_NETWORK_ADDRESS}
 
   minio:
     image: minio/minio
+    user: root
     ports:
-      - "${MINIO_PORT}:9000"
-      - "9090:9090"
+      - '${MINIO_PORT}:9000'
+      - '9090:9090'
     container_name: minio
     volumes:
-      - "${DATA_DIR}/components/mnt/data:/data"
-      - "${DATA_DIR}/components/mnt/config:/root/.minio"
+      - '${DATA_DIR}/components/mnt/data:/data'
+      - '${DATA_DIR}/components/mnt/config:/root/.minio'
     environment:
-      MINIO_ROOT_USER: "${MINIO_ACCESS_KEY}"
-      MINIO_ROOT_PASSWORD: "${MINIO_SECRET_KEY}"
+      MINIO_ROOT_USER: '${MINIO_ACCESS_KEY}'
+      MINIO_ROOT_PASSWORD: '${MINIO_SECRET_KEY}'
     restart: always
     command: minio server /data --console-address ':9090'
     networks:
       server:
         ipv4_address: ${MINIO_NETWORK_ADDRESS}
 
-  openim-web:
-    # image: ghcr.io/openimsdk/openim-web:latest
-    # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
-    # image: openim/openim-web:latest
-    image: ${IMAGE_REGISTRY}/openim-web:latest
-    container_name: openim-web
-    environment:
-      - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
-      - OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
-    restart: always
-    ports:
-      - "${OPENIM_WEB_PORT}:11001"
-    networks:
-      server:
-        ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
-
+  # openim-web:
+  #   # image: ghcr.io/openimsdk/openim-web:latest
+  #   # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-web:latest
+  #   # image: openim/openim-web:latest
+  #   image: ${IMAGE_REGISTRY}/openim-web:latest
+  #   container_name: openim-web
+  #   environment:
+  #     - OPENIM_WEB_DIST_PATH=${OPENIM_WEB_DIST_PATH}
+  #     - OPENIM_WEB_PORT=${OPENIM_WEB_PORT}
+  #   restart: always
+  #   ports:
+  #     - "${OPENIM_WEB_PORT}:11001"
+  #   networks:
+  #     server:
+  #       ipv4_address: ${OPENIM_WEB_NETWORK_ADDRESS}
 #   openim-server:
 #     # image: ghcr.io/openimsdk/openim-server:main
 #     # image: registry.cn-hangzhou.aliyuncs.com/openimsdk/openim-server:main

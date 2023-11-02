@@ -28,7 +28,8 @@
 # Zookeeper password
 zookeeper:
   schema: openim
-  address: [ 172.28.0.1:12181 ]
+  # address: [ 172.28.0.1:12181 ]
+  address: [ 127.0.0.1:12181 ]
   username: ''
   password: ''
 
@@ -42,7 +43,8 @@ zookeeper:
 # Log level: 1=slient, 2=error, 3=warn, 4=info
 # Slow query threshold in milliseconds
 mysql:
-  address: [ 172.28.0.1:13306 ]
+  # address: [ 172.28.0.1:13306 ]
+  address: [ 127.0.0.1:13306 ]
   username: root
   password: openIM123
   database: openIM_v3
@@ -72,7 +74,8 @@ mongo:
 #
 # Username is required only for Redis version 6.0+
 redis:
-  address: [ 172.28.0.1:16379 ]
+  # address: [ 172.28.0.1:16379 ]
+  address: [ 127.0.0.1:16379 ]
   username: ''
   password: openIM123
 
@@ -105,8 +108,10 @@ kafka:
 # IP address to register with zookeeper when starting RPC, the IP and corresponding rpcPort should be accessible by api/gateway
 # Default listen IP is 0.0.0.0
 rpc:
-  registerIP: ''
+  # registerIP: ''
+  registerIP : 127.0.0.1
   listenIP: 0.0.0.0
+  # listenIP: 127.0.0.1
 
 ###################### API configuration information ######################
 # API configuration

@@ -52,7 +52,8 @@ func WithLogName(logName string) func(*CmdOpts) {
 func NewRootCmd(name string, opts ...func(*CmdOpts)) (rootCmd *RootCmd) {
 	rootCmd = &RootCmd{Name: name}
 	c := cobra.Command{
-		Use:   "start openIM application",
+		// Use:   "start openIM ${{name}}",
+		Use:   fmt.Sprintf("start openIM %s", name),
 		Short: fmt.Sprintf(`Start %s `, name),
 		Long:  fmt.Sprintf(`Start %s `, name),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
