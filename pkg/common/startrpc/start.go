@@ -96,7 +96,7 @@ func Start(
 	go func() {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
 			// Create a HTTP server for prometheus.
-			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", getPromPort(rpcRegisterName))}
+			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil {
 				log.Fatal("Unable to start a http server.")
 			}
@@ -127,6 +127,6 @@ func getPromPort(name string) int {
 		return config.Config.Prometheus.ThirdPrometheusPort[0]
 	default:
 		fmt.Println("name not have correct prometheus port!!!")
-		return 9090
+		return 90
 	}
 }
