@@ -209,6 +209,9 @@ func batchGetCache2[T any, K comparable](
 			return fns(ctx, key)
 		})
 		if err != nil {
+			if errs.ErrRecordNotFound.Is(err) {
+				continue
+			}
 			return nil, err
 		}
 		res = append(res, val)

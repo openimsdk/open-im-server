@@ -15,21 +15,14 @@
 package minio
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dtm-labs/rockscache"
-	"image"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -57,10 +50,11 @@ const (
 )
 
 const (
-	maxImageWidth  = 1024
-	maxImageHeight = 1024
-	maxImageSize   = 1024 * 1024 * 50
-	pathInfo       = "openim/thumbnail"
+	maxImageWidth    = 1024
+	maxImageHeight   = 1024
+	maxImageSize     = 1024 * 1024 * 50
+	pathInfo         = "openim/thumbnail"
+	maxImageInfoSize = 1024
 )
 
 func NewMinio() (s3.Interface, error) {
@@ -125,7 +119,7 @@ type Minio struct {
 	lock         sync.Locker
 	init         bool
 	prefix       string
-	rcClient     *rockscache.Client
+	cache        cache.MinioCache
 }
 
 func (m *Minio) initMinio(ctx context.Context) error {
@@ -431,107 +425,108 @@ func (m *Minio) AccessURL(ctx context.Context, name string, expire time.Duration
 	if opt.Image == nil || (opt.Image.Width < 0 && opt.Image.Height < 0 && opt.Image.Format == "") || (opt.Image.Width > maxImageWidth || opt.Image.Height > maxImageHeight) {
 		return m.presignedGetObject(ctx, name, expire, reqParams)
 	}
-	fileInfo, err := m.StatObject(ctx, name)
-	if err != nil {
-		return "", err
-	}
-	if fileInfo.Size > maxImageSize {
-		return "", errors.New("file size too large")
-	}
-	objectInfoPath := path.Join(pathInfo, fileInfo.ETag, "image.json")
-	var (
-		img  image.Image
-		info minioImageInfo
-	)
-	data, err := m.getObjectData(ctx, objectInfoPath, 1024)
-	if err == nil {
-		if err := json.Unmarshal(data, &info); err != nil {
-			return "", fmt.Errorf("unmarshal minio image info.json error: %w", err)
-		}
-		if info.NotImage {
-			return "", errors.New("not image")
-		}
-	} else if m.IsNotFound(err) {
-		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
-		if err != nil {
-			return "", err
-		}
-		defer reader.Close()
-		imageInfo, format, err := ImageStat(reader)
-		if err == nil {
-			info.NotImage = false
-			info.Format = format
-			info.Width, info.Height = ImageWidthHeight(imageInfo)
-			img = imageInfo
-		} else {
-			info.NotImage = true
-		}
-		data, err := json.Marshal(&info)
-		if err != nil {
-			return "", err
-		}
-		if _, err := m.core.Client.PutObject(ctx, m.bucket, objectInfoPath, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{}); err != nil {
-			return "", err
-		}
-	} else {
-		return "", err
-	}
-	if opt.Image.Width > info.Width || opt.Image.Width <= 0 {
-		opt.Image.Width = info.Width
-	}
-	if opt.Image.Height > info.Height || opt.Image.Height <= 0 {
-		opt.Image.Height = info.Height
-	}
-	opt.Image.Format = strings.ToLower(opt.Image.Format)
-	if opt.Image.Format == formatJpg {
-		opt.Image.Format = formatJpeg
-	}
-	switch opt.Image.Format {
-	case formatPng:
-	case formatJpeg:
-	case formatGif:
-	default:
-		if info.Format == formatGif {
-			opt.Image.Format = formatGif
-		} else {
-			opt.Image.Format = formatJpeg
-		}
-	}
-	reqParams.Set("response-content-type", "image/"+opt.Image.Format)
-	if opt.Image.Width == info.Width && opt.Image.Height == info.Height && opt.Image.Format == info.Format {
-		return m.presignedGetObject(ctx, name, expire, reqParams)
-	}
-	cacheKey := filepath.Join(pathInfo, fileInfo.ETag, fmt.Sprintf("image_w%d_h%d.%s", opt.Image.Width, opt.Image.Height, opt.Image.Format))
-	if _, err := m.core.Client.StatObject(ctx, m.bucket, cacheKey, minio.StatObjectOptions{}); err == nil {
-		return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
-	} else if !m.IsNotFound(err) {
-		return "", err
-	}
-	if img == nil {
-		reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
-		if err != nil {
-			return "", err
-		}
-		defer reader.Close()
-		img, _, err = ImageStat(reader)
-		if err != nil {
-			return "", err
-		}
-	}
-	thumbnail := resizeImage(img, opt.Image.Width, opt.Image.Height)
-	buf := bytes.NewBuffer(nil)
-	switch opt.Image.Format {
-	case formatPng:
-		err = png.Encode(buf, thumbnail)
-	case formatJpeg:
-		err = jpeg.Encode(buf, thumbnail, nil)
-	case formatGif:
-		err = gif.Encode(buf, thumbnail, nil)
-	}
-	if _, err := m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
-		return "", err
-	}
-	return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
+	return m.GetImageThumbnail(ctx, name, expire, opt.Image)
+	//fileInfo, err := m.StatObject(ctx, name)
+	//if err != nil {
+	//	return "", err
+	//}
+	//if fileInfo.Size > maxImageSize {
+	//	return "", errors.New("file size too large")
+	//}
+	//objectInfoPath := path.Join(pathInfo, fileInfo.ETag, "image.json")
+	//var (
+	//	img  image.Image
+	//	info minioImageInfo
+	//)
+	//data, err := m.getObjectData(ctx, objectInfoPath, 1024)
+	//if err == nil {
+	//	if err := json.Unmarshal(data, &info); err != nil {
+	//		return "", fmt.Errorf("unmarshal minio image info.json error: %w", err)
+	//	}
+	//	if info.NotImage {
+	//		return "", errors.New("not image")
+	//	}
+	//} else if m.IsNotFound(err) {
+	//	reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//	defer reader.Close()
+	//	imageInfo, format, err := ImageStat(reader)
+	//	if err == nil {
+	//		info.NotImage = false
+	//		info.Format = format
+	//		info.Width, info.Height = ImageWidthHeight(imageInfo)
+	//		img = imageInfo
+	//	} else {
+	//		info.NotImage = true
+	//	}
+	//	data, err := json.Marshal(&info)
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//	if _, err := m.core.Client.PutObject(ctx, m.bucket, objectInfoPath, bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{}); err != nil {
+	//		return "", err
+	//	}
+	//} else {
+	//	return "", err
+	//}
+	//if opt.Image.Width > info.Width || opt.Image.Width <= 0 {
+	//	opt.Image.Width = info.Width
+	//}
+	//if opt.Image.Height > info.Height || opt.Image.Height <= 0 {
+	//	opt.Image.Height = info.Height
+	//}
+	//opt.Image.Format = strings.ToLower(opt.Image.Format)
+	//if opt.Image.Format == formatJpg {
+	//	opt.Image.Format = formatJpeg
+	//}
+	//switch opt.Image.Format {
+	//case formatPng:
+	//case formatJpeg:
+	//case formatGif:
+	//default:
+	//	if info.Format == formatGif {
+	//		opt.Image.Format = formatGif
+	//	} else {
+	//		opt.Image.Format = formatJpeg
+	//	}
+	//}
+	//reqParams.Set("response-content-type", "image/"+opt.Image.Format)
+	//if opt.Image.Width == info.Width && opt.Image.Height == info.Height && opt.Image.Format == info.Format {
+	//	return m.presignedGetObject(ctx, name, expire, reqParams)
+	//}
+	//cacheKey := filepath.Join(pathInfo, fileInfo.ETag, fmt.Sprintf("image_w%d_h%d.%s", opt.Image.Width, opt.Image.Height, opt.Image.Format))
+	//if _, err := m.core.Client.StatObject(ctx, m.bucket, cacheKey, minio.StatObjectOptions{}); err == nil {
+	//	return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
+	//} else if !m.IsNotFound(err) {
+	//	return "", err
+	//}
+	//if img == nil {
+	//	reader, err := m.core.Client.GetObject(ctx, m.bucket, name, minio.GetObjectOptions{})
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//	defer reader.Close()
+	//	img, _, err = ImageStat(reader)
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//}
+	//thumbnail := resizeImage(img, opt.Image.Width, opt.Image.Height)
+	//buf := bytes.NewBuffer(nil)
+	//switch opt.Image.Format {
+	//case formatPng:
+	//	err = png.Encode(buf, thumbnail)
+	//case formatJpeg:
+	//	err = jpeg.Encode(buf, thumbnail, nil)
+	//case formatGif:
+	//	err = gif.Encode(buf, thumbnail, nil)
+	//}
+	//if _, err := m.core.Client.PutObject(ctx, m.bucket, cacheKey, buf, int64(buf.Len()), minio.PutObjectOptions{}); err != nil {
+	//	return "", err
+	//}
+	//return m.presignedGetObject(ctx, cacheKey, expire, reqParams)
 }
 
 func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]byte, error) {
@@ -543,7 +538,7 @@ func (m *Minio) getObjectData(ctx context.Context, name string, limit int64) ([]
 	if limit < 0 {
 		return io.ReadAll(object)
 	}
-	return io.ReadAll(io.LimitReader(object, 1024))
+	return io.ReadAll(io.LimitReader(object, limit))
 }
 
 func (m *Minio) GetThumbnailKey(ctx context.Context, name string) (string, error) {
