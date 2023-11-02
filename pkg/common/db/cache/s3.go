@@ -182,9 +182,9 @@ func (g *minioCacheRedis) GetThumbnailKey(ctx context.Context, key string, forma
 }
 
 type MinioImageInfo struct {
-	IsImg  bool   `json:"i,omitempty"`
-	Width  int    `json:"w,omitempty"`
-	Height int    `json:"h,omitempty"`
-	Format string `json:"f,omitempty"`
-	Etag   string `json:"e,omitempty"`
+	IsImg  bool   `json:"isImg"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+	Format string `json:"format"`
+	Etag   string `json:"etag"`
 }
