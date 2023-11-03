@@ -36,7 +36,7 @@ require (
 require github.com/google/uuid v1.3.1
 
 require (
-	github.com/IBM/sarama v1.41.3
+	github.com/IBM/sarama v1.42.0
 	github.com/OpenIMSDK/protocol v0.0.30
 	github.com/OpenIMSDK/tools v0.0.16
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
