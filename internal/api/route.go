@@ -143,6 +143,7 @@ func NewGinRouter(discov discoveryregistry.SvcDiscoveryRegistry, rdb redis.Unive
 	// Third service
 	thirdGroup := r.Group("/third", ParseToken)
 	{
+		thirdGroup.GET("/prometheus", GetPrometheus)
 		t := NewThirdApi(*thirdRpc)
 		thirdGroup.POST("/fcm_update_token", t.FcmUpdateToken)
 		thirdGroup.POST("/set_app_badge", t.SetAppBadge)
