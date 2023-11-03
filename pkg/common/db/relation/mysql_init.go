@@ -22,10 +22,11 @@ import (
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/mw/specialerror"
 	mysqldriver "github.com/go-sql-driver/mysql"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 const (

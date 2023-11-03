@@ -67,7 +67,7 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	var o s3.Interface
 	switch config.Config.Object.Enable {
 	case "minio":
-		o, err = minio.NewMinio()
+		o, err = minio.NewMinio(cache.NewMinioCache(rdb))
 	case "cos":
 		o, err = cos.NewCos()
 	case "oss":
@@ -78,11 +78,17 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	if err != nil {
 		return err
 	}
+	//specialerror.AddErrHandler(func(err error) errs.CodeError {
+	//	if o.IsNotFound(err) {
+	//		return errs.ErrRecordNotFound
+	//	}
+	//	return nil
+	//})
 	third.RegisterThirdServer(server, &thirdServer{
 		apiURL:        apiURL,
 		thirdDatabase: controller.NewThirdDatabase(cache.NewMsgCacheModel(rdb), db),
 		userRpcClient: rpcclient.NewUserRpcClient(client),
-		s3dataBase:    controller.NewS3Database(o, relation.NewObjectInfo(db)),
+		s3dataBase:    controller.NewS3Database(rdb, o, relation.NewObjectInfo(db)),
 		defaultExpire: time.Hour * 24 * 7,
 	})
 	return nil

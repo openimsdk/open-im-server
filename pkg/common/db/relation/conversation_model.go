@@ -16,9 +16,7 @@ package relation
 
 import (
 	"context"
-
 	"github.com/OpenIMSDK/tools/errs"
-
 	"gorm.io/gorm"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -186,6 +184,18 @@ func (c *ConversationGorm) GetAllConversationIDs(ctx context.Context) (conversat
 		c.db(ctx).Distinct("conversation_id").Pluck("conversation_id", &conversationIDs).Error,
 		"",
 	)
+}
+
+func (c *ConversationGorm) GetAllConversationIDsNumber(ctx context.Context) (int64, error) {
+	var num int64
+	err := c.db(ctx).Select("COUNT(DISTINCT conversation_id)").Model(&relation.ConversationModel{}).Count(&num).Error
+	return num, errs.Wrap(err)
+}
+
+func (c *ConversationGorm) PageConversationIDs(ctx context.Context, pageNumber, showNumber int32) (conversationIDs []string, err error) {
+	err = c.db(ctx).Distinct("conversation_id").Limit(int(showNumber)).Offset(int((pageNumber-1)*showNumber)).Pluck("conversation_id", &conversationIDs).Error
+	err = errs.Wrap(err)
+	return
 }
 
 func (c *ConversationGorm) GetUserAllHasReadSeqs(

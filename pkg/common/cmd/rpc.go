@@ -16,10 +16,12 @@ package cmd
 
 import (
 	"errors"
+
 	"github.com/OpenIMSDK/protocol/constant"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
+
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 
