@@ -41,7 +41,9 @@ jobs:
         run: |
           git config user.name 'openimbot'
           git config user.email 'openimsdk@qq.com'
-          git checkout -b cicd/patch-${{ github.event.number }}
+          BRANCH_NAME="auto-pr-$(date +'%Y%m%d%H%M%S')"
+          git checkout -b $BRANCH_NAME
+
       - uses: actions/setup-node@v4
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -50,6 +52,7 @@ jobs:
           sudo make tidy
           sudo make tools.verify.go-gitlint
           echo "Run go modules tidy successfully" 
+        continue-on-error: true
 
       - name: Run go format
         run: |
@@ -75,13 +78,8 @@ jobs:
           echo "Run unit test and get test coverage successfully" 
         continue-on-error: true
 
-    #   - name: Initialize CodeQL
-    #     uses: github/codeql-action/init@v2
-    #     with:
-    #       languages: go
-
-    #   - name: Perform CodeQL Analysis
-        # uses: github/codeql-action/analyze@v2
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: OpenIM verify copyright
         run: |
@@ -89,31 +87,26 @@ jobs:
           sudo make add-copyright
           echo "OpenIM verify successfully" 
         continue-on-error: true
-      
-    #   - name: Commit code
-    #     run: |
-    #         git add .
-    #         git commit -m "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
-    
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          commit-message: "cicd: bump League Patch to cicd/patch-${{ github.event.number }}"
-          title: Bump League Patch to cicd/patch-${{ github.event.number }}
+          commit-message: "cicd: bump League Patch"
           author: kubbot <kubbot@3293172751ysy@gmail.com>
           signoff: false
           draft: false
-          branch: "cicd/patch-${{ github.event.number }}"
+          branch: ''
           assignees: cubxxw
           reviewers: cubxxw
           delete-branch: true
+          title: "Bump League Patch auto PR: $(date +'%Y%m%d')"
           body: |
             Review criteria:
 
             - [ ] Disenchanter can connect and issue actions
             
-            This is an automated PR. @ ${{ github.actor }}
+            This is an automated PR. @ $(date +'%Y%m%d')
             <sub>[workflow](https://github.com/openimsdk/open-im-server/blob/main/.github/workflows/pull-request.yml).</sub>
           base: main
           labels: |
