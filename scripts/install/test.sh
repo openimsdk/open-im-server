@@ -1,561 +1,332 @@
 #!/usr/bin/env bash
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# The root of the build/dist directory
+IAM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
+[[ -z ${COMMON_SOURCED} ]] && source ${IAM_ROOT}/scripts/install/common.sh
 
-# A set of helpers for tests
+# API Server API Address:Port
+INSECURE_OPENIMAPI=${IAM_APISERVER_HOST}:${API_OPENIM_PORT}
+INSECURE_OPENIMAUTO=${OPENIM_RPC_AUTH_HOST}:${OPENIM_AUTH_PORT}
 
-openim::test::clear_all() {
-  if openim::test::if_supports_resource "rc" ; then
-    # shellcheck disable=SC2154
-    # Disabling because "kube_flags" is set in a parent script
-    kubectl delete "${kube_flags[@]}" rc --all --grace-period=0 --force
-  fi
-  if openim::test::if_supports_resource "pods" ; then
-    kubectl delete "${kube_flags[@]}" pods --all --grace-period=0 --force
-  fi
+Header="-HContent-Type: application/json"
+CCURL="curl -f -s -XPOST" # Create
+UCURL="curl -f -s -XPUT" # Update
+RCURL="curl -f -s -XGET" # Retrieve
+DCURL="curl -f -s -XDELETE" # Delete
+
+openim::test::user()
+{
+  token="-HAuthorization: Bearer $(openim::test::login)"
+
+  # 1. If colin, mark, john users exist, clear them first
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/users/colin; echo
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/users/mark; echo
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/users/john; echo
+
+  # 2. Create colin, mark, john users
+  ${CCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/users \
+    -d'{"password":"User@2021","metadata":{"name":"colin"},"nickname":"colin","email":"colin@foxmail.com","phone":"1812884xxxx"}'; echo
+
+  # 3. List all users
+  ${RCURL} "${token}" "http://${INSECURE_OPENIMAPI}/v1/users?offset=0&limit=10"; echo
+
+  # 4. Get detailed information of colin user
+  ${RCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/users/colin; echo
+
+  # 5. Modify colin user
+  ${UCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/users/colin \
+    -d'{"nickname":"colin","email":"colin_modified@foxmail.com","phone":"1812884xxxx"}'; echo
+
+  # 6. Delete colin user
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/users/colin; echo
+
+  # 7. Batch delete users
+  ${DCURL} "${token}" "http://${INSECURE_OPENIMAPI}/v1/users?name=mark&name=john"; echo
+  
+  openim::log::info "$(echo -e '\033[32mcongratulations, /v1/user test passed!\033[0m')"
 }
 
-# Prints the calling file and line number $1 levels deep
-# Defaults to 2 levels so you can call this to find your own caller
-openim::test::get_caller() {
-  local levels=${1:-2}
-  local caller_file="${BASH_SOURCE[${levels}]}"
-  local caller_line="${BASH_LINENO[${levels}-1]}"
-  echo "$(basename "${caller_file}"):${caller_line}"
+	# userRouterGroup := r.Group("/user")
+	# {
+	# 	userRouterGroup.POST("/user_register", u.UserRegister)
+	# 	userRouterGroup.POST("/update_user_info", ParseToken, u.UpdateUserInfo)
+	# 	userRouterGroup.POST("/set_global_msg_recv_opt", ParseToken, u.SetGlobalRecvMessageOpt)
+	# 	userRouterGroup.POST("/get_users_info", ParseToken, u.GetUsersPublicInfo)
+	# 	userRouterGroup.POST("/get_all_users_uid", ParseToken, u.GetAllUsersID)
+	# 	userRouterGroup.POST("/account_check", ParseToken, u.AccountCheck)
+	# 	userRouterGroup.POST("/get_users", ParseToken, u.GetUsers)
+	# 	userRouterGroup.POST("/get_users_online_status", ParseToken, u.GetUsersOnlineStatus)
+	# 	userRouterGroup.POST("/get_users_online_token_detail", ParseToken, u.GetUsersOnlineTokenDetail)
+	# 	userRouterGroup.POST("/subscribe_users_status", ParseToken, u.SubscriberStatus)
+	# 	userRouterGroup.POST("/get_users_status", ParseToken, u.GetUserStatus)
+	# 	userRouterGroup.POST("/get_subscribe_users_status", ParseToken, u.GetSubscribeUsersStatus)
+	# }
+openim::test::group()
+{
+    token="-HAuthorization: Bearer $(openim::test::login)"
 }
 
-# Force exact match of a returned result for a object query.  Wrap this with || to support multiple
-# valid return types.
-# This runs `kubectl get` once and asserts that the result is as expected.
-# $1: Object on which get should be run
-# $2: The go-template to run on the result
-# $3: The expected output
-# $4: Additional args to be passed to kubectl
-openim::test::get_object_assert() {
-  openim::test::object_assert 1 "$@"
+# Define a function to register a user
+openim::register_user()
+{
+  user_register_response=$(${CCURL} "${Header}" http://localhost:10002/user/user_register \
+    -d'{
+      "secret": "openIM123",
+      "users": [{"userID": "11111112","nickname": "yourNickname","faceURL": "yourFaceURL"}]
+    }')
+  
+  echo "$user_register_response"
 }
 
-# Asserts that the output of a given get query is as expected.
-# Runs the query multiple times before failing it.
-# $1: Object on which get should be run
-# $2: The go-template to run on the result
-# $3: The expected output
-# $4: Additional args to be passed to kubectl
-openim::test::wait_object_assert() {
-  openim::test::object_assert 10 "$@"
+# Define a function to get a token
+openim::get_token()
+{
+  token_response=$(${CCURL} "${Header}" http://localhost:10002/auth/user_token \
+      -d'{
+        "secret": "openIM123",
+        "platformID": 1,
+        "userID": "11111112"
+      }')
+    
+  token=$(echo $token_response | grep -Po 'token[" :]+\K[^"]+')
+  echo "$token"
 }
 
-# Asserts that the output of a given get query is as expected.
-# Can run the query multiple times before failing it.
-# $1: Number of times the query should be run before failing it.
-# $2: Object on which get should be run
-# $3: The go-template to run on the result
-# $4: The expected output
-# $5: Additional args to be passed to kubectl
-openim::test::object_assert() {
-  local tries=$1
-  local object=$2
-  local request=$3
-  local expected=$4
-  local args=${5:-}
-
-  for j in $(seq 1 "${tries}"); do
-    # shellcheck disable=SC2086
-    # Disabling because to allow for expansion here
-    res=$(kubectl get "${kube_flags[@]}" ${args} ${object} -o go-template="${request}")
-    if [[ "${res}" =~ ^$expected$ ]]; then
-        echo -n "${green}"
-        echo "$(openim::test::get_caller 3): Successful get ${object} ${request}: ${res}"
-        echo -n "${reset}"
-        return 0
-    fi
-    echo "Waiting for Get ${object} ${request} ${args}: expected: ${expected}, got: ${res}"
-    sleep $((j-1))
-  done
-
-  echo "${bold}${red}"
-  echo "$(openim::test::get_caller 3): FAIL!"
-  echo "Get ${object} ${request}"
-  echo "  Expected: ${expected}"
-  echo "  Got:      ${res}"
-  echo "${reset}${red}"
-  caller
-  echo "${reset}"
-  return 1
+# Define a function to check the account
+openim::check_account()
+{
+  local token=$1
+  account_check_response=$(${CCURL} "${Header}" -H"operationID: 1646445464564" -H"token: ${token}" http://localhost:10002/user/account_check \
+        -d'{
+          "checkUserIDs": ["11111111","11111112"]
+        }')
+  
+  echo "$account_check_response"
 }
 
-openim::test::get_object_jsonpath_assert() {
-  local object=$1
-  local request=$2
-  local expected=$3
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-  res=$(kubectl get "${kube_flags[@]}" ${object} -o jsonpath=${request})
-
-  if [[ "${res}" =~ ^$expected$ ]]; then
-      echo -n "${green}"
-      echo "$(openim::test::get_caller): Successful get ${object} ${request}: ${res}"
-      echo -n "${reset}"
-      return 0
-  else
-      echo "${bold}${red}"
-      echo "$(openim::test::get_caller): FAIL!"
-      echo "Get ${object} ${request}"
-      echo "  Expected: ${expected}"
-      echo "  Got:      ${res}"
-      echo "${reset}${red}"
-      caller
-      echo "${reset}"
-      return 1
-  fi
-}
-
-openim::test::describe_object_assert() {
-  local resource=$1
-  local object=$2
-  local matches=( "${@:3}" )
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-  result=$(kubectl describe "${kube_flags[@]}" ${resource} ${object})
-
-  for match in "${matches[@]}"; do
-    if grep -q "${match}" <<< "${result}"; then
-      echo "matched ${match}"
-    else
-      echo "${bold}${red}"
-      echo "$(openim::test::get_caller): FAIL!"
-      echo "Describe ${resource} ${object}"
-      echo "  Expected Match: ${match}"
-      echo "  Not found in:"
-      echo "${result}"
-      echo "${reset}${red}"
-      caller
-      echo "${reset}"
-      return 1
-    fi
-  done
-
-  echo -n "${green}"
-  echo "$(openim::test::get_caller): Successful describe ${resource} ${object}:"
-  echo "${result}"
-  echo -n "${reset}"
-  return 0
-}
-
-openim::test::describe_object_events_assert() {
-    local resource=$1
-    local object=$2
-    local showevents=${3:-"true"}
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-    if [[ -z "${3:-}" ]]; then
-        result=$(kubectl describe "${kube_flags[@]}" ${resource} ${object})
-    else
-        result=$(kubectl describe "${kube_flags[@]}" "--show-events=${showevents}" ${resource} ${object})
-    fi
-
-    if grep -q "No events.\|Events:" <<< "${result}"; then
-        local has_events="true"
-    else
-        local has_events="false"
-    fi
-    if [[ "${showevents}" == "${has_events}" ]]; then
-        echo -n "${green}"
-        echo "$(openim::test::get_caller): Successful describe"
-        echo "${result}"
-        echo "${reset}"
-        return 0
-    else
-        echo "${bold}${red}"
-        echo "$(openim::test::get_caller): FAIL"
-        if [[ "${showevents}" == "false" ]]; then
-            echo "  Events information should not be described in:"
-        else
-            echo "  Events information not found in:"
-        fi
-        echo "${result}"
-        echo "${reset}${red}"
-        caller
-        echo "${reset}"
-        return 1
-    fi
-}
-
-openim::test::describe_resource_assert() {
-  local resource=$1
-  local matches=( "${@:2}" )
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-  result=$(kubectl describe "${kube_flags[@]}" ${resource})
-
-  for match in "${matches[@]}"; do
-    if grep -q "${match}" <<< "${result}"; then
-      echo "matched ${match}"
-    else
-      echo "${bold}${red}"
-      echo "FAIL!"
-      echo "Describe ${resource}"
-      echo "  Expected Match: ${match}"
-      echo "  Not found in:"
-      echo "${result}"
-      echo "${reset}${red}"
-      caller
-      echo "${reset}"
-      return 1
-    fi
-  done
-
-  echo -n "${green}"
-  echo "Successful describe ${resource}:"
-  echo "${result}"
-  echo -n "${reset}"
-  return 0
-}
-
-openim::test::describe_resource_events_assert() {
-    local resource=$1
-    local showevents=${2:-"true"}
-
-    # shellcheck disable=SC2086
-    # Disabling to allow for expansion here
-    result=$(kubectl describe "${kube_flags[@]}" "--show-events=${showevents}" ${resource})
-
-    if grep -q "No events.\|Events:" <<< "${result}"; then
-        local has_events="true"
-    else
-        local has_events="false"
-    fi
-    if [[ "${showevents}" == "${has_events}" ]]; then
-        echo -n "${green}"
-        echo "Successful describe"
-        echo "${result}"
-        echo -n "${reset}"
-        return 0
-    else
-        echo "${bold}${red}"
-        echo "FAIL"
-        if [[ "${showevents}" == "false" ]]; then
-            echo "  Events information should not be described in:"
-        else
-            echo "  Events information not found in:"
-        fi
-        echo "${result}"
-        caller
-        echo "${reset}"
-        return 1
-    fi
-}
-
-openim::test::describe_resource_chunk_size_assert() {
-  # $1: the target resource
-  local resource=$1
-  # $2: comma-separated list of additional resources that will be listed
-  local additionalResources=${2:-}
-  # Remaining args are flags to pass to kubectl
-  local args=${3:-}
-
-  # Expect list requests for the target resource and the additional resources
-  local expectLists
-  IFS="," read -r -a expectLists <<< "${resource},${additionalResources}"
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-  defaultResult=$(kubectl describe ${resource} --show-events=true -v=6 ${args} "${kube_flags[@]}" 2>&1 >/dev/null)
-  for r in "${expectLists[@]}"; do
-    if grep -q "${r}?.*limit=500" <<< "${defaultResult}"; then
-      echo "query for ${r} had limit param"
-    else
-      echo "${bold}${red}"
-      echo "FAIL!"
-      echo "Describe ${resource}"
-      echo "  Expected limit param on request for: ${r}"
-      echo "  Not found in:"
-      echo "${defaultResult}"
-      echo "${reset}${red}"
-      caller
-      echo "${reset}"
-      return 1
-    fi
-  done
-
-  # shellcheck disable=SC2086
-  # Disabling to allow for expansion here
-  # Try a non-default chunk size
-  customResult=$(kubectl describe ${resource} --show-events=false --chunk-size=10 -v=6 ${args} "${kube_flags[@]}" 2>&1 >/dev/null)
-  if grep -q "${resource}?limit=10" <<< "${customResult}"; then
-    echo "query for ${resource} had user-specified limit param"
-  else
-    echo "${bold}${red}"
-    echo "FAIL!"
-    echo "Describe ${resource}"
-    echo "  Expected limit param on request for: ${r}"
-    echo "  Not found in:"
-    echo "${customResult}"
-    echo "${reset}${red}"
-    caller
-    echo "${reset}"
-    return 1
-  fi
-
-  echo -n "${green}"
-  echo "Successful describe ${resource} verbose logs:"
-  echo "${defaultResult}"
-  echo -n "${reset}"
-
-  return 0
-}
-
-# Compare sort-by resource name output (first column, skipping first line) with expected order specify in the last parameter
-openim::test::if_sort_by_has_correct_order() {
-  local var
-  var="$(echo "$1" | awk '{if(NR!=1) print $1}' | tr '\n' ':')"
-  openim::test::if_has_string "${var}" "${@:$#}"
-}
-
-openim::test::if_has_string() {
-  local message=$1
-  local match=$2
-
-  if grep -q "${match}" <<< "${message}"; then
-    echo -n "${green}"
-    echo "Successful"
-    echo -n "${reset}"
-    echo "message:${message}"
-    echo "has:${match}"
-    return 0
-  else
-    echo -n "${bold}${red}"
-    echo "FAIL!"
-    echo -n "${reset}"
-    echo "message:${message}"
-    echo "has not:${match}"
-    caller
-    return 1
-  fi
-}
-
-openim::test::if_has_not_string() {
-  local message=$1
-  local match=$2
-
-  if grep -q "${match}" <<< "${message}"; then
-    echo -n "${bold}${red}"
-    echo "FAIL!"
-    echo -n "${reset}"
-    echo "message:${message}"
-    echo "has:${match}"
-    caller
-    return 1
-  else
-    echo -n "${green}"
-    echo "Successful"
-    echo -n "${reset}"
-    echo "message:${message}"
-    echo "has not:${match}"
-    return 0
-  fi
-}
-
-openim::test::if_empty_string() {
-  local match=$1
-  if [ -n "${match}" ]; then
-    echo -n "${bold}${red}"
-    echo "FAIL!"
-    echo "${match} is not empty"
-    echo -n "${reset}"
-    caller
-    return 1
-  else
-    echo -n "${green}"
-    echo "Successful"
-    echo -n "${reset}"
-    return 0
-  fi
-}
-
-# Returns true if the required resource is part of supported resources.
-# Expects env vars:
-#   SUPPORTED_RESOURCES: Array of all resources supported by the apiserver. "*"
-#   means it supports all resources. For ex: ("*") or ("rc" "*") both mean that
-#   all resources are supported.
-#   $1: Name of the resource to be tested.
-openim::test::if_supports_resource() {
-  SUPPORTED_RESOURCES=${SUPPORTED_RESOURCES:-""}
-  REQUIRED_RESOURCE=${1:-""}
-
-  for r in "${SUPPORTED_RESOURCES[@]}"; do
-    if [[ "${r}" == "*" || "${r}" == "${REQUIRED_RESOURCE}" ]]; then
-      return 0
-    fi
-  done
-  return 1
-}
-
-openim::test::version::object_to_file() {
-  name=$1
-  flags=${2:-""}
-  file=$3
-  # shellcheck disable=SC2086
-  # Disabling because "flags" needs to allow for expansion here
-  kubectl version ${flags} | grep "${name} Version:" | sed -e s/"${name} Version: "/""/g > "${file}"
-}
-
-openim::test::version::json_object_to_file() {
-  flags=$1
-  file=$2
-  # shellcheck disable=SC2086
-  # Disabling because "flags" needs to allow for expansion here
-  kubectl version ${flags} --output json | sed -e s/' '/''/g -e s/'\"'/''/g -e s/'}'/''/g -e s/'{'/''/g -e s/'clientVersion:'/'clientVersion:,'/ -e s/'serverVersion:'/'serverVersion:,'/ | tr , '\n' > "${file}"
-}
-
-openim::test::version::json_client_server_object_to_file() {
-  flags=$1
-  name=$2
-  file=$3
-  # shellcheck disable=SC2086
-  # Disabling because "flags" needs to allow for expansion here
-  kubectl version ${flags} --output json | jq -r ".${name}" | sed -e s/'\"'/''/g -e s/'}'/''/g -e s/'{'/''/g -e /^$/d -e s/','/''/g  -e s/':'/'='/g > "${file}"
-}
-
-openim::test::version::yaml_object_to_file() {
-  flags=$1
-  file=$2
-  # shellcheck disable=SC2086
-  # Disabling because "flags" needs to allow for expansion here
-  kubectl version ${flags} --output yaml | sed -e s/' '/''/g -e s/'\"'/''/g -e /^$/d > "${file}"
-}
-
-openim::test::version::diff_assert() {
-  local original=$1
-  local comparator=${2:-"eq"}
-  local latest=$3
-  local diff_msg=${4:-""}
-  local res=""
-
-  if [ ! -f "${original}" ]; then
-        echo "${bold}${red}"
-        echo "FAIL! ${diff_msg}"
-        echo "the file '${original}' does not exit"
-        echo "${reset}${red}"
-        caller
-        echo "${reset}"
-        return 1
-  fi
-
-  if [ ! -f "${latest}" ]; then
-        echo "${bold}${red}"
-        echo "FAIL! ${diff_msg}"
-        echo "the file '${latest}' does not exit"
-        echo "${reset}${red}"
-        caller
-        echo "${reset}"
-        return 1
-  fi
-
-  if [ "${comparator}" == "exact" ]; then
-      # Skip sorting of file content for exact comparison.
-      cp "${original}" "${original}.sorted"
-      cp "${latest}" "${latest}.sorted"
-  else
-      sort "${original}" > "${original}.sorted"
-      sort "${latest}" > "${latest}.sorted"
-  fi
-
-  if [ "${comparator}" == "eq" ] || [ "${comparator}" == "exact" ]; then
-    if [ "$(diff -iwB "${original}".sorted "${latest}".sorted)" == "" ] ; then
-        echo -n "${green}"
-        echo "Successful: ${diff_msg}"
-        echo -n "${reset}"
-        return 0
-    else
-        echo "${bold}${red}"
-        echo "FAIL! ${diff_msg}"
-        echo "  Expected: "
-        cat "${original}"
-        echo "  Got: "
-        cat "${latest}"
-        echo "${reset}${red}"
-        caller
-        echo "${reset}"
-        return 1
-    fi
-  else
-    if [ -n "$(diff -iwB "${original}".sorted "${latest}".sorted)" ] ; then
-        echo -n "${green}"
-        echo "Successful: ${diff_msg}"
-        echo -n "${reset}"
-        return 0
-    else
-        echo "${bold}${red}"
-        echo "FAIL! ${diff_msg}"
-        echo "  Expected: "
-        cat "${original}"
-        echo "  Got: "
-        cat "${latest}"
-        echo "${reset}${red}"
-        caller
-        echo "${reset}"
-        return 1
+# Define a function to register, get a token and check the account
+openim::register_and_check()
+{
+  # Register a user
+  user_register_response=$(openim::register_user)
+  
+  if [[ $user_register_response == *"errCode": 0* ]]; then
+    echo "User registration successful."
+  
+    # Get token
+    token=$(openim::get_token)
+    
+    if [[ -n $token ]]; then
+      echo "Token acquired: $token"
+    
+      # Check account
+      account_check_response=$(openim::check_account $token)
+      
+      if [[ $account_check_response == *"errCode": 0* ]]; then
+        echo "Account check successful."
+      else
+        echo "Account check failed."
       fi
+    else
+      echo "Failed to acquire token."
+    fi
+  else
+    echo "User registration failed."
   fi
 }
 
-# Force exact match of kubectl stdout, stderr, and return code.
-# $1: file with actual stdout
-# $2: file with actual stderr
-# $3: the actual return code
-# $4: file with expected stdout
-# $5: file with expected stderr
-# $6: expected return code
-# $7: additional message describing the invocation
-openim::test::results::diff() {
-  local actualstdout=$1
-  local actualstderr=$2
-  local actualcode=$3
-  local expectedstdout=$4
-  local expectedstderr=$5
-  local expectedcode=$6
-  local message=$7
-  local result=0
 
-  if ! openim::test::version::diff_assert "${expectedstdout}" "exact" "${actualstdout}" "stdout for ${message}"; then
-      result=1
-  fi
-  if ! openim::test::version::diff_assert "${expectedstderr}" "exact" "${actualstderr}" "stderr for ${message}"; then
-      result=1
-  fi
-  if [ "${actualcode}" -ne "${expectedcode}" ]; then
-      echo "${bold}${red}"
-      echo "$(openim::test::get_caller): FAIL!"
-      echo "Return code for ${message}"
-      echo "  Expected: ${expectedcode}"
-      echo "  Got:      ${actualcode}"
-      echo "${reset}${red}"
-      caller
-      echo "${reset}"
-      result=1
-  fi
+openim::test::secret()
+{
+  token="-HAuthorization: Bearer $(openim::test::login)"
 
-  if [ "${result}" -eq 0 ]; then
-     echo -n "${green}"
-     echo "$(openim::test::get_caller): Successful: ${message}"
-     echo -n "${reset}"
-  fi
+  # 1. 如果有 secret0 密钥先清空
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets/secret0; echo
 
-  return "$result"
+  # 2. 创建 secret0 密钥
+  ${CCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets \
+    -d'{"metadata":{"name":"secret0"},"expires":0,"description":"admin secret"}'; echo
+
+  # 3. 列出所有密钥
+  ${RCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets; echo
+
+  # 4. 获取 secret0 密钥的详细信息
+  ${RCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets/secret0; echo
+
+  # 5. 修改 secret0 密钥
+  ${UCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets/secret0 \
+    -d'{"expires":0,"description":"admin secret(modified)"}'; echo
+
+  # 6. 删除 secret0 密钥
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets/secret0; echo
+  openim::log::info "$(echo -e '\033[32mcongratulations, /v1/secret test passed!\033[0m')"
 }
+
+openim::test::policy()
+{
+  token="-HAuthorization: Bearer $(openim::test::login)"
+
+  # 1. 如果有 policy0 策略先清空
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/policies/policy0; echo
+
+  # 2. 创建 policy0 策略
+  ${CCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/policies \
+    -d'{"metadata":{"name":"policy0"},"policy":{"description":"One policy to rule them all.","subjects":["users:<peter|ken>","users:maria","groups:admins"],"actions":["delete","<create|update>"],"effect":"allow","resources":["resources:articles:<.*>","resources:printer"],"conditions":{"remoteIPAddress":{"type":"CIDRCondition","options":{"cidr":"192.168.0.1/16"}}}}}'; echo
+
+  # 3. 列出所有策略
+  ${RCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/policies; echo
+
+  # 4. 获取 policy0 策略的详细信息
+  ${RCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/policies/policy0; echo
+
+  # 5. 修改 policy0 策略
+  ${UCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/policies/policy0 \
+    -d'{"policy":{"description":"One policy to rule them all(modified).","subjects":["users:<peter|ken>","users:maria","groups:admins"],"actions":["delete","<create|update>"],"effect":"allow","resources":["resources:articles:<.*>","resources:printer"],"conditions":{"remoteIPAddress":{"type":"CIDRCondition","options":{"cidr":"192.168.0.1/16"}}}}}'; echo
+
+  # 6. 删除 policy0 策略
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/policies/policy0; echo
+  openim::log::info "$(echo -e '\033[32mcongratulations, /v1/policy test passed!\033[0m')"
+}
+
+openim::test::apiserver()
+{
+  openim::test::user
+  openim::test::secret
+  openim::test::policy
+  openim::log::info "$(echo -e '\033[32mcongratulations, openim-apiserver test passed!\033[0m')"
+}
+
+openim::test::authz()
+{
+  token="-HAuthorization: Bearer $(openim::test::login)"
+
+  # 1. 如果有 authzpolicy 策略先清空
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/policies/authzpolicy; echo
+
+  # 2. 创建 authzpolicy 策略
+  ${CCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/policies \
+    -d'{"metadata":{"name":"authzpolicy"},"policy":{"description":"One policy to rule them all.","subjects":["users:<peter|ken>","users:maria","groups:admins"],"actions":["delete","<create|update>"],"effect":"allow","resources":["resources:articles:<.*>","resources:printer"],"conditions":{"remoteIPAddress":{"type":"CIDRCondition","options":{"cidr":"192.168.0.1/16"}}}}}'; echo
+
+  # 3. 如果有 authzsecret 密钥先清空
+  ${DCURL} "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets/authzsecret; echo
+
+  # 4. 创建 authzsecret 密钥
+  secret=$(${CCURL} "${Header}" "${token}" http://${INSECURE_OPENIMAPI}/v1/secrets -d'{"metadata":{"name":"authzsecret"},"expires":0,"description":"admin secret"}')
+  secretID=$(echo ${secret} | grep -Po 'secretID[" :]+\K[^"]+')
+  secretKey=$(echo ${secret} | grep -Po 'secretKey[" :]+\K[^"]+')
+
+  # 5. 生成 token
+  token=$(iamctl jwt sign ${secretID} ${secretKey})
+
+  # 6. 调用 /v1/authz 完成资源授权。
+  # 注意这里要 sleep 3s 等待 openim-authz-server 将新建的密钥同步到其内存中
+  echo "wait 3s to allow openim-authz-server to sync information into its memory ..."
+  sleep 3
+  ret=`$CCURL "${Header}" -H"Authorization: Bearer ${token}" http://${INSECURE_OPENIMAUTO}/v1/authz \
+    -d'{"subject":"users:maria","action":"delete","resource":"resources:articles:ladon-introduction","context":{"remoteIPAddress":"192.168.0.5"}}' | grep -Po 'allowed[" :]+\K\w+'`
+
+  if [ "$ret" != "true" ];then
+    return 1
+  fi
+
+  openim::log::info "$(echo -e '\033[32mcongratulations, /v1/authz test passed!\033[0m')"
+}
+
+openim::test::authzserver()
+{
+  openim::test::authz
+  openim::log::info "$(echo -e '\033[32mcongratulations, openim-authz-server test passed!\033[0m')"
+}
+
+openim::test::pump()
+{
+  ${RCURL} http://${IAM_PUMP_HOST}:7070/healthz | egrep -q 'status.*ok' || {
+    openim::log::error "cannot access openim-pump healthz api, openim-pump maybe down"
+      return 1
+    }
+
+  openim::test::real_pump_test
+
+  openim::log::info "$(echo -e '\033[32mcongratulations, openim-pump test passed!\033[0m')"
+}
+
+# 使用真实的数据测试 openim-pump 是否正常工作
+openim::test::real_pump_test()
+{
+  # 1. 创建访问 openim-authz-server 需要用到的密钥对
+  iamctl secret create pumptest &>/dev/null
+
+  # 2. 使用步骤 1 创建的密钥对生成 JWT Token
+  authzAccessToken=`iamctl jwt sign njcho8gJQArsq7zr5v1YpG5NcvL0aeuZ38Ti if70HgRgp021iq5ex2l7pfy5XvgtZM3q` # iamctl jwt sign $secretID $secretKey
+
+  # 3. 创建授权策略
+  iamctl policy create pumptest '{"metadata":{"name":"policy0"},"policy":{"description":"One policy to rule them all.","subjects":["users:<peter|ken>","users:maria","groups:admins"],"actions":["delete","<create|update>"],"effect":"allow","resources":["resources:articles:<.*>","resources:printer"],"conditions":{"remoteIPAddress":{"type":"CIDRCondition","options":{"cidr":"192.168.0.1/16"}}}}}' &>/dev/null
+
+  # 注意这里要 sleep 3s 等待 openim-authz-server 将新建的密钥和授权策略同步到其内存中
+  echo "wait 3s to allow openim-authz-server to sync information into its memory ..."
+  sleep 3
+
+  # 4. 访问 /v1/authz 接口进行资源授权
+  $CCURL "${Header}" -H"Authorization: Bearer ${token}" http://${INSECURE_OPENIMAUTO}/v1/authz \
+    -d'{"subject":"users:maria","action":"delete","resource":"resources:articles:ladon-introduction","context":{"remoteIPAddress":"192.168.0.5"}}' &>/dev/null
+
+  # 这里要 sleep 5s，等待 openim-pump 将 Redis 中的日志，分析并转存到 MongoDB 中
+  echo "wait 10s to allow openim-pump analyze and dump authorization log into MongoDB ..."
+  sleep 10
+
+  # 5. 查看 MongoDB 中是否有经过解析后的授权日志。
+  echo "db.iam_analytics.find()" | mongosh --quiet "${IAM_PUMP_MONGO_URL}" | grep -q "allow access" || {
+    openim::log::error "cannot find analyzed authorization log in MongoDB"
+      return 1
+    }
+}
+
+openim::test::watcher()
+{
+  ${RCURL} http://${IAM_WATCHER_HOST}:5050/healthz | egrep -q 'status.*ok' || {
+    openim::log::error "cannot access openim-watcher healthz api, openim-watcher maybe down"
+      return 1
+    }
+  openim::log::info "$(echo -e '\033[32mcongratulations, openim-watcher test passed!\033[0m')"
+}
+
+openim::test::iamctl()
+{
+  iamctl user list | egrep -q admin || {
+    openim::log::error "iamctl cannot list users from openim-apiserver"
+      return 1
+    }
+  openim::log::info "$(echo -e '\033[32mcongratulations, iamctl test passed!\033[0m')"
+}
+
+openim::test::man()
+{
+  man openim-apiserver | grep -q 'OPENIM API Server' || {
+    openim::log::error "openim man page not installed or may not installed properly"
+      return 1
+    }
+  openim::log::info "$(echo -e '\033[32mcongratulations, man test passed!\033[0m')"
+}
+
+# OpenIM Smoke Test
+openim::test::smoke()
+{
+  openim::test::apiserver
+  openim::test::authzserver
+  openim::test::pump
+  openim::test::watcher
+  openim::test::iamctl
+  openim::log::info "$(echo -e '\033[32mcongratulations, smoke test passed!\033[0m')"
+}
+
+# OpenIM Test
+openim::test::test()
+{
+  openim::test::smoke
+  openim::test::man
+
+  openim::log::info "$(echo -e '\033[32mcongratulations, all test passed!\033[0m')"
+}
+
+if [[ "$*" =~ openim::test:: ]];then
+  eval $*
+fi
