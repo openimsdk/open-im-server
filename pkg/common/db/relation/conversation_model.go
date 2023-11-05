@@ -16,6 +16,7 @@ package relation
 
 import (
 	"context"
+
 	"github.com/OpenIMSDK/tools/errs"
 	"gorm.io/gorm"
 

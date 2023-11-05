@@ -20,10 +20,11 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 
 	"github.com/google/uuid"
 
