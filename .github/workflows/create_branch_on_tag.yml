@@ -1,23 +1,13 @@
-# Copyright © 2023 OpenIM. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 name: Create Branch on Tag
 
 on:
   push:
     tags:
       - 'v*.*.0'
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   create-branch:
@@ -36,41 +26,38 @@ jobs:
     - name: Install git-chglog
       run: make install.git-chglog
 
-    - name: Create Branch
+    - name: Create Branch and Push
+      env:
+        TAG_NAME: ${{ github.ref_name }}
       run: |
-        TAG_NAME=${GITHUB_REF/refs\/tags\//}
         IFS='.' read -ra VERSION_PARTS <<< "$TAG_NAME"
         if [[ "${VERSION_PARTS[2]}" = "0" ]]; then
           BRANCH_NAME="release-v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}"
           echo "Creating branch $BRANCH_NAME"
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
+        else
+          echo "Not a release tag. Skipping branch creation."
         fi
+      continue-on-error: true
 
-    - name: Push Changes
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "Auto Commit CHANGELOG"
-        branch: release-v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}
-      env:
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-    - name: Create and Push CHANGELOG
+    - name: Create and Commit CHANGELOG
+      if: endsWith(github.ref_name, '.0')
       run: |
-        git checkout main
-        TAG_NAME=${GITHUB_REF/refs\/tags\//}
+        git fetch --all
+        TAG_NAME=${GITHUB_REF#refs/tags/}
         IFS='.' read -ra VERSION_PARTS <<< "$TAG_NAME"
-        if [[ "${VERSION_PARTS[2]}" = "0" ]]; then
-          cd CHANGELOG
-          git-chglog --tag-filter-pattern "v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.*"  -o "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
-          git add "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
-          git commit -m "Update CHANGELOG for $TAG_NAME"
-        fi
+        git checkout main
+        cd CHANGELOG
+        git-chglog --tag-filter-pattern "v${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.*" -o "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
+        git add "CHANGELOG-${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.md"
+        git commit -m "Update CHANGELOG for $TAG_NAME" || echo "No changes to commit."
+      continue-on-error: true
 
-    - name: Push Changes
-      uses: stefanzweifel/git-auto-commit-action@v5
+    - name: Push CHANGELOG to Main
+      if: steps.create-and-commit-changelog.outputs.changes == 'true'
+      uses: ad-m/github-push-action@v0.6.0
       with:
-        commit_message: "Auto Commit CHANGELOG"
+        github_token: ${{ secrets.BOT_GITHUB_TOKEN }}
         branch: main
-      env:
-        GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+    continue-on-error: true

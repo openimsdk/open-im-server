@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'Github Rebot for Cherry Pick when PR is merged'
+name: Github Rebot for Cherry Pick when PR is merged
 on:
   pull_request_target:
     types:
