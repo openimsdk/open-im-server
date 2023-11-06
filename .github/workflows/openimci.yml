@@ -64,7 +64,8 @@ jobs:
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Module Operations
       run: |
@@ -122,7 +123,8 @@ jobs:
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run OpenIM make install start
       run: |
         sudo make install
@@ -145,10 +147,13 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
       id: go
+
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Docker Operations
       run: |
         curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
@@ -168,46 +173,6 @@ jobs:
         sudo make check || \
         (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
 
-  execute-linux-systemd-scripts:
-    name: Execute OpenIM script on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    environment:
-      name: openim
-    strategy:
-      matrix:
-        go_version: ["1.20"]
-        os: ["ubuntu-latest"]
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go ${{ matrix.go_version }}
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ matrix.go_version }}
-      id: go
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: 2.x
-    - name: Docker Operations
-      run: |
-        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
-        sudo docker compose up -d
-        sudo sleep 60
-
-    - name: Module Operations
-      run: |
-        sudo make tidy
-        sudo make tools.verify.go-gitlint
-
-    - name: Build, Start, Check Services and Print Logs
-      run: |
-        sudo ./scripts/install/install.sh -i && \
-        sudo ./scripts/install/install.sh -s && \
-        sudo ./scripts/install/install.sh -u || \
-        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
-
   openim-test-build-image:
     name: Build OpenIM Docker Image
     runs-on: ubuntu-latest
@@ -221,10 +186,13 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
       id: go
+
     - name: Install Task
       uses: arduino/setup-task@v1
       with:
-        version: 2.x
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Test Docker Build
       run: |
         sudo make image

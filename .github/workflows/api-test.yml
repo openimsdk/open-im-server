@@ -1,0 +1,25 @@
+name: OpenIM API TEST
+
+on: 
+  push:
+    branches:
+        - main
+    paths-ignore:
+        - "docs/**"
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+  pull_request:
+    branches:
+        - main
+    paths-ignore:
+        - "README.md"
+        - "README_zh-CN.md"
+        - "CONTRIBUTING.md"
+        - "docs/**"
+
+env:
+  GO_VERSION: "1.19"
+  GOLANGCI_VERSION: "v1.50.1"
+
+jobs:

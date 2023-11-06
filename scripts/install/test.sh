@@ -1,4 +1,38 @@
 #!/usr/bin/env bash
+
+# Copyright © 2023 OpenIM. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# OpenIM RPC Service Test Control Script
+# 
+# This control script is designed to conduct various tests on the OpenIM RPC services.
+# It includes functions to perform smoke tests, API tests, and comprehensive service tests.
+# The script is intended to be used in a Linux environment with appropriate permissions and
+# environmental variables set.
+# 
+# It provides robust error handling and logging to facilitate debugging and service monitoring.
+# Functions within the script can be called directly or passed as arguments to perform
+# systematic testing, ensuring the integrity of the RPC services.
+# 
+# Test Functions:
+# - openim::test::smoke: Runs basic tests to ensure the fundamental functionality of the service.
+# - openim::test::api: Executes a series of API tests covering authentication, user, friend, 
+#   group, and message functionalities.
+# - openim::test::test: Performs a complete test suite, invoking utility checks and all defined
+#   test cases, and reports on their success.
+#
+
 # The root of the build/dist directory
 IAM_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
 [[ -z ${COMMON_SOURCED} ]] && source ${IAM_ROOT}/scripts/install/common.sh
@@ -1213,13 +1247,20 @@ openim::test::man() {
 
 #################################### Build Module ####################################
 
-# OpenIM Smoke Test
+# Function: openim::test::smoke
+# Purpose: Performs a series of basic tests to validate the core functionality of the system.
+# These are preliminary checks to ensure that the most crucial operations like user registration
+# and account checking are operational.
 openim::test::smoke() {
   openim::register_user
   openim::test::check_account
   openim::test::register_and_check
 }
 
+# Function: openim::test::api
+# Purpose: This function is a collection of API test calls that cover various aspects of the 
+# service such as authentication, user operations, friend management, group interactions, and 
+# message handling. It is used to verify the integrity and functionality of API endpoints.
 openim::test::api() {
   openim::test::auth
   openim::test::user
@@ -1228,7 +1269,10 @@ openim::test::api() {
   openim::test::msg
 }
 
-# OpenIM Test
+# Function: openim::test::test
+# Purpose: This is the comprehensive test function that invokes all individual test functions.
+# It ensures that each component of the service is tested, utilizing utility functions for
+# environment checking and completing with a success message if all tests pass.
 openim::test::test() {
   openim::util::require-jq
   openim::test::smoke
@@ -1238,6 +1282,9 @@ openim::test::test() {
   openim::log::info "$(echo -e '\033[32mcongratulations, all test passed!\033[0m')"
 }
 
+# Main execution logic: This conditional block checks if the script's arguments match any known
+# test function patterns and, if so, evaluates the function call. This allows for specific test
+# functions to be triggered based on the passed arguments.
 if [[ "$*" =~ openim::test:: ]];then
   eval $*
 fi
