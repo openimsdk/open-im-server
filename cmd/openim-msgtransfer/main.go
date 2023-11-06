@@ -21,6 +21,7 @@ import (
 func main() {
 	msgTransferCmd := cmd.NewMsgTransferCmd()
 	msgTransferCmd.AddPrometheusPortFlag()
+	msgTransferCmd.AddTransferProgressFlag()
 	if err := msgTransferCmd.Exec(); err != nil {
 		panic(err.Error())
 	}
