@@ -25,10 +25,10 @@ OPENIM_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 LOCAL_OUTPUT_ROOT=""${OPENIM_ROOT}"/${OUT_DIR:-_output}"
 source "${OPENIM_ROOT}/scripts/lib/init.sh"
 
-#TODO: Access to the IP networks outside, or you want to use the IP network
-# IP=127.0.0.1
-if [ -z "${IP}" ]; then
-	IP=$(openim::util::get_server_ip)
+#TODO: Access to the OPENIM_IP networks outside, or you want to use the OPENIM_IP network
+# OPENIM_IP=127.0.0.1
+if [ -z "${OPENIM_IP}" ]; then
+	OPENIM_IP=$(openim::util::get_server_ip)
 fi
 
 # config.gateway custom bridge modes
@@ -49,14 +49,14 @@ def "DATA_DIR" "${OPENIM_ROOT}"
 def "USER" "root"
 
 # 设置统一的密码，方便记忆
-def "PASSWORD" "openIM123"
+readonly PASSWORD=${PASSWORD:-'openIM123'}
 
 # 设置统一的数据库名称，方便管理
 def "DATABASE_NAME" "openIM_v3"
 
 # Linux系统 openim 用户
 def "LINUX_USERNAME" "openim"
-def "LINUX_PASSWORD" "${PASSWORD}"
+readonly LINUX_PASSWORD=${LINUX_PASSWORD:-"${PASSWORD}"}
 
 # 设置安装目录
 def "INSTALL_DIR" "${LOCAL_OUTPUT_ROOT}/installs"
@@ -167,7 +167,8 @@ def "ZOOKEEPER_PASSWORD" ""                        # Zookeeper的密码
 def "MYSQL_PORT" "13306"                       # MySQL的端口
 def "MYSQL_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MySQL的地址
 def "MYSQL_USERNAME" "${USER}"                 # MySQL的用户名
-def "MYSQL_PASSWORD" "${PASSWORD}"             # MySQL的密码
+# MySQL的密码
+readonly MYSQL_PASSWORD=${MYSQL_PASSWORD:-"${PASSWORD}"}
 def "MYSQL_DATABASE" "${DATABASE_NAME}"        # MySQL的数据库名
 def "MYSQL_MAX_OPEN_CONN" "1000"               # 最大打开的连接数
 def "MYSQL_MAX_IDLE_CONN" "100"                # 最大空闲连接数
@@ -181,12 +182,13 @@ def "MONGO_PORT" "37017"                       # MongoDB的端口
 def "MONGO_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}" # MongoDB的地址
 def "MONGO_DATABASE" "${DATABASE_NAME}"        # MongoDB的数据库名
 def "MONGO_USERNAME" "${USER}"                 # MongoDB的用户名
-def "MONGO_PASSWORD" "${PASSWORD}"             # MongoDB的密码
+# MongoDB的密码
+readonly MONGO_PASSWORD=${MONGO_PASSWORD:-"${PASSWORD}"}
 def "MONGO_MAX_POOL_SIZE" "100"                # 最大连接池大小
 
 ###################### Object 配置信息 ######################
 # app要能访问到此ip和端口或域名
-readonly API_URL=${API_URL:-"http://${IP}:${API_OPENIM_PORT}"}
+readonly API_URL=${API_URL:-"http://${OPENIM_IP}:${API_OPENIM_PORT}"}
 
 def "OBJECT_ENABLE" "minio" # 对象是否启用
 # 对象的API地址
@@ -197,9 +199,9 @@ def "MINIO_PORT" "10005"    # MinIO的端口
 def MINIO_ADDRESS "${DOCKER_BRIDGE_GATEWAY}"
 readonly MINIO_ENDPOINT=${MINIO_ENDPOINT:-"http://${MINIO_ADDRESS}:${MINIO_PORT}"}
 def "MINIO_ACCESS_KEY" "${USER}"                                                  # MinIO的访问密钥ID
-def "MINIO_SECRET_KEY" "${PASSWORD}"                                              # MinIO的密钥
+readonly MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-"${PASSWORD}"}
 def "MINIO_SESSION_TOKEN"                                                         # MinIO的会话令牌
-readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址
+readonly MINIO_SIGN_ENDPOINT=${MINIO_SIGN_ENDPOINT:-"http://${OPENIM_IP}:${MINIO_PORT}"} # signEndpoint为minio公网地址
 def "MINIO_PUBLIC_READ" "false"                                                   # 公有读
 
 # 腾讯云COS的存储桶URL
@@ -220,7 +222,7 @@ def "OSS_PUBLIC_READ" "false"                                           # 公有
 def "REDIS_PORT" "16379"                                    # Redis的端口
 def "REDIS_ADDRESS" "${DOCKER_BRIDGE_GATEWAY}"              # Redis的地址
 def "REDIS_USERNAME"                                        # Redis的用户名
-def "REDIS_PASSWORD" "${PASSWORD}"                          # Redis的密码
+readonly REDIS_PASSWORD=${REDIS_PASSWORD:-"${PASSWORD}"}
 
 ###################### Kafka 配置信息 ######################
 def "KAFKA_USERNAME"                                        # `Kafka` 的用户名
@@ -329,7 +331,8 @@ def "RETAIN_CHAT_RECORDS" "365"       # 保留聊天记录
 readonly CHAT_RECORDS_CLEAR_TIME=${CHAT_RECORDS_CLEAR_TIME:-'0 2 * * 3'}
 # 消息销毁时间
 readonly MSG_DESTRUCT_TIME=${MSG_DESTRUCT_TIME:-'0 2 * * *'}
-def "SECRET" "${PASSWORD}"      # 密钥
+# 密钥
+readonly SECRET=${SECRET:-"${PASSWORD}"}
 def "TOKEN_EXPIRE" "90"         # Token到期时间
 def "FRIEND_VERIFY" "false"     # 朋友验证
 def "IOS_PUSH_SOUND" "xxx"      # IOS推送声音

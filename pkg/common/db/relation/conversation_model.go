@@ -143,7 +143,7 @@ func (c *ConversationGorm) FindRecvMsgNotNotifyUserIDs(
 	return userIDs, utils.Wrap(
 		c.db(ctx).
 			Where("group_id = ? and recv_msg_opt = ?", groupID, constant.ReceiveNotNotifyMessage).
-			Pluck("user_id", &userIDs).
+			Pluck("owner_user_id", &userIDs).
 			Error,
 		"",
 	)
@@ -156,7 +156,7 @@ func (c *ConversationGorm) FindSuperGroupRecvMsgNotNotifyUserIDs(
 	return userIDs, utils.Wrap(
 		c.db(ctx).
 			Where("group_id = ? and recv_msg_opt = ? and conversation_type = ?", groupID, constant.ReceiveNotNotifyMessage, constant.SuperGroupChatType).
-			Pluck("user_id", &userIDs).
+			Pluck("owner_user_id", &userIDs).
 			Error,
 		"",
 	)

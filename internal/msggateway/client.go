@@ -135,7 +135,7 @@ func (c *Client) readMessage() {
 			return
 		}
 		log.ZDebug(c.ctx, "readMessage", "messageType", messageType)
-		if c.closed == true { // 连接刚置位已经关闭，但是协程还没退出的场景
+		if c.closed { // 连接刚置位已经关闭，但是协程还没退出的场景
 			c.closedErr = ErrConnClosed
 			return
 		}
@@ -282,10 +282,10 @@ func (c *Client) KickOnlineMessage() error {
 func (c *Client) writeBinaryMsg(resp Resp) error {
 	c.w.Lock()
 	defer c.w.Unlock()
-	if c.closed == true {
+	if c.closed {
 		return nil
 	}
-	encodedBuf := bufferPool.Get().([]byte)
+
 	resultBuf := bufferPool.Get().([]byte)
 	encodedBuf, err := c.longConnServer.Encode(resp)
 	if err != nil {
@@ -307,9 +307,12 @@ func (c *Client) writeBinaryMsg(resp Resp) error {
 func (c *Client) writePongMsg() error {
 	c.w.Lock()
 	defer c.w.Unlock()
-	if c.closed == true {
+	if c.closed {
 		return nil
 	}
-	_ = c.conn.SetWriteDeadline(writeWait)
+	err := c.conn.SetWriteDeadline(writeWait)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
 	return c.conn.WriteMessage(PongMessage, nil)
 }
