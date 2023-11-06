@@ -172,8 +172,11 @@ func (c *Client) handleMessage(message []byte) error {
 			return utils.Wrap(err, "")
 		}
 	}
-	var binaryReq Req
-	err := c.longConnServer.Decode(message, &binaryReq)
+
+	var binaryReq = getReq()
+	defer freeReq(binaryReq)
+
+	err := c.longConnServer.Decode(message, binaryReq)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
@@ -219,10 +222,10 @@ func (c *Client) handleMessage(message []byte) error {
 		)
 	}
 
-	return c.replyMessage(ctx, &binaryReq, messageErr, resp)
+	return c.replyMessage(ctx, binaryReq, messageErr, resp)
 }
 
-func (c *Client) setAppBackgroundStatus(ctx context.Context, req Req) ([]byte, error) {
+func (c *Client) setAppBackgroundStatus(ctx context.Context, req *Req) ([]byte, error) {
 	resp, isBackground, messageErr := c.longConnServer.SetUserDeviceBackground(ctx, req)
 	if messageErr != nil {
 		return nil, messageErr
