@@ -83,7 +83,6 @@ func Start(
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	metric.InitializeMetrics(srv)
 	err = client.Register(
 		rpcRegisterName,
 		registerIP,
@@ -95,6 +94,7 @@ func Start(
 	}
 	go func() {
 		if config.Config.Prometheus.Enable && prometheusPort != 0 {
+			metric.InitializeMetrics(srv)
 			// Create a HTTP server for prometheus.
 			httpServer := &http.Server{Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}), Addr: fmt.Sprintf("0.0.0.0:%d", prometheusPort)}
 			if err := httpServer.ListenAndServe(); err != nil {
