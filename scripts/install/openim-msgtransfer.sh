@@ -49,7 +49,7 @@ function openim::msgtransfer::start()
     openim::log::error_exit "OPENIM_MSGGATEWAY_NUM must be equal to the number of MSG_TRANSFER_PROM_PORTS"
     fi
 
-    for (( i=1; i<=$OPENIM_MSGGATEWAY_NUM; i++ )) do
+    for (( i=0; i=$OPENIM_MSGGATEWAY_NUM; i++ )) do
       openim::log::info "prometheus port: ${MSG_TRANSFER_PROM_PORTS[$i]}"
       PROMETHEUS_PORT_OPTION=""
       if [[ -n "${OPENIM_PROMETHEUS_PORTS[$i]}" ]]; then
