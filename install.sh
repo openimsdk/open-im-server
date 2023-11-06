@@ -458,25 +458,20 @@ function openim_color() {
 }
 
 # --- helper functions for logs ---
-info()
-{
+info() {
     echo -e "[${GREEN_PREFIX}INFO${COLOR_SUFFIX}] " "$@"
 }
-warn()
-{
+warn() {
     echo -e "[${YELLOW_PREFIX}WARN${COLOR_SUFFIX}] " "$@" >&2
 }
-fatal()
-{
+fatal() {
     echo -e "[${RED_PREFIX}ERROR${COLOR_SUFFIX}] " "$@" >&2
     exit 1
 }
-debug()
-{
+debug() {
     echo -e "[${BLUE_PREFIX}DEBUG${COLOR_SUFFIX}]===> " "$@"
 }
-success()
-{
+success() {
     echo -e "${BRIGHT_GREEN_PREFIX}=== [SUCCESS] ===${COLOR_SUFFIX}\n=> " "$@"
 }
 

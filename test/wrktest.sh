@@ -46,8 +46,7 @@ openim::wrk::setup() {
 }
 
 # Print usage infomation
-openim::wrk::usage()
-{
+openim::wrk::usage() {
   cat << EOF
 
 Usage: $0 [OPTION] [diff] URL
@@ -66,8 +65,7 @@ EOF
 }
 
 # Convert plot data to useable data
-function openim::wrk::convert_plot_data()
-{
+function openim::wrk::convert_plot_data() {
   echo "$1" | awk -v datfile="${wrkdir}/${datfile}" ' {
   if ($0 ~ "Running") {
     common_time=$2
@@ -123,8 +121,7 @@ if (s ~ "s") {
 }
 
 # Remove existing data file
-function openim::wrk::prepare()
-{
+function openim::wrk::prepare() {
   rm -f ${wrkdir}/${datfile}
 }
 
@@ -167,8 +164,7 @@ EOF
 }
 
 # Plot diff graphic
-function openim::wrk::plot_diff()
-{
+function openim::wrk::plot_diff() {
   gnuplot <<  EOF
 set terminal png enhanced #输出格式为png文件
 set xlabel 'Concurrent'

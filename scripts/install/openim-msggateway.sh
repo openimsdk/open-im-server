@@ -25,8 +25,7 @@ openim::util::set_max_fd 200000
 
 SERVER_NAME="openim-msggateway"
 
-function openim::msggateway::start()
-{
+function openim::msggateway::start() {
     openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
     openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGGATEWAY_BINARY}"
 
@@ -79,8 +78,7 @@ EOF
 }
 
 # install openim-msggateway
-function openim::msggateway::install()
-{
+function openim::msggateway::install() {
   pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-msggateway
@@ -109,8 +107,7 @@ function openim::msggateway::install()
 
 
 # Unload
-function openim::msggateway::uninstall()
-{
+function openim::msggateway::uninstall() {
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
@@ -122,8 +119,7 @@ function openim::msggateway::uninstall()
 }
 
 # Status Check
-function openim::msggateway::status()
-{
+function openim::msggateway::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   systemctl status ${SERVER_NAME}|grep -q 'active' || {
     openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
