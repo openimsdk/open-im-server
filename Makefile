@@ -166,6 +166,11 @@ test:
 cover:
 	@$(MAKE) go.test.cover
 
+## test-api: Run api test. ✨
+.PHONY: test-api
+test-api:
+	@$(MAKE) go.test.api
+
 ## updates: Check for updates to go.mod dependencies. ✨
 .PHONY: updates
 	@$(MAKE) go.updates
