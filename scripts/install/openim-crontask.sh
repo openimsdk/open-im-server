@@ -43,8 +43,7 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-crontask"
 
-function openim::crontask::start()
-{
+function openim::crontask::start() {
     openim::log::info "Start OpenIM Cron, binary root: ${SERVER_NAME}"
     openim::log::status "Start OpenIM Cron, path: ${OPENIM_CRONTASK_BINARY}"
 
@@ -66,8 +65,7 @@ EOF
 }
 
 # install openim-crontask
-function openim::crontask::install()
-{
+function openim::crontask::install() {
   pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-crontask
@@ -97,8 +95,7 @@ function openim::crontask::install()
 
 
 # Unload
-function openim::crontask::uninstall()
-{
+function openim::crontask::uninstall() {
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
@@ -110,8 +107,7 @@ function openim::crontask::uninstall()
 }
 
 # Status Check
-function openim::crontask::status()
-{
+function openim::crontask::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   if systemctl is-active --quiet "${SERVER_NAME}"; then
     openim::log::info "${SERVER_NAME} is running successfully."

@@ -29,6 +29,9 @@ if [ $# -ne 2 ];then
     exit 1
 fi
 
+# Check if the required commands exist
+openim::util::require-dig
+
 source "${env_file}"
 
 declare -A envs

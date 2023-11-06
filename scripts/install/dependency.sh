@@ -43,10 +43,10 @@ docker run -d \
     -v "./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro" \
     -e TZ=Asia/Shanghai \
     -e wiredTigerCacheSizeGB=1 \
-    -e MONGO_INITDB_ROOT_USERNAME=${USER} \
+    -e MONGO_INITDB_ROOT_USERNAME=${OPENIM_USER} \
     -e MONGO_INITDB_ROOT_PASSWORD=${PASSWORD} \
     -e MONGO_INITDB_DATABASE=openIM \
-    -e MONGO_USERNAME=${USER} \
+    -e MONGO_USERNAME=${OPENIM_USER} \
     -e MONGO_PASSWORD=${PASSWORD} \
     --restart always \
     mongo:6.0.2 --wiredTigerCacheSizeGB 1 --auth
@@ -94,7 +94,7 @@ docker run -d \
     -p 9090:9090 \
     -v "/mnt/data:/data" \
     -v "/mnt/config:/root/.minio" \
-    -e MINIO_ROOT_USER=${USER} \
+    -e MINIO_ROOT_USER=${OPENIM_USER} \
     -e MINIO_ROOT_PASSWORD=${PASSWORD} \
     --restart always \
     minio/minio server /data --console-address ':9090'

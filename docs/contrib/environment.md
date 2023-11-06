@@ -136,13 +136,13 @@ For convenience, configuration through modifying environment variables is recomm
   export PASSWORD="openIM123"
   ```
 
-+ USER
++ OPENIM_USER
 
   + **Description**: Username for mysql, mongodb, redis, and minio.
   + **Default**: `root`
 
   ```bash
-  export USER="root"
+  export OPENIM_USER="root"
   ```
 
 + API_URL
