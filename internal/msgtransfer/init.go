@@ -118,13 +118,15 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		return err
 	}*/
 	////////////////////////////
-	reg := prometheus.NewRegistry()
-	reg.MustRegister(
-		collectors.NewGoCollector(),
-	)
-	reg.MustRegister(prom_metrics.GetGrpcCusMetrics("Transfer")...)
-	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+	if config.Config.Prometheus.Enable {
+		reg := prometheus.NewRegistry()
+		reg.MustRegister(
+			collectors.NewGoCollector(),
+		)
+		reg.MustRegister(prom_metrics.GetGrpcCusMetrics("Transfer")...)
+		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
+	}
 	////////////////////////////////////////
 	wg.Wait()
 	return nil
