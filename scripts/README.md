@@ -123,7 +123,7 @@ Each directory and script in the structure should be understood as a part of a l
 
 **PATH:** `scripts/lib/logging.sh`
 
-+ [log details](../docs/contrib/bash_log.md)
++ [log details](../docs/contrib/bash-log.md)
 
 ## Supported platforms
 

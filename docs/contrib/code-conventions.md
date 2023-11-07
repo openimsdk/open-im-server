@@ -24,7 +24,48 @@
   - Do not use uppercase characters, underscores, or dashes in package names.
   - Please consider parent directory name when choosing a package name. For example, `pkg/controllers/autoscaler/foo.go` should say `package autoscaler` not `package autoscalercontroller`.
     - Unless there's a good reason, the `package foo` line should match the name of the directory in which the `.go` file exists.
-    - Importers can use a different name if they need to disambiguate.
+    - Importers can use a different name if they need to disambiguate.Ⓜ️
+
+## OpenIM Naming Conventions Guide
+
+Welcome to the OpenIM Naming Conventions Guide. This document outlines the best practices and standardized naming conventions that our project follows to maintain clarity, consistency, and alignment with industry standards, specifically taking cues from the Google Naming Conventions.
+
+### 1. General File Naming
+
+Files within the OpenIM project should adhere to the following rules:
+
++ Both hyphens (`-`) and underscores (`_`) are acceptable in file names.
++ Underscores (`_`) are preferred for general files to enhance readability and compatibility.
++ For example: `data_processor.py`, `user_profile_generator.go`
+
+### 2. Special File Types
+
+#### a. Script and Markdown Files
+
++ Bash scripts and Markdown files should use hyphens (`-`) to facilitate better searchability and compatibility in web browsers.
++ For example: `deploy-script.sh`, `project-overview.md`
+
+#### b. Uppercase Markdown Documentation
+
++ Markdown files with uppercase names, such as `README`, may include underscores (`_`) to separate words if necessary.
++ For example: `README_SETUP.md`, `CONTRIBUTING_GUIDELINES.md`
+
+### 3. Directory Naming
+
++ Directories must use hyphens (`-`) exclusively to maintain a clean and organized file structure.
++ For example: `image-assets`, `user-data`
+
+### 4. Configuration Files
+
++ Configuration files, including but not limited to `.yaml` files, should use hyphens (`-`).
++ For example: `app-config.yaml`, `logging-config.yaml`
+
+### Best Practices
+
++ Keep names concise but descriptive enough to convey the file's purpose or contents at a glance.
++ Avoid using spaces in names; use hyphens or underscores instead to improve compatibility across different operating systems and environments.
++ Stick to lowercase naming where possible for consistency and to prevent issues with case-sensitive systems.
++ Include version numbers or dates in file names if the file is subject to updates, following the format: `project-plan-v1.2.md` or `backup-2023-03-15.sql`.
 
 ## Directory and file conventions
 
