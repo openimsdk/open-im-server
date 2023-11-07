@@ -32,8 +32,8 @@ This section offers developers a detailed guide on how to contribute code, set u
 This section introduces various conventions and policies within OpenIM, encompassing code, logs, versions, and more.
 
 - [API Conversions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/api.md) - Guidelines and methods for API conversions.
-- [Logging Policy](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/bash_log.md) - Logging policies and conventions in OpenIM.
-- [CI/CD Actions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/cicd_actions.md) - Procedures and conventions for CI/CD.
+- [Logging Policy](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/bash-log.md) - Logging policies and conventions in OpenIM.
+- [CI/CD Actions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/cicd-actions.md) - Procedures and conventions for CI/CD.
 - [Commit Conventions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/commit.md) - Conventions for code commits in OpenIM.
 - [Directory Conventions](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/directory.md) - Directory structure and conventions within OpenIM.
 - [Error Codes](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/error-code.md) - List and descriptions of error codes.
@@ -57,7 +57,7 @@ If you're a developer or someone keen on contributing:
 As a community maintainer:
 
 - Ensure that contributions align with the standards outlined in our documentation.
-- Regularly review the [Logging Policy](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/bash_log.md) and [Error Codes](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/error-code.md) to stay updated.
+- Regularly review the [Logging Policy](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/bash-log.md) and [Error Codes](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/error-code.md) to stay updated.
 
 ## For Users
 
