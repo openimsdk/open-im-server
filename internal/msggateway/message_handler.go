@@ -16,6 +16,7 @@ package msggateway
 
 import (
 	"context"
+	"sync"
 
 	"github.com/OpenIMSDK/protocol/push"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -49,6 +50,27 @@ func (r *Req) String() string {
 	return utils.StructToJsonString(tReq)
 }
 
+var reqPool = sync.Pool{
+	New: func() any {
+		return new(Req)
+	},
+}
+
+func getReq() *Req {
+	req := reqPool.Get().(*Req)
+	req.Data = nil
+	req.MsgIncr = ""
+	req.OperationID = ""
+	req.ReqIdentifier = 0
+	req.SendID = ""
+	req.Token = ""
+	return req
+}
+
+func freeReq(req *Req) {
+	reqPool.Put(req)
+}
+
 type Resp struct {
 	ReqIdentifier int32  `json:"reqIdentifier"`
 	MsgIncr       string `json:"msgIncr"`
@@ -69,12 +91,12 @@ func (r *Resp) String() string {
 }
 
 type MessageHandler interface {
-	GetSeq(context context.Context, data Req) ([]byte, error)
-	SendMessage(context context.Context, data Req) ([]byte, error)
-	SendSignalMessage(context context.Context, data Req) ([]byte, error)
-	PullMessageBySeqList(context context.Context, data Req) ([]byte, error)
-	UserLogout(context context.Context, data Req) ([]byte, error)
-	SetUserDeviceBackground(context context.Context, data Req) ([]byte, bool, error)
+	GetSeq(context context.Context, data *Req) ([]byte, error)
+	SendMessage(context context.Context, data *Req) ([]byte, error)
+	SendSignalMessage(context context.Context, data *Req) ([]byte, error)
+	PullMessageBySeqList(context context.Context, data *Req) ([]byte, error)
+	UserLogout(context context.Context, data *Req) ([]byte, error)
+	SetUserDeviceBackground(context context.Context, data *Req) ([]byte, bool, error)
 }
 
 var _ MessageHandler = (*GrpcHandler)(nil)
@@ -94,7 +116,7 @@ func NewGrpcHandler(validate *validator.Validate, client discoveryregistry.SvcDi
 	}
 }
 
-func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
+func (g GrpcHandler) GetSeq(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.GetMaxSeqReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
@@ -113,7 +135,7 @@ func (g GrpcHandler) GetSeq(context context.Context, data Req) ([]byte, error) {
 	return c, nil
 }
 
-func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, error) {
+func (g GrpcHandler) SendMessage(context context.Context, data *Req) ([]byte, error) {
 	msgData := sdkws.MsgData{}
 	if err := proto.Unmarshal(data.Data, &msgData); err != nil {
 		return nil, err
@@ -133,7 +155,7 @@ func (g GrpcHandler) SendMessage(context context.Context, data Req) ([]byte, err
 	return c, nil
 }
 
-func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byte, error) {
+func (g GrpcHandler) SendSignalMessage(context context.Context, data *Req) ([]byte, error) {
 	resp, err := g.msgRpcClient.SendMsg(context, nil)
 	if err != nil {
 		return nil, err
@@ -145,7 +167,7 @@ func (g GrpcHandler) SendSignalMessage(context context.Context, data Req) ([]byt
 	return c, nil
 }
 
-func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]byte, error) {
+func (g GrpcHandler) PullMessageBySeqList(context context.Context, data *Req) ([]byte, error) {
 	req := sdkws.PullMessageBySeqsReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
@@ -164,7 +186,7 @@ func (g GrpcHandler) PullMessageBySeqList(context context.Context, data Req) ([]
 	return c, nil
 }
 
-func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, error) {
+func (g GrpcHandler) UserLogout(context context.Context, data *Req) ([]byte, error) {
 	req := push.DelUserPushTokenReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, err
@@ -180,7 +202,7 @@ func (g GrpcHandler) UserLogout(context context.Context, data Req) ([]byte, erro
 	return c, nil
 }
 
-func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data Req) ([]byte, bool, error) {
+func (g GrpcHandler) SetUserDeviceBackground(_ context.Context, data *Req) ([]byte, bool, error) {
 	req := sdkws.SetAppBackgroundStatusReq{}
 	if err := proto.Unmarshal(data.Data, &req); err != nil {
 		return nil, false, err
