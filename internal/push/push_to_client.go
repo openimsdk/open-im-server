@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
 
 	"github.com/OpenIMSDK/protocol/conversation"
 
@@ -82,6 +83,8 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 		offlinePusher = fcm.NewClient(cache)
 	case "jpush":
 		offlinePusher = jpush.NewClient()
+	default:
+		offlinePusher = dummy.NewClient()
 	}
 	return offlinePusher
 }
