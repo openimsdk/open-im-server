@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"io"
 	"net/http"
 	"net/url"
@@ -29,6 +28,8 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+
+	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 
 	"github.com/OpenIMSDK/tools/log"
 	"github.com/minio/minio-go/v7"

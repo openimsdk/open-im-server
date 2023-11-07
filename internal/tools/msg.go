@@ -17,11 +17,15 @@ package tools
 import (
 	"context"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
+	"math"
+
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"math"
+
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+
+	"math/rand"
 
 	"github.com/OpenIMSDK/tools/errs"
 	"github.com/OpenIMSDK/tools/log"
@@ -29,7 +33,6 @@ import (
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/tx"
 	"github.com/OpenIMSDK/tools/utils"
-	"math/rand"
 
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
@@ -73,7 +76,7 @@ func InitMsgTool() (*MsgTool, error) {
 	if err != nil {
 		return nil, err
 	}
-	discov, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	discov, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	/*
 		discov, err := zookeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 			zookeeper.WithFreq(time.Hour), zookeeper.WithRoundRobin(), zookeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,

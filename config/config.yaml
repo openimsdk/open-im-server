@@ -198,7 +198,7 @@ rpcRegisterName:
 # Whether to output in json format
 # Whether to include stack trace in logs
 log:
-  storageLocation: ../logs/
+  storageLocation: ./logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6

@@ -24,6 +24,7 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
+// decryptPEM decrypts a PEM block using a password.
 func decryptPEM(data []byte, passphrase []byte) ([]byte, error) {
 	if len(passphrase) == 0 {
 		return data, nil

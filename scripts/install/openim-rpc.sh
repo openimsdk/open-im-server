@@ -173,8 +173,7 @@ function openim::rpc::info() {
 }
 
 # install openim-rpc
-function openim::rpc::install()
-{
+function openim::rpc::install() {
     pushd "${OPENIM_ROOT}"
 
     # 1. Build openim-rpc
@@ -208,8 +207,7 @@ function openim::rpc::install()
 }
 
 # Unload
-function openim::rpc::uninstall()
-{
+function openim::rpc::uninstall() {
     set +o errexit
     for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
         openim::common::sudo "systemctl stop ${service}"
@@ -223,8 +221,7 @@ function openim::rpc::uninstall()
 }
 
 # Status Check
-function openim::rpc::status()
-{
+function openim::rpc::status() {
     for service in "${OPENIM_RPC_SERVICE_LISTARIES[@]}"; do
         # Check the running status of the ${service}. If active (running) is displayed, the ${service} is started successfully.
         systemctl status ${service}|grep -q 'active' || {

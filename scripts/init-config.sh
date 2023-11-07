@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # This script automatically initializes the various configuration files
-# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init_config.md
+# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init-config.md
 
 set -o errexit
 set -o nounset
@@ -31,6 +31,7 @@ readonly ENV_FILE=${ENV_FILE:-"${OPENIM_ROOT}/scripts/install/environment.sh"}
 declare -A TEMPLATES=(
   ["${OPENIM_ROOT}/deployments/templates/env_template.yaml"]="${OPENIM_ROOT}/.env"
   ["${OPENIM_ROOT}/deployments/templates/openim.yaml"]="${OPENIM_ROOT}/config/config.yaml"
+  ["${OPENIM_ROOT}/deployments/templates/prometheus.yml"]="${OPENIM_ROOT}/config/prometheus.yml"
 )
 
 for template in "${!TEMPLATES[@]}"; do

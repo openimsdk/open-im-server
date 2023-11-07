@@ -16,8 +16,8 @@ package msg
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
@@ -59,7 +59,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	req *pbmsg.SendMsgReq,
 ) (resp *pbmsg.SendMsgResp, err error) {
 	if err = m.messageVerification(ctx, req); err != nil {
-		prom_metrics.GroupChatMsgProcessFailedCounter.Inc()
+		prommetrics.GroupChatMsgProcessFailedCounter.Inc()
 		return nil, err
 	}
 	if err = callbackBeforeSendGroupMsg(ctx, req); err != nil {
@@ -78,7 +78,7 @@ func (m *msgServer) sendMsgSuperGroupChat(
 	if err = callbackAfterSendGroupMsg(ctx, req); err != nil {
 		log.ZWarn(ctx, "CallbackAfterSendGroupMsg", err)
 	}
-	prom_metrics.GroupChatMsgProcessSuccessCounter.Inc()
+	prommetrics.GroupChatMsgProcessSuccessCounter.Inc()
 	resp = &pbmsg.SendMsgResp{}
 	resp.SendTime = req.MsgData.SendTime
 	resp.ServerMsgID = req.MsgData.ServerMsgID
@@ -161,7 +161,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 		}
 	}
 	if !isSend {
-		prom_metrics.SingleChatMsgProcessFailedCounter.Inc()
+		prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 		return nil, nil
 	} else {
 		if err = callbackBeforeSendSingleMsg(ctx, req); err != nil {
@@ -171,7 +171,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			return nil, err
 		}
 		if err := m.MsgDatabase.MsgToMQ(ctx, utils.GenConversationUniqueKeyForSingle(req.MsgData.SendID, req.MsgData.RecvID), req.MsgData); err != nil {
-			prom_metrics.SingleChatMsgProcessFailedCounter.Inc()
+			prommetrics.SingleChatMsgProcessFailedCounter.Inc()
 			return nil, err
 		}
 		err = callbackAfterSendSingleMsg(ctx, req)
@@ -183,7 +183,7 @@ func (m *msgServer) sendMsgSingleChat(ctx context.Context, req *pbmsg.SendMsgReq
 			ClientMsgID: req.MsgData.ClientMsgID,
 			SendTime:    req.MsgData.SendTime,
 		}
-		prom_metrics.SingleChatMsgProcessSuccessCounter.Inc()
+		prommetrics.SingleChatMsgProcessSuccessCounter.Inc()
 		return resp, nil
 	}
 }

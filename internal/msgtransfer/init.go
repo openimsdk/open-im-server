@@ -17,16 +17,15 @@ package msgtransfer
 import (
 	"errors"
 	"fmt"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/discovery_register"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"log"
+	"net/http"
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"net/http"
-	"sync"
 
 	"github.com/OpenIMSDK/tools/mw"
 
@@ -36,6 +35,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/relation"
 	relationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/relation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -65,7 +66,7 @@ func StartTransfer(prometheusPort int) error {
 	if err := mongo.CreateMsgIndex(); err != nil {
 		return err
 	}
-	client, err := discovery_register.NewDiscoveryRegister(config.Config.Envs.Discovery)
+	client, err := kdisc.NewDiscoveryRegister(config.Config.Envs.Discovery)
 	/*
 		client, err := openkeeper.NewClient(config.Config.Zookeeper.ZkAddr, config.Config.Zookeeper.Schema,
 			openkeeper.WithFreq(time.Hour), openkeeper.WithRoundRobin(), openkeeper.WithUserNameAndPassword(config.Config.Zookeeper.Username,
@@ -123,7 +124,7 @@ func (m *MsgTransfer) Start(prometheusPort int) error {
 		reg.MustRegister(
 			collectors.NewGoCollector(),
 		)
-		reg.MustRegister(prom_metrics.GetGrpcCusMetrics("Transfer")...)
+		reg.MustRegister(prommetrics.GetGrpcCusMetrics("Transfer")...)
 		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", prometheusPort), nil))
 	}

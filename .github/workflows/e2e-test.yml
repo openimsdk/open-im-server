@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: OpenIM E2E Test
+name: OpenIM Linux System E2E Test
 
 on:
   workflow_dispatch:
@@ -42,3 +42,59 @@ jobs:
       - name: Create e2e test
         run: |
           echo "...test e2e"
+
+  execute-linux-systemd-scripts:
+    name: Execute OpenIM script on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    environment:
+      name: openim
+    strategy:
+      matrix:
+        go_version: ["1.20"]
+        os: ["ubuntu-latest"]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go ${{ matrix.go_version }}
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go_version }}
+      id: go
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: '3.x' # If available, use the latest major version that's compatible
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Docker Operations
+      run: |
+        curl -o docker-compose.yml https://raw.githubusercontent.com/OpenIMSDK/openim-docker/main/example/basic-openim-server-dependency.yml
+        sudo docker compose up -d
+        sudo sleep 60
+
+    - name: Module Operations
+      run: |
+        sudo make tidy
+        sudo make tools.verify.go-gitlint
+
+    - name: Build, Start
+      run: |
+        sudo ./scripts/install/install.sh -i
+
+    - name: Exec OpenIM System Status Chack
+      run: |
+        sudo ./scripts/install/install.sh -s
+
+    - name: Exec OpenIM API test
+      run: |
+        sudo make test-api
+    
+    - name: Exec OpenIM E2E test
+      run: |
+        sudo make test-e2e
+
+    - name: Exec OpenIM System uninstall
+      run: |
+        sudo ./scripts/install/install.sh -u

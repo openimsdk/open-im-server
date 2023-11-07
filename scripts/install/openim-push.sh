@@ -49,8 +49,7 @@ OPENIM_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd -P)
 
 SERVER_NAME="openim-push"
 
-function openim::push::start()
-{
+function openim::push::start() {
     openim::log::status "Start OpenIM Push, binary root: ${SERVER_NAME}"
     openim::log::info "Start OpenIM Push, path: ${OPENIM_PUSH_BINARY}"
 
@@ -88,8 +87,7 @@ EOF
 }
 
 # install openim-push
-function openim::push::install()
-{
+function openim::push::install() {
   pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-push
@@ -117,8 +115,7 @@ function openim::push::install()
 }
 
 # Unload
-function openim::push::uninstall()
-{
+function openim::push::uninstall() {
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
@@ -130,8 +127,7 @@ function openim::push::uninstall()
 }
 
 # Status Check
-function openim::push::status()
-{
+function openim::push::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   systemctl status ${SERVER_NAME}|grep -q 'active' || {
     openim::log::error "${SERVER_NAME} failed to start, maybe not installed properly"
