@@ -89,11 +89,11 @@ services:
     ports:
     - "${KAFKA_PORT}:9094"
     volumes:
-      - ./scripts/create_topic.sh:/opt/bitnami/kafka/create_topic.sh
+      - ./scripts/create-topic.sh:/opt/bitnami/kafka/create-topic.sh
       - ${DATA_DIR}/components/kafka:/bitnami/kafka
     command: >
       bash -c "
-      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create_topic.sh; wait
+      /opt/bitnami/scripts/kafka/run.sh & sleep 5; /opt/bitnami/kafka/create-topic.sh; wait
       "
     environment:
        - TZ=Asia/Shanghai

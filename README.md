@@ -4,30 +4,27 @@
     </a>
 </p>
 
-<h3 align="center" style="border-bottom: none">
-    ⭐️  Open source Instant Messaging Server ⭐️ <br>
-<h3>
+<div align="center">
 
+[![Stars](https://img.shields.io/github/stars/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=ff69b4)](https://github.com/openimsdk/open-im-server/stargazers)
+[![Forks](https://img.shields.io/github/forks/openimsdk/open-im-server?style=for-the-badge&logo=github&colorB=blue)](https://github.com/openimsdk/open-im-server/network/members)
+[![Codecov](https://img.shields.io/codecov/c/github/openimsdk/open-im-server?style=for-the-badge&logo=codecov&colorB=orange)](https://app.codecov.io/gh/openimsdk/open-im-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/openimsdk/open-im-server?style=for-the-badge)](https://goreportcard.com/report/github.com/openimsdk/open-im-server)
+[![Go Reference](https://img.shields.io/badge/Go%20Reference-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/openimsdk/open-im-server/v3)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](https://github.com/openimsdk/open-im-server/blob/main/LICENSE)
+[![Slack](https://img.shields.io/badge/Slack-500%2B-blueviolet?style=for-the-badge&logo=slack&logoColor=white)](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q)
+[![Best Practices](https://img.shields.io/badge/Best%20Practices-purple?style=for-the-badge)](https://www.bestpractices.dev/projects/8045)
+[![Good First Issues](https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?style=for-the-badge&logo=github)](https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 
-<p align=center>
-<a href="https://goreportcard.com/report/github.com/openimsdk/open-im-server"><img src="https://goreportcard.com/badge/github.com/openimsdk/open-im-server" alt="A+"></a>
-<a href="https://github.com/openimsdk/open-im-server/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22"><img src="https://img.shields.io/github/issues/openimsdk/open-im-server/good%20first%20issue?logo=%22github%22" alt="good first"></a>
-<a href="https://github.com/openimsdk/open-im-server"><img src="https://img.shields.io/github/stars/openimsdk/open-im-server.svg?style=flat&logo=github&colorB=deeppink&label=stars"></a>
-<a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q"><img src="https://img.shields.io/badge/Slack-300%2B-blueviolet?logo=slack&amp;logoColor=white"></a>
-<a href="https://github.com/openimsdk/open-im-server/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green"></a>
-<a href="https://golang.org/"><img src="https://img.shields.io/badge/Language-Go-blue.svg"></a>
-<a href="https://pkg.go.dev/github.com/openimsdk/open-im-server/v3"><img src="https://pkg.go.dev/badge/github.com/openimsdk/open-im-server/v3.svg" alt="Go Reference"></a>
-</p>
+[**English**](./README.md) •
+[**简体中文**](./README-zh_CN.md) •
+[**Docs**](https://openim.io/en)
 
-</p>
-
-<p align="center">
-    <a href="./README.md"><b> English </b></a> •
-    <a href="./README-zh_CN.md"><b> 简体中文 </b></a> •
-<a href="https://openim.io/en"><b> Docs </b></a>
-</p>
+</div>
 
 </p>
+
 
 ## Ⓜ️ About OpenIM
 
@@ -118,7 +115,7 @@ It is recommended to use Docker Compose for deployment, which can easily and qui
 
 > **Note**
 >
-> If you don't know OpenIM's versioning policy, 📚Read our release policy: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md
+> If you don't know OpenIM's versioning policy, 📚Read our release policy: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md
 
 
 </details> 
@@ -133,7 +130,7 @@ Ur need `Go 1.20` or higher version, and `make`.
 go version && make --version || echo "Error: One of the commands failed."
 ```
 
-Version Details: https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md
+Version Details: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md
 
 You can get the version number from the command below or from [github releases](https://github.com/openimsdk/open-im-server/tags).
 
@@ -141,7 +138,7 @@ You can get the version number from the command below or from [github releases](
 $ curl --silent "https://api.github.com/repos/openimsdk/open-im-server/releases" | jq -r '.[].tag_name'
 ```
 
-We have our own version management policy, if you are interested in our version management, I recommend reading [📚 OpenIM Version](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md), We recommend using stable versions such as `v3.3.0` and `v3.2.0` whenever possible. `v3.1.1-alpha.3` as well as `v3.3.0-beta.0` and `v3.2.0-rc.0` are pre-release or beta versions and are not recommended.
+We have our own version management policy, if you are interested in our version management, I recommend reading [📚 OpenIM Version](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md), We recommend using stable versions such as `v3.3.0` and `v3.2.0` whenever possible. `v3.1.1-alpha.3` as well as `v3.3.0-beta.0` and `v3.2.0-rc.0` are pre-release or beta versions and are not recommended.
 
 Set `OPENIM_VERSION` environment variables for the latest `OPENIM_VERSION` number, or replace the `OPENIM_VERSION` for you to install the OpenIM-Server `OPENIM_VERSION`:
 
@@ -199,20 +196,22 @@ Delve into the heart of Open-IM-Server's functionality with our architecture dia
 
 ## :hammer_and_wrench: To start developing OpenIM
 
+[![Open in Dev Container](https://img.shields.io/static/v1?label=Dev%20Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/github/openimsdk/open-im-server)
+
 OpenIM Our goal is to build a top-level open source community. We have a set of standards, in the [Community repository](https://github.com/OpenIMSDK/community).
 
 If you'd like to contribute to this Open-IM-Server repository, please read our [contributor documentation](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md).
 
 Before you start, please make sure your changes are in demand. The best for that is to create a [new discussion](https://github.com/openimsdk/open-im-server/discussions/new/choose) OR [Slack Communication](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q), or if you find an issue, [report it](https://github.com/openimsdk/open-im-server/issues/new/choose) first.
 
-- [Code Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/go_code.md)
-- [Docker Images Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
-- [Directory Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/directory.md)
-- [Commit Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/commit.md)
-- [Versioning Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
-- [Interface Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/api.md)
-- [Log Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/logging.md)
-- [Error Code Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/error_code.md)
+- [Code Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/go-code.md)
+- [Docker Images Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
+- [Directory Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/directory.md)
+- [Commit Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/commit.md)
+- [Versioning Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md)
+- [Interface Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/api.md)
+- [Log Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/logging.md)
+- [Error Code Standards](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/error-code.md)
 - [OpenIM configuration and environment variable Settings](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md)
 
 

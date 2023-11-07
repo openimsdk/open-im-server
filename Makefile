@@ -6,7 +6,7 @@
 
 ## all: Run tidy, gen, add-copyright, format, lint, cover, build ✨
 .PHONY: all
-all: tidy gen add-copyright verify lint cover restart
+all: tidy gen add-copyright verify test-api lint cover restart
 
 # ==============================================================================
 # Build set
