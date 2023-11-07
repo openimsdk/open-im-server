@@ -212,4 +212,4 @@ Throughout this process, active communication within the team is pivotal to main
 
 ## Docker Images Version Management
 
-For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md).
+For more details on managing Docker image versions, visit [OpenIM Docker Images Administration](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md).

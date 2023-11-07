@@ -15,7 +15,7 @@
 
 # This is a file that initializes variables for the automation script that initializes the config file
 # You need to supplement the script according to the specification.
-# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init_config.md
+# Read: https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/init-config.md
 # 格式化 bash 注释：https://tool.lu/shell/
 # 配置中心文档：https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/environment.md
 

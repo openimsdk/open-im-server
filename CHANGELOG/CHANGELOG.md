@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
 
 ## OpenIM versioning policy
 
-+ [OpenIM Version](../docs/conversions/version.md)
++ [OpenIM Version](../docs/contrib/version.md)
 
 ## command
 
