@@ -17,6 +17,8 @@ package main
 import (
 	"context"
 	"fmt"
+	ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"net"
 	_ "net/http/pprof"
 	"strconv"
@@ -43,11 +45,11 @@ func main() {
 	}
 }
 
-func run(port int) error {
-	log.ZInfo(context.Background(), "Openim api port:", "port", port)
+func run(port int, proPort int) error {
+	log.ZInfo(context.Background(), "Openim api port:", "port", port, "proPort", proPort)
 
-	if port == 0 {
-		err := "port is empty"
+	if port == 0 || proPort == 0 {
+		err := "port or proPort is empty:" + strconv.Itoa(port) + "," + strconv.Itoa(proPort)
 		log.ZError(context.Background(), err, nil)
 
 		return fmt.Errorf(err)
@@ -82,6 +84,13 @@ func run(port int) error {
 	}
 	log.ZInfo(context.Background(), "api register public config to discov success")
 	router := api.NewGinRouter(client, rdb)
+	//////////////////////////////
+	if config.Config.Prometheus.Enable {
+		p := ginProm.NewPrometheus("app", prom_metrics.GetGinCusMetrics("Api"))
+		p.SetListenAddress(fmt.Sprintf(":%d", proPort))
+		p.Use(router)
+	}
+	/////////////////////////////////
 	log.ZInfo(context.Background(), "api init router success")
 	var address string
 	if config.Config.Api.ListenIP != "" {

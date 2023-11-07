@@ -61,33 +61,57 @@ func (a *RpcCmd) GetPortFromConfig(portType string) int {
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImPushPort[0]
 		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.PushPrometheusPort[0]
+		}
 	case RpcAuthServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImAuthPort[0]
+		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.AuthPrometheusPort[0]
 		}
 	case RpcConversationServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImConversationPort[0]
 		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.ConversationPrometheusPort[0]
+		}
 	case RpcFriendServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImFriendPort[0]
+		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.FriendPrometheusPort[0]
 		}
 	case RpcGroupServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImGroupPort[0]
 		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.GroupPrometheusPort[0]
+		}
 	case RpcMsgServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImMessagePort[0]
+		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.MessagePrometheusPort[0]
 		}
 	case RpcThirdServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImThirdPort[0]
 		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.ThirdPrometheusPort[0]
+		}
 	case RpcUserServer:
 		if portType == constant.FlagPort {
 			return config2.Config.RpcPort.OpenImUserPort[0]
+		}
+		if portType == constant.FlagPrometheusPort {
+			return config2.Config.Prometheus.UserPrometheusPort[0]
 		}
 	}
 	return 0

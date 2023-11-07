@@ -341,6 +341,9 @@ def "IOS_PRODUCTION" "false"    # IOS生产
 
 ###################### Prometheus 配置信息 ######################
 def "PROMETHEUS_ENABLE" "false" # 是否启用 Prometheus
+def "PROMETHEUS_URL" "/prometheus"
+# Api 服务的 Prometheus 端口
+readonly API_PROM_PORT=${API_PROM_PORT:-'20100'}
 # User 服务的 Prometheus 端口
 readonly USER_PROM_PORT=${USER_PROM_PORT:-'20110'}
 # Friend 服务的 Prometheus 端口
