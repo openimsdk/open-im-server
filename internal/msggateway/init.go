@@ -41,7 +41,7 @@ func RunWsAndServer(rpcPort, wsPort, prometheusPort int) error {
 	if err != nil {
 		return err
 	}
-	hubServer := NewServer(rpcPort, longServer)
+	hubServer := NewServer(rpcPort, prometheusPort, longServer)
 	go func() {
 		err := hubServer.Start()
 		if err != nil {

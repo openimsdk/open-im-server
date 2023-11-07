@@ -17,6 +17,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -30,8 +31,6 @@ import (
 	unrelationtb "github.com/openimsdk/open-im-server/v3/pkg/common/db/table/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/kafka"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
-
 	"go.mongodb.org/mongo-driver/mongo"
 
 	pbmsg "github.com/OpenIMSDK/protocol/msg"
@@ -355,10 +354,9 @@ func (db *commonMsgDatabase) DelUserDeleteMsgsList(ctx context.Context, conversa
 func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversationID string, msgs []*sdkws.MsgData) (seq int64, isNew bool, err error) {
 	currentMaxSeq, err := db.cache.GetMaxSeq(ctx, conversationID)
 	if err != nil && errs.Unwrap(err) != redis.Nil {
-		prome.Inc(prome.SeqGetFailedCounter)
+		log.ZError(ctx, "db.cache.GetMaxSeq", err)
 		return 0, false, err
 	}
-	prome.Inc(prome.SeqGetSuccessCounter)
 	lenList := len(msgs)
 	if int64(lenList) > db.msg.GetSingleGocMsgNum() {
 		return 0, false, errors.New("too large")
@@ -378,23 +376,20 @@ func (db *commonMsgDatabase) BatchInsertChat2Cache(ctx context.Context, conversa
 	}
 	failedNum, err := db.cache.SetMessageToCache(ctx, conversationID, msgs)
 	if err != nil {
-		prome.Add(prome.MsgInsertRedisFailedCounter, failedNum)
+		prom_metrics.MsgInsertRedisFailedCounter.Add(float64(failedNum))
 		log.ZError(ctx, "setMessageToCache error", err, "len", len(msgs), "conversationID", conversationID)
 	} else {
-		prome.Inc(prome.MsgInsertRedisSuccessCounter)
+		prom_metrics.MsgInsertRedisSuccessCounter.Inc()
 	}
 	err = db.cache.SetMaxSeq(ctx, conversationID, currentMaxSeq)
 	if err != nil {
-		prome.Inc(prome.SeqSetFailedCounter)
-	} else {
-		prome.Inc(prome.SeqSetSuccessCounter)
+		log.ZError(ctx, "db.cache.SetMaxSeq error", err, "conversationID", conversationID)
+		prom_metrics.SeqSetFailedCounter.Inc()
 	}
 	err2 := db.cache.SetHasReadSeqs(ctx, conversationID, userSeqMap)
 	if err != nil {
 		log.ZError(ctx, "SetHasReadSeqs error", err2, "userSeqMap", userSeqMap, "conversationID", conversationID)
-		prome.Inc(prome.SeqSetFailedCounter)
-	} else {
-		prome.Inc(prome.SeqSetSuccessCounter)
+		prom_metrics.SeqSetFailedCounter.Inc()
 	}
 	return lastMaxSeq, isNew, utils.Wrap(err, "")
 }
@@ -493,7 +488,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 	cachedMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, seqs)
 	if err != nil {
 		if err != redis.Nil {
-			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
+
 			log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", seqs)
 		}
 	}
@@ -530,7 +525,7 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 			cachedMsgs, failedSeqs2, err := db.cache.GetMessagesBySeq(ctx, conversationID, reGetSeqsCache)
 			if err != nil {
 				if err != redis.Nil {
-					prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs2))
+
 					log.ZError(ctx, "get message from redis exception", err, "conversationID", conversationID, "seqs", reGetSeqsCache)
 				}
 			}
@@ -543,14 +538,14 @@ func (db *commonMsgDatabase) GetMsgBySeqsRange(ctx context.Context, userID strin
 		log.ZDebug(ctx, "msgs not exist in redis", "seqs", failedSeqs)
 	}
 	// get from cache or db
-	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
+
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqsRange(ctx, userID, conversationID, failedSeqs, begin, end)
 		if err != nil {
-			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
+
 			return 0, 0, nil, err
 		}
-		prome.Add(prome.MsgPullFromMongoSuccessCounter, len(mongoMsgs))
+
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
 
@@ -582,7 +577,6 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 	successMsgs, failedSeqs, err := db.cache.GetMessagesBySeq(ctx, conversationID, newSeqs)
 	if err != nil {
 		if err != redis.Nil {
-			prome.Add(prome.MsgPullFromRedisFailedCounter, len(failedSeqs))
 			log.ZError(ctx, "get message from redis exception", err, "failedSeqs", failedSeqs, "conversationID", conversationID)
 		}
 	}
@@ -602,14 +596,14 @@ func (db *commonMsgDatabase) GetMsgBySeqs(ctx context.Context, userID string, co
 		"conversationID",
 		conversationID,
 	)
-	prome.Add(prome.MsgPullFromRedisSuccessCounter, len(successMsgs))
+
 	if len(failedSeqs) > 0 {
 		mongoMsgs, err := db.getMsgBySeqs(ctx, userID, conversationID, failedSeqs)
 		if err != nil {
-			prome.Add(prome.MsgPullFromMongoFailedCounter, len(failedSeqs))
+
 			return 0, 0, nil, err
 		}
-		prome.Add(prome.MsgPullFromMongoSuccessCounter, len(mongoMsgs))
+
 		successMsgs = append(successMsgs, mongoMsgs...)
 	}
 	return minSeq, maxSeq, successMsgs, nil

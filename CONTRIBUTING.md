@@ -186,7 +186,7 @@ We divide the problem into security and general problems:
 
 Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of Open-IM-Server, please do not discuss it in public and even do not open a public issue.
 
-Instead we encourage you to send us a private email to winxu81@gmail.com to report this.
+Instead we encourage you to send us a private email to info@openim.io to report this.
 
 #### Reporting general issues
 
@@ -369,7 +369,7 @@ Our most recommended way to get in touch is through [Slack](https://join.slack.c
 In addition to Slack, we also offer the following ways to get in touch:
 
 + <a href="https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q" target="_blank"><img src="https://img.shields.io/badge/slack-%40OpenIMSDKCore-informational?logo=slack&style=flat-square"></a>:  We also have Slack channels for you to communicate and discuss. To join, visit https://slack.com/ and join our [👀 Open-IM-Server slack](https://join.slack.com/t/openimsdk/shared_invite/zt-22720d66b-o_FvKxMTGXtcnnnHiMqe9Q) team channel.
-+ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=4closetool3@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: Get in touch with us on [Gmail](winxu81@gmail.com). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
++ <a href="https://mail.google.com/mail/u/0/?fs=1&tf=cm&to=4closetool3@gmail.com" target="_blank"><img src="https://img.shields.io/badge/gmail-%40OOpenIMSDKCore?style=social&logo=gmail"></a>: Get in touch with us on [Gmail](info@openim.io). If you have any questions or issues that need resolving, or any suggestions and feedback for our open source projects, please feel free to contact us via email.
 + <a href="https://doc.rentsoft.cn/" target="_blank"><img src="https://img.shields.io/badge/%E5%8D%9A%E5%AE%A2-%40OpenIMSDKCore-blue?style=social&logo=Octopus%20Deploy"></a>: Read our [blog](https://doc.rentsoft.cn/). Our blog is a great place to stay up-to-date with Open-IM-Server projects and trends. On the blog, we share our latest developments, tech trends, and other interesting information.
 + <a href="https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg" target="_blank"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-OpenIMSDKCore-brightgreen?logo=wechat&style=flat-square"></a>: Add [Wechat](https://github.com/OpenIMSDK/OpenIM-Docs/blob/main/docs/images/WechatIMG20.jpeg) and indicate that you are a user or developer of Open-IM-Server. We will process your request as soon as possible.
 

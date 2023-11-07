@@ -28,8 +28,6 @@ import (
 
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
-
-	prome "github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 )
 
 const (
@@ -131,8 +129,8 @@ func (p *Producer) SendMessage(ctx context.Context, key string, msg proto.Messag
 	kMsg.Headers = header
 	partition, offset, err := p.producer.SendMessage(kMsg)
 	log.ZDebug(ctx, "ByteEncoder SendMessage end", "key ", kMsg.Key, "key length", kMsg.Value.Length())
-	if err == nil {
-		prome.Inc(prome.SendMsgCounter)
+	if err != nil {
+		log.ZWarn(ctx, "p.producer.SendMessage error", err)
 	}
 	return partition, offset, utils.Wrap(err, "")
 }

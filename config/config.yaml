@@ -382,7 +382,9 @@ callback:
 # The number of Prometheus ports per service needs to correspond to rpcPort
 # The number of ports needs to be consistent with msg_transfer_service_num in script/path_info.sh
 prometheus:
-  enable: false
+  enable: true
+  prometheusUrl: "https://openim.prometheus"
+  apiPrometheusPort: [20100]
   userPrometheusPort: [ 20110 ]
   friendPrometheusPort: [ 20120 ]
   messagePrometheusPort: [ 20130 ]
