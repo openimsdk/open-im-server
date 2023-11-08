@@ -16,9 +16,11 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/OpenIMSDK/protocol/constant"
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/spf13/cobra"
+
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 type ApiCmd struct {
@@ -32,9 +34,9 @@ func NewApiCmd() *ApiCmd {
 	return ret
 }
 
-func (a *ApiCmd) AddApi(f func(port int) error) {
+func (a *ApiCmd) AddApi(f func(port int, promPort int) error) {
 	a.Command.RunE = func(cmd *cobra.Command, args []string) error {
-		return f(a.getPortFlag(cmd))
+		return f(a.getPortFlag(cmd), a.getPrometheusPortFlag(cmd))
 	}
 }
 
@@ -42,8 +44,8 @@ func (a *ApiCmd) GetPortFromConfig(portType string) int {
 	fmt.Println("GetPortFromConfig:", portType)
 	if portType == constant.FlagPort {
 		return config2.Config.Api.OpenImApiPort[0]
-	} else {
-
-		return 0
+	} else if portType == constant.FlagPrometheusPort {
+		return config2.Config.Prometheus.ApiPrometheusPort[0]
 	}
+	return 0
 }

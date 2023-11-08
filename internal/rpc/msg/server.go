@@ -28,7 +28,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/unrelation"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -94,25 +93,8 @@ func Start(client discoveryregistry.SvcDiscoveryRegistry, server *grpc.Server) e
 	}
 	s.notificationSender = rpcclient.NewNotificationSender(rpcclient.WithLocalSendMsg(s.SendMsg))
 	s.addInterceptorHandler(MessageHasReadEnabled)
-	s.initPrometheus()
 	msg.RegisterMsgServer(server, s)
 	return nil
-}
-
-func (m *msgServer) initPrometheus() {
-	prome.NewMsgPullFromRedisSuccessCounter()
-	prome.NewMsgPullFromRedisFailedCounter()
-	prome.NewMsgPullFromMongoSuccessCounter()
-	prome.NewMsgPullFromMongoFailedCounter()
-	prome.NewSingleChatMsgRecvSuccessCounter()
-	prome.NewGroupChatMsgRecvSuccessCounter()
-	prome.NewWorkSuperGroupChatMsgRecvSuccessCounter()
-	prome.NewSingleChatMsgProcessSuccessCounter()
-	prome.NewSingleChatMsgProcessFailedCounter()
-	prome.NewGroupChatMsgProcessSuccessCounter()
-	prome.NewGroupChatMsgProcessFailedCounter()
-	prome.NewWorkSuperGroupChatMsgProcessSuccessCounter()
-	prome.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
 func (m *msgServer) conversationAndGetRecvID(conversation *conversation.Conversation, userID string) (recvID string) {

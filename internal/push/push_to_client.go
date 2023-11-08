@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
 
 	"github.com/OpenIMSDK/protocol/conversation"
 
@@ -39,7 +41,6 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prome"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -82,6 +83,8 @@ func NewOfflinePusher(cache cache.MsgModel) offlinepush.OfflinePusher {
 		offlinePusher = fcm.NewClient(cache)
 	case "jpush":
 		offlinePusher = jpush.NewClient()
+	default:
+		offlinePusher = dummy.NewClient()
 	}
 	return offlinePusher
 }
@@ -285,10 +288,9 @@ func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg 
 	}
 	err = p.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
 	if err != nil {
-		prome.Inc(prome.MsgOfflinePushFailedCounter)
+		prom_metrics.MsgOfflinePushFailedCounter.Inc()
 		return err
 	}
-	prome.Inc(prome.MsgOfflinePushSuccessCounter)
 	return nil
 }
 

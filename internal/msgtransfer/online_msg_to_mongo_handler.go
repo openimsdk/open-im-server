@@ -16,6 +16,7 @@ package msgtransfer
 
 import (
 	"context"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
 
 	"github.com/IBM/sarama"
 	"google.golang.org/protobuf/proto"
@@ -74,6 +75,9 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(
 			"conversationID",
 			msgFromMQ.ConversationID,
 		)
+		prom_metrics.MsgInsertMongoFailedCounter.Inc()
+	} else {
+		prom_metrics.MsgInsertMongoSuccessCounter.Inc()
 	}
 	var seqs []int64
 	for _, msg := range msgFromMQ.MsgData {

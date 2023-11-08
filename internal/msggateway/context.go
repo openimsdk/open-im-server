@@ -124,7 +124,9 @@ func (c *UserConnContext) GetOperationID() string {
 }
 
 func (c *UserConnContext) SetOperationID(operationID string) {
-	c.Req.URL.Query().Set(OperationID, operationID)
+	values := c.Req.URL.Query()
+	values.Set(OperationID, operationID)
+	c.Req.URL.RawQuery = values.Encode()
 }
 
 func (c *UserConnContext) GetToken() string {

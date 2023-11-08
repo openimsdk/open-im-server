@@ -15,6 +15,7 @@
 package api
 
 import (
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -117,4 +118,8 @@ func (o *ThirdApi) DeleteLogs(c *gin.Context) {
 
 func (o *ThirdApi) SearchLogs(c *gin.Context) {
 	a2r.Call(third.ThirdClient.SearchLogs, o.Client, c)
+}
+
+func GetPrometheus(c *gin.Context) {
+	c.Redirect(http.StatusFound, config2.Config.Prometheus.PrometheusUrl)
 }
