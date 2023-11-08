@@ -297,7 +297,9 @@ func (c *Client) KickOnlineMessage() error {
 	resp := Resp{
 		ReqIdentifier: WSKickOnlineMsg,
 	}
-	return c.writeBinaryMsg(resp)
+	err := c.writeBinaryMsg(resp)
+	c.close()
+	return err
 }
 
 func (c *Client) writeBinaryMsg(resp Resp) error {

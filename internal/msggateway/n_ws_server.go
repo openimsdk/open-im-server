@@ -225,12 +225,7 @@ func (ws *WsServer) registerClient(client *Client) {
 		ws.onlineUserNum.Add(1)
 		ws.onlineUserConnNum.Add(1)
 	} else {
-		i := &kickHandler{
-			clientOK:   clientOK,
-			oldClients: oldClients,
-			newClient:  client,
-		}
-		ws.kickHandlerChan <- i
+		ws.multiTerminalLoginChecker(clientOK, oldClients, client)
 		log.ZDebug(client.ctx, "user exist", "userID", client.UserID, "platformID", client.PlatformID)
 		if clientOK {
 			ws.clients.Set(client.UserID, client)
