@@ -51,7 +51,7 @@ const (
 	getuiTaskID      = "GETUI_TASK_ID"
 	signalCache      = "SIGNAL_CACHE:"
 	signalListCache  = "SIGNAL_LIST_CACHE:"
-	fcmToken         = "FCM_TOKEN:"
+	FCM_TOKEN        = "FCM_TOKEN:"
 
 	messageCache            = "MESSAGE_CACHE:"
 	messageDelUserList      = "MESSAGE_DEL_USER_LIST:"
@@ -650,15 +650,15 @@ func (c *msgCache) GetSendMsgStatus(ctx context.Context, id string) (int32, erro
 }
 
 func (c *msgCache) SetFcmToken(ctx context.Context, account string, platformID int, fcmToken string, expireTime int64) (err error) {
-	return errs.Wrap(c.rdb.Set(ctx, fcmToken+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
+	return errs.Wrap(c.rdb.Set(ctx, FCM_TOKEN+account+":"+strconv.Itoa(platformID), fcmToken, time.Duration(expireTime)*time.Second).Err())
 }
 
 func (c *msgCache) GetFcmToken(ctx context.Context, account string, platformID int) (string, error) {
-	return utils.Wrap2(c.rdb.Get(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Result())
+	return utils.Wrap2(c.rdb.Get(ctx, FCM_TOKEN+account+":"+strconv.Itoa(platformID)).Result())
 }
 
 func (c *msgCache) DelFcmToken(ctx context.Context, account string, platformID int) error {
-	return errs.Wrap(c.rdb.Del(ctx, fcmToken+account+":"+strconv.Itoa(platformID)).Err())
+	return errs.Wrap(c.rdb.Del(ctx, FCM_TOKEN+account+":"+strconv.Itoa(platformID)).Err())
 }
 
 func (c *msgCache) IncrUserBadgeUnreadCountSum(ctx context.Context, userID string) (int, error) {
