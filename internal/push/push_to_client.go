@@ -19,14 +19,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
-
-	"github.com/OpenIMSDK/protocol/conversation"
-
-	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
-
 	"github.com/OpenIMSDK/protocol/constant"
+	"github.com/OpenIMSDK/protocol/conversation"
 	"github.com/OpenIMSDK/protocol/msggateway"
 	"github.com/OpenIMSDK/protocol/sdkws"
 	"github.com/OpenIMSDK/tools/discoveryregistry"
@@ -35,6 +29,7 @@ import (
 	"github.com/OpenIMSDK/tools/utils"
 
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush"
+	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/fcm"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/getui"
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/jpush"
@@ -42,6 +37,8 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/cache"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/controller"
 	"github.com/openimsdk/open-im-server/v3/pkg/common/db/localcache"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 	"github.com/openimsdk/open-im-server/v3/pkg/rpcclient"
 )
 
@@ -54,7 +51,6 @@ type Pusher struct {
 	msgRpcClient           *rpcclient.MessageRpcClient
 	conversationRpcClient  *rpcclient.ConversationRpcClient
 	groupRpcClient         *rpcclient.GroupRpcClient
-	successCount           int
 }
 
 var errNoOfflinePusher = errors.New("no offlinePusher is configured")
@@ -114,7 +110,6 @@ func (p *Pusher) Push2User(ctx context.Context, userIDs []string, msg *sdkws.Msg
 
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
 	log.ZDebug(ctx, "push_result", "ws push result", wsResults, "sendData", msg, "isOfflinePush", isOfflinePush, "push_to_userID", userIDs)
-	p.successCount++
 
 	if !isOfflinePush {
 		return nil
@@ -206,7 +201,6 @@ func (p *Pusher) Push2SuperGroup(ctx context.Context, groupID string, msg *sdkws
 	}
 
 	log.ZDebug(ctx, "get conn and online push success", "result", wsResults, "msg", msg)
-	p.successCount++
 	isOfflinePush := utils.GetSwitchFromOptions(msg.Options, constant.IsOfflinePush)
 	if isOfflinePush {
 		var (
