@@ -18,8 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prom_metrics"
+
 	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
+	"github.com/openimsdk/open-im-server/v3/pkg/common/metrics"
 
 	"github.com/OpenIMSDK/protocol/conversation"
 
@@ -288,7 +289,7 @@ func (p *Pusher) offlinePushMsg(ctx context.Context, conversationID string, msg 
 	}
 	err = p.offlinePusher.Push(ctx, offlinePushUserIDs, title, content, opts)
 	if err != nil {
-		prom_metrics.MsgOfflinePushFailedCounter.Inc()
+		metrics.MsgOfflinePushFailedCounter.Inc()
 		return err
 	}
 	return nil

@@ -1,6 +1,6 @@
 package prom_metrics
 
-import ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginPrometheus"
+import ginProm "github.com/openimsdk/open-im-server/v3/pkg/common/ginprom"
 
 /*
 labels := prometheus.Labels{"label_one": "any", "label_two": "value"}
