@@ -1,4 +1,4 @@
-package prom_metrics
+package prommetrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"

@@ -1,4 +1,4 @@
-package ginPrometheus
+package ginprometheus
 
 import (
 	"bytes"

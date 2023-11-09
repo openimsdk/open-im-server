@@ -1,4 +1,4 @@
-package discovery_register
+package discoveryregister
 
 import (
 	"context"
