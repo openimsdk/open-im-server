@@ -1126,9 +1126,6 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 	groupMap := utils.SliceToMap(groups, func(e *relationtb.GroupModel) string {
 		return e.GroupID
 	})
-	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
-		return nil, errs.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
-	}
 	owners, err := s.FindGroupMember(ctx, groupIDs, nil, []int32{constant.GroupOwner})
 	if err != nil {
 		return nil, err
@@ -1144,7 +1141,11 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbgrou
 		return nil, err
 	}
 	resp.GroupRequests = utils.Slice(requests, func(e *relationtb.GroupRequestModel) *sdkws.GroupRequest {
-		return convert.Db2PbGroupRequest(e, user, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+		var ownerUserID string
+		if owner, ok := ownerMap[e.GroupID]; ok {
+			ownerUserID = owner.UserID
+		}
+		return convert.Db2PbGroupRequest(e, user, convert.Db2PbGroupInfo(groupMap[e.GroupID], ownerUserID, groupMemberNum[e.GroupID]))
 	})
 	return resp, nil
 }
