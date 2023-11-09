@@ -45,6 +45,7 @@ require (
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	gopkg.in/src-d/go-git.v4 v4.13.1
+	gotest.tools v2.2.0+incompatible
 )
 
 require (
@@ -117,6 +118,7 @@ require (
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/src-d/gcfg v1.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/xanzy/ssh-agent v0.2.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -140,7 +142,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231012201019-e917dd12ba7a // indirect
 	gopkg.in/src-d/go-billy.v4 v4.3.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gotest.tools v2.2.0+incompatible // indirect
 )
 
 require (
