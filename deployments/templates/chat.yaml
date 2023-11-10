@@ -96,7 +96,14 @@ verifyCode:
     accessKeySecret: ""
     signName: ""
     verificationCodeTemplateCode: ""
-
+  mail: # 根据对应的发件邮箱更改 sendMail、senderAuthorizationCode、smtpAddr、smtpPort 即可
+    title: ""
+    senderMail: "" # 发送者
+    senderAuthorizationCode: "" # 授权码
+    smtpAddr: "smtp.qq.com"  # smtp 服务器地址
+    smtpPort: 25   # smtp 服务器邮件发送端口
+  testDepartMentID: 001
+  imAPIURL: http://127.0.0.1:10002
 
 ###################### Proxy Header ######################
 # 获取ip的header,没有配置直接获取远程地址
