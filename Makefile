@@ -6,7 +6,7 @@
 
 ## all: Run tidy, gen, add-copyright, format, lint, cover, build ✨
 .PHONY: all
-all: tidy gen add-copyright verify lint cover restart
+all: tidy gen add-copyright verify test-api lint cover restart
 
 # ==============================================================================
 # Build set
@@ -165,6 +165,15 @@ test:
 .PHONY: cover
 cover:
 	@$(MAKE) go.test.cover
+
+## test-api: Run api test. ✨
+.PHONY: test-api
+test-api:
+	@$(MAKE) go.test.api
+
+## test-e2e: Run e2e test
+test-e2e:
+	@$(MAKE) go.test.e2e
 
 ## updates: Check for updates to go.mod dependencies. ✨
 .PHONY: updates

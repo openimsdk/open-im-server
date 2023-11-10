@@ -17,8 +17,7 @@ WAITFORIT_cmdname=${0##*/}
 
 echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
 
-usage()
-{
+usage() {
     cat << USAGE >&2
 Usage:
     $WAITFORIT_cmdname host:port [-s] [-t timeout] [-- command args]
@@ -34,8 +33,7 @@ USAGE
     exit 1
 }
 
-wait_for()
-{
+wait_for() {
     if [[ $WAITFORIT_TIMEOUT -gt 0 ]]; then
         echoerr "$WAITFORIT_cmdname: waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
     else
@@ -61,8 +59,7 @@ wait_for()
     return $WAITFORIT_result
 }
 
-wait_for_wrapper()
-{
+wait_for_wrapper() {
     # In order to support SIGINT during timeout: http://unix.stackexchange.com/a/57692
     if [[ $WAITFORIT_QUIET -eq 1 ]]; then
         timeout $WAITFORIT_BUSYTIMEFLAG $WAITFORIT_TIMEOUT $0 --quiet --child --host=$WAITFORIT_HOST --port=$WAITFORIT_PORT --timeout=$WAITFORIT_TIMEOUT &

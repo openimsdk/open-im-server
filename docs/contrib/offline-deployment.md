@@ -26,11 +26,11 @@ docker pull minio/minio
 
 ## 2. OpenIM & Chat Images
 
-**For detailed understanding of version management and storage of OpenIM and Chat**: [version.md](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/version.md)
+**For detailed understanding of version management and storage of OpenIM and Chat**: [version.md](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/version.md)
 
 ### OpenIM Image
 
-- Get image version info: [images.md](https://github.com/openimsdk/open-im-server/blob/main/docs/conversions/images.md)
+- Get image version info: [images.md](https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/images.md)
 - Depending on the required version, execute the following command:
 
 ```bash

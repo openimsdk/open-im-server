@@ -25,8 +25,7 @@ openim::util::set_max_fd 200000
 
 SERVER_NAME="openim-msgtransfer"
 
-function openim::msgtransfer::start()
-{
+function openim::msgtransfer::start() {
     openim::log::info "Start OpenIM Msggateway, binary root: ${SERVER_NAME}"
     openim::log::status "Start OpenIM Msggateway, path: ${OPENIM_MSGTRANSFER_BINARY}"
 
@@ -61,8 +60,7 @@ function openim::msgtransfer::start()
     openim::util::check_process_names  "${OPENIM_OUTPUT_HOSTBIN}/${SERVER_NAME}"
 }
 
-function openim::msgtransfer::check()
-{
+function openim::msgtransfer::check() {
     PIDS=$(pgrep -f "${OPENIM_OUTPUT_HOSTBIN}/openim-msgtransfer")
 
     NUM_PROCESSES=$(echo "$PIDS" | wc -l)
@@ -89,8 +87,7 @@ EOF
 }
 
 # install openim-msgtransfer
-function openim::msgtransfer::install()
-{
+function openim::msgtransfer::install() {
   pushd "${OPENIM_ROOT}"
 
   # 1. Build openim-msgtransfer
@@ -122,8 +119,7 @@ function openim::msgtransfer::install()
 
 
 # Unload
-function openim::msgtransfer::uninstall()
-{
+function openim::msgtransfer::uninstall() {
   set +o errexit
   openim::common::sudo "systemctl stop ${SERVER_NAME}"
   openim::common::sudo "systemctl disable ${SERVER_NAME}"
@@ -135,8 +131,7 @@ function openim::msgtransfer::uninstall()
 }
 
 # Status Check
-function openim::msgtransfer::status()
-{
+function openim::msgtransfer::status() {
   # Check the running status of the ${SERVER_NAME}. If active (running) is displayed, the ${SERVER_NAME} is started successfully.
   if systemctl is-active --quiet "${SERVER_NAME}"; then
     openim::log::info "${SERVER_NAME} is running successfully."

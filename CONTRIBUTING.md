@@ -42,6 +42,12 @@ If you are familiar with [Makefile](./Makefile) , you can easily see the clever 
 
 The [Makefile](./Makefile) is for every developer, even if you don't know how to use the Makefile tool, don't worry, we provide two great commands to get you up to speed with the Makefile architecture, `make help` and `make help-all`, it can reduce problems of the developing environment.
 
+In accordance with the naming conventions adopted by OpenIM and drawing reference from the Google Naming Conventions as per the guidelines available at https://google.github.io/styleguide/go/, the following expectations for naming practices within the project are set forth: 
+
++ https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/code-conventions.md
++ https://github.com/openimsdk/open-im-server/blob/main/docs/contrib/go-code.md
+
+
 ## Code of ConductCode of Conduct
 
 #### Code and doc contribution
@@ -270,7 +276,7 @@ You can find some very formal PR in [RFC](https://github.com/openimsdk/open-im-s
 **🈴 Reviewing PRs:**
 
 + Be respectful and constructive 
-+ Assign yourself to the PR 
++ Assign yourself to the PR (comment `/assign`)
 + Check if all checks are passing
 + Suggest changes instead of simply commenting on found issues
 + If you are unsure about something, ask the author
