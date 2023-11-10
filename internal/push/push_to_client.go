@@ -19,10 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/openimsdk/open-im-server/v3/internal/push/offlinepush/dummy"
-
-	"github.com/OpenIMSDK/protocol/conversation"
-
 	"github.com/openimsdk/open-im-server/v3/pkg/msgprocessor"
 
 	"github.com/OpenIMSDK/protocol/constant"
