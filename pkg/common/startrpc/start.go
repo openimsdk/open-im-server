@@ -28,9 +28,10 @@ import (
 	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	kdisc "github.com/openimsdk/open-im-server/v3/pkg/common/discoveryregister"
 
 	"github.com/OpenIMSDK/tools/discoveryregistry"
 	"github.com/OpenIMSDK/tools/mw"

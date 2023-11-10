@@ -3,9 +3,10 @@ package prommetrics
 import (
 	"testing"
 
-	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
+
+	config2 "github.com/openimsdk/open-im-server/v3/pkg/common/config"
 )
 
 func TestNewGrpcPromObj(t *testing.T) {
