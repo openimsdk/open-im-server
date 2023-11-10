@@ -171,6 +171,10 @@ cover:
 test-api:
 	@$(MAKE) go.test.api
 
+## test-e2e: Run e2e test
+test-api:
+	@$(MAKE) go.test.e2e
+
 ## updates: Check for updates to go.mod dependencies. ✨
 .PHONY: updates
 	@$(MAKE) go.updates

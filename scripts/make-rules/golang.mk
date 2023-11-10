@@ -199,6 +199,12 @@ go.test.api:
 	@echo "===========> Run api test"
 	@$(ROOT_DIR)/scripts/install/test.sh openim::test::test
 
+## go.test.e2e: Run e2e test
+.PHONY: go.test.e2e
+go.test.e2e:
+	@echo "===========> Run e2e test"
+	@$(ROOT_DIR)/scripts/install/test.sh openim::test::e2e
+
 ## go.demo: Run demo
 .PHONY: go.demo
 go.demo:

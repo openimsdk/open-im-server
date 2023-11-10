@@ -52,6 +52,14 @@ The E2E tests are organized into the following directory structure:
 
 ## Prerequisites
 
+Since the deployment of OpenIM requires some components such as Mongo and Kafka, you should think a bit before using E2E tests
+
+```bash
+docker compose up -d
+```
+
+OR User [kubernetes deployment](https://github.com/openimsdk/helm-charts)
+
 Before running the E2E tests, ensure that you have the following prerequisites installed:
 
 - Docker

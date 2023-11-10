@@ -79,10 +79,22 @@ jobs:
         sudo make tidy
         sudo make tools.verify.go-gitlint
 
-    - name: Build, Start, Test, Check Services and Print Logs
+    - name: Build, Start
       run: |
-        sudo ./scripts/install/install.sh -i && \
-        sudo make test-api && \
-        sudo ./scripts/install/install.sh -s && \
-        sudo ./scripts/install/install.sh -u || \
-        (echo "An error occurred, printing logs:" && sudo cat ./_output/logs/* 2>/dev/null)
+        sudo ./scripts/install/install.sh -i
+
+    - name: Exec OpenIM System Status Chack
+      run: |
+        sudo ./scripts/install/install.sh -s
+
+    - name: Exec OpenIM API test
+      run: |
+        sudo make test-api
+    
+    - name: Exec OpenIM E2E test
+      run: |
+        sudo make test-e2e
+
+    - name: Exec OpenIM System uninstall
+      run: |
+        sudo ./scripts/install/install.sh -u
