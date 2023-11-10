@@ -29,6 +29,10 @@
 
 </p>
 
+## 🟢 扫描微信进群交流
+<img src="https://openim-1253691595.cos.ap-nanjing.myqcloud.com/WechatIMG20.jpeg" width="200">
+
+
 ## Ⓜ️ 关于 OpenIM
 
 OpenIM 不仅仅是一个开源的即时消息组件，它是你的应用程序生态系统的一个不可或缺的部分。查看下面的图表，了解 AppServer、AppClient、OpenIMServer 和 OpenIMSDK 是如何交互的。
